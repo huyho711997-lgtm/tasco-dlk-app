@@ -2375,17 +2375,20 @@
                         </div>
                         
                         <div id="dm-normal-btns" class="grid grid-cols-2 gap-2">
+                            <button onclick="PriceCompare.lookup(App.currentEditId)" class="col-span-2 flex items-center justify-center gap-1.5 px-2 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-[12px] font-black shadow-sm active:scale-95 transition-transform">
+                                <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Tra giá phụ tùng từ Kho AI
+                            </button>
                             <button onclick="CarDiagram.open(App.currentEditId)" class="flex items-center justify-center gap-1.5 px-2 py-2.5 bg-slate-800 text-white rounded-xl text-[11px] font-bold shadow-sm shadow-slate-300 active:scale-95 transition-transform">
-                                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="8" width="18" height="8" rx="2"/><path d="M5 8l1-4h12l1 4"/><circle cx="7" cy="16" r="2"/><circle cx="17" cy="16" r="2"/></svg> Chọn từ Sơ đồ
+                                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="8" width="18" height="8" rx="2"/><path d="M5 8l1-4h12l1 4"/><circle cx="7" cy="16" r="2"/><circle cx="17" cy="16" r="2"/></svg> Sơ đồ
                             </button> 
                             <button onclick="DamageItems.addRowAI(App.currentEditId)" class="flex items-center justify-center gap-1.5 px-2 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-[11px] font-bold shadow-sm shadow-violet-200 active:scale-95 transition-transform">
-                                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> AI bóc tách
+                                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> AI tách
                             </button>
                             <button onclick="DamageItems.addRow(App.currentEditId)" class="flex items-center justify-center gap-1.5 px-2 py-2.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-[11px] font-bold active:scale-95 transition-transform">
                                 <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Thêm tay
                             </button>
                             <button onclick="DamageItems.exportWord(App.currentEditId)" class="flex items-center justify-center gap-1.5 px-2 py-2.5 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl text-[11px] font-bold active:scale-95 transition-transform">
-                                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6M9 15l3 3 3-3"/></svg> Xuất Biên Bản
+                                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6M9 15l3 3 3-3"/></svg> Biên Bản
                             </button>
                         </div>
 
@@ -10762,7 +10765,246 @@
             });
         }
     };   
+    // ============================================================
+    // SPARE PARTS & PRICE COMPARE (TRA GIÁ KHO)
+    // ============================================================
+    const SpareParts = {
+        list: [],
+        init() {
+            db.ref('SparePartsPrice').on('value', snap => {
+                const raw = snap.val() || {};
+                this.list = Object.keys(raw).map(k => ({ _key: k, ...raw[k] }));
+            });
+        }
+    };
 
+    const PriceCompare = {
+        async lookup(id) {
+            const item = App.find(id);
+            if (!item || !item.damageItems || !item.damageItems.length) return;
+            const itemsToLookup = item.damageItems.filter(h => h.thayThe);
+            
+            if (!itemsToLookup.length) {
+                Toast.fire({icon: 'info', title: 'Không có hạng mục "Thay thế" nào để tra giá!'});
+                return;
+            }
+
+            Swal.fire({
+                title: 'Đang tra giá...',
+                html: `<p style="font-size:12px;color:#64748b;margin-top:8px">AI đang quét kho tìm món tương đương cho <b>${itemsToLookup.length} hạng mục</b>...</p>`,
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            try {
+                const carBrand = (item.hangXe || '').trim().toLowerCase();
+                const carModel = (item.loaiXe || item.hieuxe || '').trim().toLowerCase();
+                
+                let warehouse = SpareParts.list.filter(p => {
+                    const matchBrand = !carBrand || !p.carBrand || p.carBrand.toLowerCase().includes(carBrand) || carBrand.includes((p.carBrand||'').toLowerCase());
+                    const matchModel = !carModel || !p.carModel || p.carModel.toLowerCase().includes(carModel) || carModel.includes((p.carModel||'').toLowerCase());
+                    return matchBrand && matchModel;
+                });
+                
+                if (!warehouse.length) warehouse = SpareParts.list.filter(p => !carBrand || !p.carBrand || p.carBrand.toLowerCase().includes(carBrand) || carBrand.includes((p.carBrand||'').toLowerCase()));
+                if (!warehouse.length) warehouse = SpareParts.list;
+
+                const warehouseList = warehouse.slice(0, 400).map(p => ({ id: p._key, name: p.partName, code: p.partCode||'', type: p.partType||'oem' }));
+
+                const matchPrompt = 'Bạn là chuyên gia phụ tùng xe ô tô Việt Nam. Đối chiếu từng mục CẦN TRA với KHO GIÁ.\n\n'
+                    + 'Quy tắc tên gọi tương đương vùng miền: cản = ba đờ sốc = bumper, gương = kiếng chiếu hậu, đèn pha = đèn chiếu sáng đầu, trái = tài, phải = phụ, lốp = vỏ, mâm = lazang, nắp capo = nắp động cơ, lốc lạnh = máy nén điều hoà...\n\n'
+                    + 'KHO GIÁ:\n' + JSON.stringify(warehouseList) + '\n\n'
+                    + 'CẦN TRA:\n' + JSON.stringify(itemsToLookup.map(q => ({ stt: q.stt, name: q.chiTiet }))) + '\n\n'
+                    + 'Trả về CHỈ JSON array, KHÔNG có text khác. Mỗi phần tử đại diện cho 1 mục cần tra, chứa TỐI ĐA 6 kết quả (candidates) có tên gọi tương tự hoặc khớp nhất trong kho.\n'
+                    + '🚨 LƯU Ý QUAN TRỌNG: 1 phụ tùng trong kho có thể có 2 loại (type="oem" và type="aftermarket"). Nếu kho có CẢ 2 LOẠI cho 1 món, BẮT BUỘC phải trả về ID của CẢ 2 vào mảng candidates. KHÔNG ĐƯỢC BỎ SÓT BẤT KỲ LOẠI NÀO!\n'
+                    + 'Định dạng:\n'
+                    + '[{"stt":1, "candidates": [ {"id":"id_trong_kho", "score":95, "reason":"trùng tên"}, {"id":"id_khac", "score":75, "reason":"tương đương vùng miền"} ] }]\n'
+                    + 'Score 0-100: 100=trùng hoàn toàn, 80-99=tương đương rõ, 60-79=có thể là cùng mục. Nếu không tìm thấy, để candidates: []';
+
+                const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${GeminiKeys.next()}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: matchPrompt }] }],
+                        generationConfig: { temperature: 0.1, maxOutputTokens: 8192 }
+                    })
+                });
+
+                const respData = await resp.json();
+                if (respData.error) throw new Error(respData.error.message);
+
+                const raw = ((respData.candidates||[])[0]||{}).content?.parts?.[0]?.text || '';
+                const cleaned = raw.replace(/```json|```/gi, '').trim();
+                let matchResults = [];
+                try { matchResults = JSON.parse(cleaned); } catch(_) {
+                    const mm = cleaned.match(/\[[\s\S]*\]/);
+                    if (mm) matchResults = JSON.parse(mm[0]);
+                }
+                if (!Array.isArray(matchResults)) matchResults = [];
+
+                Swal.close();
+
+                const results = itemsToLookup.map(h => {
+                    const r = matchResults.find(x => parseInt(x.stt) === parseInt(h.stt)) || { candidates: [] };
+                    const mappedCandidates = [];
+                    const addedIds = new Set();
+
+                    (r.candidates || []).forEach(c => {
+                        const wItem = warehouse.find(p => p._key === c.id);
+                        if (wItem) {
+                            if (!addedIds.has(wItem._key)) {
+                                mappedCandidates.push({ item: wItem, score: c.score, reason: c.reason });
+                                addedIds.add(wItem._key);
+                            }
+                            const exactMatches = warehouse.filter(p => (p.partName || '').toLowerCase().trim() === (wItem.partName || '').toLowerCase().trim() && !addedIds.has(p._key));
+                            exactMatches.forEach(em => {
+                                mappedCandidates.push({ item: em, score: c.score, reason: 'Tự động gộp cùng tên' });
+                                addedIds.add(em._key);
+                            });
+                        }
+                    }); 
+
+                    mappedCandidates.sort((a,b) => { 
+                        if (b.score !== a.score) return b.score - a.score; 
+                        if (a.item.partType === 'oem' && b.item.partType !== 'oem') return -1;
+                        if (a.item.partType !== 'oem' && b.item.partType === 'oem') return 1;
+                        return 0;
+                    });
+
+                    return { h: h, candidates: mappedCandidates, topScore: mappedCandidates.length > 0 ? mappedCandidates[0].score : 0, accepted: mappedCandidates.length > 0 };
+                });
+
+                this._showConfirmPanel(id, results);
+
+            } catch(e) {
+                Swal.close();
+                Swal.fire({icon:'error', title:'Lỗi tra giá', text: e.message, customClass:{popup:'custom-rounded'}});
+            }
+        },
+
+        _showConfirmPanel(id, results) {
+            const fmt = n => n ? Number(n).toLocaleString('vi-VN') : '—';
+            function scoreColor(s) {
+                if (s >= 90) return { border:'#10b981', label:'#d1fae5', labelTx:'#065f46' };
+                if (s >= 60) return { border:'#f59e0b', label:'#fef3c7', labelTx:'#92400e' };
+                return       { border:'#cbd5e1', label:'#f1f5f9', labelTx:'#475569' };
+            }
+
+            const customCss = `
+                <style>
+                .pr-card-label { display:block; cursor:pointer; margin-bottom:6px; }
+                .pr-card-label input[type="radio"] { display:none; }
+                .pr-card-content { display:flex; flex-direction:column; padding:8px 10px; border:1px solid #e2e8f0; border-radius:8px; background:#fff; transition:all 0.2s; position:relative; }
+                .pr-card-label input[type="radio"]:checked + .pr-card-content { border-color:#3b82f6; background:#eff6ff; }
+                .pr-card-label input[type="radio"]:checked + .pr-card-content::after { content:"✓"; position:absolute; top:8px; right:10px; font-weight:900; color:#2563eb; font-size:12px; }
+                .pr-null-card .pr-card-content { border:1px dashed #cbd5e1; background:transparent; align-items:center; min-height:36px; padding:6px; }
+                .pr-card-label input[type="radio"]:checked + .pr-null-card .pr-card-content { border-color:#94a3b8; background:#f1f5f9; }
+                </style>
+            `;
+
+            const rowsHtml = results.map((r, i) => {
+                const h = r.h;
+                const col = scoreColor(r.topScore);
+                const hasAny = r.candidates.length > 0;
+                const scoreBadge = r.topScore > 0 ? `<span style="font-size:9px;padding:2px 6px;border-radius:20px;background:${col.label};color:${col.labelTx};font-weight:800;flex-shrink:0;">${r.topScore}% khớp</span>` : '';
+
+                const oemCands = r.candidates.filter(c => c.item.partType === 'oem').slice(0, 3);
+                const amCands  = r.candidates.filter(c => c.item.partType === 'aftermarket').slice(0, 3);
+
+                let oemListHtml = `<div class="mb-2"><p class="text-[9px] font-black text-purple-600 uppercase mb-1.5 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-purple-500 rounded-full"></span> OEM</p>`;
+                if (oemCands.length > 0) {
+                    oemCands.forEach((c, idx) => {
+                        oemListHtml += `<label class="pr-card-label"><input type="radio" name="pr_oem_${i}" value="${c.item._key}" ${idx===0?'checked':''}>
+                            <div class="pr-card-content"><p class="text-[11px] font-bold text-slate-800 pr-3 truncate">${c.item.partName}</p>
+                            <div class="flex justify-between items-center mt-1"><span class="text-xs font-black text-purple-600">${fmt(c.item.price)}đ</span><span class="text-[8px] font-bold text-slate-500 bg-slate-100 px-1 rounded">${c.score}%</span></div></div></label>`;
+                    });
+                }
+                oemListHtml += `<label class="pr-card-label pr-null-card mb-0"><input type="radio" name="pr_oem_${i}" value="" ${oemCands.length===0?'checked':''}><div class="pr-card-content"><span class="text-[9px] font-bold text-slate-400">Bỏ qua</span></div></label></div>`;
+
+                let amListHtml = `<div><p class="text-[9px] font-black text-cyan-600 uppercase mb-1.5 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-cyan-500 rounded-full"></span> HÀNG NGOÀI</p>`;
+                if (amCands.length > 0) {
+                    amCands.forEach((c, idx) => {
+                        amListHtml += `<label class="pr-card-label"><input type="radio" name="pr_am_${i}" value="${c.item._key}" ${idx===0?'checked':''}>
+                            <div class="pr-card-content"><p class="text-[11px] font-bold text-slate-800 pr-3 truncate">${c.item.partName}</p>
+                            <div class="flex justify-between items-center mt-1"><span class="text-xs font-black text-cyan-600">${fmt(c.item.price)}đ</span><span class="text-[8px] font-bold text-slate-500 bg-slate-100 px-1 rounded">${c.score}%</span></div></div></label>`;
+                    });
+                }
+                amListHtml += `<label class="pr-card-label pr-null-card mb-0"><input type="radio" name="pr_am_${i}" value="" ${amCands.length===0?'checked':''}><div class="pr-card-content"><span class="text-[9px] font-bold text-slate-400">Bỏ qua</span></div></label></div>`;
+
+                return `
+                <div class="bg-white border border-slate-200 rounded-xl p-3 mb-3 shadow-sm" style="border-left: 3px solid ${col.border};">
+                    <div class="flex items-start gap-2 mb-2">
+                        <input type="checkbox" id="pr-chk-${i}" ${hasAny && r.accepted ? 'checked' : ''} ${!hasAny ? 'disabled' : ''} class="mt-0.5 w-4 h-4 accent-emerald-500 shrink-0">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap mb-1">
+                                <span class="text-[12px] font-black text-slate-800 leading-tight">${h.stt}. ${h.chiTiet}</span>
+                                ${scoreBadge}
+                            </div>
+                        </div>
+                    </div>
+                    ${hasAny ? `<div class="grid grid-cols-2 gap-2 bg-slate-50 p-2 rounded-xl border border-slate-100">${oemListHtml}${amListHtml}</div>` : `<p class="text-[10px] text-amber-600 font-bold bg-amber-50 p-2 rounded-lg text-center mt-1">Không tìm thấy món tương đương</p>`}
+                </div>`;
+            }).join('');
+
+            window._prResults = results;
+            window._prSelectAll = val => { results.forEach((r, i) => { const chk = document.getElementById('pr-chk-' + i); if (chk && !chk.disabled) chk.checked = val; }); };
+            window._prApplySelected = (recordId) => {
+                const rec = App.find(recordId);
+                if (!rec) return;
+                const newList = JSON.parse(JSON.stringify(rec.damageItems || []));
+                let appliedCount = 0;
+
+                results.forEach((r, i) => {
+                    const chk = document.getElementById('pr-chk-' + i);
+                    if (!chk || !chk.checked) return;
+
+                    const idx = newList.findIndex(x => parseInt(x.stt) === parseInt(r.h.stt));
+                    if (idx === -1) return;
+
+                    const oemRadio = document.querySelector('input[name="pr_oem_' + i + '"]:checked');
+                    const amRadio  = document.querySelector('input[name="pr_am_' + i + '"]:checked');
+                    const oemItem = SpareParts.list.find(p => p._key === (oemRadio ? oemRadio.value : ''));
+                    const amItem  = SpareParts.list.find(p => p._key === (amRadio  ? amRadio.value  : ''));
+
+                    if (oemItem) newList[idx].giaOem = oemItem.price;
+                    if (amItem)  newList[idx].giaAm  = amItem.price;
+                    if (oemItem || amItem) { newList[idx].traGiaStatus = 'matched'; appliedCount++; }
+                });
+
+                if (appliedCount === 0) return Toast.fire({icon:'warning', title:'Chưa chọn áp giá!'});
+
+                db.ref('Workstation/' + recordId + '/damageItems').set(newList).then(() => {
+                    Swal.close();
+                    Toast.fire({icon:'success', title:'Đã áp giá cho ' + appliedCount + ' hạng mục!'});
+                    DamageItems.render(recordId);
+                });
+            };
+
+            Swal.fire({
+                title: false, padding: '0',
+                html: customCss + `
+                    <div class="text-left flex flex-col max-h-[85vh]">
+                        <div class="bg-slate-900 p-4 rounded-t-3xl shrink-0 text-white">
+                            <p class="font-black text-base mb-1">Kết quả tra giá kho</p>
+                            <p class="text-emerald-400 text-[11px] font-bold">Tìm thấy gợi ý cho ${results.filter(r=>r.candidates.length>0).length}/${results.length} hạng mục</p>
+                        </div>
+                        <div class="p-3 bg-slate-100 overflow-y-auto no-scrollbar flex-1">${rowsHtml}</div>
+                        <div class="p-3 bg-white border-t border-slate-200 rounded-b-3xl shrink-0">
+                            <div class="flex justify-between items-center mb-3 px-1">
+                                <button onclick="_prSelectAll(true)" class="text-blue-600 text-[11px] font-bold">Chọn tất cả</button>
+                                <button onclick="_prSelectAll(false)" class="text-slate-400 text-[11px] font-bold">Bỏ chọn</button>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="Swal.close()" class="w-1/3 py-3 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs active:bg-slate-200">Hủy</button>
+                                <button onclick="_prApplySelected('${id}')" class="w-2/3 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-200 active:bg-emerald-700">Áp giá →</button>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                showConfirmButton: false, customClass: { popup: 'custom-rounded p-0' }
+            });
+        }
+    };        
     // ============================================================
     // BOOT
     // ============================================================
@@ -10772,6 +11014,7 @@
         Garage.init();
         document.getElementById('plate-scanner-modal').classList.add('hidden');
         Inspection.startWatcher();
+        SpareParts.init();
 
         // 1. Scroll to top cho màn hình chính (main)
         const main = document.querySelector('main');
