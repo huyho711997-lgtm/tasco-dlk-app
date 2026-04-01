@@ -1231,7 +1231,102 @@
         [data-theme="dark"] .recv-btn { background-color: var(--bg-app); border-color: var(--border-light); color: var(--text-secondary); }
         [data-theme="dark"] .recv-btn.active { background-color: rgba(6, 182, 212, 0.15); border-color: rgba(6, 182, 212, 0.4); color: #22d3ee; }
         [data-theme="dark"] .recv-preview-box { background-color: var(--bg-app); border-color: var(--border-light); }
-        [data-theme="dark"] .recv-preview-box .bg-slate-100 { background-color: var(--bg-white) !important; }                        
+        [data-theme="dark"] .recv-preview-box .bg-slate-100 { background-color: var(--bg-white) !important; }    
+
+        /* 1. Stack narrow inputs into full-width block groups, giving them proper space */
+        .gara-repair-section .flex-row-inputs,
+        .gara-repair-section .grid-inputs {
+          display: block !important;
+          width: 100% !important;
+          margin-bottom: 16px !important;
+        }
+        
+        /* 2. Style each stacked input item to take full width and separate it */
+        .gara-repair-section .input-item,
+        .gara-repair-section .flex-item {
+          display: block !important;
+          width: 100% !important;
+          margin-bottom: 12px !important;
+          flex: none !important;
+          box-sizing: border-box !important;
+        }
+        
+        /* 3. Force labels to be on top and occupy full width for stacked items */
+        .gara-repair-section .input-item label {
+          display: block;
+          width: 100%;
+          margin-bottom: 6px;
+          font-size: 13px;
+          color: #64748b; /* --text-muted assuming common color system */
+          white-space: nowrap; /* Keep label on one line */
+        }
+        
+        /* 4. Increase input width to maximum and disable any truncation */
+        .gara-repair-section .input-item input {
+          width: 100% !important;
+          box-sizing: border-box !important;
+          text-align: left !important; /* numbers left-aligned for easier reading flow */
+          padding-left: 12px !important;
+          padding-right: 12px !important;
+          text-overflow: clip !important; /* Do not cut numbers with ellipsis */
+          overflow: visible !important; /* Allow numbers to overflow container */
+        }
+        
+        /*
+          Fix for Price Cards (Figure 2)
+        */
+        /* 1. Target comparison rows that use narrow columns (flex layout) and stack them vertically */
+        .price-comparison-group {
+          display: block !important;
+          width: 100% !important;
+          margin-bottom: 20px !important;
+        }
+        
+        /* 2. Change column to full-width block sections, allowing stacked price categories */
+        .price-comparison-col {
+          width: 100% !important;
+          flex: none !important;
+          margin-bottom: 16px !important; /* Add space between OEM and aftermarket blocks */
+        }
+        
+        /* 3. Force all cards to occupy full width within the expanded columns */
+        .price-card {
+          width: 100% !important;
+          padding: 16px !important;
+          display: block !important;
+          box-sizing: border-box !important;
+        }
+        
+        /* 4. Remove restriction on title length and allow it to wrap into multiple lines */
+        .price-card-title {
+          white-space: normal !important; /* Change white-space: nowrap to normal */
+          overflow: visible !important;
+          text-overflow: clip !important;
+          margin-bottom: 8px !important;
+          display: block !important;
+        }
+        
+        /* 5. Ensure price details (like price number) always display without cutting off */
+        .price-card-details {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+        }
+        
+        /* 6. Fix for narrow price display, making it fully visible */
+        .price-card-price {
+          flex-shrink: 0 !important;
+          white-space: nowrap !important;
+          text-align: left !important;
+        }
+        
+        /* 7. Ensure flexible meta info (like percentage match) is not cut */
+        .price-card-meta {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }        
     </style>
 </head>
 <body class="h-screen w-full flex flex-col overflow-hidden bg-slate-50">
