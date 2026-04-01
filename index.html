@@ -11000,28 +11000,42 @@
 
             const customCss = `
                 <style>
-                .pr-card-label { display:block; cursor:pointer; margin-bottom:6px; }
-                .pr-card-label input[type="radio"] { display:none; }
-                .pr-card-content { display:flex; flex-direction:column; padding:8px 10px; border:1px solid var(--border-light, #e2e8f0); border-radius:8px; background:var(--bg-white, #fff); transition:all 0.2s; position:relative; }
-                
-                .pr-card-label.is-oem input[type="radio"]:checked + .pr-card-content { border-color:#8b5cf6; background:rgba(139,92,246,0.1); }
-                .pr-card-label.is-oem input[type="radio"]:checked + .pr-card-content::after { content:"✓"; position:absolute; top:8px; right:10px; font-weight:900; color:#8b5cf6; font-size:12px; }
-                
-                .pr-card-label.is-am input[type="radio"]:checked + .pr-card-content { border-color:#06b6d4; background:rgba(6,182,212,0.1); }
-                .pr-card-label.is-am input[type="radio"]:checked + .pr-card-content::after { content:"✓"; position:absolute; top:8px; right:10px; font-weight:900; color:#06b6d4; font-size:12px; }
-                
-                .pr-null-card .pr-card-content { border:1px dashed var(--border-light, #cbd5e1); background:transparent; align-items:center; min-height:36px; padding:6px; }
-                .pr-null-card input[type="radio"]:checked + .pr-card-content { border-color:var(--text-muted, #94a3b8); background:var(--bg-surface, #f1f5f9); }
-                .pr-null-card input[type="radio"]:checked + .pr-card-content::after { content:"✓"; position:absolute; top:6px; right:10px; font-weight:900; color:var(--text-muted, #64748b); font-size:12px; }
-                
-                /* CLASS MỚI: ÉP MODAL TRÀN LỀ, XÓA PADDING THỪA */
+                /* Xóa triệt để khoảng đệm thừa của Swal để mở rộng không gian */
                 .swal-edge-to-edge {
                     padding: 0 !important;
-                    width: 96% !important; 
+                    width: 95% !important; /* Rộng 95% màn hình */
                     max-width: 500px !important;
-                    border-radius: 18px !important;
-                    overflow: hidden !important;
+                    border-radius: 24px !important;
+                    background: transparent !important;
                 }
+                .swal-edge-to-edge .swal2-html-container {
+                    margin: 0 !important;
+                    padding: 0 !important; 
+                }
+                
+                .pr-card-label { display:block; cursor:pointer; margin-bottom:8px; }
+                .pr-card-label input[type="radio"] { display:none; }
+                
+                /* Viền mỏng 1px và bo góc mềm mại (12px) cho thẻ chọn giá */
+                .pr-card-content { 
+                    display:flex; flex-direction:column; padding:10px 14px; 
+                    border:1px solid var(--border-light, #e2e8f0); 
+                    border-radius:12px; background:var(--bg-white, #fff); 
+                    transition:all 0.2s; position:relative; 
+                }
+                
+                /* Trạng thái đã chọn (OEM) */
+                .pr-card-label.is-oem input[type="radio"]:checked + .pr-card-content { border-color:#8b5cf6; background:rgba(139,92,246,0.08); }
+                .pr-card-label.is-oem input[type="radio"]:checked + .pr-card-content::after { content:"✓"; position:absolute; top:50%; transform:translateY(-50%); right:14px; font-weight:900; color:#8b5cf6; font-size:16px; }
+                
+                /* Trạng thái đã chọn (Hàng ngoài) */
+                .pr-card-label.is-am input[type="radio"]:checked + .pr-card-content { border-color:#06b6d4; background:rgba(6,182,212,0.08); }
+                .pr-card-label.is-am input[type="radio"]:checked + .pr-card-content::after { content:"✓"; position:absolute; top:50%; transform:translateY(-50%); right:14px; font-weight:900; color:#06b6d4; font-size:16px; }
+                
+                /* Thẻ Bỏ qua (Null Card) */
+                .pr-null-card .pr-card-content { border:1px dashed var(--border-light, #cbd5e1); background:transparent; align-items:center; min-height:42px; padding:10px; }
+                .pr-null-card input[type="radio"]:checked + .pr-card-content { border-color:var(--text-muted, #94a3b8); background:var(--bg-surface, #f1f5f9); }
+                .pr-null-card input[type="radio"]:checked + .pr-card-content::after { content:"✓"; position:absolute; top:50%; transform:translateY(-50%); right:14px; font-weight:900; color:var(--text-muted, #64748b); font-size:16px; }
                 </style>
             `;
 
@@ -11029,61 +11043,60 @@
                 const h = r.h;
                 const col = scoreColor(r.topScore);
                 const hasAny = r.candidates.length > 0;
-                const scoreBadge = r.topScore > 0 ? `<span style="font-size:9px;padding:2px 6px;border-radius:20px;background:${col.label};color:${col.labelTx};font-weight:800;flex-shrink:0;white-space:nowrap;">${r.topScore}% khớp</span>` : '';
+                const scoreBadge = r.topScore > 0 ? `<span style="font-size:10px;padding:2px 8px;border-radius:20px;background:${col.label};color:${col.labelTx};font-weight:800;flex-shrink:0;white-space:nowrap;">${r.topScore}% khớp</span>` : '';
 
                 const oemCands = r.candidates.filter(c => c.item.partType === 'oem').slice(0, 3);
                 const amCands  = r.candidates.filter(c => c.item.partType === 'aftermarket').slice(0, 3);
 
-                // FIX 1: Bỏ class "truncate" ở thẻ <p> chứa tên phụ tùng, thêm word-break để tự xuống dòng
-                let oemListHtml = `<div class="mb-2"><p class="text-[9px] font-black text-purple-500 uppercase mb-1.5 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-purple-500 rounded-full"></span> OEM</p>`;
+                // Dùng danh sách DỌC thay vì chia 2 cột để chữ có đủ không gian hiển thị
+                let oemListHtml = `<div class="mb-4"><p class="text-[10px] font-black text-purple-500 uppercase mb-2.5 flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-purple-500 rounded-full"></span> OEM (CHÍNH HÃNG)</p>`;
                 if (oemCands.length > 0) {
                     oemCands.forEach((c, idx) => {
                         oemListHtml += `<label class="pr-card-label is-oem"><input type="radio" name="pr_oem_${i}" value="${c.item._key}" ${idx===0?'checked':''}>
                             <div class="pr-card-content">
-                                <p style="font-size:11px;font-weight:700;color:var(--text-primary, #1e293b);margin:0 0 6px 0;line-height:1.4;word-break:break-word;">${c.item.partName}</p>
-                                <div class="flex justify-between items-center mt-auto">
-                                    <span class="text-[13px] font-black text-purple-500">${fmt(c.item.price)}đ</span>
-                                    <span style="background:var(--bg-surface, #f1f5f9);color:var(--text-secondary, #64748b);" class="text-[9px] font-bold px-1.5 py-0.5 rounded">${c.score}%</span>
+                                <p style="font-size:12px;font-weight:700;color:var(--text-primary, #1e293b);margin:0 0 6px 0;line-height:1.4;word-break:break-word;padding-right:20px;">${c.item.partName}</p>
+                                <div class="flex justify-between items-center mt-1">
+                                    <span class="text-[14px] font-black text-purple-500">${fmt(c.item.price)}đ</span>
+                                    <span style="background:var(--bg-app, #f1f5f9);color:var(--text-secondary, #64748b);" class="text-[10px] font-bold px-2 py-0.5 rounded-md">${c.score}%</span>
                                 </div>
                             </div></label>`;
                     });
                 }
-                oemListHtml += `<label class="pr-card-label pr-null-card mb-0"><input type="radio" name="pr_oem_${i}" value="" ${oemCands.length===0?'checked':''}><div class="pr-card-content"><span class="text-[10px] font-bold" style="color:var(--text-muted, #94a3b8);">Bỏ qua</span></div></label></div>`;
+                oemListHtml += `<label class="pr-card-label pr-null-card mb-0"><input type="radio" name="pr_oem_${i}" value="" ${oemCands.length===0?'checked':''}><div class="pr-card-content"><span class="text-[11px] font-bold" style="color:var(--text-muted, #94a3b8);">Bỏ qua</span></div></label></div>`;
 
-                let amListHtml = `<div><p class="text-[9px] font-black text-cyan-500 uppercase mb-1.5 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-cyan-500 rounded-full"></span> HÀNG NGOÀI</p>`;
+                let amListHtml = `<div><p class="text-[10px] font-black text-cyan-500 uppercase mb-2.5 flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-cyan-500 rounded-full"></span> HÀNG NGOÀI</p>`;
                 if (amCands.length > 0) {
                     amCands.forEach((c, idx) => {
                         amListHtml += `<label class="pr-card-label is-am"><input type="radio" name="pr_am_${i}" value="${c.item._key}" ${idx===0?'checked':''}>
                             <div class="pr-card-content">
-                                <p style="font-size:11px;font-weight:700;color:var(--text-primary, #1e293b);margin:0 0 6px 0;line-height:1.4;word-break:break-word;">${c.item.partName}</p>
-                                <div class="flex justify-between items-center mt-auto">
-                                    <span class="text-[13px] font-black text-cyan-500">${fmt(c.item.price)}đ</span>
-                                    <span style="background:var(--bg-surface, #f1f5f9);color:var(--text-secondary, #64748b);" class="text-[9px] font-bold px-1.5 py-0.5 rounded">${c.score}%</span>
+                                <p style="font-size:12px;font-weight:700;color:var(--text-primary, #1e293b);margin:0 0 6px 0;line-height:1.4;word-break:break-word;padding-right:20px;">${c.item.partName}</p>
+                                <div class="flex justify-between items-center mt-1">
+                                    <span class="text-[14px] font-black text-cyan-500">${fmt(c.item.price)}đ</span>
+                                    <span style="background:var(--bg-app, #f1f5f9);color:var(--text-secondary, #64748b);" class="text-[10px] font-bold px-2 py-0.5 rounded-md">${c.score}%</span>
                                 </div>
                             </div></label>`;
                     });
                 }
-                amListHtml += `<label class="pr-card-label pr-null-card mb-0"><input type="radio" name="pr_am_${i}" value="" ${amCands.length===0?'checked':''}><div class="pr-card-content"><span class="text-[10px] font-bold" style="color:var(--text-muted, #94a3b8);">Bỏ qua</span></div></label></div>`;
+                amListHtml += `<label class="pr-card-label pr-null-card mb-0"><input type="radio" name="pr_am_${i}" value="" ${amCands.length===0?'checked':''}><div class="pr-card-content"><span class="text-[11px] font-bold" style="color:var(--text-muted, #94a3b8);">Bỏ qua</span></div></label></div>`;
 
                 return `
-                <div style="background:var(--bg-white, #fff); border:1px solid var(--border-light, #e2e8f0); border-left: 3px solid ${col.border};" class="rounded-xl p-3 mb-3 shadow-sm">
-                    <div class="flex items-start gap-2 mb-2">
-                        <input type="checkbox" id="pr-chk-${i}" ${hasAny && r.accepted ? 'checked' : ''} ${!hasAny ? 'disabled' : ''} class="mt-0.5 w-4 h-4 accent-emerald-500 shrink-0">
+                <div style="background:var(--bg-white, #fff); border:1px solid var(--border-light, #e2e8f0); border-left: 4px solid ${col.border};" class="rounded-2xl p-4 mb-4 shadow-sm">
+                    <div class="flex items-start gap-3 mb-4">
+                        <input type="checkbox" id="pr-chk-${i}" ${hasAny && r.accepted ? 'checked' : ''} ${!hasAny ? 'disabled' : ''} class="mt-0.5 w-5 h-5 accent-emerald-500 shrink-0">
                         <div class="flex-1 min-w-0">
-                            <div class="flex items-start justify-between gap-2 mb-1">
-                                <span class="text-[13px] font-black leading-tight" style="color:var(--text-primary, #1e293b);">${h.stt}. ${h.chiTiet}</span>
+                            <div class="flex items-start justify-between gap-2">
+                                <span class="text-[15px] font-black leading-snug" style="color:var(--text-primary, #1e293b);">${h.stt}. ${h.chiTiet}</span>
                                 ${scoreBadge}
                             </div>
                         </div>
                     </div>
-                    ${hasAny ? `<div class="grid grid-cols-2 gap-2 p-2 rounded-xl" style="background:var(--bg-app, #f8fafc); border:1px solid var(--border-light, #f1f5f9);">${oemListHtml}${amListHtml}</div>` : `<p class="text-[10px] text-amber-600 font-bold bg-amber-50 p-2 rounded-lg text-center mt-1">Không tìm thấy món tương đương</p>`}
+                    ${hasAny ? `<div class="flex flex-col p-4 rounded-xl" style="background:var(--bg-app, #f8fafc); border:1px solid var(--border-light, #f1f5f9);">${oemListHtml}${amListHtml}</div>` : `<p class="text-[12px] text-amber-600 font-bold bg-amber-50 p-3 rounded-xl text-center mt-2 border border-amber-200">Không tìm thấy món tương đương trong kho</p>`}
                 </div>`;
             }).join('');
 
             window._prResults = results;
             window._prSelectAll = val => { results.forEach((r, i) => { const chk = document.getElementById('pr-chk-' + i); if (chk && !chk.disabled) chk.checked = val; }); };
             window._prApplySelected = (recordId) => {
-                // ... (Phần logic hàm _prApplySelected giữ nguyên)
                 const rec = App.find(recordId);
                 if (!rec) return;
                 const newList = JSON.parse(JSON.stringify(rec.damageItems || []));
@@ -11116,31 +11129,27 @@
             };
 
             Swal.fire({
-                title: false, 
-                padding: '0',
+                title: false, padding: '0',
                 html: customCss + `
-                    <div class="text-left flex flex-col max-h-[88vh]">
-                        <div class="bg-slate-900 p-4 shrink-0 text-white">
-                            <p class="font-black text-base mb-1">Kết quả tra giá kho</p>
-                            <p class="text-emerald-400 text-[11px] font-bold">Tìm thấy gợi ý cho ${results.filter(r=>r.candidates.length>0).length}/${results.length} hạng mục</p>
+                    <div class="text-left flex flex-col max-h-[85vh] rounded-3xl overflow-hidden" style="background:var(--bg-white, #fff); box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                        <div class="p-5 shrink-0" style="background:var(--bg-surface, #f8fafc); border-bottom:1px solid var(--border-light, #e2e8f0);">
+                            <p class="font-black text-[18px] mb-1" style="color:var(--text-primary, #0f172a);">Kết quả tra giá kho</p>
+                            <p class="text-emerald-500 text-[12px] font-bold">Tìm thấy gợi ý cho ${results.filter(r=>r.candidates.length>0).length}/${results.length} hạng mục</p>
                         </div>
-                        
-                        <div class="p-3 overflow-y-auto no-scrollbar flex-1" style="background:var(--bg-app);">${rowsHtml}</div>
-                        
-                        <div class="p-3 border-t shrink-0" style="background:var(--bg-white); border-color:var(--border-light);">
-                            <div class="flex justify-between items-center mb-3 px-1">
-                                <button onclick="_prSelectAll(true)" class="text-blue-600 text-[11px] font-bold">Chọn tất cả</button>
-                                <button onclick="_prSelectAll(false)" class="text-slate-400 text-[11px] font-bold">Bỏ chọn</button>
+                        <div class="p-4 overflow-y-auto no-scrollbar flex-1" style="background:var(--bg-surface, #f8fafc);">${rowsHtml}</div>
+                        <div class="p-4 border-t shrink-0" style="background:var(--bg-white, #fff); border-color:var(--border-light, #e2e8f0);">
+                            <div class="flex justify-between items-center mb-4 px-2">
+                                <button onclick="_prSelectAll(true)" class="text-blue-600 text-[13px] font-bold">Chọn tất cả</button>
+                                <button onclick="_prSelectAll(false)" class="text-slate-500 text-[13px] font-bold">Bỏ chọn</button>
                             </div>
-                            <div class="flex gap-2">
-                                <button onclick="Swal.close()" class="w-1/3 py-3 rounded-xl font-bold text-xs transition-colors" style="background:var(--bg-surface); color:var(--text-secondary);">Hủy</button>
-                                <button onclick="_prApplySelected('${id}')" class="w-2/3 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-200 active:bg-emerald-700">Áp giá →</button>
+                            <div class="flex gap-3">
+                                <button onclick="Swal.close()" class="w-1/3 py-4 rounded-xl font-bold text-sm transition-colors border" style="background:var(--bg-app, #f8fafc); border-color:var(--border-light, #e2e8f0); color:var(--text-secondary, #64748b);">Hủy</button>
+                                <button onclick="_prApplySelected('${id}')" class="w-2/3 py-4 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-lg shadow-emerald-200 active:scale-95 transition-transform">Áp giá →</button>
                             </div>
                         </div>
                     </div>
                 `,
                 showConfirmButton: false, 
-                // ÁP DỤNG CLASS MỚI ĐỂ XÓA VIỀN
                 customClass: { popup: 'swal-edge-to-edge' }
             });
         }
