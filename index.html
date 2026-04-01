@@ -2469,21 +2469,21 @@
                             </button>
                         </div>
                         
-                        <div id="dm-normal-btns" class="grid grid-cols-2 gap-2">
-                            <button onclick="PriceCompare.lookup(App.currentEditId)" class="col-span-2 flex items-center justify-center gap-1.5 px-2 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-[12px] font-black shadow-sm active:scale-95 transition-transform">
-                                <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Tra giá phụ tùng từ Kho AI
+                        <div id="dm-normal-btns" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 mb-2 border-b border-slate-100">
+                            <button onclick="PriceCompare.lookup(App.currentEditId)" class="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-[11px] font-black shadow-sm active:scale-95 transition-transform">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Tra giá Kho AI
                             </button>
-                            <button onclick="CarDiagram.open(App.currentEditId)" class="flex items-center justify-center gap-1.5 px-2 py-2.5 bg-slate-800 text-white rounded-xl text-[11px] font-bold shadow-sm shadow-slate-300 active:scale-95 transition-transform">
-                                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="8" width="18" height="8" rx="2"/><path d="M5 8l1-4h12l1 4"/><circle cx="7" cy="16" r="2"/><circle cx="17" cy="16" r="2"/></svg> Sơ đồ
+                            <button onclick="DamageItems.addRowAI(App.currentEditId)" class="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-[11px] font-bold shadow-sm shadow-violet-200 active:scale-95 transition-transform">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> AI bóc tách
+                            </button>
+                            <button onclick="DamageItems.addRow(App.currentEditId)" class="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-[11px] font-bold active:scale-95 transition-transform">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Thêm tay
+                            </button>
+                            <button onclick="CarDiagram.open(App.currentEditId)" class="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-800 text-white rounded-xl text-[11px] font-bold shadow-sm shadow-slate-300 active:scale-95 transition-transform">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="8" width="18" height="8" rx="2"/><path d="M5 8l1-4h12l1 4"/><circle cx="7" cy="16" r="2"/><circle cx="17" cy="16" r="2"/></svg> Sơ đồ
                             </button> 
-                            <button onclick="DamageItems.addRowAI(App.currentEditId)" class="flex items-center justify-center gap-1.5 px-2 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-[11px] font-bold shadow-sm shadow-violet-200 active:scale-95 transition-transform">
-                                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> AI tách
-                            </button>
-                            <button onclick="DamageItems.addRow(App.currentEditId)" class="flex items-center justify-center gap-1.5 px-2 py-2.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-[11px] font-bold active:scale-95 transition-transform">
-                                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Thêm tay
-                            </button>
-                            <button onclick="DamageItems.exportWord(App.currentEditId)" class="flex items-center justify-center gap-1.5 px-2 py-2.5 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl text-[11px] font-bold active:scale-95 transition-transform">
-                                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6M9 15l3 3 3-3"/></svg> Biên Bản
+                            <button onclick="DamageItems.exportWord(App.currentEditId)" class="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl text-[11px] font-bold active:scale-95 transition-transform">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6M9 15l3 3 3-3"/></svg> Xuất BB
                             </button>
                         </div>
 
@@ -3735,6 +3735,18 @@
                 const isSelected = this._selectedIndices.has(i);
                 const selClass = isSelected ? ' bulk-selected' : '';
 
+                // BỔ SUNG: Hiển thị giá trị đã áp dụng từ Kho giá
+                let priceHtml = '';
+                if (h.traGiaStatus === 'matched' && (h.giaOem || h.giaAm)) {
+                    priceHtml = `<div style="margin-top:6px; padding-top:6px; border-top:1px dashed #e2e8f0; display:flex; align-items:center; justify-content:space-between;">
+                        <span style="font-size:9px;font-weight:800;color:#10b981;background:#d1fae5;padding:2px 6px;border-radius:4px;">✓ Đã áp giá</span>
+                        <div style="display:flex; gap:8px;">
+                            ${h.giaOem ? `<span style="font-size:11px;font-weight:900;color:#8b5cf6;">OEM: ${Number(h.giaOem).toLocaleString('vi-VN')}đ</span>` : ''}
+                            ${h.giaAm ? `<span style="font-size:11px;font-weight:900;color:#06b6d4;">Ngoài: ${Number(h.giaAm).toLocaleString('vi-VN')}đ</span>` : ''}
+                        </div>
+                    </div>`;
+                }
+
                 return '<div class="dm-swipe-wrap" id="swipe-' + i + '">'
                     + '<div class="dm-card ' + accentClass(h) + selClass + '" id="card-' + i + '" onclick="DamageItems.handleCardClick(' + i + ')">'
                     +   '<span class="dm-num">' + (h.stt || i + 1) + '</span>'
@@ -3745,6 +3757,7 @@
                     +       moTaSep
                     +       actionChips(h)
                     +     '</div>'
+                    +     priceHtml // Chèn đoạn giá trị vào đây
                     +   '</div>'
                     + '</div>'
                     + '<div class="dm-swipe-actions">'
@@ -11046,7 +11059,7 @@
                             </div>
                         </div>
                     </div>
-                    ${hasAny ? `<div class="grid grid-cols-2 gap-2 p-2 rounded-xl" style="background:var(--bg-app, #f8fafc); border:1px solid var(--border-light, #f1f5f9);">${oemListHtml}${amListHtml}</div>` : `<p class="text-[10px] text-amber-600 font-bold bg-amber-50 p-2 rounded-lg text-center mt-1">Không tìm thấy món tương đương</p>`}
+                    ${hasAny ? `<div class="flex flex-col gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">${oemListHtml}${amListHtml}</div>` : `<p class="text-[10px] text-amber-600 font-bold bg-amber-50 p-2 rounded-lg text-center mt-1">Không tìm thấy món tương đương</p>`}
                 </div>`;
             }).join('');
 
