@@ -3189,9 +3189,17 @@ function _dtpBuildHTML(mode) {
   var curRec=(mode==='step2'&&curId)?(allData.find(function(r){return r.id===curId;})||{}):{};
   var locHtml=_dtpState.locShow?'<div class="mt-4"><label class="lbl">Địa điểm giám định</label><input id="dtp-loc" class="inp text-sm mt-1" placeholder="Nhập địa điểm..." value="'+(curRec.location||'')+'"></div>':'';
   var garHtml='';
-  if(_dtpState.garShow){garHtml='<div class="mt-4 p-4 rounded-2xl bg-teal-50/60 border border-teal-200"><p class="lbl text-teal-700 mb-3">🔧 Gara sửa chữa</p><div class="relative mb-2"><input id="dtp-gname" class="inp text-sm" placeholder="Tên gara..." value="'+(curRec.garaName||'')+'" oninput="dtpGaraSearch(this)" onblur="setTimeout(dtpGaraHide,200)"><div id="dtp-gdrop" class="gdrop hidden"></div></div><div class="grid grid-cols-2 gap-2"><input id="dtp-gphone" class="inp text-sm" placeholder="SĐT gara" value="'+(curRec.garaPhone||'')+'"><input id="dtp-gaddr" class="inp text-sm" placeholder="Địa chỉ" value="'+(curRec.garaAddress||'')+'"></div></div>';}
-  return '<div class="dtp-box"><div class="px-6 pt-5 pb-4 border-b border-slate-100"><div class="flex items-center justify-between mb-4"><p class="text-base font-extrabold text-slate-800">📅 Chọn ngày & giờ</p><div id="dtp-display" class="text-sm font-black text-blue-600 bg-blue-50 px-3 py-1.5 rounded-xl">—</div></div><div class="flex gap-1.5 flex-wrap">'+['07:30','08:00','08:30','09:00','10:00','13:30','14:00','15:00'].map(function(t){var p=t.split(':');return'<span class="dtp-qchip" onclick="dtpQuickHour('+p[0]+','+p[1]+')">'+t+'</span>';}).join('')+'</div></div><div class="overflow-y-auto flex-1 px-6 pb-5"><div class="flex items-center justify-between mt-5 mb-3"><button onclick="_dtpPrevMonth()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600">‹</button><p id="dtp-month-label" class="font-extrabold text-slate-800 text-sm"></p><button onclick="_dtpNextMonth()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600">›</button></div><div class="dtp-cal-head mb-1"><span>CN</span><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span></div><div id="dtp-cal-grid" class="dtp-cal-grid mb-5"></div><div class="bg-slate-50 rounded-2xl p-4 border border-slate-100"><p class="lbl mb-3">⏰ Giờ</p><div id="dtp-hours" class="grid grid-cols-8 gap-1 mb-4"></div><p class="lbl mb-3">Phút</p><div id="dtp-mins" class="grid grid-cols-6 gap-1"></div></div>'+locHtml+garHtml+'</div><div class="px-6 py-4 border-t border-slate-100 flex gap-3"><button onclick="dtpClose()" class="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200">Hủy</button><button onclick="dtpConfirm(\''+mode+'\')" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200">✓ Xác nhận</button></div></div>';
-}
+  if(_dtpState.garShow){
+    garHtml='<div class="mt-4 p-4 rounded-2xl bg-teal-50/60 border border-teal-200">'
+      + '<p class="lbl text-teal-700 mb-3">🔧 Gara sửa chữa</p>'
+      + '<div class="relative mb-2"><input id="dtp-gname" class="inp text-sm" placeholder="Tên gara..." value="'+(curRec.garaName||'')+'" oninput="dtpGaraSearch(this)" onblur="setTimeout(dtpGaraHide,200)"><div id="dtp-gdrop" class="gdrop hidden"></div></div>'
+      + '<div class="grid grid-cols-2 gap-2"><input id="dtp-gphone" class="inp text-sm" placeholder="SĐT gara" value="'+(curRec.garaPhone||'')+'"><input id="dtp-gaddr" class="inp text-sm" placeholder="Địa chỉ" value="'+(curRec.garaAddress||'')+'"></div>'
+      + '<input type="hidden" id="dtp-gtax" value="'+(curRec.garaTax||'')+'">'
+      + '<input type="hidden" id="dtp-gbankno" value="'+(curRec.garaBankNo||'')+'">'
+      + '<input type="hidden" id="dtp-gbankname" value="'+(curRec.garaBankName||'')+'">'
+      + '<input type="hidden" id="dtp-gbankowner" value="'+(curRec.garaBankOwner||'')+'">'
+      + '</div>';
+  }
 
 function _dtpRenderCal() {
   var grid=document.getElementById('dtp-cal-grid'),label=document.getElementById('dtp-month-label');
@@ -3246,7 +3254,18 @@ function dtpConfirm(mode) {
   if(!s.day||!s.year){Toast.fire({icon:'warning',title:'Vui lòng chọn ngày!'});return;}
   var iso=moment({year:s.year,month:s.month,date:s.day,hour:s.hour,minute:s.minute,second:0}).toISOString();
   var loc=s.locShow?((document.getElementById('dtp-loc')||{}).value||''):null;
-  var gara=s.garShow?{name:((document.getElementById('dtp-gname')||{}).value||'').trim(),phone:((document.getElementById('dtp-gphone')||{}).value||'').trim(),address:((document.getElementById('dtp-gaddr')||{}).value||'').trim()}:null;
+  
+  // Thu thập toàn bộ dữ liệu gara từ form
+  var gara=s.garShow?{
+    name:((document.getElementById('dtp-gname')||{}).value||'').trim(),
+    phone:((document.getElementById('dtp-gphone')||{}).value||'').trim(),
+    address:((document.getElementById('dtp-gaddr')||{}).value||'').trim(),
+    tax:((document.getElementById('dtp-gtax')||{}).value||'').trim(),
+    bankNo:((document.getElementById('dtp-gbankno')||{}).value||'').trim(),
+    bankName:((document.getElementById('dtp-gbankname')||{}).value||'').trim(),
+    bankOwner:((document.getElementById('dtp-gbankowner')||{}).value||'').trim()
+  }:null;
+  
   dtpClose();
   if(mode==='appt'){
     var hidden=document.getElementById('f-appt-iso'),display=document.getElementById('f-appt-label');
@@ -3257,7 +3276,16 @@ function dtpConfirm(mode) {
   if(mode==='step2'){
     var upd2={step:2,stepUpdatedAt:new Date().toISOString(),appointmentTime:iso};
     if(loc!==null)upd2.location=loc;
-    if(gara&&gara.name){upd2.garaName=gara.name;upd2.garaPhone=gara.phone||'';upd2.garaAddress=gara.address||'';garaSaveNew(gara);}
+    if(gara&&gara.name){
+      upd2.garaName=gara.name;
+      upd2.garaPhone=gara.phone||'';
+      upd2.garaAddress=gara.address||'';
+      upd2.garaTax=gara.tax||'';
+      upd2.garaBankNo=gara.bankNo||'';
+      upd2.garaBankName=gara.bankName||'';
+      upd2.garaBankOwner=gara.bankOwner||'';
+      garaSaveNew(gara);
+    }
     db.ref('Workstation/'+curId).update(upd2).then(function(){Toast.fire({icon:'success',title:'Đã lên lịch hẹn!'});});
   }
   if(mode==='task'){
@@ -3285,7 +3313,7 @@ function calAssign(id,iso,location){
 }
 
 function dtpGaraSearch(inp){var q=inp.value.trim().toLowerCase();var drop=document.getElementById('dtp-gdrop');if(!q||!drop){drop&&drop.classList.add('hidden');return;}var hits=garaList.filter(function(g){return g.name&&g.name.toLowerCase().includes(q);}).slice(0,5);if(!hits.length){drop.classList.add('hidden');return;}drop.innerHTML=hits.map(function(g){return'<div class="gdrop-item" onclick="dtpGaraSelect('+JSON.stringify(g).replace(/"/g,'&quot;')+')">🔧 <div><p class="font-bold text-teal-800">'+(g.name||'')+'</p>'+(g.address?'<p class="text-[10px] text-slate-400">'+g.address+'</p>':'')+'</div></div>';}).join('');drop.classList.remove('hidden');}
-function dtpGaraSelect(g){var n=document.getElementById('dtp-gname'),p=document.getElementById('dtp-gphone'),a=document.getElementById('dtp-gaddr');if(n)n.value=g.name||'';if(p)p.value=g.phone||'';if(a)a.value=g.address||'';document.getElementById('dtp-gdrop')&&document.getElementById('dtp-gdrop').classList.add('hidden');}
+function dtpGaraSelect(g){   var n=document.getElementById('dtp-gname'), p=document.getElementById('dtp-gphone'), a=document.getElementById('dtp-gaddr');   var tax=document.getElementById('dtp-gtax'), bno=document.getElementById('dtp-gbankno'), bname=document.getElementById('dtp-gbankname'), bowner=document.getElementById('dtp-gbankowner');      if(n) n.value=g.name||'';   if(p) p.value=g.phone||'';   if(a) a.value=g.address||'';   if(tax) tax.value=g.tax||'';   if(bno) bno.value=g.bankNo||'';   if(bname) bname.value=g.bankName||'';   if(bowner) bowner.value=g.bankOwner||'';      document.getElementById('dtp-gdrop')&&document.getElementById('dtp-gdrop').classList.add('hidden'); }
 function dtpGaraHide(){var d=document.getElementById('dtp-gdrop');if(d)d.classList.add('hidden');}
 function garaSaveNew(g) {
   if(!g || !g.name) return;
