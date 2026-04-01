@@ -11004,18 +11004,24 @@
                 .pr-card-label input[type="radio"] { display:none; }
                 .pr-card-content { display:flex; flex-direction:column; padding:8px 10px; border:1px solid var(--border-light, #e2e8f0); border-radius:8px; background:var(--bg-white, #fff); transition:all 0.2s; position:relative; }
                 
-                /* OEM Styles */
                 .pr-card-label.is-oem input[type="radio"]:checked + .pr-card-content { border-color:#8b5cf6; background:rgba(139,92,246,0.1); }
                 .pr-card-label.is-oem input[type="radio"]:checked + .pr-card-content::after { content:"✓"; position:absolute; top:8px; right:10px; font-weight:900; color:#8b5cf6; font-size:12px; }
                 
-                /* AM Styles */
                 .pr-card-label.is-am input[type="radio"]:checked + .pr-card-content { border-color:#06b6d4; background:rgba(6,182,212,0.1); }
                 .pr-card-label.is-am input[type="radio"]:checked + .pr-card-content::after { content:"✓"; position:absolute; top:8px; right:10px; font-weight:900; color:#06b6d4; font-size:12px; }
                 
-                /* Null (Bỏ qua) Styles */
                 .pr-null-card .pr-card-content { border:1px dashed var(--border-light, #cbd5e1); background:transparent; align-items:center; min-height:36px; padding:6px; }
                 .pr-null-card input[type="radio"]:checked + .pr-card-content { border-color:var(--text-muted, #94a3b8); background:var(--bg-surface, #f1f5f9); }
                 .pr-null-card input[type="radio"]:checked + .pr-card-content::after { content:"✓"; position:absolute; top:6px; right:10px; font-weight:900; color:var(--text-muted, #64748b); font-size:12px; }
+                
+                /* CLASS MỚI: ÉP MODAL TRÀN LỀ, XÓA PADDING THỪA */
+                .swal-edge-to-edge {
+                    padding: 0 !important;
+                    width: 96% !important; 
+                    max-width: 500px !important;
+                    border-radius: 18px !important;
+                    overflow: hidden !important;
+                }
                 </style>
             `;
 
@@ -11110,15 +11116,18 @@
             };
 
             Swal.fire({
-                title: false, padding: '0',
+                title: false, 
+                padding: '0',
                 html: customCss + `
                     <div class="text-left flex flex-col max-h-[88vh]">
-                        <div class="bg-slate-900 p-4 rounded-t-3xl shrink-0 text-white">
+                        <div class="bg-slate-900 p-4 shrink-0 text-white">
                             <p class="font-black text-base mb-1">Kết quả tra giá kho</p>
                             <p class="text-emerald-400 text-[11px] font-bold">Tìm thấy gợi ý cho ${results.filter(r=>r.candidates.length>0).length}/${results.length} hạng mục</p>
                         </div>
-                        <div class="p-3 bg-slate-100 overflow-y-auto no-scrollbar flex-1" style="background:var(--bg-app);">${rowsHtml}</div>
-                        <div class="p-3 border-t rounded-b-3xl shrink-0" style="background:var(--bg-white); border-color:var(--border-light);">
+                        
+                        <div class="p-3 overflow-y-auto no-scrollbar flex-1" style="background:var(--bg-app);">${rowsHtml}</div>
+                        
+                        <div class="p-3 border-t shrink-0" style="background:var(--bg-white); border-color:var(--border-light);">
                             <div class="flex justify-between items-center mb-3 px-1">
                                 <button onclick="_prSelectAll(true)" class="text-blue-600 text-[11px] font-bold">Chọn tất cả</button>
                                 <button onclick="_prSelectAll(false)" class="text-slate-400 text-[11px] font-bold">Bỏ chọn</button>
@@ -11131,8 +11140,8 @@
                     </div>
                 `,
                 showConfirmButton: false, 
-                // FIX 2: Thêm !w-[96%] để Modal bung rộng ra tận lề màn hình điện thoại
-                customClass: { popup: 'custom-rounded !p-0 !w-[96%]' }
+                // ÁP DỤNG CLASS MỚI ĐỂ XÓA VIỀN
+                customClass: { popup: 'swal-edge-to-edge' }
             });
         }
     };        
