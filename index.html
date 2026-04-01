@@ -10894,11 +10894,20 @@
                 <style>
                 .pr-card-label { display:block; cursor:pointer; margin-bottom:6px; }
                 .pr-card-label input[type="radio"] { display:none; }
-                .pr-card-content { display:flex; flex-direction:column; padding:8px 10px; border:1px solid #e2e8f0; border-radius:8px; background:#fff; transition:all 0.2s; position:relative; }
-                .pr-card-label input[type="radio"]:checked + .pr-card-content { border-color:#3b82f6; background:#eff6ff; }
-                .pr-card-label input[type="radio"]:checked + .pr-card-content::after { content:"✓"; position:absolute; top:8px; right:10px; font-weight:900; color:#2563eb; font-size:12px; }
-                .pr-null-card .pr-card-content { border:1px dashed #cbd5e1; background:transparent; align-items:center; min-height:36px; padding:6px; }
-                .pr-card-label input[type="radio"]:checked + .pr-null-card .pr-card-content { border-color:#94a3b8; background:#f1f5f9; }
+                .pr-card-content { display:flex; flex-direction:column; padding:8px 10px; border:1px solid var(--border-light, #e2e8f0); border-radius:8px; background:var(--bg-white, #fff); transition:all 0.2s; position:relative; }
+                
+                /* OEM Styles */
+                .pr-card-label.is-oem input[type="radio"]:checked + .pr-card-content { border-color:#8b5cf6; background:rgba(139,92,246,0.1); }
+                .pr-card-label.is-oem input[type="radio"]:checked + .pr-card-content::after { content:"✓"; position:absolute; top:8px; right:10px; font-weight:900; color:#8b5cf6; font-size:12px; }
+                
+                /* AM Styles */
+                .pr-card-label.is-am input[type="radio"]:checked + .pr-card-content { border-color:#06b6d4; background:rgba(6,182,212,0.1); }
+                .pr-card-label.is-am input[type="radio"]:checked + .pr-card-content::after { content:"✓"; position:absolute; top:8px; right:10px; font-weight:900; color:#06b6d4; font-size:12px; }
+                
+                /* Null (Bỏ qua) Styles */
+                .pr-null-card .pr-card-content { border:1px dashed var(--border-light, #cbd5e1); background:transparent; align-items:center; min-height:36px; padding:6px; }
+                .pr-null-card input[type="radio"]:checked + .pr-card-content { border-color:var(--text-muted, #94a3b8); background:var(--bg-surface, #f1f5f9); }
+                .pr-null-card input[type="radio"]:checked + .pr-card-content::after { content:"✓"; position:absolute; top:6px; right:10px; font-weight:900; color:var(--text-muted, #64748b); font-size:12px; }
                 </style>
             `;
 
@@ -10911,38 +10920,38 @@
                 const oemCands = r.candidates.filter(c => c.item.partType === 'oem').slice(0, 3);
                 const amCands  = r.candidates.filter(c => c.item.partType === 'aftermarket').slice(0, 3);
 
-                let oemListHtml = `<div class="mb-2"><p class="text-[9px] font-black text-purple-600 uppercase mb-1.5 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-purple-500 rounded-full"></span> OEM</p>`;
+                let oemListHtml = `<div class="mb-2"><p class="text-[9px] font-black text-purple-500 uppercase mb-1.5 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-purple-500 rounded-full"></span> OEM</p>`;
                 if (oemCands.length > 0) {
                     oemCands.forEach((c, idx) => {
-                        oemListHtml += `<label class="pr-card-label"><input type="radio" name="pr_oem_${i}" value="${c.item._key}" ${idx===0?'checked':''}>
-                            <div class="pr-card-content"><p class="text-[11px] font-bold text-slate-800 pr-3 truncate">${c.item.partName}</p>
-                            <div class="flex justify-between items-center mt-1"><span class="text-xs font-black text-purple-600">${fmt(c.item.price)}đ</span><span class="text-[8px] font-bold text-slate-500 bg-slate-100 px-1 rounded">${c.score}%</span></div></div></label>`;
+                        oemListHtml += `<label class="pr-card-label is-oem"><input type="radio" name="pr_oem_${i}" value="${c.item._key}" ${idx===0?'checked':''}>
+                            <div class="pr-card-content"><p class="text-[11px] font-bold pr-3 truncate" style="color:var(--text-primary, #1e293b);">${c.item.partName}</p>
+                            <div class="flex justify-between items-center mt-1"><span class="text-xs font-black text-purple-500">${fmt(c.item.price)}đ</span><span style="background:var(--bg-surface, #f1f5f9);color:var(--text-secondary, #64748b);" class="text-[8px] font-bold px-1 rounded">${c.score}%</span></div></div></label>`;
                     });
                 }
-                oemListHtml += `<label class="pr-card-label pr-null-card mb-0"><input type="radio" name="pr_oem_${i}" value="" ${oemCands.length===0?'checked':''}><div class="pr-card-content"><span class="text-[9px] font-bold text-slate-400">Bỏ qua</span></div></label></div>`;
+                oemListHtml += `<label class="pr-card-label pr-null-card mb-0"><input type="radio" name="pr_oem_${i}" value="" ${oemCands.length===0?'checked':''}><div class="pr-card-content"><span class="text-[9px] font-bold" style="color:var(--text-muted, #94a3b8);">Bỏ qua</span></div></label></div>`;
 
-                let amListHtml = `<div><p class="text-[9px] font-black text-cyan-600 uppercase mb-1.5 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-cyan-500 rounded-full"></span> HÀNG NGOÀI</p>`;
+                let amListHtml = `<div><p class="text-[9px] font-black text-cyan-500 uppercase mb-1.5 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-cyan-500 rounded-full"></span> HÀNG NGOÀI</p>`;
                 if (amCands.length > 0) {
                     amCands.forEach((c, idx) => {
-                        amListHtml += `<label class="pr-card-label"><input type="radio" name="pr_am_${i}" value="${c.item._key}" ${idx===0?'checked':''}>
-                            <div class="pr-card-content"><p class="text-[11px] font-bold text-slate-800 pr-3 truncate">${c.item.partName}</p>
-                            <div class="flex justify-between items-center mt-1"><span class="text-xs font-black text-cyan-600">${fmt(c.item.price)}đ</span><span class="text-[8px] font-bold text-slate-500 bg-slate-100 px-1 rounded">${c.score}%</span></div></div></label>`;
+                        amListHtml += `<label class="pr-card-label is-am"><input type="radio" name="pr_am_${i}" value="${c.item._key}" ${idx===0?'checked':''}>
+                            <div class="pr-card-content"><p class="text-[11px] font-bold pr-3 truncate" style="color:var(--text-primary, #1e293b);">${c.item.partName}</p>
+                            <div class="flex justify-between items-center mt-1"><span class="text-xs font-black text-cyan-500">${fmt(c.item.price)}đ</span><span style="background:var(--bg-surface, #f1f5f9);color:var(--text-secondary, #64748b);" class="text-[8px] font-bold px-1 rounded">${c.score}%</span></div></div></label>`;
                     });
                 }
-                amListHtml += `<label class="pr-card-label pr-null-card mb-0"><input type="radio" name="pr_am_${i}" value="" ${amCands.length===0?'checked':''}><div class="pr-card-content"><span class="text-[9px] font-bold text-slate-400">Bỏ qua</span></div></label></div>`;
+                amListHtml += `<label class="pr-card-label pr-null-card mb-0"><input type="radio" name="pr_am_${i}" value="" ${amCands.length===0?'checked':''}><div class="pr-card-content"><span class="text-[9px] font-bold" style="color:var(--text-muted, #94a3b8);">Bỏ qua</span></div></label></div>`;
 
                 return `
-                <div class="bg-white border border-slate-200 rounded-xl p-3 mb-3 shadow-sm" style="border-left: 3px solid ${col.border};">
+                <div style="background:var(--bg-white, #fff); border:1px solid var(--border-light, #e2e8f0); border-left: 3px solid ${col.border};" class="rounded-xl p-3 mb-3 shadow-sm">
                     <div class="flex items-start gap-2 mb-2">
                         <input type="checkbox" id="pr-chk-${i}" ${hasAny && r.accepted ? 'checked' : ''} ${!hasAny ? 'disabled' : ''} class="mt-0.5 w-4 h-4 accent-emerald-500 shrink-0">
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 flex-wrap mb-1">
-                                <span class="text-[12px] font-black text-slate-800 leading-tight">${h.stt}. ${h.chiTiet}</span>
+                                <span class="text-[12px] font-black leading-tight" style="color:var(--text-primary, #1e293b);">${h.stt}. ${h.chiTiet}</span>
                                 ${scoreBadge}
                             </div>
                         </div>
                     </div>
-                    ${hasAny ? `<div class="grid grid-cols-2 gap-2 bg-slate-50 p-2 rounded-xl border border-slate-100">${oemListHtml}${amListHtml}</div>` : `<p class="text-[10px] text-amber-600 font-bold bg-amber-50 p-2 rounded-lg text-center mt-1">Không tìm thấy món tương đương</p>`}
+                    ${hasAny ? `<div class="grid grid-cols-2 gap-2 p-2 rounded-xl" style="background:var(--bg-app, #f8fafc); border:1px solid var(--border-light, #f1f5f9);">${oemListHtml}${amListHtml}</div>` : `<p class="text-[10px] text-amber-600 font-bold bg-amber-50 p-2 rounded-lg text-center mt-1">Không tìm thấy món tương đương</p>`}
                 </div>`;
             }).join('');
 
