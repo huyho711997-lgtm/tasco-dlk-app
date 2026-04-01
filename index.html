@@ -6325,6 +6325,7 @@
                 ${showGarage ? `
                 <div style="padding:0 20px;margin-bottom:12px;">
                     <p style="font-size:10px;font-weight:800;color:#0d9488;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">🔧 Gara sửa chữa</p>
+                    
                     <div style="position:relative;margin-bottom:8px;">
                         <input id="dtp-gara-name" type="text" placeholder="Tên gara..." value="${garageValue.name||''}"
                             oninput="DateTimePicker._garaInput(this)"
@@ -6332,11 +6333,29 @@
                             style="width:100%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;color:#0f172a;outline:none;box-sizing:border-box;">
                         <div id="dtp-gara-drop" class="garage-dropdown hidden"></div>
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
                         <input id="dtp-gara-phone" type="tel" placeholder="SĐT gara" value="${garageValue.phone||''}"
                             style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;color:#0f172a;outline:none;box-sizing:border-box;">
+                        <input id="dtp-gara-tax" type="text" placeholder="Mã số thuế" value="${garageValue.tax||''}"
+                            style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;color:#0f172a;outline:none;box-sizing:border-box;font-family:monospace;">
+                    </div>
+                    
+                    <div style="margin-bottom:8px;">
                         <input id="dtp-gara-address" type="text" placeholder="Địa chỉ" value="${garageValue.address||''}"
+                            style="width:100%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;color:#0f172a;outline:none;box-sizing:border-box;">
+                    </div>
+                    
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;padding-top:8px;border-top:1px solid #e2e8f0;">
+                        <input id="dtp-gara-bankno" type="text" placeholder="Số tài khoản" value="${garageValue.bankNo||''}"
+                            style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;color:#0f172a;outline:none;box-sizing:border-box;font-family:monospace;">
+                        <input id="dtp-gara-bankname" type="text" placeholder="Ngân hàng (VD: VCB)" value="${garageValue.bankName||''}"
                             style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;color:#0f172a;outline:none;box-sizing:border-box;">
+                    </div>
+                    
+                    <div>
+                        <input id="dtp-gara-bankowner" type="text" placeholder="Chủ tài khoản" value="${garageValue.bankOwner||''}"
+                            style="width:100%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;color:#0f172a;outline:none;box-sizing:border-box;text-transform:uppercase;">
                     </div>
                 </div>` : ''}
 
