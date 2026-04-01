@@ -5288,8 +5288,43 @@
                         try { raw = dataResponse.candidates[0].content.parts[0].text || ''; } catch(e) {}
                         if (!raw.trim()) throw new Error('AI tra ve rong');
 
-                        var parsed = OCR._parseJSON(raw);
-                        if (!parsed || !parsed.data) throw new Error('Khong doc duoc JSON');
+                        var parsedStr = raw.replace(/```json|```/gi, '').trim();
+                        var startIdx = parsedStr.indexOf('{');
+                        var endIdx = parsedStr.lastIndexOf('}');
+                        
+                        if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+                             parsedStr = parsedStr.substring(startIdx, endIdx + 1);
+                        }
+
+                        var parsed = null;
+                        try {
+                           parsed = JSON.parse(parsedStr);
+                           
+                           // BẪY LỖI 1: AI trả về mảng thay vì Object
+                           if (Array.isArray(parsed) && parsed.length > 0) {
+                               parsed = parsed[0];
+                           }
+                        } catch(e) {
+                            throw new Error('Lỗi lấy chuỗi Json');
+                        }
+                       
+                        // BẪY LỖI 2: AI tự ý bỏ wrapper "data": {...} và trả thẳng các trường
+                        if (parsed && !parsed.data) {
+                            let isFlatData = Object.keys(parsed).some(k => 
+                                ['bsx', 'soKhung', 'soDangKiem', 'chuXe', 'soGPLX', 'soId', 'hangXe', 'hoTen', 'ngayCapDK', 'hetHanDK'].includes(k)
+                            );
+                            
+                            if (isFlatData) {
+                                let tempDocType = parsed.docType || 'dangkiem';
+                                delete parsed.docType;
+                                parsed = {
+                                    docType: tempDocType,
+                                    data: parsed
+                                };
+                            }
+                        }
+
+                        if (!parsed || !parsed.data) throw new Error('Không đọc được JSON');
 
                         if (parsed.docType) OCR._detectedTypes.add(parsed.docType);
                         if (parsed.docType === 'dangkiem') {
