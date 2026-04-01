@@ -4800,10 +4800,27 @@
                     showLocation:true,
                     locationValue:item?.location||'',
                     showGarage:true,
-                    garageValue:{name:item?.garaName||'',phone:item?.garaPhone||'',address:item?.garaAddress||'',tax:item?.garaTax||''},
+                    garageValue:{
+                        name: item?.garaName || '', 
+                        phone: item?.garaPhone || '', 
+                        address: item?.garaAddress || '', 
+                        tax: item?.garaTax || '',
+                        bankNo: item?.garaBankNo || '',
+                        bankName: item?.garaBankName || '',
+                        bankOwner: item?.garaBankOwner || ''
+                    },
                     onConfirm:(iso,location,garage)=>{
                         const updates={step:2,stepUpdatedAt:new Date().toISOString(),appointmentTime:iso,location:location||''};
-                        if (garage?.name) { updates.garaName=garage.name; updates.garaPhone=garage.phone||''; updates.garaAddress=garage.address||''; updates.garaTax=garage.tax||''; Garage.saveIfNewData(garage); }
+                        if (garage?.name) { 
+                            updates.garaName=garage.name; 
+                            updates.garaPhone=garage.phone||''; 
+                            updates.garaAddress=garage.address||''; 
+                            updates.garaTax=garage.tax||''; 
+                            updates.garaBankNo=garage.bankNo||''; 
+                            updates.garaBankName=garage.bankName||''; 
+                            updates.garaBankOwner=garage.bankOwner||''; 
+                            Garage.saveIfNewData(garage); 
+                        }
                         db.ref(`Workstation/${id}`).update(updates).then(()=>{ Toast.fire({icon:'success',title:'Đã lên lịch hẹn!'}); if(App.currentEditId===id)this.open(id); });
                     }
                 });
@@ -6101,10 +6118,26 @@
                 initial: moment().add(1, 'day').hour(8).minute(0).toISOString(),
                 showLocation: true, locationValue: item?.location || '',
                 showGarage: true,
-                garageValue: { name: item?.garaName || '', phone: item?.garaPhone || '', address: item?.garaAddress || '' },
+                garageValue: { 
+                    name: item?.garaName || '', 
+                    phone: item?.garaPhone || '', 
+                    address: item?.garaAddress || '',
+                    tax: item?.garaTax || '',
+                    bankNo: item?.garaBankNo || '',
+                    bankName: item?.garaBankName || '',
+                    bankOwner: item?.garaBankOwner || ''
+                },
                 onConfirm: (iso, location, garage) => {
                     const updates = { appointmentTime: iso, step: 2, stepUpdatedAt: new Date().toISOString(), location: location || '' };
-                    if (garage?.name) { updates.garaName = garage.name; updates.garaPhone = garage.phone || ''; updates.garaAddress = garage.address || ''; }
+                    if (garage?.name) { 
+                        updates.garaName = garage.name; 
+                        updates.garaPhone = garage.phone || ''; 
+                        updates.garaAddress = garage.address || ''; 
+                        updates.garaTax = garage.tax || ''; 
+                        updates.garaBankNo = garage.bankNo || ''; 
+                        updates.garaBankName = garage.bankName || ''; 
+                        updates.garaBankOwner = garage.bankOwner || ''; 
+                    }
                     db.ref(`Workstation/${id}`).update(updates).then(() => {
                         Toast.fire({ icon: 'success', title: 'Đã đặt lịch hẹn!' });
                         if (this.instance) this.instance.refetchEvents();
@@ -6159,6 +6192,7 @@
             const garageHtml = showGarage
                 ? '<div style="padding:0 20px;margin-bottom:12px;">'
                 + '<p style="font-size:10px;font-weight:800;color:#0d9488;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">🔧 Gara sửa chữa</p>'
+                
                 + '<div style="position:relative;margin-bottom:8px;">'
                 + '<input id="dtp-gara-name" type="text" placeholder="Tên gara..." value="' + (garageValue.name||'').replace(/"/g,'&quot;') + '"'
                 + ' oninput="DateTimePicker._garaInput(this)"'
@@ -6166,12 +6200,25 @@
                 + ' style="width:100%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;color:#0f172a;outline:none;box-sizing:border-box;">'
                 + '<div id="dtp-gara-drop" class="garage-dropdown hidden"></div>'
                 + '</div>'
-                + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
-                + '<input id="dtp-gara-phone" type="tel" placeholder="SĐT gara" value="' + (garageValue.phone||'').replace(/"/g,'&quot;') + '"'
-                + ' style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;color:#0f172a;outline:none;box-sizing:border-box;">'
-                + '<input id="dtp-gara-address" type="text" placeholder="Địa chỉ" value="' + (garageValue.address||'').replace(/"/g,'&quot;') + '"'
-                + ' style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;color:#0f172a;outline:none;box-sizing:border-box;">'
+                
+                + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'
+                + '<input id="dtp-gara-phone" type="tel" placeholder="SĐT gara" value="' + (garageValue.phone||'').replace(/"/g,'&quot;') + '" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;color:#0f172a;outline:none;box-sizing:border-box;">'
+                + '<input id="dtp-gara-tax" type="text" placeholder="Mã số thuế" value="' + (garageValue.tax||'').replace(/"/g,'&quot;') + '" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;color:#0f172a;outline:none;box-sizing:border-box;font-family:monospace;">'
                 + '</div>'
+                
+                + '<div style="margin-bottom:8px;">'
+                + '<input id="dtp-gara-address" type="text" placeholder="Địa chỉ" value="' + (garageValue.address||'').replace(/"/g,'&quot;') + '" style="width:100%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;color:#0f172a;outline:none;box-sizing:border-box;">'
+                + '</div>'
+                
+                + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;padding-top:8px;border-top:1px solid #e2e8f0;">'
+                + '<input id="dtp-gara-bankno" type="text" placeholder="Số tài khoản" value="' + (garageValue.bankNo||'').replace(/"/g,'&quot;') + '" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;color:#0f172a;outline:none;box-sizing:border-box;font-family:monospace;">'
+                + '<input id="dtp-gara-bankname" type="text" placeholder="Ngân hàng (VD: VCB)" value="' + (garageValue.bankName||'').replace(/"/g,'&quot;') + '" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;color:#0f172a;outline:none;box-sizing:border-box;">'
+                + '</div>'
+                
+                + '<div>'
+                + '<input id="dtp-gara-bankowner" type="text" placeholder="Chủ tài khoản" value="' + (garageValue.bankOwner||'').replace(/"/g,'&quot;') + '" style="width:100%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;color:#0f172a;outline:none;box-sizing:border-box;text-transform:uppercase;">'
+                + '</div>'
+                
                 + '</div>'
                 : '';
             overlay.innerHTML = `
@@ -6469,7 +6516,11 @@
             const garage = this._showGarage ? {
                 name: document.getElementById('dtp-gara-name')?.value.trim() || '',
                 phone: document.getElementById('dtp-gara-phone')?.value.trim() || '',
-                address: document.getElementById('dtp-gara-address')?.value.trim() || ''
+                address: document.getElementById('dtp-gara-address')?.value.trim() || '',
+                tax: document.getElementById('dtp-gara-tax')?.value.trim() || '',
+                bankNo: document.getElementById('dtp-gara-bankno')?.value.trim() || '',
+                bankName: document.getElementById('dtp-gara-bankname')?.value.trim() || '',
+                bankOwner: document.getElementById('dtp-gara-bankowner')?.value.trim() || ''
             } : undefined;
 
             this.close();
@@ -6498,9 +6549,19 @@
             const n = document.getElementById('dtp-gara-name');
             const p = document.getElementById('dtp-gara-phone');
             const a = document.getElementById('dtp-gara-address');
+            const tax = document.getElementById('dtp-gara-tax');
+            const bno = document.getElementById('dtp-gara-bankno');
+            const bname = document.getElementById('dtp-gara-bankname');
+            const bowner = document.getElementById('dtp-gara-bankowner');
+            
             if (n) n.value = g.name || '';
             if (p) p.value = g.phone || '';
             if (a) a.value = g.address || '';
+            if (tax) tax.value = g.tax || '';
+            if (bno) bno.value = g.bankNo || '';
+            if (bname) bname.value = g.bankName || '';
+            if (bowner) bowner.value = g.bankOwner || '';
+            
             document.getElementById('dtp-gara-drop')?.classList.add('hidden');
         },
         clearAppt() {
