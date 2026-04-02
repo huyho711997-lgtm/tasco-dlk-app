@@ -1361,6 +1361,40 @@
         [data-theme="dark"] #noti-panel { background-color: var(--bg-white); border-color: var(--border-light); }
         [data-theme="dark"] #noti-panel .noti-item { background-color: var(--bg-app) !important; border-color: var(--border-light) !important; }
         [data-theme="dark"] #btn-open-noti { background-color: var(--bg-white) !important; border-color: var(--border-light) !important; color: var(--text-primary) !important; }
+
+        /* ====== QUOTE CHECKER (ĐỐI CHIẾU BÁO GIÁ) ====== */
+        .qc-card {
+            background: var(--bg-white, #fff);
+            border: 1.5px solid var(--border-light, #e2e8f0);
+            border-radius: 14px; padding: 12px; margin-bottom: 10px;
+            position: relative; overflow: hidden;
+        }
+        .qc-status-badge {
+            font-size: 9px; font-weight: 900; padding: 3px 8px; border-radius: 6px; text-transform: uppercase;
+        }
+        /* Khớp hoàn toàn */
+        .qc-match { border-left: 4px solid #10b981; }
+        .qc-match .qc-status-badge { background: #d1fae5; color: #059669; border: 1px solid #a7f3d0; }
+        /* Sai phương án (Gara đòi thay, BBGĐ bắt sửa) */
+        .qc-diff { border-left: 4px solid #f59e0b; background: #fffbeb; }
+        .qc-diff .qc-status-badge { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+        /* Báo dư (Không có trong BBGĐ) */
+        .qc-extra { border-left: 4px solid #ef4444; background: #fef2f2; }
+        .qc-extra .qc-status-badge { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+        /* Gara quên báo (Có trong BBGĐ mà Gara không thèm báo) */
+        .qc-miss { border-left: 4px solid #64748b; opacity: 0.8; }
+        .qc-miss .qc-status-badge { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        
+        .qc-compare-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;
+            padding-top: 8px; border-top: 1px dashed var(--border-light, #e2e8f0);
+        }
+        .qc-col { background: var(--bg-surface, #f8fafc); padding: 8px; border-radius: 8px; border: 1px solid var(--border-light, #f1f5f9); }
+        .qc-col-title { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
+        .qc-val { font-size: 12px; font-weight: 800; color: var(--text-primary, #1e293b); }
+        
+        [data-theme="dark"] .qc-diff { background: rgba(245, 158, 11, 0.05); }
+        [data-theme="dark"] .qc-extra { background: rgba(239, 68, 68, 0.05); }
     </style>
 </head>
 <body class="h-screen w-full flex flex-col overflow-hidden bg-slate-50">
@@ -2509,8 +2543,13 @@
                         </div>
                         
                         <div id="dm-normal-btns" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 mb-2 border-b border-slate-100">
+                            <button onclick="QuoteChecker.open(App.currentEditId)" class="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl text-[11px] font-black shadow-sm active:scale-95 transition-transform">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg> 
+                                Duyệt BG AI
+                            </button>
+
                             <button onclick="PriceCompare.lookup(App.currentEditId)" class="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-[11px] font-black shadow-sm active:scale-95 transition-transform">
-                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Tra giá Kho AI
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Tra giá Kho
                             </button>
                             <button onclick="DamageItems.addRowAI(App.currentEditId)" class="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-[11px] font-bold shadow-sm shadow-violet-200 active:scale-95 transition-transform">
                                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> AI bóc tách
@@ -2521,9 +2560,6 @@
                             <button onclick="CarDiagram.open(App.currentEditId)" class="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-800 text-white rounded-xl text-[11px] font-bold shadow-sm shadow-slate-300 active:scale-95 transition-transform">
                                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="8" width="18" height="8" rx="2"/><path d="M5 8l1-4h12l1 4"/><circle cx="7" cy="16" r="2"/><circle cx="17" cy="16" r="2"/></svg> Sơ đồ
                             </button> 
-                            <button onclick="DamageItems.exportWord(App.currentEditId)" class="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl text-[11px] font-bold active:scale-95 transition-transform">
-                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6M9 15l3 3 3-3"/></svg> Xuất BB
-                            </button>
                         </div>
 
                         <div id="dm-select-btns" class="flex gap-2 hidden">
@@ -11561,7 +11597,213 @@
             lucide.createIcons();
         }
     };
-  
+        
+    // ============================================================
+    // QUOTE CHECKER (ĐỐI CHIẾU BÁO GIÁ VỚI BBGĐ)
+    // ============================================================
+    const QuoteChecker = {
+        _id: null,
+        
+        open(id) {
+            const item = App.find(id);
+            if (!item || !item.damageItems || item.damageItems.length === 0) {
+                Toast.fire({ icon: 'warning', title: 'Hồ sơ chưa có hạng mục nào để đối chiếu!' });
+                return;
+            }
+            this._id = id;
+
+            // Tạo input ảo để gọi Camera/Gallery
+            let input = document.getElementById('qc-file-input');
+            if (!input) {
+                input = document.createElement('input');
+                input.type = 'file';
+                input.id = 'qc-file-input';
+                input.accept = 'image/*';
+                input.capture = 'environment';
+                input.style.display = 'none';
+                document.body.appendChild(input);
+            }
+
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                input.value = ''; // reset
+                this._processImage(file, item.damageItems);
+            };
+
+            input.click();
+        },
+
+        async _processImage(file, currentDamageItems) {
+            Swal.fire({
+                html: `
+                    <div style="display:flex;flex-direction:column;align-items:center;padding:10px 0;">
+                        <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg, #f43f5e, #8b5cf6);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(244,63,94,0.4);margin-bottom:16px;">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" style="animation:img-spin 1s linear infinite;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                        </div>
+                        <p style="font-size:16px;font-weight:900;color:var(--text-primary,#0f172a);margin:0;">Đang quét & Đối chiếu...</p>
+                        <p style="font-size:12px;font-weight:600;color:var(--text-secondary,#64748b);margin-top:6px;text-align:center;">AI đang so sánh báo giá Gara với ${currentDamageItems.length} hạng mục trong BBGĐ</p>
+                    </div>
+                `,
+                showConfirmButton: false, allowOutsideClick: false,
+                customClass: { popup: 'custom-rounded' }
+            });
+
+            try {
+                // Tận dụng hàm nén ảnh của OCR giúp gửi lên Gemini cực nhanh
+                const base64 = await OCR._compressImage(file, 1200);
+
+                // Rút gọn dữ liệu BBGĐ gửi lên AI để tiết kiệm token
+                const bbgdList = currentDamageItems.map((item, idx) => ({
+                    stt: idx + 1,
+                    ten: item.chiTiet,
+                    phuongAn: item.thayThe ? "Thay thế" : (item.suaChua ? "Sửa chữa" : "Chưa rõ")
+                }));
+
+                const PROMPT = `Bạn là Giám định viên bảo hiểm. Hãy phân tích ảnh Báo Giá sửa chữa xe ô tô của Gara.
+                Đồng thời, tôi cung cấp danh sách Hạng mục tôi đã duyệt trong Biên Bản Giám Định (BBGD) dưới dạng JSON:
+                ${JSON.stringify(bbgdList)}
+
+                NHIỆM VỤ:
+                Đối chiếu từng dòng trong ảnh Báo giá với danh sách BBGD của tôi. Trả về JSON Array chứa kết quả đối chiếu.
+                
+                QUY TẮC PHÂN LOẠI (trangThai):
+                1. "KHOP": Gara báo đúng Tên và Phương án như BBGD.
+                2. "SAI_PHUONG_AN": Gara báo Phương án khác BBGD (VD: BBGD duyệt "Sửa chữa", Gara báo "Thay thế").
+                3. "GARA_BAO_DU": Có trong báo giá Gara nhưng KHÔNG CÓ trong BBGD.
+                4. "GARA_QUEN_BAO": Có trong BBGD nhưng KHÔNG THẤY Gara báo giá. (Bạn tự rà soát xem có mục nào ở BBGD mà ảnh báo giá không có không).
+
+                ĐỊNH DẠNG JSON TRẢ VỀ (CHỈ TRẢ VỀ MẢNG NÀY, KHÔNG TEXT):
+                [
+                  {
+                    "tenPhuTung": "Tên phụ tùng (Lấy tên theo báo giá, nếu quên báo thì lấy tên BBGD)",
+                    "trangThai": "KHOP" | "SAI_PHUONG_AN" | "GARA_BAO_DU" | "GARA_QUEN_BAO",
+                    "gara": { "phuongAn": "Sửa/Thay/Sơn", "gia": 1500000 (số nguyên) },
+                    "bbgd": { "phuongAn": "Sửa/Thay" },
+                    "canhBao": "Ghi chú ngắn ngọn nếu có sai lệch"
+                  }
+                ]`;
+
+                let dataResponse = null;
+                const maxRetries = CONFIG.gemini.keys.length;
+
+                for (let attempt = 0; attempt < maxRetries; attempt++) {
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 20000);
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${GeminiKeys.next()}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: 'image/jpeg', data: base64 } }] }],
+                                generationConfig: { temperature: 0.1 }
+                            }),
+                            signal: controller.signal
+                        });
+                        clearTimeout(timeoutId);
+                        dataResponse = await res.json();
+                        if (res.ok && !dataResponse.error) break;
+                        await new Promise(r => setTimeout(r, 1000));
+                    } catch (e) {}
+                }
+
+                if (!dataResponse || dataResponse.error) throw new Error('AI quá tải, vui lòng thử lại');
+
+                const txt = dataResponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                let parsed = null;
+                try { parsed = JSON.parse(txt.replace(/```json|```/gi, '').trim()); } catch (e) {
+                    const m = txt.match(/\[[\s\S]*\]/);
+                    if (m) parsed = JSON.parse(m[0]);
+                }
+
+                if (!parsed || !Array.isArray(parsed)) throw new Error('AI không nhận diện được bảng báo giá');
+
+                this._renderResults(parsed);
+
+            } catch (error) {
+                Swal.close();
+                Toast.fire({ icon: 'error', title: error.message });
+            }
+        },
+
+        _renderResults(results) {
+            const fmt = n => n ? Number(n).toLocaleString('vi-VN') + 'đ' : '—';
+            
+            // Sắp xếp: Lỗi nặng lên đầu (Gara báo dư -> Sai phương án -> Quên báo -> Khớp)
+            const sortMap = { 'GARA_BAO_DU': 1, 'SAI_PHUONG_AN': 2, 'GARA_QUEN_BAO': 3, 'KHOP': 4 };
+            results.sort((a, b) => sortMap[a.trangThai] - sortMap[b.trangThai]);
+
+            let html = '';
+            let errorCount = 0;
+
+            results.forEach(r => {
+                let cardClass = '';
+                let badgeHtml = '';
+                
+                if (r.trangThai === 'KHOP') {
+                    cardClass = 'qc-match';
+                    badgeHtml = '<span class="qc-status-badge">✓ Trùng khớp</span>';
+                } else if (r.trangThai === 'SAI_PHUONG_AN') {
+                    cardClass = 'qc-diff'; errorCount++;
+                    badgeHtml = '<span class="qc-status-badge">⚠️ Sai phương án</span>';
+                } else if (r.trangThai === 'GARA_BAO_DU') {
+                    cardClass = 'qc-extra'; errorCount++;
+                    badgeHtml = '<span class="qc-status-badge">❌ Báo dư</span>';
+                } else if (r.trangThai === 'GARA_QUEN_BAO') {
+                    cardClass = 'qc-miss'; errorCount++;
+                    badgeHtml = '<span class="qc-status-badge">❓ Quên báo giá</span>';
+                }
+
+                const garaData = r.gara || {};
+                const bbgdData = r.bbgd || {};
+
+                html += `
+                <div class="qc-card ${cardClass}">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                        <p style="font-size:13px; font-weight:800; color:var(--text-primary); flex:1; padding-right:8px; line-height:1.3;">${r.tenPhuTung}</p>
+                        ${badgeHtml}
+                    </div>
+                    
+                    ${r.canhBao ? `<p style="font-size:10px; color:#ef4444; font-weight:700; margin-bottom:8px; display:flex; gap:4px;"><i data-lucide="info" class="w-3 h-3"></i> ${r.canhBao}</p>` : ''}
+                    
+                    <div class="qc-compare-grid">
+                        <div class="qc-col">
+                            <p class="qc-col-title">Báo giá Gara</p>
+                            <p class="qc-val" style="color:#d97706;">${garaData.phuongAn || '—'}</p>
+                            <p class="qc-val" style="margin-top:2px; font-size:14px;">${fmt(garaData.gia)}</p>
+                        </div>
+                        <div class="qc-col">
+                            <p class="qc-col-title">Biên bản của bạn</p>
+                            <p class="qc-val" style="color:#2563eb;">${bbgdData.phuongAn || '—'}</p>
+                            <p class="qc-val" style="margin-top:2px; font-size:10px; color:var(--text-muted);">Đã duyệt</p>
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            Swal.fire({
+                title: `<div class="text-left font-black text-lg" style="color:var(--text-primary);">
+                            <span class="text-rose-500">AI</span> Đối chiếu báo giá
+                        </div>`,
+                html: `
+                    <div class="text-left mt-2">
+                        ${errorCount > 0 
+                            ? `<div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#ef4444; padding:8px 12px; border-radius:10px; font-size:12px; font-weight:800; margin-bottom:12px;">Phát hiện ${errorCount} điểm bất thường cần kiểm tra lại!</div>`
+                            : `<div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); color:#10b981; padding:8px 12px; border-radius:10px; font-size:12px; font-weight:800; margin-bottom:12px;">Tuyệt vời! Báo giá khớp hoàn toàn với Biên bản.</div>`
+                        }
+                        <div style="max-height: 60vh; overflow-y: auto; padding-right: 4px;" class="custom-scrollbar">
+                            ${html}
+                        </div>
+                    </div>
+                `,
+                showCloseButton: true,
+                showConfirmButton: false,
+                customClass: { popup: 'custom-rounded w-full mb-0 rounded-b-none', title: '!pb-0' },
+                position: 'bottom',
+                didOpen: () => lucide.createIcons()
+            });
+        }
+    };  
     // ============================================================
     // BOOT
     // ============================================================
