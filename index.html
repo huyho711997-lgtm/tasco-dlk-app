@@ -6026,31 +6026,96 @@
             }).then(r=>{ if(r.isConfirmed&&r.value)PlateScanner._showResultForPlate(r.value); });
         },
         async _processImage(blob) {
-            if(PlateScanner._processing)return; PlateScanner._processing=true;
-            var btn=document.getElementById('scan-capture-btn');
-            if(btn)btn.innerHTML='<div style="width:20px;height:20px;border:3px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;margin-right:8px;display:inline-block;vertical-align:middle"></div>Đang nhận dạng...';
-            if(!document.getElementById('spin-style')){const ss=document.createElement('style');ss.id='spin-style';ss.textContent='@keyframes spin{to{transform:rotate(360deg)}}';document.head.appendChild(ss);}
+            if(PlateScanner._processing) return; 
+            PlateScanner._processing = true;
+            
+            var btn = document.getElementById('scan-capture-btn');
+            if(btn) btn.innerHTML = '<div style="width:20px;height:20px;border:3px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;margin-right:8px;display:inline-block;vertical-align:middle"></div>Đang nhận dạng...';
+            if(!document.getElementById('spin-style')){
+                const ss = document.createElement('style');
+                ss.id = 'spin-style';
+                ss.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+                document.head.appendChild(ss);
+            }
+
             try {
-                const base64=await new Promise((resolve,reject)=>{ const r=new FileReader(); r.onloadend=()=>resolve(r.result.replace(/^data:[^;]+;base64,/,'')); r.onerror=reject; r.readAsDataURL(blob); });
-                if(!base64)throw new Error('base64 rỗng');
-                const PROMPT=`Đây là ảnh biển số xe Việt Nam. Hãy đọc biển số xe trong ảnh và trả về JSON: {"plate":"51A12345"} hoặc {"plate":null} nếu không rõ. CHỈ JSON.`;
-                const PLATE_API_KEY = "AIzaSy" + "CoLxADkPvF2M-kMYOFug0x_RY-NjIxxXI";
-                const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${PLATE_API_KEY}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:PROMPT},{inline_data:{mime_type:blob.type||'image/jpeg',data:base64}}]}]})});
-                const data=await res.json();
-                if(data.error)throw new Error('API: '+(data.error.message||data.error.status));
-                const txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
-                let parsed=null;
-                try{parsed=JSON.parse(txt.replace(/```json|```/gi,'').trim());}catch(e){}
-                if(!parsed?.plate){
-                    const match=txt.replace(/\s/g,'').toUpperCase().match(/\d{2}[A-Z]{1,2}\d{4,5}/);
-                    if(match){PlateScanner._showResultForPlate(match[0]);return;}
-                    PlateScanner._showErrorResult('Không nhận diện được biển số. Thử ảnh rõ hơn!');return;
+                // Chuyển ảnh sang Base64
+                const base64 = await new Promise((resolve,reject) => { 
+                    const r = new FileReader(); 
+                    r.onloadend = () => resolve(r.result.replace(/^data:[^;]+;base64,/,'')); 
+                    r.onerror = reject; 
+                    r.readAsDataURL(blob); 
+                });
+                if(!base64) throw new Error('Không thể đọc ảnh');
+
+                const PROMPT = `Đây là ảnh biển số xe Việt Nam. Hãy đọc biển số xe trong ảnh và trả về JSON: {"plate":"51A12345"} hoặc {"plate":null} nếu không rõ. CHỈ JSON.`;
+                
+                let dataResponse = null;
+                let lastError = '';
+                const maxRetries = CONFIG.gemini.keys.length; // Số lần thử lại tương đương số Key đang có
+
+                // VÒNG LẶP RETRY: Thử đổi Key nếu Google báo lỗi quá tải
+                for (let attempt = 0; attempt < maxRetries; attempt++) {
+                    try {
+                        const key = GeminiKeys.next(); // Lấy key từ Pool xoay vòng
+                        
+                        // Cài đặt Timeout 15s để tránh treo app
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${key}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: blob.type || 'image/jpeg', data: base64 } }] }],
+                                generationConfig: { temperature: 0.1 }
+                            }),
+                            signal: controller.signal
+                        });
+                        clearTimeout(timeoutId);
+
+                        dataResponse = await res.json();
+
+                        // Nếu gọi thành công và không bị Google trả về lỗi, thoát vòng lặp để xử lý data
+                        if (res.ok && !dataResponse.error) {
+                            break; 
+                        } else if (dataResponse.error) {
+                            lastError = dataResponse.error.message || dataResponse.error.status;
+                            // Nếu bị báo quá tải, đợi 1 giây rồi vòng lặp tiếp theo sẽ lấy key khác thử lại
+                            await new Promise(r => setTimeout(r, 1000));
+                        }
+                    } catch (fetchErr) {
+                        lastError = fetchErr.name === 'AbortError' ? 'Mạng chậm, Timeout 15s' : fetchErr.message;
+                    }
                 }
-                const plate=String(parsed.plate).toUpperCase().replace(/[\s.\-]/g,'');
-                if(plate.length<6){PlateScanner._showErrorResult('Biển số không hợp lệ: '+plate);return;}
+
+                // Nếu sau khi thử hết các Key mà vẫn lỗi
+                if (!dataResponse || dataResponse.error) {
+                    throw new Error('Google AI đang quá tải: ' + (lastError || 'Vui lòng thử lại sau vài giây.'));
+                }
+
+                // Xử lý dữ liệu trả về
+                const txt = dataResponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                let parsed = null;
+                try { parsed = JSON.parse(txt.replace(/```json|```/gi,'').trim()); } catch(e) {}
+
+                // Nếu AI trả về text thường (không ra JSON), dùng Regex để vớt lại biển số
+                if (!parsed?.plate) {
+                    const match = txt.replace(/\s/g,'').toUpperCase().match(/\d{2}[A-Z]{1,2}\d{4,5}/);
+                    if (match) { PlateScanner._showResultForPlate(match[0]); return; }
+                    PlateScanner._showErrorResult('Không nhận diện được biển số. Thử ảnh chụp gần/rõ hơn!'); return;
+                }
+
+                const plate = String(parsed.plate).toUpperCase().replace(/[\s.\-]/g,'');
+                if (plate.length < 6) { PlateScanner._showErrorResult('Biển số không hợp lệ: ' + plate); return; }
+                
                 PlateScanner._showResultForPlate(plate);
-            } catch(err){PlateScanner._showErrorResult(err.message||'Lỗi không xác định');}
-            finally{PlateScanner._resetBtn();}
+
+            } catch(err) {
+                PlateScanner._showErrorResult(err.message || 'Lỗi không xác định');
+            } finally {
+                PlateScanner._resetBtn();
+            }
         },
         _resetBtn() {
             PlateScanner._processing=false;
