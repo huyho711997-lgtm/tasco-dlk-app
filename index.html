@@ -11715,102 +11715,112 @@
             });
 
             try {
-                // Tận dụng hàm nén ảnh của OCR giúp gửi lên Gemini cực nhanh
-                const base64 = await OCR._compressImage(file, 1200);
+                // 1. Tối ưu 1: Nén ảnh xuống 1024px thay vì 1200px để AI đọc nhanh hơn, tiết kiệm token
+                const base64 = await OCR._compressImage(file, 1024);
 
-                // Rút gọn dữ liệu BBGĐ gửi lên AI để tiết kiệm token
-                const bbgdList = currentDamageItems.map((item, idx) => ({
-                    stt: idx + 1,
+                // 2. Tối ưu 2: Rút gọn dữ liệu BBGĐ gửi lên AI để tiết kiệm dung lượng gửi
+                const bbgdList = currentDamageItems.map((item) => ({
                     ten: item.chiTiet,
-                    phuongAn: item.thayThe ? "Thay thế" : (item.suaChua ? "Sửa chữa" : "Chưa rõ")
+                    pa: item.thayThe ? "Thay" : (item.suaChua ? "Sửa" : "Chưa rõ")
                 }));
 
-                const PROMPT = `Bạn là Giám định viên bảo hiểm. Hãy phân tích ảnh Báo Giá sửa chữa xe ô tô của Gara.
-                Đồng thời, tôi cung cấp danh sách Hạng mục tôi đã duyệt trong Biên Bản Giám Định (BBGD) dưới dạng JSON:
+                // 3. Tối ưu 3: Prompt rút gọn key JSON cực ngắn gọn để AI sinh text (generate) nhanh nhất có thể
+                const PROMPT = `Bạn là Giám định viên. Phân tích ảnh Báo giá sửa chữa và đối chiếu với danh sách BBGD sau:
                 ${JSON.stringify(bbgdList)}
-
-                NHIỆM VỤ:
-                Đối chiếu từng dòng trong ảnh Báo giá với danh sách BBGD của tôi. Trả về JSON Array chứa kết quả đối chiếu.
                 
-                QUY TẮC PHÂN LOẠI (trangThai):
-                1. "KHOP": Gara báo đúng Tên và Phương án như BBGD.
-                2. "SAI_PHUONG_AN": Gara báo Phương án khác BBGD (VD: BBGD duyệt "Sửa chữa", Gara báo "Thay thế").
-                3. "GARA_BAO_DU": Có trong báo giá Gara nhưng KHÔNG CÓ trong BBGD.
-                4. "GARA_QUEN_BAO": Có trong BBGD nhưng KHÔNG THẤY Gara báo giá. (Bạn tự rà soát xem có mục nào ở BBGD mà ảnh báo giá không có không).
+                NHIỆM VỤ:
+                So khớp các mục trong Báo giá với BBGD. Trả về MẢNG JSON (CHỈ JSON, không giải thích).
+                Quy tắc "tt" (trạng thái):
+                1: "KHOP" (Gara báo đúng Tên & Phương án)
+                2: "SAI_PA" (Sai phương án. VD: BBGD duyệt Sửa, Gara báo Thay)
+                3: "DU" (Gara báo nhưng BBGD không có)
+                4: "THIEU" (BBGD có nhưng Gara không báo giá)
+                
+                Định dạng phần tử JSON:
+                {
+                  "t": "Tên phụ tùng (theo báo giá, hoặc theo BBGD nếu thiếu)",
+                  "tt": 1|2|3|4,
+                  "gPa": "Sửa/Thay/Sơn/...",
+                  "gGia": 1500000,
+                  "bPa": "Sửa/Thay",
+                  "cb": "Cảnh báo (nếu có)"
+                }`;
 
-                ĐỊNH DẠNG JSON TRẢ VỀ (CHỈ TRẢ VỀ MẢNG NÀY, KHÔNG TEXT):
-                [
-                  {
-                    "tenPhuTung": "Tên phụ tùng (Lấy tên theo báo giá, nếu quên báo thì lấy tên BBGD)",
-                    "trangThai": "KHOP" | "SAI_PHUONG_AN" | "GARA_BAO_DU" | "GARA_QUEN_BAO",
-                    "gara": { "phuongAn": "Sửa/Thay/Sơn", "gia": 1500000 (số nguyên) },
-                    "bbgd": { "phuongAn": "Sửa/Thay" },
-                    "canhBao": "Ghi chú ngắn ngọn nếu có sai lệch"
-                  }
-                ]`;
-
-                let dataResponse = null;
-                let parsedResult = null; 
+                let parsedResult = null;
                 let lastError = '';
-                const maxRetries = CONFIG.gemini.keys.length; // Số lần thử bằng tổng số Key
+                const maxRetries = CONFIG.gemini.keys.length;
 
                 for (let attempt = 0; attempt < maxRetries; attempt++) {
-                    const currentKey = GeminiKeys.next(); // Liên tục xoay vòng Key mới
+                    const currentKey = GeminiKeys.next();
                     try {
                         const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 25000); // Tăng thời gian chờ lên 25s cho xử lý ảnh
-
+                        // 4. Tối ưu 4: Nới lỏng Timeout lên 40 giây (40000ms) để không bị cắt đột ngột
+                        const timeoutId = setTimeout(() => controller.abort(), 40000); 
+                        
                         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${currentKey}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: 'image/jpeg', data: base64 } }] }],
-                                generationConfig: { temperature: 0.1 }
+                                generationConfig: { temperature: 0.1 } // Độ sáng tạo thấp giúp xuất JSON chuẩn hơn
                             }),
                             signal: controller.signal
                         });
                         clearTimeout(timeoutId);
-                        dataResponse = await res.json();
+                        const dataResponse = await res.json();
 
-                        // 1. Kiểm tra lỗi từ Google (Ví dụ: 429 Quota Exceeded)
                         if (!res.ok || dataResponse.error) {
-                            lastError = dataResponse?.error?.message || `Lỗi máy chủ Google: ${res.status}`;
-                            console.warn(`[Tasco AI] Key nghẽn, thử Key khác. Lỗi: ${lastError}`);
-                            await new Promise(r => setTimeout(r, 1500));
-                            continue; // Bỏ qua, tiếp tục vòng lặp với Key khác
+                            lastError = dataResponse?.error?.message || `Lỗi máy chủ: ${res.status}`;
+                            await new Promise(r => setTimeout(r, 1000));
+                            continue;
                         }
 
-                        // 2. Lấy dữ liệu văn bản AI trả về
                         const txt = dataResponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                        if (!txt) throw new Error('AI trả về kết quả rỗng');
+                        if (!txt) throw new Error('AI trả về rỗng');
 
-                        // 3. Cố gắng bóc tách JSON ngay trong vòng lặp
                         try { 
                             parsedResult = JSON.parse(txt.replace(/```json|```/gi, '').trim()); 
                         } catch (parseErr) {
                             const m = txt.match(/\[[\s\S]*\]/);
                             if (m) parsedResult = JSON.parse(m[0]);
-                            else throw new Error('AI tạo sai định dạng JSON');
+                            else throw new Error('Sai định dạng JSON');
                         }
 
-                        if (!Array.isArray(parsedResult)) throw new Error('Dữ liệu bóc tách không phải là mảng hợp lệ');
-
-                        // Nếu đến được đây nghĩa là API thành công và JSON bóc tách chuẩn -> Thoát vòng lặp
-                        break; 
+                        // Thoát vòng lặp nếu parse thành công ra mảng
+                        if (Array.isArray(parsedResult)) break;
 
                     } catch (e) {
-                        lastError = e.name === 'AbortError' ? 'Quá thời gian chờ mạng (25s)' : e.message;
-                        console.warn(`[Tasco AI] Lần thử ${attempt + 1} thất bại: ${lastError}`);
-                        await new Promise(r => setTimeout(r, 1000)); // Nghỉ 1 nhịp trước khi thử Key khác
+                        lastError = e.name === 'AbortError' ? 'Quá thời gian đáp ứng (40s)' : e.message;
                     }
                 }
 
-                // Nếu sau khi thử hết tất cả các Key mà parsedResult vẫn rỗng thì báo lỗi
-                if (!parsedResult) {
-                    throw new Error('Hệ thống AI đang quá tải toàn bộ. Vui lòng thử lại sau. Lỗi: ' + lastError);
+                if (!parsedResult || !Array.isArray(parsedResult)) {
+                    throw new Error('AI quá tải hoặc không đọc được ảnh. Lỗi: ' + lastError);
                 }
 
-                this._renderResults(parsedResult);
+                // 5. Dịch ngược lại JSON siêu tốc của AI thành cấu trúc chuẩn cho UI hiển thị
+                const finalResults = parsedResult.map(r => {
+                    let statusMap = { 1: 'KHOP', 2: 'SAI_PHUONG_AN', 3: 'GARA_BAO_DU', 4: 'GARA_QUEN_BAO' };
+                    let strStatus = statusMap[r.tt] || 'KHOP';
+                    
+                    // Dự phòng nếu AI vẫn lì lợm trả về chữ thay vì số 1,2,3,4
+                    if (typeof r.tt === 'string') {
+                        if (r.tt.includes('KHOP')) strStatus = 'KHOP';
+                        else if (r.tt.includes('SAI')) strStatus = 'SAI_PHUONG_AN';
+                        else if (r.tt.includes('DU')) strStatus = 'GARA_BAO_DU';
+                        else if (r.tt.includes('THIEU')) strStatus = 'GARA_QUEN_BAO';
+                    }
+
+                    return {
+                        tenPhuTung: r.t || 'Không rõ',
+                        trangThai: strStatus,
+                        gara: { phuongAn: r.gPa || '', gia: r.gGia || 0 },
+                        bbgd: { phuongAn: r.bPa || '' },
+                        canhBao: r.cb || ''
+                    };
+                });
+
+                this._renderResults(finalResults);
 
             } catch (error) {
                 Swal.close();
