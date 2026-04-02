@@ -11736,32 +11736,55 @@ async _processImage(file, currentDamageItems) {
 
                 _setMsg(`Đang gửi ảnh lên AI... (${currentDamageItems.length} hạng mục)`);
 
-                // ── Bước 3: Rút gọn danh sách BBGĐ (chỉ giữ trường cần thiết) ──
                 const bbgdList = currentDamageItems.map((item, idx) => ({
-                    i: idx + 1,
-                    t: item.chiTiet,
-                    p: item.thayThe ? 'TT' : (item.suaChua ? 'SC' : '?')
+                    stt: idx + 1,
+                    tenHangMuc: item.chiTiet,
+                    phuongAn: item.thayThe ? 'Thay thế' : (item.suaChua ? 'Sửa chữa' : 'Chưa rõ')
                 }));
 
-                // ── Bước 4: Prompt ngắn gọn hơn, giảm token ──
-                const PROMPT = `Bạn là chuyên gia giám định bảo hiểm xe cơ giới.
-                Ảnh đính kèm là BẢNG BÁO GIÁ sửa chữa xe ô tô của Gara.
-                Danh sách hạng mục Biên bản giám định (BBGĐ) của tôi (JSON, p=phương án: TT=Thay thế, SC=Sửa chữa):
+                // ── Bước 4: Prompt với ngữ nghĩa sâu ──
+                const PROMPT = `Bạn là chuyên gia giám định bảo hiểm xe cơ giới Việt Nam, rất am hiểu thuật ngữ nghề sửa chữa ô tô.
+                Ảnh đính kèm là BẢNG BÁO GIÁ SỬA CHỮA của Gara.
+                Danh sách hạng mục trong Biên Bản Giám Định (BBGĐ) của tôi:
                 ${JSON.stringify(bbgdList)}
                 
-                NHIỆM VỤ: Đối chiếu từng dòng trong ảnh báo giá với BBGĐ. Trả về JSON Array, KHÔNG có text khác.
-                Mỗi phần tử gồm:
-                - tenPhuTung: string
-                - trangThai: "KHOP"|"SAI_PHUONG_AN"|"GARA_BAO_DU"|"GARA_QUEN_BAO"
-                - gara: { phuongAn: string, gia: number }
-                - bbgd: { phuongAn: string }
-                - canhBao: string (rỗng nếu khớp)
+                NHIỆM VỤ: Đọc toàn bộ ảnh báo giá, sau đó đối chiếu với BBGĐ. Trả về JSON Array, KHÔNG kèm text nào khác.
                 
-                QUY TẮC QUAN TRỌNG:
-                1. So sánh tên linh hoạt theo ngữ nghĩa: "Cửa trước trái" khớp với "Sơn cửa trước T", "Hông xe trái" khớp với "Sơn hông sau T", v.v. Chữ viết tắt T=Trái, P=Phải.
-                2. Phương án tương đương: "Sơn", "Phục hồi", "Sơn sửa" đều được coi là TƯƠNG ĐƯƠNG với "Sửa chữa" (SC). Chỉ "Thay thế", "Thay mới" mới là TT.
-                3. KHOP = tên khớp nghĩa VÀ phương án tương đương; SAI_PHUONG_AN = tên khớp nghĩa nhưng phương án thực sự khác (VD: BBGĐ duyệt SC nhưng Gara báo TT); GARA_BAO_DU = có trong ảnh nhưng không tìm được hạng mục tương ứng trong BBGĐ; GARA_QUEN_BAO = có trong BBGĐ nhưng không thấy trong ảnh báo giá.
-                4. Ưu tiên tìm sự TƯƠNG ĐỒNG trước khi kết luận không khớp.`;
+                === BẢNG TỪ ĐỒNG NGHĨA TÊN BỘ PHẬN (bắt buộc áp dụng) ===
+                - "Vè", "Vè trước", "Vè sau" = "Tai xe" (trước/sau tương ứng)
+                - "Hông", "Hông xe", "Sườn xe" = "Hông xe"
+                - "Cửa" = "Cửa xe" (trước/sau/trái/phải tương ứng)
+                - "Nắp ca pô", "Ca pô" = "Nắp động cơ"
+                - "Cốp", "Nắp cốp", "Cửa hậu" = "Cốp xe"
+                - "Đèn pha", "Đèn trước" = "Đèn pha"
+                - "Đèn hậu", "Đèn sau" = "Đèn hậu"
+                - Chữ viết tắt: T = Trái, P = Phải, Tr = Trước, S/Sa = Sau
+                
+                === BẢNG PHƯƠNG ÁN TƯƠNG ĐƯƠNG (bắt buộc áp dụng) ===
+                - "Sơn", "Sơn sửa", "Sơn phục hồi", "Đánh bóng sơn", "Phục hồi sơn" → đều là "Sửa chữa"
+                - "Nắn", "Nắn sửa", "Nắn chỉnh", "Gò nắn" → đều là "Sửa chữa"
+                - "Thay", "Thay mới", "Thay thế", "Mua mới" → đều là "Thay thế"
+                
+                === QUY TẮC ĐỐI CHIẾU ===
+                Bước 1 — Đọc toàn bộ dòng trong ảnh báo giá.
+                Bước 2 — Với mỗi dòng báo giá, tìm hạng mục BBGĐ có tên gần nhất (dùng bảng từ đồng nghĩa, bỏ qua chữ "Sơn/Nắn" ở đầu tên vì đó là động từ chỉ phương án).
+                Bước 3 — Phân loại:
+                  • KHOP: tên khớp nghĩa VÀ phương án tương đương nhau
+                  • SAI_PHUONG_AN: tên khớp nghĩa NHƯNG phương án thực sự khác (VD: BBGĐ=Sửa chữa, Gara báo=Thay thế)
+                  • GARA_BAO_DU: dòng trong ảnh báo giá KHÔNG tìm được bộ phận tương ứng nào trong BBGĐ
+                  • GARA_QUEN_BAO: hạng mục trong BBGĐ KHÔNG thấy xuất hiện ở bất kỳ dòng nào trong ảnh báo giá
+                Bước 4 — LUÔN ưu tiên tìm sự TƯƠNG ĐỒNG. Chỉ kết luận không khớp khi đã cố gắng tối đa.
+                
+                === ĐỊNH DẠNG KẾT QUẢ ===
+                [
+                  {
+                    "tenPhuTung": "tên bộ phận (ưu tiên tên theo BBGĐ)",
+                    "trangThai": "KHOP"|"SAI_PHUONG_AN"|"GARA_BAO_DU"|"GARA_QUEN_BAO",
+                    "gara": { "phuongAn": "tên phương án Gara dùng", "gia": <số nguyên, 0 nếu không có> },
+                    "bbgd": { "phuongAn": "tên phương án trong BBGĐ" },
+                    "canhBao": "mô tả ngắn nếu có bất thường, để trống nếu khớp"
+                  }
+                ]`;
 
                 // ── Bước 5: Gọi API với retry toàn key pool + timeout 40s ──
                 // Dùng flash-lite nhanh hơn cho task đọc bảng giá
