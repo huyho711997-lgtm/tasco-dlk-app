@@ -580,7 +580,9 @@
             cursor: pointer; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
             display: flex; align-items: center; justify-content: center; gap: 6px;
             white-space: nowrap;
-            border-radius: 10px 10px 0 0; /* Bo tròn góc trên */
+            border-radius: 10px 10px 0 0; 
+            background: transparent;
+            border-top: none; border-left: none; border-right: none;
         }
         
         /* Hiệu ứng khi lướt qua (Hover) */
@@ -594,7 +596,7 @@
             color: #2563eb; 
             font-weight: 800;
             border-bottom-color: #2563eb;
-            background: #eff6ff; /* Nền xanh nhạt nổi bật */
+            background: #eff6ff; 
         }
         
         /* Hiệu ứng chuyển động của Icon */
@@ -602,9 +604,13 @@
             transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); 
         }
         .modal-tab.active svg { 
-            transform: scale(1.15); /* Phóng to icon một chút khi chọn */
+            transform: scale(1.15); 
             stroke-width: 2.5px;
         }
+
+        /* KHẮC PHỤC LỖI: 2 dòng quan trọng để ẩn/hiện nội dung tab */
+        .modal-tab-panel { display: none; }
+        .modal-tab-panel.active { display: block; }
 
         /* Dark Mode cho Tabs */
         [data-theme="dark"] .modal-tab-bar { background-color: var(--bg-white) !important; border-color: var(--border-light) !important; }
