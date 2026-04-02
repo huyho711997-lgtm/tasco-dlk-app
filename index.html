@@ -11707,7 +11707,7 @@
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" style="animation:img-spin 1s linear infinite;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
                         </div>
                         <p style="font-size:16px;font-weight:900;color:var(--text-primary,#0f172a);margin:0;">Đang quét & Đối chiếu...</p>
-                        <p style="font-size:12px;font-weight:600;color:var(--text-secondary,#64748b);margin-top:6px;text-align:center;">AI đang so sánh báo giá Gara với ${currentDamageItems.length} hạng mục trong BBGĐ</p>
+                        <p id="qc-loading-status" style="font-size:12px;font-weight:600;color:var(--text-secondary,#64748b);margin-top:6px;text-align:center;">Bước 1/2: Đang đọc dữ liệu ảnh báo giá...</p>
                     </div>
                 `,
                 showConfirmButton: false, allowOutsideClick: false,
@@ -11715,100 +11715,117 @@
             });
 
             try {
-                // 1. Tối ưu 1: Nén ảnh xuống 1024px thay vì 1200px để AI đọc nhanh hơn, tiết kiệm token
                 const base64 = await OCR._compressImage(file, 1024);
+                const statusText = document.getElementById('qc-loading-status');
 
-                // 2. Tối ưu 2: Rút gọn dữ liệu BBGĐ gửi lên AI để tiết kiệm dung lượng gửi
+                // Hàm gọi API tái sử dụng để code gọn hơn
+                const callGemini = async (prompt, imgBase64, key) => {
+                    const body = {
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: { temperature: 0.1 }
+                    };
+                    if (imgBase64) {
+                        body.contents[0].parts.push({ inline_data: { mime_type: 'image/jpeg', data: imgBase64 } });
+                    }
+                    
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s cho mỗi bước
+
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${key}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body),
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    const data = await res.json();
+                    
+                    if (!res.ok || data.error) throw new Error(data?.error?.message || "Lỗi API");
+                    
+                    const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                    try {
+                        return JSON.parse(txt.replace(/```json|```/gi, '').trim());
+                    } catch (e) {
+                        const m = txt.match(/\[[\s\S]*\]/);
+                        return m ? JSON.parse(m[0]) : null;
+                    }
+                };
+
+                // ==========================================
+                // BƯỚC 1: ĐỌC ẢNH VÀ BÓC TÁCH (API 1)
+                // ==========================================
+                const PROMPT_1 = `Bạn là nhân viên nhập liệu. Đọc ảnh Báo giá sửa chữa và trích xuất danh sách phụ tùng/nhân công.
+                TRẢ VỀ MẢNG JSON (CHỈ JSON, KHÔNG CÓ TEXT).
+                Định dạng: [{"t": "Tên vật tư/nhân công", "pa": "Sửa/Thay/Sơn/...", "g": 1500000}]`;
+
+                let extractedData = null;
+                let key1 = GeminiKeys.next();
+                
+                try {
+                    extractedData = await callGemini(PROMPT_1, base64, key1);
+                } catch (e1) {
+                    console.warn("Lỗi Bước 1, thử lại bằng Key khác:", e1);
+                    key1 = GeminiKeys.next(); // Đổi key nếu lỗi
+                    extractedData = await callGemini(PROMPT_1, base64, key1);
+                }
+
+                if (!extractedData || !Array.isArray(extractedData)) {
+                    throw new Error("Không thể đọc được ảnh báo giá. Vui lòng chụp rõ hơn.");
+                }
+
+                // ==========================================
+                // BƯỚC 2: ĐỐI CHIẾU DỮ LIỆU (API 2)
+                // ==========================================
+                if (statusText) statusText.innerHTML = `Bước 2/2: AI đang đối chiếu ${extractedData.length} mục với BBGĐ...`;
+
                 const bbgdList = currentDamageItems.map((item) => ({
                     ten: item.chiTiet,
                     pa: item.thayThe ? "Thay" : (item.suaChua ? "Sửa" : "Chưa rõ")
                 }));
 
-                // 3. Tối ưu 3: Prompt rút gọn key JSON cực ngắn gọn để AI sinh text (generate) nhanh nhất có thể
-                const PROMPT = `Bạn là Giám định viên. Phân tích ảnh Báo giá sửa chữa và đối chiếu với danh sách BBGD sau:
-                ${JSON.stringify(bbgdList)}
+                const PROMPT_2 = `Bạn là Giám định viên. Đối chiếu 2 danh sách:
+                1. BÁO GIÁ: ${JSON.stringify(extractedData)}
+                2. BBGĐ: ${JSON.stringify(bbgdList)}
                 
-                NHIỆM VỤ:
-                So khớp các mục trong Báo giá với BBGD. Trả về MẢNG JSON (CHỈ JSON, không giải thích).
+                So khớp và phân loại từng mục. Trả về MẢNG JSON.
                 Quy tắc "tt" (trạng thái):
-                1: "KHOP" (Gara báo đúng Tên & Phương án)
-                2: "SAI_PA" (Sai phương án. VD: BBGD duyệt Sửa, Gara báo Thay)
-                3: "DU" (Gara báo nhưng BBGD không có)
-                4: "THIEU" (BBGD có nhưng Gara không báo giá)
+                1: "KHOP" (Trùng tên và phương án)
+                2: "SAI_PA" (Cùng tên nhưng Phương án khác nhau)
+                3: "DU" (BÁO GIÁ có nhưng BBGĐ không có)
+                4: "THIEU" (BBGĐ có nhưng BÁO GIÁ không có)
                 
-                Định dạng phần tử JSON:
-                {
-                  "t": "Tên phụ tùng (theo báo giá, hoặc theo BBGD nếu thiếu)",
-                  "tt": 1|2|3|4,
-                  "gPa": "Sửa/Thay/Sơn/...",
-                  "gGia": 1500000,
-                  "bPa": "Sửa/Thay",
-                  "cb": "Cảnh báo (nếu có)"
-                }`;
+                Định dạng trả về CHỈ MẢNG JSON:
+                [{"t": "Tên mục", "tt": 1|2|3|4, "gPa": "PA Gara", "gGia": 1500000, "bPa": "PA BBGĐ", "cb": "Ghi chú ngắn nếu sai lệch"}]`;
 
-                let parsedResult = null;
-                let lastError = '';
-                const maxRetries = CONFIG.gemini.keys.length;
-
-                for (let attempt = 0; attempt < maxRetries; attempt++) {
-                    const currentKey = GeminiKeys.next();
-                    try {
-                        const controller = new AbortController();
-                        // 4. Tối ưu 4: Nới lỏng Timeout lên 40 giây (40000ms) để không bị cắt đột ngột
-                        const timeoutId = setTimeout(() => controller.abort(), 40000); 
-                        
-                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${currentKey}`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: 'image/jpeg', data: base64 } }] }],
-                                generationConfig: { temperature: 0.1 } // Độ sáng tạo thấp giúp xuất JSON chuẩn hơn
-                            }),
-                            signal: controller.signal
-                        });
-                        clearTimeout(timeoutId);
-                        const dataResponse = await res.json();
-
-                        if (!res.ok || dataResponse.error) {
-                            lastError = dataResponse?.error?.message || `Lỗi máy chủ: ${res.status}`;
-                            await new Promise(r => setTimeout(r, 1000));
-                            continue;
-                        }
-
-                        const txt = dataResponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                        if (!txt) throw new Error('AI trả về rỗng');
-
-                        try { 
-                            parsedResult = JSON.parse(txt.replace(/```json|```/gi, '').trim()); 
-                        } catch (parseErr) {
-                            const m = txt.match(/\[[\s\S]*\]/);
-                            if (m) parsedResult = JSON.parse(m[0]);
-                            else throw new Error('Sai định dạng JSON');
-                        }
-
-                        // Thoát vòng lặp nếu parse thành công ra mảng
-                        if (Array.isArray(parsedResult)) break;
-
-                    } catch (e) {
-                        lastError = e.name === 'AbortError' ? 'Quá thời gian đáp ứng (40s)' : e.message;
-                    }
+                let comparedData = null;
+                let key2 = GeminiKeys.next(); // Đổi sang một Key khác để chia tải
+                
+                try {
+                    // Gọi API 2 (Không gửi ảnh, chỉ gửi Prompt Text -> Chạy siêu nhanh)
+                    comparedData = await callGemini(PROMPT_2, null, key2);
+                } catch (e2) {
+                    console.warn("Lỗi Bước 2, thử lại bằng Key khác:", e2);
+                    key2 = GeminiKeys.next();
+                    comparedData = await callGemini(PROMPT_2, null, key2);
                 }
 
-                if (!parsedResult || !Array.isArray(parsedResult)) {
-                    throw new Error('AI quá tải hoặc không đọc được ảnh. Lỗi: ' + lastError);
+                if (!comparedData || !Array.isArray(comparedData)) {
+                    throw new Error("Lỗi khi đối chiếu logic dữ liệu.");
                 }
 
-                // 5. Dịch ngược lại JSON siêu tốc của AI thành cấu trúc chuẩn cho UI hiển thị
-                const finalResults = parsedResult.map(r => {
-                    let statusMap = { 1: 'KHOP', 2: 'SAI_PHUONG_AN', 3: 'GARA_BAO_DU', 4: 'GARA_QUEN_BAO' };
-                    let strStatus = statusMap[r.tt] || 'KHOP';
+                // ==========================================
+                // BƯỚC 3: DỊCH NGƯỢC JSON CHO UI
+                // ==========================================
+                const finalResults = comparedData.map(r => {
+                    let strStatus = { 1: 'KHOP', 2: 'SAI_PHUONG_AN', 3: 'GARA_BAO_DU', 4: 'GARA_QUEN_BAO' }[r.tt] || 'KHOP';
                     
-                    // Dự phòng nếu AI vẫn lì lợm trả về chữ thay vì số 1,2,3,4
+                    // Fallback an toàn nếu AI trả về chuỗi thay vì số
                     if (typeof r.tt === 'string') {
-                        if (r.tt.includes('KHOP')) strStatus = 'KHOP';
-                        else if (r.tt.includes('SAI')) strStatus = 'SAI_PHUONG_AN';
-                        else if (r.tt.includes('DU')) strStatus = 'GARA_BAO_DU';
-                        else if (r.tt.includes('THIEU')) strStatus = 'GARA_QUEN_BAO';
+                        if (r.tt.includes('KHOP') || r.tt === '1') strStatus = 'KHOP';
+                        else if (r.tt.includes('SAI') || r.tt === '2') strStatus = 'SAI_PHUONG_AN';
+                        else if (r.tt.includes('DU') || r.tt === '3') strStatus = 'GARA_BAO_DU';
+                        else if (r.tt.includes('THIEU') || r.tt === '4') strStatus = 'GARA_QUEN_BAO';
                     }
 
                     return {
