@@ -11745,7 +11745,7 @@ async _processImage(file, currentDamageItems) {
 
                 // ── Bước 4: Prompt ngắn gọn hơn, giảm token ──
                 const PROMPT = `Bạn là chuyên gia giám định bảo hiểm xe cơ giới.
-                Ảnh đính kèm là BẢNG BÁO GIÁ của Gara sửa chữa.
+                Ảnh đính kèm là BẢNG BÁO GIÁ sửa chữa xe ô tô của Gara.
                 Danh sách hạng mục Biên bản giám định (BBGĐ) của tôi (JSON, p=phương án: TT=Thay thế, SC=Sửa chữa):
                 ${JSON.stringify(bbgdList)}
                 
@@ -11757,8 +11757,11 @@ async _processImage(file, currentDamageItems) {
                 - bbgd: { phuongAn: string }
                 - canhBao: string (rỗng nếu khớp)
                 
-                QUY TẮC:
-                KHOP = tên+phương án trùng; SAI_PHUONG_AN = tên trùng nhưng phương án khác; GARA_BAO_DU = có trong ảnh nhưng không có trong BBGĐ; GARA_QUEN_BAO = có trong BBGĐ nhưng không thấy trong ảnh.`;
+                QUY TẮC QUAN TRỌNG:
+                1. So sánh tên linh hoạt theo ngữ nghĩa: "Cửa trước trái" khớp với "Sơn cửa trước T", "Hông xe trái" khớp với "Sơn hông sau T", v.v. Chữ viết tắt T=Trái, P=Phải.
+                2. Phương án tương đương: "Sơn", "Phục hồi", "Sơn sửa" đều được coi là TƯƠNG ĐƯƠNG với "Sửa chữa" (SC). Chỉ "Thay thế", "Thay mới" mới là TT.
+                3. KHOP = tên khớp nghĩa VÀ phương án tương đương; SAI_PHUONG_AN = tên khớp nghĩa nhưng phương án thực sự khác (VD: BBGĐ duyệt SC nhưng Gara báo TT); GARA_BAO_DU = có trong ảnh nhưng không tìm được hạng mục tương ứng trong BBGĐ; GARA_QUEN_BAO = có trong BBGĐ nhưng không thấy trong ảnh báo giá.
+                4. Ưu tiên tìm sự TƯƠNG ĐỒNG trước khi kết luận không khớp.`;
 
                 // ── Bước 5: Gọi API với retry toàn key pool + timeout 40s ──
                 // Dùng flash-lite nhanh hơn cho task đọc bảng giá
