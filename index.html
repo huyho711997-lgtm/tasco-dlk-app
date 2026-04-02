@@ -11743,46 +11743,27 @@ async _processImage(file, currentDamageItems) {
                 }));
 
                 // ── Bước 4: Prompt với ngữ nghĩa sâu ──
-                const PROMPT = `Bạn là chuyên gia giám định bảo hiểm xe cơ giới Việt Nam, rất am hiểu thuật ngữ nghề sửa chữa ô tô.
-                Ảnh đính kèm là BẢNG BÁO GIÁ SỬA CHỮA của Gara.
-                Danh sách hạng mục trong Biên Bản Giám Định (BBGĐ) của tôi:
+                const PROMPT = `Bạn là Giám định viên bảo hiểm. Hãy phân tích ảnh Báo Giá sửa chữa xe ô tô của Gara.
+                Đồng thời, tôi cung cấp danh sách Hạng mục tôi đã duyệt trong Biên Bản Giám Định (BBGD) dưới dạng JSON:
                 ${JSON.stringify(bbgdList)}
+
+                NHIỆM VỤ:
+                Đối chiếu từng dòng trong ảnh Báo giá với danh sách BBGD của tôi. Trả về JSON Array chứa kết quả đối chiếu.
                 
-                NHIỆM VỤ: Đọc toàn bộ ảnh báo giá, sau đó đối chiếu với BBGĐ. Trả về JSON Array, KHÔNG kèm text nào khác.
-                
-                === BẢNG TỪ ĐỒNG NGHĨA TÊN BỘ PHẬN (bắt buộc áp dụng) ===
-                - "Vè", "Vè trước", "Vè sau" = "Tai xe" (trước/sau tương ứng)
-                - "Hông", "Hông xe", "Sườn xe" = "Hông xe"
-                - "Cửa" = "Cửa xe" (trước/sau/trái/phải tương ứng)
-                - "Nắp ca pô", "Ca pô" = "Nắp động cơ"
-                - "Cốp", "Nắp cốp", "Cửa hậu" = "Cốp xe"
-                - "Đèn pha", "Đèn trước" = "Đèn pha"
-                - "Đèn hậu", "Đèn sau" = "Đèn hậu"
-                - Chữ viết tắt: T = Trái, P = Phải, Tr = Trước, S/Sa = Sau
-                
-                === BẢNG PHƯƠNG ÁN TƯƠNG ĐƯƠNG (bắt buộc áp dụng) ===
-                - "Sơn", "Sơn sửa", "Sơn phục hồi", "Đánh bóng sơn", "Phục hồi sơn" → đều là "Sửa chữa"
-                - "Nắn", "Nắn sửa", "Nắn chỉnh", "Gò nắn" → đều là "Sửa chữa"
-                - "Thay", "Thay mới", "Thay thế", "Mua mới" → đều là "Thay thế"
-                
-                === QUY TẮC ĐỐI CHIẾU ===
-                Bước 1 — Đọc toàn bộ dòng trong ảnh báo giá.
-                Bước 2 — Với mỗi dòng báo giá, tìm hạng mục BBGĐ có tên gần nhất (dùng bảng từ đồng nghĩa, bỏ qua chữ "Sơn/Nắn" ở đầu tên vì đó là động từ chỉ phương án).
-                Bước 3 — Phân loại:
-                  • KHOP: tên khớp nghĩa VÀ phương án tương đương nhau
-                  • SAI_PHUONG_AN: tên khớp nghĩa NHƯNG phương án thực sự khác (VD: BBGĐ=Sửa chữa, Gara báo=Thay thế)
-                  • GARA_BAO_DU: dòng trong ảnh báo giá KHÔNG tìm được bộ phận tương ứng nào trong BBGĐ
-                  • GARA_QUEN_BAO: hạng mục trong BBGĐ KHÔNG thấy xuất hiện ở bất kỳ dòng nào trong ảnh báo giá
-                Bước 4 — LUÔN ưu tiên tìm sự TƯƠNG ĐỒNG. Chỉ kết luận không khớp khi đã cố gắng tối đa.
-                
-                === ĐỊNH DẠNG KẾT QUẢ ===
+                QUY TẮC PHÂN LOẠI (trangThai):
+                1. "KHOP": Gara báo đúng Tên và Phương án như BBGD.
+                2. "SAI_PHUONG_AN": Gara báo Phương án khác BBGD (VD: BBGD duyệt "Sửa chữa", Gara báo "Thay thế").
+                3. "GARA_BAO_DU": Có trong báo giá Gara nhưng KHÔNG CÓ trong BBGD.
+                4. "GARA_QUEN_BAO": Có trong BBGD nhưng KHÔNG THẤY Gara báo giá. (Bạn tự rà soát xem có mục nào ở BBGD mà ảnh báo giá không có không).
+
+                ĐỊNH DẠNG JSON TRẢ VỀ (CHỈ TRẢ VỀ MẢNG NÀY, KHÔNG TEXT):
                 [
                   {
-                    "tenPhuTung": "tên bộ phận (ưu tiên tên theo BBGĐ)",
-                    "trangThai": "KHOP"|"SAI_PHUONG_AN"|"GARA_BAO_DU"|"GARA_QUEN_BAO",
-                    "gara": { "phuongAn": "tên phương án Gara dùng", "gia": <số nguyên, 0 nếu không có> },
-                    "bbgd": { "phuongAn": "tên phương án trong BBGĐ" },
-                    "canhBao": "mô tả ngắn nếu có bất thường, để trống nếu khớp"
+                    "tenPhuTung": "Tên phụ tùng (Lấy tên theo báo giá, nếu quên báo thì lấy tên BBGD)",
+                    "trangThai": "KHOP" | "SAI_PHUONG_AN" | "GARA_BAO_DU" | "GARA_QUEN_BAO",
+                    "gara": { "phuongAn": "Sửa/Thay/Sơn", "gia": 1500000 (số nguyên) },
+                    "bbgd": { "phuongAn": "Sửa/Thay" },
+                    "canhBao": "Ghi chú ngắn ngọn nếu có sai lệch"
                   }
                 ]`;
 
