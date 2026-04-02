@@ -11743,33 +11743,40 @@ async _processImage(file, currentDamageItems) {
                 }));
 
                 // ── Bước 4: Prompt với ngữ nghĩa sâu ──
-                const PROMPT = `Bạn là Giám định viên bảo hiểm. Hãy phân tích ảnh Báo Giá sửa chữa xe ô tô của Gara.
-                Đồng thời, tôi cung cấp danh sách Hạng mục tôi đã duyệt trong Biên Bản Giám Định (BBGD) dưới dạng JSON:
+                // ── Bước 4: Prompt với ngữ nghĩa sâu (Đã tinh chỉnh Few-shot) ──
+                const PROMPT = `Bạn là chuyên gia giám định bảo hiểm xe cơ giới Việt Nam. Nhiệm vụ của bạn là đọc BẢNG BÁO GIÁ trong ảnh và đối chiếu 1-1 với danh sách HẠNG MỤC BBGĐ sau đây:
                 ${JSON.stringify(bbgdList)}
-
-                NHIỆM VỤ:
-                Đối chiếu từng dòng trong ảnh Báo giá với danh sách BBGD của tôi. Trả về JSON Array chứa kết quả đối chiếu.
                 
-                QUY TẮC PHÂN LOẠI (trangThai):
-                1. "KHOP": Gara báo đúng Tên và Phương án như BBGD.
-                2. "SAI_PHUONG_AN": Gara báo Phương án khác BBGD (VD: BBGD duyệt "Sửa chữa", Gara báo "Thay thế").
-                3. "GARA_BAO_DU": Có trong báo giá Gara nhưng KHÔNG CÓ trong BBGD.
-                4. "GARA_QUEN_BAO": Có trong BBGD nhưng KHÔNG THẤY Gara báo giá. (Bạn tự rà soát xem có mục nào ở BBGD mà ảnh báo giá không có không).
-
-                ĐỊNH DẠNG JSON TRẢ VỀ (CHỈ TRẢ VỀ MẢNG NÀY, KHÔNG TEXT):
+                === TỪ ĐIỂN ĐỒNG NGHĨA (BẮT BUỘC ÁP DỤNG) ===
+                - Viết tắt: T = Trái, P = Phải, Tr = Trước, S/Sa = Sau.
+                - Bộ phận: "Vè" = "Tai xe", "Hông", "Sườn" = "Hông xe", "Cản" = "Ba đờ sốc", "Ca pô" = "Nắp động cơ".
+                - Phương án: Các từ "Sơn", "Gò", "Nắn", "Hàn", "Phục hồi" -> đều có nghĩa là "Sửa chữa".
+                
+                === VÍ DỤ CÁCH ĐỐI CHIẾU (HÃY HỌC THEO LOGIC NÀY) ===
+                - Gara ghi: "Sơn vè trước T" | BBGĐ có: "Tai xe trái" (Sửa chữa) -> ĐÂY LÀ KHỚP NHAU HOÀN TOÀN (Vè = Tai, T = Trái, Sơn = Sửa chữa).
+                - Gara ghi: "Sơn hông sau P" | BBGĐ có: "Hông xe phải" (Sửa chữa) -> ĐÂY LÀ KHỚP NHAU HOÀN TOÀN.
+                - Gara ghi: "Thay cản trước" | BBGĐ có: "Cản trước" (Sửa chữa) -> ĐÂY LÀ SAI_PHUONG_AN (Cùng bộ phận nhưng Gara đòi thay, BBGĐ bắt sửa).
+                
+                === QUY TẮC PHÂN LOẠI ===
+                • KHOP: Tìm thấy bộ phận tương đồng (dùng từ điển) VÀ phương án giống nhau.
+                • SAI_PHUONG_AN: Tìm thấy bộ phận tương đồng NHƯNG phương án khác nhau.
+                • GARA_BAO_DU: Gara có báo nhưng KHÔNG THỂ tìm thấy bộ phận nào tương đương trong BBGĐ.
+                • GARA_QUEN_BAO: Có trong BBGĐ nhưng KHÔNG xuất hiện trên báo giá của Gara.
+                
+                TRẢ VỀ CHỈ MỘT JSON ARRAY, KHÔNG KÈM BẤT KỲ VĂN BẢN NÀO KHÁC:
                 [
                   {
-                    "tenPhuTung": "Tên phụ tùng (Lấy tên theo báo giá, nếu quên báo thì lấy tên BBGD)",
+                    "tenPhuTung": "Tên theo BBGĐ (hoặc tên Gara nếu báo dư)",
                     "trangThai": "KHOP" | "SAI_PHUONG_AN" | "GARA_BAO_DU" | "GARA_QUEN_BAO",
-                    "gara": { "phuongAn": "Sửa/Thay/Sơn", "gia": 1500000 (số nguyên) },
-                    "bbgd": { "phuongAn": "Sửa/Thay" },
-                    "canhBao": "Ghi chú ngắn ngọn nếu có sai lệch"
+                    "gara": { "phuongAn": "tên phương án Gara ghi", "gia": 800000 },
+                    "bbgd": { "phuongAn": "tên phương án trong BBGĐ" },
+                    "canhBao": "Ghi chú nếu sai phương án, để rỗng nếu khớp"
                   }
                 ]`;
 
                 // ── Bước 5: Gọi API với retry toàn key pool + timeout 40s ──
-                // Dùng flash-lite nhanh hơn cho task đọc bảng giá
-                const QC_MODEL = 'gemini-2.5-flash-lite';
+                // Đổi sang model flash chuẩn để tăng khả năng tư duy logic khi đối chiếu từ đồng nghĩa
+                const QC_MODEL = 'gemini-2.5-flash';
                 const keys = CONFIG.gemini.keys;
                 let dataResponse = null;
                 let lastError = null;
