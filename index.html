@@ -33,6 +33,216 @@
         .bottom-nav-active { color: #2563eb !important; }
         .bottom-nav-active .nav-icon-bg { background-color: #eff6ff; }
         .swal2-popup.custom-rounded { border-radius: 28px !important; padding: 1.5rem !important; }
+
+        /* ══ TASCO AI BÓC TÁCH — REDESIGNED ══ */
+        .ai-boc-tach-header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border-radius: 20px;
+            padding: 20px 18px 18px;
+            margin: -4px -4px 18px;
+            position: relative;
+            overflow: hidden;
+        }
+        .ai-boc-tach-header::before {
+            content: '';
+            position: absolute;
+            top: -30px; right: -30px;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+        }
+        .ai-boc-tach-header::after {
+            content: '';
+            position: absolute;
+            bottom: -20px; left: 20px;
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.04);
+        }
+        .ai-boc-tach-icon-wrap {
+            width: 48px; height: 48px;
+            background: rgba(255,255,255,0.15);
+            border: 1.5px solid rgba(255,255,255,0.25);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 12px;
+            backdrop-filter: blur(4px);
+        }
+        .ai-boc-tach-title {
+            font-size: 18px; font-weight: 900;
+            color: #ffffff; margin: 0 0 4px;
+            letter-spacing: -0.3px;
+        }
+        .ai-boc-tach-subtitle {
+            font-size: 11.5px; font-weight: 500;
+            color: rgba(255,255,255,0.72);
+            margin: 0; line-height: 1.5;
+        }
+        .ai-boc-tach-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px; padding: 4px 10px;
+            font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.9);
+            margin-top: 10px; letter-spacing: 0.04em;
+        }
+        .ai-existing-chip {
+            display: flex; align-items: center; gap: 8px;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin-bottom: 14px;
+        }
+        .ai-existing-chip-icon {
+            width: 28px; height: 28px;
+            background: #10b981;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .ai-existing-chip-text { font-size: 11px; font-weight: 700; color: #065f46; }
+        .ai-existing-chip-count { font-size: 13px; font-weight: 900; color: #047857; }
+        .ai-textarea-wrap {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .ai-textarea-wrap:focus-within {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99,102,241,0.1);
+            background: #fff;
+        }
+        .ai-textarea-inner {
+            width: 100%; border: none; background: transparent;
+            padding: 14px 14px 10px;
+            font-size: 13px; font-weight: 500;
+            color: var(--text-primary, #1e293b);
+            resize: none; outline: none;
+            box-sizing: border-box; line-height: 1.55;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .ai-textarea-inner::placeholder { color: #94a3b8; font-weight: 400; }
+        .ai-textarea-toolbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 12px 10px;
+            border-top: 1px solid #f1f5f9;
+            background: white;
+        }
+        .ai-mic-btn {
+            display: flex; align-items: center; gap: 7px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border: none; border-radius: 10px;
+            font-size: 12px; font-weight: 800; color: white;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(79,70,229,0.3);
+            transition: all 0.2s;
+        }
+        .ai-mic-btn:active { transform: scale(0.96); }
+        .ai-mic-btn.recording {
+            background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+            box-shadow: 0 3px 10px rgba(220,38,38,0.35) !important;
+            animation: mic-pulse 1.4s ease-in-out infinite;
+        }
+        @keyframes mic-pulse {
+            0%, 100% { box-shadow: 0 3px 10px rgba(220,38,38,0.35); }
+            50% { box-shadow: 0 3px 18px rgba(220,38,38,0.55), 0 0 0 6px rgba(220,38,38,0.12); }
+        }
+        .ai-char-count { font-size: 10px; font-weight: 700; color: #94a3b8; }
+        .ai-loading-overlay-v2 {
+            display: none; position: absolute; inset: 0;
+            background: rgba(255,255,255,0.97);
+            z-index: 10;
+            flex-direction: column; align-items: center; justify-content: center;
+            border-radius: 16px;
+            gap: 12px;
+        }
+        .ai-loading-spinner-v2 {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+        }
+        .ai-loading-spinner-v2 svg { animation: img-spin 0.9s linear infinite; }
+        @keyframes img-spin { to { transform: rotate(360deg); } }
+        .ai-loading-text { font-size: 13px; font-weight: 800; color: #1e293b; }
+        .ai-loading-sub { font-size: 11px; font-weight: 500; color: #64748b; }
+
+        /* ── Result screen ── */
+        .ai-result-header {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 4px;
+        }
+        .ai-result-icon {
+            width: 36px; height: 36px;
+            background: #ecfdf5; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .ai-result-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 11px 12px; border-radius: 12px;
+            margin-bottom: 7px; cursor: pointer;
+            border: 1.5px solid #e2e8f0;
+            background: #f8fafc;
+            transition: all 0.15s;
+        }
+        .ai-result-row.checked {
+            border-color: rgba(16,185,129,0.45);
+            background: rgba(16,185,129,0.07);
+        }
+        .ai-result-checkbox {
+            width: 20px; height: 20px; border-radius: 6px;
+            border: 1.5px solid #cbd5e1; background: white;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: all 0.15s;
+        }
+        .ai-result-row.checked .ai-result-checkbox {
+            background: #10b981; border-color: #10b981;
+        }
+        .ai-result-name {
+            font-size: 13px; font-weight: 800;
+            color: var(--text-primary, #1e293b);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            margin-bottom: 3px;
+        }
+        .ai-result-meta {
+            display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+        }
+        .ai-result-meta-text {
+            font-size: 11px; color: var(--text-secondary, #64748b);
+        }
+        .chip-sc { font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe; }
+        .chip-tt { font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:#fffbeb;color:#d97706;border:1px solid #fde68a; }
+        .chip-thu { font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:#faf5ff;color:#7c3aed;border:1px solid #ddd6fe; }
+        .ai-dup-section {
+            background: #fffbeb; border: 1px solid #fde68a;
+            border-radius: 12px; padding: 10px 12px; margin-bottom: 12px;
+        }
+        .ai-dup-label { font-size:10px;font-weight:900;color:#b45309;margin-bottom:6px;letter-spacing:0.05em; }
+        .ai-dup-item { font-size:12px;font-weight:600;color:#92400e;padding:3px 0;display:flex;align-items:center;gap:6px; }
+        .ai-sel-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .ai-sel-label { font-size:10px;font-weight:900;color:var(--text-secondary,#64748b);letter-spacing:0.05em; }
+        .ai-toggle-all-btn {
+            font-size:10px; font-weight:800;
+            color: #4f46e5; background: #eff6ff; /* was #f1f5f9 */
+            border: 1px solid #c7d2fe;
+            border-radius: 8px; padding:5px 12px;
+            cursor:pointer; transition:all 0.2s;
+        }
+        .ai-count-bar {
+            margin-top:10px; padding-top:10px;
+            border-top:1px solid rgba(0,0,0,0.06);
+            font-size:11px; color:var(--text-secondary,#64748b);
+            text-align:right; font-weight:600;
+        }
         .input-field {
             width: 100%;
             background-color: #f8fafc;
@@ -4107,53 +4317,58 @@
             Swal.fire({
                 title: '',
                 html: 
-                    // --- HEADER ---
-                    '<div style="text-align:center; margin-bottom:20px; padding-top:10px;">'
-                    + '<div style="width:52px; height:52px; background:rgba(99, 102, 241, 0.1); border:1px solid rgba(99, 102, 241, 0.2); border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">'
-                    + '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>'
+                    // ── HEADER GRADIENT ──
+                    '<div class="ai-boc-tach-header">'
+                    + '<div class="ai-boc-tach-icon-wrap">'
+                    + '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>'
                     + '</div>'
-                    + '<h2 style="font-size:17px; font-weight:800; color:var(--text-primary, #0f172a); margin:0 0 6px;">Tasco AI Bóc Tách</h2>'
-                    + '<p style="font-size:11px; color:var(--text-secondary, #64748b); font-weight:500; margin:0; line-height:1.5; padding: 0 10px;">Quay video hiện trường hoặc đọc hạng mục tổn thất. Hệ thống sẽ tách âm thanh và tự động chuẩn hóa.</p>'
+                    + '<h2 class="ai-boc-tach-title">Tasco AI Bóc Tách</h2>'
+                    + '<p class="ai-boc-tach-subtitle">Đọc hạng mục tổn thất — AI tự động chuẩn hóa và tách từng mục rõ ràng.</p>'
+                    + '<span class="ai-boc-tach-badge"><svg width="9" height="9" viewBox="0 0 10 10" fill="white"><circle cx="5" cy="5" r="5"/></svg>TASCO AI · BỒI THƯỜNG XE CƠ GIỚI</span>'
                     + '</div>'
 
-                    // --- CHIP HIỂN THỊ CÁC MỤC ĐÃ CÓ ---
-                    + existingChip
+                    // ── EXISTING CHIP ──
+                    + (existing.length ? '<div class="ai-existing-chip"><div class="ai-existing-chip-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="ai-existing-chip-count">' + existing.length + ' hạng mục đã có</div><div class="ai-existing-chip-text">AI sẽ bổ sung thêm, không trùng lặp</div></div></div>' : '')
 
-                    + '<div style="position:relative; background:var(--bg-app, #f8fafc); border:1px solid var(--border-light, #e2e8f0); border-radius:14px; overflow:hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">'
-                    + '<textarea id="dm-ai-input" rows="4" class="custom-scrollbar" placeholder="Nhập văn bản hoặc nhấn nút ghi âm bên dưới..." style="width:100%; border:none; background:transparent; padding:14px; font-size:13px; font-weight:500; color:var(--text-primary, #1e293b); resize:none; outline:none; box-sizing:border-box; line-height:1.5;">' + initialText + '</textarea>'
-
-                    + '<div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--bg-white, #ffffff); border-top:1px solid var(--border-light, #e2e8f0);">'
-                    // Đã thu nhỏ nút mic (giảm padding, font, icon)
-                    + '<button id="dm-ai-mic-btn" type="button" onclick="SpeechInput.toggle(\'dm-ai-input\',\'dm-ai-mic-btn\',\'dm-ai-status\')" style="display:flex; align-items:center; gap:6px; padding:8px 14px; background:#4f46e5; border:none; border-radius:10px; font-size:12px; font-weight:700; color:white; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 10px rgba(79, 70, 229, 0.25);">'
-                    + '<svg id="dm-ai-mic-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg> Bắt đầu Ghi âm'
+                    // ── TEXTAREA BLOCK ──
+                    + '<div style="position:relative;">'
+                    + '<div class="ai-textarea-wrap">'
+                    + '<textarea id="dm-ai-input" rows="4" class="ai-textarea-inner custom-scrollbar" placeholder="Nhập hoặc đọc hạng mục tổn thất: cản trước vỡ thay thế, đèn pha trái bể thay...">' + initialText + '</textarea>'
+                    + '<div class="ai-textarea-toolbar">'
+                    + '<button id="dm-ai-mic-btn" type="button" onclick="SpeechInput.toggle(\'dm-ai-input\',\'dm-ai-mic-btn\',\'dm-ai-status\')" class="ai-mic-btn">'
+                    + '<svg id="dm-ai-mic-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>'
+                    + '<span id="dm-ai-status">Bắt đầu Ghi âm</span>'
                     + '</button>'
-                    // --- MÀN HÌNH LOADING OVERLAY ---
-                    + '<div id="ai-loading-overlay" style="display:none; position:absolute; inset:0; background:var(--bg-white, #ffffff); opacity:0.95; z-index:10; flex-direction:column; align-items:center; justify-content:center;">'
-                    + '<div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg, #6366f1, #4f46e5);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(99,102,241,0.4);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="animation:img-spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></div>'
-                    + '<p style="margin-top:16px;font-size:14px;font-weight:800;color:var(--text-primary, #0f172a);">Đang phân tích...</p>'
+                    + '<span class="ai-char-count" id="dm-ai-charcount">0 ký tự</span>'
+                    + '</div>'
                     + '</div>'
 
+                    // ── LOADING OVERLAY ──
+                    + '<div id="ai-loading-overlay" class="ai-loading-overlay-v2">'
+                    + '<div class="ai-loading-spinner-v2"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></div>'
+                    + '<p class="ai-loading-text">Đang phân tích...</p>'
+                    + '<p class="ai-loading-sub">AI đang bóc tách hạng mục tổn thất</p>'
+                    + '</div>'
                     + '</div>',
+
                 showCancelButton: true,
-                confirmButtonText: 'Phân tích AI',
+                confirmButtonText: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="display:inline;vertical-align:middle;margin-right:6px;"><path d="M5 3l14 9-14 9V3z"/></svg>Phân tích AI',
                 cancelButtonText: 'Đóng',
                 buttonsStyling: false,
-                customClass: { 
-                    popup: 'custom-rounded'
-                },
-                // SỬ DỤNG didOpen ĐỂ ÉP CSS CÂN ĐỐI 50/50 CHO 2 NÚT DƯỚI CÙNG
+                customClass: { popup: 'custom-rounded' },
                 didOpen: () => {
                     const actions = document.querySelector('.swal2-actions');
-                    if (actions) {
-                        actions.style.cssText = 'display: flex !important; flex-direction: row !important; gap: 12px !important; width: 100% !important; padding: 0 4px !important; margin-top: 20px !important; box-sizing: border-box;';
-                    }
+                    if (actions) actions.style.cssText = 'display:flex!important;flex-direction:row!important;gap:10px!important;width:100%!important;padding:0 2px!important;margin-top:18px!important;box-sizing:border-box;';
                     const confirmBtn = Swal.getConfirmButton();
                     const cancelBtn = Swal.getCancelButton();
-                    if (confirmBtn) {
-                        confirmBtn.style.cssText = 'flex: 1 !important; margin: 0 !important; padding: 12px !important; background: #4f46e5 !important; color: white !important; border-radius: 12px !important; font-weight: 800 !important; font-size: 13px !important; border: none !important; cursor: pointer; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);';
-                    }
-                    if (cancelBtn) {
-                        cancelBtn.style.cssText = 'flex: 1 !important; margin: 0 !important; padding: 12px !important; background: var(--bg-surface, #f8fafc) !important; color: var(--text-secondary, #64748b) !important; border-radius: 12px !important; font-weight: 800 !important; font-size: 13px !important; border: 1px solid var(--border-light, #e2e8f0) !important; cursor: pointer;';
+                    if (confirmBtn) confirmBtn.style.cssText = 'flex:1!important;margin:0!important;padding:13px!important;background:linear-gradient(135deg,#4f46e5,#7c3aed)!important;color:white!important;border-radius:14px!important;font-weight:800!important;font-size:13px!important;border:none!important;cursor:pointer;box-shadow:0 4px 14px rgba(79,70,229,0.3);letter-spacing:-0.1px;';
+                    if (cancelBtn) cancelBtn.style.cssText = 'flex:0 0 auto!important;margin:0!important;padding:13px 18px!important;background:#f1f5f9!important;color:#64748b!important;border-radius:14px!important;font-weight:700!important;font-size:13px!important;border:none!important;cursor:pointer;';
+                    // char count live update
+                    const ta = document.getElementById('dm-ai-input');
+                    const cc = document.getElementById('dm-ai-charcount');
+                    if (ta && cc) {
+                        const upd = () => { cc.textContent = ta.value.length + ' ký tự'; };
+                        upd(); ta.addEventListener('input', upd);
                     }
                     try { lucide.createIcons(); } catch(e) {}
                 },
@@ -4198,31 +4413,22 @@
 
                 const selected = new Set(fresh.map((_, i) => i));
 
-                const chipSC  = `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;">Sửa chữa</span>`;
-                const chipTT  = `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:#fef3c7;color:#b45309;border:1px solid #fde68a;">Thay thế</span>`;
-                const chipThu = `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:#faf5ff;color:#7e22ce;border:1px solid #e9d5ff;margin-left:3px;">Thu hồi</span>`;
+                const chipSC  = `<span class="chip-sc">Sửa chữa</span>`;
+                const chipTT  = `<span class="chip-tt">Thay thế</span>`;
+                const chipThu = `<span class="chip-thu">Thu hồi</span>`;
 
                 const renderFreshList = () => fresh.map((h, i) => {
                     const isChecked = selected.has(i);
-                    const chipSC  = `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(37,99,235,0.12);color:#93c5fd;border:1px solid rgba(37,99,235,0.25);">Sửa chữa</span>`;
-                    const chipTT  = `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(217,119,6,0.15);color:#fbbf24;border:1px solid rgba(217,119,6,0.3);">Thay thế</span>`;
-                    const chipThu = `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(147,51,234,0.15);color:#c084fc;border:1px solid rgba(147,51,234,0.3);margin-left:4px;">Thu hồi</span>`;
-                    const chips = (h.thayThe ? chipTT : chipSC) + (h.thuHoi ? chipThu : '');
-                    const borderColor = isChecked ? 'rgba(34,197,94,0.4)' : 'var(--border-light, #e2e8f0)';
-                    const bgColor = isChecked ? 'rgba(34,197,94,0.1)' : 'var(--bg-surface, #f8fafc)';
-                    const chkBg = isChecked ? '#16a34a' : 'transparent';
-                    const chkBorder = isChecked ? '#16a34a' : 'rgba(255,255,255,0.2)';
-                    return `<div onclick="window._dmToggle(${i})" id="dm-row-${i}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;margin-bottom:6px;cursor:pointer;border:1px solid ${borderColor};background:${bgColor};transition:all 0.15s;">
-                        <div id="dm-chk-${i}" style="width:18px;height:18px;border-radius:5px;border:1.5px solid ${chkBorder};background:${chkBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;">
-                            ${isChecked ? '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+                    const chips = (h.thayThe ? `<span class="chip-tt">Thay thế</span>` : `<span class="chip-sc">Sửa chữa</span>`) + (h.thuHoi ? `<span class="chip-thu" style="margin-left:4px;">Thu hồi</span>` : '');
+                    return `<div onclick="window._dmToggle(${i})" id="dm-row-${i}" class="ai-result-row${isChecked ? ' checked' : ''}">
+                        <div id="dm-chk-${i}" class="ai-result-checkbox">
+                            ${isChecked ? '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
                         </div>
                         <div style="flex:1;min-width:0;">
-                            <div style="font-size:13px;font-weight:800;color:var(--text-primary,#f1f5f9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;">${h.chiTiet}</div>
-                            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                                <span style="font-size:11px;color:var(--text-secondary,#94a3b8);">${h.moTa || ''}</span>
-                                ${h.moTa ? '<span style="color:rgba(255,255,255,0.2);font-size:10px;">·</span>' : ''}
-                                <span style="font-size:11px;color:var(--text-secondary,#94a3b8);">${h.mucDo || ''}</span>
-                                <span style="color:rgba(255,255,255,0.2);font-size:10px;">·</span>
+                            <div class="ai-result-name">${h.chiTiet}</div>
+                            <div class="ai-result-meta">
+                                ${h.moTa ? `<span class="ai-result-meta-text">${h.moTa}</span><span style="color:#cbd5e1;font-size:10px;">·</span>` : ''}
+                                ${h.mucDo ? `<span class="ai-result-meta-text">${h.mucDo}</span><span style="color:#cbd5e1;font-size:10px;">·</span>` : ''}
                                 ${chips}
                             </div>
                         </div>
@@ -4235,27 +4441,27 @@
                     let html = '<div style="text-align:left;margin-top:4px;">';
 
                     if (duplicates.length > 0) {
-                        html += `<div style="background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.25);border-radius:10px;padding:8px 12px;margin-bottom:10px;">
-                            <p style="font-size:10px;font-weight:900;color:#fbbf24;margin-bottom:6px;letter-spacing:0.05em;">BỎ QUA — ${duplicates.length} MỤC ĐÃ CÓ</p>`
-                            + duplicates.map(h => `<div style="font-size:12px;font-weight:600;color:rgba(251,191,36,0.7);padding:3px 0;display:flex;align-items:center;gap:6px;">
-                                <span style="color:#f59e0b;font-size:11px;">✕</span>
+                        html += `<div class="ai-dup-section">
+                            <p class="ai-dup-label">⚠️ BỎ QUA — ${duplicates.length} MỤC ĐÃ TỒN TẠI</p>`
+                            + duplicates.map(h => `<div class="ai-dup-item">
+                                <svg width="10" height="10" viewBox="0 0 12 12" fill="#b45309"><path d="M6 1a5 5 0 100 10A5 5 0 006 1zm0 8a.75.75 0 110-1.5.75.75 0 010 1.5zM5.25 4.5a.75.75 0 011.5 0v2a.75.75 0 01-1.5 0v-2z"/></svg>
                                 <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${h.chiTiet}</span>
-                                <span style="font-size:10px;color:rgba(251,191,36,0.5);">${h.moTa || ''}</span>
+                                ${h.moTa ? `<span style="font-size:10px;color:#92400e;opacity:0.6;">${h.moTa}</span>` : ''}
                             </div>`).join('')
                             + '</div>';
                     }
 
                     if (fresh.length > 0) {
-                        html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-                            <span style="font-size:10px;font-weight:900;color:var(--text-secondary, #64748b);letter-spacing:0.05em;">THÊM MỚI — ${fresh.length} MỤC</span>
-                            <button onclick="window._dmToggleAll(${allChecked})" type="button" style="font-size:10px;font-weight:800;color:var(--text-primary, #334155);background:var(--bg-surface, #f1f5f9);border:1px solid var(--border-light, #e2e8f0);border-radius:8px;padding:5px 12px;cursor:pointer;transition:all 0.2s;box-shadow:0 1px 2px rgba(0,0,0,0.05);">
+                        html += `<div class="ai-sel-bar">
+                            <span class="ai-sel-label">✨ THÊM MỚI — ${fresh.length} HẠNG MỤC</span>
+                            <button onclick="window._dmToggleAll(${allChecked})" type="button" class="ai-toggle-all-btn">
                                 ${allChecked ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
                             </button>
                         </div>`;
                         html += `<div id="dm-fresh-list" style="max-height:42vh;overflow-y:auto;padding-right:2px;">${renderFreshList()}</div>`;
-                        html += `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.07);font-size:11px;color:var(--text-secondary,#64748b);text-align:right;" id="dm-sel-count">${cnt}/${fresh.length} mục được chọn</div>`;
+                        html += `<div class="ai-count-bar" id="dm-sel-count">${cnt}/${fresh.length} mục được chọn</div>`;
                     } else {
-                        html += `<p style="text-align:center;font-size:13px;font-weight:700;color:#f87171;padding:16px 0;">Không có hạng mục nào mới!</p>`;
+                        html += `<p style="text-align:center;font-size:13px;font-weight:700;color:#ef4444;padding:20px 0;">Không có hạng mục nào mới!</p>`;
                     }
 
                     html += '</div>';
@@ -4282,14 +4488,9 @@
                     const row = document.getElementById('dm-row-' + i);
                     const chk = document.getElementById('dm-chk-' + i);
                     const isChecked = selected.has(i);
-                    if (row) {
-                        row.style.border = `1px solid ${isChecked ? 'rgba(34,197,94,0.4)' : 'var(--border-light, #e2e8f0)'}`;
-                        row.style.background = isChecked ? 'rgba(34,197,94,0.1)' : 'var(--bg-surface, #f8fafc)';
-                    }
+                    if (row) row.classList.toggle('checked', isChecked);
                     if (chk) {
-                        chk.style.borderColor = isChecked ? '#16a34a' : '#cbd5e1';
-                        chk.style.background = isChecked ? '#16a34a' : 'transparent';
-                        chk.innerHTML = isChecked ? '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '';
+                        chk.innerHTML = isChecked ? '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '';
                     }
                     updateConfirmBtn();
                     const allChecked = selected.size === fresh.length;
@@ -4316,7 +4517,7 @@
                 };
 
                 Swal.fire({
-                    title: '<div style="display:flex;align-items:center;gap:10px;text-align:left;"><div style="width:36px;height:36px;background:var(--bg-surface,#f1f5f9);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div style="display:flex;flex-direction:column;"><span style="font-size:16px;font-weight:900;color:var(--text-primary);line-height:1.2;">Kiểm tra kết quả AI</span><span style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-top:2px;">Click để chọn / bỏ chọn hạng mục</span></div></div>',
+                    title: '<div class="ai-result-header"><div class="ai-result-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div><span style="font-size:16px;font-weight:900;color:var(--text-primary,#0f172a);display:block;line-height:1.2;">Kết quả AI</span><span style="font-size:11px;font-weight:600;color:var(--text-secondary,#64748b);margin-top:2px;display:block;">Nhấn để chọn / bỏ chọn hạng mục</span></div></div>',
                     html: buildHtml(),
                     showCancelButton: true,
                     showDenyButton: true,
@@ -4329,14 +4530,14 @@
                     buttonsStyling: false,
                     customClass: { popup: 'custom-rounded', actions: 'flex w-full flex-wrap gap-2 px-2' },
                     didOpen: () => {
-                        if (fresh.length === 0) Swal.getConfirmButton().style.background = '#64748b';
+                        if (fresh.length === 0) Swal.getConfirmButton().style.background = '#94a3b8';
                         updateConfirmBtn();
                         const confirmBtn = Swal.getConfirmButton();
                         const denyBtn = Swal.getDenyButton();
                         const cancelBtn = Swal.getCancelButton();
-                        if (confirmBtn) confirmBtn.style.cssText = 'flex:1 1 100%; padding:12px; background:#10b981; color:white; border-radius:12px; font-weight:800; font-size:13px; border:none; cursor:pointer; transition:all 0.2s;';
-                        if (denyBtn) denyBtn.style.cssText = 'flex:1 1 45%; padding:10px; background:#3b82f6; color:white; border-radius:12px; font-weight:800; font-size:12px; border:none; cursor:pointer;';
-                        if (cancelBtn) cancelBtn.style.cssText = 'flex:1 1 45%; padding:10px; background:var(--bg-surface, #f1f5f9); color:var(--text-secondary, #64748b); border-radius:12px; font-weight:800; font-size:12px; border:none; cursor:pointer;';
+                        if (confirmBtn) confirmBtn.style.cssText = 'flex:1 1 100%;padding:13px;background:linear-gradient(135deg,#10b981,#059669);color:white;border-radius:14px;font-weight:800;font-size:13px;border:none;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 14px rgba(16,185,129,0.3);letter-spacing:-0.1px;';
+                        if (denyBtn) denyBtn.style.cssText = 'flex:1 1 45%;padding:11px;background:#eff6ff;color:#2563eb;border-radius:14px;font-weight:800;font-size:12px;border:1.5px solid #bfdbfe;cursor:pointer;';
+                        if (cancelBtn) cancelBtn.style.cssText = 'flex:1 1 45%;padding:11px;background:#f8fafc;color:#64748b;border-radius:14px;font-weight:700;font-size:12px;border:1px solid #e2e8f0;cursor:pointer;';
                     }
                 }).then(r => {
                     if (r.isConfirmed && fresh.length > 0 && selected.size > 0) {
