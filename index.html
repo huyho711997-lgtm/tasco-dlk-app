@@ -3982,38 +3982,48 @@
                 title: '',
                 html: 
                     // --- HEADER ---
-                    '<div style="text-align:center; margin-bottom:20px; padding-top:10px;">'
-                    + '<div style="width:52px; height:52px; background:rgba(99, 102, 241, 0.1); border:1px solid rgba(99, 102, 241, 0.2); border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">'
-                    + '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>'
+                    '<div style="display:flex; align-items:center; gap:12px; padding:4px 0 16px; border-bottom:1px solid var(--border-light, #e2e8f0); margin-bottom:16px;">'
+                    + '<div style="width:44px; height:44px; background:linear-gradient(135deg, #4f46e5, #7c3aed); border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">'
+                    + '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>'
                     + '</div>'
-                    + '<h2 style="font-size:17px; font-weight:800; color:var(--text-primary, #0f172a); margin:0 0 6px;">Tasco AI Bóc Tách</h2>'
-                    + '<p style="font-size:11px; color:var(--text-secondary, #64748b); font-weight:500; margin:0; line-height:1.5; padding: 0 10px;">Quay video hiện trường hoặc đọc hạng mục tổn thất. Hệ thống sẽ tách âm thanh và tự động chuẩn hóa.</p>'
+                    + '<div style="flex:1; text-align:left;">'
+                    + '<h2 style="font-size:15px; font-weight:800; color:var(--text-primary, #0f172a); margin:0 0 3px; line-height:1.2;">Tasco AI Bóc Tách</h2>'
+                    + '<p style="font-size:11px; color:var(--text-secondary, #64748b); font-weight:500; margin:0; line-height:1.4;">Quay video hoặc đọc hạng mục tổn thất</p>'
+                    + '</div>'
                     + '</div>'
 
                     // --- CHIP HIỂN THỊ CÁC MỤC ĐÃ CÓ ---
                     + existingChip
 
-                    // --- KHỐI NHẬP LIỆU & GHI ÂM ---
-                    + '<div style="position:relative; background:var(--bg-app, #f8fafc); border:1px solid var(--border-light, #e2e8f0); border-radius:14px; overflow:hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">'
-                    + '<textarea id="dm-ai-input" rows="4" class="custom-scrollbar" placeholder="Nhập văn bản hoặc nhấn nút bắt đầu bên dưới..." style="width:100%; border:none; background:transparent; padding:14px; font-size:13px; font-weight:500; color:var(--text-primary, #1e293b); resize:none; outline:none; box-sizing:border-box; line-height:1.5;">' + initialText + '</textarea>'
+                    // --- LABEL ---
+                    + '<p style="font-size:10px; font-weight:700; color:var(--text-secondary, #64748b); text-transform:uppercase; letter-spacing:0.06em; margin:0 0 6px; text-align:left;">Nội dung phân tích</p>'
 
-                    + '<div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--bg-white, #ffffff); border-top:1px solid var(--border-light, #e2e8f0);">'
-                    // Đã thu nhỏ nút mic (giảm padding, font, icon)
-                    + '<button id="dm-ai-mic-btn" type="button" onclick="SpeechInput.toggle(\'dm-ai-input\',\'dm-ai-mic-btn\',\'dm-ai-status\')" style="display:flex; align-items:center; gap:6px; padding:8px 14px; background:#4f46e5; border:none; border-radius:10px; font-size:12px; font-weight:700; color:white; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 10px rgba(79, 70, 229, 0.25);">'
-                    + '<svg id="dm-ai-mic-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Bắt đầu Quay/Đọc'
+                    // --- KHỐI NHẬP LIỆU & GHI ÂM ---
+                    + '<div style="position:relative; background:var(--bg-app, #f8fafc); border:1.5px solid var(--border-light, #e2e8f0); border-radius:14px; overflow:hidden; transition:border-color 0.2s;" onfocusin="this.style.borderColor=\'#6366f1\'" onfocusout="this.style.borderColor=\'var(--border-light,#e2e8f0)\'">'
+                    + '<textarea id="dm-ai-input" rows="4" class="custom-scrollbar" placeholder="Nhập văn bản hoặc nhấn nút Bắt đầu bên dưới để ghi âm..." style="width:100%; border:none; background:transparent; padding:12px 14px; font-size:13px; font-weight:500; color:var(--text-primary, #1e293b); resize:none; outline:none; box-sizing:border-box; line-height:1.6;">' + initialText + '</textarea>'
+
+                    + '<div style="display:flex; align-items:center; justify-content:space-between; padding:8px 10px; background:var(--bg-white, #ffffff); border-top:1px solid var(--border-light, #e2e8f0);">'
+                    + '<button id="dm-ai-mic-btn" type="button" onclick="SpeechInput.toggle(\'dm-ai-input\',\'dm-ai-mic-btn\',\'dm-ai-status\')" style="display:flex; align-items:center; gap:6px; padding:7px 13px; background:linear-gradient(135deg, #4f46e5, #7c3aed); border:none; border-radius:9px; font-size:11px; font-weight:700; color:white; cursor:pointer; transition:opacity 0.15s; letter-spacing:0.01em;">'
+                    + '<svg id="dm-ai-mic-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg> Bắt đầu Quay / Đọc'
                     + '</button>'
-                    + '<span id="dm-ai-status" style="font-size:11px; font-weight:600; color:var(--text-muted, #94a3b8); flex:1; text-align:right;">Sẵn sàng</span>'
+                    + '<span id="dm-ai-status" style="font-size:10.5px; font-weight:600; color:var(--text-muted, #94a3b8);">● Sẵn sàng</span>'
                     + '</div>'
 
                     // --- MÀN HÌNH LOADING OVERLAY ---
-                    + '<div id="ai-loading-overlay" style="display:none; position:absolute; inset:0; background:var(--bg-white, #ffffff); opacity:0.95; z-index:10; flex-direction:column; align-items:center; justify-content:center;">'
-                    + '<div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg, #6366f1, #4f46e5);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(99,102,241,0.4);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="animation:img-spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></div>'
-                    + '<p style="margin-top:16px;font-size:14px;font-weight:800;color:var(--text-primary, #0f172a);">Đang phân tích...</p>'
+                    + '<div id="ai-loading-overlay" style="display:none; position:absolute; inset:0; background:var(--bg-white, rgba(255,255,255,0.97)); z-index:10; flex-direction:column; align-items:center; justify-content:center; gap:14px; backdrop-filter:blur(4px);">'
+                    + '<div style="position:relative; width:52px; height:52px;">'
+                    + '<svg width="52" height="52" viewBox="0 0 52 52" fill="none" style="position:absolute;inset:0;animation:img-spin 1.1s linear infinite;"><circle cx="26" cy="26" r="22" stroke="url(#sp-g)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="100 40"/><defs><linearGradient id="sp-g" x1="0" y1="0" x2="52" y2="52" gradientUnits="userSpaceOnUse"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#a78bfa"/></linearGradient></defs></svg>'
+                    + '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg></div>'
+                    + '</div>'
+                    + '<div style="text-align:center;">'
+                    + '<p style="font-size:13px; font-weight:800; color:var(--text-primary, #0f172a); margin:0 0 4px;">Đang phân tích...</p>'
+                    + '<p style="font-size:11px; font-weight:500; color:var(--text-secondary, #64748b); margin:0;">AI đang xử lý hạng mục tổn thất</p>'
+                    + '</div>'
                     + '</div>'
 
                     + '</div>',
                 showCancelButton: true,
-                confirmButtonText: 'Phân tích AI',
+                confirmButtonText: '✦ Phân tích AI',
                 cancelButtonText: 'Đóng',
                 buttonsStyling: false,
                 customClass: { 
@@ -4023,15 +4033,15 @@
                 didOpen: () => {
                     const actions = document.querySelector('.swal2-actions');
                     if (actions) {
-                        actions.style.cssText = 'display: flex !important; flex-direction: row !important; gap: 12px !important; width: 100% !important; padding: 0 4px !important; margin-top: 20px !important; box-sizing: border-box;';
+                        actions.style.cssText = 'display: flex !important; flex-direction: row !important; gap: 10px !important; width: 100% !important; padding: 0 !important; margin-top: 16px !important; box-sizing: border-box;';
                     }
                     const confirmBtn = Swal.getConfirmButton();
                     const cancelBtn = Swal.getCancelButton();
                     if (confirmBtn) {
-                        confirmBtn.style.cssText = 'flex: 1 !important; margin: 0 !important; padding: 12px !important; background: #4f46e5 !important; color: white !important; border-radius: 12px !important; font-weight: 800 !important; font-size: 13px !important; border: none !important; cursor: pointer; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);';
+                        confirmBtn.style.cssText = 'flex: 1 !important; margin: 0 !important; padding: 12px !important; background: linear-gradient(135deg, #4f46e5, #7c3aed) !important; color: white !important; border-radius: 12px !important; font-weight: 800 !important; font-size: 13px !important; border: none !important; cursor: pointer; letter-spacing: 0.01em;';
                     }
                     if (cancelBtn) {
-                        cancelBtn.style.cssText = 'flex: 1 !important; margin: 0 !important; padding: 12px !important; background: var(--bg-surface, #f8fafc) !important; color: var(--text-secondary, #64748b) !important; border-radius: 12px !important; font-weight: 800 !important; font-size: 13px !important; border: 1px solid var(--border-light, #e2e8f0) !important; cursor: pointer;';
+                        cancelBtn.style.cssText = 'flex: 1 !important; margin: 0 !important; padding: 12px !important; background: var(--bg-surface, #f1f5f9) !important; color: var(--text-secondary, #64748b) !important; border-radius: 12px !important; font-weight: 700 !important; font-size: 13px !important; border: 1.5px solid var(--border-light, #e2e8f0) !important; cursor: pointer;';
                     }
                     try { lucide.createIcons(); } catch(e) {}
                 },
@@ -10898,10 +10908,35 @@
             }
 
             Swal.fire({
-                title: 'Đang tra giá...',
-                html: `<p style="font-size:12px;color:#64748b;margin-top:8px">AI đang quét kho tìm món tương đương cho <b>${itemsToLookup.length} hạng mục</b>...</p>`,
+                title: '',
+                html: `
+                <div style="display:flex;flex-direction:column;align-items:center;padding:8px 0 4px;gap:0;">
+                    <div style="position:relative;width:64px;height:64px;margin-bottom:16px;">
+                        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" style="position:absolute;inset:0;animation:img-spin 1.2s linear infinite;">
+                            <circle cx="32" cy="32" r="27" stroke="url(#tg-grad)" stroke-width="4" stroke-linecap="round" stroke-dasharray="120 50"/>
+                            <defs>
+                                <linearGradient id="tg-grad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#6366f1"/>
+                                    <stop offset="1" stop-color="#10b981"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+                            <div style="width:36px;height:36px;background:linear-gradient(135deg,#6366f1,#10b981);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="font-size:15px;font-weight:800;color:var(--text-primary,#0f172a);margin:0 0 6px;">Đang tra giá kho AI</p>
+                    <p style="font-size:12px;font-weight:500;color:var(--text-secondary,#64748b);margin:0 0 16px;line-height:1.5;">Quét & đối chiếu <b style="color:var(--text-primary,#0f172a);font-weight:800;">${itemsToLookup.length} hạng mục</b> với kho phụ tùng...</p>
+                    <div style="width:100%;max-width:220px;height:4px;background:var(--bg-surface,#f1f5f9);border-radius:99px;overflow:hidden;">
+                        <div style="height:100%;width:40%;background:linear-gradient(90deg,#6366f1,#10b981);border-radius:99px;animation:tg-bar 1.5s ease-in-out infinite;"></div>
+                    </div>
+                </div>
+                <style>@keyframes tg-bar{0%{transform:translateX(-100%);width:40%}50%{width:70%}100%{transform:translateX(280%);width:40%}}</style>`,
                 allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
+                showConfirmButton: false,
+                customClass: { popup: 'custom-rounded' }
             });
 
             try {
