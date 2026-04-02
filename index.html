@@ -1326,7 +1326,25 @@
           display: flex;
           align-items: center;
           gap: 8px;
-        }        
+        } 
+
+        /* ====== NOTIFICATION PANEL ====== */
+        #noti-panel {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; border-radius: 28px 28px 0 0;
+            box-shadow: 0 -8px 40px rgba(0,0,0,0.15);
+            z-index: 9990; max-height: 80vh;
+            display: flex; flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.34,1.2,0.64,1);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        #noti-panel.open { transform: translateY(0); }
+        
+        /* Dark mode cho Noti Panel và Nút bấm */
+        [data-theme="dark"] #noti-panel { background-color: var(--bg-white); border-color: var(--border-light); }
+        [data-theme="dark"] #noti-panel .noti-item { background-color: var(--bg-app) !important; border-color: var(--border-light) !important; }
+        [data-theme="dark"] #btn-open-noti { background-color: var(--bg-white) !important; border-color: var(--border-light) !important; color: var(--text-primary) !important; }
     </style>
 </head>
 <body class="h-screen w-full flex flex-col overflow-hidden bg-slate-50">
@@ -1350,6 +1368,11 @@
                 </button>
                 <button onclick="App.exportCSV()" class="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center border border-emerald-100 text-emerald-600 active:scale-95 transition-transform">
                     <i data-lucide="download" class="w-4 h-4"></i>
+                </button>
+                
+                <button id="btn-open-noti" onclick="NotificationManager.toggle()" class="relative w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center border border-slate-200 text-slate-600 active:scale-95 transition-transform" title="Xem thông báo">
+                    <i data-lucide="bell" class="w-4 h-4"></i>
+                    <span id="noti-badge" class="hidden absolute top-0 right-0 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full animate-pulse"></span>
                 </button>
                 <button id="dark-toggle" onclick="DarkMode.toggle()"
                     title="Chế độ tối / sáng">
@@ -3102,11 +3125,11 @@
         }
     };
     // ============================================================
-    // TOAST
+    // TOAST (Đã sửa để tự động tích hợp NotificationManager)
     // ============================================================
     const Toast = {
         _timer: null,
-        fire({ icon = 'info', title = '' } = {}) {
+        fire({ icon = 'info', title = '', message = '' } = {}) {
             const el  = document.getElementById('app-toast');
             const ico = document.getElementById('app-toast-icon');
             const msg = document.getElementById('app-toast-msg');
@@ -3119,6 +3142,9 @@
             requestAnimationFrame(() => el.classList.add('show'));
             clearTimeout(this._timer);
             this._timer = setTimeout(() => el.classList.remove('show'), 1800);
+
+            // Ghi log vào lịch sử thông báo
+            NotificationManager.add(title, message, icon);
         }
     };
 
@@ -11301,12 +11327,133 @@
                 customClass: { popup: 'swal-edge-to-edge' }
             });
         }
-    };        
+    };  
+
+    // ============================================================
+    // NOTIFICATION MANAGER
+    // ============================================================
+    const NotificationManager = {
+        _open: false,
+        _data: [],
+        _unread: 0,
+
+        init() {
+            const saved = localStorage.getItem('tasco_notifications');
+            if (saved) {
+                try {
+                    this._data = JSON.parse(saved);
+                    this._unread = parseInt(localStorage.getItem('tasco_noti_unread') || '0');
+                } catch(e) {}
+            }
+            this.updateBadge();
+        },
+
+        add(title, message, type = 'info') {
+            const noti = {
+                id: Date.now(),
+                title: title,
+                message: message,
+                type: type, // success, error, warning, info
+                time: new Date().toISOString()
+            };
+            this._data.unshift(noti); // Đẩy lên đầu
+            if (this._data.length > 30) this._data.pop(); // Giữ tối đa 30 thông báo gần nhất
+            this._unread++;
+
+            this.save();
+            this.updateBadge();
+            if (this._open) this.renderList();
+        },
+
+        save() {
+            localStorage.setItem('tasco_notifications', JSON.stringify(this._data));
+            localStorage.setItem('tasco_noti_unread', this._unread.toString());
+        },
+
+        toggle() {
+            this._open = !this._open;
+            const panel = document.getElementById('noti-panel');
+            if (this._open) {
+                panel.classList.add('open');
+                this._unread = 0; // Xóa thông báo đỏ khi mở
+                this.save();
+                this.updateBadge();
+                this.renderList();
+            } else {
+                panel.classList.remove('open');
+            }
+        },
+
+        updateBadge() {
+            const badge = document.getElementById('noti-badge');
+            if (badge) badge.classList.toggle('hidden', this._unread === 0);
+        },
+
+        clearAll() {
+            if (!this._data.length) return;
+            Swal.fire({
+                title: 'Xóa lịch sử thông báo?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'Xóa tất cả',
+                cancelButtonText: 'Hủy',
+                customClass: { popup: 'custom-rounded' }
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    this._data = [];
+                    this._unread = 0;
+                    this.save();
+                    this.renderList();
+                    this.updateBadge();
+                }
+            });
+        },
+
+        renderList() {
+            const listEl = document.getElementById('noti-list');
+            if (!this._data.length) {
+                listEl.innerHTML = `
+                    <div class="text-center py-10 opacity-50">
+                        <i data-lucide="bell-off" class="w-12 h-12 mx-auto mb-2 text-slate-400"></i>
+                        <p class="text-sm font-bold text-slate-500">Chưa có thông báo nào</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            const icons = {
+                info:    { i: 'info',           color: 'text-blue-500',    bg: 'bg-blue-50',    border: 'border-blue-100' },
+                success: { i: 'check-circle-2', color: 'text-emerald-500', bg: 'bg-emerald-50', border: 'border-emerald-100' },
+                warning: { i: 'alert-triangle', color: 'text-amber-500',   bg: 'bg-amber-50',   border: 'border-amber-100' },
+                error:   { i: 'x-circle',       color: 'text-rose-500',    bg: 'bg-rose-50',    border: 'border-rose-100' }
+            };
+
+            listEl.innerHTML = this._data.map(n => {
+                const style = icons[n.type] || icons.info;
+                const timeStr = moment(n.time).fromNow();
+                return `
+                    <div class="noti-item flex gap-3 p-3 rounded-2xl border border-slate-100 bg-slate-50 items-start">
+                        <div class="w-8 h-8 rounded-full ${style.bg} flex items-center justify-center shrink-0 border ${style.border}">
+                            <i data-lucide="${style.i}" class="w-4 h-4 ${style.color}"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-black text-slate-800">${n.title}</p>
+                            ${n.message ? `<p class="text-[11px] text-slate-600 mt-0.5 leading-relaxed">${n.message}</p>` : ''}
+                            <p class="text-[9px] text-slate-400 mt-1 font-bold">${timeStr}</p>
+                        </div>
+                    </div>`;
+            }).join('');
+            lucide.createIcons();
+        }
+    };
+  
     // ============================================================
     // BOOT
     // ============================================================
     window.onload = () => {
         DarkMode.init();
+        NotificationManager.init();
         App.init();
         Garage.init();
         document.getElementById('plate-scanner-modal').classList.add('hidden');
@@ -11536,6 +11683,28 @@
             </svg>
         </button>
 
-    </div>     
+    </div>   
+    <div id="noti-panel">
+        <div class="flex items-center justify-between px-5 pt-5 pb-3 border-b border-slate-100 shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-2xl bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-md shadow-rose-200">
+                    <i data-lucide="bell-ring" class="w-4 h-4 text-white"></i>
+                </div>
+                <div>
+                    <p class="font-black text-slate-800 text-sm leading-none">Thông báo</p>
+                    <p class="text-[10px] text-slate-500 font-bold mt-0.5">Lịch sử hoạt động</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="NotificationManager.clearAll()" class="w-8 h-8 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 active:bg-rose-100 active:text-rose-600 transition-colors" title="Xóa tất cả">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+                <button onclick="NotificationManager.toggle()" class="w-8 h-8 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 active:bg-slate-200">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+        <div id="noti-list" class="flex-1 overflow-y-auto px-4 py-3 space-y-2 no-scrollbar" style="min-height:250px;"></div>
+    </div>
 </body>
 </html>
