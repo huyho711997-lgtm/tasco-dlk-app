@@ -2229,7 +2229,7 @@
         </div>
 
         <!-- Scrollable body -->
-        <div id="modal-scroll-area" class="flex-1 overflow-y-auto no-scrollbar pb-24 relative scroll-smooth">
+        <div id="modal-scroll-area" class="flex-1 overflow-y-auto no-scrollbar relative scroll-smooth">
 
             <!-- ====== TAB BAR ====== -->
             <div class="modal-tab-bar px-2 pt-1 bg-white">
@@ -2961,9 +2961,9 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round"><path d="M18 15l-6-6-6 6"/></svg>
         </button>
         <!-- Bottom action bar -->
-        <div class="absolute bottom-0 w-full bg-white border-t border-slate-200 px-5 py-4 flex gap-3 z-30">
+        <div class="w-full border-t px-5 py-4 flex gap-3 shrink-0 z-30" style="background: var(--bg-white); border-color: var(--border-light);">
             <button onclick="Modal.close()"
-                class="flex-1 py-3.5 bg-slate-100 text-slate-700 rounded-xl font-bold active:bg-slate-200 transition-colors border border-slate-200">
+                class="flex-1 py-3.5 rounded-xl font-bold transition-colors border" style="background: var(--bg-surface); color: var(--text-secondary); border-color: var(--border-light);">
                 Đóng
             </button>
             <button onclick="Modal.save()"
@@ -4448,13 +4448,10 @@
                     // Tip nhỏ phía dưới
                     + '<div class="abt-tip" style="margin-top:12px;">'
                     + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
-                    + '<span class="abt-tip-text">Có thể nhập liên tục không cần dấu phẩy. AI sẽ tự nhận biết từng hạng mục và chuẩn hóa thuật ngữ chuyên ngành.</span>'
+                    + '<span class="abt-tip-text">Có thể nhập liên tục không cần dấu phẩy. AI sẽ tự nhận biết từng hạng mục.</span>'
                     + '</div>'
 
-                    + '</div>'  // end abt-body
-
-                    // Footer padding cho nút action
-                    + '<div class="abt-footer"></div>',
+                    + '</div>',  // end abt-body (Đã xóa abt-footer ở đây)
 
                 showCancelButton: true,
                 confirmButtonText: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="display:inline;vertical-align:middle;margin-right:5px;"><path d="M5 3l14 9-14 9V3z"/></svg>Phân tích AI',
@@ -4463,11 +4460,12 @@
                 customClass: { popup: 'ai-form-popup' },
                 didOpen: () => {
                     const actions = document.querySelector('.swal2-actions');
-                    if (actions) actions.style.cssText = 'display:flex!important;flex-direction:row!important;gap:10px!important;width:100%!important;padding:0 20px 20px!important;margin-top:0!important;box-sizing:border-box;background:#fafaff;';
+                    // Sửa background:#fafaff thành transparent
+                    if (actions) actions.style.cssText = 'display:flex!important;flex-direction:row!important;gap:10px!important;width:100%!important;padding:0 20px 20px!important;margin-top:0!important;box-sizing:border-box;background:transparent;';
                     const confirmBtn = Swal.getConfirmButton();
                     const cancelBtn = Swal.getCancelButton();
-                    if (confirmBtn) confirmBtn.style.cssText = 'flex:1!important;margin:0!important;padding:13px!important;background:linear-gradient(135deg,#4338ca,#7c3aed)!important;color:white!important;border-radius:14px!important;font-weight:800!important;font-size:13px!important;border:none!important;cursor:pointer;box-shadow:0 4px 14px rgba(67,56,202,0.35);';
-                    if (cancelBtn) cancelBtn.style.cssText = 'flex:0 0 auto!important;margin:0!important;padding:13px 18px!important;background:#ede9fe!important;color:#5b21b6!important;border-radius:14px!important;font-weight:700!important;font-size:13px!important;border:none!important;cursor:pointer;';
+                    if (confirmBtn) confirmBtn.style.cssText = 'flex:1!important;margin:0!important;padding:13px!important;background:linear-gradient(135deg,#4338ca,#7c3aed)!important;color:white!important;border-radius:16px!important;font-weight:800!important;font-size:13px!important;border:none!important;cursor:pointer;box-shadow:0 4px 14px rgba(67,56,202,0.35);';
+                    if (cancelBtn) cancelBtn.style.cssText = 'flex:0 0 auto!important;margin:0!important;padding:13px 18px!important;background:var(--bg-surface, #ede9fe)!important;color:var(--text-secondary, #5b21b6)!important;border-radius:16px!important;font-weight:700!important;font-size:13px!important;border:none!important;cursor:pointer;';
                     const ta = document.getElementById('dm-ai-input');
                     const cc = document.getElementById('dm-ai-charcount');
                     if (ta && cc) { const upd = () => { cc.textContent = ta.value.length + ' ký tự'; }; upd(); ta.addEventListener('input', upd); }
@@ -5124,9 +5122,15 @@
             });
             
             try {
+                // Lấy thông tin tiền tệ hiển thị trên giao diện
+                const tienNhanCong = document.getElementById('dm-tienNhanCong')?.value.replace(/\D/g, '') || 0;
+                const tienSonSua = document.getElementById('dm-tienSonSua')?.value.replace(/\D/g, '') || 0;
+                const tongPhuTung = document.getElementById('dm-tongPhuTung')?.textContent.replace(/\D/g, '') || 0;
+
                 const payload = {
                     action: 'export_bienbangd',
                     data: { item, hangMuc: list, nguyenNhan, kienNghi,
+                        tienNhanCong, tienSonSua, tongPhuTung, // <--- BỔ SUNG Ở ĐÂY
                         ngay: moment().format('DD'), thang: moment().format('MM'), nam: moment().format('YYYY'),
                         noiGiamDinh: item.location || item.garaName || '' }
                 };
@@ -7625,9 +7629,14 @@
                     // Chuẩn bị 3 cục dữ liệu gửi lên AppScript
                     const payloadTBNT = { action: 'export_word', data: item };
 
+                    const tienNhanCong = document.getElementById('dm-tienNhanCong')?.value.replace(/\D/g, '') || 0;
+                    const tienSonSua = document.getElementById('dm-tienSonSua')?.value.replace(/\D/g, '') || 0;
+                    const tongPhuTung = document.getElementById('dm-tongPhuTung')?.textContent.replace(/\D/g, '') || 0;
+
                     const payloadBBGD = {
                         action: 'export_bienbangd',
                         data: { item, hangMuc: list, nguyenNhan, kienNghi,
+                            tienNhanCong, tienSonSua, tongPhuTung, // <--- BỔ SUNG Ở ĐÂY
                             ngay: moment().format('DD'), thang: moment().format('MM'), nam: moment().format('YYYY'),
                             noiGiamDinh: item.location || item.garaName || '' }
                     };
