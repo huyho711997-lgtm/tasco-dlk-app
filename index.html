@@ -11777,25 +11777,30 @@
                 // ==========================================
                 // BƯỚC 2: ĐỐI CHIẾU DỮ LIỆU (API 2)
                 // ==========================================
-                if (statusText) statusText.innerHTML = `Bước 2/2: AI đang đối chiếu ${extractedData.length} mục với BBGĐ...`;
+                if (statusText) statusText.innerHTML = `Bước 2/2: AI đang kiểm tra ${extractedData.length} hạng mục với BBGĐ...`;
 
                 const bbgdList = currentDamageItems.map((item) => ({
                     ten: item.chiTiet,
                     pa: item.thayThe ? "Thay" : (item.suaChua ? "Sửa" : "Chưa rõ")
                 }));
 
-                const PROMPT_2 = `Bạn là Giám định viên. Đối chiếu 2 danh sách:
+                const PROMPT_2 = `Bạn là Giám định viên xe cơ giới. Đối chiếu 2 danh sách:
                 1. BÁO GIÁ: ${JSON.stringify(extractedData)}
                 2. BBGĐ: ${JSON.stringify(bbgdList)}
                 
+                LUẬT NGÀNH XE BẮT BUỘC (Tuân thủ tuyệt đối để đánh giá Trạng thái):
+                - Các từ "Sơn", "Gò", "Hàn", "Sửa", "Đồng sơn", "Phục hồi" mang ý nghĩa TƯƠNG ĐƯƠNG NHAU. Nếu BBGĐ duyệt "Sửa" mà Gara báo "Sơn" (hoặc ngược lại) -> BẮT BUỘC đánh giá là "KHOP" (1).
+                - Tên gọi vùng miền: "Cản" = "Ba đờ sốc", "Vè" = "Tai xe", "Gương" = "Kiếng", "Lốp" = "Vỏ". Hãy linh hoạt gom nhóm.
+                - CHỈ ĐÁNH GIÁ LÀ "SAI_PA" (2) khi có xung đột sống còn giữa "THAY" và "SỬA". (Ví dụ: BBGĐ duyệt "Sửa" nhưng Gara đòi "Thay").
+                
                 So khớp và phân loại từng mục. Trả về MẢNG JSON.
                 Quy tắc "tt" (trạng thái):
-                1: "KHOP" (Trùng tên và phương án)
-                2: "SAI_PA" (Cùng tên nhưng Phương án khác nhau)
+                1: "KHOP" (Trùng tên và phương án tương đương theo luật trên)
+                2: "SAI_PA" (Xung đột Thay vs Sửa)
                 3: "DU" (BÁO GIÁ có nhưng BBGĐ không có)
                 4: "THIEU" (BBGĐ có nhưng BÁO GIÁ không có)
                 
-                Định dạng trả về CHỈ MẢNG JSON:
+                Định dạng trả về CHỈ MẢNG JSON, KHÔNG CÓ TEXT GIẢI THÍCH NÀO KHÁC:
                 [{"t": "Tên mục", "tt": 1|2|3|4, "gPa": "PA Gara", "gGia": 1500000, "bPa": "PA BBGĐ", "cb": "Ghi chú ngắn nếu sai lệch"}]`;
 
                 let comparedData = null;
