@@ -2229,7 +2229,7 @@
         </div>
 
         <!-- Scrollable body -->
-        <div id="modal-scroll-area" class="flex-1 overflow-y-auto no-scrollbar relative scroll-smooth pb-6">
+        <div id="modal-scroll-area" class="flex-1 overflow-y-auto no-scrollbar relative scroll-smooth pb-6" style="padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));">
 
             <!-- ====== TAB BAR ====== -->
             <div class="modal-tab-bar px-2 pt-1 bg-white">
@@ -2961,18 +2961,6 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round"><path d="M18 15l-6-6-6 6"/></svg>
         </button>
 
-        <div class="w-full shrink-0 border-t px-5 pt-4 flex gap-3 z-[60]" 
-             style="position: sticky; bottom: 0; background: var(--bg-white); border-color: var(--border-light); padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));">
-            <button onclick="Modal.close()"
-                class="flex-1 py-3.5 rounded-xl font-bold transition-colors border" 
-                style="background: var(--bg-surface); color: var(--text-secondary); border-color: var(--border-light);">
-                Đóng
-            </button>
-            <button onclick="Modal.save()"
-                class="flex-1 py-3.5 bg-blue-600 text-white rounded-xl font-bold active:bg-blue-700 shadow-lg shadow-blue-200 transition-colors flex justify-center items-center gap-2">
-                <i data-lucide="save" class="w-5 h-5"></i> Lưu lại
-            </button>
-        </div>
     </div> <div id="car-diagram-modal" onclick="if(event.target===this) CarDiagram.close()">
       <div id="car-diagram-sheet">
 
@@ -5249,12 +5237,16 @@
             modal.classList.remove('hidden');
             setTimeout(()=>modal.classList.remove('translate-y-full'), 10);
             const aiFab = document.getElementById('ai-fab');
-            if(aiFab) aiFab.style.display = 'none';            
+            if(aiFab) aiFab.style.display = 'none';
+            const modalFooter = document.getElementById('modal-footer-bar');
+            if(modalFooter) modalFooter.style.display = 'flex';
         },
 
         close() {
             const modal = document.getElementById('native-edit-modal');
             modal.classList.add('translate-y-full');
+            const modalFooter = document.getElementById('modal-footer-bar');
+            if(modalFooter) modalFooter.style.display = 'none';
             setTimeout(()=>{ 
                 modal.classList.add('hidden'); 
                 App.currentEditId=null; 
@@ -11957,6 +11949,23 @@
             </svg>
         </button>
 
-    </div>     
+    </div>  
+    <!-- Footer cố định form chỉnh sửa hồ sơ -->
+    <div id="modal-footer-bar" 
+         style="display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
+                background: white; border-top: 1px solid #e2e8f0;
+                padding: 12px 20px; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+                gap: 12px; box-shadow: 0 -4px 16px rgba(0,0,0,0.06);"
+         class="flex">
+        <button onclick="Modal.close()"
+            class="flex-1 py-3.5 rounded-xl font-bold transition-colors border"
+            style="background: #f8fafc; color: #64748b; border-color: #e2e8f0;">
+            Đóng
+        </button>
+        <button onclick="Modal.save()"
+            class="flex-1 py-3.5 bg-blue-600 text-white rounded-xl font-bold active:bg-blue-700 shadow-lg shadow-blue-200 transition-colors flex justify-center items-center gap-2">
+            <i data-lucide="save" class="w-5 h-5"></i> Lưu lại
+        </button>
+    </div>        
 </body>
 </html>
