@@ -4088,259 +4088,266 @@
         addRowAI(id, initialText = '') {
             const item = App.find(id) || {};
             const existing = item.damageItems || [];
-        
+            const existingNames = existing.map(h => h.chiTiet).join(', ');
+            
+            const existingChip = existing.length
+                ? '<div class="bg-emerald-50 border border-emerald-200 text-emerald-700" style="border-radius:10px;padding:8px 10px;margin-bottom:10px;font-size:10px;font-weight:700;">Đã có '
+                  + existing.length + ' hạng mục: '
+                  + (existingNames.length > 80 ? existingNames.slice(0, 80) + '...' : existingNames)
+                  + '</div>'
+                : '';
+
             let wakeLock = null;
-            const acquireWakeLock = async () => { try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch(_) {} };
+            const acquireWakeLock = async () => {
+                try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (_) {}
+            };
             const releaseWakeLock = () => { if (wakeLock) { wakeLock.release(); wakeLock = null; } };
             acquireWakeLock();
-        
-            const existingChip = existing.length
-                ? `<div style="display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:10px;background:#f0fdf4;border:1px solid #bbf7d0;margin-bottom:12px;">
-                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                       <span style="font-size:11px;font-weight:700;color:#15803d;">Đã có ${existing.length} hạng mục — AI sẽ bổ sung thêm</span>
-                   </div>`
-                : '';
-        
-            const html = `
-            <div style="text-align:left;">
-        
-                ${existingChip}
-        
-                <!-- MIC HERO -->
-                <div id="dm-mic-hero" style="
-                    display:flex;flex-direction:column;align-items:center;
-                    padding:28px 16px 20px;
-                    border-radius:20px;
-                    background:linear-gradient(160deg,#f5f3ff,#ede9fe);
-                    border:1px solid #ddd6fe;
-                    margin-bottom:14px;
-                    position:relative;overflow:hidden;
-                ">
-                    <!-- Sóng âm nền (decoration) -->
-                    <div id="dm-wave-wrap" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;gap:3px;opacity:0.18;">
-                        ${Array.from({length:18},(_,i)=>`<div class="dm-wave-bar" style="width:3px;border-radius:2px;background:#7c3aed;animation:dm-wave ${0.6+i*0.07}s ease-in-out infinite alternate;animation-delay:${i*0.04}s;"></div>`).join('')}
-                    </div>
-        
-                    <!-- Nút mic lớn -->
-                    <button id="dm-mic-btn" type="button"
-                        onclick="SpeechInput.toggle('dm-ai-input','dm-mic-btn','dm-mic-status')"
-                        style="
-                            width:72px;height:72px;border-radius:50%;border:none;cursor:pointer;
-                            background:linear-gradient(135deg,#7c3aed,#4f46e5);
-                            color:white;
-                            display:flex;align-items:center;justify-content:center;
-                            box-shadow:0 6px 24px rgba(124,58,237,.4);
-                            transition:all 0.2s;position:relative;z-index:1;margin-bottom:14px;
-                        ">
-                        <!-- Ring pulse (hiện khi đang ghi) -->
-                        <div id="dm-mic-ring" style="display:none;position:absolute;inset:-8px;border-radius:50%;border:3px solid rgba(124,58,237,.35);animation:dm-ring-pulse 1.4s ease-out infinite;"></div>
-                        <svg id="dm-mic-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
-                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                            <line x1="12" y1="19" x2="12" y2="23"/>
-                            <line x1="8" y1="23" x2="16" y2="23"/>
-                        </svg>
-                    </button>
-        
-                    <p id="dm-mic-label" style="font-size:13px;font-weight:800;color:#5b21b6;margin:0 0 4px;">Nhấn để ghi âm</p>
-                    <p id="dm-mic-status" style="font-size:11px;font-weight:600;color:#7c3aed;margin:0;">Giọng nói → AI tự động bóc tách hạng mục</p>
-                </div>
-        
-                <!-- DIVIDER -->
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-                    <div style="flex:1;height:1px;background:var(--border-light,#e2e8f0);"></div>
-                    <span style="font-size:10px;font-weight:700;color:var(--text-muted,#94a3b8);">HOẶC NHẬP TAY</span>
-                    <div style="flex:1;height:1px;background:var(--border-light,#e2e8f0);"></div>
-                </div>
-        
-                <!-- TEXTAREA -->
-                <div style="position:relative;border-radius:14px;border:1.5px solid var(--border-light,#e2e8f0);background:var(--bg-surface,#f8fafc);overflow:hidden;">
-                    <textarea id="dm-ai-input" rows="4" class="custom-scrollbar"
-                        placeholder="VD: cản trước thay thế, nắp ca-pô thay thế, đèn pha trái sửa chữa..."
-                        style="width:100%;border:none;background:transparent;padding:12px 14px;font-size:13px;font-weight:500;color:var(--text-primary,#1e293b);resize:none;outline:none;box-sizing:border-box;line-height:1.6;font-family:inherit;">${initialText}</textarea>
-                    <div style="display:flex;align-items:center;justify-content:flex-end;padding:6px 10px;border-top:1px solid var(--border-light,#f1f5f9);">
-                        <button type="button" onclick="document.getElementById('dm-ai-input').value=''" style="font-size:10px;font-weight:700;color:var(--text-muted,#94a3b8);background:none;border:none;cursor:pointer;padding:2px 6px;">Xóa</button>
-                    </div>
-        
-                    <!-- Loading overlay -->
-                    <div id="ai-loading-overlay" style="display:none;position:absolute;inset:0;background:var(--bg-white,#fff);opacity:0.96;z-index:10;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
-                        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="animation:img-spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                        </div>
-                        <p style="font-size:13px;font-weight:800;color:var(--text-primary,#0f172a);margin:0;">AI đang phân tích...</p>
-                    </div>
-                </div>
-        
-            </div>
-        
-            <style>
-            @keyframes dm-wave { from{height:8px} to{height:32px} }
-            @keyframes dm-ring-pulse { 0%{transform:scale(1);opacity:.8} 100%{transform:scale(1.5);opacity:0} }
-            </style>`;
-        
+
             Swal.fire({
-                title: `<div style="display:flex;align-items:center;gap:10px;text-align:left;">
-                    <div style="width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
-                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                            <line x1="12" y1="19" x2="12" y2="23"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <p style="font-size:15px;font-weight:900;color:var(--text-primary,#0f172a);margin:0;line-height:1.2;">Tasco AI Bóc Tách</p>
-                        <p style="font-size:11px;font-weight:600;color:var(--text-muted,#94a3b8);margin:0;margin-top:2px;">Ghi âm hoặc nhập tay để AI phân tích</p>
-                    </div>
-                </div>`,
-                html,
+                title: '',
+                html: 
+                    // --- HEADER ---
+                    '<div style="text-align:center; margin-bottom:20px; padding-top:10px;">'
+                    + '<div style="width:52px; height:52px; background:rgba(99, 102, 241, 0.1); border:1px solid rgba(99, 102, 241, 0.2); border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">'
+                    + '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>'
+                    + '</div>'
+                    + '<h2 style="font-size:17px; font-weight:800; color:var(--text-primary, #0f172a); margin:0 0 6px;">Tasco AI Bóc Tách</h2>'
+                    + '<p style="font-size:11px; color:var(--text-secondary, #64748b); font-weight:500; margin:0; line-height:1.5; padding: 0 10px;">Quay video hiện trường hoặc đọc hạng mục tổn thất. Hệ thống sẽ tách âm thanh và tự động chuẩn hóa.</p>'
+                    + '</div>'
+
+                    // --- CHIP HIỂN THỊ CÁC MỤC ĐÃ CÓ ---
+                    + existingChip
+
+                    // --- KHỐI NHẬP LIỆU & GHI ÂM ---
+                    + '<div style="position:relative; background:var(--bg-app, #f8fafc); border:1px solid var(--border-light, #e2e8f0); border-radius:14px; overflow:hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">'
+                    + '<textarea id="dm-ai-input" rows="4" class="custom-scrollbar" placeholder="Nhập văn bản hoặc nhấn nút bắt đầu bên dưới..." style="width:100%; border:none; background:transparent; padding:14px; font-size:13px; font-weight:500; color:var(--text-primary, #1e293b); resize:none; outline:none; box-sizing:border-box; line-height:1.5;">' + initialText + '</textarea>'
+
+                    + '<div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--bg-white, #ffffff); border-top:1px solid var(--border-light, #e2e8f0);">'
+                    // Đã thu nhỏ nút mic (giảm padding, font, icon)
+                    + '<button id="dm-ai-mic-btn" type="button" onclick="SpeechInput.toggle(\'dm-ai-input\',\'dm-ai-mic-btn\',\'dm-ai-status\')" style="display:flex; align-items:center; gap:6px; padding:8px 14px; background:#4f46e5; border:none; border-radius:10px; font-size:12px; font-weight:700; color:white; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 10px rgba(79, 70, 229, 0.25);">'
+                    + '<svg id="dm-ai-mic-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Bắt đầu Quay/Đọc'
+                    + '</button>'
+                    + '<span id="dm-ai-status" style="font-size:11px; font-weight:600; color:var(--text-muted, #94a3b8); flex:1; text-align:right;">Sẵn sàng</span>'
+                    + '</div>'
+
+                    // --- MÀN HÌNH LOADING OVERLAY ---
+                    + '<div id="ai-loading-overlay" style="display:none; position:absolute; inset:0; background:var(--bg-white, #ffffff); opacity:0.95; z-index:10; flex-direction:column; align-items:center; justify-content:center;">'
+                    + '<div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg, #6366f1, #4f46e5);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(99,102,241,0.4);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="animation:img-spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></div>'
+                    + '<p style="margin-top:16px;font-size:14px;font-weight:800;color:var(--text-primary, #0f172a);">Đang phân tích...</p>'
+                    + '</div>'
+
+                    + '</div>',
                 showCancelButton: true,
                 confirmButtonText: 'Phân tích AI',
                 cancelButtonText: 'Đóng',
                 buttonsStyling: false,
-                customClass: { popup: 'custom-rounded', title: '!text-left !px-5 !pt-5 !pb-0' },
+                customClass: { 
+                    popup: 'custom-rounded'
+                },
+                // SỬ DỤNG didOpen ĐỂ ÉP CSS CÂN ĐỐI 50/50 CHO 2 NÚT DƯỚI CÙNG
                 didOpen: () => {
                     const actions = document.querySelector('.swal2-actions');
-                    if (actions) actions.style.cssText = 'display:flex!important;gap:10px!important;width:100%!important;padding:0 4px!important;margin-top:16px!important;box-sizing:border-box;';
+                    if (actions) {
+                        actions.style.cssText = 'display: flex !important; flex-direction: row !important; gap: 12px !important; width: 100% !important; padding: 0 4px !important; margin-top: 20px !important; box-sizing: border-box;';
+                    }
                     const confirmBtn = Swal.getConfirmButton();
-                    const cancelBtn  = Swal.getCancelButton();
-                    if (confirmBtn) confirmBtn.style.cssText = 'flex:2!important;margin:0!important;padding:13px!important;background:linear-gradient(135deg,#7c3aed,#4f46e5)!important;color:white!important;border-radius:13px!important;font-weight:900!important;font-size:13px!important;border:none!important;cursor:pointer;box-shadow:0 4px 14px rgba(124,58,237,.3);';
-                    if (cancelBtn)  cancelBtn.style.cssText  = 'flex:1!important;margin:0!important;padding:13px!important;background:var(--bg-surface,#f8fafc)!important;color:var(--text-secondary,#64748b)!important;border-radius:13px!important;font-weight:800!important;font-size:13px!important;border:1.5px solid var(--border-light,#e2e8f0)!important;cursor:pointer;';
+                    const cancelBtn = Swal.getCancelButton();
+                    if (confirmBtn) {
+                        confirmBtn.style.cssText = 'flex: 1 !important; margin: 0 !important; padding: 12px !important; background: #4f46e5 !important; color: white !important; border-radius: 12px !important; font-weight: 800 !important; font-size: 13px !important; border: none !important; cursor: pointer; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);';
+                    }
+                    if (cancelBtn) {
+                        cancelBtn.style.cssText = 'flex: 1 !important; margin: 0 !important; padding: 12px !important; background: var(--bg-surface, #f8fafc) !important; color: var(--text-secondary, #64748b) !important; border-radius: 12px !important; font-weight: 800 !important; font-size: 13px !important; border: 1px solid var(--border-light, #e2e8f0) !important; cursor: pointer;';
+                    }
+                    try { lucide.createIcons(); } catch(e) {}
                 },
                 willClose: () => { SpeechInput.cleanup(); releaseWakeLock(); },
-        
+                
                 preConfirm: async () => {
                     const text = (document.getElementById('dm-ai-input') || {}).value || '';
-                    if (!text.trim()) { Swal.showValidationMessage('Vui lòng nhập hoặc ghi âm hạng mục tổn thất!'); return false; }
+                    if (!text.trim()) { Swal.showValidationMessage('Vui lòng nhập danh sách bộ phận hư hỏng!'); return false; }
+                    
                     const overlay = document.getElementById('ai-loading-overlay');
                     const confirmBtn = Swal.getConfirmButton();
-                    const cancelBtn  = Swal.getCancelButton();
-                    if (overlay)    overlay.style.display = 'flex';
+                    const cancelBtn = Swal.getCancelButton();
+                    if (overlay) overlay.style.display = 'flex';
                     if (confirmBtn) confirmBtn.style.display = 'none';
-                    if (cancelBtn)  cancelBtn.style.display  = 'none';
+                    if (cancelBtn) cancelBtn.style.display = 'none';
+
                     try {
                         const items = await DamageItems._analyzeNew(text.trim(), item, existing);
-                        return { items, originalText: text.trim() };
-                    } catch(err) {
-                        if (overlay)    overlay.style.display = 'none';
+                        return { items: items, originalText: text.trim() }; // Gửi lại text cũ để Phân tích lại
+                    } catch (err) {
+                        if (overlay) overlay.style.display = 'none';
                         if (confirmBtn) confirmBtn.style.display = '';
-                        if (cancelBtn)  cancelBtn.style.display  = '';
-                        Swal.showValidationMessage('❌ ' + (err.message || 'AI không phản hồi.'));
+                        if (cancelBtn) cancelBtn.style.display = '';
+                        Swal.showValidationMessage('❌ ' + (err.message || 'AI không phản hồi. Thử lại sau.'));
                         return false;
                     }
                 },
                 allowOutsideClick: () => !Swal.isLoading()
-        
+
             }).then(res => {
-                if (!res.isConfirmed || !res.value?.items?.length) return;
-        
-                const newItems  = res.value.items;
-                const origText  = res.value.originalText;
-                const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
+                if (!res.isConfirmed || !res.value || !res.value.items || !Array.isArray(res.value.items) || !res.value.items.length) return;
+
+                const newItems = res.value.items;
+                const origText = res.value.originalText;
+                const norm = s => String(s || '').toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                    .replace(/\s+/g, ' ').trim();
+
                 const existingNorms = existing.map(h => norm(h.chiTiet));
                 const duplicates = newItems.filter(h => existingNorms.includes(norm(h.chiTiet)));
-                const fresh      = newItems.filter(h => !existingNorms.includes(norm(h.chiTiet)));
-                const selected   = new Set(fresh.map((_,i) => i));
-        
-                const chipSC = `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;">Sửa chữa</span>`;
-                const chipTT = `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:#fef3c7;color:#b45309;border:1px solid #fde68a;">Thay thế</span>`;
-                const chipTH = `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:#fee2e2;color:#b91c1c;border:1px solid #fecaca;">Thu hồi</span>`;
-        
+                const fresh = newItems.filter(h => !existingNorms.includes(norm(h.chiTiet)));
+
+                const selected = new Set(fresh.map((_, i) => i));
+
+                const chipSC  = `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;">Sửa chữa</span>`;
+                const chipTT  = `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:#fef3c7;color:#b45309;border:1px solid #fde68a;">Thay thế</span>`;
+                const chipThu = `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:#faf5ff;color:#7e22ce;border:1px solid #e9d5ff;margin-left:3px;">Thu hồi</span>`;
+
                 const renderFreshList = () => fresh.map((h, i) => {
-                    const chip = h.suaChua ? chipSC : h.thuHoi ? chipTH : chipTT;
-                    const isSel = selected.has(i);
-                    return `<div id="dm-row-${i}" onclick="window._dmToggle(${i})" style="
-                        display:flex;align-items:center;gap:10px;padding:11px 12px;
-                        border-radius:12px;border:1.5px solid ${isSel?'rgba(34,197,94,.4)':'var(--border-light,#e2e8f0)'};
-                        background:${isSel?'rgba(34,197,94,.07)':'var(--bg-white,#fff)'};
-                        cursor:pointer;margin-bottom:6px;transition:all .15s;">
-                        <div id="dm-chk-${i}" style="
-                            width:18px;height:18px;border-radius:5px;flex-shrink:0;
-                            border:2px solid ${isSel?'#16a34a':'#cbd5e1'};
-                            background:${isSel?'#16a34a':'transparent'};
-                            display:flex;align-items:center;justify-content:center;transition:all .15s;">
-                            ${isSel?'<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
+                    const isChecked = selected.has(i);
+                    const chipSC  = `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(37,99,235,0.12);color:#93c5fd;border:1px solid rgba(37,99,235,0.25);">Sửa chữa</span>`;
+                    const chipTT  = `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(217,119,6,0.15);color:#fbbf24;border:1px solid rgba(217,119,6,0.3);">Thay thế</span>`;
+                    const chipThu = `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(147,51,234,0.15);color:#c084fc;border:1px solid rgba(147,51,234,0.3);margin-left:4px;">Thu hồi</span>`;
+                    const chips = (h.thayThe ? chipTT : chipSC) + (h.thuHoi ? chipThu : '');
+                    const borderColor = isChecked ? 'rgba(34,197,94,0.4)' : 'var(--border-light, #e2e8f0)';
+                    const bgColor = isChecked ? 'rgba(34,197,94,0.1)' : 'var(--bg-surface, #f8fafc)';
+                    const chkBg = isChecked ? '#16a34a' : 'transparent';
+                    const chkBorder = isChecked ? '#16a34a' : 'rgba(255,255,255,0.2)';
+                    return `<div onclick="window._dmToggle(${i})" id="dm-row-${i}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;margin-bottom:6px;cursor:pointer;border:1px solid ${borderColor};background:${bgColor};transition:all 0.15s;">
+                        <div id="dm-chk-${i}" style="width:18px;height:18px;border-radius:5px;border:1.5px solid ${chkBorder};background:${chkBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;">
+                            ${isChecked ? '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
                         </div>
                         <div style="flex:1;min-width:0;">
-                            <p style="font-size:13px;font-weight:700;color:var(--text-primary,#0f172a);margin:0 0 3px;line-height:1.4;">${h.chiTiet}</p>
-                            <div style="display:flex;gap:4px;">${chip}</div>
+                            <div style="font-size:13px;font-weight:800;color:var(--text-primary,#f1f5f9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;">${h.chiTiet}</div>
+                            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                                <span style="font-size:11px;color:var(--text-secondary,#94a3b8);">${h.moTa || ''}</span>
+                                ${h.moTa ? '<span style="color:rgba(255,255,255,0.2);font-size:10px;">·</span>' : ''}
+                                <span style="font-size:11px;color:var(--text-secondary,#94a3b8);">${h.mucDo || ''}</span>
+                                <span style="color:rgba(255,255,255,0.2);font-size:10px;">·</span>
+                                ${chips}
+                            </div>
                         </div>
                     </div>`;
                 }).join('');
-        
+
+                const buildHtml = () => {
+                    const cnt = selected.size;
+                    const allChecked = cnt === fresh.length;
+                    let html = '<div style="text-align:left;margin-top:4px;">';
+
+                    if (duplicates.length > 0) {
+                        html += `<div style="background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.25);border-radius:10px;padding:8px 12px;margin-bottom:10px;">
+                            <p style="font-size:10px;font-weight:900;color:#fbbf24;margin-bottom:6px;letter-spacing:0.05em;">BỎ QUA — ${duplicates.length} MỤC ĐÃ CÓ</p>`
+                            + duplicates.map(h => `<div style="font-size:12px;font-weight:600;color:rgba(251,191,36,0.7);padding:3px 0;display:flex;align-items:center;gap:6px;">
+                                <span style="color:#f59e0b;font-size:11px;">✕</span>
+                                <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${h.chiTiet}</span>
+                                <span style="font-size:10px;color:rgba(251,191,36,0.5);">${h.moTa || ''}</span>
+                            </div>`).join('')
+                            + '</div>';
+                    }
+
+                    if (fresh.length > 0) {
+                        html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                            <span style="font-size:10px;font-weight:900;color:var(--text-secondary, #64748b);letter-spacing:0.05em;">THÊM MỚI — ${fresh.length} MỤC</span>
+                            <button onclick="window._dmToggleAll(${allChecked})" type="button" style="font-size:10px;font-weight:800;color:var(--text-primary, #334155);background:var(--bg-surface, #f1f5f9);border:1px solid var(--border-light, #e2e8f0);border-radius:8px;padding:5px 12px;cursor:pointer;transition:all 0.2s;box-shadow:0 1px 2px rgba(0,0,0,0.05);">
+                                ${allChecked ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+                            </button>
+                        </div>`;
+                        html += `<div id="dm-fresh-list" style="max-height:42vh;overflow-y:auto;padding-right:2px;">${renderFreshList()}</div>`;
+                        html += `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.07);font-size:11px;color:var(--text-secondary,#64748b);text-align:right;" id="dm-sel-count">${cnt}/${fresh.length} mục được chọn</div>`;
+                    } else {
+                        html += `<p style="text-align:center;font-size:13px;font-weight:700;color:#f87171;padding:16px 0;">Không có hạng mục nào mới!</p>`;
+                    }
+
+                    html += '</div>';
+                    return html;
+                };
+
                 const updateConfirmBtn = () => {
                     const cnt = selected.size;
                     const btn = Swal.getConfirmButton();
                     if (!btn) return;
-                    btn.innerHTML = cnt > 0
-                        ? `<div style="display:flex;align-items:center;justify-content:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Thêm ${cnt} hạng mục</div>`
-                        : `<div style="display:flex;align-items:center;justify-content:center;gap:6px;">Chọn ít nhất 1 mục</div>`;
-                    btn.style.opacity = cnt > 0 ? '1' : '0.5';
-                    btn.style.pointerEvents = cnt > 0 ? 'auto' : 'none';
+                    if (cnt > 0) {
+                        btn.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Thêm ' + cnt + ' hạng mục</div>';
+                        btn.style.opacity = '1';
+                        btn.style.pointerEvents = 'auto';
+                    } else {
+                        btn.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Chọn ít nhất 1 mục</div>';
+                        btn.style.opacity = '0.5';
+                        btn.style.pointerEvents = 'none';
+                    }
                 };
-        
-                window._dmToggle = i => {
+
+                window._dmToggle = (i) => {
                     if (selected.has(i)) selected.delete(i); else selected.add(i);
                     const row = document.getElementById('dm-row-' + i);
                     const chk = document.getElementById('dm-chk-' + i);
-                    const isSel = selected.has(i);
-                    if (row) { row.style.border = `1.5px solid ${isSel?'rgba(34,197,94,.4)':'var(--border-light,#e2e8f0)'}`; row.style.background = isSel?'rgba(34,197,94,.07)':'var(--bg-white,#fff)'; }
-                    if (chk) { chk.style.borderColor = isSel?'#16a34a':'#cbd5e1'; chk.style.background = isSel?'#16a34a':'transparent'; chk.innerHTML = isSel?'<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>':''; }
+                    const isChecked = selected.has(i);
+                    if (row) {
+                        row.style.border = `1px solid ${isChecked ? 'rgba(34,197,94,0.4)' : 'var(--border-light, #e2e8f0)'}`;
+                        row.style.background = isChecked ? 'rgba(34,197,94,0.1)' : 'var(--bg-surface, #f8fafc)';
+                    }
+                    if (chk) {
+                        chk.style.borderColor = isChecked ? '#16a34a' : '#cbd5e1';
+                        chk.style.background = isChecked ? '#16a34a' : 'transparent';
+                        chk.innerHTML = isChecked ? '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '';
+                    }
                     updateConfirmBtn();
+                    const allChecked = selected.size === fresh.length;
+                    const toggleAllBtn = document.querySelector('[onclick^="window._dmToggleAll"]');
+                    if (toggleAllBtn) {
+                        toggleAllBtn.textContent = allChecked ? 'Bỏ chọn tất cả' : 'Chọn tất cả';
+                        toggleAllBtn.setAttribute('onclick', `window._dmToggleAll(${allChecked})`);
+                    }
                 };
-        
-                window._dmToggleAll = wasAll => {
-                    fresh.forEach((_, i) => wasAll ? selected.delete(i) : selected.add(i));
+
+                window._dmToggleAll = (wasAll) => {
+                    fresh.forEach((_, i) => { if (wasAll) selected.delete(i); else selected.add(i); });
                     const listEl = document.getElementById('dm-fresh-list');
                     if (listEl) listEl.innerHTML = renderFreshList();
+                    const countEl = document.getElementById('dm-sel-count');
+                    if (countEl) countEl.textContent = selected.size + '/' + fresh.length + ' mục được chọn';
                     updateConfirmBtn();
+                    const toggleAllBtn = document.querySelector('[onclick^="window._dmToggleAll"]');
+                    if (toggleAllBtn) {
+                        const nowAll = selected.size === fresh.length;
+                        toggleAllBtn.textContent = nowAll ? 'Bỏ chọn tất cả' : 'Chọn tất cả';
+                        toggleAllBtn.setAttribute('onclick', 'window._dmToggleAll(' + nowAll + ')');
+                    }
                 };
-        
-                const dupBlock = duplicates.length
-                    ? `<div style="padding:10px 12px;border-radius:12px;background:#fffbeb;border:1px solid #fde68a;margin-bottom:12px;font-size:11px;font-weight:700;color:#92400e;">
-                          ⚠️ ${duplicates.length} mục đã tồn tại, bỏ qua: ${duplicates.map(h=>h.chiTiet).join(', ')}
-                       </div>` : '';
-        
+
                 Swal.fire({
-                    title: `<div style="display:flex;align-items:center;gap:10px;text-align:left;">
-                        <div style="width:34px;height:34px;border-radius:11px;background:#ecfdf5;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid #bbf7d0;">
-                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                        </div>
-                        <div>
-                            <p style="font-size:15px;font-weight:900;color:var(--text-primary,#0f172a);margin:0;line-height:1.2;">Kiểm tra kết quả AI</p>
-                            <p style="font-size:11px;font-weight:600;color:var(--text-muted,#94a3b8);margin:0;margin-top:2px;">Chọn hạng mục muốn thêm vào biên bản</p>
-                        </div>
-                    </div>`,
-                    html: `
-                    <div style="text-align:left;">
-                        ${dupBlock}
-                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 2px;">
-                            <span id="dm-sel-count" style="font-size:11px;font-weight:700;color:var(--text-muted,#94a3b8);">${fresh.length}/${fresh.length} mục được chọn</span>
-                            <button onclick="window._dmToggleAll(selected && selected.size===fresh.length)" style="font-size:11px;font-weight:800;color:#2563eb;background:none;border:none;cursor:pointer;">Bỏ chọn tất cả</button>
-                        </div>
-                        <div id="dm-fresh-list" style="max-height:42vh;overflow-y:auto;" class="no-scrollbar">${renderFreshList()}</div>
-                    </div>`,
+                    title: '<div style="display:flex;align-items:center;gap:10px;text-align:left;"><div style="width:36px;height:36px;background:var(--bg-surface,#f1f5f9);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div style="display:flex;flex-direction:column;"><span style="font-size:16px;font-weight:900;color:var(--text-primary);line-height:1.2;">Kiểm tra kết quả AI</span><span style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-top:2px;">Click để chọn / bỏ chọn hạng mục</span></div></div>',
+                    html: buildHtml(),
                     showCancelButton: true,
                     showDenyButton: true,
-                    confirmButtonText: `Thêm ${fresh.length} hạng mục`,
-                    denyButtonText: 'Ghi âm lại',
-                    cancelButtonText: 'Hủy',
+                    confirmButtonText: '<div style="display:flex;align-items:center;justify-content:center;gap:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Thêm ' + fresh.length + ' hạng mục</div>',
+                    denyButtonText: '<div style="display:flex;align-items:center;justify-content:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> Phân tích lại</div>',
+                    cancelButtonText: '<div style="display:flex;align-items:center;justify-content:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Hủy bỏ</div>',
+                    confirmButtonColor: '#10b981',
+                    denyButtonColor: '#3b82f6',
+                    cancelButtonColor: '#64748b',
                     buttonsStyling: false,
-                    customClass: { popup: 'custom-rounded', title: '!text-left !px-5 !pt-5 !pb-0' },
+                    customClass: { popup: 'custom-rounded', actions: 'flex w-full flex-wrap gap-2 px-2' },
                     didOpen: () => {
+                        if (fresh.length === 0) Swal.getConfirmButton().style.background = '#64748b';
                         updateConfirmBtn();
                         const confirmBtn = Swal.getConfirmButton();
-                        const denyBtn    = Swal.getDenyButton();
-                        const cancelBtn  = Swal.getCancelButton();
-                        const actions    = document.querySelector('.swal2-actions');
-                        if (actions) actions.style.cssText = 'display:flex!important;flex-wrap:wrap!important;gap:8px!important;width:100%!important;padding:0 4px!important;margin-top:14px!important;box-sizing:border-box;';
-                        if (confirmBtn) confirmBtn.style.cssText = 'flex:1 1 100%!important;margin:0!important;padding:13px!important;background:linear-gradient(135deg,#059669,#10b981)!important;color:white!important;border-radius:13px!important;font-weight:900!important;font-size:13px!important;border:none!important;cursor:pointer;';
-                        if (denyBtn)    denyBtn.style.cssText    = 'flex:1!important;margin:0!important;padding:11px!important;background:#eff6ff!important;color:#2563eb!important;border-radius:13px!important;font-weight:800!important;font-size:12px!important;border:1.5px solid #bfdbfe!important;cursor:pointer;';
-                        if (cancelBtn)  cancelBtn.style.cssText  = 'flex:1!important;margin:0!important;padding:11px!important;background:var(--bg-surface,#f8fafc)!important;color:var(--text-secondary,#64748b)!important;border-radius:13px!important;font-weight:800!important;font-size:12px!important;border:1.5px solid var(--border-light,#e2e8f0)!important;cursor:pointer;';
+                        const denyBtn = Swal.getDenyButton();
+                        const cancelBtn = Swal.getCancelButton();
+                        if (confirmBtn) confirmBtn.style.cssText = 'flex:1 1 100%; padding:12px; background:#10b981; color:white; border-radius:12px; font-weight:800; font-size:13px; border:none; cursor:pointer; transition:all 0.2s;';
+                        if (denyBtn) denyBtn.style.cssText = 'flex:1 1 45%; padding:10px; background:#3b82f6; color:white; border-radius:12px; font-weight:800; font-size:12px; border:none; cursor:pointer;';
+                        if (cancelBtn) cancelBtn.style.cssText = 'flex:1 1 45%; padding:10px; background:var(--bg-surface, #f1f5f9); color:var(--text-secondary, #64748b); border-radius:12px; font-weight:800; font-size:12px; border:none; cursor:pointer;';
                     }
                 }).then(r => {
-                    if (r.isConfirmed && selected.size > 0) {
-                        DamageItems._mergeAndSave(id, existing, fresh.filter((_, i) => selected.has(i)));
+                    if (r.isConfirmed && fresh.length > 0 && selected.size > 0) {
+                        const toAdd = fresh.filter((_, i) => selected.has(i));
+                        DamageItems._mergeAndSave(id, existing, toAdd);
                     } else if (r.isDenied) {
+                        // Nếu bấm Phân tích lại -> Mở lại form với text cũ
                         setTimeout(() => DamageItems.addRowAI(id, origText), 300);
                     }
                 });
@@ -7383,8 +7390,8 @@
                 input.type = 'file';
                 input.id = 'native-audio-input';
                 // ĐIỀU CHỈNH 1: Ép thiết bị mở Camera quay video (có thu âm) hoặc Máy ghi âm
-                input.accept = 'audio/*';
-                input.capture = 'microphone';
+                input.accept = 'video/*,audio/*'; 
+                input.capture = 'environment'; // Ưu tiên camera sau
                 input.style.display = 'none';
                 document.body.appendChild(input);
             }
@@ -7401,20 +7408,7 @@
                 // Cập nhật giao diện báo đang xử lý
                 if (btn) {
                     btn.style.pointerEvents = 'none';
-                    btn.style.background = 'linear-gradient(135deg,#dc2626,#ef4444)';
-                    btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="animation:img-spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`;
-                    const ring = document.getElementById('dm-mic-ring');
-                    const label = document.getElementById('dm-mic-label');
-                    const wave = document.getElementById('dm-wave-wrap');
-                    if (ring) ring.style.display = 'block';
-                    if (label) label.textContent = 'Đang xử lý âm thanh...';
-                    if (wave) { wave.style.display = 'flex'; }
-                    const ring = document.getElementById('dm-mic-ring');
-                    const label = document.getElementById('dm-mic-label');
-                    const wave = document.getElementById('dm-wave-wrap');
-                    if (ring) ring.style.display = 'none';
-                    if (label) label.textContent = 'Nhấn để ghi âm';
-                    if (wave) wave.style.display = 'none';
+                    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="animation:img-spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Đang xử lý...`;
                 }
                 if (sta) { sta.textContent = '⏳ Tasco AI đang nghe...'; sta.style.color = '#d97706'; }
 
