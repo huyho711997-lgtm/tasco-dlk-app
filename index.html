@@ -567,56 +567,44 @@
         #app-toast.t-warning .t-icon { background: #fef9c3; color: #ca8a04; }
         #app-toast.t-info    .t-icon { background: #dbeafe; color: #2563eb; }
 
-        /* ====== MODAL TAB BAR V2 (Đã nâng cấp) ====== */
+        /* ====== MODAL TAB BAR V3 (Tinh tế, thanh mảnh) ====== */
         .modal-tab-bar {
-            display: flex; gap: 4px; padding: 6px 12px 0;
-            border-bottom: 1px solid #e2e8f0;
+            display: flex; gap: 0; 
+            border-bottom: 1.5px solid #e2e8f0; 
             background: white; position: sticky; top: 0; z-index: 10;
         }
         .modal-tab {
-            flex: 1; padding: 10px 4px 12px;
-            font-size: 12px; font-weight: 700; color: #64748b;
-            border-bottom: 3px solid transparent; margin-bottom: -1px;
-            cursor: pointer; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-            white-space: nowrap;
-            border-radius: 10px 10px 0 0; 
+            flex: 1; 
+            padding: 12px 0; /* Tăng vùng chạm, chữ tự động canh giữa */
+            font-size: 11px; font-weight: 700; color: #64748b; 
+            border-bottom: 2px solid transparent; margin-bottom: -1.5px; 
+            cursor: pointer; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
             background: transparent;
             border-top: none; border-left: none; border-right: none;
+            outline: none;
+            -webkit-tap-highlight-color: transparent; /* Bỏ chớp xanh khi chạm trên mobile */
         }
         
-        /* Hiệu ứng khi lướt qua (Hover) */
-        .modal-tab:hover {
-            color: #3b82f6;
-            background: #f8fafc;
-        }
+        .modal-tab:active { opacity: 0.6; } /* Hiệu ứng mờ nhẹ khi chạm */
         
-        /* Hiệu ứng khi đang được chọn (Active) */
         .modal-tab.active { 
             color: #2563eb; 
             font-weight: 800;
             border-bottom-color: #2563eb;
-            background: #eff6ff; 
         }
         
-        /* Hiệu ứng chuyển động của Icon */
-        .modal-tab svg { 
-            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); 
-        }
-        .modal-tab.active svg { 
-            transform: scale(1.15); 
-            stroke-width: 2.5px;
-        }
+        /* Chuyển động icon cực kỳ mượt và nhẹ */
+        .modal-tab i, .modal-tab svg { opacity: 0.7; transition: all 0.2s ease; }
+        .modal-tab.active i, .modal-tab.active svg { opacity: 1; stroke-width: 2.5px; }
 
-        /* KHẮC PHỤC LỖI: 2 dòng quan trọng để ẩn/hiện nội dung tab */
         .modal-tab-panel { display: none; }
         .modal-tab-panel.active { display: block; }
 
-        /* Dark Mode cho Tabs */
+        /* Dark Mode */
         [data-theme="dark"] .modal-tab-bar { background-color: var(--bg-white) !important; border-color: var(--border-light) !important; }
         [data-theme="dark"] .modal-tab { color: var(--text-muted); }
-        [data-theme="dark"] .modal-tab:hover { background: rgba(255,255,255,0.03); color: #93c5fd; }
-        [data-theme="dark"] .modal-tab.active { color: #60a5fa; border-bottom-color: #60a5fa; background: rgba(59, 130, 246, 0.12); }
+        [data-theme="dark"] .modal-tab.active { color: #60a5fa; border-bottom-color: #60a5fa; }
 
         /* ====== DAMAGE ITEMS ====== */
         .dm-card {
@@ -1929,17 +1917,17 @@
             <!-- ====== TAB BAR ====== -->
             <div class="modal-tab-bar">
                 <button class="modal-tab active" onclick="ModalTabs.switch('info', this)">
-                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                    <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
                     <span>Hồ sơ</span>
                 </button>
                 <button class="modal-tab" onclick="ModalTabs.switch('hientruong', this)">
-                    <i data-lucide="map-pin" class="w-4 h-4"></i>
+                    <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
                     <span>Tiếp nhận HT</span>
                 </button>
-                <button class="modal-tab" onclick="ModalTabs.switch('damage', this)">
-                    <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+                <button class="modal-tab relative" onclick="ModalTabs.switch('damage', this)">
+                    <i data-lucide="clipboard-list" class="w-3.5 h-3.5"></i>
                     <span>Hạng mục GĐ</span>
-                    <span id="dm-count-badge" class="hidden ml-1 px-1.5 py-0.5 bg-rose-500 text-white text-[10px] font-black rounded-full leading-none shadow-sm"></span>
+                    <span id="dm-count-badge" class="hidden absolute top-2 right-1.5 px-1.5 py-[1px] bg-rose-500 text-white text-[8px] font-black rounded-full leading-none shadow-sm"></span>
                 </button>
             </div>
 
