@@ -173,7 +173,6 @@
         [data-theme="dark"] .bg-white,
         [data-theme="dark"] header,
         [data-theme="dark"] nav,
-        [data-theme="dark"] .modal-tab-bar,
         [data-theme="dark"] #ai-panel,
         [data-theme="dark"] #gd-notify-panel { 
             background-color: var(--bg-white) !important; 
@@ -312,8 +311,6 @@
         [data-theme="dark"] .dm-num { color: var(--border-light); }
 
         /* Tabs & Bottom Nav */
-        [data-theme="dark"] .modal-tab { color: var(--text-muted); }
-        [data-theme="dark"] .modal-tab.active { color: #60a5fa; border-bottom-color: #60a5fa; }
         [data-theme="dark"] .bottom-nav-active { color: #60a5fa !important; }
         [data-theme="dark"] .bottom-nav-active .nav-icon-bg { background-color: transparent !important; } /* Nền trong suốt khi active */
 
@@ -570,25 +567,50 @@
         #app-toast.t-warning .t-icon { background: #fef9c3; color: #ca8a04; }
         #app-toast.t-info    .t-icon { background: #dbeafe; color: #2563eb; }
 
-        /* ====== MODAL TAB BAR ====== */
+        /* ====== MODAL TAB BAR V2 (Đã nâng cấp) ====== */
         .modal-tab-bar {
-            display: flex; gap: 0;
-            border-bottom: 1.5px solid #e2e8f0;
+            display: flex; gap: 4px; padding: 6px 12px 0;
+            border-bottom: 1px solid #e2e8f0;
             background: white; position: sticky; top: 0; z-index: 10;
-            overflow-x: auto;
         }
-        .modal-tab-bar::-webkit-scrollbar { display: none; }
         .modal-tab {
-            flex-shrink: 0; padding: 11px 16px;
-            font-size: 11px; font-weight: 800; color: #94a3b8;
-            border-bottom: 2.5px solid transparent; margin-bottom: -1.5px;
-            cursor: pointer; transition: all 0.15s;
-            display: flex; align-items: center; gap: 5px;
+            flex: 1; padding: 10px 4px 12px;
+            font-size: 12px; font-weight: 700; color: #64748b;
+            border-bottom: 3px solid transparent; margin-bottom: -1px;
+            cursor: pointer; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex; align-items: center; justify-content: center; gap: 6px;
             white-space: nowrap;
+            border-radius: 10px 10px 0 0; /* Bo tròn góc trên */
         }
-        .modal-tab.active { color: #2563eb; border-bottom-color: #2563eb; }
-        .modal-tab-panel { display: none; }
-        .modal-tab-panel.active { display: block; }
+        
+        /* Hiệu ứng khi lướt qua (Hover) */
+        .modal-tab:hover {
+            color: #3b82f6;
+            background: #f8fafc;
+        }
+        
+        /* Hiệu ứng khi đang được chọn (Active) */
+        .modal-tab.active { 
+            color: #2563eb; 
+            font-weight: 800;
+            border-bottom-color: #2563eb;
+            background: #eff6ff; /* Nền xanh nhạt nổi bật */
+        }
+        
+        /* Hiệu ứng chuyển động của Icon */
+        .modal-tab svg { 
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); 
+        }
+        .modal-tab.active svg { 
+            transform: scale(1.15); /* Phóng to icon một chút khi chọn */
+            stroke-width: 2.5px;
+        }
+
+        /* Dark Mode cho Tabs */
+        [data-theme="dark"] .modal-tab-bar { background-color: var(--bg-white) !important; border-color: var(--border-light) !important; }
+        [data-theme="dark"] .modal-tab { color: var(--text-muted); }
+        [data-theme="dark"] .modal-tab:hover { background: rgba(255,255,255,0.03); color: #93c5fd; }
+        [data-theme="dark"] .modal-tab.active { color: #60a5fa; border-bottom-color: #60a5fa; background: rgba(59, 130, 246, 0.12); }
 
         /* ====== DAMAGE ITEMS ====== */
         .dm-card {
@@ -1899,20 +1921,20 @@
         <div id="modal-scroll-area" class="flex-1 overflow-y-auto no-scrollbar pb-24 relative scroll-smooth">
 
             <!-- ====== TAB BAR ====== -->
-            <div class="modal-tab-bar px-2 pt-1 bg-white">
-                <div class="modal-tab active" onclick="ModalTabs.switch('info', this)">
-                    <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 2h8a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M6 6h4M6 9h4M6 12h2"/></svg>
-                    Hồ sơ
-                </div>
-                <div class="modal-tab" onclick="ModalTabs.switch('hientruong', this)">
-                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
-                    Tiếp nhận HT
-                </div>
-                <div class="modal-tab" onclick="ModalTabs.switch('damage', this)">
-                    <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l10 10M8 3h5v5M3 8v5h5"/></svg>
-                    Hạng mục GĐ
-                    <span id="dm-count-badge" class="hidden px-1.5 py-0.5 bg-rose-500 text-white text-[9px] font-black rounded-full leading-none"></span>
-                </div>
+            <div class="modal-tab-bar">
+                <button class="modal-tab active" onclick="ModalTabs.switch('info', this)">
+                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                    <span>Hồ sơ</span>
+                </button>
+                <button class="modal-tab" onclick="ModalTabs.switch('hientruong', this)">
+                    <i data-lucide="map-pin" class="w-4 h-4"></i>
+                    <span>Tiếp nhận HT</span>
+                </button>
+                <button class="modal-tab" onclick="ModalTabs.switch('damage', this)">
+                    <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+                    <span>Hạng mục GĐ</span>
+                    <span id="dm-count-badge" class="hidden ml-1 px-1.5 py-0.5 bg-rose-500 text-white text-[10px] font-black rounded-full leading-none shadow-sm"></span>
+                </button>
             </div>
 
             <!-- ====== PANEL: HỒ SƠ ====== -->
