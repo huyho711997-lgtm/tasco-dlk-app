@@ -2960,7 +2960,8 @@
             preset: "claim_ntn"
         },
         gemini: {
-            model: "gemini-2.5-flash",
+            model: "gemini-2.5-flash",        // Model nặng cho việc khó (Duyệt BG, Viết BBGĐ)
+            modelFast: "gemini-2.5-flash-8b", // MỚI: Model siêu nhẹ cho việc dễ (Quét chữ, Biển số)
             keys: [
                 "AIzaSy" + "DWQ6fATzFmqDozABBEDiEwTwuuN2X_mHo",
                 "AIzaSy" + "AZ23wYEUgbF43IzdOu22morg2FyxMM5cg",
@@ -5492,7 +5493,7 @@
 
                             var r = await fetch(
                                 'https://generativelanguage.googleapis.com/v1beta/models/' 
-                                + CONFIG.gemini.model + ':generateContent?key=' + key,
+                                + CONFIG.gemini.modelFast + ':generateContent?key=' + key,
                                 {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
@@ -6132,7 +6133,7 @@
                         const controller = new AbortController();
                         const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${key}`, {
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.modelFast}:generateContent?key=${key}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -8084,7 +8085,7 @@
                     : 'Đây là ảnh mặt sau CCCD/CMND Việt Nam. Trích xuất thông tin và trả về JSON (CHỈ JSON): {"ngayCap":"DD/MM/YYYY","noiCap":"...","dacDiem":"..."}';
 
                 const res = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${GeminiKeys.next()}`,
+                    `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.modelFast}:generateContent?key=${GeminiKeys.next()}`,
                     {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -8173,7 +8174,7 @@
     Nếu không tìm được thì trả về {"tenCongTy":null}`;
 
                 const res = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${GeminiKeys.next()}`,
+                    `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.modelFast}:generateContent?key=${GeminiKeys.next()}`,
                     {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
