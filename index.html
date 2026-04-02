@@ -11707,7 +11707,7 @@
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" style="animation:img-spin 1s linear infinite;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
                         </div>
                         <p style="font-size:16px;font-weight:900;color:var(--text-primary,#0f172a);margin:0;">Đang quét & Đối chiếu...</p>
-                        <p style="font-size:12px;font-weight:600;color:var(--text-secondary,#64748b);margin-top:6px;text-align:center;">AI đang so sánh báo giá Gara với ${currentDamageItems.length} hạng mục trong BBGĐ</p>
+                        <p style="font-size:12px;font-weight:600;color:var(--text-secondary,#64748b);margin-top:6px;text-align:center;">Tasco AI đang xử lý (Tốc độ cao)...</p>
                     </div>
                 `,
                 showConfirmButton: false, allowOutsideClick: false,
@@ -11715,64 +11715,77 @@
             });
 
             try {
-                // Tận dụng hàm nén ảnh của OCR giúp gửi lên Gemini cực nhanh
-                const base64 = await OCR._compressImage(file, 1200);
+                // TỐI ƯU 1: Nén ảnh mạnh hơn (giảm từ 1200 xuống 800) để tiết kiệm Token và tăng tốc độ upload
+                const base64 = await OCR._compressImage(file, 800);
 
-                // Rút gọn dữ liệu BBGĐ gửi lên AI để tiết kiệm token
+                // Rút gọn dữ liệu mồi
                 const bbgdList = currentDamageItems.map((item, idx) => ({
                     stt: idx + 1,
                     ten: item.chiTiet,
-                    phuongAn: item.thayThe ? "Thay thế" : (item.suaChua ? "Sửa chữa" : "Chưa rõ")
+                    pa: item.thayThe ? "Thay" : (item.suaChua ? "Sửa" : "Khác")
                 }));
 
-                const PROMPT = `Bạn là Giám định viên bảo hiểm. Hãy phân tích ảnh Báo Giá sửa chữa xe ô tô của Gara.
-                Đồng thời, tôi cung cấp danh sách Hạng mục tôi đã duyệt trong Biên Bản Giám Định (BBGD) dưới dạng JSON:
+                // TỐI ƯU 2: Rút gọn Prompt và thu gọn key JSON trả về để AI generate nhanh hơn
+                const PROMPT = `Đối chiếu Bảng báo giá trong ảnh với danh sách Biên bản (BBGD) sau:
                 ${JSON.stringify(bbgdList)}
 
-                NHIỆM VỤ:
-                Đối chiếu từng dòng trong ảnh Báo giá với danh sách BBGD của tôi. Trả về JSON Array chứa kết quả đối chiếu.
-                
-                QUY TẮC PHÂN LOẠI (trangThai):
-                1. "KHOP": Gara báo đúng Tên và Phương án như BBGD.
-                2. "SAI_PHUONG_AN": Gara báo Phương án khác BBGD (VD: BBGD duyệt "Sửa chữa", Gara báo "Thay thế").
-                3. "GARA_BAO_DU": Có trong báo giá Gara nhưng KHÔNG CÓ trong BBGD.
-                4. "GARA_QUEN_BAO": Có trong BBGD nhưng KHÔNG THẤY Gara báo giá. (Bạn tự rà soát xem có mục nào ở BBGD mà ảnh báo giá không có không).
+                Quy tắc phân loại (tt):
+                1. "KHOP": Khớp tên và phương án.
+                2. "SAI_PA": Khác phương án.
+                3. "DU": Có trong ảnh nhưng KHÔNG CÓ trong BBGD.
+                4. "QUEN": Có trong BBGD nhưng ảnh không có.
 
-                ĐỊNH DẠNG JSON TRẢ VỀ (CHỈ TRẢ VỀ MẢNG NÀY, KHÔNG TEXT):
+                Chỉ trả về JSON Array định dạng ngắn gọn:
                 [
                   {
-                    "tenPhuTung": "Tên phụ tùng (Lấy tên theo báo giá, nếu quên báo thì lấy tên BBGD)",
-                    "trangThai": "KHOP" | "SAI_PHUONG_AN" | "GARA_BAO_DU" | "GARA_QUEN_BAO",
-                    "gara": { "phuongAn": "Sửa/Thay/Sơn", "gia": 1500000 (số nguyên) },
-                    "bbgd": { "phuongAn": "Sửa/Thay" },
-                    "canhBao": "Ghi chú ngắn ngọn nếu có sai lệch"
+                    "ten": "Tên phụ tùng",
+                    "tt": "KHOP|SAI_PA|DU|QUEN",
+                    "gr_pa": "Sửa/Thay", "gr_gia": 1500000,
+                    "bb_pa": "Sửa/Thay",
+                    "note": "Cảnh báo nếu có"
                   }
                 ]`;
 
                 let dataResponse = null;
-                const maxRetries = CONFIG.gemini.keys.length;
+                let lastError = '';
+                
+                // TỐI ƯU 3: Giảm số lần retry vô ích. Chỉ thử tối đa 3 key để không treo máy GĐV
+                const maxRetries = Math.min(3, CONFIG.gemini.keys.length);
 
                 for (let attempt = 0; attempt < maxRetries; attempt++) {
                     try {
                         const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 20000);
+                        const timeoutId = setTimeout(() => controller.abort(), 12000); // Rút timeout xuống 12s để fail fast
+
                         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${GeminiKeys.next()}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: 'image/jpeg', data: base64 } }] }],
-                                generationConfig: { temperature: 0.1 }
+                                // TỐI ƯU 4: Temperature = 0.0 để AI phản xạ nhanh nhất, không sáng tạo lang man
+                                generationConfig: { temperature: 0.0, maxOutputTokens: 2000 }
                             }),
                             signal: controller.signal
                         });
                         clearTimeout(timeoutId);
+                        
                         dataResponse = await res.json();
-                        if (res.ok && !dataResponse.error) break;
-                        await new Promise(r => setTimeout(r, 1000));
-                    } catch (e) {}
+                        
+                        if (res.ok && !dataResponse.error) {
+                            break; 
+                        } else if (dataResponse.error) {
+                            lastError = dataResponse.error.message || dataResponse.error.status;
+                            // Nếu lỗi 429 Quá tải, nghỉ 1.5s trước khi nhảy key khác
+                            await new Promise(r => setTimeout(r, 1500));
+                        }
+                    } catch (fetchErr) {
+                        lastError = fetchErr.name === 'AbortError' ? 'Mạng chậm, Timeout 12s' : fetchErr.message;
+                    }
                 }
 
-                if (!dataResponse || dataResponse.error) throw new Error('AI quá tải, vui lòng thử lại');
+                if (!dataResponse || dataResponse.error) {
+                    throw new Error('Hệ thống AI đang quá tải (' + lastError + '). Vui lòng thử lại.');
+                }
 
                 const txt = dataResponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
                 let parsed = null;
@@ -11781,9 +11794,18 @@
                     if (m) parsed = JSON.parse(m[0]);
                 }
 
-                if (!parsed || !Array.isArray(parsed)) throw new Error('AI không nhận diện được bảng báo giá');
+                if (!parsed || !Array.isArray(parsed)) throw new Error('Không nhận diện được dữ liệu bảng báo giá');
 
-                this._renderResults(parsed);
+                // Chuyển đổi lại các key viết tắt thành key cũ để renderResults hoạt động khớp
+                const mappedResults = parsed.map(r => ({
+                    tenPhuTung: r.ten,
+                    trangThai: r.tt === 'SAI_PA' ? 'SAI_PHUONG_AN' : (r.tt === 'DU' ? 'GARA_BAO_DU' : (r.tt === 'QUEN' ? 'GARA_QUEN_BAO' : 'KHOP')),
+                    gara: { phuongAn: r.gr_pa, gia: r.gr_gia },
+                    bbgd: { phuongAn: r.bb_pa },
+                    canhBao: r.note
+                }));
+
+                this._renderResults(mappedResults);
 
             } catch (error) {
                 Swal.close();
