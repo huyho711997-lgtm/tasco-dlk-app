@@ -4119,18 +4119,14 @@
                     // --- CHIP HIỂN THỊ CÁC MỤC ĐÃ CÓ ---
                     + existingChip
 
-                    // --- KHỐI NHẬP LIỆU & GHI ÂM ---
                     + '<div style="position:relative; background:var(--bg-app, #f8fafc); border:1px solid var(--border-light, #e2e8f0); border-radius:14px; overflow:hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">'
-                    + '<textarea id="dm-ai-input" rows="4" class="custom-scrollbar" placeholder="Nhập văn bản hoặc nhấn nút bắt đầu bên dưới..." style="width:100%; border:none; background:transparent; padding:14px; font-size:13px; font-weight:500; color:var(--text-primary, #1e293b); resize:none; outline:none; box-sizing:border-box; line-height:1.5;">' + initialText + '</textarea>'
+                    + '<textarea id="dm-ai-input" rows="4" class="custom-scrollbar" placeholder="Nhập văn bản hoặc nhấn nút ghi âm bên dưới..." style="width:100%; border:none; background:transparent; padding:14px; font-size:13px; font-weight:500; color:var(--text-primary, #1e293b); resize:none; outline:none; box-sizing:border-box; line-height:1.5;">' + initialText + '</textarea>'
 
                     + '<div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--bg-white, #ffffff); border-top:1px solid var(--border-light, #e2e8f0);">'
                     // Đã thu nhỏ nút mic (giảm padding, font, icon)
                     + '<button id="dm-ai-mic-btn" type="button" onclick="SpeechInput.toggle(\'dm-ai-input\',\'dm-ai-mic-btn\',\'dm-ai-status\')" style="display:flex; align-items:center; gap:6px; padding:8px 14px; background:#4f46e5; border:none; border-radius:10px; font-size:12px; font-weight:700; color:white; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 10px rgba(79, 70, 229, 0.25);">'
-                    + '<svg id="dm-ai-mic-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Bắt đầu Quay/Đọc'
+                    + '<svg id="dm-ai-mic-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg> Bắt đầu Ghi âm'
                     + '</button>'
-                    + '<span id="dm-ai-status" style="font-size:11px; font-weight:600; color:var(--text-muted, #94a3b8); flex:1; text-align:right;">Sẵn sàng</span>'
-                    + '</div>'
-
                     // --- MÀN HÌNH LOADING OVERLAY ---
                     + '<div id="ai-loading-overlay" style="display:none; position:absolute; inset:0; background:var(--bg-white, #ffffff); opacity:0.95; z-index:10; flex-direction:column; align-items:center; justify-content:center;">'
                     + '<div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg, #6366f1, #4f46e5);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(99,102,241,0.4);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="animation:img-spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></div>'
@@ -7389,9 +7385,9 @@
                 input = document.createElement('input');
                 input.type = 'file';
                 input.id = 'native-audio-input';
-                // ĐIỀU CHỈNH 1: Ép thiết bị mở Camera quay video (có thu âm) hoặc Máy ghi âm
-                input.accept = 'video/*,audio/*'; 
-                input.capture = 'environment'; // Ưu tiên camera sau
+                // ĐIỀU CHỈNH 1: Ép thiết bị mở Máy ghi âm (chỉ thu âm thanh)
+                input.accept = 'audio/*'; 
+                input.capture = 'microphone'; // Ưu tiên mở máy ghi âm
                 input.style.display = 'none';
                 document.body.appendChild(input);
             }
@@ -7481,7 +7477,7 @@
                     // Khôi phục lại trạng thái nút bấm
                     if (btn) {
                         btn.style.pointerEvents = 'auto';
-                        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg> Bắt đầu Quay/Đọc`;
+                        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg> Bắt đầu Ghi âm`;
                     }
                 }
             };
