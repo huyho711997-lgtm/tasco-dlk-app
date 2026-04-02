@@ -11699,20 +11699,15 @@
             input.click();
         },
 
-async _processImage(file, currentDamageItems) {
-            // ── Bước 1: Loading UI ──────────────────────────────────
-            const _setMsg = (msg) => {
-                const el = document.getElementById('qc-progress-msg');
-                if (el) el.textContent = msg;
-            };
+        async _processImage(file, currentDamageItems) {
             Swal.fire({
                 html: `
                     <div style="display:flex;flex-direction:column;align-items:center;padding:10px 0;">
-                        <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg, #f43f5e, #8b5cf6);display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+                        <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg, #f43f5e, #8b5cf6);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(244,63,94,0.4);margin-bottom:16px;">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" style="animation:img-spin 1s linear infinite;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
                         </div>
-                        <p style="font-size:16px;font-weight:900;color:var(--text-primary,#0f172a);margin:0;">Đang đối chiếu báo giá...</p>
-                        <p id="qc-progress-msg" style="font-size:12px;font-weight:600;color:var(--text-secondary,#64748b);margin-top:6px;text-align:center;">Đang nén ảnh...</p>
+                        <p style="font-size:16px;font-weight:900;color:var(--text-primary,#0f172a);margin:0;">Đang quét & Đối chiếu...</p>
+                        <p style="font-size:12px;font-weight:600;color:var(--text-secondary,#64748b);margin-top:6px;text-align:center;">AI đang so sánh báo giá Gara với ${currentDamageItems.length} hạng mục trong BBGĐ</p>
                     </div>
                 `,
                 showConfirmButton: false, allowOutsideClick: false,
@@ -11720,138 +11715,79 @@ async _processImage(file, currentDamageItems) {
             });
 
             try {
-                // ── Bước 2: Nén ảnh (có fallback nếu OCR._compressImage lỗi) ──
-                let base64;
-                try {
-                    base64 = await OCR._compressImage(file, 1024);
-                } catch (e) {
-                    // Fallback: đọc thẳng file không nén
-                    base64 = await new Promise((res, rej) => {
-                        const r = new FileReader();
-                        r.onload = () => res(r.result.split(',')[1]);
-                        r.onerror = () => rej(new Error('Không đọc được file ảnh'));
-                        r.readAsDataURL(file);
-                    });
-                }
+                // Tận dụng hàm nén ảnh của OCR giúp gửi lên Gemini cực nhanh
+                const base64 = await OCR._compressImage(file, 1200);
 
-                _setMsg(`Đang gửi ảnh lên AI... (${currentDamageItems.length} hạng mục)`);
-
+                // Rút gọn dữ liệu BBGĐ gửi lên AI để tiết kiệm token
                 const bbgdList = currentDamageItems.map((item, idx) => ({
                     stt: idx + 1,
-                    tenHangMuc: item.chiTiet,
-                    phuongAn: item.thayThe ? 'Thay thế' : (item.suaChua ? 'Sửa chữa' : 'Chưa rõ')
+                    ten: item.chiTiet,
+                    phuongAn: item.thayThe ? "Thay thế" : (item.suaChua ? "Sửa chữa" : "Chưa rõ")
                 }));
 
-                // ── Bước 4: Prompt với ngữ nghĩa sâu ──
-                // ── Bước 4: Prompt với ngữ nghĩa sâu (Đã tinh chỉnh Few-shot) ──
-                const PROMPT = `Bạn là chuyên gia giám định bảo hiểm xe cơ giới Việt Nam. Nhiệm vụ của bạn là đọc BẢNG BÁO GIÁ trong ảnh và đối chiếu 1-1 với danh sách HẠNG MỤC BBGĐ sau đây:
+                const PROMPT = `Bạn là Giám định viên bảo hiểm. Hãy phân tích ảnh Báo Giá sửa chữa xe ô tô của Gara.
+                Đồng thời, tôi cung cấp danh sách Hạng mục tôi đã duyệt trong Biên Bản Giám Định (BBGD) dưới dạng JSON:
                 ${JSON.stringify(bbgdList)}
+
+                NHIỆM VỤ:
+                Đối chiếu từng dòng trong ảnh Báo giá với danh sách BBGD của tôi. Trả về JSON Array chứa kết quả đối chiếu.
                 
-                === TỪ ĐIỂN ĐỒNG NGHĨA (BẮT BUỘC ÁP DỤNG) ===
-                - Viết tắt: T = Trái, P = Phải, Tr = Trước, S/Sa = Sau.
-                - Bộ phận: "Vè" = "Tai xe", "Hông", "Sườn" = "Hông xe", "Cản" = "Ba đờ sốc", "Ca pô" = "Nắp động cơ".
-                - Phương án: Các từ "Sơn", "Gò", "Nắn", "Hàn", "Phục hồi" -> đều có nghĩa là "Sửa chữa".
-                
-                === VÍ DỤ CÁCH ĐỐI CHIẾU (HÃY HỌC THEO LOGIC NÀY) ===
-                - Gara ghi: "Sơn vè trước T" | BBGĐ có: "Tai xe trái" (Sửa chữa) -> ĐÂY LÀ KHỚP NHAU HOÀN TOÀN (Vè = Tai, T = Trái, Sơn = Sửa chữa).
-                - Gara ghi: "Sơn hông sau P" | BBGĐ có: "Hông xe phải" (Sửa chữa) -> ĐÂY LÀ KHỚP NHAU HOÀN TOÀN.
-                - Gara ghi: "Thay cản trước" | BBGĐ có: "Cản trước" (Sửa chữa) -> ĐÂY LÀ SAI_PHUONG_AN (Cùng bộ phận nhưng Gara đòi thay, BBGĐ bắt sửa).
-                
-                === QUY TẮC PHÂN LOẠI ===
-                • KHOP: Tìm thấy bộ phận tương đồng (dùng từ điển) VÀ phương án giống nhau.
-                • SAI_PHUONG_AN: Tìm thấy bộ phận tương đồng NHƯNG phương án khác nhau.
-                • GARA_BAO_DU: Gara có báo nhưng KHÔNG THỂ tìm thấy bộ phận nào tương đương trong BBGĐ.
-                • GARA_QUEN_BAO: Có trong BBGĐ nhưng KHÔNG xuất hiện trên báo giá của Gara.
-                
-                TRẢ VỀ CHỈ MỘT JSON ARRAY, KHÔNG KÈM BẤT KỲ VĂN BẢN NÀO KHÁC:
+                QUY TẮC PHÂN LOẠI (trangThai):
+                1. "KHOP": Gara báo đúng Tên và Phương án như BBGD.
+                2. "SAI_PHUONG_AN": Gara báo Phương án khác BBGD (VD: BBGD duyệt "Sửa chữa", Gara báo "Thay thế").
+                3. "GARA_BAO_DU": Có trong báo giá Gara nhưng KHÔNG CÓ trong BBGD.
+                4. "GARA_QUEN_BAO": Có trong BBGD nhưng KHÔNG THẤY Gara báo giá. (Bạn tự rà soát xem có mục nào ở BBGD mà ảnh báo giá không có không).
+
+                ĐỊNH DẠNG JSON TRẢ VỀ (CHỈ TRẢ VỀ MẢNG NÀY, KHÔNG TEXT):
                 [
                   {
-                    "tenPhuTung": "Tên theo BBGĐ (hoặc tên Gara nếu báo dư)",
+                    "tenPhuTung": "Tên phụ tùng (Lấy tên theo báo giá, nếu quên báo thì lấy tên BBGD)",
                     "trangThai": "KHOP" | "SAI_PHUONG_AN" | "GARA_BAO_DU" | "GARA_QUEN_BAO",
-                    "gara": { "phuongAn": "tên phương án Gara ghi", "gia": 800000 },
-                    "bbgd": { "phuongAn": "tên phương án trong BBGĐ" },
-                    "canhBao": "Ghi chú nếu sai phương án, để rỗng nếu khớp"
+                    "gara": { "phuongAn": "Sửa/Thay/Sơn", "gia": 1500000 (số nguyên) },
+                    "bbgd": { "phuongAn": "Sửa/Thay" },
+                    "canhBao": "Ghi chú ngắn ngọn nếu có sai lệch"
                   }
                 ]`;
 
-                // ── Bước 5: Gọi API với retry toàn key pool + timeout 40s ──
-                // Đổi sang model flash chuẩn để tăng khả năng tư duy logic khi đối chiếu từ đồng nghĩa
-                const QC_MODEL = 'gemini-2.5-flash';
-                const keys = CONFIG.gemini.keys;
                 let dataResponse = null;
-                let lastError = null;
+                const maxRetries = CONFIG.gemini.keys.length;
 
-                for (let attempt = 0; attempt < keys.length; attempt++) {
-                    const key = GeminiKeys.next();
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 40000); // 40s timeout
+                for (let attempt = 0; attempt < maxRetries; attempt++) {
                     try {
-                        _setMsg(`Đang phân tích... (lần ${attempt + 1}/${keys.length})`);
-                        const res = await fetch(
-                            `https://generativelanguage.googleapis.com/v1beta/models/${QC_MODEL}:generateContent?key=${key}`,
-                            {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    contents: [{ parts: [
-                                        { text: PROMPT },
-                                        { inline_data: { mime_type: 'image/jpeg', data: base64 } }
-                                    ]}],
-                                    generationConfig: { temperature: 0.0, maxOutputTokens: 2048 }
-                                }),
-                                signal: controller.signal
-                            }
-                        );
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 20000);
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${GeminiKeys.next()}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: 'image/jpeg', data: base64 } }] }],
+                                generationConfig: { temperature: 0.1 }
+                            }),
+                            signal: controller.signal
+                        });
                         clearTimeout(timeoutId);
-
-                        // Kiểm tra HTTP status trước khi parse
-                        if (res.status === 429 || res.status === 503) {
-                            lastError = `API key ${attempt + 1} quá tải (${res.status}), đang thử key khác...`;
-                            await new Promise(r => setTimeout(r, 1500));
-                            continue;
-                        }
-
-                        const json = await res.json();
-                        if (json.error) {
-                            lastError = json.error.message || 'API lỗi';
-                            await new Promise(r => setTimeout(r, 1000));
-                            continue;
-                        }
-
-                        dataResponse = json;
-                        break; // Thành công → thoát loop
-
-                    } catch (e) {
-                        clearTimeout(timeoutId);
-                        lastError = e.name === 'AbortError' ? 'Hết thời gian chờ (40s), đang thử lại...' : e.message;
-                        _setMsg(lastError);
-                        await new Promise(r => setTimeout(r, 800));
-                    }
+                        dataResponse = await res.json();
+                        if (res.ok && !dataResponse.error) break;
+                        await new Promise(r => setTimeout(r, 1000));
+                    } catch (e) {}
                 }
 
-                if (!dataResponse) throw new Error(lastError || 'AI không phản hồi sau nhiều lần thử');
+                if (!dataResponse || dataResponse.error) throw new Error('AI quá tải, vui lòng thử lại');
 
-                // ── Bước 6: Parse JSON an toàn ──
                 const txt = dataResponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
                 let parsed = null;
-                try {
-                    parsed = JSON.parse(txt.replace(/```json|```/gi, '').trim());
-                } catch (e) {
+                try { parsed = JSON.parse(txt.replace(/```json|```/gi, '').trim()); } catch (e) {
                     const m = txt.match(/\[[\s\S]*\]/);
-                    if (m) {
-                        try { parsed = JSON.parse(m[0]); } catch (e2) {}
-                    }
+                    if (m) parsed = JSON.parse(m[0]);
                 }
 
-                if (!parsed || !Array.isArray(parsed) || parsed.length === 0) {
-                    throw new Error('AI không nhận diện được bảng báo giá. Thử chụp ảnh rõ hơn!');
-                }
+                if (!parsed || !Array.isArray(parsed)) throw new Error('AI không nhận diện được bảng báo giá');
 
                 this._renderResults(parsed);
 
             } catch (error) {
                 Swal.close();
-                Toast.fire({ icon: 'error', title: error.message, timer: 4000 });
+                Toast.fire({ icon: 'error', title: error.message });
             }
         },
 
