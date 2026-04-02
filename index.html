@@ -5961,27 +5961,60 @@
     // ============================================================
     const PlateScanner = {
         _processing: false, _selectedFile: null,
+        
         open() {
-            var modal=document.getElementById('plate-scanner-modal');
-            modal.classList.remove('hidden'); setTimeout(()=>modal.classList.add('open'),10);
-            PlateScanner._hideResult(); PlateScanner._processing=false; PlateScanner._selectedFile=null;
-            var img=document.getElementById('plate-preview-img'),ph=document.getElementById('plate-upload-placeholder'),ov=document.getElementById('plate-preview-overlay'),btn=document.getElementById('scan-capture-btn');
-            if(img){img.style.display='none';img.src='';} if(ph)ph.style.display='flex'; if(ov)ov.style.display='none';
-            if(btn){btn.style.opacity='0.5';btn.style.pointerEvents='none';}
+            var modal = document.getElementById('plate-scanner-modal');
+            modal.classList.remove('hidden'); 
+            setTimeout(() => modal.classList.add('open'), 10);
+            
+            PlateScanner._hideResult(); 
+            PlateScanner._processing = false; 
+            PlateScanner._selectedFile = null;
+            
+            var img = document.getElementById('plate-preview-img'),
+                ph = document.getElementById('plate-upload-placeholder'),
+                ov = document.getElementById('plate-preview-overlay'),
+                btn = document.getElementById('scan-capture-btn');
+                
+            if(img) { img.style.display = 'none'; img.src = ''; } 
+            if(ph) ph.style.display = 'flex'; 
+            if(ov) ov.style.display = 'none';
+            if(btn) { btn.style.opacity = '0.5'; btn.style.pointerEvents = 'none'; }
+
+            // THÊM MỚI: Tự động mở trình chụp ảnh/camera ngay khi mở Modal
+            const fileInput = document.getElementById('plate-gallery-input');
+            if (fileInput) {
+                fileInput.click();
+            }
         },
+        
         close() {
-            var modal=document.getElementById('plate-scanner-modal');
-            modal.classList.remove('open'); setTimeout(()=>modal.classList.add('hidden'),400);
-            PlateScanner._selectedFile=null;
+            var modal = document.getElementById('plate-scanner-modal');
+            modal.classList.remove('open'); 
+            setTimeout(() => modal.classList.add('hidden'), 400);
+            PlateScanner._selectedFile = null;
         },
+        
         fromGallery(event) {
-            var file=event.target.files[0]; if(!file)return; event.target.value='';
-            PlateScanner._selectedFile=file;
-            var reader=new FileReader();
-            reader.onload=function(e){
-                var img=document.getElementById('plate-preview-img'),ph=document.getElementById('plate-upload-placeholder'),ov=document.getElementById('plate-preview-overlay'),btn=document.getElementById('scan-capture-btn');
-                if(img){img.src=e.target.result;img.style.display='block';} if(ph)ph.style.display='none'; if(ov)ov.style.display='block';
-                if(btn){btn.style.opacity='1';btn.style.pointerEvents='auto';}
+            var file = event.target.files[0]; 
+            if(!file) return; 
+            event.target.value = '';
+            PlateScanner._selectedFile = file;
+            
+            var reader = new FileReader();
+            reader.onload = function(e){
+                var img = document.getElementById('plate-preview-img'),
+                    ph = document.getElementById('plate-upload-placeholder'),
+                    ov = document.getElementById('plate-preview-overlay'),
+                    btn = document.getElementById('scan-capture-btn');
+                    
+                if(img){ img.src = e.target.result; img.style.display = 'block'; } 
+                if(ph) ph.style.display = 'none'; 
+                if(ov) ov.style.display = 'block';
+                if(btn){ btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; }
+
+                // THÊM MỚI: Tự động gọi hàm quét AI ngay sau khi chọn/chụp ảnh xong
+                PlateScanner.doScan();
             };
             reader.readAsDataURL(file);
         },
