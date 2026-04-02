@@ -11750,13 +11750,17 @@
                 ]`;
 
                 let dataResponse = null;
-                const maxRetries = CONFIG.gemini.keys.length;
+                let parsedResult = null; 
+                let lastError = '';
+                const maxRetries = CONFIG.gemini.keys.length; // Số lần thử bằng tổng số Key
 
                 for (let attempt = 0; attempt < maxRetries; attempt++) {
+                    const currentKey = GeminiKeys.next(); // Liên tục xoay vòng Key mới
                     try {
                         const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 20000);
-                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${GeminiKeys.next()}`, {
+                        const timeoutId = setTimeout(() => controller.abort(), 25000); // Tăng thời gian chờ lên 25s cho xử lý ảnh
+
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${currentKey}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -11767,23 +11771,46 @@
                         });
                         clearTimeout(timeoutId);
                         dataResponse = await res.json();
-                        if (res.ok && !dataResponse.error) break;
-                        await new Promise(r => setTimeout(r, 1000));
-                    } catch (e) {}
+
+                        // 1. Kiểm tra lỗi từ Google (Ví dụ: 429 Quota Exceeded)
+                        if (!res.ok || dataResponse.error) {
+                            lastError = dataResponse?.error?.message || `Lỗi máy chủ Google: ${res.status}`;
+                            console.warn(`[Tasco AI] Key nghẽn, thử Key khác. Lỗi: ${lastError}`);
+                            await new Promise(r => setTimeout(r, 1500));
+                            continue; // Bỏ qua, tiếp tục vòng lặp với Key khác
+                        }
+
+                        // 2. Lấy dữ liệu văn bản AI trả về
+                        const txt = dataResponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                        if (!txt) throw new Error('AI trả về kết quả rỗng');
+
+                        // 3. Cố gắng bóc tách JSON ngay trong vòng lặp
+                        try { 
+                            parsedResult = JSON.parse(txt.replace(/```json|```/gi, '').trim()); 
+                        } catch (parseErr) {
+                            const m = txt.match(/\[[\s\S]*\]/);
+                            if (m) parsedResult = JSON.parse(m[0]);
+                            else throw new Error('AI tạo sai định dạng JSON');
+                        }
+
+                        if (!Array.isArray(parsedResult)) throw new Error('Dữ liệu bóc tách không phải là mảng hợp lệ');
+
+                        // Nếu đến được đây nghĩa là API thành công và JSON bóc tách chuẩn -> Thoát vòng lặp
+                        break; 
+
+                    } catch (e) {
+                        lastError = e.name === 'AbortError' ? 'Quá thời gian chờ mạng (25s)' : e.message;
+                        console.warn(`[Tasco AI] Lần thử ${attempt + 1} thất bại: ${lastError}`);
+                        await new Promise(r => setTimeout(r, 1000)); // Nghỉ 1 nhịp trước khi thử Key khác
+                    }
                 }
 
-                if (!dataResponse || dataResponse.error) throw new Error('AI quá tải, vui lòng thử lại');
-
-                const txt = dataResponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                let parsed = null;
-                try { parsed = JSON.parse(txt.replace(/```json|```/gi, '').trim()); } catch (e) {
-                    const m = txt.match(/\[[\s\S]*\]/);
-                    if (m) parsed = JSON.parse(m[0]);
+                // Nếu sau khi thử hết tất cả các Key mà parsedResult vẫn rỗng thì báo lỗi
+                if (!parsedResult) {
+                    throw new Error('Hệ thống AI đang quá tải toàn bộ. Vui lòng thử lại sau. Lỗi: ' + lastError);
                 }
 
-                if (!parsed || !Array.isArray(parsed)) throw new Error('AI không nhận diện được bảng báo giá');
-
-                this._renderResults(parsed);
+                this._renderResults(parsedResult);
 
             } catch (error) {
                 Swal.close();
