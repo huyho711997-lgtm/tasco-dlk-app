@@ -690,6 +690,13 @@
         [data-theme="dark"] .dm-num { background: rgba(255,255,255,0.08); color: #64748b; }
         [data-theme="dark"] .dm-price { color: var(--text-primary); }
         [data-theme="dark"] .dm-garage-label { color: var(--text-muted); }
+        /* ============================================================
+           FIX ICON FLATICON TRONG DARK MODE
+           Đảo ngược màu đen thành trắng/xám sáng và làm dịu lại
+           ============================================================ */
+        [data-theme="dark"] .dm-part-icon img {
+            filter: invert(1) brightness(0.9) opacity(0.85) !important;
+        }
         /* Swal select/checkbox style */
         .swal2-popup select.input-field { appearance: auto; }
         .dm-checkbox-row {
@@ -3886,16 +3893,16 @@
             if (/cua/.test(name)) return imgWrap('https://cdn-icons-png.flaticon.com/128/4404/4404656.png');
             
             // 3. Hông xe / Lườn / Bậc lên xuống
-            if (/hong|luon|luong|nguong|bac/.test(name)) return imgWrap('https://cdn-icons-png.flaticon.com/512/6121/6121111.png');
+            if (/hong|luon|luong|nguong|bac/.test(name)) return imgWrap('https://cdn-icons-png.flaticon.com/128/18890/18890538.png');
             
             // 4. Tai xe / Vè / Fender
             if (/tai|ve\s*(truoc|sau)|fender/.test(name)) return imgWrap('https://cdn-icons-png.flaticon.com/128/18890/18890538.png');
             
             // 5. Cản trước / Cản sau / Ba đờ sốc
-            if (/can|cang|ba\s*do\s*soc|bumper/.test(name)) return imgWrap('https://cdn-icons-png.flaticon.com/512/2800/2800057.png');
+            if (/can|cang|ba\s*do\s*soc|bumper/.test(name)) return imgWrap('https://cdn-icons-png.flaticon.com/128/6843/6843888.png');
             
             // 6. Nắp Capo / Nắp động cơ
-            if (/capo|cap|nap\s*(truoc|may|dong\s*co)/.test(name)) return imgWrap('https://cdn-icons-png.flaticon.com/512/3097/3097180.png');
+            if (/capo|cap|nap\s*(truoc|may|dong\s*co)/.test(name)) return imgWrap('https://cdn-icons-png.flaticon.com/128/18890/18890525.png');
             
             // 7. Cốp sau / Nắp thùng
             if (/cop|nap\s*sau|nap\s*thung/.test(name)) return imgWrap('https://cdn-icons-png.flaticon.com/512/5812/5812836.png');
@@ -3907,7 +3914,7 @@
             if (/den\s*(hau|sau|de|lui)/.test(name)) return imgWrap('https://cdn-icons-png.flaticon.com/512/8700/8700208.png');
             
             // 10. Gương chiếu hậu / Kiếng hậu
-            if (/guong|kinh\s*chieu|kieng\s*chieu/.test(name)) return imgWrap('https://cdn-icons-png.flaticon.com/512/3100/3100345.png');
+            if (/guong|kinh\s*chieu|kieng\s*chieu/.test(name)) return imgWrap('https://cdn-icons-png.flaticon.com/128/9328/9328133.png');
             
             // 11. Trụ A, B, C / Cột
             if (/tru|cot/.test(name)) return imgWrap('https://cdn-icons-png.flaticon.com/512/6253/6253163.png');
@@ -3919,10 +3926,10 @@
             if (/san|gam|chassis/.test(name)) return imgWrap('https://cdn-icons-png.flaticon.com/512/6121/6121087.png');
             
             // 14. Bánh xe / La zăng / Mâm / Lốp
-            if (/banh|la\s*zang|lazang|mam|lop/.test(name)) return imgWrap('https://cdn-icons-png.flaticon.com/512/1750/1750058.png');
+            if (/banh|la\s*zang|lazang|mam|lop/.test(name)) return imgWrap('https://cdn-icons-png.flaticon.com/128/9322/9322911.png');
 
             // 15. DEFAULT: Icon xe ô tô chung
-            return imgWrap('https://cdn-icons-png.flaticon.com/512/3204/3204121.png');
+            return imgWrap('https://cdn-icons-png.flaticon.com/128/4900/4900649.png');
         },
 
         // ── RENDER ────────────────────────────────────────────────
