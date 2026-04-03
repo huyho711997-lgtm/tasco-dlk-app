@@ -8978,14 +8978,14 @@
                     let angle = 0;
                     if (Math.abs(e.beta) < 45 || Math.abs(e.beta) > 135) { 
                         if (e.gamma > 45) angle = -90; // Quay phải
-                        else if (e.gamma < -45) angle = 90; // Quay trái
+                        else if (e.gamma < -45) angle = 90;  // Quay trái
                     }
                     this._deviceOrientation = angle;
                 }
 
-                // CHỈ xoay các Icon UI (Nút đóng, Nút đổi cam), KHÔNG XOAY VIDEO để tránh méo hình
-                document.querySelectorAll('#secure-camera-modal .lucide').forEach(icon => {
-                    icon.style.transform = `rotate(${-this._deviceOrientation}deg)`;
+                // CHỈ xoay các Icon UI (Nút đóng, Nút đổi cam, Nút V, Số đếm) - Đã SỬA CHIỀU XOAY
+                document.querySelectorAll('#secure-camera-modal .lucide, #sc-zoom-btn, #secure-camera-count').forEach(icon => {
+                    icon.style.transform = `rotate(${this._deviceOrientation}deg)`;
                     icon.style.transition = 'transform 0.3s ease';
                 });
             };
@@ -9099,21 +9099,16 @@
             const vh = video.videoHeight;
             const angle = this._deviceOrientation || 0;
 
-            // XỬ LÝ LẬT ẢNH HOÀN HẢO
+            // XỬ LÝ LẬT ẢNH HOÀN HẢO VÀO CANVAS
             if (Math.abs(angle) === 90) {
-                // GĐV đang khóa dọc nhưng cầm ngang máy
-                // Trình duyệt báo video là Dọc (VD: 1080x1920), ta cần lật thành Canvas Ngang (1920x1080)
                 canvas.width = vh; 
                 canvas.height = vw;
                 ctx.translate(canvas.width / 2, canvas.height / 2);
-                
-                // Xoay bồi trừ góc nghiêng
                 ctx.rotate(-angle * Math.PI / 180); 
                 
                 if (this._facingMode === 'user') ctx.scale(-1, 1);
                 ctx.drawImage(video, -vw / 2, -vh / 2, vw, vh);
             } else {
-                // Cầm dọc bình thường
                 canvas.width = vw;
                 canvas.height = vh;
                 if (this._facingMode === 'user') {
@@ -9168,13 +9163,17 @@
                 window.removeEventListener('deviceorientation', this._orientationHandler);
                 this._orientationHandler = null;
             }
-            document.querySelectorAll('#secure-camera-modal .lucide').forEach(icon => icon.style.transform = 'rotate(0deg)');
+            // Trả icon UI về đứng thẳng
+            document.querySelectorAll('#secure-camera-modal .lucide, #sc-zoom-btn, #secure-camera-count').forEach(icon => icon.style.transform = 'rotate(0deg)');
             const modal = document.getElementById('secure-camera-modal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
         }
     };
 
+    // ============================================================
+    // IMAGE PROCESSOR — Cấu hình Watermark siêu nét, kích thước tối ưu
+    // ============================================================
     const ImageProcessor = {
         async addWatermark(file, bsx = '', locationStr = '') {
             return new Promise((resolve, reject) => {
@@ -9199,41 +9198,43 @@
                         canvas.width = width;
                         canvas.height = height;
 
-                        // Vẽ ảnh gốc
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // Cấu hình Font chữ
-                        const fontSize = Math.max(14, Math.floor(width * 0.022)); 
-                        ctx.font = `800 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
+                        // Cấu hình Font chữ NHỎ HƠN (Giảm hệ số từ 0.022 xuống 0.015)
+                        const fontSize = Math.max(12, Math.floor(width * 0.015)); 
                         ctx.textAlign = 'right';
                         ctx.textBaseline = 'bottom';
 
-                        ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-                        ctx.shadowBlur = 4;
-                        ctx.shadowOffsetX = 1.5;
-                        ctx.shadowOffsetY = 1.5;
+                        // Đổ bóng đậm hơn một chút để chữ nhỏ vẫn đọc rõ trên nền sáng
+                        ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+                        ctx.shadowBlur = 5;
+                        ctx.shadowOffsetX = 2;
+                        ctx.shadowOffsetY = 2;
 
                         const timeStr = moment().format('DD/MM/YYYY HH:mm:ss');
                         const labelStr = bsx ? `TASCO DLK - ${bsx}` : 'TASCO DLK';
                         const locStr = locationStr;
-                        const padding = fontSize + 8;
+                        const padding = fontSize + 10;
                         
-                        // In Ngày giờ & Biển số (Màu trắng)
-                        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-                        ctx.fillText(timeStr, width - padding, height - padding);
-                        ctx.fillText(labelStr, width - padding, height - padding - fontSize * 1.3);
-
-                        // In Tọa độ GPS (Màu vàng sáng để dễ phân biệt)
+                        // 1. In Tọa độ GPS (Nằm sát DƯỚI CÙNG, màu vàng sáng)
                         ctx.font = `700 ${fontSize * 0.85}px "Plus Jakarta Sans", sans-serif`;
                         ctx.fillStyle = 'rgba(253, 224, 71, 0.95)'; 
-                        ctx.fillText(locStr, width - padding, height - padding - fontSize * 2.7);
+                        ctx.fillText(locStr, width - padding, height - padding);
 
-                        // Nén ảnh
+                        // 2. In Thời gian (Nằm ở giữa, cách định vị 1 dòng, màu trắng)
+                        ctx.font = `800 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                        ctx.fillText(timeStr, width - padding, height - padding - fontSize * 1.3);
+
+                        // 3. In TASCO DLK (Nằm trên cùng)
+                        ctx.fillText(labelStr, width - padding, height - padding - fontSize * 2.6);
+
+                        // Xuất ảnh
                         canvas.toBlob((blob) => {
                             if (!blob) return reject(new Error('Lỗi xử lý ảnh'));
                             const newFile = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
                             resolve(newFile);
-                        }, 'image/jpeg', 0.80);
+                        }, 'image/jpeg', 0.85);
                     };
                     img.onerror = reject;
                     img.src = e.target.result;
