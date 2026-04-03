@@ -11847,9 +11847,6 @@
                 }
 
                 // ==========================================
-                // BƯỚC 3: DỊCH NGƯỢC JSON CHO UI
-                // ==========================================
-                // ==========================================
                 // BƯỚC 3: DỊCH NGƯỢC JSON & TỰ ĐỘNG LƯU
                 // ==========================================
                 const finalResults = comparedData.map(r => {
@@ -11873,14 +11870,14 @@
 
                 // TỰ ĐỘNG LƯU VÀO FIREBASE NGAY KHI AI PHÂN TÍCH XONG
                 const errorCount = finalResults.filter(r => r.trangThai !== 'KHOP').length;
-                await db.ref(`Workstation/${item.id}`).update({
+                await db.ref(`Workstation/${this._id}`).update({ // Dùng this._id thay cho item.id
                     quoteCheckedAt: new Date().toISOString(),
                     quoteHasErrors: errorCount > 0,
                     quoteCheckResults: JSON.stringify(finalResults)
                 });
 
                 // Hiển thị giao diện
-                this._renderResults(finalResults, item.id);
+                this._renderResults(finalResults, this._id); // Dùng this._id thay cho item.id
 
             } catch (error) {
                 Swal.close();
