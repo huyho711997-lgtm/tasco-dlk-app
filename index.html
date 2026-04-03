@@ -11715,11 +11715,12 @@
             });
 
             try {
+                // Tối ưu 1: Giảm kích thước ảnh xuống 1024px để AI đọc nhanh hơn
                 const base64 = await OCR._compressImage(file, 1024);
                 const statusText = document.getElementById('qc-loading-status');
 
-                // Hàm gọi API tái sử dụng để code gọn hơn
-                const callGemini = async (prompt, imgBase64, key) => {
+                // Hàm gọi API tái sử dụng để code gọn hơn (Đã nâng cấp chống lỗi Timeout)
+                const callGemini = async (prompt, imgBase64, key, modelName = "gemini-2.5-flash") => {
                     const body = {
                         contents: [{ parts: [{ text: prompt }] }],
                         generationConfig: { temperature: 0.1 }
@@ -11729,26 +11730,39 @@
                     }
                     
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s cho mỗi bước
+                    // Nới lỏng thời gian chờ lên 45 giây để AI có đủ thời gian đọc ảnh báo giá dài
+                    const timeoutId = setTimeout(() => {
+                        // Truyền lý do abort để trình duyệt không báo "without reason" nữa
+                        controller.abort('Timeout'); 
+                    }, 45000); 
 
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${key}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(body),
-                        signal: controller.signal
-                    });
-                    
-                    clearTimeout(timeoutId);
-                    const data = await res.json();
-                    
-                    if (!res.ok || data.error) throw new Error(data?.error?.message || "Lỗi API");
-                    
-                    const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
                     try {
-                        return JSON.parse(txt.replace(/```json|```/gi, '').trim());
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${key}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(body),
+                            signal: controller.signal
+                        });
+                        
+                        clearTimeout(timeoutId);
+                        const data = await res.json();
+                        
+                        if (!res.ok || data.error) throw new Error(data?.error?.message || "Lỗi API từ Google");
+                        
+                        const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                        try {
+                            return JSON.parse(txt.replace(/```json|```/gi, '').trim());
+                        } catch (e) {
+                            const m = txt.match(/\[[\s\S]*\]/);
+                            return m ? JSON.parse(m[0]) : null;
+                        }
                     } catch (e) {
-                        const m = txt.match(/\[[\s\S]*\]/);
-                        return m ? JSON.parse(m[0]) : null;
+                        clearTimeout(timeoutId);
+                        // Bắt trúng lỗi do Timeout gây ra và đổi thành câu tiếng Việt
+                        if (e.name === 'AbortError' || e.message.includes('aborted')) {
+                            throw new Error('Máy chủ phản hồi quá lâu (Timeout). Đang thử lại...');
+                        }
+                        throw e;
                     }
                 };
 
@@ -11763,17 +11777,18 @@
                 let key1 = GeminiKeys.next();
                 
                 try {
-                    extractedData = await callGemini(PROMPT_1, base64, key1);
+                    // Bước 1 chỉ cần đọc chữ, dùng bản Lite cho tốc độ bàn thờ
+                    extractedData = await callGemini(PROMPT_1, base64, key1, "gemini-2.5-flash-lite");
                 } catch (e1) {
                     console.warn("Lỗi Bước 1, thử lại bằng Key khác:", e1);
                     key1 = GeminiKeys.next(); // Đổi key nếu lỗi
-                    extractedData = await callGemini(PROMPT_1, base64, key1);
+                    extractedData = await callGemini(PROMPT_1, base64, key1, "gemini-2.5-flash-lite");
                 }
 
                 if (!extractedData || !Array.isArray(extractedData)) {
                     throw new Error("Không thể đọc được ảnh báo giá. Vui lòng chụp rõ hơn.");
                 }
-                
+
                 // ==========================================
                 // BƯỚC 2: ĐỐI CHIẾU DỮ LIỆU (API 2)
                 // ==========================================
@@ -11816,12 +11831,12 @@
                 let key2 = GeminiKeys.next(); // Đổi sang một Key khác để chia tải
                 
                 try {
-                    // Gọi API 2 (Không gửi ảnh, chỉ gửi Prompt Text -> Chạy siêu nhanh)
-                    comparedData = await callGemini(PROMPT_2, null, key2);
+                    // Bước 2 cần tư duy logic, cộng tiền và gom nhóm -> Ép dùng bản Flash chuẩn
+                    comparedData = await callGemini(PROMPT_2, null, key2, "gemini-2.5-flash");
                 } catch (e2) {
                     console.warn("Lỗi Bước 2, thử lại bằng Key khác:", e2);
                     key2 = GeminiKeys.next();
-                    comparedData = await callGemini(PROMPT_2, null, key2);
+                    comparedData = await callGemini(PROMPT_2, null, key2, "gemini-2.5-flash");
                 }
 
                 if (!comparedData || !Array.isArray(comparedData)) {
