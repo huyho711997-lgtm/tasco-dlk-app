@@ -8937,64 +8937,63 @@
     };
 
     // ============================================================
-    // SECURE CAMERA — Chụp ngang thông minh & Chuyển góc Cam
+    // SECURE CAMERA — Chống fake, Zoom Lenses & Fix Khung hình
     // ============================================================
     const SecureCamera = {
         _stream: null,
-        _facingMode: 'environment',
+        _facingMode: 'environment', // Camera sau
         _id: null,
         _capturedFiles: [],
         _gpsLocation: '',
         _deviceOrientation: 0,
         _orientationHandler: null,
         
-        // Quản lý ống kính
-        _backCameras: [],
-        _currentCamIdx: 0,
-        _labels: ['1x', '0.5x', '2x'],
+        // Quản lý ống kính (Zoom phần cứng)
+        _zoomSupported: false,
+        _zoomMin: 1,
+        _zoomMax: 2,
+        _currentZoom: 1,
 
         async open(id) {
             this._id = id;
             this._capturedFiles = [];
             this._updateThumbs();
+            
             const modal = document.getElementById('secure-camera-modal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             
             const gpsLabel = document.getElementById('sc-gps-status');
-            gpsLabel.textContent = 'Đang tra cứu địa chỉ...';
+            gpsLabel.textContent = 'Đang tra cứu vệ tinh và địa chỉ...';
             gpsLabel.className = 'text-[10px] font-bold text-amber-400 animate-pulse';
 
             // 1. Lắng nghe cảm biến góc nghiêng (Gyroscope)
             this._deviceOrientation = 0;
             this._orientationHandler = (e) => {
-                let angle = 0;
-                // Nhận diện khi người dùng cầm ngang điện thoại
-                if (Math.abs(e.beta) < 45) {
-                    if (e.gamma > 45) angle = -90; // Quay sang phải
-                    else if (e.gamma < -45) angle = 90; // Quay sang trái
-                }
-                
-                if (this._deviceOrientation !== angle) {
+                // Nếu trình duyệt hoặc OS đã tự xoay ngang (Không khóa màn hình), bỏ qua việc tính toán
+                if (window.innerWidth > window.innerHeight) {
+                    this._deviceOrientation = 0;
+                } else {
+                    // Nhận diện khi người dùng khóa màn hình dọc nhưng cầm ngang máy
+                    let angle = 0;
+                    if (Math.abs(e.beta) < 45 || Math.abs(e.beta) > 135) { 
+                        if (e.gamma > 45) angle = -90; // Quay phải
+                        else if (e.gamma < -45) angle = 90; // Quay trái
+                    }
                     this._deviceOrientation = angle;
-                    
-                    // Xoay luồng Video trên màn hình (để UI vẫn giữ nguyên chiều dọc)
-                    const video = document.getElementById('secure-camera-video');
-                    if (video) video.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
-                    
-                    // Xoay các Icon (Báo hiệu cho GĐV biết đã nhận diện khổ ngang)
-                    document.querySelectorAll('#secure-camera-modal .lucide').forEach(icon => {
-                        icon.style.transform = `rotate(${-angle}deg)`;
-                        icon.style.transition = 'transform 0.3s ease';
-                    });
                 }
+
+                // CHỈ xoay các Icon UI (Nút đóng, Nút đổi cam), KHÔNG XOAY VIDEO để tránh méo hình
+                document.querySelectorAll('#secure-camera-modal .lucide').forEach(icon => {
+                    icon.style.transform = `rotate(${-this._deviceOrientation}deg)`;
+                    icon.style.transition = 'transform 0.3s ease';
+                });
             };
 
-            // Yêu cầu quyền cảm biến cho iOS 13+
             if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                 try {
-                    const permission = await DeviceOrientationEvent.requestPermission();
-                    if (permission === 'granted') window.addEventListener('deviceorientation', this._orientationHandler);
+                    const perm = await DeviceOrientationEvent.requestPermission();
+                    if (perm === 'granted') window.addEventListener('deviceorientation', this._orientationHandler);
                 } catch(err) {}
             } else {
                 window.addEventListener('deviceorientation', this._orientationHandler);
@@ -9012,54 +9011,43 @@
             });
         },
 
-        async _loadAvailableCameras() {
-            try {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                // Lọc lấy các ống kính camera sau (Thường có Ultra Wide, Wide, Tele)
-                this._backCameras = devices.filter(d => d.kind === 'videoinput' && d.label.toLowerCase().includes('back'));
-                if (this._backCameras.length === 0) this._backCameras = devices.filter(d => d.kind === 'videoinput');
-            } catch(e) { console.warn(e); }
-        },
-
         async _startStream() {
             if (this._stream) this._stream.getTracks().forEach(t => t.stop());
-            if (this._backCameras.length === 0) await this._loadAvailableCameras();
-
-            let videoConstraints = { facingMode: this._facingMode, width: { ideal: 4096 }, height: { ideal: 2160 } };
-
-            // Nếu máy có nhiều ống kính -> Kích hoạt đúng ống kính theo Index
-            if (this._facingMode === 'environment' && this._backCameras.length > 1) {
-                videoConstraints = { 
-                    deviceId: { exact: this._backCameras[this._currentCamIdx].deviceId },
-                    width: { ideal: 4096 }, height: { ideal: 2160 }
-                };
-            }
 
             try {
-                this._stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
+                this._stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: this._facingMode, width: { ideal: 4096 }, height: { ideal: 2160 } },
+                    audio: false
+                });
+                
                 const video = document.getElementById('secure-camera-video');
-                
-                // Ép kích thước Video luôn full màn hình dù có xoay
-                video.style.position = 'absolute';
-                video.style.top = '50%';
-                video.style.left = '50%';
-                video.style.width = '100vmax';
-                video.style.height = '100vmax';
+                // Trả video về nguyên bản: Phủ kín màn hình, không dùng css transform rotate
+                video.style.transform = 'none';
+                video.style.width = '100%';
+                video.style.height = '100%';
                 video.style.objectFit = 'cover';
-                video.style.transform = `translate(-50%, -50%) rotate(${this._deviceOrientation}deg)`;
-                
                 video.srcObject = this._stream;
 
-                // Hiển thị nút Zoom
+                // CẤU HÌNH ZOOM CHO ỐNG KÍNH (0.5x, 1x, 2x)
+                const track = this._stream.getVideoTracks()[0];
+                const capabilities = track.getCapabilities ? track.getCapabilities() : {};
                 const zoomBtn = document.getElementById('sc-zoom-btn');
-                if (zoomBtn) {
-                    if (this._facingMode === 'environment' && this._backCameras.length > 1) {
+
+                if (capabilities.zoom && this._facingMode === 'environment') {
+                    this._zoomSupported = true;
+                    this._zoomMin = capabilities.zoom.min || 1;
+                    this._zoomMax = Math.min(capabilities.zoom.max || 3, 3); // Khóa Max 3x để ảnh không bị vỡ
+                    this._currentZoom = 1;
+                    
+                    if (zoomBtn) {
                         zoomBtn.style.display = 'flex';
-                        zoomBtn.textContent = this._labels[this._currentCamIdx % this._labels.length];
-                    } else {
-                        zoomBtn.style.display = 'none';
+                        zoomBtn.textContent = '1x';
                     }
+                } else {
+                    this._zoomSupported = false;
+                    if (zoomBtn) zoomBtn.style.display = 'none';
                 }
+
             } catch (err) {
                 Toast.fire({ icon: 'error', title: 'Thiếu quyền Camera!' });
                 this.close();
@@ -9067,15 +9055,35 @@
         },
 
         toggleZoom() {
-            if (this._backCameras.length > 1) {
-                this._currentCamIdx = (this._currentCamIdx + 1) % this._backCameras.length;
-                this._startStream(); // Đổi sang ống kính tiếp theo
+            if (!this._zoomSupported || !this._stream) return;
+            const track = this._stream.getVideoTracks()[0];
+            
+            // Xoay vòng: 1x -> 2x -> 0.5x (nếu có) -> 1x
+            if (this._currentZoom === 1) {
+                this._currentZoom = 2; // Lên 2x
+            } else if (this._currentZoom === 2 && this._zoomMin < 1) {
+                this._currentZoom = this._zoomMin; // Xuống 0.5x (Góc siêu rộng)
+            } else {
+                this._currentZoom = 1; // Về lại 1x
+            }
+
+            try {
+                // Ép phần cứng Camera thay đổi tiêu cự
+                track.applyConstraints({ advanced: [{ zoom: this._currentZoom }] });
+                
+                const zoomBtn = document.getElementById('sc-zoom-btn');
+                if (zoomBtn) {
+                    let label = (this._currentZoom < 1) ? '0.5x' : this._currentZoom + 'x';
+                    zoomBtn.textContent = label;
+                }
+                if (window.navigator.vibrate) window.navigator.vibrate(15);
+            } catch (e) {
+                console.warn("Lỗi chuyển đổi ống kính", e);
             }
         },
 
         switchCamera() {
             this._facingMode = this._facingMode === 'environment' ? 'user' : 'environment';
-            this._currentCamIdx = 0;
             this._startStream();
         },
 
@@ -9091,24 +9099,28 @@
             const vh = video.videoHeight;
             const angle = this._deviceOrientation || 0;
 
+            // XỬ LÝ LẬT ẢNH HOÀN HẢO
             if (Math.abs(angle) === 90) {
-                // Khổ ngang: Đảo ngược Dài x Rộng của Canvas
-                canvas.width = vh;
+                // GĐV đang khóa dọc nhưng cầm ngang máy
+                // Trình duyệt báo video là Dọc (VD: 1080x1920), ta cần lật thành Canvas Ngang (1920x1080)
+                canvas.width = vh; 
                 canvas.height = vw;
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 
-                // Thuật toán bù trừ góc nghiêng để ảnh không bị lật ngược
+                // Xoay bồi trừ góc nghiêng
                 ctx.rotate(-angle * Math.PI / 180); 
                 
                 if (this._facingMode === 'user') ctx.scale(-1, 1);
                 ctx.drawImage(video, -vw / 2, -vh / 2, vw, vh);
             } else {
-                // Khổ dọc bình thường
+                // Cầm dọc bình thường
                 canvas.width = vw;
                 canvas.height = vh;
-                ctx.translate(canvas.width / 2, canvas.height / 2);
-                if (this._facingMode === 'user') ctx.scale(-1, 1);
-                ctx.drawImage(video, -vw / 2, -vh / 2, vw, vh);
+                if (this._facingMode === 'user') {
+                    ctx.translate(canvas.width, 0);
+                    ctx.scale(-1, 1);
+                }
+                ctx.drawImage(video, 0, 0, vw, vh);
             }
             
             canvas.toBlob((blob) => {
@@ -9156,10 +9168,7 @@
                 window.removeEventListener('deviceorientation', this._orientationHandler);
                 this._orientationHandler = null;
             }
-            // Trả icon UI về đứng thẳng
-            document.querySelectorAll('#secure-camera-modal .lucide').forEach(icon => {
-                icon.style.transform = 'rotate(0deg)';
-            });
+            document.querySelectorAll('#secure-camera-modal .lucide').forEach(icon => icon.style.transform = 'rotate(0deg)');
             const modal = document.getElementById('secure-camera-modal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
