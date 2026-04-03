@@ -8892,8 +8892,160 @@
         },
     };
         
+    const LocationHelper = {
+        async get() {
+            return new Promise((resolve) => {
+                if (!navigator.geolocation) {
+                    resolve('Không hỗ trợ định vị');
+                    return;
+                }
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        const lat = pos.coords.latitude.toFixed(6);
+                        const lng = pos.coords.longitude.toFixed(6);
+                        resolve(`GPS: ${lat}, ${lng}`);
+                    },
+                    (err) => {
+                        console.warn(err);
+                        resolve('Không lấy được vị trí GPS');
+                    },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+            });
+        }
+    };  
+
+    // ============================================================
+    // SECURE CAMERA — Chụp liên tục & Chống gian lận
+    // ============================================================
+    const SecureCamera = {
+        _stream: null,
+        _facingMode: 'environment', // Camera sau mặc định
+        _id: null,
+        _capturedFiles: [],
+        _gpsLocation: '',
+
+        async open(id) {
+            this._id = id;
+            this._capturedFiles = [];
+            this._updateThumbs();
+            const modal = document.getElementById('secure-camera-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            const gpsLabel = document.getElementById('sc-gps-status');
+            gpsLabel.textContent = 'Đang lấy tọa độ GPS...';
+            gpsLabel.classList.add('text-amber-400', 'animate-pulse');
+            gpsLabel.classList.remove('text-emerald-400');
+
+            // Khởi động Camera trước để người dùng không phải chờ
+            await this._startStream();
+            lucide.createIcons();
+
+            // Lấy GPS chạy ngầm song song
+            this._gpsLocation = await LocationHelper.get();
+            gpsLabel.textContent = '✓ ' + this._gpsLocation;
+            gpsLabel.classList.remove('text-amber-400', 'animate-pulse');
+            gpsLabel.classList.add('text-emerald-400');
+        },
+
+        async _startStream() {
+            if (this._stream) {
+                this._stream.getTracks().forEach(t => t.stop());
+            }
+            try {
+                this._stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: this._facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } },
+                    audio: false
+                });
+                const video = document.getElementById('secure-camera-video');
+                video.srcObject = this._stream;
+            } catch (err) {
+                Toast.fire({ icon: 'error', title: 'Cần cấp quyền truy cập Camera!' });
+                this.close();
+            }
+        },
+
+        switchCamera() {
+            this._facingMode = this._facingMode === 'environment' ? 'user' : 'environment';
+            this._startStream();
+        },
+
+        takePhoto() {
+            if (!this._stream) return;
+            if (window.navigator.vibrate) window.navigator.vibrate(40); // Rung khi chụp
+            
+            const video = document.getElementById('secure-camera-video');
+            const canvas = document.createElement('canvas'); // Tạo canvas ảo trong RAM để không giật khung hình
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            
+            // Xử lý bị ngược hình nếu đang dùng camera trước
+            if (this._facingMode === 'user') {
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+            }
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            canvas.toBlob((blob) => {
+                const file = new File([blob], `TASCO_${Date.now()}.jpg`, { type: 'image/jpeg' });
+                const previewUrl = URL.createObjectURL(blob);
+                this._capturedFiles.push({ file, preview: previewUrl });
+                this._updateThumbs();
+            }, 'image/jpeg', 0.95); // Giữ chất lượng cao lúc chụp
+
+            // Hiệu ứng chớp nháy (Flash)
+            const flash = document.getElementById('secure-camera-flash');
+            flash.style.opacity = '1';
+            setTimeout(() => flash.style.opacity = '0', 100);
+        },
+
+        _updateThumbs() {
+            const thumb = document.getElementById('secure-camera-thumbs');
+            const count = document.getElementById('secure-camera-count');
+            if (this._capturedFiles.length > 0) {
+                thumb.style.backgroundImage = `url(${this._capturedFiles[this._capturedFiles.length - 1].preview})`;
+                thumb.style.transform = 'scale(1.1)';
+                setTimeout(() => thumb.style.transform = 'scale(1)', 150);
+                count.textContent = this._capturedFiles.length;
+                count.classList.remove('hidden');
+            } else {
+                thumb.style.backgroundImage = 'none';
+                count.classList.add('hidden');
+            }
+        },
+
+        async done() {
+            if (this._capturedFiles.length === 0) {
+                this.close();
+                return;
+            }
+            
+            const filesToUpload = this._capturedFiles.map(c => c.file);
+            // Giải phóng RAM
+            this._capturedFiles.forEach(c => URL.revokeObjectURL(c.preview));
+            this._capturedFiles = [];
+            
+            this.close();
+            
+            // Chuyển toàn bộ ảnh sang hàm Upload Ngầm để đóng dấu GPS và đẩy lên server
+            await Images._processSecureUpload(filesToUpload, this._id, this._gpsLocation);
+        },
+
+        close() {
+            if (this._stream) {
+                this._stream.getTracks().forEach(t => t.stop());
+                this._stream = null;
+            }
+            const modal = document.getElementById('secure-camera-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    };
+
     const ImageProcessor = {
-        async addWatermark(file, bsx = '') {
+        async addWatermark(file, bsx = '', locationStr = '') {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
@@ -8902,7 +9054,6 @@
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
 
-                        // 1. Giảm phân giải xuống 1280px: Đủ nét để GĐV xem, nhưng xử lý cực nhanh
                         let MAX_WIDTH = 1280;
                         let MAX_HEIGHT = 1280;
                         let width = img.width;
@@ -8917,13 +9068,12 @@
                         canvas.width = width;
                         canvas.height = height;
 
-                        // 2. Vẽ ảnh gốc lên canvas
+                        // Vẽ ảnh gốc
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // 3. Cấu hình Font chữ NHỎ HƠN (Giảm hệ số nhân từ 0.035 xuống 0.022)
+                        // Cấu hình Font chữ
                         const fontSize = Math.max(14, Math.floor(width * 0.022)); 
                         ctx.font = `800 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
-                        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
                         ctx.textAlign = 'right';
                         ctx.textBaseline = 'bottom';
 
@@ -8932,16 +9082,22 @@
                         ctx.shadowOffsetX = 1.5;
                         ctx.shadowOffsetY = 1.5;
 
-                        // 4. Chuẩn bị nội dung đóng dấu
                         const timeStr = moment().format('DD/MM/YYYY HH:mm:ss');
                         const labelStr = bsx ? `TASCO DLK - ${bsx}` : 'TASCO DLK';
+                        const locStr = locationStr;
                         const padding = fontSize + 8;
                         
-                        // 5. In chữ
+                        // In Ngày giờ & Biển số (Màu trắng)
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
                         ctx.fillText(timeStr, width - padding, height - padding);
                         ctx.fillText(labelStr, width - padding, height - padding - fontSize * 1.3);
 
-                        // 6. Nén JPEG 80% (tối ưu dung lượng để upload nhanh nhất có thể)
+                        // In Tọa độ GPS (Màu vàng sáng để dễ phân biệt)
+                        ctx.font = `700 ${fontSize * 0.85}px "Plus Jakarta Sans", sans-serif`;
+                        ctx.fillStyle = 'rgba(253, 224, 71, 0.95)'; 
+                        ctx.fillText(locStr, width - padding, height - padding - fontSize * 2.7);
+
+                        // Nén ảnh
                         canvas.toBlob((blob) => {
                             if (!blob) return reject(new Error('Lỗi xử lý ảnh'));
                             const newFile = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
@@ -9005,10 +9161,10 @@
             }).join('');
 
             const addTile = `
-                <label for="img-upload-btn" class="relative shrink-0 flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 cursor-pointer active:bg-blue-50 active:border-blue-300 transition-all" style="width:72px;height:72px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-                    <span style="font-size:8px;font-weight:800;color:#94a3b8;">Thêm</span>
-                </label>`;
+                <div onclick="Images.showAddOptions('${id}')" class="relative shrink-0 flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-slate-400 bg-slate-100 cursor-pointer active:bg-blue-50 active:border-blue-400 transition-all" style="width:72px;height:72px;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                    <span style="font-size:9px;font-weight:900;color:#475569;">CHỤP/THÊM</span>
+                </div>`;
 
             container.innerHTML = `<div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">${tiles}${addTile}</div>`;
         },
@@ -9021,57 +9177,51 @@
             const cat = await this._pickCategory();
             if (!cat) return;
 
+            // BẬT LẤY ĐỊNH VỊ NGAY KHI VỪA CHỌN ẢNH XONG
+            const gpsLocation = await LocationHelper.get();
+
             const item = App.find(id) || {};
             const current = (item.documentImages || []).map(i => typeof i === 'string' ? { url: i, cat: 'other' } : i);
             const bsxToStamp = item.bsx || '';
 
-            // 1. Tạo Url cục bộ (Blob URL) để hiện ngay lên màn hình không cần chờ mạng
             const tempFiles = files.map(file => {
                 const tempId = 'temp_' + Math.random().toString(36).substr(2, 9);
                 const localUrl = URL.createObjectURL(file);
                 const tempObj = { url: localUrl, cat: cat, isUploading: true, tempId: tempId };
-                current.push(tempObj); // Nhét tạm vào mảng
+                current.push(tempObj);
                 return { file, tempObj, localUrl };
             });
 
-            // 2. Gán tạm mảng vào biến hệ thống và Render ngay lập tức
             item.documentImages = current;
             Images.render(id);
 
-            // 3. Kích hoạt xử lý và Upload NGẦM (Promise.all giúp up song song cực nhanh)
             Promise.all(tempFiles.map(async ({ file, tempObj, localUrl }) => {
                 try {
-                    // Đóng dấu ngày giờ & Nén
-                    const watermarkedFile = await ImageProcessor.addWatermark(file, bsxToStamp);
+                    // Đưa định vị GPS vào hàm đóng dấu
+                    const watermarkedFile = await ImageProcessor.addWatermark(file, bsxToStamp, gpsLocation);
                     
-                    // Upload lên Cloudinary
                     const fd = new FormData();
                     fd.append('file', watermarkedFile);
                     fd.append('upload_preset', CONFIG.cloudinary.preset);
                     const res = await fetch(CONFIG.cloudinary.url, { method: 'POST', body: fd });
                     const data = await res.json();
                     
-                    // Up xong, đổi URL ảo thành URL thật và xóa cờ loading
                     if (data.secure_url) {
                         tempObj.url = data.secure_url;
                         delete tempObj.isUploading;
                         delete tempObj.tempId;
                     }
                 } catch (e) {
-                    console.error("Lỗi up ảnh ngầm:", e);
-                    Toast.fire({ icon: 'error', title: 'Lỗi tải ảnh: ' + file.name.slice(0, 15) });
-                    // Nếu lỗi, xóa ảnh ảo khỏi danh sách
                     const idx = current.findIndex(i => i.tempId === tempObj.tempId);
                     if (idx > -1) current.splice(idx, 1);
                 } finally {
-                    URL.revokeObjectURL(localUrl); // Giải phóng RAM
-                    Images.render(id); // Cập nhật lại UI từng tấm một khi xong
+                    URL.revokeObjectURL(localUrl);
+                    Images.render(id);
                 }
             })).then(() => {
-                // 4. Khi TẤT CẢ các ảnh đã up xong ngầm, lưu mảng hoàn chỉnh vào Firebase
-                const finalImages = current.filter(i => !i.isUploading); // Chắc cú bỏ đi các ảnh kẹt
+                const finalImages = current.filter(i => !i.isUploading);
                 db.ref(`Workstation/${id}/documentImages`).set(finalImages).then(() => {
-                    Toast.fire({ icon: 'success', title: `Đã tải lên ${files.length} ảnh!` });
+                    Toast.fire({ icon: 'success', title: `Đã tải lên ${files.length} ảnh có định vị!` });
                 });
             });
         },
@@ -9157,7 +9307,93 @@
                     }
                 }).then(r => { if (r.isDismissed) resolve(null); });
             });
-        }
+        },
+        // HIỂN THỊ MENU LỰA CHỌN KHI BẤM NÚT "THÊM ẢNH"
+        showAddOptions(id) {
+            Swal.fire({
+                title: '<span class="text-sm font-black text-slate-800">Thêm hình ảnh</span>',
+                html: `
+                    <div class="flex flex-col gap-3 mt-4">
+                        <button onclick="Swal.close(); setTimeout(()=>SecureCamera.open('${id}'), 200)" 
+                            class="flex items-center gap-3 p-4 bg-emerald-50 border-2 border-emerald-200 rounded-2xl text-emerald-800 active:scale-95 transition-transform text-left">
+                            <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-md">
+                                <i data-lucide="camera" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <p class="font-black text-[15px] uppercase">Chụp Hiện Trường</p>
+                                <p class="text-[11px] text-emerald-600 font-bold mt-1">Chụp liên tục, chèn tọa độ tự động</p>
+                            </div>
+                        </button>
+
+                        <label class="flex items-center gap-3 p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl text-slate-700 active:scale-95 transition-transform text-left cursor-pointer">
+                            <div class="w-12 h-12 bg-slate-200 text-slate-500 rounded-xl flex items-center justify-center shrink-0">
+                                <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <p class="font-black text-[15px] uppercase">Tải giấy tờ từ máy</p>
+                                <p class="text-[11px] text-slate-500 font-medium mt-1">Dành cho Hóa đơn, Báo giá, Đăng kiểm...</p>
+                            </div>
+                            <input type="file" class="hidden" accept="image/*" multiple onchange="Swal.close(); Images.upload(event, '${id}')">
+                        </label>
+                    </div>
+                `,
+                showConfirmButton: false, showCloseButton: true, customClass: { popup: 'custom-rounded w-full' },
+                didOpen: () => lucide.createIcons()
+            });
+        },
+
+        // HÀM XỬ LÝ UPLOAD DÀNH CHO ẢNH CHỤP TỪ CAMERA KHÉP KÍN
+        async _processSecureUpload(files, id, gpsLocation) {
+            if (!files.length || !id) return;
+
+            const item = App.find(id) || {};
+            const current = (item.documentImages || []).map(i => typeof i === 'string' ? { url: i, cat: 'other' } : i);
+            const bsxToStamp = item.bsx || '';
+
+            // Phân loại tự động là 'scene' (Ảnh hiện trường)
+            const cat = 'scene';
+
+            const tempFiles = files.map(file => {
+                const tempId = 'temp_' + Math.random().toString(36).substr(2, 9);
+                const localUrl = URL.createObjectURL(file);
+                const tempObj = { url: localUrl, cat: cat, isUploading: true, tempId: tempId };
+                current.push(tempObj);
+                return { file, tempObj, localUrl };
+            });
+
+            item.documentImages = current;
+            Images.render(id);
+
+            Promise.all(tempFiles.map(async ({ file, tempObj, localUrl }) => {
+                try {
+                    // Tận dụng tọa độ GPS lấy sẵn lúc mở camera để tiết kiệm thời gian
+                    const watermarkedFile = await ImageProcessor.addWatermark(file, bsxToStamp, gpsLocation);
+                    
+                    const fd = new FormData();
+                    fd.append('file', watermarkedFile);
+                    fd.append('upload_preset', CONFIG.cloudinary.preset);
+                    const res = await fetch(CONFIG.cloudinary.url, { method: 'POST', body: fd });
+                    const data = await res.json();
+                    
+                    if (data.secure_url) {
+                        tempObj.url = data.secure_url;
+                        delete tempObj.isUploading;
+                        delete tempObj.tempId;
+                    }
+                } catch (e) {
+                    const idx = current.findIndex(i => i.tempId === tempObj.tempId);
+                    if (idx > -1) current.splice(idx, 1);
+                } finally {
+                    URL.revokeObjectURL(localUrl);
+                    Images.render(id);
+                }
+            })).then(() => {
+                const finalImages = current.filter(i => !i.isUploading);
+                db.ref(`Workstation/${id}/documentImages`).set(finalImages).then(() => {
+                    Toast.fire({ icon: 'success', title: `Đã lưu ${files.length} ảnh hiện trường!` });
+                });
+            });
+        },
     };
 
     // ============================================================
@@ -12678,6 +12914,44 @@
             </div>
         </div>
         <div id="noti-list" class="flex-1 overflow-y-auto px-4 py-3 space-y-2 no-scrollbar" style="min-height:250px;"></div>
+    </div>
+
+    
+    <div id="secure-camera-modal" class="fixed inset-0 bg-black z-[99999] hidden flex-col">
+        <div class="flex justify-between items-center p-5 text-white z-20 absolute top-0 w-full bg-gradient-to-b from-black/80 to-transparent">
+            <button onclick="SecureCamera.close()" class="p-2 bg-black/50 rounded-full active:scale-90 transition-transform"><i data-lucide="x" class="w-6 h-6"></i></button>
+            <div class="text-center">
+                <p class="font-black text-sm uppercase tracking-widest text-emerald-400">Camera An Toàn</p>
+                <p class="text-[10px] font-bold text-white/70" id="sc-gps-status">Đang tìm vệ tinh GPS...</p>
+            </div>
+            <button onclick="SecureCamera.switchCamera()" class="p-2 bg-black/50 rounded-full active:scale-90 transition-transform"><i data-lucide="refresh-ccw" class="w-5 h-5"></i></button>
+        </div>
+
+        <div class="flex-1 relative flex items-center justify-center overflow-hidden bg-black">
+            <video id="secure-camera-video" autoplay playsinline class="absolute min-w-full min-h-full object-cover"></video>
+            <div id="secure-camera-flash" class="absolute inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-100 z-10"></div>
+            
+            <div class="absolute inset-0 border border-white/20 grid grid-cols-3 grid-rows-3 pointer-events-none z-10">
+                <div class="border-r border-b border-white/20"></div><div class="border-r border-b border-white/20"></div><div class="border-b border-white/20"></div>
+                <div class="border-r border-b border-white/20"></div><div class="border-r border-b border-white/20"></div><div class="border-b border-white/20"></div>
+                <div class="border-r border-white/20"></div><div class="border-r border-white/20"></div><div></div>
+            </div>
+        </div>
+
+        <div class="h-36 bg-black flex items-center justify-between px-8 pb-safe z-20 absolute bottom-0 w-full bg-gradient-to-t from-black to-black/80">
+            <div class="relative">
+                <div id="secure-camera-thumbs" class="w-14 h-14 rounded-xl bg-slate-800 bg-cover bg-center border-2 border-slate-600 transition-all"></div>
+                <span id="secure-camera-count" class="absolute -top-2 -right-2 bg-rose-600 text-white text-[11px] w-6 h-6 rounded-full flex items-center justify-center font-black hidden shadow-md shadow-rose-500/50 scale-in">0</span>
+            </div>
+
+            <button onclick="SecureCamera.takePhoto()" class="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center active:scale-90 transition-transform">
+                <div class="w-[68px] h-[68px] rounded-full bg-white border-4 border-black"></div>
+            </button>
+
+            <button onclick="SecureCamera.done()" class="w-14 h-14 rounded-full bg-emerald-600 text-white flex items-center justify-center active:scale-90 transition-transform shadow-lg shadow-emerald-600/40">
+                <i data-lucide="check" class="w-7 h-7"></i>
+            </button>
+        </div>
     </div>
 </body>
 </html>
