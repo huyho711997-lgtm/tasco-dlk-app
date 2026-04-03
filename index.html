@@ -12213,8 +12213,9 @@
                 // ==========================================
                 // BƯỚC 3: MERGE KẾT QUẢ VÀO HẠNG MỤC GĐ & LƯU FIREBASE
                 // ==========================================
-                const item = App.find(this._id);
-                let damageItems = [...(item.damageItems || [])];
+                const freshSnap = await db.ref(`Workstation/${this._id}/damageItems`).once('value');
+                const freshList = freshSnap.val() || item.damageItems || [];
+                let damageItems = JSON.parse(JSON.stringify(freshList));
 
                 comparedData.forEach(r => {
                     let strStatus = { 1: 'KHOP', 2: 'SAI_PHUONG_AN', 3: 'GARA_BAO_DU', 4: 'GARA_QUEN_BAO' }[r.tt] || 'KHOP';
