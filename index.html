@@ -1410,6 +1410,23 @@
         }
         [data-theme="dark"] .qc-action-btn { background: var(--bg-app); }
         [data-theme="dark"] .qc-action-btn:active { background: rgba(59, 130, 246, 0.1); }
+        /* Các nút tùy chọn nguồn tải Báo giá */
+        .qc-action-btn {
+            display: flex; align-items: center; gap: 14px;
+            width: 100%; padding: 14px 16px; margin-bottom: 12px;
+            border-radius: 16px; border: 1.5px solid var(--border-light, #e2e8f0);
+            background: var(--bg-surface, #f8fafc);
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            cursor: pointer; text-align: left;
+        }
+        .qc-action-btn:last-child { margin-bottom: 0; }
+        .qc-action-btn:active { transform: scale(0.98); border-color: #3b82f6; background: var(--bg-white, #fff); }
+        .qc-action-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        [data-theme="dark"] .qc-action-btn { background: var(--bg-app); }
+        [data-theme="dark"] .qc-action-btn:active { background: rgba(59, 130, 246, 0.1); }
     </style>
 </head>
 <body class="h-screen w-full flex flex-col overflow-hidden bg-slate-50">
