@@ -1412,6 +1412,134 @@
         }
         [data-theme="dark"] .qc-action-btn { background: var(--bg-app); }
         [data-theme="dark"] .qc-action-btn:active { background: rgba(59, 130, 246, 0.1); }
+        /* ============================================================
+           QUOTE CHECKER v2 — FULL SCREEN PANEL
+           ============================================================ */
+        #qc-panel {
+            position: fixed; inset: 0; z-index: 9998;
+            background: var(--bg-app, #f8fafc);
+            display: flex; flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.34,1.1,0.64,1);
+        }
+        #qc-panel.open { transform: translateY(0); }
+        
+        .qc-header {
+            background: var(--bg-white, #fff);
+            border-bottom: 1px solid var(--border, #e2e8f0);
+            padding: 16px 16px 0; flex-shrink: 0;
+        }
+        .qc-tab-bar {
+            display: flex; gap: 4px; overflow-x: auto; padding-bottom: 0;
+            -ms-overflow-style: none; scrollbar-width: none;
+        }
+        .qc-tab-bar::-webkit-scrollbar { display: none; }
+        .qc-tab {
+            padding: 7px 14px; border-radius: 10px 10px 0 0; font-size: 11px;
+            font-weight: 800; cursor: pointer; white-space: nowrap; border: none;
+            background: transparent; color: var(--text-muted, #94a3b8);
+            border-bottom: 3px solid transparent; transition: all 0.2s;
+        }
+        .qc-tab.active { color: #2563eb; border-bottom-color: #2563eb; background: rgba(37,99,235,0.06); }
+        .qc-tab .qc-tab-count {
+            display: inline-block; min-width: 16px; height: 16px; border-radius: 8px;
+            background: currentColor; color: white; font-size: 9px; font-weight: 900;
+            line-height: 16px; text-align: center; padding: 0 3px; margin-left: 4px; opacity: 0.85;
+        }
+        
+        .qc-summary-bar {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+            padding: 10px 16px; background: var(--bg-white, #fff);
+            border-bottom: 1px solid var(--border, #e2e8f0); flex-shrink: 0;
+        }
+        .qc-sum-box {
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            padding: 8px 4px; border-radius: 10px; border: 1.5px solid;
+        }
+        .qc-sum-box .qc-sum-val { font-size: 18px; font-weight: 900; line-height: 1; }
+        .qc-sum-box .qc-sum-lbl { font-size: 9px; font-weight: 800; text-transform: uppercase; opacity: 0.7; }
+        .qc-sum-match  { background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.3); color: #059669; }
+        .qc-sum-diff   { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.3); color: #d97706; }
+        .qc-sum-extra  { background: rgba(239,68,68,0.08);  border-color: rgba(239,68,68,0.3);  color: #dc2626; }
+        .qc-sum-miss   { background: rgba(100,116,139,0.08);border-color: rgba(100,116,139,0.3);color: #475569; }
+        
+        .qc-money-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 16px; background: linear-gradient(135deg,#1e293b,#334155);
+            flex-shrink: 0; gap: 12px;
+        }
+        .qc-money-item { text-align: center; flex: 1; }
+        .qc-money-item .qc-money-lbl { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; }
+        .qc-money-item .qc-money-val { font-size: 13px; font-weight: 900; color: #f8fafc; margin-top: 2px; }
+        .qc-money-divider { width: 1px; height: 30px; background: rgba(255,255,255,0.15); flex-shrink: 0; }
+        .qc-money-diff-val { font-size: 13px; font-weight: 900; margin-top: 2px; }
+        .qc-money-diff-val.over  { color: #f87171; }
+        .qc-money-diff-val.under { color: #34d399; }
+        .qc-money-diff-val.even  { color: #94a3b8; }
+        
+        .qc-content { flex: 1; overflow-y: auto; padding: 12px 12px 80px; }
+        .qc-footer {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: var(--bg-white, #fff); border-top: 1px solid var(--border, #e2e8f0);
+            padding: 10px 12px; display: flex; gap: 8px; flex-shrink: 0;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+        }
+        .qc-footer-btn {
+            flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 11px 8px; border-radius: 12px; font-size: 12px; font-weight: 800;
+            cursor: pointer; border: none; transition: all 0.2s; white-space: nowrap;
+        }
+        .qc-footer-btn.primary { background: #2563eb; color: white; }
+        .qc-footer-btn.primary:active { background: #1d4ed8; transform: scale(0.97); }
+        .qc-footer-btn.secondary { background: var(--bg-surface, #f1f5f9); color: var(--text-secondary, #475569); border: 1.5px solid var(--border, #e2e8f0); }
+        .qc-footer-btn.secondary:active { background: var(--bg-white, #fff); transform: scale(0.97); }
+        .qc-footer-btn.danger { background: rgba(239,68,68,0.1); color: #dc2626; border: 1.5px solid rgba(239,68,68,0.3); }
+        .qc-footer-btn.danger:active { background: rgba(239,68,68,0.2); transform: scale(0.97); }
+        
+        .qc-card-v2 {
+            background: var(--bg-white, #fff); border-radius: 14px;
+            border: 1.5px solid var(--border, #e2e8f0);
+            margin-bottom: 8px; overflow: hidden;
+            transition: border-color 0.2s;
+        }
+        .qc-card-v2.qc-match  { border-left: 4px solid #10b981; }
+        .qc-card-v2.qc-diff   { border-left: 4px solid #f59e0b; background: rgba(254,243,199,0.3); }
+        .qc-card-v2.qc-extra  { border-left: 4px solid #ef4444; background: rgba(254,242,242,0.5); }
+        .qc-card-v2.qc-miss   { border-left: 4px solid #94a3b8; opacity: 0.85; }
+        
+        [data-theme="dark"] .qc-card-v2.qc-diff  { background: rgba(245,158,11,0.06); }
+        [data-theme="dark"] .qc-card-v2.qc-extra { background: rgba(239,68,68,0.06); }
+        
+        .qc-card-head {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 12px 8px; gap: 8px;
+        }
+        .qc-card-body { padding: 0 12px 10px; }
+        .qc-card-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px;
+        }
+        .qc-col-v2 {
+            background: var(--bg-surface, #f8fafc); padding: 8px 10px;
+            border-radius: 8px; border: 1px solid var(--border, #f1f5f9);
+        }
+        .qc-col-title-v2 { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 3px; }
+        .qc-col-pa { font-size: 12px; font-weight: 800; }
+        .qc-col-price { font-size: 13px; font-weight: 900; margin-top: 2px; }
+        .qc-warn-row {
+            display: flex; align-items: flex-start; gap: 6px;
+            background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+            border-radius: 8px; padding: 6px 10px; margin-bottom: 6px;
+            font-size: 11px; font-weight: 700; color: #dc2626;
+        }
+        
+        /* Empty state */
+        .qc-empty {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; padding: 48px 20px; gap: 8px;
+            color: var(--text-muted, #94a3b8); text-align: center;
+        }
+        .qc-empty svg { opacity: 0.3; }
+        .qc-empty p { font-size: 13px; font-weight: 700; }      
     </style>
 </head>
 <body class="h-screen w-full flex flex-col overflow-hidden bg-slate-50">
@@ -11616,344 +11744,465 @@
     };
         
     // ============================================================
-    // QUOTE CHECKER (ĐỐI CHIẾU BÁO GIÁ VỚI BBGĐ)
-    // ============================================================
-    const QuoteChecker = {
-        _id: null,
-        
-        open(id) {
-            const item = App.find(id);
-            if (!item || !item.damageItems || item.damageItems.length === 0) {
-                Toast.fire({ icon: 'warning', title: 'Hồ sơ chưa có hạng mục nào để đối chiếu!' });
-                return;
-            }
-            this._id = id;
+    // QUOTE CHECKER v2 (ĐỐI CHIẾU BÁO GIÁ VỚI BBGĐ) — NÂNG CẤP TOÀN DIỆN
+    // ============================================================
+    const QuoteChecker = {
+        _id: null,
+        _results: [],
+        _activeTab: 'all',
 
-            // Xây dựng Menu (Bottom Sheet) chọn nguồn ảnh
-            const html = `
-                <div class="text-left mt-3">
-                    <button class="qc-action-btn" onclick="Swal.close(); setTimeout(() => QuoteChecker._triggerInput('camera', '${id}'), 300)">
-                        <div class="qc-action-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
-                            <i data-lucide="camera" class="w-5 h-5"></i>
-                        </div>
-                        <div>
-                            <div style="font-size:14px;font-weight:800;color:var(--text-primary, #1e293b);">Chụp ảnh báo giá</div>
-                            <div style="font-size:11px;font-weight:600;color:var(--text-secondary, #64748b);margin-top:2px;">Mở Camera để chụp trực tiếp</div>
-                        </div>
-                    </button>
+        open(id) {
+            const item = App.find(id);
+            if (!item || !item.damageItems || item.damageItems.length === 0) {
+                Toast.fire({ icon: 'warning', title: 'Hồ sơ chưa có hạng mục nào để đối chiếu!' });
+                return;
+            }
+            this._id = id;
 
-                    <button class="qc-action-btn" onclick="Swal.close(); setTimeout(() => QuoteChecker._triggerInput('gallery', '${id}'), 300)">
-                        <div class="qc-action-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
-                            <i data-lucide="image" class="w-5 h-5"></i>
-                        </div>
-                        <div>
-                            <div style="font-size:14px;font-weight:800;color:var(--text-primary, #1e293b);">Chọn từ thư viện</div>
-                            <div style="font-size:11px;font-weight:600;color:var(--text-secondary, #64748b);margin-top:2px;">Tải lên ảnh hoặc ảnh chụp màn hình</div>
-                        </div>
-                    </button>
-                </div>
-            `;
+            // Nếu đã có kết quả lưu sẵn → hỏi có muốn xem lại không
+            const saved = this._loadSaved(id);
+            if (saved && saved.results && saved.results.length > 0) {
+                Swal.fire({
+                    title: '<div style="font-size:15px;font-weight:900;color:var(--text-primary,#0f172a)">Kết quả đã lưu</div>',
+                    html: `<p style="font-size:13px;color:var(--text-secondary,#64748b);">Đã có kết quả đối chiếu từ <b>${saved.time}</b>.<br>Bạn muốn xem lại hay quét mới?</p>`,
+                    showDenyButton: true,
+                    confirmButtonText: '📂 Xem lại',
+                    denyButtonText: '📷 Quét mới',
+                    customClass: { popup: 'custom-rounded', confirmButton: 'swal2-styled', denyButton: 'swal2-styled' },
+                }).then(r => {
+                    if (r.isConfirmed) this._openPanel(saved.results, item);
+                    else this._showSourceMenu(id, item);
+                });
+                return;
+            }
+            this._showSourceMenu(id, item);
+        },
 
-            Swal.fire({
-                title: '<div class="text-left font-black text-lg flex items-center gap-2" style="color:var(--text-primary, #1e293b);"><div style="width:32px;height:32px;background:var(--bg-surface, #f1f5f9);border-radius:10px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg></div> Nguồn báo giá</div>',
-                html: html,
-                showConfirmButton: false,
-                showCloseButton: true,
-                position: 'bottom',
-                customClass: { popup: 'custom-rounded w-full mb-0 rounded-b-none', title: '!pb-0 !px-1' },
-                didOpen: () => lucide.createIcons()
-            });
-        },
+        _showSourceMenu(id, item) {
+            const html = `
+                <div class="text-left mt-3">
+                    <button class="qc-action-btn" onclick="Swal.close(); setTimeout(() => QuoteChecker._triggerInput('camera', '${id}'), 300)">
+                        <div class="qc-action-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6;">
+                            <i data-lucide="camera" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:14px;font-weight:800;color:var(--text-primary,#1e293b);">Chụp ảnh báo giá</div>
+                            <div style="font-size:11px;font-weight:600;color:var(--text-secondary,#64748b);margin-top:2px;">Mở Camera để chụp trực tiếp</div>
+                        </div>
+                    </button>
+                    <button class="qc-action-btn" onclick="Swal.close(); setTimeout(() => QuoteChecker._triggerInput('gallery', '${id}'), 300)">
+                        <div class="qc-action-icon" style="background:rgba(16,185,129,0.15);color:#10b981;">
+                            <i data-lucide="image" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:14px;font-weight:800;color:var(--text-primary,#1e293b);">Chọn từ thư viện</div>
+                            <div style="font-size:11px;font-weight:600;color:var(--text-secondary,#64748b);margin-top:2px;">Tải lên ảnh hoặc ảnh chụp màn hình</div>
+                        </div>
+                    </button>
+                </div>`;
+            Swal.fire({
+                title: '<div class="text-left font-black text-lg flex items-center gap-2" style="color:var(--text-primary,#1e293b);"><div style="width:32px;height:32px;background:var(--bg-surface,#f1f5f9);border-radius:10px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg></div> Nguồn báo giá</div>',
+                html,
+                showConfirmButton: false, showCloseButton: true,
+                position: 'bottom',
+                customClass: { popup: 'custom-rounded w-full mb-0 rounded-b-none', title: '!pb-0 !px-1' },
+                didOpen: () => lucide.createIcons()
+            });
+        },
 
-        // Hàm xử lý kích hoạt Input tùy theo sự lựa chọn của người dùng
-        _triggerInput(mode, id) {
-            const item = App.find(id);
-            let input = document.getElementById('qc-file-input');
-            
-            // Tạo input ảo nếu chưa có
-            if (!input) {
-                input = document.createElement('input');
-                input.type = 'file';
-                input.id = 'qc-file-input';
-                input.accept = 'image/*';
-                input.style.display = 'none';
-                document.body.appendChild(input);
-            }
+        _triggerInput(mode, id) {
+            const item = App.find(id);
+            let input = document.getElementById('qc-file-input');
+            if (!input) {
+                input = document.createElement('input');
+                input.type = 'file'; input.id = 'qc-file-input';
+                input.accept = 'image/*'; input.style.display = 'none';
+                document.body.appendChild(input);
+            }
+            if (mode === 'camera') input.capture = 'environment';
+            else input.removeAttribute('capture');
+            input.onchange = (e) => {
+                const file = e.target.files[0]; if (!file) return;
+                input.value = '';
+                this._processImage(file, item.damageItems, item);
+            };
+            input.click();
+        },
 
-            // Gắn thuộc tính dựa trên lựa chọn
-            if (mode === 'camera') {
-                input.capture = 'environment'; // Ép mở Camera
-            } else {
-                input.removeAttribute('capture'); // Mở thư viện
-            }
+        async _processImage(file, currentDamageItems, item) {
+            Swal.fire({
+                html: `<div style="display:flex;flex-direction:column;align-items:center;padding:10px 0;">
+                    <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#f43f5e,#8b5cf6);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(244,63,94,0.4);margin-bottom:16px;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" style="animation:img-spin 1s linear infinite;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                    </div>
+                    <p style="font-size:16px;font-weight:900;color:var(--text-primary,#0f172a);margin:0;">Đang quét & Đối chiếu...</p>
+                    <p id="qc-loading-status" style="font-size:12px;font-weight:600;color:var(--text-secondary,#64748b);margin-top:6px;text-align:center;">Bước 1/2: Đang đọc dữ liệu ảnh báo giá...</p>
+                </div>`,
+                showConfirmButton: false, allowOutsideClick: false,
+                customClass: { popup: 'custom-rounded' }
+            });
 
-            // Lắng nghe sự kiện chọn file
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                input.value = ''; // Reset input để chọn lại file cũ nếu cần
-                this._processImage(file, item.damageItems); // Gọi hàm AI xử lý
-            };
+            try {
+                const base64 = await OCR._compressImage(file, 1024);
+                const statusText = document.getElementById('qc-loading-status');
 
-            // Kích hoạt input
-            input.click();
-        },
+                const callGemini = async (prompt, imgBase64, key, modelName = "gemini-2.5-flash") => {
+                    const body = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.1 } };
+                    if (imgBase64) body.contents[0].parts.push({ inline_data: { mime_type: 'image/jpeg', data: imgBase64 } });
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort('Timeout'), 45000);
+                    try {
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${key}`, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(body), signal: controller.signal
+                        });
+                        clearTimeout(timeoutId);
+                        const data = await res.json();
+                        if (!res.ok || data.error) throw new Error(data?.error?.message || "Lỗi API từ Google");
+                        const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                        try { return JSON.parse(txt.replace(/```json|```/gi, '').trim()); }
+                        catch (e) { const m = txt.match(/\[[\s\S]*\]/); return m ? JSON.parse(m[0]) : null; }
+                    } catch (e) {
+                        clearTimeout(timeoutId);
+                        if (e.name === 'AbortError' || e.message.includes('aborted')) throw new Error('Máy chủ phản hồi quá lâu (Timeout). Đang thử lại...');
+                        throw e;
+                    }
+                };
 
-        async _processImage(file, currentDamageItems) {
-            Swal.fire({
-                html: `
-                    <div style="display:flex;flex-direction:column;align-items:center;padding:10px 0;">
-                        <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg, #f43f5e, #8b5cf6);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(244,63,94,0.4);margin-bottom:16px;">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" style="animation:img-spin 1s linear infinite;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                        </div>
-                        <p style="font-size:16px;font-weight:900;color:var(--text-primary,#0f172a);margin:0;">Đang quét & Đối chiếu...</p>
-                        <p id="qc-loading-status" style="font-size:12px;font-weight:600;color:var(--text-secondary,#64748b);margin-top:6px;text-align:center;">Bước 1/2: Đang đọc dữ liệu ảnh báo giá...</p>
-                    </div>
-                `,
-                showConfirmButton: false, allowOutsideClick: false,
-                customClass: { popup: 'custom-rounded' }
-            });
+                // BƯỚC 1
+                const PROMPT_1 = `Bạn là nhân viên nhập liệu. Đọc ảnh Báo giá sửa chữa và trích xuất danh sách phụ tùng/nhân công.
+                TRẢ VỀ MẢNG JSON (CHỈ JSON, KHÔNG CÓ TEXT).
+                Định dạng: [{"t": "Tên vật tư/nhân công", "pa": "Sửa/Thay/Sơn/...", "g": 1500000}]`;
+                let extractedData = null;
+                let key1 = GeminiKeys.next();
+                try { extractedData = await callGemini(PROMPT_1, base64, key1, "gemini-2.5-flash-lite"); }
+                catch (e1) { key1 = GeminiKeys.next(); extractedData = await callGemini(PROMPT_1, base64, key1, "gemini-2.5-flash-lite"); }
+                if (!extractedData || !Array.isArray(extractedData)) throw new Error("Không thể đọc được ảnh báo giá. Vui lòng chụp rõ hơn.");
 
-            try {
-                // Tối ưu 1: Giảm kích thước ảnh xuống 1024px để AI đọc nhanh hơn
-                const base64 = await OCR._compressImage(file, 1024);
-                const statusText = document.getElementById('qc-loading-status');
+                // BƯỚC 2
+                if (statusText) statusText.innerHTML = `Bước 2/2: AI đang đối chiếu và gom nhóm ${extractedData.length} mục với BBGĐ...`;
+                const bbgdList = currentDamageItems.map(i => ({ ten: i.chiTiet, pa: i.thayThe ? "Thay" : (i.suaChua ? "Sửa" : "Chưa rõ") }));
+                const PROMPT_2 = `Bạn là Giám định viên trưởng. Hãy đối chiếu 2 danh sách:
+                1. BÁO GIÁ GARA (Chi tiết): ${JSON.stringify(extractedData)}
+                2. BBGĐ ĐÃ DUYỆT: ${JSON.stringify(bbgdList)}
+                NHIỆM VỤ ĐẶC BIỆT: GOM NHÓM TRƯỚC KHI ĐỐI CHIẾU
+                Trong báo giá, 1 bộ phận có thể bị chia nhỏ thành nhiều chi phí. Bạn BẮT BUỘC phải gom chúng lại thành 1 mục duy nhất tương ứng với BBGĐ.
+                LUẬT ĐỐI CHIẾU PHƯƠNG ÁN:
+                - Nhóm SỬA CHỮA (Sửa, Sơn, Gò, Nắn, Hàn, Kéo, Phục hồi). BBGĐ duyệt "Sửa" + Gara báo nhóm này -> Trạng thái: 1 (KHỚP).
+                - Nhóm THAY THẾ (Vật tư mới, Công thay, Tháo lắp). BBGĐ duyệt "Thay" + Gara báo thay -> Trạng thái: 1 (KHỚP).
+                - XUNG ĐỘT: BBGĐ duyệt "Sửa" nhưng Gara đòi "Thay" (hoặc ngược lại) -> Trạng thái: 2 (SAI_PA).
+                - DƯ THỪA: Có trong Báo giá nhưng BBGĐ không có -> Trạng thái: 3 (DU).
+                - THIẾU SÓT: Có trong BBGĐ nhưng Báo giá không đề cập -> Trạng thái: 4 (THIEU).
+                Trả về CHỈ MẢNG JSON:
+                [{"t":"Tên","tt":1|2|3|4,"gPa":"PA Gara","gGia":1500000,"bPa":"PA BBGĐ","cb":"Cảnh báo nếu có"}]`;
+                let comparedData = null;
+                let key2 = GeminiKeys.next();
+                try { comparedData = await callGemini(PROMPT_2, null, key2, "gemini-2.5-flash"); }
+                catch (e2) { key2 = GeminiKeys.next(); comparedData = await callGemini(PROMPT_2, null, key2, "gemini-2.5-flash"); }
+                if (!comparedData || !Array.isArray(comparedData)) throw new Error("Lỗi khi đối chiếu logic dữ liệu.");
 
-                // Hàm gọi API tái sử dụng để code gọn hơn (Đã nâng cấp chống lỗi Timeout)
-                const callGemini = async (prompt, imgBase64, key, modelName = "gemini-2.5-flash") => {
-                    const body = {
-                        contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: { temperature: 0.1 }
-                    };
-                    if (imgBase64) {
-                        body.contents[0].parts.push({ inline_data: { mime_type: 'image/jpeg', data: imgBase64 } });
-                    }
-                    
-                    const controller = new AbortController();
-                    // Nới lỏng thời gian chờ lên 45 giây để AI có đủ thời gian đọc ảnh báo giá dài
-                    const timeoutId = setTimeout(() => {
-                        // Truyền lý do abort để trình duyệt không báo "without reason" nữa
-                        controller.abort('Timeout'); 
-                    }, 45000); 
+                const finalResults = comparedData.map(r => {
+                    let strStatus = { 1: 'KHOP', 2: 'SAI_PHUONG_AN', 3: 'GARA_BAO_DU', 4: 'GARA_QUEN_BAO' }[r.tt] || 'KHOP';
+                    if (typeof r.tt === 'string') {
+                        if (r.tt.includes('KHOP') || r.tt === '1') strStatus = 'KHOP';
+                        else if (r.tt.includes('SAI') || r.tt === '2') strStatus = 'SAI_PHUONG_AN';
+                        else if (r.tt.includes('DU') || r.tt === '3') strStatus = 'GARA_BAO_DU';
+                        else if (r.tt.includes('THIEU') || r.tt === '4') strStatus = 'GARA_QUEN_BAO';
+                    }
+                    return { tenPhuTung: r.t || 'Không rõ', trangThai: strStatus, gara: { phuongAn: r.gPa || '', gia: r.gGia || 0 }, bbgd: { phuongAn: r.bPa || '' }, canhBao: r.cb || '' };
+                });
 
-                    try {
-                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${key}`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(body),
-                            signal: controller.signal
-                        });
-                        
-                        clearTimeout(timeoutId);
-                        const data = await res.json();
-                        
-                        if (!res.ok || data.error) throw new Error(data?.error?.message || "Lỗi API từ Google");
-                        
-                        const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                        try {
-                            return JSON.parse(txt.replace(/```json|```/gi, '').trim());
-                        } catch (e) {
-                            const m = txt.match(/\[[\s\S]*\]/);
-                            return m ? JSON.parse(m[0]) : null;
-                        }
-                    } catch (e) {
-                        clearTimeout(timeoutId);
-                        // Bắt trúng lỗi do Timeout gây ra và đổi thành câu tiếng Việt
-                        if (e.name === 'AbortError' || e.message.includes('aborted')) {
-                            throw new Error('Máy chủ phản hồi quá lâu (Timeout). Đang thử lại...');
-                        }
-                        throw e;
-                    }
-                };
+                Swal.close();
+                this._saveResult(this._id, finalResults);
+                this._openPanel(finalResults, item);
 
-                // ==========================================
-                // BƯỚC 1: ĐỌC ẢNH VÀ BÓC TÁCH (API 1)
-                // ==========================================
-                const PROMPT_1 = `Bạn là nhân viên nhập liệu. Đọc ảnh Báo giá sửa chữa và trích xuất danh sách phụ tùng/nhân công.
-                TRẢ VỀ MẢNG JSON (CHỈ JSON, KHÔNG CÓ TEXT).
-                Định dạng: [{"t": "Tên vật tư/nhân công", "pa": "Sửa/Thay/Sơn/...", "g": 1500000}]`;
+            } catch (error) {
+                Swal.close();
+                Toast.fire({ icon: 'error', title: error.message });
+            }
+        },
 
-                let extractedData = null;
-                let key1 = GeminiKeys.next();
-                
-                try {
-                    // Bước 1 chỉ cần đọc chữ, dùng bản Lite cho tốc độ bàn thờ
-                    extractedData = await callGemini(PROMPT_1, base64, key1, "gemini-2.5-flash-lite");
-                } catch (e1) {
-                    console.warn("Lỗi Bước 1, thử lại bằng Key khác:", e1);
-                    key1 = GeminiKeys.next(); // Đổi key nếu lỗi
-                    extractedData = await callGemini(PROMPT_1, base64, key1, "gemini-2.5-flash-lite");
-                }
+        _openPanel(results, item) {
+            this._results = results;
+            this._activeTab = 'all';
+            
+            const panel = document.getElementById('qc-panel');
+            if (!panel) return;
+            
+            // Cập nhật header
+            document.getElementById('qc-panel-bsx').textContent = item.bsx || 'Không rõ BSX';
+            document.getElementById('qc-panel-gara').textContent = item.gara || '';
+            
+            // Cập nhật thống kê
+            this._updateStats(results);
+            
+            // Render danh sách
+            this._renderList('all');
+            
+            // Mở panel
+            panel.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        },
 
-                if (!extractedData || !Array.isArray(extractedData)) {
-                    throw new Error("Không thể đọc được ảnh báo giá. Vui lòng chụp rõ hơn.");
-                }
+        close() {
+            const panel = document.getElementById('qc-panel');
+            if (panel) panel.classList.remove('open');
+            document.body.style.overflow = '';
+        },
 
-                // ==========================================
-                // BƯỚC 2: ĐỐI CHIẾU DỮ LIỆU (API 2)
-                // ==========================================
-                if (statusText) statusText.innerHTML = `Bước 2/2: AI đang đối chiếu và gom nhóm ${extractedData.length} mục với BBGĐ...`;
+        _updateStats(results) {
+            const counts = { KHOP: 0, SAI_PHUONG_AN: 0, GARA_BAO_DU: 0, GARA_QUEN_BAO: 0 };
+            let tongBG = 0, tongBBGD = 0;
+            results.forEach(r => {
+                counts[r.trangThai] = (counts[r.trangThai] || 0) + 1;
+                if (r.gara && r.gara.gia) tongBG += Number(r.gara.gia);
+            });
 
-                const bbgdList = currentDamageItems.map((item) => ({
-                    ten: item.chiTiet,
-                    pa: item.thayThe ? "Thay" : (item.suaChua ? "Sửa" : "Chưa rõ")
-                }));
+            // Lấy tổng từ BBGĐ gốc (App.find)
+            const item = App.find(this._id);
+            if (item && item.damageItems) {
+                item.damageItems.forEach(d => { if (d.giaTriThamDinh) tongBBGD += Number(d.giaTriThamDinh) || 0; });
+            }
 
-                const PROMPT_2 = `Bạn là Giám định viên trưởng. Hãy đối chiếu 2 danh sách:
-                1. BÁO GIÁ GARA (Chi tiết): ${JSON.stringify(extractedData)}
-                2. BBGĐ ĐÃ DUYỆT: ${JSON.stringify(bbgdList)}
-                
-                NHIỆM VỤ ĐẶC BIỆT: GOM NHÓM TRƯỚC KHI ĐỐI CHIẾU
-                Trong báo giá, 1 bộ phận có thể bị chia nhỏ thành nhiều chi phí. Bạn BẮT BUỘC phải gom chúng lại thành 1 mục duy nhất tương ứng với BBGĐ.
-                Ví dụ: "Gò cửa" (500k) + "Sơn cửa" (800k) -> Gom thành 1 mục: "Cửa" | PA Gara: "Gò + Sơn" | Giá: 1300000.
-                Ví dụ: "Thay cản" (2000k) + "Công thay" (300k) + "Sơn cản" (700k) -> Gom thành: "Cản" | PA Gara: "Thay + Công + Sơn" | Giá: 3000000.
-                
-                LUẬT ĐỐI CHIẾU PHƯƠNG ÁN (Quyết định biến "tt"):
-                - Nhóm SỬA CHỮA (Bao gồm: Sửa, Sơn, Gò, Nắn, Hàn, Kéo, Phục hồi). Nếu BBGĐ duyệt "Sửa", và Gara báo bất kỳ cụm nào trong nhóm này -> Trạng thái: 1 (KHỚP).
-                - Nhóm THAY THẾ (Bao gồm: Vật tư mới, Công thay thế, Tháo lắp). Nếu BBGĐ duyệt "Thay", và Gara báo thay vật tư -> Trạng thái: 1 (KHỚP).
-                - XUNG ĐỘT SỐNG CÒN: BBGĐ duyệt "Sửa" nhưng Gara đòi "Thay vật tư" (Hoặc ngược lại) -> Trạng thái: 2 (SAI_PA).
-                - DƯ THỪA: Có trong Báo giá nhưng BBGĐ không có -> Trạng thái: 3 (DU).
-                - THIẾU SÓT: Có trong BBGĐ nhưng Báo giá hoàn toàn không đề cập -> Trạng thái: 4 (THIEU).
-                
-                Định dạng trả về CHỈ MẢNG JSON (Tuyệt đối không giải thích, không bọc markdown):
-                [
-                  {
-                    "t": "Tên phụ tùng (Gom gọn, VD: Cản trước, Cửa sau trái)",
-                    "tt": 1|2|3|4,
-                    "gPa": "Các phương án Gara đã làm (VD: Gò + Sơn, Thay + Sơn)",
-                    "gGia": Tổng tiền của nhóm này (Số nguyên),
-                    "bPa": "Phương án BBGĐ (Sửa/Thay)",
-                    "cb": "Cảnh báo (Chỉ ghi nếu sai phương án, báo dư hoặc báo thiếu. Nếu Khớp thì để rỗng)"
-                  }
-                ]`;
+            // Update count badges
+            document.getElementById('qc-tab-all').querySelector('.qc-tab-count').textContent = results.length;
+            document.getElementById('qc-tab-err').querySelector('.qc-tab-count').textContent = (counts.SAI_PHUONG_AN + counts.GARA_BAO_DU + counts.GARA_QUEN_BAO);
+            document.getElementById('qc-tab-diff').querySelector('.qc-tab-count').textContent = counts.SAI_PHUONG_AN;
+            document.getElementById('qc-tab-extra').querySelector('.qc-tab-count').textContent = counts.GARA_BAO_DU;
+            document.getElementById('qc-tab-miss').querySelector('.qc-tab-count').textContent = counts.GARA_QUEN_BAO;
 
-                let comparedData = null;
-                let key2 = GeminiKeys.next(); // Đổi sang một Key khác để chia tải
-                
-                try {
-                    // Bước 2 cần tư duy logic, cộng tiền và gom nhóm -> Ép dùng bản Flash chuẩn
-                    comparedData = await callGemini(PROMPT_2, null, key2, "gemini-2.5-flash");
-                } catch (e2) {
-                    console.warn("Lỗi Bước 2, thử lại bằng Key khác:", e2);
-                    key2 = GeminiKeys.next();
-                    comparedData = await callGemini(PROMPT_2, null, key2, "gemini-2.5-flash");
-                }
+            // Summary boxes
+            document.getElementById('qc-sum-match').textContent = counts.KHOP;
+            document.getElementById('qc-sum-diff').textContent = counts.SAI_PHUONG_AN;
+            document.getElementById('qc-sum-extra').textContent = counts.GARA_BAO_DU;
+            document.getElementById('qc-sum-miss').textContent = counts.GARA_QUEN_BAO;
 
-                if (!comparedData || !Array.isArray(comparedData)) {
-                    throw new Error("Lỗi khi đối chiếu logic dữ liệu.");
-                }
+            // Money bar
+            const fmt = n => n ? Number(n).toLocaleString('vi-VN') + 'đ' : '—';
+            document.getElementById('qc-money-bg').textContent = fmt(tongBG);
+            document.getElementById('qc-money-bbgd').textContent = tongBBGD > 0 ? fmt(tongBBGD) : 'N/A';
+            const diff = tongBG - tongBBGD;
+            const diffEl = document.getElementById('qc-money-diff');
+            if (tongBBGD === 0) { diffEl.textContent = '—'; diffEl.className = 'qc-money-diff-val even'; }
+            else if (diff > 0) { diffEl.textContent = '+' + fmt(diff); diffEl.className = 'qc-money-diff-val over'; }
+            else if (diff < 0) { diffEl.textContent = fmt(diff); diffEl.className = 'qc-money-diff-val under'; }
+            else { diffEl.textContent = 'Khớp'; diffEl.className = 'qc-money-diff-val even'; }
+        },
 
-                // ==========================================
-                // BƯỚC 3: DỊCH NGƯỢC JSON CHO UI
-                // ==========================================
-                const finalResults = comparedData.map(r => {
-                    let strStatus = { 1: 'KHOP', 2: 'SAI_PHUONG_AN', 3: 'GARA_BAO_DU', 4: 'GARA_QUEN_BAO' }[r.tt] || 'KHOP';
-                    
-                    // Fallback an toàn nếu AI trả về chuỗi thay vì số
-                    if (typeof r.tt === 'string') {
-                        if (r.tt.includes('KHOP') || r.tt === '1') strStatus = 'KHOP';
-                        else if (r.tt.includes('SAI') || r.tt === '2') strStatus = 'SAI_PHUONG_AN';
-                        else if (r.tt.includes('DU') || r.tt === '3') strStatus = 'GARA_BAO_DU';
-                        else if (r.tt.includes('THIEU') || r.tt === '4') strStatus = 'GARA_QUEN_BAO';
-                    }
+        switchTab(tab) {
+            this._activeTab = tab;
+            document.querySelectorAll('.qc-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('qc-tab-' + tab)?.classList.add('active');
+            this._renderList(tab);
+        },
 
-                    return {
-                        tenPhuTung: r.t || 'Không rõ',
-                        trangThai: strStatus,
-                        gara: { phuongAn: r.gPa || '', gia: r.gGia || 0 },
-                        bbgd: { phuongAn: r.bPa || '' },
-                        canhBao: r.cb || ''
-                    };
-                });
+        _renderList(tab) {
+            const container = document.getElementById('qc-list');
+            if (!container) return;
+            const fmt = n => n ? Number(n).toLocaleString('vi-VN') + 'đ' : '—';
+            
+            const filterMap = {
+                'all': null,
+                'err': ['SAI_PHUONG_AN', 'GARA_BAO_DU', 'GARA_QUEN_BAO'],
+                'diff': ['SAI_PHUONG_AN'],
+                'extra': ['GARA_BAO_DU'],
+                'miss': ['GARA_QUEN_BAO'],
+                'match': ['KHOP']
+            };
+            
+            const filter = filterMap[tab];
+            const sortMap = { 'GARA_BAO_DU': 1, 'SAI_PHUONG_AN': 2, 'GARA_QUEN_BAO': 3, 'KHOP': 4 };
+            const sorted = [...this._results].sort((a, b) => sortMap[a.trangThai] - sortMap[b.trangThai]);
+            const filtered = filter ? sorted.filter(r => filter.includes(r.trangThai)) : sorted;
 
-                this._renderResults(finalResults);
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="qc-empty"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg><p>Không có mục nào trong danh mục này</p></div>`;
+                return;
+            }
 
-            } catch (error) {
-                Swal.close();
-                Toast.fire({ icon: 'error', title: error.message });
-            }
-        },
+            const statusConfig = {
+                'KHOP': { cls: 'qc-match', badge: '<span class="qc-status-badge">✓ Trùng khớp</span>' },
+                'SAI_PHUONG_AN': { cls: 'qc-diff', badge: '<span class="qc-status-badge">⚠️ Sai phương án</span>' },
+                'GARA_BAO_DU': { cls: 'qc-extra', badge: '<span class="qc-status-badge">❌ Báo dư</span>' },
+                'GARA_QUEN_BAO': { cls: 'qc-miss', badge: '<span class="qc-status-badge">❓ Quên báo</span>' }
+            };
 
-        _renderResults(results) {
-            const fmt = n => n ? Number(n).toLocaleString('vi-VN') + 'đ' : '—';
-            
-            // Sắp xếp: Lỗi nặng lên đầu (Gara báo dư -> Sai phương án -> Quên báo -> Khớp)
-            const sortMap = { 'GARA_BAO_DU': 1, 'SAI_PHUONG_AN': 2, 'GARA_QUEN_BAO': 3, 'KHOP': 4 };
-            results.sort((a, b) => sortMap[a.trangThai] - sortMap[b.trangThai]);
+            container.innerHTML = filtered.map(r => {
+                const cfg = statusConfig[r.trangThai] || statusConfig['KHOP'];
+                const garaData = r.gara || {};
+                const bbgdData = r.bbgd || {};
+                const paColor = r.trangThai === 'KHOP' ? '#059669' : (r.trangThai === 'SAI_PHUONG_AN' ? '#d97706' : '#dc2626');
+                return `<div class="qc-card-v2 ${cfg.cls}">
+                    <div class="qc-card-head">
+                        <p style="font-size:13px;font-weight:800;color:var(--text-primary);flex:1;line-height:1.3;padding-right:8px;">${r.tenPhuTung}</p>
+                        ${cfg.badge}
+                    </div>
+                    <div class="qc-card-body">
+                        ${r.canhBao ? `<div class="qc-warn-row"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>${r.canhBao}</div>` : ''}
+                        <div class="qc-card-grid">
+                            <div class="qc-col-v2">
+                                <p class="qc-col-title-v2">Báo giá Gara</p>
+                                <p class="qc-col-pa" style="color:#d97706;">${garaData.phuongAn || '—'}</p>
+                                <p class="qc-col-price" style="color:var(--text-primary);">${fmt(garaData.gia)}</p>
+                            </div>
+                            <div class="qc-col-v2">
+                                <p class="qc-col-title-v2">Biên bản GĐ</p>
+                                <p class="qc-col-pa" style="color:#2563eb;">${bbgdData.phuongAn || '—'}</p>
+                                <p class="qc-col-price" style="font-size:10px;color:var(--text-muted);">Đã duyệt</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        },
 
-            let html = '';
-            let errorCount = 0;
+        // ── LƯU / ĐỌC KẾT QUẢ ──
+        _saveResult(id, results) {
+            try {
+                const data = {
+                    id, results,
+                    time: moment().format('HH:mm DD/MM/YYYY'),
+                    ts: Date.now()
+                };
+                localStorage.setItem(`qc_result_${id}`, JSON.stringify(data));
+                Toast.fire({ icon: 'success', title: 'Đã lưu kết quả đối chiếu!' });
+            } catch(e) { console.warn('Không thể lưu kết quả:', e); }
+        },
 
-            results.forEach(r => {
-                let cardClass = '';
-                let badgeHtml = '';
-                
-                if (r.trangThai === 'KHOP') {
-                    cardClass = 'qc-match';
-                    badgeHtml = '<span class="qc-status-badge">✓ Trùng khớp</span>';
-                } else if (r.trangThai === 'SAI_PHUONG_AN') {
-                    cardClass = 'qc-diff'; errorCount++;
-                    badgeHtml = '<span class="qc-status-badge">⚠️ Sai phương án</span>';
-                } else if (r.trangThai === 'GARA_BAO_DU') {
-                    cardClass = 'qc-extra'; errorCount++;
-                    badgeHtml = '<span class="qc-status-badge">❌ Báo dư</span>';
-                } else if (r.trangThai === 'GARA_QUEN_BAO') {
-                    cardClass = 'qc-miss'; errorCount++;
-                    badgeHtml = '<span class="qc-status-badge">❓ Quên báo giá</span>';
-                }
+        _loadSaved(id) {
+            try {
+                const raw = localStorage.getItem(`qc_result_${id}`);
+                return raw ? JSON.parse(raw) : null;
+            } catch(e) { return null; }
+        },
 
-                const garaData = r.gara || {};
-                const bbgdData = r.bbgd || {};
+        clearSaved() {
+            if (!this._id) return;
+            localStorage.removeItem(`qc_result_${this._id}`);
+            Toast.fire({ icon: 'info', title: 'Đã xóa kết quả đã lưu' });
+            this.close();
+        },
 
-                html += `
-                <div class="qc-card ${cardClass}">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
-                        <p style="font-size:13px; font-weight:800; color:var(--text-primary); flex:1; padding-right:8px; line-height:1.3;">${r.tenPhuTung}</p>
-                        ${badgeHtml}
-                    </div>
-                    
-                    ${r.canhBao ? `<p style="font-size:10px; color:#ef4444; font-weight:700; margin-bottom:8px; display:flex; gap:4px;"><i data-lucide="info" class="w-3 h-3"></i> ${r.canhBao}</p>` : ''}
-                    
-                    <div class="qc-compare-grid">
-                        <div class="qc-col">
-                            <p class="qc-col-title">Báo giá Gara</p>
-                            <p class="qc-val" style="color:#d97706;">${garaData.phuongAn || '—'}</p>
-                            <p class="qc-val" style="margin-top:2px; font-size:14px;">${fmt(garaData.gia)}</p>
-                        </div>
-                        <div class="qc-col">
-                            <p class="qc-col-title">Biên bản của bạn</p>
-                            <p class="qc-val" style="color:#2563eb;">${bbgdData.phuongAn || '—'}</p>
-                            <p class="qc-val" style="margin-top:2px; font-size:10px; color:var(--text-muted);">Đã duyệt</p>
-                        </div>
-                    </div>
-                </div>`;
-            });
+        // ── TẠO TIN NHẮN TỰ ĐỘNG ──
+        generateMessage() {
+            const results = this._results;
+            const item = App.find(this._id) || {};
+            
+            const errors = results.filter(r => r.trangThai !== 'KHOP');
+            if (errors.length === 0) {
+                // Trường hợp khớp hoàn toàn
+                const msg = `Chào anh/chị, em đã kiểm tra báo giá xe ${item.bsx || ''} ${item.hangXe || ''} và thấy báo giá đã khớp hoàn toàn với biên bản giám định. Anh/chị tiến hành đặt vật tư và sửa chữa nhé!`;
+                this._showMessageSheet(msg, 'Báo duyệt giá (Khớp hoàn toàn)', '✅');
+                return;
+            }
 
-            Swal.fire({
-                title: `<div class="text-left font-black text-lg" style="color:var(--text-primary);">
-                            <span class="text-rose-500">AI</span> Đối chiếu báo giá
-                        </div>`,
-                html: `
-                    <div class="text-left mt-2">
-                        ${errorCount > 0 
-                            ? `<div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#ef4444; padding:8px 12px; border-radius:10px; font-size:12px; font-weight:800; margin-bottom:12px;">Phát hiện ${errorCount} điểm bất thường cần kiểm tra lại!</div>`
-                            : `<div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); color:#10b981; padding:8px 12px; border-radius:10px; font-size:12px; font-weight:800; margin-bottom:12px;">Tuyệt vời! Báo giá khớp hoàn toàn với Biên bản.</div>`
-                        }
-                        <div style="max-height: 60vh; overflow-y: auto; padding-right: 4px;" class="custom-scrollbar">
-                            ${html}
-                        </div>
-                    </div>
-                `,
-                showCloseButton: true,
-                showConfirmButton: false,
-                customClass: { popup: 'custom-rounded w-full mb-0 rounded-b-none', title: '!pb-0' },
-                position: 'bottom',
-                didOpen: () => lucide.createIcons()
-            });
-        }
-    };  
-    // ============================================================
-    // BOOT
+            const du = errors.filter(r => r.trangThai === 'GARA_BAO_DU');
+            const sai = errors.filter(r => r.trangThai === 'SAI_PHUONG_AN');
+            const thieu = errors.filter(r => r.trangThai === 'GARA_QUEN_BAO');
+
+            let lines = [`Chào anh/chị, em đã đối chiếu báo giá xe ${item.bsx || ''} ${item.hangXe || ''} với biên bản giám định và phát hiện một số điểm cần điều chỉnh:\n`];
+
+            if (sai.length > 0) {
+                lines.push(`⚠️ *SAI PHƯƠNG ÁN* (${sai.length} mục):`)
+                sai.forEach(r => lines.push(`  - ${r.tenPhuTung}: Gara báo "${r.gara?.phuongAn || ''}", BBGĐ duyệt "${r.bbgd?.phuongAn || ''}"`));
+                lines.push('');
+            }
+            if (du.length > 0) {
+                lines.push(`❌ *BÁO DƯ* (${du.length} mục — không có trong BBGĐ):`)
+                du.forEach(r => lines.push(`  - ${r.tenPhuTung} (${Number(r.gara?.gia || 0).toLocaleString('vi-VN')}đ)`));
+                lines.push('');
+            }
+            if (thieu.length > 0) {
+                lines.push(`❓ *CHƯA BÁO GIÁ* (${thieu.length} mục — có trong BBGĐ):`)
+                thieu.forEach(r => lines.push(`  - ${r.tenPhuTung} (PA: ${r.bbgd?.phuongAn || ''})`));
+                lines.push('');
+            }
+
+            lines.push(`Anh/chị kiểm tra và điều chỉnh lại báo giá giúp em nhé!`);
+            const msg = lines.join('\n');
+            this._showMessageSheet(msg, 'Thông báo điều chỉnh báo giá', '📋');
+        },
+
+        _showMessageSheet(msg, title, icon) {
+            const item = App.find(this._id) || {};
+            const phone = item.garaAdvisorPhone || item.garaPhone || '';
+            
+            const copyMsg = () => {
+                if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(msg).catch(()=>{});
+                else { const ta = document.createElement('textarea'); ta.value = msg; ta.style.cssText='position:absolute;opacity:0;top:0;left:0;'; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(e){} document.body.removeChild(ta); }
+                Toast.fire({ icon: 'success', title: 'Đã copy tin nhắn!' });
+            };
+
+            Swal.fire({
+                title: `<div style="font-size:15px;font-weight:900;color:var(--text-primary,#0f172a);text-align:left;">${icon} ${title}</div>`,
+                html: `<div style="text-align:left;">
+                    <div style="background:var(--bg-surface,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:12px 14px;font-size:12px;font-weight:600;color:var(--text-primary,#1e293b);line-height:1.7;white-space:pre-wrap;max-height:40vh;overflow-y:auto;" class="custom-scrollbar">${msg}</div>
+                    <div style="display:flex;gap:8px;margin-top:12px;">
+                        <button onclick="QuoteChecker._copyAndZalo('${phone}')" style="flex:1;padding:12px;background:#0068ff;color:white;border:none;border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.02 2 11c0 2.76 1.27 5.23 3.29 6.92L4 22l4.09-1.37C9.27 21.17 10.61 21.5 12 21.5c5.52 0 10-4.02 10-9s-4.48-9-10-9z"/></svg>
+                            Gửi Zalo Gara
+                        </button>
+                        <button onclick="QuoteChecker._copyMsg()" style="flex:1;padding:12px;background:var(--bg-surface,#f1f5f9);color:var(--text-secondary,#475569);border:1.5px solid var(--border,#e2e8f0);border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;">📋 Copy</button>
+                    </div>
+                </div>`,
+                showConfirmButton: false, showCloseButton: true,
+                position: 'bottom',
+                customClass: { popup: 'custom-rounded w-full mb-0 rounded-b-none', title: '!pb-0 !px-1' },
+                didOpen: () => {
+                    QuoteChecker._pendingMsg = msg;
+                    lucide.createIcons();
+                }
+            });
+        },
+
+        _pendingMsg: '',
+        _copyMsg() {
+            const msg = QuoteChecker._pendingMsg;
+            if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(msg).catch(()=>{});
+            else { const ta = document.createElement('textarea'); ta.value = msg; ta.style.cssText='position:absolute;opacity:0;top:0;left:0;'; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(e){} document.body.removeChild(ta); }
+            Toast.fire({ icon: 'success', title: 'Đã copy tin nhắn!' });
+        },
+        _copyAndZalo(phone) {
+            QuoteChecker._copyMsg();
+            if (!phone) { Toast.fire({icon:'warning',title:'Chưa có SĐT gara!'}); return; }
+            const clean = phone.replace(/\D/g,'');
+            Toast.fire({ icon:'success', title:'Đã copy! Đang mở Zalo...' });
+            setTimeout(() => { const w = window.open(`https://zalo.me/${clean}`,'_blank'); if(w) w.focus(); }, 300);
+        },
+
+        // ── XUẤT KẾT QUẢ TEXT ──
+        exportSummary() {
+            const results = this._results;
+            const item = App.find(this._id) || {};
+            const fmt = n => n ? Number(n).toLocaleString('vi-VN') + 'đ' : '—';
+            const time = moment().format('HH:mm DD/MM/YYYY');
+            const counts = { KHOP: 0, SAI_PHUONG_AN: 0, GARA_BAO_DU: 0, GARA_QUEN_BAO: 0 };
+            results.forEach(r => counts[r.trangThai] = (counts[r.trangThai] || 0) + 1);
+            
+            let lines = [
+                `=== KẾT QUẢ ĐỐI CHIẾU BÁO GIÁ ===`,
+                `BSX: ${item.bsx || '—'} | Gara: ${item.gara || '—'}`,
+                `Thời gian: ${time}`,
+                `---`,
+                `✓ Khớp: ${counts.KHOP} | ⚠️ Sai PA: ${counts.SAI_PHUONG_AN} | ❌ Báo dư: ${counts.GARA_BAO_DU} | ❓ Quên báo: ${counts.GARA_QUEN_BAO}`,
+                `---`
+            ];
+            const sortMap = { 'GARA_BAO_DU': 1, 'SAI_PHUONG_AN': 2, 'GARA_QUEN_BAO': 3, 'KHOP': 4 };
+            [...results].sort((a,b)=>sortMap[a.trangThai]-sortMap[b.trangThai]).forEach(r => {
+                const icon = { KHOP:'✓', SAI_PHUONG_AN:'⚠️', GARA_BAO_DU:'❌', GARA_QUEN_BAO:'❓' }[r.trangThai];
+                lines.push(`${icon} ${r.tenPhuTung}`);
+                if (r.gara?.phuongAn) lines.push(`   Gara: ${r.gara.phuongAn} — ${fmt(r.gara.gia)}`);
+                if (r.bbgd?.phuongAn) lines.push(`   BBGĐ: ${r.bbgd.phuongAn}`);
+                if (r.canhBao) lines.push(`   ⚡ ${r.canhBao}`);
+            });
+            const text = lines.join('\n');
+            if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).catch(()=>{});
+            else { const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText='position:absolute;opacity:0;top:0;'; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(e){} document.body.removeChild(ta); }
+            Toast.fire({ icon: 'success', title: 'Đã copy bản tóm tắt!' });
+        }
+    };  
+    // ============================================================
+    // BOOT
     // ============================================================
     window.onload = () => {
         DarkMode.init();
@@ -12005,7 +12254,92 @@
         }
     };
     </script>
+    <!-- QUOTE CHECKER v2 FULL-SCREEN PANEL -->
+    <div id="qc-panel">
+        <!-- HEADER -->
+        <div class="qc-header">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <button onclick="QuoteChecker.close()" style="width:36px;height:36px;border-radius:10px;background:var(--bg-surface,#f1f5f9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-secondary,#475569);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <div>
+                        <p style="font-size:15px;font-weight:900;color:var(--text-primary,#0f172a);line-height:1.2;"><span style="color:#ef4444;">AI</span> Đối chiếu báo giá</p>
+                        <p id="qc-panel-bsx" style="font-size:11px;font-weight:700;color:var(--text-muted,#94a3b8);line-height:1.2;"></p>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <p id="qc-panel-gara" style="font-size:11px;font-weight:800;color:var(--text-secondary,#475569);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></p>
+                </div>
+            </div>
+            <!-- Tab bar -->
+            <div class="qc-tab-bar">
+                <button id="qc-tab-all" class="qc-tab active" onclick="QuoteChecker.switchTab('all')">Tất cả <span class="qc-tab-count">0</span></button>
+                <button id="qc-tab-err" class="qc-tab" onclick="QuoteChecker.switchTab('err')" style="color:#dc2626;">Bất thường <span class="qc-tab-count">0</span></button>
+                <button id="qc-tab-diff" class="qc-tab" onclick="QuoteChecker.switchTab('diff')" style="color:#d97706;">Sai PA <span class="qc-tab-count">0</span></button>
+                <button id="qc-tab-extra" class="qc-tab" onclick="QuoteChecker.switchTab('extra')" style="color:#dc2626;">Báo dư <span class="qc-tab-count">0</span></button>
+                <button id="qc-tab-miss" class="qc-tab" onclick="QuoteChecker.switchTab('miss')" style="color:#475569;">Quên báo <span class="qc-tab-count">0</span></button>
+                <button id="qc-tab-match" class="qc-tab" onclick="QuoteChecker.switchTab('match')" style="color:#059669;">Khớp <span class="qc-tab-count">0</span></button>
+            </div>
+        </div>
 
+        <!-- SUMMARY BOXES -->
+        <div class="qc-summary-bar">
+            <div class="qc-sum-box qc-sum-match">
+                <span id="qc-sum-match" class="qc-sum-val">0</span>
+                <span class="qc-sum-lbl">Khớp</span>
+            </div>
+            <div class="qc-sum-box qc-sum-diff">
+                <span id="qc-sum-diff" class="qc-sum-val">0</span>
+                <span class="qc-sum-lbl">Sai PA</span>
+            </div>
+            <div class="qc-sum-box qc-sum-extra">
+                <span id="qc-sum-extra" class="qc-sum-val">0</span>
+                <span class="qc-sum-lbl">Báo dư</span>
+            </div>
+            <div class="qc-sum-box qc-sum-miss">
+                <span id="qc-sum-miss" class="qc-sum-val">0</span>
+                <span class="qc-sum-lbl">Quên báo</span>
+            </div>
+        </div>
+
+        <!-- MONEY BAR -->
+        <div class="qc-money-bar">
+            <div class="qc-money-item">
+                <p class="qc-money-lbl">💰 Báo giá Gara</p>
+                <p id="qc-money-bg" class="qc-money-val">—</p>
+            </div>
+            <div class="qc-money-divider"></div>
+            <div class="qc-money-item">
+                <p class="qc-money-lbl">📋 BBGĐ</p>
+                <p id="qc-money-bbgd" class="qc-money-val">—</p>
+            </div>
+            <div class="qc-money-divider"></div>
+            <div class="qc-money-item">
+                <p class="qc-money-lbl">⚡ Chênh lệch</p>
+                <p id="qc-money-diff" class="qc-money-diff-val even">—</p>
+            </div>
+        </div>
+
+        <!-- DANH SÁCH KẾT QUẢ -->
+        <div id="qc-list" class="qc-content custom-scrollbar"></div>
+
+        <!-- FOOTER ACTIONS -->
+        <div class="qc-footer">
+            <button class="qc-footer-btn primary" onclick="QuoteChecker.generateMessage()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Tạo tin nhắn
+            </button>
+            <button class="qc-footer-btn secondary" onclick="QuoteChecker.exportSummary()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                Copy tóm tắt
+            </button>
+            <button class="qc-footer-btn danger" onclick="QuoteChecker.clearSaved()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                Xóa lưu
+            </button>
+        </div>
+    </div>
     <!-- GD NOTIFY PANEL -->
     <div id="gd-notify-panel">
         <div style="padding:16px 16px 0;display:flex;align-items:center;justify-content:space-between;">
