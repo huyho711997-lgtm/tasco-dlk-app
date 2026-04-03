@@ -11773,35 +11773,44 @@
                 if (!extractedData || !Array.isArray(extractedData)) {
                     throw new Error("Không thể đọc được ảnh báo giá. Vui lòng chụp rõ hơn.");
                 }
-
+                
                 // ==========================================
                 // BƯỚC 2: ĐỐI CHIẾU DỮ LIỆU (API 2)
                 // ==========================================
-                if (statusText) statusText.innerHTML = `Bước 2/2: AI đang kiểm tra ${extractedData.length} hạng mục với BBGĐ...`;
+                if (statusText) statusText.innerHTML = `Bước 2/2: AI đang đối chiếu và gom nhóm ${extractedData.length} mục với BBGĐ...`;
 
                 const bbgdList = currentDamageItems.map((item) => ({
                     ten: item.chiTiet,
                     pa: item.thayThe ? "Thay" : (item.suaChua ? "Sửa" : "Chưa rõ")
                 }));
 
-                const PROMPT_2 = `Bạn là Giám định viên xe cơ giới. Đối chiếu 2 danh sách:
-                1. BÁO GIÁ: ${JSON.stringify(extractedData)}
-                2. BBGĐ: ${JSON.stringify(bbgdList)}
+                const PROMPT_2 = `Bạn là Giám định viên trưởng. Hãy đối chiếu 2 danh sách:
+                1. BÁO GIÁ GARA (Chi tiết): ${JSON.stringify(extractedData)}
+                2. BBGĐ ĐÃ DUYỆT: ${JSON.stringify(bbgdList)}
                 
-                LUẬT NGÀNH XE BẮT BUỘC (Tuân thủ tuyệt đối để đánh giá Trạng thái):
-                - Các từ "Sơn", "Gò", "Hàn", "Sửa", "Đồng sơn", "Phục hồi" mang ý nghĩa TƯƠNG ĐƯƠNG NHAU. Nếu BBGĐ duyệt "Sửa" mà Gara báo "Sơn" (hoặc ngược lại) -> BẮT BUỘC đánh giá là "KHOP" (1).
-                - Tên gọi vùng miền: "Cản" = "Ba đờ sốc", "Vè" = "Tai xe", "Gương" = "Kiếng", "Lốp" = "Vỏ". Hãy linh hoạt gom nhóm.
-                - CHỈ ĐÁNH GIÁ LÀ "SAI_PA" (2) khi có xung đột sống còn giữa "THAY" và "SỬA". (Ví dụ: BBGĐ duyệt "Sửa" nhưng Gara đòi "Thay").
+                NHIỆM VỤ ĐẶC BIỆT: GOM NHÓM TRƯỚC KHI ĐỐI CHIẾU
+                Trong báo giá, 1 bộ phận có thể bị chia nhỏ thành nhiều chi phí. Bạn BẮT BUỘC phải gom chúng lại thành 1 mục duy nhất tương ứng với BBGĐ.
+                Ví dụ: "Gò cửa" (500k) + "Sơn cửa" (800k) -> Gom thành 1 mục: "Cửa" | PA Gara: "Gò + Sơn" | Giá: 1300000.
+                Ví dụ: "Thay cản" (2000k) + "Công thay" (300k) + "Sơn cản" (700k) -> Gom thành: "Cản" | PA Gara: "Thay + Công + Sơn" | Giá: 3000000.
                 
-                So khớp và phân loại từng mục. Trả về MẢNG JSON.
-                Quy tắc "tt" (trạng thái):
-                1: "KHOP" (Trùng tên và phương án tương đương theo luật trên)
-                2: "SAI_PA" (Xung đột Thay vs Sửa)
-                3: "DU" (BÁO GIÁ có nhưng BBGĐ không có)
-                4: "THIEU" (BBGĐ có nhưng BÁO GIÁ không có)
+                LUẬT ĐỐI CHIẾU PHƯƠNG ÁN (Quyết định biến "tt"):
+                - Nhóm SỬA CHỮA (Bao gồm: Sửa, Sơn, Gò, Nắn, Hàn, Kéo, Phục hồi). Nếu BBGĐ duyệt "Sửa", và Gara báo bất kỳ cụm nào trong nhóm này -> Trạng thái: 1 (KHỚP).
+                - Nhóm THAY THẾ (Bao gồm: Vật tư mới, Công thay thế, Tháo lắp). Nếu BBGĐ duyệt "Thay", và Gara báo thay vật tư -> Trạng thái: 1 (KHỚP).
+                - XUNG ĐỘT SỐNG CÒN: BBGĐ duyệt "Sửa" nhưng Gara đòi "Thay vật tư" (Hoặc ngược lại) -> Trạng thái: 2 (SAI_PA).
+                - DƯ THỪA: Có trong Báo giá nhưng BBGĐ không có -> Trạng thái: 3 (DU).
+                - THIẾU SÓT: Có trong BBGĐ nhưng Báo giá hoàn toàn không đề cập -> Trạng thái: 4 (THIEU).
                 
-                Định dạng trả về CHỈ MẢNG JSON, KHÔNG CÓ TEXT GIẢI THÍCH NÀO KHÁC:
-                [{"t": "Tên mục", "tt": 1|2|3|4, "gPa": "PA Gara", "gGia": 1500000, "bPa": "PA BBGĐ", "cb": "Ghi chú ngắn nếu sai lệch"}]`;
+                Định dạng trả về CHỈ MẢNG JSON (Tuyệt đối không giải thích, không bọc markdown):
+                [
+                  {
+                    "t": "Tên phụ tùng (Gom gọn, VD: Cản trước, Cửa sau trái)",
+                    "tt": 1|2|3|4,
+                    "gPa": "Các phương án Gara đã làm (VD: Gò + Sơn, Thay + Sơn)",
+                    "gGia": Tổng tiền của nhóm này (Số nguyên),
+                    "bPa": "Phương án BBGĐ (Sửa/Thay)",
+                    "cb": "Cảnh báo (Chỉ ghi nếu sai phương án, báo dư hoặc báo thiếu. Nếu Khớp thì để rỗng)"
+                  }
+                ]`;
 
                 let comparedData = null;
                 let key2 = GeminiKeys.next(); // Đổi sang một Key khác để chia tải
