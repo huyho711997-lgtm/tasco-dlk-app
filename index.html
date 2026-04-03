@@ -3831,9 +3831,28 @@
                 const selClass = isSelected ? ' bulk-selected' : '';
 
                 // BỔ SUNG: Hiển thị giá trị đã áp dụng từ Kho giá
-                let priceHtml = '';
-                if (h.traGiaStatus === 'matched' && (h.giaOem || h.giaAm)) {
-                    priceHtml = `<div style="margin-top:6px; padding-top:6px; border-top:1px dashed #e2e8f0; display:flex; align-items:center; justify-content:space-between;">
+                // BỔ SUNG: Hiển thị trạng thái Đối chiếu báo giá HOẶC Giá từ Kho AI
+                let extraHtml = '';
+                
+                // Ưu tiên 1: Hiển thị kết quả check Báo giá
+                if (h.quoteStatus) {
+                    let qText = '', qColor = '', qBg = '', qBorder = '';
+                    if (h.quoteStatus === 'KHOP') { qText = '✓ Khớp BG'; qColor = '#10b981'; qBg = '#d1fae5'; qBorder = '#a7f3d0'; }
+                    else if (h.quoteStatus === 'SAI_PHUONG_AN') { qText = '⚠️ Sai P.Án'; qColor = '#d97706'; qBg = '#fef3c7'; qBorder = '#fde68a'; }
+                    else if (h.quoteStatus === 'GARA_BAO_DU') { qText = '❌ Báo dư'; qColor = '#dc2626'; qBg = '#fee2e2'; qBorder = '#fca5a5'; }
+                    else if (h.quoteStatus === 'GARA_QUEN_BAO') { qText = '❓ Quên báo'; qColor = '#475569'; qBg = '#f1f5f9'; qBorder = '#cbd5e1'; }
+                    
+                    extraHtml += `<div style="margin-top:6px; padding-top:6px; border-top:1px dashed #e2e8f0; display:flex; align-items:center; justify-content:space-between;">
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <span style="font-size:9px;font-weight:800;color:${qColor};background:${qBg};border:1px solid ${qBorder};padding:2px 6px;border-radius:4px;">${qText}</span>
+                            ${h.quoteGaraPa ? `<span style="font-size:10px;font-weight:700;color:#64748b;">Gara: ${h.quoteGaraPa}</span>` : ''}
+                        </div>
+                        ${h.quoteGaraGia ? `<span style="font-size:11px;font-weight:900;color:#64748b;">${Number(h.quoteGaraGia).toLocaleString('vi-VN')}đ</span>` : ''}
+                    </div>`;
+                }
+                // Ưu tiên 2: Nếu chưa có Check Báo giá thì hiện giá Tra từ Kho
+                else if (h.traGiaStatus === 'matched' && (h.giaOem || h.giaAm)) {
+                    extraHtml += `<div style="margin-top:6px; padding-top:6px; border-top:1px dashed #e2e8f0; display:flex; align-items:center; justify-content:space-between;">
                         <span style="font-size:9px;font-weight:800;color:#10b981;background:#d1fae5;padding:2px 6px;border-radius:4px;">✓ Đã áp giá</span>
                         <div style="display:flex; gap:8px;">
                             ${h.giaOem ? `<span style="font-size:11px;font-weight:900;color:#8b5cf6;">OEM: ${Number(h.giaOem).toLocaleString('vi-VN')}đ</span>` : ''}
@@ -3852,7 +3871,7 @@
                     +       moTaSep
                     +       actionChips(h)
                     +     '</div>'
-                    +     priceHtml // Chèn đoạn giá trị vào đây
+                    +     extraHtml // <- CHÈN BIẾN MỚI VÀO ĐÂY
                     +   '</div>'
                     + '</div>'
                     + '<div class="dm-swipe-actions">'
@@ -11847,11 +11866,13 @@
                 }
 
                 // ==========================================
-                // BƯỚC 3: DỊCH NGƯỢC JSON & TỰ ĐỘNG LƯU
+                // BƯỚC 3: MERGE KẾT QUẢ VÀO HẠNG MỤC GĐ & LƯU FIREBASE
                 // ==========================================
-                const finalResults = comparedData.map(r => {
+                const item = App.find(this._id);
+                let damageItems = [...(item.damageItems || [])];
+
+                comparedData.forEach(r => {
                     let strStatus = { 1: 'KHOP', 2: 'SAI_PHUONG_AN', 3: 'GARA_BAO_DU', 4: 'GARA_QUEN_BAO' }[r.tt] || 'KHOP';
-                    
                     if (typeof r.tt === 'string') {
                         if (r.tt.includes('KHOP') || r.tt === '1') strStatus = 'KHOP';
                         else if (r.tt.includes('SAI') || r.tt === '2') strStatus = 'SAI_PHUONG_AN';
@@ -11859,25 +11880,52 @@
                         else if (r.tt.includes('THIEU') || r.tt === '4') strStatus = 'GARA_QUEN_BAO';
                     }
 
-                    return {
-                        tenPhuTung: r.t || 'Không rõ',
-                        trangThai: strStatus,
-                        gara: { phuongAn: r.gPa || '', gia: r.gGia || 0 },
-                        bbgd: { phuongAn: r.bPa || '' },
-                        canhBao: r.cb || ''
-                    };
+                    // Tìm hạng mục khớp trong BBGD
+                    let idx = damageItems.findIndex(d => {
+                        const a = String(d.chiTiet||'').toLowerCase().trim();
+                        const b = String(r.t||'').toLowerCase().trim();
+                        return a === b || a.includes(b) || b.includes(a);
+                    });
+
+                    if (idx !== -1) {
+                        damageItems[idx].quoteStatus = strStatus;
+                        damageItems[idx].quoteGaraPa = r.gPa || '';
+                        damageItems[idx].quoteGaraGia = r.gGia || 0;
+                        damageItems[idx].quoteBbgdPa = r.bPa || '';
+                        damageItems[idx].quoteWarning = r.cb || '';
+                    } else if (strStatus === 'GARA_BAO_DU') {
+                        // Gara báo dư -> Tự động Push hạng mục mới vào danh sách luôn để GDV thấy
+                        damageItems.push({
+                            chiTiet: r.t || 'Không rõ',
+                            moTa: 'Gara báo ngoài BB',
+                            mucDo: 'Chưa rõ',
+                            suaChua: false, thayThe: false, thuHoi: false,
+                            quoteStatus: strStatus,
+                            quoteGaraPa: r.gPa || '',
+                            quoteGaraGia: r.gGia || 0,
+                            quoteBbgdPa: r.bPa || '',
+                            quoteWarning: r.cb || ''
+                        });
+                    }
                 });
 
-                // TỰ ĐỘNG LƯU VÀO FIREBASE NGAY KHI AI PHÂN TÍCH XONG
-                const errorCount = finalResults.filter(r => r.trangThai !== 'KHOP').length;
-                await db.ref(`Workstation/${this._id}`).update({ // Dùng this._id thay cho item.id
+                // Đánh lại STT phòng trường hợp có item push thêm
+                damageItems.forEach((d, i) => d.stt = i + 1);
+
+                const errorCount = damageItems.filter(d => d.quoteStatus && d.quoteStatus !== 'KHOP').length;
+                
+                // LƯU NGAY VÀO FIREBASE
+                await db.ref(`Workstation/${this._id}`).update({ 
+                    damageItems: damageItems,
                     quoteCheckedAt: new Date().toISOString(),
-                    quoteHasErrors: errorCount > 0,
-                    quoteCheckResults: JSON.stringify(finalResults)
+                    quoteHasErrors: errorCount > 0
                 });
 
-                // Hiển thị giao diện
-                this._renderResults(finalResults, this._id); // Dùng this._id thay cho item.id
+                // Cập nhật lại UI Hạng mục GĐ ngầm bên dưới
+                DamageItems.render(this._id);
+
+                // Hiển thị giao diện Popup Đối chiếu
+                this._renderResults(damageItems, this._id);
 
             } catch (error) {
                 Swal.close();
@@ -11885,67 +11933,76 @@
             }
         },
 
-        _renderResults(results, id) {
-            this._id = id; // Lưu lại ID hồ sơ
-            window._qcCurrentResults = results; // Lưu state để đổi tay
+        _renderResults(damageItems, id) {
+            this._id = id;
+            window._qcCurrentItems = damageItems; // Lưu mảng state toàn cục để đổi trạng thái tay
             
             const fmt = n => n ? Number(n).toLocaleString('vi-VN') + 'đ' : '—';
             
+            // Chỉ hiển thị các mục vừa được AI check (có quoteStatus), giữ nguyên Index gốc để Mapping
+            let displayList = damageItems
+                .map((item, index) => ({ ...item, originalIndex: index }))
+                .filter(item => item.quoteStatus);
+
             // Sắp xếp: Lỗi nặng lên đầu
             const sortMap = { 'GARA_BAO_DU': 1, 'SAI_PHUONG_AN': 2, 'GARA_QUEN_BAO': 3, 'KHOP': 4 };
-            results.sort((a, b) => sortMap[a.trangThai] - sortMap[b.trangThai]);
+            displayList.sort((a, b) => sortMap[a.quoteStatus] - sortMap[b.quoteStatus]);
 
             let html = '';
             let errorCount = 0;
+            let errorSummaryText = '';
 
-            results.forEach((r, index) => {
+            displayList.forEach(r => {
                 let cardClass = '';
                 let badgeHtml = '';
                 
-                // Trạng thái biến thành Nút bấm (có chevron-down báo hiệu có thể click)
-                if (r.trangThai === 'KHOP') {
+                if (r.quoteStatus === 'KHOP') {
                     cardClass = 'qc-match';
-                    badgeHtml = `<button onclick="QuoteChecker.toggleStatus(${index})" class="qc-status-badge flex items-center gap-1 active:scale-95 transition-transform" style="border:none; cursor:pointer;">✓ Trùng khớp <i data-lucide="chevron-down" class="w-3 h-3 opacity-50"></i></button>`;
+                    badgeHtml = `<button onclick="QuoteChecker.toggleStatus(${r.originalIndex})" class="qc-status-badge flex items-center gap-1 active:scale-95 transition-transform" style="border:none; cursor:pointer; background:#d1fae5; color:#059669;">✓ Trùng khớp <i data-lucide="chevron-down" class="w-3 h-3 opacity-50"></i></button>`;
                 } else {
                     errorCount++;
-                    if (r.trangThai === 'SAI_PHUONG_AN') {
+                    let errLabel = '';
+                    if (r.quoteStatus === 'SAI_PHUONG_AN') {
                         cardClass = 'qc-diff'; 
-                        badgeHtml = `<button onclick="QuoteChecker.toggleStatus(${index})" class="qc-status-badge flex items-center gap-1 active:scale-95 transition-transform" style="border:none; cursor:pointer;">⚠️ Sai phương án <i data-lucide="chevron-down" class="w-3 h-3 opacity-50"></i></button>`;
-                    } else if (r.trangThai === 'GARA_BAO_DU') {
+                        badgeHtml = `<button onclick="QuoteChecker.toggleStatus(${r.originalIndex})" class="qc-status-badge flex items-center gap-1 active:scale-95 transition-transform" style="border:none; cursor:pointer; background:#fef3c7; color:#d97706;">⚠️ Sai P.Án <i data-lucide="chevron-down" class="w-3 h-3 opacity-50"></i></button>`;
+                        errLabel = 'Sai phương án';
+                    } else if (r.quoteStatus === 'GARA_BAO_DU') {
                         cardClass = 'qc-extra'; 
-                        badgeHtml = `<button onclick="QuoteChecker.toggleStatus(${index})" class="qc-status-badge flex items-center gap-1 active:scale-95 transition-transform" style="border:none; cursor:pointer;">❌ Báo dư <i data-lucide="chevron-down" class="w-3 h-3 opacity-50"></i></button>`;
-                    } else if (r.trangThai === 'GARA_QUEN_BAO') {
+                        badgeHtml = `<button onclick="QuoteChecker.toggleStatus(${r.originalIndex})" class="qc-status-badge flex items-center gap-1 active:scale-95 transition-transform" style="border:none; cursor:pointer; background:#fee2e2; color:#dc2626;">❌ Báo dư <i data-lucide="chevron-down" class="w-3 h-3 opacity-50"></i></button>`;
+                        errLabel = 'Báo dư ngoài BB';
+                    } else if (r.quoteStatus === 'GARA_QUEN_BAO') {
                         cardClass = 'qc-miss'; 
-                        badgeHtml = `<button onclick="QuoteChecker.toggleStatus(${index})" class="qc-status-badge flex items-center gap-1 active:scale-95 transition-transform" style="border:none; cursor:pointer;">❓ Quên báo giá <i data-lucide="chevron-down" class="w-3 h-3 opacity-50"></i></button>`;
+                        badgeHtml = `<button onclick="QuoteChecker.toggleStatus(${r.originalIndex})" class="qc-status-badge flex items-center gap-1 active:scale-95 transition-transform" style="border:none; cursor:pointer; background:#f1f5f9; color:#475569;">❓ Quên báo <i data-lucide="chevron-down" class="w-3 h-3 opacity-50"></i></button>`;
+                        errLabel = 'Gara chưa báo';
                     }
+                    errorSummaryText += `- ${r.chiTiet}: ${errLabel}\n`;
                 }
-
-                const garaData = r.gara || {};
-                const bbgdData = r.bbgd || {};
 
                 html += `
                 <div class="qc-card ${cardClass}">
                     <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
-                        <p style="font-size:13px; font-weight:800; color:var(--text-primary); flex:1; padding-right:8px; line-height:1.3;">${r.tenPhuTung}</p>
+                        <p style="font-size:13px; font-weight:800; color:var(--text-primary); flex:1; padding-right:8px; line-height:1.3;">${r.chiTiet}</p>
                         ${badgeHtml}
                     </div>
-                    ${r.canhBao ? `<p style="font-size:10px; color:#ef4444; font-weight:700; margin-bottom:8px; display:flex; gap:4px;"><i data-lucide="info" class="w-3 h-3"></i> ${r.canhBao}</p>` : ''}
+                    ${r.quoteWarning ? `<p style="font-size:10px; color:#ef4444; font-weight:700; margin-bottom:8px; display:flex; gap:4px;"><i data-lucide="info" class="w-3 h-3"></i> ${r.quoteWarning}</p>` : ''}
                     <div class="qc-compare-grid">
                         <div class="qc-col">
                             <p class="qc-col-title">Báo giá Gara</p>
-                            <p class="qc-val" style="color:#d97706;">${garaData.phuongAn || '—'}</p>
-                            <p class="qc-val" style="margin-top:2px; font-size:14px;">${fmt(garaData.gia)}</p>
+                            <p class="qc-val" style="color:#d97706;">${r.quoteGaraPa || '—'}</p>
+                            <p class="qc-val" style="margin-top:2px; font-size:14px;">${fmt(r.quoteGaraGia)}</p>
                         </div>
                         <div class="qc-col">
                             <p class="qc-col-title">Biên bản của bạn</p>
-                            <p class="qc-val" style="color:#2563eb;">${bbgdData.phuongAn || '—'}</p>
+                            <p class="qc-val" style="color:#2563eb;">${r.quoteBbgdPa || '—'}</p>
                             <p class="qc-val" style="margin-top:2px; font-size:10px; color:var(--text-muted);">Đã duyệt</p>
                         </div>
                     </div>
                 </div>`;
             });
 
-            // UI Footer Buttons
+            window._qcCurrentErrorSummary = errorSummaryText;
+
+            // UI Footer
             let footerBtns = '';
             if (errorCount > 0) {
                 footerBtns = `
@@ -11953,9 +12010,7 @@
                         <button onclick="QuoteChecker.saveAndAction('${id}', 'zalo')" style="flex:1; padding:12px 0; border-radius:12px; font-size:12px; font-weight:800; background:#3b82f6; color:white; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Gửi Zalo nhắc Gara
                         </button>
-                        <button onclick="Swal.close()" style="padding:12px 16px; border-radius:12px; font-size:12px; font-weight:800; background:var(--bg-surface, #f1f5f9); color:var(--text-secondary, #475569); border:none; cursor:pointer;">
-                            Đóng
-                        </button>
+                        <button onclick="Swal.close()" style="padding:12px 16px; border-radius:12px; font-size:12px; font-weight:800; background:var(--bg-surface, #f1f5f9); color:var(--text-secondary, #475569); border:none; cursor:pointer;">Đóng</button>
                     </div>`;
             } else {
                 footerBtns = `
@@ -11967,13 +12022,11 @@
             }
 
             Swal.fire({
-                title: `<div class="text-left font-black text-lg flex items-center gap-2" style="color:var(--text-primary);">
-                            <span class="text-rose-500">AI</span> Đối chiếu báo giá
-                        </div>`,
+                title: `<div class="text-left font-black text-lg" style="color:var(--text-primary);"><span class="text-rose-500">AI</span> Đối chiếu báo giá</div>`,
                 html: `
                     <div class="text-left mt-2">
                         ${errorCount > 0 
-                            ? `<div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#ef4444; padding:8px 12px; border-radius:10px; font-size:12px; font-weight:800; margin-bottom:12px;">Phát hiện ${errorCount} điểm bất thường cần Gara sửa lại! (Có thể chạm vào Tag để đổi trạng thái)</div>`
+                            ? `<div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#ef4444; padding:8px 12px; border-radius:10px; font-size:12px; font-weight:800; margin-bottom:12px;">Phát hiện ${errorCount} điểm bất thường! (Chạm vào Tag để sửa tay)</div>`
                             : `<div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); color:#10b981; padding:8px 12px; border-radius:10px; font-size:12px; font-weight:800; margin-bottom:12px;">Tuyệt vời! Báo giá khớp hoàn toàn với Biên bản.</div>`
                         }
                         <div style="max-height: 55vh; overflow-y: auto; padding-right: 4px; padding-bottom:10px;" class="custom-scrollbar">
@@ -11990,68 +12043,55 @@
             });
         },
 
-        // Hàm click xoay vòng trạng thái bằng tay
-        toggleStatus(index) {
+        // Click để xoay vòng trạng thái bằng tay nếu AI nhận diện nhầm
+        toggleStatus(originalIndex) {
             const statuses = ['KHOP', 'SAI_PHUONG_AN', 'GARA_BAO_DU', 'GARA_QUEN_BAO'];
-            const currentObj = window._qcCurrentResults[index];
+            const item = window._qcCurrentItems[originalIndex]; // Lấy đúng Item dựa vào index trên mảng gốc
             
-            let currentIdx = statuses.indexOf(currentObj.trangThai);
-            currentIdx = (currentIdx + 1) % statuses.length; // Tiến lên 1 nấc
-            currentObj.trangThai = statuses[currentIdx];
+            let currentIdx = statuses.indexOf(item.quoteStatus || 'KHOP');
+            currentIdx = (currentIdx + 1) % statuses.length;
+            item.quoteStatus = statuses[currentIdx];
 
-            // Render lại UI với State mới
-            this._renderResults(window._qcCurrentResults, this._id);
-
-            // Cập nhật lại Firebase ngầm để lưu trạng thái tay
-            const errorCount = window._qcCurrentResults.filter(r => r.trangThai !== 'KHOP').length;
+            const errorCount = window._qcCurrentItems.filter(d => d.quoteStatus && d.quoteStatus !== 'KHOP').length;
+            
+            // Lưu trực tiếp vào mảng trên Firebase
             db.ref(`Workstation/${this._id}`).update({
-                quoteHasErrors: errorCount > 0,
-                quoteCheckResults: JSON.stringify(window._qcCurrentResults)
+                damageItems: window._qcCurrentItems,
+                quoteHasErrors: errorCount > 0
             });
+            
+            // Vẽ lại UI
+            DamageItems.render(this._id);
+            this._renderResults(window._qcCurrentItems, this._id); // Nạp lại PopUp
             
             if (window.navigator.vibrate) window.navigator.vibrate(15);
         },
 
-        // Hàm xử lý nút Zalo / Duyệt Báo Giá
+        // Nút Gửi Zalo / Duyệt Báo giá
         saveAndAction(id, actionType) {
             const item = App.find(id);
             if (!item) return;
 
-            const results = window._qcCurrentResults || [];
-
-            // Nút Xác nhận khớp -> Đẩy sang Bước 4
+            const errorSummaryText = window._qcCurrentErrorSummary || '';
+            
             if (actionType === 'approve') {
                 const updates = { 
                     quoteCheckedAt: new Date().toISOString(),
                     quoteHasErrors: false 
                 };
-                
                 if (item.step === 3) {
                     updates.step = 4;
                     updates.stepUpdatedAt = new Date().toISOString();
                     updates.quotedAt = new Date().toISOString();
                 }
-
                 Swal.fire({ title: 'Đang lưu...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                 db.ref(`Workstation/${id}`).update(updates).then(() => {
                     Swal.close();
-                    Toast.fire({ icon: 'success', title: 'Đã xác nhận báo giá khớp & chuyển Bước 4!' });
+                    Toast.fire({ icon: 'success', title: 'Đã xác nhận báo giá khớp & chuyển sang Bước 4!' });
                     setTimeout(() => Modal.open(id), 300);
                 });
             } 
-            // Nút Gửi Zalo
             else if (actionType === 'zalo') {
-                // Gom text lỗi
-                let errorSummaryText = '';
-                results.forEach(r => {
-                    if (r.trangThai !== 'KHOP') {
-                        let errLabel = r.trangThai === 'SAI_PHUONG_AN' ? 'Sai phương án' :
-                                       r.trangThai === 'GARA_BAO_DU' ? 'Báo dư ngoài BB' : 'Gara chưa báo';
-                        errorSummaryText += `- ${r.tenPhuTung}: ${errLabel}\n`;
-                    }
-                });
-
-                // Ưu tiên SĐT Cố vấn, không có thì lấy SĐT Gara
                 const phone = document.getElementById('edit-garaAdvisorPhone')?.value.trim() 
                               || item.garaAdvisorPhone 
                               || item.garaPhone;
@@ -12061,10 +12101,8 @@
                     return;
                 }
 
-                // Gọi template sinh tin nhắn
                 const msg = ZaloHelper.templates.saiBaoGia(item, errorSummaryText);
                 
-                // Copy vào Clipboard
                 if (navigator.clipboard && window.isSecureContext) {
                     navigator.clipboard.writeText(msg).catch(() => {});
                 } else {
@@ -12078,16 +12116,15 @@
                     document.body.removeChild(ta);
                 }
 
-                // Mở tab Zalo
                 Toast.fire({ icon: 'success', title: 'Đã copy lỗi! Đang mở Zalo...' });
                 const cleanPhone = phone.replace(/\D/g, '');
                 setTimeout(() => {
                     window.open(`https://zalo.me/${cleanPhone}`, '_blank');
-                    Swal.close(); // Đóng popup đối chiếu
+                    Swal.close();
                 }, 300);
             }
         }
-    };  
+    }; 
     // ============================================================
     // BOOT
     // ============================================================
