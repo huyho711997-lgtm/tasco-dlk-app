@@ -620,12 +620,12 @@
         .dm-card.tt  { border-left-color: #f59e0b; background: linear-gradient(to right, #fffcf0 0%, white 60%); }
         .dm-card.nd  { border-left-color: #cbd5e1; }
         .dm-num {
-            width: 22px; height: 22px; min-width: 22px;
-            display: flex; align-items: center; justify-content: center;
-            background: #f1f5f9; border-radius: 6px;
-            font-size: 10px; font-weight: 900; color: #94a3b8; flex-shrink: 0;
-            margin-top: 1px;
+            font-size: 10px; font-weight: 900; color: #94a3b8;
+            min-width: 14px; max-width: 14px;
+            flex-shrink: 0; flex-grow: 0;
+            text-align: center; line-height: 1;
         }
+        [data-theme="dark"] .dm-num { color: #475569; }
         .dm-body { flex: 1; min-width: 0; }
         .dm-name { font-size: 13px; font-weight: 800; color: #1e293b; line-height: 1.3; }
         .dm-meta { display: flex; align-items: center; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
@@ -738,12 +738,12 @@
 
         .dm-card {
             background: white;
-            border: 1.5px solid #e8edf3;
-            border-left: 4px solid #e2e8f0;
-            padding: 12px 12px 12px 14px;
+            border: 1px solid #e2e8f0;
+            border-left: 3px solid #e2e8f0;
+            padding: 10px 10px 10px 12px;
             display: flex;
-            align-items: flex-start;
-            gap: 10px;
+            align-items: center;
+            gap: 8px;
             position: relative;
             z-index: 2;
             touch-action: pan-y;
@@ -751,15 +751,44 @@
             border-radius: 14px;
             width: 100%;
             box-sizing: border-box;
-            box-shadow: 0 1px 4px rgba(15,23,42,0.04);
             transition: transform 0.28s cubic-bezier(0.25,1,0.5,1),
                         border-radius 0.28s,
                         border-color 0.28s;
         }
 
-        .dm-card.sc { border-left-color: #3b82f6; background: linear-gradient(to right, #f8fbff, #fff); }
-        .dm-card.tt { border-left-color: #f59e0b; background: linear-gradient(to right, #fffbf0, #fff); }
+        .dm-card.sc { border-left-color: #3b82f6; }
+        .dm-card.tt { border-left-color: #f59e0b; }
         .dm-card.nd { border-left-color: #cbd5e1; }
+
+        /* Icon bộ phận xe — kích thước cố định, không được phép co giãn */
+        .dm-part-icon {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            max-width: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f1f5f9;
+            border-radius: 8px;
+            color: #94a3b8;
+            flex-shrink: 0;
+            flex-grow: 0;
+            padding: 5px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        .dm-part-icon svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            flex-shrink: 0;
+        }
+        .dm-card.sc .dm-part-icon { background: rgba(59,130,246,0.1); color: #2563eb; }
+        .dm-card.tt .dm-part-icon { background: rgba(245,158,11,0.1); color: #b45309; }
+        [data-theme="dark"] .dm-part-icon { background: rgba(255,255,255,0.06); color: #64748b; }
+        [data-theme="dark"] .dm-card.sc .dm-part-icon { background: rgba(59,130,246,0.15); color: #60a5fa; }
+        [data-theme="dark"] .dm-card.tt .dm-part-icon { background: rgba(245,158,11,0.15); color: #fbbf24; }
         .dm-card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
         .dm-price { font-size: 12px; font-weight: 900; color: #0f172a; white-space: nowrap; }
         .dm-garage-label { font-size: 10px; font-weight: 600; color: #94a3b8; }
