@@ -11849,10 +11849,12 @@
                 // ==========================================
                 // BƯỚC 3: DỊCH NGƯỢC JSON CHO UI
                 // ==========================================
+                // ==========================================
+                // BƯỚC 3: DỊCH NGƯỢC JSON & TỰ ĐỘNG LƯU
+                // ==========================================
                 const finalResults = comparedData.map(r => {
                     let strStatus = { 1: 'KHOP', 2: 'SAI_PHUONG_AN', 3: 'GARA_BAO_DU', 4: 'GARA_QUEN_BAO' }[r.tt] || 'KHOP';
                     
-                    // Fallback an toàn nếu AI trả về chuỗi thay vì số
                     if (typeof r.tt === 'string') {
                         if (r.tt.includes('KHOP') || r.tt === '1') strStatus = 'KHOP';
                         else if (r.tt.includes('SAI') || r.tt === '2') strStatus = 'SAI_PHUONG_AN';
@@ -11869,7 +11871,16 @@
                     };
                 });
 
-                this._renderResults(finalResults);
+                // TỰ ĐỘNG LƯU VÀO FIREBASE NGAY KHI AI PHÂN TÍCH XONG
+                const errorCount = finalResults.filter(r => r.trangThai !== 'KHOP').length;
+                await db.ref(`Workstation/${item.id}`).update({
+                    quoteCheckedAt: new Date().toISOString(),
+                    quoteHasErrors: errorCount > 0,
+                    quoteCheckResults: JSON.stringify(finalResults)
+                });
+
+                // Hiển thị giao diện
+                this._renderResults(finalResults, item.id);
 
             } catch (error) {
                 Swal.close();
@@ -11877,7 +11888,10 @@
             }
         },
 
-        _renderResults(results) {
+        _renderResults(results, id) {
+            this._id = id; // Lưu lại ID hồ sơ
+            window._qcCurrentResults = results; // Lưu state để đổi tay
+            
             const fmt = n => n ? Number(n).toLocaleString('vi-VN') + 'đ' : '—';
             
             // Sắp xếp: Lỗi nặng lên đầu
@@ -11886,33 +11900,27 @@
 
             let html = '';
             let errorCount = 0;
-            let errorSummaryText = ''; // Chuỗi gom lỗi để gửi Zalo
 
-            results.forEach(r => {
+            results.forEach((r, index) => {
                 let cardClass = '';
                 let badgeHtml = '';
                 
+                // Trạng thái biến thành Nút bấm (có chevron-down báo hiệu có thể click)
                 if (r.trangThai === 'KHOP') {
                     cardClass = 'qc-match';
-                    badgeHtml = '<span class="qc-status-badge">✓ Trùng khớp</span>';
+                    badgeHtml = `<button onclick="QuoteChecker.toggleStatus(${index})" class="qc-status-badge flex items-center gap-1 active:scale-95 transition-transform" style="border:none; cursor:pointer;">✓ Trùng khớp <i data-lucide="chevron-down" class="w-3 h-3 opacity-50"></i></button>`;
                 } else {
                     errorCount++;
-                    let errLabel = '';
                     if (r.trangThai === 'SAI_PHUONG_AN') {
                         cardClass = 'qc-diff'; 
-                        badgeHtml = '<span class="qc-status-badge">⚠️ Sai phương án</span>';
-                        errLabel = 'Sai phương án';
+                        badgeHtml = `<button onclick="QuoteChecker.toggleStatus(${index})" class="qc-status-badge flex items-center gap-1 active:scale-95 transition-transform" style="border:none; cursor:pointer;">⚠️ Sai phương án <i data-lucide="chevron-down" class="w-3 h-3 opacity-50"></i></button>`;
                     } else if (r.trangThai === 'GARA_BAO_DU') {
                         cardClass = 'qc-extra'; 
-                        badgeHtml = '<span class="qc-status-badge">❌ Báo dư</span>';
-                        errLabel = 'Báo dư ngoài BB';
+                        badgeHtml = `<button onclick="QuoteChecker.toggleStatus(${index})" class="qc-status-badge flex items-center gap-1 active:scale-95 transition-transform" style="border:none; cursor:pointer;">❌ Báo dư <i data-lucide="chevron-down" class="w-3 h-3 opacity-50"></i></button>`;
                     } else if (r.trangThai === 'GARA_QUEN_BAO') {
                         cardClass = 'qc-miss'; 
-                        badgeHtml = '<span class="qc-status-badge">❓ Quên báo giá</span>';
-                        errLabel = 'Gara chưa báo';
+                        badgeHtml = `<button onclick="QuoteChecker.toggleStatus(${index})" class="qc-status-badge flex items-center gap-1 active:scale-95 transition-transform" style="border:none; cursor:pointer;">❓ Quên báo giá <i data-lucide="chevron-down" class="w-3 h-3 opacity-50"></i></button>`;
                     }
-                    // Gom text lỗi
-                    errorSummaryText += `- ${r.tenPhuTung}: ${errLabel}\n`;
                 }
 
                 const garaData = r.gara || {};
@@ -11924,9 +11932,7 @@
                         <p style="font-size:13px; font-weight:800; color:var(--text-primary); flex:1; padding-right:8px; line-height:1.3;">${r.tenPhuTung}</p>
                         ${badgeHtml}
                     </div>
-                    
                     ${r.canhBao ? `<p style="font-size:10px; color:#ef4444; font-weight:700; margin-bottom:8px; display:flex; gap:4px;"><i data-lucide="info" class="w-3 h-3"></i> ${r.canhBao}</p>` : ''}
-                    
                     <div class="qc-compare-grid">
                         <div class="qc-col">
                             <p class="qc-col-title">Báo giá Gara</p>
@@ -11942,44 +11948,38 @@
                 </div>`;
             });
 
-            // Lưu chuỗi lỗi vào biến toàn cục để hàm gửi Zalo lấy được
-            window._qcCurrentErrorSummary = errorSummaryText;
-            window._qcCurrentResults = results;
-
-            // Xây dựng nút Footer dựa trên có lỗi hay không
+            // UI Footer Buttons
             let footerBtns = '';
             if (errorCount > 0) {
                 footerBtns = `
                     <div style="display:flex; gap:8px; padding: 12px 16px; background: var(--bg-white, #fff); border-top: 1px solid var(--border-light, #e2e8f0);">
-                        <button onclick="QuoteChecker.saveAndAction('${this._id}', 'zalo')" style="flex:1; padding:12px 0; border-radius:12px; font-size:12px; font-weight:800; background:#3b82f6; color:white; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+                        <button onclick="QuoteChecker.saveAndAction('${id}', 'zalo')" style="flex:1; padding:12px 0; border-radius:12px; font-size:12px; font-weight:800; background:#3b82f6; color:white; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Gửi Zalo nhắc Gara
                         </button>
-                        <button onclick="QuoteChecker.saveAndAction('${this._id}', 'save')" style="padding:12px 16px; border-radius:12px; font-size:12px; font-weight:800; background:var(--bg-surface, #f1f5f9); color:var(--text-secondary, #475569); border:none; cursor:pointer;">
-                            Chỉ lưu
+                        <button onclick="Swal.close()" style="padding:12px 16px; border-radius:12px; font-size:12px; font-weight:800; background:var(--bg-surface, #f1f5f9); color:var(--text-secondary, #475569); border:none; cursor:pointer;">
+                            Đóng
                         </button>
-                    </div>
-                `;
+                    </div>`;
             } else {
                 footerBtns = `
                     <div style="display:flex; gap:8px; padding: 12px 16px; background: var(--bg-white, #fff); border-top: 1px solid var(--border-light, #e2e8f0);">
-                        <button onclick="QuoteChecker.saveAndAction('${this._id}', 'approve')" style="flex:1; padding:12px 0; border-radius:12px; font-size:13px; font-weight:800; background:#10b981; color:white; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+                        <button onclick="QuoteChecker.saveAndAction('${id}', 'approve')" style="flex:1; padding:12px 0; border-radius:12px; font-size:13px; font-weight:800; background:#10b981; color:white; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Xác nhận Báo giá Khớp
                         </button>
-                    </div>
-                `;
+                    </div>`;
             }
 
             Swal.fire({
-                title: `<div class="text-left font-black text-lg" style="color:var(--text-primary);">
+                title: `<div class="text-left font-black text-lg flex items-center gap-2" style="color:var(--text-primary);">
                             <span class="text-rose-500">AI</span> Đối chiếu báo giá
                         </div>`,
                 html: `
                     <div class="text-left mt-2">
                         ${errorCount > 0 
-                            ? `<div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#ef4444; padding:8px 12px; border-radius:10px; font-size:12px; font-weight:800; margin-bottom:12px;">Phát hiện ${errorCount} điểm bất thường cần Gara sửa lại!</div>`
+                            ? `<div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#ef4444; padding:8px 12px; border-radius:10px; font-size:12px; font-weight:800; margin-bottom:12px;">Phát hiện ${errorCount} điểm bất thường cần Gara sửa lại! (Có thể chạm vào Tag để đổi trạng thái)</div>`
                             : `<div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); color:#10b981; padding:8px 12px; border-radius:10px; font-size:12px; font-weight:800; margin-bottom:12px;">Tuyệt vời! Báo giá khớp hoàn toàn với Biên bản.</div>`
                         }
-                        <div style="max-height: 50vh; overflow-y: auto; padding-right: 4px; padding-bottom:10px;" class="custom-scrollbar">
+                        <div style="max-height: 55vh; overflow-y: auto; padding-right: 4px; padding-bottom:10px;" class="custom-scrollbar">
                             ${html}
                         </div>
                     </div>
@@ -11993,78 +11993,102 @@
             });
         },
 
+        // Hàm click xoay vòng trạng thái bằng tay
+        toggleStatus(index) {
+            const statuses = ['KHOP', 'SAI_PHUONG_AN', 'GARA_BAO_DU', 'GARA_QUEN_BAO'];
+            const currentObj = window._qcCurrentResults[index];
+            
+            let currentIdx = statuses.indexOf(currentObj.trangThai);
+            currentIdx = (currentIdx + 1) % statuses.length; // Tiến lên 1 nấc
+            currentObj.trangThai = statuses[currentIdx];
+
+            // Render lại UI với State mới
+            this._renderResults(window._qcCurrentResults, this._id);
+
+            // Cập nhật lại Firebase ngầm để lưu trạng thái tay
+            const errorCount = window._qcCurrentResults.filter(r => r.trangThai !== 'KHOP').length;
+            db.ref(`Workstation/${this._id}`).update({
+                quoteHasErrors: errorCount > 0,
+                quoteCheckResults: JSON.stringify(window._qcCurrentResults)
+            });
+            
+            if (window.navigator.vibrate) window.navigator.vibrate(15);
+        },
+
+        // Hàm xử lý nút Zalo / Duyệt Báo Giá
         saveAndAction(id, actionType) {
             const item = App.find(id);
             if (!item) return;
 
-            const errorSummaryText = window._qcCurrentErrorSummary || '';
             const results = window._qcCurrentResults || [];
-            
-            // Xây dựng dữ liệu cập nhật Firebase
-            const updates = {
-                quoteCheckedAt: new Date().toISOString(),
-                quoteHasErrors: errorSummaryText !== '',
-                quoteCheckResults: JSON.stringify(results) // Tuỳ chọn lưu chi tiết mảng lỗi
-            };
 
-            // Nếu người dùng xác nhận khớp -> Cập nhật step luôn (nếu đang ở Bước chờ Báo giá)
-            if (actionType === 'approve' && item.step === 3) {
-                updates.step = 4; // Chuyển sang "Đã có báo giá"
-                updates.stepUpdatedAt = new Date().toISOString();
-                updates.quotedAt = new Date().toISOString();
-            }
+            // Nút Xác nhận khớp -> Đẩy sang Bước 4
+            if (actionType === 'approve') {
+                const updates = { 
+                    quoteCheckedAt: new Date().toISOString(),
+                    quoteHasErrors: false 
+                };
+                
+                if (item.step === 3) {
+                    updates.step = 4;
+                    updates.stepUpdatedAt = new Date().toISOString();
+                    updates.quotedAt = new Date().toISOString();
+                }
 
-            // Gọi Firebase lưu dữ liệu
-            Swal.fire({ title: 'Đang lưu kết quả...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-            
-            db.ref(`Workstation/${id}`).update(updates).then(() => {
-                if (actionType === 'save') {
+                Swal.fire({ title: 'Đang lưu...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                db.ref(`Workstation/${id}`).update(updates).then(() => {
                     Swal.close();
-                    Toast.fire({ icon: 'success', title: 'Đã lưu kết quả đối chiếu!' });
-                    setTimeout(() => Modal.open(id), 300); // Reload lại form
-                } 
-                else if (actionType === 'approve') {
-                    Swal.close();
-                    Toast.fire({ icon: 'success', title: 'Đã xác nhận báo giá khớp!' });
+                    Toast.fire({ icon: 'success', title: 'Đã xác nhận báo giá khớp & chuyển Bước 4!' });
                     setTimeout(() => Modal.open(id), 300);
-                }
-                else if (actionType === 'zalo') {
-                    Swal.close();
-                    // Lấy số điện thoại Cố vấn (ưu tiên) hoặc số Gara
-                    const phone = document.getElementById('edit-garaAdvisorPhone')?.value.trim() 
-                                  || item.garaAdvisorPhone 
-                                  || item.garaPhone;
-
-                    if (!phone) {
-                        Toast.fire({ icon: 'warning', title: 'Hồ sơ chưa lưu SĐT của Gara/Cố vấn!' });
-                        return;
+                });
+            } 
+            // Nút Gửi Zalo
+            else if (actionType === 'zalo') {
+                // Gom text lỗi
+                let errorSummaryText = '';
+                results.forEach(r => {
+                    if (r.trangThai !== 'KHOP') {
+                        let errLabel = r.trangThai === 'SAI_PHUONG_AN' ? 'Sai phương án' :
+                                       r.trangThai === 'GARA_BAO_DU' ? 'Báo dư ngoài BB' : 'Gara chưa báo';
+                        errorSummaryText += `- ${r.tenPhuTung}: ${errLabel}\n`;
                     }
+                });
 
-                    // Tái sử dụng ZaloHelper nhưng tiêm nội dung custom vào
-                    const msg = ZaloHelper.templates.saiBaoGia(item, errorSummaryText);
-                    
-                    if (navigator.clipboard && window.isSecureContext) {
-                        navigator.clipboard.writeText(msg).catch(() => {});
-                    } else {
-                        const ta = document.createElement('textarea');
-                        ta.value = msg;
-                        ta.style.cssText = `position:absolute;opacity:0;top:${window.scrollY}px;left:0;`;
-                        document.body.appendChild(ta);
-                        ta.focus({ preventScroll: true }); 
-                        ta.select();
-                        try { document.execCommand('copy'); } catch(e) {}
-                        document.body.removeChild(ta);
-                    }
+                // Ưu tiên SĐT Cố vấn, không có thì lấy SĐT Gara
+                const phone = document.getElementById('edit-garaAdvisorPhone')?.value.trim() 
+                              || item.garaAdvisorPhone 
+                              || item.garaPhone;
 
-                    Toast.fire({ icon: 'success', title: 'Đã copy lỗi! Đang mở Zalo...' });
-                    const cleanPhone = phone.replace(/\D/g, '');
-                    setTimeout(() => {
-                        window.open(`https://zalo.me/${cleanPhone}`, '_blank');
-                    }, 300);
+                if (!phone) {
+                    Toast.fire({ icon: 'warning', title: 'Hồ sơ chưa lưu SĐT của Gara/Cố vấn!' });
+                    return;
                 }
-            }).catch((err) => {
-                Swal.fire('Lỗi', 'Không thể lưu kết quả: ' + err.message, 'error');
-            });
+
+                // Gọi template sinh tin nhắn
+                const msg = ZaloHelper.templates.saiBaoGia(item, errorSummaryText);
+                
+                // Copy vào Clipboard
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(msg).catch(() => {});
+                } else {
+                    const ta = document.createElement('textarea');
+                    ta.value = msg;
+                    ta.style.cssText = `position:absolute;opacity:0;top:${window.scrollY}px;left:0;`;
+                    document.body.appendChild(ta);
+                    ta.focus({ preventScroll: true }); 
+                    ta.select();
+                    try { document.execCommand('copy'); } catch(e) {}
+                    document.body.removeChild(ta);
+                }
+
+                // Mở tab Zalo
+                Toast.fire({ icon: 'success', title: 'Đã copy lỗi! Đang mở Zalo...' });
+                const cleanPhone = phone.replace(/\D/g, '');
+                setTimeout(() => {
+                    window.open(`https://zalo.me/${cleanPhone}`, '_blank');
+                    Swal.close(); // Đóng popup đối chiếu
+                }, 300);
+            }
         }
     };  
     // ============================================================
