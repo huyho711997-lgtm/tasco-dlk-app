@@ -1362,56 +1362,54 @@
         [data-theme="dark"] #noti-panel .noti-item { background-color: var(--bg-app) !important; border-color: var(--border-light) !important; }
         [data-theme="dark"] #btn-open-noti { background-color: var(--bg-white) !important; border-color: var(--border-light) !important; color: var(--text-primary) !important; }
 
-        /* ====== QUOTE CHECKER (ĐỐI CHIẾU BÁO GIÁ) ====== */
-        .qc-card {
-            background: var(--bg-white, #fff);
-            border: 1.5px solid var(--border-light, #e2e8f0);
-            border-radius: 14px; padding: 12px; margin-bottom: 10px;
-            position: relative; overflow: hidden;
-        }
-        .qc-status-badge {
-            font-size: 9px; font-weight: 900; padding: 3px 8px; border-radius: 6px; text-transform: uppercase;
-        }
-        /* Khớp hoàn toàn */
-        .qc-match { border-left: 4px solid #10b981; }
-        .qc-match .qc-status-badge { background: #d1fae5; color: #059669; border: 1px solid #a7f3d0; }
-        /* Sai phương án (Gara đòi thay, BBGĐ bắt sửa) */
-        .qc-diff { border-left: 4px solid #f59e0b; background: #fffbeb; }
-        .qc-diff .qc-status-badge { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
-        /* Báo dư (Không có trong BBGĐ) */
-        .qc-extra { border-left: 4px solid #ef4444; background: #fef2f2; }
-        .qc-extra .qc-status-badge { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
-        /* Gara quên báo (Có trong BBGĐ mà Gara không thèm báo) */
-        .qc-miss { border-left: 4px solid #64748b; opacity: 0.8; }
-        .qc-miss .qc-status-badge { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
-        
-        .qc-compare-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;
-            padding-top: 8px; border-top: 1px dashed var(--border-light, #e2e8f0);
-        }
-        .qc-col { background: var(--bg-surface, #f8fafc); padding: 8px; border-radius: 8px; border: 1px solid var(--border-light, #f1f5f9); }
-        .qc-col-title { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
-        .qc-val { font-size: 12px; font-weight: 800; color: var(--text-primary, #1e293b); }
-        
-        [data-theme="dark"] .qc-diff { background: rgba(245, 158, 11, 0.05); }
-        [data-theme="dark"] .qc-extra { background: rgba(239, 68, 68, 0.05); }
-        /* Các nút tùy chọn nguồn tải Báo giá */
-        .qc-action-btn {
-            display: flex; align-items: center; gap: 14px;
-            width: 100%; padding: 14px 16px; margin-bottom: 12px;
-            border-radius: 16px; border: 1.5px solid var(--border-light, #e2e8f0);
-            background: var(--bg-surface, #f8fafc);
-            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); 
-            cursor: pointer; text-align: left;
-        }
-        .qc-action-btn:last-child { margin-bottom: 0; }
-        .qc-action-btn:active { transform: scale(0.98); border-color: #3b82f6; background: var(--bg-white, #fff); }
-        .qc-action-icon {
-            width: 44px; height: 44px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        }
-        [data-theme="dark"] .qc-action-btn { background: var(--bg-app); }
-        [data-theme="dark"] .qc-action-btn:active { background: rgba(59, 130, 246, 0.1); }
+        /* ====== QUOTE CHECKER (ĐỐI CHIẾU BÁO GIÁ) V2 ====== */
+        .qc-card {
+            background: var(--bg-white, #fff);
+            border: 1px solid var(--border-light, #e2e8f0);
+            border-radius: 12px; padding: 10px; margin-bottom: 8px;
+            position: relative; overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .qc-status-badge {
+            font-size: 9px; font-weight: 900; padding: 3px 6px; border-radius: 6px; text-transform: uppercase; white-space: nowrap;
+        }
+        .qc-match { border-left: 3px solid #10b981; }
+        .qc-match .qc-status-badge { background: #d1fae5; color: #059669; border: 1px solid #a7f3d0; }
+        .qc-diff { border-left: 3px solid #f59e0b; background: #fffbeb; }
+        .qc-diff .qc-status-badge { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+        .qc-extra { border-left: 3px solid #ef4444; background: #fef2f2; }
+        .qc-extra .qc-status-badge { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+        .qc-miss { border-left: 3px solid #64748b; background: #f8fafc; }
+        .qc-miss .qc-status-badge { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        
+        .qc-compare-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px;
+            padding-top: 6px; border-top: 1px dashed var(--border-light, #e2e8f0);
+        }
+        .qc-col { background: var(--bg-surface, #f8fafc); padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border-light, #f1f5f9); }
+        .qc-col-title { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px; }
+        .qc-val { font-size: 11px; font-weight: 800; color: var(--text-primary, #1e293b); }
+        
+        [data-theme="dark"] .qc-diff { background: rgba(245, 158, 11, 0.05); }
+        [data-theme="dark"] .qc-extra { background: rgba(239, 68, 68, 0.05); }
+        [data-theme="dark"] .qc-miss { background: rgba(100, 116, 139, 0.05); }
+        
+        .qc-action-btn {
+            display: flex; align-items: center; gap: 12px;
+            width: 100%; padding: 12px 14px; margin-bottom: 10px;
+            border-radius: 14px; border: 1.5px solid var(--border-light, #e2e8f0);
+            background: var(--bg-surface, #f8fafc);
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            cursor: pointer; text-align: left;
+        }
+        .qc-action-btn:last-child { margin-bottom: 0; }
+        .qc-action-btn:active { transform: scale(0.98); border-color: #3b82f6; background: var(--bg-white, #fff); }
+        .qc-action-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        [data-theme="dark"] .qc-action-btn { background: var(--bg-app); }
+        [data-theme="dark"] .qc-action-btn:active { background: rgba(59, 130, 246, 0.1); }
     </style>
 </head>
 <body class="h-screen w-full flex flex-col overflow-hidden bg-slate-50">
@@ -11616,342 +11614,344 @@
     };
         
     // ============================================================
-    // QUOTE CHECKER (ĐỐI CHIẾU BÁO GIÁ VỚI BBGĐ)
-    // ============================================================
-    const QuoteChecker = {
-        _id: null,
-        
-        open(id) {
-            const item = App.find(id);
-            if (!item || !item.damageItems || item.damageItems.length === 0) {
-                Toast.fire({ icon: 'warning', title: 'Hồ sơ chưa có hạng mục nào để đối chiếu!' });
-                return;
-            }
-            this._id = id;
+    // QUOTE CHECKER (ĐỐI CHIẾU BÁO GIÁ VỚI BBGĐ)
+    // ============================================================
+    const QuoteChecker = {
+        _id: null,
+        _currentResults: [], // Lưu trữ kết quả tạm thời
+        
+        open(id) {
+            const item = App.find(id);
+            if (!item || !item.damageItems || item.damageItems.length === 0) {
+                Toast.fire({ icon: 'warning', title: 'Hồ sơ chưa có hạng mục nào để đối chiếu!' });
+                return;
+            }
+            this._id = id;
 
-            // Xây dựng Menu (Bottom Sheet) chọn nguồn ảnh
-            const html = `
-                <div class="text-left mt-3">
-                    <button class="qc-action-btn" onclick="Swal.close(); setTimeout(() => QuoteChecker._triggerInput('camera', '${id}'), 300)">
-                        <div class="qc-action-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
-                            <i data-lucide="camera" class="w-5 h-5"></i>
-                        </div>
-                        <div>
-                            <div style="font-size:14px;font-weight:800;color:var(--text-primary, #1e293b);">Chụp ảnh báo giá</div>
-                            <div style="font-size:11px;font-weight:600;color:var(--text-secondary, #64748b);margin-top:2px;">Mở Camera để chụp trực tiếp</div>
-                        </div>
-                    </button>
+            const html = `
+                <div class="text-left mt-3">
+                    <button class="qc-action-btn" onclick="Swal.close(); setTimeout(() => QuoteChecker._triggerInput('camera', '${id}'), 300)">
+                        <div class="qc-action-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
+                            <i data-lucide="camera" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:14px;font-weight:800;color:var(--text-primary, #1e293b);">Chụp ảnh báo giá</div>
+                            <div style="font-size:11px;font-weight:600;color:var(--text-secondary, #64748b);margin-top:2px;">Mở Camera để chụp trực tiếp</div>
+                        </div>
+                    </button>
 
-                    <button class="qc-action-btn" onclick="Swal.close(); setTimeout(() => QuoteChecker._triggerInput('gallery', '${id}'), 300)">
-                        <div class="qc-action-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
-                            <i data-lucide="image" class="w-5 h-5"></i>
-                        </div>
-                        <div>
-                            <div style="font-size:14px;font-weight:800;color:var(--text-primary, #1e293b);">Chọn từ thư viện</div>
-                            <div style="font-size:11px;font-weight:600;color:var(--text-secondary, #64748b);margin-top:2px;">Tải lên ảnh hoặc ảnh chụp màn hình</div>
-                        </div>
-                    </button>
-                </div>
-            `;
+                    <button class="qc-action-btn" onclick="Swal.close(); setTimeout(() => QuoteChecker._triggerInput('gallery', '${id}'), 300)">
+                        <div class="qc-action-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+                            <i data-lucide="image" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:14px;font-weight:800;color:var(--text-primary, #1e293b);">Chọn từ thư viện</div>
+                            <div style="font-size:11px;font-weight:600;color:var(--text-secondary, #64748b);margin-top:2px;">Tải lên ảnh báo giá/PDF</div>
+                        </div>
+                    </button>
+                </div>
+            `;
 
-            Swal.fire({
-                title: '<div class="text-left font-black text-lg flex items-center gap-2" style="color:var(--text-primary, #1e293b);"><div style="width:32px;height:32px;background:var(--bg-surface, #f1f5f9);border-radius:10px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg></div> Nguồn báo giá</div>',
-                html: html,
-                showConfirmButton: false,
-                showCloseButton: true,
-                position: 'bottom',
-                customClass: { popup: 'custom-rounded w-full mb-0 rounded-b-none', title: '!pb-0 !px-1' },
-                didOpen: () => lucide.createIcons()
-            });
-        },
+            Swal.fire({
+                title: '<div class="text-left font-black text-lg flex items-center gap-2" style="color:var(--text-primary, #1e293b);"><div style="width:32px;height:32px;background:var(--bg-surface, #f1f5f9);border-radius:10px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg></div> Nguồn báo giá</div>',
+                html: html,
+                showConfirmButton: false,
+                showCloseButton: true,
+                position: 'bottom',
+                customClass: { popup: 'custom-rounded w-full mb-0 rounded-b-none', title: '!pb-0 !px-1' },
+                didOpen: () => lucide.createIcons()
+            });
+        },
 
-        // Hàm xử lý kích hoạt Input tùy theo sự lựa chọn của người dùng
-        _triggerInput(mode, id) {
-            const item = App.find(id);
-            let input = document.getElementById('qc-file-input');
-            
-            // Tạo input ảo nếu chưa có
-            if (!input) {
-                input = document.createElement('input');
-                input.type = 'file';
-                input.id = 'qc-file-input';
-                input.accept = 'image/*';
-                input.style.display = 'none';
-                document.body.appendChild(input);
-            }
+        _triggerInput(mode, id) {
+            const item = App.find(id);
+            let input = document.getElementById('qc-file-input');
+            if (!input) {
+                input = document.createElement('input');
+                input.type = 'file';
+                input.id = 'qc-file-input';
+                input.accept = 'image/*';
+                input.style.display = 'none';
+                document.body.appendChild(input);
+            }
 
-            // Gắn thuộc tính dựa trên lựa chọn
-            if (mode === 'camera') {
-                input.capture = 'environment'; // Ép mở Camera
-            } else {
-                input.removeAttribute('capture'); // Mở thư viện
-            }
+            if (mode === 'camera') {
+                input.capture = 'environment';
+            } else {
+                input.removeAttribute('capture');
+            }
 
-            // Lắng nghe sự kiện chọn file
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                input.value = ''; // Reset input để chọn lại file cũ nếu cần
-                this._processImage(file, item.damageItems); // Gọi hàm AI xử lý
-            };
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                input.value = '';
+                this._processImage(file, item.damageItems);
+            };
+            input.click();
+        },
 
-            // Kích hoạt input
-            input.click();
-        },
+        async _processImage(file, currentDamageItems) {
+            Swal.fire({
+                html: `
+                    <div style="display:flex;flex-direction:column;align-items:center;padding:10px 0;">
+                        <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg, #f43f5e, #8b5cf6);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(244,63,94,0.4);margin-bottom:16px;">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" style="animation:img-spin 1s linear infinite;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                        </div>
+                        <p style="font-size:16px;font-weight:900;color:var(--text-primary,#0f172a);margin:0;">Đang quét & Đối chiếu...</p>
+                        <p id="qc-loading-status" style="font-size:12px;font-weight:600;color:var(--text-secondary,#64748b);margin-top:6px;text-align:center;">Bước 1/2: Đang đọc dữ liệu ảnh báo giá...</p>
+                    </div>
+                `,
+                showConfirmButton: false, allowOutsideClick: false,
+                customClass: { popup: 'custom-rounded' }
+            });
 
-        async _processImage(file, currentDamageItems) {
-            Swal.fire({
-                html: `
-                    <div style="display:flex;flex-direction:column;align-items:center;padding:10px 0;">
-                        <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg, #f43f5e, #8b5cf6);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(244,63,94,0.4);margin-bottom:16px;">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" style="animation:img-spin 1s linear infinite;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                        </div>
-                        <p style="font-size:16px;font-weight:900;color:var(--text-primary,#0f172a);margin:0;">Đang quét & Đối chiếu...</p>
-                        <p id="qc-loading-status" style="font-size:12px;font-weight:600;color:var(--text-secondary,#64748b);margin-top:6px;text-align:center;">Bước 1/2: Đang đọc dữ liệu ảnh báo giá...</p>
-                    </div>
-                `,
-                showConfirmButton: false, allowOutsideClick: false,
-                customClass: { popup: 'custom-rounded' }
-            });
+            try {
+                const base64 = await OCR._compressImage(file, 1024);
+                const statusText = document.getElementById('qc-loading-status');
 
-            try {
-                // Tối ưu 1: Giảm kích thước ảnh xuống 1024px để AI đọc nhanh hơn
-                const base64 = await OCR._compressImage(file, 1024);
-                const statusText = document.getElementById('qc-loading-status');
+                const callGemini = async (prompt, imgBase64, key, modelName = "gemini-2.5-flash") => {
+                    const body = {
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: { temperature: 0.1 }
+                    };
+                    if (imgBase64) {
+                        body.contents[0].parts.push({ inline_data: { mime_type: 'image/jpeg', data: imgBase64 } });
+                    }
+                    
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort('Timeout'), 45000);
 
-                // Hàm gọi API tái sử dụng để code gọn hơn (Đã nâng cấp chống lỗi Timeout)
-                const callGemini = async (prompt, imgBase64, key, modelName = "gemini-2.5-flash") => {
-                    const body = {
-                        contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: { temperature: 0.1 }
-                    };
-                    if (imgBase64) {
-                        body.contents[0].parts.push({ inline_data: { mime_type: 'image/jpeg', data: imgBase64 } });
-                    }
-                    
-                    const controller = new AbortController();
-                    // Nới lỏng thời gian chờ lên 45 giây để AI có đủ thời gian đọc ảnh báo giá dài
-                    const timeoutId = setTimeout(() => {
-                        // Truyền lý do abort để trình duyệt không báo "without reason" nữa
-                        controller.abort('Timeout'); 
-                    }, 45000); 
+                    try {
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${key}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(body),
+                            signal: controller.signal
+                        });
+                        clearTimeout(timeoutId);
+                        const data = await res.json();
+                        if (!res.ok || data.error) throw new Error(data?.error?.message || "Lỗi API");
+                        const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                        try {
+                            return JSON.parse(txt.replace(/```json|```/gi, '').trim());
+                        } catch (e) {
+                            const m = txt.match(/\[[\s\S]*\]/);
+                            return m ? JSON.parse(m[0]) : null;
+                        }
+                    } catch (e) {
+                        clearTimeout(timeoutId);
+                        if (e.name === 'AbortError' || e.message.includes('aborted')) throw new Error('Máy chủ phản hồi quá lâu (Timeout)');
+                        throw e;
+                    }
+                };
 
-                    try {
-                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${key}`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(body),
-                            signal: controller.signal
-                        });
-                        
-                        clearTimeout(timeoutId);
-                        const data = await res.json();
-                        
-                        if (!res.ok || data.error) throw new Error(data?.error?.message || "Lỗi API từ Google");
-                        
-                        const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                        try {
-                            return JSON.parse(txt.replace(/```json|```/gi, '').trim());
-                        } catch (e) {
-                            const m = txt.match(/\[[\s\S]*\]/);
-                            return m ? JSON.parse(m[0]) : null;
-                        }
-                    } catch (e) {
-                        clearTimeout(timeoutId);
-                        // Bắt trúng lỗi do Timeout gây ra và đổi thành câu tiếng Việt
-                        if (e.name === 'AbortError' || e.message.includes('aborted')) {
-                            throw new Error('Máy chủ phản hồi quá lâu (Timeout). Đang thử lại...');
-                        }
-                        throw e;
-                    }
-                };
+                const PROMPT_1 = `Bạn là nhân viên nhập liệu. Đọc ảnh Báo giá sửa chữa và trích xuất danh sách phụ tùng/nhân công. TRẢ VỀ MẢNG JSON (CHỈ JSON, KHÔNG CÓ TEXT). Định dạng: [{"t": "Tên vật tư/nhân công", "pa": "Sửa/Thay/Sơn/...", "g": 1500000}]`;
 
-                // ==========================================
-                // BƯỚC 1: ĐỌC ẢNH VÀ BÓC TÁCH (API 1)
-                // ==========================================
-                const PROMPT_1 = `Bạn là nhân viên nhập liệu. Đọc ảnh Báo giá sửa chữa và trích xuất danh sách phụ tùng/nhân công.
-                TRẢ VỀ MẢNG JSON (CHỈ JSON, KHÔNG CÓ TEXT).
-                Định dạng: [{"t": "Tên vật tư/nhân công", "pa": "Sửa/Thay/Sơn/...", "g": 1500000}]`;
+                let extractedData = null;
+                let key1 = GeminiKeys.next();
+                try {
+                    extractedData = await callGemini(PROMPT_1, base64, key1, "gemini-2.5-flash-lite");
+                } catch (e1) {
+                    key1 = GeminiKeys.next();
+                    extractedData = await callGemini(PROMPT_1, base64, key1, "gemini-2.5-flash-lite");
+                }
 
-                let extractedData = null;
-                let key1 = GeminiKeys.next();
-                
-                try {
-                    // Bước 1 chỉ cần đọc chữ, dùng bản Lite cho tốc độ bàn thờ
-                    extractedData = await callGemini(PROMPT_1, base64, key1, "gemini-2.5-flash-lite");
-                } catch (e1) {
-                    console.warn("Lỗi Bước 1, thử lại bằng Key khác:", e1);
-                    key1 = GeminiKeys.next(); // Đổi key nếu lỗi
-                    extractedData = await callGemini(PROMPT_1, base64, key1, "gemini-2.5-flash-lite");
-                }
+                if (!extractedData || !Array.isArray(extractedData)) throw new Error("Không thể đọc được ảnh báo giá. Vui lòng chụp rõ hơn.");
 
-                if (!extractedData || !Array.isArray(extractedData)) {
-                    throw new Error("Không thể đọc được ảnh báo giá. Vui lòng chụp rõ hơn.");
-                }
+                if (statusText) statusText.innerHTML = `Bước 2/2: AI đang đối chiếu và gom nhóm ${extractedData.length} mục với BBGĐ...`;
 
-                // ==========================================
-                // BƯỚC 2: ĐỐI CHIẾU DỮ LIỆU (API 2)
-                // ==========================================
-                if (statusText) statusText.innerHTML = `Bước 2/2: AI đang đối chiếu và gom nhóm ${extractedData.length} mục với BBGĐ...`;
+                const bbgdList = currentDamageItems.map(item => ({
+                    ten: item.chiTiet,
+                    pa: item.thayThe ? "Thay" : (item.suaChua ? "Sửa" : "Chưa rõ")
+                }));
 
-                const bbgdList = currentDamageItems.map((item) => ({
-                    ten: item.chiTiet,
-                    pa: item.thayThe ? "Thay" : (item.suaChua ? "Sửa" : "Chưa rõ")
-                }));
+                const PROMPT_2 = `Bạn là Giám định viên trưởng. Hãy đối chiếu 2 danh sách:
+                1. BÁO GIÁ GARA (Chi tiết): ${JSON.stringify(extractedData)}
+                2. BBGĐ ĐÃ DUYỆT: ${JSON.stringify(bbgdList)}
+                
+                NHIỆM VỤ ĐẶC BIỆT: GOM NHÓM TRƯỚC KHI ĐỐI CHIẾU. Gom các mục lẻ tẻ của cùng 1 bộ phận trong Báo giá thành 1 mục để khớp với BBGĐ.
+                LUẬT ĐỐI CHIẾU PHƯƠNG ÁN (Quyết định biến "tt"):
+                - SỬA CHỮA (Sửa, Sơn, Gò...) khớp với "Sửa" -> 1 (KHỚP).
+                - THAY THẾ (Thay, Tháo lắp...) khớp với "Thay" -> 1 (KHỚP).
+                - XUNG ĐỘT (Duyệt Sửa nhưng Gara đòi Thay, hoặc ngược lại) -> 2 (SAI_PA).
+                - DƯ THỪA (Có trong BG, không có trong BBGĐ) -> 3 (DU).
+                - THIẾU SÓT (Có trong BBGĐ, thiếu trong BG) -> 4 (THIEU).
+                
+                Trả về MẢNG JSON: [{"t":"Tên phụ tùng","tt":1|2|3|4,"gPa":"PA Gara","gGia":100000,"bPa":"PA BBGĐ","cb":"Cảnh báo"}]`;
 
-                const PROMPT_2 = `Bạn là Giám định viên trưởng. Hãy đối chiếu 2 danh sách:
-                1. BÁO GIÁ GARA (Chi tiết): ${JSON.stringify(extractedData)}
-                2. BBGĐ ĐÃ DUYỆT: ${JSON.stringify(bbgdList)}
-                
-                NHIỆM VỤ ĐẶC BIỆT: GOM NHÓM TRƯỚC KHI ĐỐI CHIẾU
-                Trong báo giá, 1 bộ phận có thể bị chia nhỏ thành nhiều chi phí. Bạn BẮT BUỘC phải gom chúng lại thành 1 mục duy nhất tương ứng với BBGĐ.
-                Ví dụ: "Gò cửa" (500k) + "Sơn cửa" (800k) -> Gom thành 1 mục: "Cửa" | PA Gara: "Gò + Sơn" | Giá: 1300000.
-                Ví dụ: "Thay cản" (2000k) + "Công thay" (300k) + "Sơn cản" (700k) -> Gom thành: "Cản" | PA Gara: "Thay + Công + Sơn" | Giá: 3000000.
-                
-                LUẬT ĐỐI CHIẾU PHƯƠNG ÁN (Quyết định biến "tt"):
-                - Nhóm SỬA CHỮA (Bao gồm: Sửa, Sơn, Gò, Nắn, Hàn, Kéo, Phục hồi). Nếu BBGĐ duyệt "Sửa", và Gara báo bất kỳ cụm nào trong nhóm này -> Trạng thái: 1 (KHỚP).
-                - Nhóm THAY THẾ (Bao gồm: Vật tư mới, Công thay thế, Tháo lắp). Nếu BBGĐ duyệt "Thay", và Gara báo thay vật tư -> Trạng thái: 1 (KHỚP).
-                - XUNG ĐỘT SỐNG CÒN: BBGĐ duyệt "Sửa" nhưng Gara đòi "Thay vật tư" (Hoặc ngược lại) -> Trạng thái: 2 (SAI_PA).
-                - DƯ THỪA: Có trong Báo giá nhưng BBGĐ không có -> Trạng thái: 3 (DU).
-                - THIẾU SÓT: Có trong BBGĐ nhưng Báo giá hoàn toàn không đề cập -> Trạng thái: 4 (THIEU).
-                
-                Định dạng trả về CHỈ MẢNG JSON (Tuyệt đối không giải thích, không bọc markdown):
-                [
-                  {
-                    "t": "Tên phụ tùng (Gom gọn, VD: Cản trước, Cửa sau trái)",
-                    "tt": 1|2|3|4,
-                    "gPa": "Các phương án Gara đã làm (VD: Gò + Sơn, Thay + Sơn)",
-                    "gGia": Tổng tiền của nhóm này (Số nguyên),
-                    "bPa": "Phương án BBGĐ (Sửa/Thay)",
-                    "cb": "Cảnh báo (Chỉ ghi nếu sai phương án, báo dư hoặc báo thiếu. Nếu Khớp thì để rỗng)"
-                  }
-                ]`;
+                let comparedData = null;
+                let key2 = GeminiKeys.next();
+                try {
+                    comparedData = await callGemini(PROMPT_2, null, key2, "gemini-2.5-flash");
+                } catch (e2) {
+                    key2 = GeminiKeys.next();
+                    comparedData = await callGemini(PROMPT_2, null, key2, "gemini-2.5-flash");
+                }
 
-                let comparedData = null;
-                let key2 = GeminiKeys.next(); // Đổi sang một Key khác để chia tải
-                
-                try {
-                    // Bước 2 cần tư duy logic, cộng tiền và gom nhóm -> Ép dùng bản Flash chuẩn
-                    comparedData = await callGemini(PROMPT_2, null, key2, "gemini-2.5-flash");
-                } catch (e2) {
-                    console.warn("Lỗi Bước 2, thử lại bằng Key khác:", e2);
-                    key2 = GeminiKeys.next();
-                    comparedData = await callGemini(PROMPT_2, null, key2, "gemini-2.5-flash");
-                }
+                if (!comparedData || !Array.isArray(comparedData)) throw new Error("Lỗi khi đối chiếu logic dữ liệu.");
 
-                if (!comparedData || !Array.isArray(comparedData)) {
-                    throw new Error("Lỗi khi đối chiếu logic dữ liệu.");
-                }
+                const finalResults = comparedData.map(r => {
+                    let strStatus = { 1: 'KHOP', 2: 'SAI_PHUONG_AN', 3: 'GARA_BAO_DU', 4: 'GARA_QUEN_BAO' }[r.tt] || 'KHOP';
+                    if (typeof r.tt === 'string') {
+                        if (r.tt.includes('KHOP') || r.tt === '1') strStatus = 'KHOP';
+                        else if (r.tt.includes('SAI') || r.tt === '2') strStatus = 'SAI_PHUONG_AN';
+                        else if (r.tt.includes('DU') || r.tt === '3') strStatus = 'GARA_BAO_DU';
+                        else if (r.tt.includes('THIEU') || r.tt === '4') strStatus = 'GARA_QUEN_BAO';
+                    }
+                    return {
+                        tenPhuTung: r.t || 'Không rõ', trangThai: strStatus,
+                        gara: { phuongAn: r.gPa || '', gia: r.gGia || 0 },
+                        bbgd: { phuongAn: r.bPa || '' }, canhBao: r.cb || ''
+                    };
+                });
 
-                // ==========================================
-                // BƯỚC 3: DỊCH NGƯỢC JSON CHO UI
-                // ==========================================
-                const finalResults = comparedData.map(r => {
-                    let strStatus = { 1: 'KHOP', 2: 'SAI_PHUONG_AN', 3: 'GARA_BAO_DU', 4: 'GARA_QUEN_BAO' }[r.tt] || 'KHOP';
-                    
-                    // Fallback an toàn nếu AI trả về chuỗi thay vì số
-                    if (typeof r.tt === 'string') {
-                        if (r.tt.includes('KHOP') || r.tt === '1') strStatus = 'KHOP';
-                        else if (r.tt.includes('SAI') || r.tt === '2') strStatus = 'SAI_PHUONG_AN';
-                        else if (r.tt.includes('DU') || r.tt === '3') strStatus = 'GARA_BAO_DU';
-                        else if (r.tt.includes('THIEU') || r.tt === '4') strStatus = 'GARA_QUEN_BAO';
-                    }
+                this._currentResults = finalResults; // LƯU VÀO BIẾN TOÀN CỤC ĐỂ DÙNG SAU
+                this._renderResults(finalResults);
 
-                    return {
-                        tenPhuTung: r.t || 'Không rõ',
-                        trangThai: strStatus,
-                        gara: { phuongAn: r.gPa || '', gia: r.gGia || 0 },
-                        bbgd: { phuongAn: r.bPa || '' },
-                        canhBao: r.cb || ''
-                    };
-                });
+            } catch (error) {
+                Swal.close();
+                Toast.fire({ icon: 'error', title: error.message });
+            }
+        },
 
-                this._renderResults(finalResults);
+        _renderResults(results) {
+            const fmt = n => n ? Number(n).toLocaleString('vi-VN') + 'đ' : '—';
+            const sortMap = { 'GARA_BAO_DU': 1, 'SAI_PHUONG_AN': 2, 'GARA_QUEN_BAO': 3, 'KHOP': 4 };
+            results.sort((a, b) => sortMap[a.trangThai] - sortMap[b.trangThai]);
 
-            } catch (error) {
-                Swal.close();
-                Toast.fire({ icon: 'error', title: error.message });
-            }
-        },
+            let html = '';
+            let errorCount = 0;
 
-        _renderResults(results) {
-            const fmt = n => n ? Number(n).toLocaleString('vi-VN') + 'đ' : '—';
-            
-            // Sắp xếp: Lỗi nặng lên đầu (Gara báo dư -> Sai phương án -> Quên báo -> Khớp)
-            const sortMap = { 'GARA_BAO_DU': 1, 'SAI_PHUONG_AN': 2, 'GARA_QUEN_BAO': 3, 'KHOP': 4 };
-            results.sort((a, b) => sortMap[a.trangThai] - sortMap[b.trangThai]);
+            results.forEach(r => {
+                let cardClass = ''; let badgeHtml = '';
+                if (r.trangThai === 'KHOP') { cardClass = 'qc-match'; badgeHtml = '<span class="qc-status-badge">✓ Trùng khớp</span>'; }
+                else if (r.trangThai === 'SAI_PHUONG_AN') { cardClass = 'qc-diff'; errorCount++; badgeHtml = '<span class="qc-status-badge">⚠️ Sai P.Án</span>'; }
+                else if (r.trangThai === 'GARA_BAO_DU') { cardClass = 'qc-extra'; errorCount++; badgeHtml = '<span class="qc-status-badge">❌ Báo dư</span>'; }
+                else if (r.trangThai === 'GARA_QUEN_BAO') { cardClass = 'qc-miss'; errorCount++; badgeHtml = '<span class="qc-status-badge">❓ Quên báo</span>'; }
 
-            let html = '';
-            let errorCount = 0;
+                html += `
+                <div class="qc-card ${cardClass}">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+                        <p style="font-size:12px; font-weight:800; color:var(--text-primary); flex:1; padding-right:6px; line-height:1.2;">${r.tenPhuTung}</p>
+                        ${badgeHtml}
+                    </div>
+                    ${r.canhBao ? `<p style="font-size:9px; color:#ef4444; font-weight:700; margin-bottom:6px; display:flex; gap:3px;"><i data-lucide="info" class="w-3 h-3"></i> ${r.canhBao}</p>` : ''}
+                    <div class="qc-compare-grid">
+                        <div class="qc-col">
+                            <p class="qc-col-title">BG Gara</p>
+                            <p class="qc-val" style="color:#d97706;">${r.gara?.phuongAn || '—'}</p>
+                            <p class="qc-val" style="margin-top:2px; font-size:12px;">${fmt(r.gara?.gia)}</p>
+                        </div>
+                        <div class="qc-col">
+                            <p class="qc-col-title">Biên bản GĐ</p>
+                            <p class="qc-val" style="color:#2563eb;">${r.bbgd?.phuongAn || '—'}</p>
+                        </div>
+                    </div>
+                </div>`;
+            });
 
-            results.forEach(r => {
-                let cardClass = '';
-                let badgeHtml = '';
-                
-                if (r.trangThai === 'KHOP') {
-                    cardClass = 'qc-match';
-                    badgeHtml = '<span class="qc-status-badge">✓ Trùng khớp</span>';
-                } else if (r.trangThai === 'SAI_PHUONG_AN') {
-                    cardClass = 'qc-diff'; errorCount++;
-                    badgeHtml = '<span class="qc-status-badge">⚠️ Sai phương án</span>';
-                } else if (r.trangThai === 'GARA_BAO_DU') {
-                    cardClass = 'qc-extra'; errorCount++;
-                    badgeHtml = '<span class="qc-status-badge">❌ Báo dư</span>';
-                } else if (r.trangThai === 'GARA_QUEN_BAO') {
-                    cardClass = 'qc-miss'; errorCount++;
-                    badgeHtml = '<span class="qc-status-badge">❓ Quên báo giá</span>';
-                }
+            // Thiết kế Layout có Footer cố định (Sticky Bottom Actions)
+            Swal.fire({
+                title: false, padding: '0',
+                html: `
+                    <div style="display:flex; flex-direction:column; height: 85vh; background: var(--bg-white, #fff); border-radius: 20px; overflow: hidden;">
+                                                <div style="padding:16px; border-bottom:1px solid var(--border-light, #e2e8f0); display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+                            <div style="text-align:left;">
+                                <div style="font-size:16px; font-weight:900; color:var(--text-primary);"><span style="color:#f43f5e;">AI</span> Đối chiếu báo giá</div>
+                                <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">${errorCount > 0 ? `<span style="color:#ef4444;font-weight:700;">Phát hiện ${errorCount} điểm bất thường!</span>` : `<span style="color:#10b981;font-weight:700;">Khớp 100% với Biên bản</span>`}</div>
+                            </div>
+                            <button onclick="Swal.close()" style="width:32px;height:32px;border-radius:50%;background:var(--bg-surface, #f1f5f9);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                        
+                                                <div style="flex:1; overflow-y:auto; padding:12px; background:var(--bg-app, #f8fafc);" class="no-scrollbar">
+                            ${html}
+                        </div>
+                        
+                                                <div style="padding:12px 16px 16px; background:var(--bg-white, #fff); border-top:1px solid var(--border-light, #e2e8f0); display:flex; gap:10px; flex-shrink:0;">
+                            <button onclick="QuoteChecker.generateZaloMessage('${this._id}')" style="flex:1; padding:12px 0; background:linear-gradient(135deg, #3b82f6, #2563eb); color:white; border:none; border-radius:12px; font-size:13px; font-weight:800; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer; box-shadow:0 4px 12px rgba(59,130,246,0.3);">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Nhắn Zalo
+                            </button>
+                            <button onclick="QuoteChecker.saveResult('${this._id}')" style="flex:1; padding:12px 0; background:var(--bg-surface, #f1f5f9); color:var(--text-primary, #334155); border:1.5px solid var(--border-light, #e2e8f0); border-radius:12px; font-size:13px; font-weight:800; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Lưu kết quả
+                            </button>
+                        </div>
+                    </div>
+                `,
+                showCloseButton: false,
+                showConfirmButton: false,
+                customClass: { popup: 'swal-edge-to-edge' },
+                didOpen: () => lucide.createIcons()
+            });
+        },
 
-                const garaData = r.gara || {};
-                const bbgdData = r.bbgd || {};
+        // --- HÀM MỚI: Lưu kết quả vào Firebase ---
+        saveResult(id) {
+            if (!this._currentResults || this._currentResults.length === 0) return;
+            db.ref(`Workstation/${id}/quoteCheckResult`).set(this._currentResults).then(() => {
+                Toast.fire({ icon: 'success', title: 'Đã lưu kết quả đối chiếu vào hồ sơ!' });
+            }).catch(e => {
+                Toast.fire({ icon: 'error', title: 'Lỗi lưu: ' + e.message });
+            });
+        },
 
-                html += `
-                <div class="qc-card ${cardClass}">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
-                        <p style="font-size:13px; font-weight:800; color:var(--text-primary); flex:1; padding-right:8px; line-height:1.3;">${r.tenPhuTung}</p>
-                        ${badgeHtml}
-                    </div>
-                    
-                    ${r.canhBao ? `<p style="font-size:10px; color:#ef4444; font-weight:700; margin-bottom:8px; display:flex; gap:4px;"><i data-lucide="info" class="w-3 h-3"></i> ${r.canhBao}</p>` : ''}
-                    
-                    <div class="qc-compare-grid">
-                        <div class="qc-col">
-                            <p class="qc-col-title">Báo giá Gara</p>
-                            <p class="qc-val" style="color:#d97706;">${garaData.phuongAn || '—'}</p>
-                            <p class="qc-val" style="margin-top:2px; font-size:14px;">${fmt(garaData.gia)}</p>
-                        </div>
-                        <div class="qc-col">
-                            <p class="qc-col-title">Biên bản của bạn</p>
-                            <p class="qc-val" style="color:#2563eb;">${bbgdData.phuongAn || '—'}</p>
-                            <p class="qc-val" style="margin-top:2px; font-size:10px; color:var(--text-muted);">Đã duyệt</p>
-                        </div>
-                    </div>
-                </div>`;
-            });
+        // --- HÀM MỚI: Tự động tổng hợp lỗi và nhắn Zalo ---
+        generateZaloMessage(id) {
+            const item = App.find(id);
+            const results = this._currentResults || [];
+            
+            const saiPA = results.filter(r => r.trangThai === 'SAI_PHUONG_AN');
+            const baoDu = results.filter(r => r.trangThai === 'GARA_BAO_DU');
+            const quenBao = results.filter(r => r.trangThai === 'GARA_QUEN_BAO');
 
-            Swal.fire({
-                title: `<div class="text-left font-black text-lg" style="color:var(--text-primary);">
-                            <span class="text-rose-500">AI</span> Đối chiếu báo giá
-                        </div>`,
-                html: `
-                    <div class="text-left mt-2">
-                        ${errorCount > 0 
-                            ? `<div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#ef4444; padding:8px 12px; border-radius:10px; font-size:12px; font-weight:800; margin-bottom:12px;">Phát hiện ${errorCount} điểm bất thường cần kiểm tra lại!</div>`
-                            : `<div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); color:#10b981; padding:8px 12px; border-radius:10px; font-size:12px; font-weight:800; margin-bottom:12px;">Tuyệt vời! Báo giá khớp hoàn toàn với Biên bản.</div>`
-                        }
-                        <div style="max-height: 60vh; overflow-y: auto; padding-right: 4px;" class="custom-scrollbar">
-                            ${html}
-                        </div>
-                    </div>
-                `,
-                showCloseButton: true,
-                showConfirmButton: false,
-                customClass: { popup: 'custom-rounded w-full mb-0 rounded-b-none', title: '!pb-0' },
-                position: 'bottom',
-                didOpen: () => lucide.createIcons()
-            });
-        }
-    };  
+            if (saiPA.length === 0 && baoDu.length === 0 && quenBao.length === 0) {
+                Toast.fire({ icon: 'info', title: 'Báo giá đã chuẩn, không có lỗi để nhắc!' });
+                return;
+            }
+
+            let msg = `Chào anh/chị, em check báo giá xe ${item.bsx || ''} thấy có vài hạng mục lệch với Biên bản Giám định, nhờ anh/chị hỗ trợ điều chỉnh lại giúp em nhé:\n`;
+            
+            if (saiPA.length > 0) {
+                msg += `\n🔸 SAI PHƯƠNG ÁN:\n` + saiPA.map(r => `- ${r.tenPhuTung}: Gara báo [${r.gara.phuongAn}] nhưng BBGĐ là [${r.bbgd.phuongAn}]`).join('\n');
+            }
+            if (baoDu.length > 0) {
+                msg += `\n\n🔸 BÁO DƯ (Không có trong BBGĐ):\n` + baoDu.map(r => `- ${r.tenPhuTung}`).join('\n');
+            }
+            if (quenBao.length > 0) {
+                msg += `\n\n🔸 QUÊN BÁO (Bị sót so với BBGĐ):\n` + quenBao.map(r => `- ${r.tenPhuTung}`).join('\n');
+            }
+            
+            msg += `\n\nAnh/chị xem lại và gửi lại báo giá mới giúp em nha. Em cảm ơn!`;
+
+            const phone = document.getElementById('edit-garaAdvisorPhone')?.value || item.garaAdvisorPhone || item.garaPhone || '';
+            
+            // Copy tin nhắn vào bộ nhớ đệm
+            const copyToClipboard = () => {
+                const ta = document.createElement('textarea');
+                ta.value = msg;
+                ta.style.cssText = `position:absolute;opacity:0;top:${window.scrollY}px;left:0;`;
+                document.body.appendChild(ta);
+                ta.focus({ preventScroll: true }); 
+                ta.select();
+                try { document.execCommand('copy'); } catch(e) {}
+                document.body.removeChild(ta);
+            };
+
+            copyToClipboard();
+
+            if(phone) {
+                Toast.fire({icon: 'success', title: 'Đã copy lỗi! Đang mở Zalo...'});
+                const cleanPhone = phone.replace(/\D/g, '');
+                setTimeout(() => {
+                    const zaloWindow = window.open(`https://zalo.me/${cleanPhone}`, '_blank');
+                    if (zaloWindow) zaloWindow.focus();
+                }, 400);
+            } else {
+                Toast.fire({icon: 'success', title: 'Đã copy tin nhắn báo lỗi! (Chưa có SĐT Gara)'});
+            }
+        }
+    };  
     // ============================================================
     // BOOT
     // ============================================================
