@@ -8892,29 +8892,44 @@
     };
         
     // ============================================================
-    // LẤY TỌA ĐỘ GPS SIÊU TỐC
+    // LẤY VÀ DỊCH TỌA ĐỘ GPS RA ĐỊA CHỈ (ĐƯỜNG, PHƯỜNG, XÃ)
     // ============================================================
     const LocationHelper = {
         async get() {
             return new Promise((resolve) => {
                 if (!navigator.geolocation) {
-                    resolve('Lỗi: Trình duyệt không hỗ trợ GPS');
+                    resolve('Lỗi: Trình duyệt không hỗ trợ định vị');
                     return;
                 }
                 navigator.geolocation.getCurrentPosition(
-                    (pos) => {
+                    async (pos) => {
                         const lat = pos.coords.latitude.toFixed(6);
                         const lng = pos.coords.longitude.toFixed(6);
-                        resolve(`GPS: ${lat}, ${lng}`);
+                        const coordsStr = `Tọa độ: ${lat}, ${lng}`;
+                        
+                        try {
+                            // Gọi API Bản đồ vệ tinh để dịch tọa độ thành chữ (Reverse Geocoding)
+                            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=vi`);
+                            const data = await res.json();
+                            
+                            if (data && data.display_name) {
+                                // Cắt bỏ chữ ", Việt Nam" ở cuối để ảnh đỡ bị dài dòng
+                                let address = data.display_name.replace(/, Việt Nam$/, '').trim();
+                                resolve(address);
+                            } else {
+                                resolve(coordsStr); // Nếu bản đồ không tra ra tên đường, trả về tọa độ số
+                            }
+                        } catch (e) {
+                            console.warn('Lỗi dịch địa chỉ:', e);
+                            resolve(coordsStr); // Nếu mạng yếu không gọi được bản đồ, trả về tọa độ số
+                        }
                     },
                     (err) => {
-                        console.warn('Lỗi GPS:', err);
                         if (err.code === 1) resolve('Lỗi: Bị từ chối quyền vị trí');
                         else if (err.code === 2) resolve('Lỗi: Không tìm thấy vệ tinh');
                         else if (err.code === 3) resolve('Lỗi: Quá thời gian lấy GPS');
                         else resolve('Lỗi: Không lấy được GPS');
                     },
-                    // Tăng thời gian chờ lên 15s, cho phép dùng vị trí cũ trong 10s để load nhanh
                     { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
                 );
             });
@@ -8922,7 +8937,7 @@
     };
 
     // ============================================================
-    // SECURE CAMERA — Chụp liên tục & Chống gian lận
+    // SECURE CAMERA — Chụp ngang thông minh & Chống gian lận
     // ============================================================
     const SecureCamera = {
         _stream: null,
@@ -8930,6 +8945,8 @@
         _id: null,
         _capturedFiles: [],
         _gpsLocation: '',
+        _deviceOrientation: 0, // Cảm biến độ nghiêng: 0 (Dọc), 90 hoặc -90 (Ngang)
+        _orientationHandler: null,
 
         async open(id) {
             this._id = id;
@@ -8940,44 +8957,62 @@
             modal.classList.add('flex');
             
             const gpsLabel = document.getElementById('sc-gps-status');
-            gpsLabel.textContent = 'Đang tìm vệ tinh GPS...';
+            gpsLabel.textContent = 'Đang tìm vệ tinh và tra cứu địa chỉ...';
             gpsLabel.classList.add('text-amber-400', 'animate-pulse');
             gpsLabel.classList.remove('text-emerald-400', 'text-rose-400');
 
-            // Khởi động Camera trước để người dùng có thể ngắm khung hình ngay
+            // 1. Kích hoạt Cảm biến góc nghiêng (Gyroscope)
+            this._deviceOrientation = 0;
+            this._orientationHandler = (e) => {
+                let angle = 0;
+                // e.gamma quét góc lật trái/phải của điện thoại
+                if (e.gamma > 45) angle = -90; // Nghiêng phải
+                else if (e.gamma < -45) angle = 90; // Nghiêng trái
+                else angle = 0; // Đang cầm dọc thẳng đứng
+                
+                if (this._deviceOrientation !== angle) {
+                    this._deviceOrientation = angle;
+                    // Xoay các Icon trên UI để báo hiệu cho GDV biết máy đã nhận diện khổ ngang
+                    const icons = document.querySelectorAll('#secure-camera-modal .lucide');
+                    icons.forEach(icon => {
+                        icon.style.transform = `rotate(${angle}deg)`;
+                        icon.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    });
+                }
+            };
+
+            // Cấp quyền cảm biến (Bắt buộc với iOS 13+ khi dùng Web)
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                try {
+                    const permission = await DeviceOrientationEvent.requestPermission();
+                    if (permission === 'granted') window.addEventListener('deviceorientation', this._orientationHandler);
+                } catch(err) { console.warn('Bỏ qua quyền cảm biến'); }
+            } else {
+                window.addEventListener('deviceorientation', this._orientationHandler);
+            }
+
+            // 2. Mở Camera phân giải siêu cao (Tự ép phần cứng)
             await this._startStream();
             lucide.createIcons();
 
-            // Lấy GPS chạy ngầm (không dùng await để tránh làm đơ ứng dụng nếu sóng GPS yếu)
+            // 3. Lấy GPS chạy ngầm song song (Không bắt GDV phải chờ)
             LocationHelper.get().then(loc => {
                 this._gpsLocation = loc;
-                gpsLabel.textContent = loc.includes('Lỗi') ? loc : '✓ ' + loc;
+                gpsLabel.textContent = loc.includes('Lỗi') ? loc : '📍 ' + loc;
                 gpsLabel.classList.remove('animate-pulse', 'text-amber-400');
-                
-                if (loc.includes('Lỗi')) {
-                    gpsLabel.classList.add('text-rose-400'); // Hiện màu đỏ nếu lỗi
-                } else {
-                    gpsLabel.classList.add('text-emerald-400'); // Màu xanh nếu thành công
-                }
+                if (loc.includes('Lỗi')) gpsLabel.classList.add('text-rose-400');
+                else gpsLabel.classList.add('text-emerald-400');
             });
         },
 
         async _startStream() {
-            if (this._stream) {
-                this._stream.getTracks().forEach(t => t.stop());
-            }
+            if (this._stream) this._stream.getTracks().forEach(t => t.stop());
             try {
-                // Bỏ width/height lý tưởng để trình duyệt tự động bắt độ phân giải theo chiều dọc/ngang của cảm biến
                 this._stream = await navigator.mediaDevices.getUserMedia({
-                    video: { 
-                        facingMode: this._facingMode,
-                        width: { ideal: 4096 }, // Yêu cầu nét nhất có thể
-                        height: { ideal: 2160 }
-                    },
+                    video: { facingMode: this._facingMode, width: { ideal: 4096 }, height: { ideal: 2160 } },
                     audio: false
                 });
-                const video = document.getElementById('secure-camera-video');
-                video.srcObject = this._stream;
+                document.getElementById('secure-camera-video').srcObject = this._stream;
             } catch (err) {
                 Toast.fire({ icon: 'error', title: 'Cần cấp quyền truy cập Camera!' });
                 this.close();
@@ -8991,29 +9026,45 @@
 
         takePhoto() {
             if (!this._stream) return;
-            if (window.navigator.vibrate) window.navigator.vibrate(40); // Rung khi chụp
+            if (window.navigator.vibrate) window.navigator.vibrate(40);
             
             const video = document.getElementById('secure-camera-video');
-            const canvas = document.createElement('canvas'); // Tạo canvas ảo trong RAM để không giật khung hình
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
+            const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
-            // Xử lý bị ngược hình nếu đang dùng camera trước
-            if (this._facingMode === 'user') {
-                ctx.translate(canvas.width, 0);
-                ctx.scale(-1, 1);
+            const vw = video.videoWidth;
+            const vh = video.videoHeight;
+            
+            // XỬ LÝ LẬT ẢNH: Nếu máy cầm ngang nhưng đang khóa xoay màn hình (Stream vẫn dọc)
+            if (Math.abs(this._deviceOrientation) === 90) {
+                canvas.width = vh; // Lật ngược Chiều Dài thành Rộng
+                canvas.height = vw;
+                
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.rotate(this._deviceOrientation * Math.PI / 180); // Xoay khung vẽ 90 độ
+                
+                if (this._facingMode === 'user') ctx.scale(-1, 1);
+                
+                // Vẽ Video dọc vào khung Ngang
+                ctx.drawImage(video, -vw / 2, -vh / 2, vw, vh);
+            } else {
+                // Chụp dọc bình thường
+                canvas.width = vw;
+                canvas.height = vh;
+                if (this._facingMode === 'user') {
+                    ctx.translate(canvas.width, 0);
+                    ctx.scale(-1, 1);
+                }
+                ctx.drawImage(video, 0, 0, vw, vh);
             }
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             
             canvas.toBlob((blob) => {
                 const file = new File([blob], `TASCO_${Date.now()}.jpg`, { type: 'image/jpeg' });
                 const previewUrl = URL.createObjectURL(blob);
                 this._capturedFiles.push({ file, preview: previewUrl });
                 this._updateThumbs();
-            }, 'image/jpeg', 0.95); // Giữ chất lượng cao lúc chụp
+            }, 'image/jpeg', 0.95);
 
-            // Hiệu ứng chớp nháy (Flash)
             const flash = document.getElementById('secure-camera-flash');
             flash.style.opacity = '1';
             setTimeout(() => flash.style.opacity = '0', 100);
@@ -9035,19 +9086,11 @@
         },
 
         async done() {
-            if (this._capturedFiles.length === 0) {
-                this.close();
-                return;
-            }
-            
+            if (this._capturedFiles.length === 0) return this.close();
             const filesToUpload = this._capturedFiles.map(c => c.file);
-            // Giải phóng RAM
             this._capturedFiles.forEach(c => URL.revokeObjectURL(c.preview));
             this._capturedFiles = [];
-            
             this.close();
-            
-            // Chuyển toàn bộ ảnh sang hàm Upload Ngầm để đóng dấu GPS và đẩy lên server
             await Images._processSecureUpload(filesToUpload, this._id, this._gpsLocation);
         },
 
@@ -9056,6 +9099,14 @@
                 this._stream.getTracks().forEach(t => t.stop());
                 this._stream = null;
             }
+            if (this._orientationHandler) {
+                window.removeEventListener('deviceorientation', this._orientationHandler);
+                this._orientationHandler = null;
+            }
+            // Trả icon UI về đứng thẳng
+            document.querySelectorAll('#secure-camera-modal .lucide').forEach(icon => {
+                icon.style.transform = 'rotate(0deg)';
+            });
             const modal = document.getElementById('secure-camera-modal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
