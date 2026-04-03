@@ -1523,6 +1523,17 @@
         [data-theme="dark"] .dm-part-icon { background: rgba(255,255,255,0.07); color: #94a3b8; }
         [data-theme="dark"] .dm-card.sc .dm-part-icon { background: rgba(59,130,246,0.15); color: #60a5fa; }
         [data-theme="dark"] .dm-card.tt .dm-part-icon { background: rgba(245,158,11,0.15); color: #fbbf24; }
+
+        /* Hiệu ứng loading trên từng ảnh tải ngầm */
+        .img-uploading-overlay {
+            position: absolute; inset: 0; background: rgba(255,255,255,0.6);
+            display: flex; align-items: center; justify-content: center; z-index: 10;
+        }
+        [data-theme="dark"] .img-uploading-overlay { background: rgba(15,23,42,0.6); }
+        .spinner-small {
+            width: 24px; height: 24px; border: 3px solid #cbd5e1; border-top-color: #3b82f6;
+            border-radius: 50%; animation: img-spin 1s linear infinite;
+        }
     </style>
 </head>
 <body class="h-screen w-full flex flex-col overflow-hidden bg-slate-50">
@@ -8891,9 +8902,9 @@
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
 
-                        // 1. Giới hạn kích thước ảnh (Max 1920px) để app không bị lag và upload nhanh hơn
-                        let MAX_WIDTH = 1920;
-                        let MAX_HEIGHT = 1920;
+                        // 1. Giảm phân giải xuống 1280px: Đủ nét để GĐV xem, nhưng xử lý cực nhanh
+                        let MAX_WIDTH = 1280;
+                        let MAX_HEIGHT = 1280;
                         let width = img.width;
                         let height = img.height;
 
@@ -8909,36 +8920,33 @@
                         // 2. Vẽ ảnh gốc lên canvas
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // 3. Cấu hình Font chữ và hiệu ứng Đổ bóng (để chữ nổi bật trên mọi nền ảnh)
-                        const fontSize = Math.max(18, Math.floor(width * 0.035)); 
+                        // 3. Cấu hình Font chữ NHỎ HƠN (Giảm hệ số nhân từ 0.035 xuống 0.022)
+                        const fontSize = Math.max(14, Math.floor(width * 0.022)); 
                         ctx.font = `800 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
                         ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
                         ctx.textAlign = 'right';
                         ctx.textBaseline = 'bottom';
 
                         ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-                        ctx.shadowBlur = 6;
-                        ctx.shadowOffsetX = 2;
-                        ctx.shadowOffsetY = 2;
+                        ctx.shadowBlur = 4;
+                        ctx.shadowOffsetX = 1.5;
+                        ctx.shadowOffsetY = 1.5;
 
                         // 4. Chuẩn bị nội dung đóng dấu
                         const timeStr = moment().format('DD/MM/YYYY HH:mm:ss');
                         const labelStr = bsx ? `TASCO DLK - ${bsx}` : 'TASCO DLK';
-                        const padding = fontSize + 10;
+                        const padding = fontSize + 8;
                         
-                        // 5. In chữ lên góc dưới cùng bên phải của ảnh
+                        // 5. In chữ
                         ctx.fillText(timeStr, width - padding, height - padding);
                         ctx.fillText(labelStr, width - padding, height - padding - fontSize * 1.3);
 
-                        // 6. Chuyển đổi lại thành File (Nén JPEG 85% giữ chất lượng tốt, dung lượng nhẹ)
+                        // 6. Nén JPEG 80% (tối ưu dung lượng để upload nhanh nhất có thể)
                         canvas.toBlob((blob) => {
                             if (!blob) return reject(new Error('Lỗi xử lý ảnh'));
-                            const newFile = new File([blob], file.name, {
-                                type: 'image/jpeg',
-                                lastModified: Date.now()
-                            });
+                            const newFile = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
                             resolve(newFile);
-                        }, 'image/jpeg', 0.85);
+                        }, 'image/jpeg', 0.80);
                     };
                     img.onerror = reject;
                     img.src = e.target.result;
@@ -8980,15 +8988,19 @@
                 const cat = IMG_CATS[img.cat] || IMG_CATS.other;
                 const url = typeof img === 'string' ? img : img.url;
                 const catLabel = typeof img === 'string' ? '' : cat.label;
+                const isUploading = img.isUploading; // Cờ nhận biết đang up ngầm
+                
                 return `
                 <div class="relative shrink-0" style="width:72px;">
-                    <div class="w-full rounded-xl overflow-hidden border border-slate-200 cursor-pointer active:scale-95 transition-transform" style="height:72px;" onclick="ImageViewer.open('${id}', ${idx})">
+                    <div class="w-full rounded-xl overflow-hidden border border-slate-200 cursor-pointer active:scale-95 transition-transform" style="height:72px;" onclick="${isUploading ? '' : `ImageViewer.open('${id}', ${idx})`}">
                         <img src="${url}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">
+                        ${isUploading ? '<div class="img-uploading-overlay"><div class="spinner-small"></div></div>' : ''}
                     </div>
                     ${catLabel ? `<p class="text-[8px] font-black text-center mt-1 truncate flex items-center justify-center gap-0.5" style="color:${cat.color};"><span style="color:${cat.color};">${cat.svg}</span>${catLabel}</p>` : ''}
+                    ${!isUploading ? `
                     <button class="img-remove-btn" style="top:3px;right:3px;width:18px;height:18px;border-radius:6px;" onclick="event.stopPropagation(); Images.remove('${id}', ${idx})">
                         <svg width="8" height="8" viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
-                    </button>
+                    </button>` : ''}
                 </div>`;
             }).join('');
 
@@ -9006,47 +9018,62 @@
             event.target.value = '';
             if (!files.length || !id) return;
 
-            // Hỏi loại ảnh nếu chưa có
             const cat = await this._pickCategory();
             if (!cat) return;
 
-            const wrap = document.getElementById('img-progress-wrap');
-            const bar  = document.getElementById('img-progress-bar');
-            const lbl  = document.getElementById('img-progress-label');
-            const cnt  = document.getElementById('img-progress-count');
-            if (wrap) wrap.classList.remove('hidden');
-
-            const item    = App.find(id) || {};
+            const item = App.find(id) || {};
             const current = (item.documentImages || []).map(i => typeof i === 'string' ? { url: i, cat: 'other' } : i);
-            let done = 0;
-
             const bsxToStamp = item.bsx || '';
 
-            for (const file of files) {
-                if (lbl) lbl.textContent = `Đang xử lý ${file.name.slice(0, 15)}...`;
-                if (cnt) cnt.textContent = `${done}/${files.length}`;
-                try {
-                    // Gọi hàm đóng dấu ngày giờ & nén ảnh trước khi up
-                    const watermarkedFile = await ImageProcessor.addWatermark(file, bsxToStamp);
+            // 1. Tạo Url cục bộ (Blob URL) để hiện ngay lên màn hình không cần chờ mạng
+            const tempFiles = files.map(file => {
+                const tempId = 'temp_' + Math.random().toString(36).substr(2, 9);
+                const localUrl = URL.createObjectURL(file);
+                const tempObj = { url: localUrl, cat: cat, isUploading: true, tempId: tempId };
+                current.push(tempObj); // Nhét tạm vào mảng
+                return { file, tempObj, localUrl };
+            });
 
+            // 2. Gán tạm mảng vào biến hệ thống và Render ngay lập tức
+            item.documentImages = current;
+            Images.render(id);
+
+            // 3. Kích hoạt xử lý và Upload NGẦM (Promise.all giúp up song song cực nhanh)
+            Promise.all(tempFiles.map(async ({ file, tempObj, localUrl }) => {
+                try {
+                    // Đóng dấu ngày giờ & Nén
+                    const watermarkedFile = await ImageProcessor.addWatermark(file, bsxToStamp);
+                    
+                    // Upload lên Cloudinary
                     const fd = new FormData();
                     fd.append('file', watermarkedFile);
                     fd.append('upload_preset', CONFIG.cloudinary.preset);
-                    const res  = await fetch(CONFIG.cloudinary.url, { method: 'POST', body: fd });
+                    const res = await fetch(CONFIG.cloudinary.url, { method: 'POST', body: fd });
                     const data = await res.json();
-                    if (data.secure_url) current.push({ url: data.secure_url, cat });
-                } catch (e) { 
-                    console.error(e);
-                    Toast.fire({ icon: 'error', title: 'Lỗi tải ảnh: ' + file.name.slice(0, 15) }); 
+                    
+                    // Up xong, đổi URL ảo thành URL thật và xóa cờ loading
+                    if (data.secure_url) {
+                        tempObj.url = data.secure_url;
+                        delete tempObj.isUploading;
+                        delete tempObj.tempId;
+                    }
+                } catch (e) {
+                    console.error("Lỗi up ảnh ngầm:", e);
+                    Toast.fire({ icon: 'error', title: 'Lỗi tải ảnh: ' + file.name.slice(0, 15) });
+                    // Nếu lỗi, xóa ảnh ảo khỏi danh sách
+                    const idx = current.findIndex(i => i.tempId === tempObj.tempId);
+                    if (idx > -1) current.splice(idx, 1);
+                } finally {
+                    URL.revokeObjectURL(localUrl); // Giải phóng RAM
+                    Images.render(id); // Cập nhật lại UI từng tấm một khi xong
                 }
-                done++;
-                if (bar) bar.style.width = Math.round(done / files.length * 100) + '%';
-            }
-
-            await db.ref(`Workstation/${id}/documentImages`).set(current);
-            setTimeout(() => { if (wrap) { wrap.classList.add('hidden'); if (bar) bar.style.width = '0%'; } }, 600);
-            Toast.fire({ icon: 'success', title: `Đã tải lên ${done} ảnh!` });
-            Images.render(id);
+            })).then(() => {
+                // 4. Khi TẤT CẢ các ảnh đã up xong ngầm, lưu mảng hoàn chỉnh vào Firebase
+                const finalImages = current.filter(i => !i.isUploading); // Chắc cú bỏ đi các ảnh kẹt
+                db.ref(`Workstation/${id}/documentImages`).set(finalImages).then(() => {
+                    Toast.fire({ icon: 'success', title: `Đã tải lên ${files.length} ảnh!` });
+                });
+            });
         },
 
         remove(id, idx) {
