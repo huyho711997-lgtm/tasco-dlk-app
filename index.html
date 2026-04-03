@@ -8891,11 +8891,14 @@
         },
     };
         
+    // ============================================================
+    // LẤY TỌA ĐỘ GPS SIÊU TỐC
+    // ============================================================
     const LocationHelper = {
         async get() {
             return new Promise((resolve) => {
                 if (!navigator.geolocation) {
-                    resolve('Không hỗ trợ định vị');
+                    resolve('Lỗi: Trình duyệt không hỗ trợ GPS');
                     return;
                 }
                 navigator.geolocation.getCurrentPosition(
@@ -8905,14 +8908,18 @@
                         resolve(`GPS: ${lat}, ${lng}`);
                     },
                     (err) => {
-                        console.warn(err);
-                        resolve('Không lấy được vị trí GPS');
+                        console.warn('Lỗi GPS:', err);
+                        if (err.code === 1) resolve('Lỗi: Bị từ chối quyền vị trí');
+                        else if (err.code === 2) resolve('Lỗi: Không tìm thấy vệ tinh');
+                        else if (err.code === 3) resolve('Lỗi: Quá thời gian lấy GPS');
+                        else resolve('Lỗi: Không lấy được GPS');
                     },
-                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                    // Tăng thời gian chờ lên 15s, cho phép dùng vị trí cũ trong 10s để load nhanh
+                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
                 );
             });
         }
-    };  
+    };
 
     // ============================================================
     // SECURE CAMERA — Chụp liên tục & Chống gian lận
@@ -8933,19 +8940,26 @@
             modal.classList.add('flex');
             
             const gpsLabel = document.getElementById('sc-gps-status');
-            gpsLabel.textContent = 'Đang lấy tọa độ GPS...';
+            gpsLabel.textContent = 'Đang tìm vệ tinh GPS...';
             gpsLabel.classList.add('text-amber-400', 'animate-pulse');
-            gpsLabel.classList.remove('text-emerald-400');
+            gpsLabel.classList.remove('text-emerald-400', 'text-rose-400');
 
-            // Khởi động Camera trước để người dùng không phải chờ
+            // Khởi động Camera trước để người dùng có thể ngắm khung hình ngay
             await this._startStream();
             lucide.createIcons();
 
-            // Lấy GPS chạy ngầm song song
-            this._gpsLocation = await LocationHelper.get();
-            gpsLabel.textContent = '✓ ' + this._gpsLocation;
-            gpsLabel.classList.remove('text-amber-400', 'animate-pulse');
-            gpsLabel.classList.add('text-emerald-400');
+            // Lấy GPS chạy ngầm (không dùng await để tránh làm đơ ứng dụng nếu sóng GPS yếu)
+            LocationHelper.get().then(loc => {
+                this._gpsLocation = loc;
+                gpsLabel.textContent = loc.includes('Lỗi') ? loc : '✓ ' + loc;
+                gpsLabel.classList.remove('animate-pulse', 'text-amber-400');
+                
+                if (loc.includes('Lỗi')) {
+                    gpsLabel.classList.add('text-rose-400'); // Hiện màu đỏ nếu lỗi
+                } else {
+                    gpsLabel.classList.add('text-emerald-400'); // Màu xanh nếu thành công
+                }
+            });
         },
 
         async _startStream() {
@@ -8953,8 +8967,13 @@
                 this._stream.getTracks().forEach(t => t.stop());
             }
             try {
+                // Bỏ width/height lý tưởng để trình duyệt tự động bắt độ phân giải theo chiều dọc/ngang của cảm biến
                 this._stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: this._facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } },
+                    video: { 
+                        facingMode: this._facingMode,
+                        width: { ideal: 4096 }, // Yêu cầu nét nhất có thể
+                        height: { ideal: 2160 }
+                    },
                     audio: false
                 });
                 const video = document.getElementById('secure-camera-video');
