@@ -9000,31 +9000,10 @@
                     icon.style.transition = 'transform 0.3s ease';
                 });
 
-                // ĐIỀU KHIỂN KHỐI NGÀY GIỜ CHẠY THEO GÓC MÀN HÌNH ĐỂ KHÔNG BỊ ĐÈ
+                // ĐIỀU KHIỂN KHỐI NGÀY GIỜ CHỈ XOAY TẠI CHỖ, KHÔNG DI CHUYỂN TỌA ĐỘ LUNG TUNG
                 const overlayInfo = document.getElementById('sc-overlay-info');
                 if (overlayInfo) {
-                    // Reset tọa độ
-                    overlayInfo.style.top = 'auto';
-                    overlayInfo.style.bottom = 'auto';
-                    overlayInfo.style.left = 'auto';
-                    overlayInfo.style.right = 'auto';
-
-                    if (this._deviceOrientation === 90) {
-                        // Nằm ngang - Chiều trái (Góc trên phải của màn hình dọc)
-                        overlayInfo.style.top = '160px';
-                        overlayInfo.style.right = '-64px';
-                        overlayInfo.style.transform = 'rotate(90deg)';
-                    } else if (this._deviceOrientation === -90 || this._deviceOrientation === 270) {
-                        // Nằm ngang - Chiều phải (Góc dưới trái của màn hình dọc)
-                        overlayInfo.style.bottom = '220px';
-                        overlayInfo.style.left = '-64px';
-                        overlayInfo.style.transform = 'rotate(-90deg)';
-                    } else {
-                        // Nằm dọc (Góc dưới phải)
-                        overlayInfo.style.bottom = '130px';
-                        overlayInfo.style.right = '16px';
-                        overlayInfo.style.transform = 'rotate(0deg)';
-                    }
+                    overlayInfo.style.transform = `rotate(${this._deviceOrientation}deg)`;
                 }
             };
 
@@ -13284,13 +13263,13 @@
             <video id="secure-camera-video" autoplay playsinline class="absolute min-w-full min-h-full object-cover"></video>
             <div id="secure-camera-flash" class="absolute inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-100 z-10"></div>
             
-            <div id="sc-overlay-info" class="absolute z-30 flex flex-col gap-1.5 items-end text-right transition-all duration-300 pointer-events-none" style="bottom: 130px; right: 16px; transform-origin: center; width: 220px;">
+            <div id="sc-overlay-info" class="absolute z-30 flex flex-col gap-1.5 items-start text-left transition-transform duration-300 pointer-events-none" style="bottom: 24px; left: 16px; transform-origin: center left; width: 240px;">
                 <div class="bg-black/50 backdrop-blur-md px-2.5 py-1.5 rounded-lg border border-white/20 inline-block shadow-sm pointer-events-auto">
                     <p id="sc-time-status" class="text-white text-[13px] font-mono font-black tracking-wider m-0 leading-none drop-shadow-md">--:--:--</p>
                 </div>
-                <div class="bg-black/50 backdrop-blur-md px-2.5 py-1.5 rounded-lg border border-white/20 shadow-sm pointer-events-auto cursor-pointer flex items-center gap-1.5 active:bg-white/10 transition-colors w-full justify-end" onclick="event.stopPropagation(); SecureCamera.refreshLocation()">
+                <div class="bg-black/50 backdrop-blur-md px-2.5 py-1.5 rounded-lg border border-white/20 shadow-sm pointer-events-auto cursor-pointer flex items-center gap-1.5 active:bg-white/10 transition-colors w-full justify-start" onclick="event.stopPropagation(); SecureCamera.refreshLocation()">
                     <i data-lucide="refresh-cw" class="w-3 h-3 text-emerald-400 shrink-0" id="refresh-icon"></i>
-                    <p id="sc-gps-status" class="text-amber-400 text-[10px] font-bold leading-snug line-clamp-2 m-0 text-right drop-shadow-md">Đang tìm vệ tinh GPS...</p>
+                    <p id="sc-gps-status" class="text-amber-400 text-[10px] font-bold leading-snug line-clamp-2 m-0 text-left drop-shadow-md">Đang tìm vệ tinh GPS...</p>
                 </div>
             </div>
 
