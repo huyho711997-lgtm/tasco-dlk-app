@@ -9723,46 +9723,83 @@
             const count = this._selected.size;
             if (count === 0) return;
             
+            const id = App.currentEditId;
+            const item = App.find(id);
+            if (!item?.documentImages) return;
+
             const res = await Swal.fire({
-                title: `Xóa ${count} ảnh này?`,
-                text: "Dữ liệu sẽ bị xóa vĩnh viễn khỏi Cloud.",
-                icon: 'warning',
+                html: `
+                    <div id="del-confirm-ui" style="display:flex; flex-direction:column; align-items:center; padding: 10px 0 0;">
+                        <div style="width:60px; height:60px; border-radius:50%; background:rgba(239, 68, 68, 0.15); display:flex; align-items:center; justify-content:center; margin-bottom:16px;">
+                            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                            </svg>
+                        </div>
+                        <p style="font-size:18px; font-weight:900; color:var(--text-primary, #0f172a); margin:0;">Xóa ${count} ảnh đã chọn?</p>
+                        <p style="font-size:13px; font-weight:600; color:var(--text-secondary, #64748b); margin-top:8px; text-align:center;">Dữ liệu sẽ bị xóa vĩnh viễn khỏi Cloud.</p>
+                    </div>
+                    
+                    <div id="del-loading-ui" style="display:none; flex-direction:column; align-items:center; padding: 10px 0 0;">
+                        <div style="width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg, #ef4444, #f97316); display:flex; align-items:center; justify-content:center; box-shadow:0 8px 25px rgba(239, 68, 68, 0.4); margin-bottom:16px;">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="animation:img-spin 1s linear infinite;">
+                                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                            </svg>
+                        </div>
+                        <p style="font-size:18px; font-weight:900; color:var(--text-primary, #0f172a); margin:0;">Đang dọn dẹp Cloud...</p>
+                        <p style="font-size:13px; font-weight:600; color:var(--text-secondary, #64748b); margin-top:8px; text-align:center;">Vui lòng đợi trong giây lát</p>
+                    </div>
+                `,
                 showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                confirmButtonText: 'Xác nhận xóa',
+                confirmButtonText: 'Xóa vĩnh viễn',
                 cancelButtonText: 'Hủy',
-                customClass: { popup: 'custom-rounded z-[100001]' }
+                buttonsStyling: false,
+                customClass: { 
+                    popup: 'custom-rounded z-[100001]',
+                    actions: 'flex w-full gap-3 mt-4 px-2' // Căn 2 nút song song
+                },
+                didOpen: () => {
+                    // Ép CSS trực tiếp cho 2 nút để đồng bộ Light/Dark Mode
+                    const confirmBtn = Swal.getConfirmButton();
+                    const cancelBtn = Swal.getCancelButton();
+                    if(confirmBtn) confirmBtn.style.cssText = 'flex:1; padding:12px; background:#ef4444; color:white; border-radius:12px; font-weight:800; font-size:13px; border:none; cursor:pointer; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);';
+                    if(cancelBtn) cancelBtn.style.cssText = 'flex:1; padding:12px; background:var(--bg-surface, #f1f5f9); color:var(--text-secondary, #475569); border-radius:12px; font-weight:800; font-size:13px; border:1px solid var(--border-light, transparent); cursor:pointer;';
+                },
+                preConfirm: async () => {
+                    // CHUYỂN ĐỔI MƯỢT MÀ TỪ HỎI -> ĐANG XÓA
+                    document.getElementById('del-confirm-ui').style.display = 'none';
+                    document.getElementById('del-loading-ui').style.display = 'flex';
+                    
+                    // Ẩn thanh chứa 2 nút bấm đi
+                    const actions = document.querySelector('.swal2-actions');
+                    if(actions) actions.style.display = 'none';
+
+                    // Bắt đầu logic xóa
+                    const list = [...item.documentImages];
+                    const indicesToDelete = Array.from(this._selected).sort((a, b) => b - a);
+
+                    for (let idx of indicesToDelete) {
+                        const img = list[idx];
+                        const url = typeof img === 'string' ? img : img.url;
+                        const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[a-zA-Z0-9]+)?(?:\?.*)?$/);
+                        if (match && match[1]) {
+                            await fetch(CONFIG.exportWordUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                                body: JSON.stringify({ action: 'delete_cloudinary', publicId: match[1] })
+                            }).catch(() => {});
+                        }
+                        list.splice(idx, 1);
+                    }
+
+                    await db.ref(`Workstation/${id}/documentImages`).set(list.length ? list : null);
+                    return true;
+                },
+                allowOutsideClick: () => !Swal.isLoading()
             });
 
             if (res.isConfirmed) {
-                const id = App.currentEditId;
-                const item = App.find(id);
-                if (!item?.documentImages) return;
-
-                const list = [...item.documentImages];
-                const indicesToDelete = Array.from(this._selected).sort((a, b) => b - a);
-
-                Swal.fire({ title: 'Đang xóa...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-                // Xóa trên Cloudinary (nếu có publicId)
-                for (let idx of indicesToDelete) {
-                    const img = list[idx];
-                    const url = typeof img === 'string' ? img : img.url;
-                    const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[a-zA-Z0-9]+)?(?:\?.*)?$/);
-                    if (match && match[1]) {
-                        await fetch(CONFIG.exportWordUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            body: JSON.stringify({ action: 'delete_cloudinary', publicId: match[1] })
-                        }).catch(() => {});
-                    }
-                    list.splice(idx, 1);
-                }
-
-                await db.ref(`Workstation/${id}/documentImages`).set(list.length ? list : null);
-                
-                Swal.close();
-                Toast.fire({ icon: 'success', title: `Đã xóa thành công ${count} ảnh!` });
+                Toast.fire({ icon: 'success', title: `Đã xóa vĩnh viễn ${count} ảnh!` });
                 this.exitSelectMode();
             }
         },
