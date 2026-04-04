@@ -10001,9 +10001,15 @@
                             })
                         });
                         const data = await res.json();
-                        // FIX: Kiểm tra kết quả từ Drive và gán URL
+                        
+                        // SỬA TẠI ĐÂY: Đồng bộ cấu trúc trả về
                         if (data.success && data.url) {
-                            finalUrl = data.url;
+                            finalUrl = data.url; 
+                            tempObj.url = finalUrl; // Cập nhật URL mới vào object ảnh
+                            delete tempObj.isUploading; // Xóa spinner ngay lập tức
+                            delete tempObj.tempId;
+                        } else {
+                            throw new Error(data.error || "Lỗi lưu Drive");
                         }
                     }
 
