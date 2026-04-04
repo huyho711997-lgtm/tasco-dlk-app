@@ -8892,15 +8892,29 @@
     };
         
     // ============================================================
-    // LẤY VÀ DỊCH TỌA ĐỘ GPS RA ĐỊA CHỈ (ĐƯỜNG, PHƯỜNG, XÃ)
+    // LẤY VÀ DỊCH TỌA ĐỘ GPS RA ĐỊA CHỈ (CÓ CACHE 15 PHÚT)
     // ============================================================
     const LocationHelper = {
+        _cachedLocation: null,
+        _lastFetchTime: 0,
+        _isFetching: false,
+
         async get() {
+            // Nếu đã có cache và chưa quá 15 phút (900,000 ms), dùng lại luôn để không hỏi quyền
+            if (this._cachedLocation && (Date.now() - this._lastFetchTime < 900000)) {
+                return this._cachedLocation;
+            }
+
+            if (this._isFetching) return 'Đang lấy tọa độ...';
+            this._isFetching = true;
+
             return new Promise((resolve) => {
                 if (!navigator.geolocation) {
+                    this._isFetching = false;
                     resolve('Lỗi: Trình duyệt không hỗ trợ định vị');
                     return;
                 }
+                
                 navigator.geolocation.getCurrentPosition(
                     async (pos) => {
                         const lat = pos.coords.latitude.toFixed(6);
@@ -8908,29 +8922,32 @@
                         const coordsStr = `Tọa độ: ${lat}, ${lng}`;
                         
                         try {
-                            // Gọi API Bản đồ để dịch tọa độ thành địa chỉ cụ thể
                             const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=vi`);
                             const data = await res.json();
                             
                             if (data && data.display_name) {
-                                // Xóa bỏ cụm ", Việt Nam" ở cuối cho ngắn gọn
                                 let address = data.display_name.replace(/,\s*Việt Nam$/, '').trim();
-                                resolve(address);
+                                this._cachedLocation = address;
                             } else {
-                                resolve(coordsStr);
+                                this._cachedLocation = coordsStr;
                             }
                         } catch (e) {
-                            resolve(coordsStr); // Nếu mất mạng, giữ lại tọa độ số
+                            this._cachedLocation = coordsStr; 
                         }
+                        
+                        this._lastFetchTime = Date.now();
+                        this._isFetching = false;
+                        resolve(this._cachedLocation);
                     },
                     (err) => {
+                        this._isFetching = false;
                         console.warn(err);
                         if (err.code === 1) resolve('LỖI: Vui lòng vào Cài đặt cấp quyền Vị trí!');
                         else if (err.code === 2) resolve('LỖI: Không tìm thấy vệ tinh GPS');
-                        else if (err.code === 3) resolve('LỖI: GPS phản hồi quá chậm');
                         else resolve('Lỗi: Không lấy được GPS');
                     },
-                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+                    // maximumAge: 60000 cho phép trình duyệt xài lại GPS cũ trong 1 phút của OS
+                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
                 );
             });
         }
