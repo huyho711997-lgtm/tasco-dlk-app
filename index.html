@@ -8892,25 +8892,20 @@
     };
         
     // ============================================================
-    // LẤY VÀ DỊCH TỌA ĐỘ GPS RA ĐỊA CHỈ (CÓ CACHE 15 PHÚT)
+    // LẤY VÀ DỊCH TỌA ĐỘ GPS 
     // ============================================================
     const LocationHelper = {
         _cachedLocation: null,
         _lastFetchTime: 0,
-        _isFetching: false,
 
-        async get() {
-            // Nếu đã có cache và chưa quá 15 phút (900,000 ms), dùng lại luôn để không hỏi quyền
-            if (this._cachedLocation && (Date.now() - this._lastFetchTime < 900000)) {
+        async get(forceRefresh = false) {
+            // Nếu không ép làm mới và cache chưa quá 5 phút thì dùng lại (giảm từ 15 xuống 5)
+            if (!forceRefresh && this._cachedLocation && (Date.now() - this._lastFetchTime < 300000)) {
                 return this._cachedLocation;
             }
 
-            if (this._isFetching) return 'Đang lấy tọa độ...';
-            this._isFetching = true;
-
             return new Promise((resolve) => {
                 if (!navigator.geolocation) {
-                    this._isFetching = false;
                     resolve('Lỗi: Trình duyệt không hỗ trợ định vị');
                     return;
                 }
@@ -8919,35 +8914,19 @@
                     async (pos) => {
                         const lat = pos.coords.latitude.toFixed(6);
                         const lng = pos.coords.longitude.toFixed(6);
-                        const coordsStr = `Tọa độ: ${lat}, ${lng}`;
-                        
                         try {
                             const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=vi`);
                             const data = await res.json();
-                            
-                            if (data && data.display_name) {
-                                let address = data.display_name.replace(/,\s*Việt Nam$/, '').trim();
-                                this._cachedLocation = address;
-                            } else {
-                                this._cachedLocation = coordsStr;
-                            }
+                            const address = data?.display_name?.replace(/,\s*Việt Nam$/, '').trim() || `Tọa độ: ${lat}, ${lng}`;
+                            this._cachedLocation = address;
+                            this._lastFetchTime = Date.now();
+                            resolve(address);
                         } catch (e) {
-                            this._cachedLocation = coordsStr; 
+                            resolve(`Tọa độ: ${lat}, ${lng}`);
                         }
-                        
-                        this._lastFetchTime = Date.now();
-                        this._isFetching = false;
-                        resolve(this._cachedLocation);
                     },
-                    (err) => {
-                        this._isFetching = false;
-                        console.warn(err);
-                        if (err.code === 1) resolve('LỖI: Vui lòng vào Cài đặt cấp quyền Vị trí!');
-                        else if (err.code === 2) resolve('LỖI: Không tìm thấy vệ tinh GPS');
-                        else resolve('Lỗi: Không lấy được GPS');
-                    },
-                    // maximumAge: 60000 cho phép trình duyệt xài lại GPS cũ trong 1 phút của OS
-                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
+                    (err) => resolve('Lỗi: Không lấy được GPS'),
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } // maximumAge: 0 ép máy quét vệ tinh mới
                 );
             });
         }
@@ -8963,6 +8942,7 @@
         _capturedFiles: [],
         _gpsLocation: '',
         _deviceOrientation: 0,
+        _lastStickyAngle: 0,
         _orientationHandler: null,
         
         // Quản lý ống kính (Zoom phần cứng)
@@ -8976,6 +8956,9 @@
         _flashSupported: false,
         _flashOn: false,
 
+        // THÊM BIẾN QUẢN LÝ ĐỒNG HỒ
+        _clockTimer: null,
+
         async open(id) {
             this._id = id;
             this._capturedFiles = [];
@@ -8985,37 +8968,26 @@
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             
-            const gpsLabel = document.getElementById('sc-gps-status');
-            gpsLabel.textContent = 'Đang tra cứu vệ tinh và địa chỉ...';
-            gpsLabel.className = 'text-[10px] font-bold text-amber-400 animate-pulse';
-
             // 1. Lắng nghe cảm biến góc nghiêng (Gyroscope)
             this._deviceOrientation = 0;
-            this._lastStickyAngle = 0; // Thêm biến nhớ trạng thái góc xoay
+            this._lastStickyAngle = 0; 
 
             this._orientationHandler = (e) => {
-                // Nếu trình duyệt hoặc OS đã tự xoay ngang (Không khóa màn hình), bỏ qua
                 if (window.innerWidth > window.innerHeight) {
                     this._deviceOrientation = 0;
                 } else {
                     let beta = e.beta;
                     let gamma = e.gamma;
 
-                    // 1. Nếu cầm điện thoại đứng thẳng lên (góc beta từ 50 -> 130 độ) -> Chuyển về Dọc
                     if (beta > 50 && beta < 130) {
                         this._lastStickyAngle = 0; 
                     } 
-                    // 2. Nếu nghiêng điện thoại sang ngang (góc gamma > 30 độ) -> Chuyển về Ngang
                     else if (Math.abs(gamma) > 30) {
                         this._lastStickyAngle = 90; 
                     }
-                    // 3. NẾU ĐẶT NẰM PHẲNG TRÊN BÀN (beta < 50 và gamma < 30):
-                    // KHÔNG gán lại giá trị. Hệ thống sẽ tự động giữ nguyên _lastStickyAngle trước đó!
-
                     this._deviceOrientation = this._lastStickyAngle;
                 }
 
-                // CHỈ xoay các Icon UI (Nút đóng, Nút đổi cam, Nút V, Số đếm)
                 document.querySelectorAll('#secure-camera-modal .lucide, #sc-zoom-btn, #secure-camera-count').forEach(icon => {
                     icon.style.transform = `rotate(${this._deviceOrientation}deg)`;
                     icon.style.transition = 'transform 0.3s ease';
@@ -9035,12 +9007,38 @@
             await this._startStream();
             lucide.createIcons();
 
-            // 3. Lấy GPS ngầm
-            LocationHelper.get().then(loc => {
-                this._gpsLocation = loc;
-                gpsLabel.textContent = loc.includes('LỖI') ? loc : '📍 ' + loc;
-                gpsLabel.className = loc.includes('LỖI') ? 'text-[10px] font-bold text-rose-400' : 'text-[10px] font-bold text-emerald-400';
-            });
+            // 3. Khởi động Đồng hồ Live trên màn hình
+            this._clockTimer = setInterval(() => {
+                const el = document.getElementById('live-clock');
+                if (el) el.textContent = moment().format('HH:mm:ss DD/MM/YYYY');
+            }, 1000);
+
+            // 4. Lấy vị trí lần đầu
+            this.refreshLocation();
+        },
+
+        // HÀM MỚI: LÀM MỚI ĐỊNH VỊ GPS
+        async refreshLocation() {
+            const locEl = document.getElementById('live-location');
+            const icon = document.getElementById('refresh-icon');
+            
+            if (locEl) {
+                locEl.textContent = '🛰️ Đang tìm vệ tinh...';
+                locEl.style.color = '#fbbf24'; // text-amber-400
+            }
+            if (icon) icon.classList.add('animate-spin');
+
+            // Gọi LocationHelper với forceRefresh = true
+            const loc = await LocationHelper.get(true);
+            this._gpsLocation = loc;
+
+            if (locEl) {
+                locEl.textContent = loc;
+                // Nháy xanh nếu thành công, đỏ nếu lỗi
+                locEl.style.color = loc.includes('LỖI') ? '#f87171' : '#34d399'; 
+                setTimeout(() => locEl.style.color = loc.includes('LỖI') ? '#f87171' : '#fbbf24', 1500);
+            }
+            if (icon) icon.classList.remove('animate-spin');
         },
 
         async _startStream() {
@@ -9062,7 +9060,6 @@
                 const track = this._stream.getVideoTracks()[0];
                 const capabilities = track.getCapabilities ? track.getCapabilities() : {};
                 
-                // CẤU HÌNH ZOOM... (Đoạn code cũ giữ nguyên)
                 const zoomBtn = document.getElementById('sc-zoom-btn');
                 if (capabilities.zoom && this._facingMode === 'environment') {
                     this._zoomSupported = true;
@@ -9075,15 +9072,13 @@
                     if (zoomBtn) zoomBtn.style.display = 'none';
                 }
 
-                // CẤU HÌNH FLASH (THÊM MỚI TẠI ĐÂY)
                 const flashBtn = document.getElementById('sc-flash-btn');
-                this._flashOn = false; // Reset trạng thái mỗi khi bật cam
+                this._flashOn = false; 
                 if (flashBtn) {
                     flashBtn.classList.remove('text-amber-400');
                     flashBtn.classList.add('text-white');
                 }
 
-                // Chỉ hỗ trợ torch (đèn pin) ở camera sau và nếu API trình duyệt cho phép
                 if (capabilities.torch && this._facingMode === 'environment') {
                     this._flashSupported = true;
                     if (flashBtn) flashBtn.classList.remove('hidden');
@@ -9102,17 +9097,15 @@
             if (!this._zoomSupported || !this._stream) return;
             const track = this._stream.getVideoTracks()[0];
             
-            // Xoay vòng: 1x -> 2x -> 0.5x (nếu có) -> 1x
             if (this._currentZoom === 1) {
-                this._currentZoom = 2; // Lên 2x
+                this._currentZoom = 2; 
             } else if (this._currentZoom === 2 && this._zoomMin < 1) {
-                this._currentZoom = this._zoomMin; // Xuống 0.5x (Góc siêu rộng)
+                this._currentZoom = this._zoomMin; 
             } else {
-                this._currentZoom = 1; // Về lại 1x
+                this._currentZoom = 1; 
             }
 
             try {
-                // Ép phần cứng Camera thay đổi tiêu cự
                 track.applyConstraints({ advanced: [{ zoom: this._currentZoom }] });
                 
                 const zoomBtn = document.getElementById('sc-zoom-btn');
@@ -9131,7 +9124,6 @@
             this._startStream();
         },
 
-        // HÀM MỚI: BẬT TẮT ĐÈN FLASH
         async toggleFlash() {
             if (!this._flashSupported || !this._stream) {
                 Toast.fire({ icon: 'info', title: 'Trình duyệt/Thiết bị không hỗ trợ bật Flash' });
@@ -9143,12 +9135,10 @@
             
             try {
                 this._flashOn = !this._flashOn;
-                // Áp dụng lệnh bật/tắt đèn pin (torch) xuống phần cứng
                 await track.applyConstraints({
                     advanced: [{ torch: this._flashOn }]
                 });
 
-                // Đổi màu nút (Trắng -> Vàng sáng)
                 if (flashBtn) {
                     if (this._flashOn) {
                         flashBtn.classList.remove('text-white');
@@ -9162,7 +9152,7 @@
             } catch (err) {
                 console.warn("Lỗi bật flash:", err);
                 Toast.fire({ icon: 'error', title: 'Không thể can thiệp đèn Flash' });
-                this._flashOn = false; // Trả lại trạng thái cũ
+                this._flashOn = false; 
             }
         },
 
@@ -9178,7 +9168,6 @@
             const vh = video.videoHeight;
             const angle = this._deviceOrientation || 0;
 
-            // XỬ LÝ LẬT ẢNH HOÀN HẢO VÀO CANVAS
             if (Math.abs(angle) === 90) {
                 canvas.width = vh; 
                 canvas.height = vw;
@@ -9242,14 +9231,17 @@
                 window.removeEventListener('deviceorientation', this._orientationHandler);
                 this._orientationHandler = null;
             }
-            // Trả icon UI về đứng thẳng
+            // Dọn dẹp đồng hồ live
+            if (this._clockTimer) {
+                clearInterval(this._clockTimer);
+                this._clockTimer = null;
+            }
             document.querySelectorAll('#secure-camera-modal .lucide, #sc-zoom-btn, #secure-camera-count').forEach(icon => icon.style.transform = 'rotate(0deg)');
             const modal = document.getElementById('secure-camera-modal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
         },
         
-        // HÀM MỚI: XỬ LÝ CHẠM ĐỂ LẤY NÉT (CẢ UI LẪN PHẦN CỨNG)
         async focusAt(event) {
             if (!this._stream) return;
 
@@ -9257,16 +9249,13 @@
             const ring = document.getElementById('sc-focus-ring');
             if (!video || !ring) return;
 
-            // 1. TÍNH TOÁN TỌA ĐỘ CLICK/TOUCH ĐỂ VẼ GIAO DIỆN
             const rect = video.getBoundingClientRect();
             const clientX = event.touches ? event.touches[0].clientX : event.clientX;
             const clientY = event.touches ? event.touches[0].clientY : event.clientY;
 
-            // Giới hạn tọa độ nằm trong khung video
             const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
             const y = Math.max(0, Math.min(clientY - rect.top, rect.height));
 
-            // 2. HIỆU ỨNG UI: Hiện khung và thu nhỏ dần
             ring.style.left = `${x}px`;
             ring.style.top = `${y}px`;
             ring.classList.remove('hidden');
@@ -9285,59 +9274,61 @@
                 setTimeout(() => ring.classList.add('hidden'), 300);
             }, 1500);
 
-            // 3. CAN THIỆP PHẦN CỨNG CAMERA ĐỂ LẤY NÉT THẬT
             try {
                 const track = this._stream.getVideoTracks()[0];
                 const capabilities = track.getCapabilities ? track.getCapabilities() : {};
-                const settings = track.getSettings ? track.getSettings() : {};
+                const supportedModes = capabilities.focusMode || [];
 
-                // Tính tọa độ chuẩn hóa (từ 0.0 đến 1.0) theo yêu cầu của API
                 const normalizedX = x / rect.width;
                 const normalizedY = y / rect.height;
 
-                let constraintsApplied = false;
-                const advancedConstraint = {};
+                let isSuccess = false;
 
-                // Kiểm tra xem trình duyệt có hỗ trợ focusMode không
-                if (capabilities.focusMode) {
-                    
-                    // TH 1: Máy hỗ trợ chọn điểm lấy nét (pointsOfInterest)
-                    // (Chỉ hoạt động trên một số dòng Android nhất định)
-                    if (capabilities.focusMode.includes('single-shot')) {
-                        advancedConstraint.focusMode = 'single-shot';
-                        advancedConstraint.pointsOfInterest = [{ x: normalizedX, y: normalizedY }];
+                if (supportedModes.includes('manual') && capabilities.pointsOfInterest) {
+                    try {
+                        await track.applyConstraints({
+                            advanced: [{
+                                focusMode: 'manual',
+                                pointsOfInterest: [{ x: normalizedX, y: normalizedY }]
+                            }]
+                        });
+                        isSuccess = true;
                         
-                        await track.applyConstraints({ advanced: [advancedConstraint] });
-                        constraintsApplied = true;
-
-                        // Trả lại chế độ lấy nét liên tục sau 2 giây để máy không bị đơ tiêu cự
-                        setTimeout(() => {
-                            if (this._stream && track.readyState === "live" && capabilities.focusMode.includes('continuous')) {
-                                track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(()=>{});
+                        setTimeout(async () => {
+                            if (this._stream && track.readyState === 'live' && supportedModes.includes('continuous')) {
+                                await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(()=>{});
                             }
                         }, 2000);
-                    } 
-                    // TH 2: Máy không cho chọn điểm, nhưng cho ép lấy nét lại (Force Auto-focus)
-                    else if (capabilities.focusMode.includes('continuous')) {
-                        await track.applyConstraints({ advanced: [{ focusMode: 'manual' }] }); // Tắt AF
-                        await new Promise(r => setTimeout(r, 50));
-                        await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }); // Bật lại AF để kích hoạt quét tiêu cự
-                        constraintsApplied = true;
-                    }
+                    } catch (e) { console.warn("Tầng 1 thất bại", e); }
                 }
 
-                // TH 3 (TRICK HACK): Dành cho iOS Safari hoặc các máy bị khóa API
-                // Mẹo: Cố tình apply lại các thông số hiện tại (như frameRate hoặc width) 
-                // Điều này đôi khi "đánh lừa" firmware camera buộc nó phải quét lại cảnh vật (Auto-focus sweep)
-                if (!constraintsApplied) {
-                    const currentConstraints = track.getConstraints();
-                    await track.applyConstraints(currentConstraints);
+                if (!isSuccess && supportedModes.includes('single-shot')) {
+                    try {
+                        await track.applyConstraints({ advanced: [{ focusMode: 'single-shot' }] });
+                        isSuccess = true;
+                        
+                        setTimeout(async () => {
+                            if (this._stream && track.readyState === 'live' && supportedModes.includes('continuous')) {
+                                await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(()=>{});
+                            }
+                        }, 1000);
+                    } catch (e) { console.warn("Tầng 2 thất bại", e); }
+                }
+
+                if (!isSuccess && supportedModes.includes('continuous') && supportedModes.includes('manual')) {
+                    try {
+                        await track.applyConstraints({ advanced: [{ focusMode: 'manual' }] });
+                        setTimeout(async () => {
+                            if (this._stream && track.readyState === 'live') {
+                                await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(()=>{});
+                            }
+                        }, 50);
+                        isSuccess = true;
+                    } catch (e) { console.warn("Tầng 3 thất bại", e); }
                 }
 
             } catch (err) {
-                // Lỗi này xảy ra khi trình duyệt chặn quyền can thiệp phần cứng. 
-                // Ta chỉ log ra chứ không báo lỗi UI để người dùng không bị khó chịu.
-                console.warn("Thiết bị không cho phép can thiệp lấy nét phần cứng:", err);
+                console.warn("Thiết bị chặn hoàn toàn quyền lấy nét:", err);
             }
         }
     };
@@ -13262,27 +13253,33 @@
 
         <div class="flex-1 relative bg-black overflow-hidden flex items-center justify-center" onclick="SecureCamera.focusAt(event)">
             <video id="secure-camera-video" autoplay playsinline class="absolute min-w-full min-h-full object-cover"></video>
+            
+            <div class="absolute top-24 left-5 z-20 pointer-events-none space-y-1">
+                <div class="bg-black/30 backdrop-blur-sm px-2 py-1 rounded border border-white/10 inline-block">
+                    <p id="live-clock" class="text-white font-mono text-[13px] font-black tracking-wider shadow-sm">--:--:-- --/--/----</p>
+                </div>
+                <div class="bg-black/30 backdrop-blur-sm px-2 py-1 rounded border border-white/10 block max-w-[220px]">
+                    <p id="live-location" class="text-amber-400 text-[10px] font-bold leading-tight">Đang xác định vị trí...</p>
+                </div>
+            </div>
+
             <div id="secure-camera-flash" class="absolute inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-100 z-10"></div>
+            <div id="sc-focus-ring" class="hidden absolute w-16 h-16 border-2 border-amber-400 rounded-lg pointer-events-none z-20 transition-all duration-300 transform -translate-x-1/2 -translate-y-1/2"></div>
             
-            <div id="sc-focus-ring" class="hidden absolute w-16 h-16 border-2 border-amber-400 rounded-lg pointer-events-none z-20 transition-all duration-300 ease-out transform -translate-x-1/2 -translate-y-1/2 shadow-[0_0_10px_rgba(251,191,36,0.3)]"></div>
-            
-            <div class="absolute inset-4 sm:inset-8 pointer-events-none z-10 flex flex-col justify-between">
-                <div class="absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-30">
-                    <div class="border-r border-b border-white/80"></div><div class="border-r border-b border-white/80"></div><div class="border-b border-white/80"></div>
-                    <div class="border-r border-b border-white/80"></div><div class="border-r border-b border-white/80"></div><div class="border-b border-white/80"></div>
-                    <div class="border-r border-white/80"></div><div class="border-r border-white/80"></div><div></div>
+            <div class="absolute inset-4 sm:inset-8 pointer-events-none z-10">
+                <div class="absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-20">
+                    <div class="border-r border-b border-white"></div><div class="border-r border-b border-white"></div><div class="border-b border-white"></div>
+                    <div class="border-r border-b border-white"></div><div class="border-r border-b border-white"></div><div class="border-b border-white"></div>
+                    <div class="border-r border-white"></div><div class="border-r border-white"></div><div></div>
                 </div>
-                
-                <div class="absolute top-0 left-0 w-10 h-10 border-t-4 border-l-4 border-amber-400 rounded-tl-xl"></div>
-                <div class="absolute top-0 right-0 w-10 h-10 border-t-4 border-r-4 border-amber-400 rounded-tr-xl"></div>
-                <div class="absolute bottom-0 left-0 w-10 h-10 border-b-4 border-l-4 border-amber-400 rounded-bl-xl"></div>
-                <div class="absolute bottom-0 right-0 w-10 h-10 border-b-4 border-r-4 border-amber-400 rounded-br-xl"></div>
-                
-                <div class="absolute bottom-6 left-0 right-0 flex justify-center">
-                    <p id="sc-gps-status" class="px-3 py-1.5 bg-black/60 backdrop-blur-md rounded-lg text-[10px] font-bold text-white border border-white/10 truncate max-w-[85%] shadow-lg">
-                        Đang tìm vệ tinh GPS...
-                    </p>
-                </div>
+
+                <div class="absolute bottom-6 left-0 right-0 flex flex-col items-center gap-2 pointer-events-auto">
+                    <button onclick="event.stopPropagation(); SecureCamera.refreshLocation()" 
+                        class="flex items-center gap-2 px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-full border border-white/20 text-white active:scale-95 transition-all shadow-lg">
+                        <i data-lucide="refresh-cw" class="w-3 h-3 text-emerald-400" id="refresh-icon"></i>
+                        <span class="text-[9px] font-black uppercase tracking-tighter">Làm mới vị trí</span>
+                    </button>
+                    <p id="sc-gps-status" class="hidden"></p> </div>
             </div>
         </div>
 
