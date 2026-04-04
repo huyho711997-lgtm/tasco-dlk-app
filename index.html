@@ -9130,7 +9130,7 @@
             this._facingMode = this._facingMode === 'environment' ? 'user' : 'environment';
             this._startStream();
         },
-        
+
         // HÀM MỚI: BẬT TẮT ĐÈN FLASH
         async toggleFlash() {
             if (!this._flashSupported || !this._stream) {
@@ -13251,14 +13251,6 @@
                     <i data-lucide="zap" class="w-5 h-5"></i>
                 </button>
 
-                <button onclick="SecureCamera.switchCamera()" class="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform border border-white/10 shadow-sm">
-                    <i data-lucide="refresh-ccw" class="w-4 h-4"></i>
-                </button>
-                <button onclick="SecureCamera.toggleZoom()" id="sc-zoom-btn" class="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform border border-white/10 font-bold text-[11px] hidden shadow-sm">
-                    1x
-                </button>
-            </div>
-            <div class="flex flex-col gap-3 items-end pointer-events-auto">
                 <button onclick="SecureCamera.switchCamera()" class="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform border border-white/10 shadow-sm">
                     <i data-lucide="refresh-ccw" class="w-4 h-4"></i>
                 </button>
