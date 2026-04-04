@@ -9281,85 +9281,181 @@
             modal.classList.remove('flex');
         },
         
-        // --- CÁC HÀM MỚI: XEM LẠI ẢNH TRƯỚC KHI UPLOAD ---
+        // Khai báo thêm biến lưu vị trí ảnh đang xem
+        _currentReviewIdx: 0,
+
+        // --- GIAO DIỆN XEM LẠI ẢNH CHUYÊN NGHIỆP (NATIVE-LIKE) ---
         reviewPhotos() {
             if (this._capturedFiles.length === 0) {
-                Swal.close();
+                Toast.fire({ icon: 'info', title: 'Chưa có ảnh nào để xem' });
                 return;
             }
 
-            let html = `
-                <div class="text-left mb-3">
-                    <p style="font-size:12px; color:var(--text-secondary, #64748b);">Kiểm tra lại ảnh trước khi tải lên. Bấm vào dấu X màu đỏ để loại bỏ ảnh hỏng.</p>
-                </div>
-                <div class="grid grid-cols-3 gap-2 max-h-[55vh] overflow-y-auto no-scrollbar p-1">
-            `;
-            
-            this._capturedFiles.forEach((fileObj, idx) => {
-                html += `
-                    <div class="relative aspect-square rounded-xl overflow-hidden border-2 border-slate-200 shadow-sm">
-                        <img src="${fileObj.preview}" class="w-full h-full object-cover">
-                        <button onclick="SecureCamera.removePreview(${idx})" 
-                            class="absolute top-1 right-1 w-6 h-6 bg-rose-500/90 backdrop-blur-sm text-white rounded-lg flex items-center justify-center active:scale-90 transition-transform shadow-md">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            let modal = document.getElementById('sc-review-modal');
+            if (!modal) {
+                // Tạo giao diện Fullscreen Review Modal
+                modal = document.createElement('div');
+                modal.id = 'sc-review-modal';
+                modal.className = 'fixed inset-0 z-[100000] bg-slate-950 flex flex-col transition-transform duration-300 translate-y-full';
+                modal.innerHTML = `
+                    <div class="flex items-center justify-between px-4 py-3 bg-slate-900/80 backdrop-blur-md border-b border-white/10 shrink-0 pt-safe">
+                        <button onclick="SecureCamera.closeReview()" class="w-10 h-10 flex items-center justify-center bg-white/10 rounded-full text-white active:bg-white/20 transition-colors shadow-sm">
+                            <i data-lucide="chevron-down" class="w-6 h-6"></i>
+                        </button>
+                        <div class="text-center">
+                            <p class="text-white font-black text-sm">Xem chi tiết</p>
+                            <p id="sc-review-count" class="text-emerald-400 text-[10px] font-bold">1 / 5</p>
+                        </div>
+                        <button onclick="SecureCamera.removeCurrentPreview()" class="w-10 h-10 flex items-center justify-center bg-rose-500/20 text-rose-500 rounded-full active:bg-rose-500/40 transition-colors shadow-sm">
+                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="flex-1 relative flex items-center justify-center overflow-hidden bg-black" id="sc-review-swipe-area">
+                        <img id="sc-review-main-img" src="" class="max-w-full max-h-full object-contain transition-opacity duration-200">
+                        
+                        <button onclick="SecureCamera.prevReview()" class="absolute left-4 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center backdrop-blur-sm active:scale-90 hidden sm:flex border border-white/20"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
+                        <button onclick="SecureCamera.nextReview()" class="absolute right-4 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center backdrop-blur-sm active:scale-90 hidden sm:flex border border-white/20"><i data-lucide="chevron-right" class="w-6 h-6"></i></button>
+                    </div>
+
+                    <div class="bg-slate-900/90 backdrop-blur-md p-4 shrink-0 border-t border-white/10 pb-safe">
+                        <div class="flex gap-3 overflow-x-auto no-scrollbar mb-4 px-2" id="sc-review-thumbs"></div>
+                        
+                        <button onclick="SecureCamera.confirmUpload()" class="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-black text-[15px] flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 active:scale-95 transition-transform">
+                            <i data-lucide="cloud-upload" class="w-5 h-5"></i>
+                            <span id="sc-review-upload-btn">Tải lên Cloud</span>
                         </button>
                     </div>
                 `;
-            });
-            html += `</div>`;
+                document.body.appendChild(modal);
+                lucide.createIcons();
 
-            Swal.fire({
-                title: `<div class="text-left font-black text-lg" style="color:var(--text-primary, #1e293b);">Xem lại ${this._capturedFiles.length} ảnh</div>`,
-                html: html,
-                showCancelButton: true,
-                confirmButtonText: `<div class="flex items-center justify-center gap-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Tải lên Cloud</div>`,
-                cancelButtonText: 'Quay lại chụp',
-                confirmButtonColor: '#2563eb',
-                cancelButtonColor: '#64748b',
-                customClass: { 
-                    popup: 'custom-rounded w-full',
-                    actions: 'w-full gap-2 mt-4',
-                    confirmButton: 'flex-2 py-3 rounded-xl font-bold shadow-md shadow-blue-200',
-                    cancelButton: 'flex-1 py-3 rounded-xl font-bold bg-slate-100 text-slate-600 border border-slate-200'
-                },
-                allowOutsideClick: false
-            }).then((res) => {
-                if (res.isConfirmed) {
-                    this.confirmUpload();
-                }
-                // Nếu bấm "Quay lại chụp" (Cancel), popup sẽ đóng và camera vẫn giữ nguyên trạng thái để chụp tiếp.
-            });
+                // Thêm sự kiện vuốt (Swipe) trái/phải để chuyển ảnh
+                let sx = 0;
+                const swipeArea = document.getElementById('sc-review-swipe-area');
+                swipeArea.addEventListener('touchstart', e => sx = e.touches[0].clientX, {passive:true});
+                swipeArea.addEventListener('touchend', e => {
+                    let dx = e.changedTouches[0].clientX - sx;
+                    if (dx < -50) this.nextReview();
+                    else if (dx > 50) this.prevReview();
+                }, {passive:true});
+            }
+
+            // Mở mặc định ở ảnh vừa chụp (ảnh cuối cùng)
+            this._currentReviewIdx = this._capturedFiles.length - 1; 
+            this.renderReviewUI();
+            
+            // Hiệu ứng trượt lên
+            modal.classList.remove('hidden');
+            void modal.offsetWidth; // Bắt buộc render
+            modal.classList.remove('translate-y-full');
         },
 
-        removePreview(idx) {
-            // Xóa ảnh khỏi mảng tạm
-            const removed = this._capturedFiles.splice(idx, 1)[0];
-            URL.revokeObjectURL(removed.preview); // Giải phóng bộ nhớ RAM
+        renderReviewUI() {
+            if (this._capturedFiles.length === 0) return;
             
-            // Cập nhật lại số lượng ở bong bóng nhỏ góc dưới màn hình Camera
-            this._updateThumbs();
+            const imgEl = document.getElementById('sc-review-main-img');
+            const countEl = document.getElementById('sc-review-count');
+            const thumbsEl = document.getElementById('sc-review-thumbs');
+            const uploadBtn = document.getElementById('sc-review-upload-btn');
 
-            if (this._capturedFiles.length === 0) {
-                Swal.close();
-                Toast.fire({ icon: 'info', title: 'Đã xóa hết ảnh. Vui lòng chụp lại.' });
-            } else {
-                // Render lại màn hình Review ngay lập tức
-                this.reviewPhotos();
+            // Hiệu ứng mờ ảo khi chuyển ảnh
+            imgEl.style.opacity = '0';
+            setTimeout(() => {
+                imgEl.src = this._capturedFiles[this._currentReviewIdx].preview;
+                imgEl.style.opacity = '1';
+            }, 100);
+
+            countEl.textContent = `${this._currentReviewIdx + 1} / ${this._capturedFiles.length}`;
+            uploadBtn.textContent = `Xác nhận tải lên ${this._capturedFiles.length} ảnh`;
+
+            // Render lại cuộn thumbnail
+            thumbsEl.innerHTML = this._capturedFiles.map((fileObj, idx) => `
+                <div onclick="SecureCamera.setReviewIdx(${idx})" 
+                    class="w-16 h-16 shrink-0 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${idx === this._currentReviewIdx ? 'border-blue-500 scale-105 shadow-md shadow-blue-500/40 opacity-100' : 'border-transparent opacity-40 scale-95 hover:opacity-80'}">
+                    <img src="${fileObj.preview}" class="w-full h-full object-cover pointer-events-none">
+                </div>
+            `).join('');
+            
+            // Tự động cuộn tới ảnh đang chọn
+            const activeThumb = thumbsEl.children[this._currentReviewIdx];
+            if (activeThumb) {
+                activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             }
         },
 
+        setReviewIdx(idx) {
+            this._currentReviewIdx = idx;
+            this.renderReviewUI();
+        },
+
+        prevReview() {
+            if (this._currentReviewIdx > 0) {
+                this._currentReviewIdx--;
+                this.renderReviewUI();
+                if (window.navigator.vibrate) window.navigator.vibrate(10);
+            }
+        },
+
+        nextReview() {
+            if (this._currentReviewIdx < this._capturedFiles.length - 1) {
+                this._currentReviewIdx++;
+                this.renderReviewUI();
+                if (window.navigator.vibrate) window.navigator.vibrate(10);
+            }
+        },
+
+        closeReview() {
+            const modal = document.getElementById('sc-review-modal');
+            if (modal) {
+                modal.classList.add('translate-y-full'); // Trượt xuống
+            }
+        },
+
+        removeCurrentPreview() {
+            // Dùng z-index cực lớn (100001) để popup hỏi đè lên màn hình Review
+            Swal.fire({
+                title: 'Xóa ảnh này?',
+                text: 'Hình ảnh bị mờ hoặc không đạt yêu cầu?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Xóa ngay',
+                cancelButtonText: 'Giữ lại',
+                customClass: { popup: 'custom-rounded z-[100001]' } 
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    const removed = this._capturedFiles.splice(this._currentReviewIdx, 1)[0];
+                    URL.revokeObjectURL(removed.preview); // Giải phóng RAM
+                    this._updateThumbs(); // Cập nhật lại số lượng ở góc camera
+
+                    if (this._capturedFiles.length === 0) {
+                        this.closeReview();
+                        Toast.fire({ icon: 'info', title: 'Đã xóa toàn bộ ảnh. Hãy tiếp tục chụp.' });
+                    } else {
+                        // Nếu xóa ảnh cuối cùng, lùi index lại 1
+                        if (this._currentReviewIdx >= this._capturedFiles.length) {
+                            this._currentReviewIdx = this._capturedFiles.length - 1;
+                        }
+                        this.renderReviewUI();
+                    }
+                }
+            });
+        },
+
         async confirmUpload() {
-            // Lấy danh sách file cuối cùng cần đẩy lên
+            this.closeReview(); // Đóng màn hình review
+            
             const filesToUpload = this._capturedFiles.map(c => c.file);
             
-            // Dọn dẹp bộ nhớ RAM các ảnh Preview
+            // Xóa URL tạm để tránh tràn RAM
             this._capturedFiles.forEach(c => URL.revokeObjectURL(c.preview));
             this._capturedFiles = [];
             
-            // Đóng hẳn Camera
-            this.close();
+            this.close(); // Tắt luôn Camera
             
-            // Gọi hàm đẩy lên Cloudinary
+            // Đẩy lên Cloud
             await Images._processSecureUpload(filesToUpload, this._id, this._gpsLocation);
         },
 
