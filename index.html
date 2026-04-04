@@ -2097,6 +2097,11 @@
                     <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
                     <span>Hồ sơ</span>
                 </button>
+                <button class="modal-tab relative" onclick="ModalTabs.switch('images', this)">
+                    <i data-lucide="image" class="w-3.5 h-3.5"></i>
+                    <span>Ảnh chứng từ</span>
+                    <span id="tab-img-badge" class="hidden absolute top-2 right-1.5 px-1.5 py-[1px] bg-blue-500 text-white text-[8px] font-black rounded-full leading-none shadow-sm"></span>
+                </button>
                 <button class="modal-tab" onclick="ModalTabs.switch('hientruong', this)">
                     <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
                     <span>Tiếp nhận HT</span>
@@ -2145,33 +2150,6 @@
                 </div>
                 <!-- WARNINGS PANEL -->
                 <div id="modal-warn-panel" class="hidden mx-5 mt-4 mb-1 rounded-2xl border overflow-hidden"></div>
-                <!-- Images -->
-                <div class="px-4 py-3 bg-white mb-2">
-                    <div class="flex items-center justify-between mb-2">
-                        <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                            <i data-lucide="camera" class="w-3.5 h-3.5"></i> Ảnh chứng từ
-                            <span id="img-count-badge" class="hidden text-[9px] font-black text-blue-600 bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded-md"></span>
-                        </h4>
-                        <div class="flex gap-1.5">
-                            <button onclick="ImageManager.open(App.currentEditId)" class="flex items-center justify-center w-7 h-7 bg-slate-100 text-slate-500 border border-slate-200 rounded-lg cursor-pointer active:bg-slate-200 transition-colors">
-                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-                            </button>
-                            
-                            <button type="button" onclick="Images.showAddOptions(App.currentEditId)" class="flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-600 border border-blue-100 rounded-lg text-[10px] font-black cursor-pointer active:bg-blue-100 transition-colors">
-                                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-                                Thêm
-                            </button>
-                        </div>
-                    </div>
-                    <div id="img-progress-wrap" class="hidden mb-2 bg-blue-50 rounded-xl px-3 py-2 border border-blue-100">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-[10px] font-bold text-blue-600" id="img-progress-label">Đang tải...</span>
-                            <span class="text-[10px] font-black text-slate-500" id="img-progress-count"></span>
-                        </div>
-                        <div class="img-progress-bar-track"><div class="img-progress-bar-fill" id="img-progress-bar"></div></div>
-                    </div>
-                    <div id="modal-images-container"></div>
-                </div>
 
                 <!-- Form fields -->
                 <div class="px-5 pt-3 pb-1 flex justify-between items-center sticky top-0 bg-slate-100 z-10 border-b border-slate-200/50 mb-2">
@@ -2665,7 +2643,40 @@
                     </div>
 
                 </div>
-            </div><!-- end tab-panel-hientruong -->
+            </div>
+
+            <div id="tab-panel-images" class="modal-tab-panel">
+                <div class="p-4 min-h-[50vh]">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h4 class="text-sm font-black text-slate-800 flex items-center gap-1.5">
+                                <i data-lucide="camera" class="w-4 h-4 text-blue-500"></i> Quản lý hình ảnh
+                            </h4>
+                            <p class="text-[10px] text-slate-500 mt-0.5">Tải lên hóa đơn, báo giá, ảnh hiện trường...</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="Images.showAddOptions(App.currentEditId)" class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-xl text-xs font-bold active:scale-95 transition-transform shadow-md shadow-blue-200">
+                                <i data-lucide="plus" class="w-4 h-4"></i> Thêm
+                            </button>
+                            <button onclick="ImageManager.open(App.currentEditId)" class="w-8 h-8 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center active:bg-slate-200 transition-colors">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="img-progress-wrap" class="hidden mb-4 bg-blue-50 rounded-xl px-3 py-2 border border-blue-100">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] font-bold text-blue-600" id="img-progress-label">Đang tải...</span>
+                            <span class="text-[10px] font-black text-slate-500" id="img-progress-count"></span>
+                        </div>
+                        <div class="img-progress-bar-track"><div class="img-progress-bar-fill" id="img-progress-bar"></div></div>
+                    </div>
+                    
+                    <div id="modal-images-container"></div>
+                </div>
+            </div>```
+            
+            
             <!-- ====== PANEL: HẠNG MỤC GIÁM ĐỊNH ====== -->
             <div id="tab-panel-damage" class="modal-tab-panel">
                 <div class="p-4">
@@ -9649,53 +9660,57 @@
             const container = document.getElementById('modal-images-container');
             if (!container) return;
 
-            const badge = document.getElementById('img-count-badge');
-            if (badge) { badge.textContent = imgs.length + ' ảnh'; badge.classList.toggle('hidden', !imgs.length); }
+            // Cập nhật Badge trên Tab thay vì trong nội dung
+            const tabBadge = document.getElementById('tab-img-badge');
+            if (tabBadge) { 
+                tabBadge.textContent = imgs.length; 
+                tabBadge.classList.toggle('hidden', !imgs.length); 
+            }
 
             if (!imgs.length) {
-                // Empty state thu gọn — 1 dòng ngang
                 container.innerHTML = `
-                    <div onclick="Images.showAddOptions('${id}')" class="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-dashed border-slate-200 cursor-pointer active:bg-blue-50 active:border-blue-300 transition-all w-full">
-                        <div class="w-9 h-9 bg-white rounded-xl border border-slate-200 flex items-center justify-center shrink-0 shadow-sm">
-                            <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <div onclick="Images.showAddOptions('${id}')" class="flex flex-col items-center justify-center gap-3 py-16 mt-2 bg-white rounded-3xl border-2 border-dashed border-slate-200 cursor-pointer active:bg-blue-50 active:border-blue-300 transition-all w-full">
+                        <div class="w-14 h-14 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-center shrink-0 shadow-sm">
+                            <i data-lucide="image-plus" class="w-6 h-6 text-slate-400"></i>
                         </div>
-                        <div>
-                            <p class="text-xs font-black text-slate-400">Chưa có ảnh chứng từ</p>
-                            <p class="text-[10px] text-slate-300 font-medium">Nhấn để chụp hoặc tải lên</p>
+                        <div class="text-center">
+                            <p class="text-sm font-black text-slate-600">Chưa có ảnh chứng từ</p>
+                            <p class="text-[11px] text-slate-400 font-medium mt-1">Nhấn để chụp hoặc tải lên từ thư viện</p>
                         </div>
-                        <svg class="w-4 h-4 text-slate-300 ml-auto" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 4l4 4-4 4"/></svg>
                     </div>`;
+                lucide.createIcons();
                 return;
             }
 
-            // Scroll ngang — ảnh nhỏ gọn, không chiếm nhiều chiều cao
+            // Giao diện Lưới 3 Cột (Grid)
             const tiles = imgs.map((img, idx) => {
                 const cat = IMG_CATS[img.cat] || IMG_CATS.other;
                 const url = typeof img === 'string' ? img : img.url;
                 const catLabel = typeof img === 'string' ? '' : cat.label;
-                const isUploading = img.isUploading; // Cờ nhận biết đang up ngầm
+                const isUploading = img.isUploading;
                 
                 return `
-                <div class="relative shrink-0" style="width:72px;">
-                    <div class="w-full rounded-xl overflow-hidden border border-slate-200 cursor-pointer active:scale-95 transition-transform" style="height:72px;" onclick="${isUploading ? '' : `ImageViewer.open('${id}', ${idx})`}">
-                        <img src="${url}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">
+                <div class="relative w-full aspect-square group">
+                    <div class="w-full h-full rounded-2xl overflow-hidden border border-slate-200 cursor-pointer active:scale-95 transition-transform shadow-sm bg-slate-50" onclick="${isUploading ? '' : `ImageViewer.open('${id}', ${idx})`}">
+                        <img src="${url}" loading="lazy" class="w-full h-full object-cover">
                         ${isUploading ? '<div class="img-uploading-overlay"><div class="spinner-small"></div></div>' : ''}
                     </div>
-                    ${catLabel ? `<p class="text-[8px] font-black text-center mt-1 truncate flex items-center justify-center gap-0.5" style="color:${cat.color};"><span style="color:${cat.color};">${cat.svg}</span>${catLabel}</p>` : ''}
+                    ${catLabel ? `<div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-1.5 pt-5 rounded-b-2xl pointer-events-none"><p class="text-[9px] font-black text-center truncate flex items-center justify-center gap-1" style="color:${cat.color};"><span style="color:${cat.color};">${cat.svg}</span>${catLabel}</p></div>` : ''}
                     ${!isUploading ? `
-                    <button class="img-remove-btn" style="top:3px;right:3px;width:18px;height:18px;border-radius:6px;" onclick="event.stopPropagation(); Images.remove('${id}', ${idx})">
-                        <svg width="8" height="8" viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+                    <button class="absolute top-1.5 right-1.5 w-7 h-7 bg-black/50 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center active:scale-90 transition-transform opacity-80 hover:opacity-100" onclick="event.stopPropagation(); Images.remove('${id}', ${idx})">
+                        <i data-lucide="x" class="w-4 h-4 text-white"></i>
                     </button>` : ''}
                 </div>`;
             }).join('');
 
             const addTile = `
-                <div onclick="Images.showAddOptions('${id}')" class="relative shrink-0 flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-slate-400 bg-slate-100 cursor-pointer active:bg-blue-50 active:border-blue-400 transition-all" style="width:72px;height:72px;">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-                    <span style="font-size:9px;font-weight:900;color:#475569;">CHỤP/THÊM</span>
+                <div onclick="Images.showAddOptions('${id}')" class="relative w-full aspect-square flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 cursor-pointer active:bg-blue-50 active:border-blue-400 transition-all shadow-sm">
+                    <i data-lucide="plus" class="w-6 h-6 text-slate-400"></i>
+                    <span style="font-size:10px;font-weight:800;color:#64748b;">THÊM ẢNH</span>
                 </div>`;
 
-            container.innerHTML = `<div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">${tiles}${addTile}</div>`;
+            container.innerHTML = `<div class="grid grid-cols-3 gap-3 pb-6">${tiles}${addTile}</div>`;
+            lucide.createIcons();
         },
 
         async upload(event, id) {
@@ -13533,5 +13548,6 @@
             </button>
         </div>
     </div>
+    
 </body>
 </html>
