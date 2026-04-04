@@ -8969,25 +8969,28 @@
             gpsLabel.textContent = 'Đang tra cứu vệ tinh và địa chỉ...';
             gpsLabel.className = 'text-[10px] font-bold text-amber-400 animate-pulse';
 
-            // 1. CẢM BIẾN & KHÓA HƯỚNG MỚI (ĐÃ SỬA CHIỀU XOAY ICON)
+            // 1. CẢM BIẾN: Tách biệt góc xoay ảnh và góc xoay UI
             this._deviceOrientation = 0;
             this._orientationHandler = (e) => {
                 if (window.innerWidth > window.innerHeight) {
                     this._deviceOrientation = 0;
                 } else {
                     let angle = this._deviceOrientation; 
-                    
-                    if (e.gamma > 45) angle = -90;      // Đỉnh máy quay sang phải -> UI xoay ngược chiều kim đồng hồ
-                    else if (e.gamma < -45) angle = 90; // Đỉnh máy quay sang trái -> UI xoay cùng chiều kim đồng hồ
-                    else if (Math.abs(e.gamma) < 25) angle = 0; 
-
+                    if (e.gamma > 45) angle = -90;      // Máy quay phải
+                    else if (e.gamma < -45) angle = 90; // Máy quay trái
+                    else if (Math.abs(e.gamma) < 25) angle = 0; // Máy thẳng đứng
                     this._deviceOrientation = angle;
                 }
 
-                // Xoay Icon UI (Bỏ dấu âm để icon luôn hướng đúng lên trên)
+                // FIX LỖI UI NGƯỢC: Tính toán góc xoay dành riêng cho các nút bấm
+                let uiAngle = 0;
+                if (this._deviceOrientation === -90) uiAngle = 90;
+                else if (this._deviceOrientation === 90) uiAngle = -90;
+
+                // Chỉ xoay nút bấm, giữ nguyên khung hình Video
                 document.querySelectorAll('#secure-camera-modal .lucide, #sc-zoom-btn, #secure-camera-count').forEach(icon => {
-                    icon.style.transform = `rotate(${this._deviceOrientation}deg)`;
-                    icon.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    icon.style.transform = `rotate(${uiAngle}deg)`;
+                    icon.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
                 });
             };
 
@@ -9050,11 +9053,7 @@
                     this._zoomMin = capabilities.zoom.min || 1;
                     this._zoomMax = Math.min(capabilities.zoom.max || 3, 3);
                     this._currentZoom = 1;
-                    
-                    if (zoomBtn) {
-                        zoomBtn.style.display = 'flex';
-                        zoomBtn.textContent = '1x';
-                    }
+                    if (zoomBtn) { zoomBtn.style.display = 'flex'; zoomBtn.textContent = '1x'; }
                 } else {
                     this._zoomSupported = false;
                     if (zoomBtn) zoomBtn.style.display = 'none';
@@ -9098,13 +9097,12 @@
             const vh = video.videoHeight;
             const angle = this._deviceOrientation || 0;
 
-            // XỬ LÝ LẬT ẢNH HOÀN HẢO VÀO CANVAS
+            // XỬ LÝ LẬT ẢNH VÀO CANVAS (Giữ nguyên thuật toán đang hoạt động TỐT của anh)
             if (Math.abs(angle) === 90) {
                 canvas.width = vh; 
                 canvas.height = vw;
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.rotate(-angle * Math.PI / 180); 
-                
                 if (this._facingMode === 'user') ctx.scale(-1, 1);
                 ctx.drawImage(video, -vw / 2, -vh / 2, vw, vh);
             } else {
@@ -9170,7 +9168,7 @@
     };
 
     // ============================================================
-    // IMAGE PROCESSOR — Chữ cực nhỏ, GPS dưới cùng
+    // IMAGE PROCESSOR — Chữ siêu nhỏ gọn, Định vị ở dưới cùng
     // ============================================================
     const ImageProcessor = {
         async addWatermark(file, bsx = '', locationStr = '') {
@@ -9198,34 +9196,37 @@
 
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // Cỡ chữ NHỎ HƠN NỮA (hệ số 0.012)
-                        const fontSize = Math.max(10, Math.floor(width * 0.012)); 
+                        // GIẢM MẠNH KÍCH THƯỚC CHỮ (Hệ số 0.009 -> Chữ rất nhỏ gọn)
+                        const fontSize = Math.max(8, Math.floor(width * 0.009)); 
                         ctx.textAlign = 'right';
                         ctx.textBaseline = 'bottom';
 
-                        // Đổ bóng sắc nét để chữ nhỏ không bị chìm vào nền sáng
+                        // Bóng viền mỏng để chữ dễ đọc
                         ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-                        ctx.shadowBlur = 4;
-                        ctx.shadowOffsetX = 1.5;
-                        ctx.shadowOffsetY = 1.5;
+                        ctx.shadowBlur = 3;
+                        ctx.shadowOffsetX = 1;
+                        ctx.shadowOffsetY = 1;
 
                         const timeStr = moment().format('DD/MM/YYYY HH:mm:ss');
                         const labelStr = bsx ? `TASCO DLK - ${bsx}` : 'TASCO DLK';
                         const locStr = locationStr;
-                        const padding = fontSize + 6;
                         
-                        // 1. In Tọa độ/Địa chỉ GPS (Nằm DƯỚI CÙNG nhất, sát lề)
-                        ctx.font = `700 ${fontSize * 0.85}px "Plus Jakarta Sans", sans-serif`;
-                        ctx.fillStyle = 'rgba(253, 224, 71, 0.95)'; 
+                        // Đẩy sát lề dưới (padding rất nhỏ)
+                        const padding = fontSize + 4; 
+                        
+                        // 1. In Tọa độ/Địa chỉ GPS (Sát lề đáy)
+                        ctx.font = `600 ${fontSize * 0.85}px "Plus Jakarta Sans", sans-serif`;
+                        ctx.fillStyle = 'rgba(253, 224, 71, 0.95)'; // Vàng sáng
                         ctx.fillText(locStr, width - padding, height - padding);
 
-                        // 2. In Thời gian (Nằm giữa, ngay trên GPS)
-                        ctx.font = `800 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
-                        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-                        ctx.fillText(timeStr, width - padding, height - padding - fontSize * 1.2);
+                        // 2. In Thời gian (Nằm giữa)
+                        ctx.font = `700 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)'; // Trắng
+                        ctx.fillText(timeStr, width - padding, height - padding - fontSize * 1.1);
 
-                        // 3. In TASCO DLK (Nằm trên cùng)
-                        ctx.fillText(labelStr, width - padding, height - padding - fontSize * 2.4);
+                        // 3. In Nhãn TASCO (Trên cùng)
+                        ctx.font = `800 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
+                        ctx.fillText(labelStr, width - padding, height - padding - fontSize * 2.2);
 
                         canvas.toBlob((blob) => {
                             if (!blob) return reject(new Error('Lỗi xử lý ảnh'));
