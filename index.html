@@ -9178,6 +9178,75 @@
             const modal = document.getElementById('secure-camera-modal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
+        },
+        
+        focusAt(event) {
+            if (!this._stream) return;
+
+            const video = document.getElementById('secure-camera-video');
+            const ring = document.getElementById('sc-focus-ring');
+            if (!video || !ring) return;
+
+            // 1. Tính toán tọa độ click/touch
+            const rect = video.getBoundingClientRect();
+            // Hỗ trợ cả thao tác chạm (mobile) và click (chuột/giả lập)
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+
+            // Giới hạn tọa độ nằm trong khung video
+            const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+            const y = Math.max(0, Math.min(clientY - rect.top, rect.height));
+
+            // 2. Hiệu ứng UI: Hiện khung và thu nhỏ dần
+            ring.style.left = `${x}px`;
+            ring.style.top = `${y}px`;
+            ring.classList.remove('hidden');
+            ring.style.opacity = '1';
+            
+            // Xoay khung nét theo chiều của điện thoại để nhìn tự nhiên hơn
+            ring.style.transform = `translate(-50%, -50%) scale(1.5) rotate(${this._deviceOrientation}deg)`;
+
+            // Frame tiếp theo: Scale về 1 tạo hiệu ứng "bắt nét"
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    ring.style.transform = `translate(-50%, -50%) scale(1) rotate(${this._deviceOrientation}deg)`;
+                }, 50);
+            });
+
+            // Tự động ẩn khung sau 1.5 giây
+            clearTimeout(this._focusTimer);
+            this._focusTimer = setTimeout(() => {
+                ring.style.opacity = '0';
+                setTimeout(() => ring.classList.add('hidden'), 300); // Chờ opacity transition xong mới hidden
+            }, 1500);
+
+            // 3. Can thiệp phần cứng Camera (Chỉ hoạt động trên các máy có hỗ trợ API)
+            try {
+                const track = this._stream.getVideoTracks()[0];
+                const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+
+                if (capabilities.focusMode && capabilities.focusMode.includes('manual')) {
+                    // API yêu cầu tọa độ được chuẩn hóa (0.0 đến 1.0)
+                    const normalizedX = x / rect.width;
+                    const normalizedY = y / rect.height;
+
+                    track.applyConstraints({
+                        advanced: [{
+                            focusMode: "manual",
+                            pointsOfInterest: [{ x: normalizedX, y: normalizedY }]
+                        }]
+                    });
+
+                    // Trả lại auto focus sau 3 giây để máy tự điều chỉnh lại nếu di chuyển
+                    setTimeout(() => {
+                        if (this._stream && track.readyState === "live") {
+                            track.applyConstraints({ advanced: [{ focusMode: "continuous" }] }).catch(e => {});
+                        }
+                    }, 3000);
+                }
+            } catch (err) {
+                console.warn("Trình duyệt không hỗ trợ Focus API phần cứng", err);
+            }
         }
     };
 
@@ -13096,9 +13165,11 @@
             </div>
         </div>
 
-        <div class="flex-1 relative bg-black overflow-hidden flex items-center justify-center">
+        <div class="flex-1 relative bg-black overflow-hidden flex items-center justify-center" onclick="SecureCamera.focusAt(event)">
             <video id="secure-camera-video" autoplay playsinline class="absolute min-w-full min-h-full object-cover"></video>
             <div id="secure-camera-flash" class="absolute inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-100 z-10"></div>
+            
+            <div id="sc-focus-ring" class="hidden absolute w-16 h-16 border-2 border-amber-400 rounded-lg pointer-events-none z-20 transition-all duration-300 ease-out transform -translate-x-1/2 -translate-y-1/2 shadow-[0_0_10px_rgba(251,191,36,0.3)]"></div>
             
             <div class="absolute inset-4 sm:inset-8 pointer-events-none z-10 flex flex-col justify-between">
                 <div class="absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-30">
