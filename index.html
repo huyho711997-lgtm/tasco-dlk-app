@@ -9082,7 +9082,8 @@
                 });
                 
                 const video = document.getElementById('secure-camera-video');
-                video.style.transform = 'none';
+                // Lật màn hình ngắm (như soi gương) nếu là cam trước để dễ căn góc
+                video.style.transform = this._facingMode === 'user' ? 'scaleX(-1)' : 'none';
                 video.style.width = '100%';
                 video.style.height = '100%';
                 video.style.objectFit = 'cover';
@@ -9208,15 +9209,13 @@
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.rotate(-angle * Math.PI / 180); 
                 
-                if (this._facingMode === 'user') ctx.scale(-1, 1);
+                // Đã bỏ dòng lật ảnh để chữ không bị ngược
                 ctx.drawImage(video, -vw / 2, -vh / 2, vw, vh);
             } else {
                 canvas.width = vw;
                 canvas.height = vh;
-                if (this._facingMode === 'user') {
-                    ctx.translate(canvas.width, 0);
-                    ctx.scale(-1, 1);
-                }
+                
+                // Đã bỏ đoạn translate và scale lật ảnh
                 ctx.drawImage(video, 0, 0, vw, vh);
             }
 
@@ -9249,7 +9248,26 @@
 
         async done() {
             if (this._capturedFiles.length === 0) return this.close();
-            // THAY ĐỔI: Không upload ngay mà mở màn hình Review
+            
+            // --- BỔ SUNG: Tự động tắt Flash khi chuyển qua màn hình Review ---
+            if (this._flashOn && this._stream) {
+                try {
+                    const track = this._stream.getVideoTracks()[0];
+                    await track.applyConstraints({ advanced: [{ torch: false }] });
+                    this._flashOn = false;
+                    
+                    // Trả lại UI nút Flash về mặc định (Màu trắng)
+                    const flashBtn = document.getElementById('sc-flash-btn');
+                    if (flashBtn) {
+                        flashBtn.classList.remove('text-amber-400');
+                        flashBtn.classList.add('text-white');
+                    }
+                } catch (e) {
+                    console.warn("Không thể tắt flash tự động:", e);
+                }
+            }
+
+            // Mở màn hình Review
             this.reviewPhotos();
         },
 
