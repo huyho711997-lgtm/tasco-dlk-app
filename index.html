@@ -8967,25 +8967,33 @@
             gpsLabel.textContent = 'Đang tra cứu vệ tinh và địa chỉ...';
             gpsLabel.className = 'text-[10px] font-bold text-amber-400 animate-pulse';
 
+            // 1. Lắng nghe cảm biến góc nghiêng (Gyroscope)
             this._deviceOrientation = 0;
+            this._lastStickyAngle = 0; // Thêm biến nhớ trạng thái góc xoay
+
             this._orientationHandler = (e) => {
-                // Nếu trình duyệt hoặc OS đã tự xoay ngang (Không khóa màn hình), bỏ qua việc tính toán
+                // Nếu trình duyệt hoặc OS đã tự xoay ngang (Không khóa màn hình), bỏ qua
                 if (window.innerWidth > window.innerHeight) {
                     this._deviceOrientation = 0;
                 } else {
-                    // Nhận diện khi người dùng khóa màn hình dọc nhưng cầm ngang máy
-                    let angle = 0;
-                    if (Math.abs(e.beta) < 45 || Math.abs(e.beta) > 135) { 
-                        // ĐÃ SỬA: Cố định 1 chiều nằm ngang duy nhất khi máy xoay ngang. 
-                        // Tránh tình trạng cảm biến lật ngược (xoay lên/xoay xuống loạn xạ) khi đặt máy trên bàn.
-                        if (Math.abs(e.gamma) > 40) {
-                            angle = 90; // Chỉ khóa cứng 1 góc 90 độ (hướng xuống)
-                        }
+                    let beta = e.beta;
+                    let gamma = e.gamma;
+
+                    // 1. Nếu cầm điện thoại đứng thẳng lên (góc beta từ 50 -> 130 độ) -> Chuyển về Dọc
+                    if (beta > 50 && beta < 130) {
+                        this._lastStickyAngle = 0; 
+                    } 
+                    // 2. Nếu nghiêng điện thoại sang ngang (góc gamma > 30 độ) -> Chuyển về Ngang
+                    else if (Math.abs(gamma) > 30) {
+                        this._lastStickyAngle = 90; 
                     }
-                    this._deviceOrientation = angle;
+                    // 3. NẾU ĐẶT NẰM PHẲNG TRÊN BÀN (beta < 50 và gamma < 30):
+                    // KHÔNG gán lại giá trị. Hệ thống sẽ tự động giữ nguyên _lastStickyAngle trước đó!
+
+                    this._deviceOrientation = this._lastStickyAngle;
                 }
 
-                // CHỈ xoay các Icon UI (Nút đóng, Nút đổi cam, Nút V, Số đếm) - Đã SỬA CHIỀU XOAY
+                // CHỈ xoay các Icon UI (Nút đóng, Nút đổi cam, Nút V, Số đếm)
                 document.querySelectorAll('#secure-camera-modal .lucide, #sc-zoom-btn, #secure-camera-count').forEach(icon => {
                     icon.style.transform = `rotate(${this._deviceOrientation}deg)`;
                     icon.style.transition = 'transform 0.3s ease';
