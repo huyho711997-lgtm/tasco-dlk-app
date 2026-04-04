@@ -12741,23 +12741,12 @@
                 // ==========================================
                 // BƯỚC 3: MERGE KẾT QUẢ VÀO HẠNG MỤC GĐ & LƯU FIREBASE
                 // ==========================================
-<<<<<<< HEAD
-                // ==========================================
-                // BƯỚC 3: DỊCH NGƯỢC JSON & TỰ ĐỘNG LƯU
-                // ==========================================
-                const finalResults = comparedData.map(r => {
-=======
                 const freshSnap = await db.ref(`Workstation/${this._id}/damageItems`).once('value');
                 const freshList = freshSnap.val() || item.damageItems || [];
                 let damageItems = JSON.parse(JSON.stringify(freshList));
 
                 comparedData.forEach(r => {
->>>>>>> eff2a63c3543b1dc8094468a2c9f4b6562b08d22
                     let strStatus = { 1: 'KHOP', 2: 'SAI_PHUONG_AN', 3: 'GARA_BAO_DU', 4: 'GARA_QUEN_BAO' }[r.tt] || 'KHOP';
-<<<<<<< HEAD
-                    
-=======
->>>>>>> eff2a63c3543b1dc8094468a2c9f4b6562b08d22
                     if (typeof r.tt === 'string') {
                         if (r.tt.includes('KHOP') || r.tt === '1') strStatus = 'KHOP';
                         else if (r.tt.includes('SAI') || r.tt === '2') strStatus = 'SAI_PHUONG_AN';
@@ -12856,19 +12845,11 @@
                         badgeHtml = `<button onclick="QuoteChecker.toggleStatus(${r.originalIndex})" class="qc-status-badge flex items-center gap-1 active:scale-95 transition-transform" style="border:none; cursor:pointer; background:#fee2e2; color:#dc2626;">❌ Báo dư <i data-lucide="chevron-down" class="w-3 h-3 opacity-50"></i></button>`;
                         errLabel = 'Báo dư ngoài BB';
                     } else if (r.quoteStatus === 'GARA_QUEN_BAO') {
->>>>>>> eff2a63c3543b1dc8094468a2c9f4b6562b08d22
                         cardClass = 'qc-miss'; 
-<<<<<<< HEAD
-                        badgeHtml = `<button onclick="QuoteChecker.toggleStatus(${index})" class="qc-status-badge flex items-center gap-1 active:scale-95 transition-transform" style="border:none; cursor:pointer;">❓ Quên báo giá <i data-lucide="chevron-down" class="w-3 h-3 opacity-50"></i></button>`;
-=======
                         badgeHtml = `<button onclick="QuoteChecker.toggleStatus(${r.originalIndex})" class="qc-status-badge flex items-center gap-1 active:scale-95 transition-transform" style="border:none; cursor:pointer; background:#f1f5f9; color:#475569;">❓ Quên báo <i data-lucide="chevron-down" class="w-3 h-3 opacity-50"></i></button>`;
                         errLabel = 'Gara chưa báo';
->>>>>>> eff2a63c3543b1dc8094468a2c9f4b6562b08d22
                     }
-<<<<<<< HEAD
-=======
                     errorSummaryText += `- ${r.chiTiet}: ${errLabel}\n`;
->>>>>>> eff2a63c3543b1dc8094468a2c9f4b6562b08d22
                 }
 
                 html += `
@@ -12877,11 +12858,7 @@
                         <p style="font-size:13px; font-weight:800; color:var(--text-primary); flex:1; padding-right:8px; line-height:1.3;">${r.chiTiet}</p>
                         ${badgeHtml}
                     </div>
-<<<<<<< HEAD
-                    ${r.canhBao ? `<p style="font-size:10px; color:#ef4444; font-weight:700; margin-bottom:8px; display:flex; gap:4px;"><i data-lucide="info" class="w-3 h-3"></i> ${r.canhBao}</p>` : ''}
-=======
                     ${r.quoteWarning ? `<p style="font-size:10px; color:#ef4444; font-weight:700; margin-bottom:8px; display:flex; gap:4px;"><i data-lucide="info" class="w-3 h-3"></i> ${r.quoteWarning}</p>` : ''}
->>>>>>> eff2a63c3543b1dc8094468a2c9f4b6562b08d22
                     <div class="qc-compare-grid">
                         <div class="qc-col">
                             <p class="qc-col-title">Báo giá Gara</p>
@@ -12897,13 +12874,9 @@
                 </div>`;
             });
 
-<<<<<<< HEAD
-            // UI Footer Buttons
-=======
             window._qcCurrentErrorSummary = errorSummaryText;
 
             // UI Footer
->>>>>>> eff2a63c3543b1dc8094468a2c9f4b6562b08d22
             let footerBtns = '';
             if (errorCount > 0) {
                 footerBtns = `
@@ -12911,15 +12884,8 @@
                         <button onclick="QuoteChecker.saveAndAction('${id}', 'zalo')" style="flex:1; padding:12px 0; border-radius:12px; font-size:12px; font-weight:800; background:#3b82f6; color:white; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Gửi Zalo nhắc Gara
                         </button>
-<<<<<<< HEAD
-                        <button onclick="Swal.close()" style="padding:12px 16px; border-radius:12px; font-size:12px; font-weight:800; background:var(--bg-surface, #f1f5f9); color:var(--text-secondary, #475569); border:none; cursor:pointer;">
-                            Đóng
-                        </button>
-                    </div>`;
-=======
                         <button onclick="Swal.close()" style="padding:12px 16px; border-radius:12px; font-size:12px; font-weight:800; background:var(--bg-surface, #f1f5f9); color:var(--text-secondary, #475569); border:none; cursor:pointer;">Đóng</button>
                     </div>`;
->>>>>>> eff2a63c3543b1dc8094468a2c9f4b6562b08d22
             } else {
                 footerBtns = `
                     <div style="display:flex; gap:8px; padding: 12px 16px; background: var(--bg-white, #fff); border-top: 1px solid var(--border-light, #e2e8f0);">
@@ -12930,21 +12896,11 @@
             }
 
             Swal.fire({
-<<<<<<< HEAD
-                title: `<div class="text-left font-black text-lg flex items-center gap-2" style="color:var(--text-primary);">
-                            <span class="text-rose-500">AI</span> Đối chiếu báo giá
-                        </div>`,
-=======
                 title: `<div class="text-left font-black text-lg" style="color:var(--text-primary);"><span class="text-rose-500">AI</span> Đối chiếu báo giá</div>`,
->>>>>>> eff2a63c3543b1dc8094468a2c9f4b6562b08d22
                 html: `
                     <div class="text-left mt-2">
                         ${errorCount > 0 
-<<<<<<< HEAD
-                            ? `<div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#ef4444; padding:8px 12px; border-radius:10px; font-size:12px; font-weight:800; margin-bottom:12px;">Phát hiện ${errorCount} điểm bất thường cần Gara sửa lại! (Có thể chạm vào Tag để đổi trạng thái)</div>`
-=======
                             ? `<div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#ef4444; padding:8px 12px; border-radius:10px; font-size:12px; font-weight:800; margin-bottom:12px;">Phát hiện ${errorCount} điểm bất thường! (Chạm vào Tag để sửa tay)</div>`
->>>>>>> eff2a63c3543b1dc8094468a2c9f4b6562b08d22
                             : `<div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); color:#10b981; padding:8px 12px; border-radius:10px; font-size:12px; font-weight:800; margin-bottom:12px;">Tuyệt vời! Báo giá khớp hoàn toàn với Biên bản.</div>`
                         }
                         <div style="max-height: 55vh; overflow-y: auto; padding-right: 4px; padding-bottom:10px;" class="custom-scrollbar">
@@ -12961,31 +12917,6 @@
             });
         },
 
-<<<<<<< HEAD
-        // Hàm click xoay vòng trạng thái bằng tay
-        toggleStatus(index) {
-            const statuses = ['KHOP', 'SAI_PHUONG_AN', 'GARA_BAO_DU', 'GARA_QUEN_BAO'];
-            const currentObj = window._qcCurrentResults[index];
-            
-            let currentIdx = statuses.indexOf(currentObj.trangThai);
-            currentIdx = (currentIdx + 1) % statuses.length; // Tiến lên 1 nấc
-            currentObj.trangThai = statuses[currentIdx];
-
-            // Render lại UI với State mới
-            this._renderResults(window._qcCurrentResults, this._id);
-
-            // Cập nhật lại Firebase ngầm để lưu trạng thái tay
-            const errorCount = window._qcCurrentResults.filter(r => r.trangThai !== 'KHOP').length;
-            db.ref(`Workstation/${this._id}`).update({
-                quoteHasErrors: errorCount > 0,
-                quoteCheckResults: JSON.stringify(window._qcCurrentResults)
-            });
-            
-            if (window.navigator.vibrate) window.navigator.vibrate(15);
-        },
-
-        // Hàm xử lý nút Zalo / Duyệt Báo Giá
-=======
         // Click để xoay vòng trạng thái bằng tay nếu AI nhận diện nhầm
         toggleStatus(originalIndex) {
             const statuses = ['KHOP', 'SAI_PHUONG_AN', 'GARA_BAO_DU', 'GARA_QUEN_BAO'];
@@ -13011,30 +12942,10 @@
         },
 
         // Nút Gửi Zalo / Duyệt Báo giá
->>>>>>> eff2a63c3543b1dc8094468a2c9f4b6562b08d22
         saveAndAction(id, actionType) {
             const item = App.find(id);
             if (!item) return;
 
-<<<<<<< HEAD
-            const results = window._qcCurrentResults || [];
-
-            // Nút Xác nhận khớp -> Đẩy sang Bước 4
-            if (actionType === 'approve') {
-                const updates = { 
-                    quoteCheckedAt: new Date().toISOString(),
-                    quoteHasErrors: false 
-                };
-                
-                if (item.step === 3) {
-                    updates.step = 4;
-                    updates.stepUpdatedAt = new Date().toISOString();
-                    updates.quotedAt = new Date().toISOString();
-                }
-
-                Swal.fire({ title: 'Đang lưu...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-                db.ref(`Workstation/${id}`).update(updates).then(() => {
-=======
             const errorSummaryText = window._qcCurrentErrorSummary || '';
             
             if (actionType === 'approve') {
@@ -13049,38 +12960,9 @@
                 }
                 Swal.fire({ title: 'Đang lưu...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                 db.ref(`Workstation/${id}`).update(updates).then(() => {
->>>>>>> eff2a63c3543b1dc8094468a2c9f4b6562b08d22
                     Swal.close();
-<<<<<<< HEAD
-                    Toast.fire({ icon: 'success', title: 'Đã xác nhận báo giá khớp & chuyển Bước 4!' });
-=======
                     Toast.fire({ icon: 'success', title: 'Đã xác nhận báo giá khớp & chuyển sang Bước 4!' });
->>>>>>> eff2a63c3543b1dc8094468a2c9f4b6562b08d22
                     setTimeout(() => Modal.open(id), 300);
-<<<<<<< HEAD
-                });
-            } 
-            // Nút Gửi Zalo
-            else if (actionType === 'zalo') {
-                // Gom text lỗi
-                let errorSummaryText = '';
-                results.forEach(r => {
-                    if (r.trangThai !== 'KHOP') {
-                        let errLabel = r.trangThai === 'SAI_PHUONG_AN' ? 'Sai phương án' :
-                                       r.trangThai === 'GARA_BAO_DU' ? 'Báo dư ngoài BB' : 'Gara chưa báo';
-                        errorSummaryText += `- ${r.tenPhuTung}: ${errLabel}\n`;
-                    }
-                });
-
-                // Ưu tiên SĐT Cố vấn, không có thì lấy SĐT Gara
-                const phone = document.getElementById('edit-garaAdvisorPhone')?.value.trim() 
-                              || item.garaAdvisorPhone 
-                              || item.garaPhone;
-
-                if (!phone) {
-                    Toast.fire({ icon: 'warning', title: 'Hồ sơ chưa lưu SĐT của Gara/Cố vấn!' });
-                    return;
-=======
                 });
             } 
             else if (actionType === 'zalo') {
@@ -13106,36 +12988,7 @@
                     ta.select();
                     try { document.execCommand('copy'); } catch(e) {}
                     document.body.removeChild(ta);
->>>>>>> eff2a63c3543b1dc8094468a2c9f4b6562b08d22
                 }
-<<<<<<< HEAD
-
-                // Gọi template sinh tin nhắn
-                const msg = ZaloHelper.templates.saiBaoGia(item, errorSummaryText);
-                
-                // Copy vào Clipboard
-                if (navigator.clipboard && window.isSecureContext) {
-                    navigator.clipboard.writeText(msg).catch(() => {});
-                } else {
-                    const ta = document.createElement('textarea');
-                    ta.value = msg;
-                    ta.style.cssText = `position:absolute;opacity:0;top:${window.scrollY}px;left:0;`;
-                    document.body.appendChild(ta);
-                    ta.focus({ preventScroll: true }); 
-                    ta.select();
-                    try { document.execCommand('copy'); } catch(e) {}
-                    document.body.removeChild(ta);
-                }
-
-                // Mở tab Zalo
-                Toast.fire({ icon: 'success', title: 'Đã copy lỗi! Đang mở Zalo...' });
-                const cleanPhone = phone.replace(/\D/g, '');
-                setTimeout(() => {
-                    window.open(`https://zalo.me/${cleanPhone}`, '_blank');
-                    Swal.close(); // Đóng popup đối chiếu
-                }, 300);
-            }
-=======
 
                 Toast.fire({ icon: 'success', title: 'Đã copy lỗi! Đang mở Zalo...' });
                 const cleanPhone = phone.replace(/\D/g, '');
@@ -13144,7 +12997,6 @@
                     Swal.close();
                 }, 300);
             }
->>>>>>> eff2a63c3543b1dc8094468a2c9f4b6562b08d22
         }
     }; 
     // ============================================================
