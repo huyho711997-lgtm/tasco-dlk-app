@@ -9779,7 +9779,6 @@
                     const list = [...item.documentImages];
                     const indicesToDelete = Array.from(this._selected).sort((a, b) => b - a);
 
-                    // Xóa trên Cloudinary hoặc Google Drive
                     for (let idx of indicesToDelete) {
                         const img = list[idx];
                         const url = typeof img === 'string' ? img : img.url;
@@ -9883,7 +9882,7 @@
                 reader.readAsDataURL(blob);
             });
         },
-
+        
         // CÁC HÀM CŨ GIỮ NGUYÊN (Không thay đổi logic upload của anh)
         showAddOptions(id) { 
             Swal.fire({
@@ -9938,34 +9937,15 @@
             const cat = await this._pickCategory();
             if (!cat) return;
 
-            // Hỏi chọn nơi lưu
-            const targetRes = await Swal.fire({
-                title: '<span style="font-size:16px;font-weight:800;">Lưu trữ đám mây</span>',
-                html: '<p style="font-size:12px; color:#64748b;">Chọn nơi lưu ảnh tải lên:</p>',
-                showCancelButton: true, showDenyButton: true,
-                confirmButtonText: 'Google Drive', denyButtonText: 'Cloudinary', cancelButtonText: 'Hủy',
-                confirmButtonColor: '#2563eb', denyButtonColor: '#1e293b', cancelButtonColor: '#94a3b8',
-                customClass: { popup: 'custom-rounded', actions: 'flex flex-wrap gap-2 w-full px-2', confirmButton: 'flex-1 py-2', denyButton: 'flex-1 py-2' }
-            });
-
-            if (targetRes.isDismissed && !targetRes.isDenied) return;
-            const targetCloud = targetRes.isConfirmed ? 'drive' : 'cloudinary';
-
             const gpsLocation = await LocationHelper.get();
-            await this._processSecureUpload(files, id, gpsLocation, targetCloud);
-        },
-        async _processSecureUpload(files, id, gpsLocation, targetCloud = 'drive') {
-            if (!files.length || !id) return;
-
             const item = App.find(id) || {};
             const current = (item.documentImages || []).map(i => typeof i === 'string' ? { url: i, cat: 'other' } : i);
             const bsxToStamp = item.bsx || '';
-            const cat = 'scene';
 
             const tempFiles = files.map(file => {
                 const tempId = 'temp_' + Math.random().toString(36).substr(2, 9);
                 const localUrl = URL.createObjectURL(file);
-                const tempObj = { url: localUrl, cat: cat, isUploading: true, tempId: tempId, cloud: targetCloud };
+                const tempObj = { url: localUrl, cat: cat, isUploading: true, tempId: tempId };
                 current.push(tempObj);
                 return { file, tempObj, localUrl };
             });
@@ -9976,35 +9956,18 @@
             Promise.all(tempFiles.map(async ({ file, tempObj, localUrl }) => {
                 try {
                     const watermarkedFile = await ImageProcessor.addWatermark(file, bsxToStamp, gpsLocation);
-                    let finalUrl = '';
-
-                    if (targetCloud === 'cloudinary') {
-                        const fd = new FormData();
-                        fd.append('file', watermarkedFile);
-                        fd.append('upload_preset', CONFIG.cloudinary.preset);
-                        const res = await fetch(CONFIG.cloudinary.url, { method: 'POST', body: fd });
-                        const data = await res.json();
-                        if (data.secure_url) finalUrl = data.secure_url;
-                    } 
-                    else if (targetCloud === 'drive') {
-                        const base64 = await this._blobToBase64(watermarkedFile);
-                        const fileName = `TASCO_${bsxToStamp}_${Date.now()}_${Math.floor(Math.random()*1000)}.jpg`;
-                        const res = await fetch(CONFIG.exportWordUrl, { 
-                            method: 'POST', 
-                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            body: JSON.stringify({ action: 'upload_drive', fileName: fileName, mimeType: 'image/jpeg', base64: base64 })
-                        });
-                        const data = await res.json();
-                        if (data.success && data.url) finalUrl = data.url;
-                    }
-
-                    if (finalUrl) {
-                        tempObj.url = finalUrl;
+                    const fd = new FormData();
+                    fd.append('file', watermarkedFile);
+                    fd.append('upload_preset', CONFIG.cloudinary.preset);
+                    const res = await fetch(CONFIG.cloudinary.url, { method: 'POST', body: fd });
+                    const data = await res.json();
+                    
+                    if (data.secure_url) {
+                        tempObj.url = data.secure_url;
                         delete tempObj.isUploading;
                         delete tempObj.tempId;
                     }
                 } catch (e) {
-                    console.error("Lỗi upload:", e);
                     const idx = current.findIndex(i => i.tempId === tempObj.tempId);
                     if (idx > -1) current.splice(idx, 1);
                 } finally {
@@ -10014,7 +9977,54 @@
             })).then(() => {
                 const finalImages = current.filter(i => !i.isUploading);
                 db.ref(`Workstation/${id}/documentImages`).set(finalImages).then(() => {
-                    Toast.fire({ icon: 'success', title: `Đã lưu ${files.length} ảnh lên ${targetCloud === 'drive' ? 'Google Drive' : 'Cloudinary'}!` });
+                    Toast.fire({ icon: 'success', title: `Đã tải lên ${files.length} ảnh có định vị!` });
+                });
+            });
+        },
+        async _processSecureUpload(files, id, gpsLocation) {
+            if (!files.length || !id) return;
+
+            const item = App.find(id) || {};
+            const current = (item.documentImages || []).map(i => typeof i === 'string' ? { url: i, cat: 'other' } : i);
+            const bsxToStamp = item.bsx || '';
+            const cat = 'scene';
+
+            const tempFiles = files.map(file => {
+                const tempId = 'temp_' + Math.random().toString(36).substr(2, 9);
+                const localUrl = URL.createObjectURL(file);
+                const tempObj = { url: localUrl, cat: cat, isUploading: true, tempId: tempId };
+                current.push(tempObj);
+                return { file, tempObj, localUrl };
+            });
+
+            item.documentImages = current;
+            Images.render(id);
+
+            Promise.all(tempFiles.map(async ({ file, tempObj, localUrl }) => {
+                try {
+                    const watermarkedFile = await ImageProcessor.addWatermark(file, bsxToStamp, gpsLocation);
+                    const fd = new FormData();
+                    fd.append('file', watermarkedFile);
+                    fd.append('upload_preset', CONFIG.cloudinary.preset);
+                    const res = await fetch(CONFIG.cloudinary.url, { method: 'POST', body: fd });
+                    const data = await res.json();
+                    
+                    if (data.secure_url) {
+                        tempObj.url = data.secure_url;
+                        delete tempObj.isUploading;
+                        delete tempObj.tempId;
+                    }
+                } catch (e) {
+                    const idx = current.findIndex(i => i.tempId === tempObj.tempId);
+                    if (idx > -1) current.splice(idx, 1);
+                } finally {
+                    URL.revokeObjectURL(localUrl);
+                    Images.render(id);
+                }
+            })).then(() => {
+                const finalImages = current.filter(i => !i.isUploading);
+                db.ref(`Workstation/${id}/documentImages`).set(finalImages).then(() => {
+                    Toast.fire({ icon: 'success', title: `Đã lưu ${files.length} ảnh hiện trường!` });
                 });
             });
         },
