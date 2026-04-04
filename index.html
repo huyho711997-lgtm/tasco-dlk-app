@@ -8937,7 +8937,7 @@
     };
 
     // ============================================================
-    // SECURE CAMERA — Chống fake, Khóa xoay dọc/ngang & Zoom
+    // SECURE CAMERA — Chống fake, Zoom Lenses & Fix Khung hình
     // ============================================================
     const SecureCamera = {
         _stream: null,
@@ -8948,13 +8948,11 @@
         _deviceOrientation: 0,
         _orientationHandler: null,
         
+        // Quản lý ống kính (Zoom phần cứng)
         _zoomSupported: false,
         _zoomMin: 1,
         _zoomMax: 2,
         _currentZoom: 1,
-        _backCameras: [],
-        _currentCamIdx: 0,
-        _labels: ['1x', '0.5x', '2x'],
 
         async open(id) {
             this._id = id;
@@ -8969,28 +8967,28 @@
             gpsLabel.textContent = 'Đang tra cứu vệ tinh và địa chỉ...';
             gpsLabel.className = 'text-[10px] font-bold text-amber-400 animate-pulse';
 
-            // 1. CẢM BIẾN: Tách biệt góc xoay ảnh và góc xoay UI
             this._deviceOrientation = 0;
             this._orientationHandler = (e) => {
+                // Nếu trình duyệt hoặc OS đã tự xoay ngang (Không khóa màn hình), bỏ qua việc tính toán
                 if (window.innerWidth > window.innerHeight) {
                     this._deviceOrientation = 0;
                 } else {
-                    let angle = this._deviceOrientation; 
-                    if (e.gamma > 45) angle = -90;      // Máy quay phải
-                    else if (e.gamma < -45) angle = 90; // Máy quay trái
-                    else if (Math.abs(e.gamma) < 25) angle = 0; // Máy thẳng đứng
+                    // Nhận diện khi người dùng khóa màn hình dọc nhưng cầm ngang máy
+                    let angle = 0;
+                    if (Math.abs(e.beta) < 45 || Math.abs(e.beta) > 135) { 
+                        // ĐÃ SỬA: Cố định 1 chiều nằm ngang duy nhất khi máy xoay ngang. 
+                        // Tránh tình trạng cảm biến lật ngược (xoay lên/xoay xuống loạn xạ) khi đặt máy trên bàn.
+                        if (Math.abs(e.gamma) > 40) {
+                            angle = 90; // Chỉ khóa cứng 1 góc 90 độ (hướng xuống)
+                        }
+                    }
                     this._deviceOrientation = angle;
                 }
 
-                // FIX LỖI UI NGƯỢC: Tính toán góc xoay dành riêng cho các nút bấm
-                let uiAngle = 0;
-                if (this._deviceOrientation === -90) uiAngle = 90;
-                else if (this._deviceOrientation === 90) uiAngle = -90;
-
-                // Chỉ xoay nút bấm, giữ nguyên khung hình Video
+                // CHỈ xoay các Icon UI (Nút đóng, Nút đổi cam, Nút V, Số đếm) - Đã SỬA CHIỀU XOAY
                 document.querySelectorAll('#secure-camera-modal .lucide, #sc-zoom-btn, #secure-camera-count').forEach(icon => {
-                    icon.style.transform = `rotate(${uiAngle}deg)`;
-                    icon.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    icon.style.transform = `rotate(${this._deviceOrientation}deg)`;
+                    icon.style.transition = 'transform 0.3s ease';
                 });
             };
 
@@ -9003,9 +9001,11 @@
                 window.addEventListener('deviceorientation', this._orientationHandler);
             }
 
+            // 2. Mở Camera
             await this._startStream();
             lucide.createIcons();
 
+            // 3. Lấy GPS ngầm
             LocationHelper.get().then(loc => {
                 this._gpsLocation = loc;
                 gpsLabel.textContent = loc.includes('LỖI') ? loc : '📍 ' + loc;
@@ -9013,37 +9013,24 @@
             });
         },
 
-        async _loadAvailableCameras() {
-            try {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                this._backCameras = devices.filter(d => d.kind === 'videoinput' && d.label.toLowerCase().includes('back'));
-                if (this._backCameras.length === 0) this._backCameras = devices.filter(d => d.kind === 'videoinput');
-            } catch(e) {}
-        },
-
         async _startStream() {
             if (this._stream) this._stream.getTracks().forEach(t => t.stop());
-            if (this._backCameras.length === 0) await this._loadAvailableCameras();
-
-            let videoConstraints = { facingMode: this._facingMode, width: { ideal: 4096 }, height: { ideal: 2160 } };
-
-            if (this._facingMode === 'environment' && this._backCameras.length > 1) {
-                videoConstraints = { 
-                    deviceId: { exact: this._backCameras[this._currentCamIdx].deviceId },
-                    width: { ideal: 4096 }, height: { ideal: 2160 }
-                };
-            }
 
             try {
-                this._stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
+                this._stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: this._facingMode, width: { ideal: 4096 }, height: { ideal: 2160 } },
+                    audio: false
+                });
                 
                 const video = document.getElementById('secure-camera-video');
+                // Trả video về nguyên bản: Phủ kín màn hình, không dùng css transform rotate
                 video.style.transform = 'none';
                 video.style.width = '100%';
                 video.style.height = '100%';
                 video.style.objectFit = 'cover';
                 video.srcObject = this._stream;
 
+                // CẤU HÌNH ZOOM CHO ỐNG KÍNH (0.5x, 1x, 2x)
                 const track = this._stream.getVideoTracks()[0];
                 const capabilities = track.getCapabilities ? track.getCapabilities() : {};
                 const zoomBtn = document.getElementById('sc-zoom-btn');
@@ -9051,13 +9038,18 @@
                 if (capabilities.zoom && this._facingMode === 'environment') {
                     this._zoomSupported = true;
                     this._zoomMin = capabilities.zoom.min || 1;
-                    this._zoomMax = Math.min(capabilities.zoom.max || 3, 3);
+                    this._zoomMax = Math.min(capabilities.zoom.max || 3, 3); // Khóa Max 3x để ảnh không bị vỡ
                     this._currentZoom = 1;
-                    if (zoomBtn) { zoomBtn.style.display = 'flex'; zoomBtn.textContent = '1x'; }
+                    
+                    if (zoomBtn) {
+                        zoomBtn.style.display = 'flex';
+                        zoomBtn.textContent = '1x';
+                    }
                 } else {
                     this._zoomSupported = false;
                     if (zoomBtn) zoomBtn.style.display = 'none';
                 }
+
             } catch (err) {
                 Toast.fire({ icon: 'error', title: 'Thiếu quyền Camera!' });
                 this.close();
@@ -9068,16 +9060,28 @@
             if (!this._zoomSupported || !this._stream) return;
             const track = this._stream.getVideoTracks()[0];
             
-            if (this._currentZoom === 1) this._currentZoom = 2; 
-            else if (this._currentZoom === 2 && this._zoomMin < 1) this._currentZoom = this._zoomMin;
-            else this._currentZoom = 1;
+            // Xoay vòng: 1x -> 2x -> 0.5x (nếu có) -> 1x
+            if (this._currentZoom === 1) {
+                this._currentZoom = 2; // Lên 2x
+            } else if (this._currentZoom === 2 && this._zoomMin < 1) {
+                this._currentZoom = this._zoomMin; // Xuống 0.5x (Góc siêu rộng)
+            } else {
+                this._currentZoom = 1; // Về lại 1x
+            }
 
             try {
+                // Ép phần cứng Camera thay đổi tiêu cự
                 track.applyConstraints({ advanced: [{ zoom: this._currentZoom }] });
+                
                 const zoomBtn = document.getElementById('sc-zoom-btn');
-                if (zoomBtn) zoomBtn.textContent = (this._currentZoom < 1) ? '0.5x' : this._currentZoom + 'x';
+                if (zoomBtn) {
+                    let label = (this._currentZoom < 1) ? '0.5x' : this._currentZoom + 'x';
+                    zoomBtn.textContent = label;
+                }
                 if (window.navigator.vibrate) window.navigator.vibrate(15);
-            } catch (e) {}
+            } catch (e) {
+                console.warn("Lỗi chuyển đổi ống kính", e);
+            }
         },
 
         switchCamera() {
@@ -9097,12 +9101,13 @@
             const vh = video.videoHeight;
             const angle = this._deviceOrientation || 0;
 
-            // XỬ LÝ LẬT ẢNH VÀO CANVAS (Giữ nguyên thuật toán đang hoạt động TỐT của anh)
+            // XỬ LÝ LẬT ẢNH HOÀN HẢO VÀO CANVAS
             if (Math.abs(angle) === 90) {
                 canvas.width = vh; 
                 canvas.height = vw;
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.rotate(-angle * Math.PI / 180); 
+                
                 if (this._facingMode === 'user') ctx.scale(-1, 1);
                 ctx.drawImage(video, -vw / 2, -vh / 2, vw, vh);
             } else {
@@ -9124,7 +9129,7 @@
 
             const flash = document.getElementById('secure-camera-flash');
             flash.style.opacity = '1';
-            setTimeout(() => flash.style.opacity = '0', 75);
+            setTimeout(() => flash.style.opacity = '0', 100);
         },
 
         _updateThumbs() {
@@ -9160,6 +9165,7 @@
                 window.removeEventListener('deviceorientation', this._orientationHandler);
                 this._orientationHandler = null;
             }
+            // Trả icon UI về đứng thẳng
             document.querySelectorAll('#secure-camera-modal .lucide, #sc-zoom-btn, #secure-camera-count').forEach(icon => icon.style.transform = 'rotate(0deg)');
             const modal = document.getElementById('secure-camera-modal');
             modal.classList.add('hidden');
@@ -9168,7 +9174,7 @@
     };
 
     // ============================================================
-    // IMAGE PROCESSOR — Chữ siêu nhỏ gọn, Định vị ở dưới cùng
+    // IMAGE PROCESSOR — Cấu hình Watermark siêu nét, kích thước tối ưu
     // ============================================================
     const ImageProcessor = {
         async addWatermark(file, bsx = '', locationStr = '') {
@@ -9196,38 +9202,36 @@
 
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // GIẢM MẠNH KÍCH THƯỚC CHỮ (Hệ số 0.009 -> Chữ rất nhỏ gọn)
-                        const fontSize = Math.max(8, Math.floor(width * 0.009)); 
+                        // Cấu hình Font chữ NHỎ HƠN (Giảm hệ số từ 0.022 xuống 0.015)
+                        const fontSize = Math.max(12, Math.floor(width * 0.015)); 
                         ctx.textAlign = 'right';
                         ctx.textBaseline = 'bottom';
 
-                        // Bóng viền mỏng để chữ dễ đọc
-                        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-                        ctx.shadowBlur = 3;
-                        ctx.shadowOffsetX = 1;
-                        ctx.shadowOffsetY = 1;
+                        // Đổ bóng đậm hơn một chút để chữ nhỏ vẫn đọc rõ trên nền sáng
+                        ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+                        ctx.shadowBlur = 5;
+                        ctx.shadowOffsetX = 2;
+                        ctx.shadowOffsetY = 2;
 
                         const timeStr = moment().format('DD/MM/YYYY HH:mm:ss');
                         const labelStr = bsx ? `TASCO DLK - ${bsx}` : 'TASCO DLK';
                         const locStr = locationStr;
+                        const padding = fontSize + 10;
                         
-                        // Đẩy sát lề dưới (padding rất nhỏ)
-                        const padding = fontSize + 4; 
-                        
-                        // 1. In Tọa độ/Địa chỉ GPS (Sát lề đáy)
-                        ctx.font = `600 ${fontSize * 0.85}px "Plus Jakarta Sans", sans-serif`;
-                        ctx.fillStyle = 'rgba(253, 224, 71, 0.95)'; // Vàng sáng
+                        // 1. In Tọa độ GPS (Nằm sát DƯỚI CÙNG, màu vàng sáng)
+                        ctx.font = `700 ${fontSize * 0.85}px "Plus Jakarta Sans", sans-serif`;
+                        ctx.fillStyle = 'rgba(253, 224, 71, 0.95)'; 
                         ctx.fillText(locStr, width - padding, height - padding);
 
-                        // 2. In Thời gian (Nằm giữa)
-                        ctx.font = `700 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
-                        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)'; // Trắng
-                        ctx.fillText(timeStr, width - padding, height - padding - fontSize * 1.1);
-
-                        // 3. In Nhãn TASCO (Trên cùng)
+                        // 2. In Thời gian (Nằm ở giữa, cách định vị 1 dòng, màu trắng)
                         ctx.font = `800 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
-                        ctx.fillText(labelStr, width - padding, height - padding - fontSize * 2.2);
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                        ctx.fillText(timeStr, width - padding, height - padding - fontSize * 1.3);
 
+                        // 3. In TASCO DLK (Nằm trên cùng)
+                        ctx.fillText(labelStr, width - padding, height - padding - fontSize * 2.6);
+
+                        // Xuất ảnh
                         canvas.toBlob((blob) => {
                             if (!blob) return reject(new Error('Lỗi xử lý ảnh'));
                             const newFile = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
@@ -13048,53 +13052,40 @@
 
     
     <div id="secure-camera-modal" class="fixed inset-0 bg-black z-[99999] hidden flex-col">
-        
-        <div class="flex justify-between items-center px-5 pt-5 pb-8 text-white z-20 absolute top-0 w-full bg-gradient-to-b from-black/70 to-transparent backdrop-blur-[2px]">
-            <button onclick="SecureCamera.close()" class="p-2 bg-white/10 rounded-full active:scale-90 transition-transform backdrop-blur-md">
-                <i data-lucide="x" class="w-6 h-6"></i>
-            </button>
-            <div class="text-center drop-shadow-md">
-                <p class="font-black text-sm uppercase tracking-widest text-emerald-400">Camera Hiện Trường</p>
-                <p class="text-[10px] font-bold text-white/90 mt-0.5" id="sc-gps-status">Đang tìm vệ tinh GPS...</p>
+        <div class="flex justify-between items-center p-5 text-white z-20 absolute top-0 w-full bg-gradient-to-b from-black/80 to-transparent">
+            <button onclick="SecureCamera.close()" class="p-2 bg-black/50 rounded-full active:scale-90 transition-transform"><i data-lucide="x" class="w-6 h-6"></i></button>
+            <div class="text-center">
+                <p class="font-black text-sm uppercase tracking-widest text-emerald-400">Camera An Toàn</p>
+                <p class="text-[10px] font-bold text-white/70" id="sc-gps-status">Đang tìm vệ tinh GPS...</p>
             </div>
             <div class="flex items-center gap-3">
-                <button onclick="SecureCamera.toggleZoom()" id="sc-zoom-btn" class="w-9 h-9 bg-black/60 rounded-full font-black text-[12px] text-yellow-400 active:scale-90 transition-transform hidden border border-yellow-400/50 flex items-center justify-center backdrop-blur-md">1x</button>
-                <button onclick="SecureCamera.switchCamera()" class="p-2 bg-white/10 rounded-full active:scale-90 transition-transform backdrop-blur-md">
-                    <i data-lucide="refresh-ccw" class="w-5 h-5"></i>
-                </button>
+                <button onclick="SecureCamera.toggleZoom()" id="sc-zoom-btn" class="w-8 h-8 bg-black/50 rounded-full font-black text-[11px] text-white active:scale-90 transition-transform hidden border border-white/30 flex items-center justify-center">1x</button>
+                <button onclick="SecureCamera.switchCamera()" class="p-2 bg-black/50 rounded-full active:scale-90 transition-transform"><i data-lucide="refresh-ccw" class="w-5 h-5"></i></button>
             </div>
         </div>
 
         <div class="flex-1 relative flex items-center justify-center overflow-hidden bg-black">
             <video id="secure-camera-video" autoplay playsinline class="absolute min-w-full min-h-full object-cover"></video>
-            <div id="secure-camera-flash" class="absolute inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-75 z-20"></div>
+            <div id="secure-camera-flash" class="absolute inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-100 z-10"></div>
             
-            <div class="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between py-[33%]">
-                <div class="w-full h-[0.5px] bg-white/30"></div>
-                <div class="w-full h-[0.5px] bg-white/30"></div>
-            </div>
-            <div class="absolute inset-0 pointer-events-none z-10 flex justify-between px-[33%]">
-                <div class="h-full w-[0.5px] bg-white/30"></div>
-                <div class="h-full w-[0.5px] bg-white/30"></div>
-            </div>
-            <div class="absolute inset-0 pointer-events-none z-10 flex items-center justify-center">
-                <div class="w-4 h-[1.5px] bg-yellow-400/80 absolute"></div>
-                <div class="h-4 w-[1.5px] bg-yellow-400/80 absolute"></div>
+            <div class="absolute inset-0 border border-white/20 grid grid-cols-3 grid-rows-3 pointer-events-none z-10">
+                <div class="border-r border-b border-white/20"></div><div class="border-r border-b border-white/20"></div><div class="border-b border-white/20"></div>
+                <div class="border-r border-b border-white/20"></div><div class="border-r border-b border-white/20"></div><div class="border-b border-white/20"></div>
+                <div class="border-r border-white/20"></div><div class="border-r border-white/20"></div><div></div>
             </div>
         </div>
 
-        <div class="h-36 bg-black flex items-center justify-between px-8 pb-safe z-20 absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent backdrop-blur-[2px]">
-            
+        <div class="h-36 bg-black flex items-center justify-between px-8 pb-safe z-20 absolute bottom-0 w-full bg-gradient-to-t from-black to-black/80">
             <div class="relative">
-                <div id="secure-camera-thumbs" class="w-14 h-14 rounded-xl bg-white/10 bg-cover bg-center border-2 border-white/20 transition-all backdrop-blur-sm"></div>
-                <span id="secure-camera-count" class="absolute -top-2 -right-2 bg-rose-500 text-white text-[12px] w-6 h-6 rounded-full flex items-center justify-center font-black hidden shadow-md shadow-rose-500/50 transition-transform">0</span>
+                <div id="secure-camera-thumbs" class="w-14 h-14 rounded-xl bg-slate-800 bg-cover bg-center border-2 border-slate-600 transition-all"></div>
+                <span id="secure-camera-count" class="absolute -top-2 -right-2 bg-rose-600 text-white text-[11px] w-6 h-6 rounded-full flex items-center justify-center font-black hidden shadow-md shadow-rose-500/50 scale-in">0</span>
             </div>
 
-            <button onclick="SecureCamera.takePhoto()" class="relative w-[72px] h-[72px] rounded-full border-[4px] border-white/80 flex items-center justify-center group active:scale-95 transition-all">
-                <div class="w-[56px] h-[56px] rounded-full bg-white transition-all group-active:w-[48px] group-active:h-[48px]"></div>
+            <button onclick="SecureCamera.takePhoto()" class="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center active:scale-90 transition-transform">
+                <div class="w-[68px] h-[68px] rounded-full bg-white border-4 border-black"></div>
             </button>
 
-            <button onclick="SecureCamera.done()" class="w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center active:scale-90 transition-transform shadow-lg shadow-emerald-500/40">
+            <button onclick="SecureCamera.done()" class="w-14 h-14 rounded-full bg-emerald-600 text-white flex items-center justify-center active:scale-90 transition-transform shadow-lg shadow-emerald-600/40">
                 <i data-lucide="check" class="w-7 h-7"></i>
             </button>
         </div>
