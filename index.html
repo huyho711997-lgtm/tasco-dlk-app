@@ -9003,8 +9003,6 @@
                 // ĐIỀU KHIỂN KHỐI NGÀY GIỜ KHÔNG BỊ CẮT KHI XOAY NGANG
                 const overlayInfo = document.getElementById('sc-overlay-info');
                 if (overlayInfo) {
-                    // Xoay quanh tâm để dễ kiểm soát bounding box
-                    overlayInfo.style.transformOrigin = 'center center';
                     overlayInfo.style.transform = `rotate(${this._deviceOrientation}deg)`;
                     
                     // Reset lại toàn bộ tọa độ
@@ -9014,15 +9012,15 @@
                     overlayInfo.style.right = 'auto';
 
                     if (this._deviceOrientation === 90) {
-                        // Máy nằm ngang (đỉnh máy xoay sang phải) -> Khối chữ bị dựng dọc xuống
-                        overlayInfo.style.top = '140px';
-                        overlayInfo.style.left = '-70px'; 
+                        // Nằm ngang (Góc trên trái)
+                        overlayInfo.style.top = '110px';
+                        overlayInfo.style.left = '-75px'; 
                     } else if (this._deviceOrientation === -90 || this._deviceOrientation === 270) {
-                        // Máy nằm ngang (đỉnh máy xoay sang trái) -> Khối chữ dựng dọc lên
-                        overlayInfo.style.bottom = '140px';
-                        overlayInfo.style.left = '-70px';
+                        // Nằm ngang (Góc dưới trái)
+                        overlayInfo.style.bottom = '110px';
+                        overlayInfo.style.left = '-75px';
                     } else {
-                        // Máy cầm dọc bình thường (0 độ)
+                        // Cầm dọc bình thường
                         overlayInfo.style.bottom = '24px';
                         overlayInfo.style.left = '16px';
                     }
@@ -9062,10 +9060,10 @@
             this._gpsLocation = loc;
 
             if (gpsLabel) {
-                gpsLabel.textContent = loc.includes('LỖI') ? loc : '📍 ' + loc;
+                gpsLabel.textContent = loc;
+                // Khi tìm thấy vị trí chớp màu xanh, lỗi chớp màu đỏ, sau đó trả về màu trắng
                 gpsLabel.style.color = loc.includes('LỖI') ? '#f87171' : '#34d399'; 
-                // Sau 1.5s nháy xanh/đỏ thì trả về màu vàng
-                setTimeout(() => gpsLabel.style.color = loc.includes('LỖI') ? '#f87171' : '#fbbf24', 1500);
+                setTimeout(() => gpsLabel.style.color = loc.includes('LỖI') ? '#f87171' : '#f8fafc', 1500);
             }
             if (icon) icon.classList.remove('animate-spin');
         },
@@ -13285,13 +13283,19 @@
             <video id="secure-camera-video" autoplay playsinline class="absolute min-w-full min-h-full object-cover"></video>
             <div id="secure-camera-flash" class="absolute inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-100 z-10"></div>
             
-            <div id="sc-overlay-info" class="absolute z-30 flex flex-col gap-1.5 items-start text-left transition-all duration-300 pointer-events-none" style="bottom: 24px; left: 16px; width: 240px;">
-                <div class="bg-black/50 backdrop-blur-md px-2.5 py-1.5 rounded-lg border border-white/20 inline-block shadow-sm pointer-events-auto">
-                    <p id="sc-time-status" class="text-white text-[13px] font-mono font-black tracking-wider m-0 leading-none drop-shadow-md">--:--:--</p>
-                </div>
-                <div class="bg-black/50 backdrop-blur-md px-2.5 py-1.5 rounded-lg border border-white/20 shadow-sm pointer-events-auto cursor-pointer flex items-center gap-1.5 active:bg-white/10 transition-colors w-full justify-start" onclick="event.stopPropagation(); SecureCamera.refreshLocation()">
-                    <i data-lucide="refresh-cw" class="w-3 h-3 text-emerald-400 shrink-0" id="refresh-icon"></i>
-                    <p id="sc-gps-status" class="text-amber-400 text-[10px] font-bold leading-snug line-clamp-2 m-0 text-left drop-shadow-md">Đang tìm vệ tinh GPS...</p>
+            <div id="sc-overlay-info" class="absolute z-30 transition-all duration-300 pointer-events-none" style="bottom: 24px; left: 16px; width: 250px; transform-origin: center center;">
+                <div class="bg-black/60 backdrop-blur-md p-3 rounded-2xl border border-white/20 shadow-lg pointer-events-auto cursor-pointer active:bg-black/80 transition-colors" onclick="event.stopPropagation(); SecureCamera.refreshLocation()">
+                    <div class="flex items-center justify-between mb-1.5 border-b border-white/10 pb-1.5">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.8)]"></span>
+                            <p id="sc-time-status" class="text-white text-xs font-mono font-black tracking-widest drop-shadow-md">--:--:--</p>
+                        </div>
+                        <span class="text-[9px] font-black text-white/50 uppercase tracking-widest">Tasco DLK</span>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" id="refresh-icon"></i>
+                        <p id="sc-gps-status" class="text-white/90 text-[10px] font-medium leading-relaxed line-clamp-2 drop-shadow-md">Đang tìm vệ tinh GPS...</p>
+                    </div>
                 </div>
             </div>
 
