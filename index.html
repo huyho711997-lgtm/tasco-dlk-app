@@ -9000,10 +9000,32 @@
                     icon.style.transition = 'transform 0.3s ease';
                 });
 
-                // ĐIỀU KHIỂN KHỐI NGÀY GIỜ CHỈ XOAY TẠI CHỖ, KHÔNG DI CHUYỂN TỌA ĐỘ LUNG TUNG
+                // ĐIỀU KHIỂN KHỐI NGÀY GIỜ KHÔNG BỊ CẮT KHI XOAY NGANG
                 const overlayInfo = document.getElementById('sc-overlay-info');
                 if (overlayInfo) {
+                    // Xoay quanh tâm để dễ kiểm soát bounding box
+                    overlayInfo.style.transformOrigin = 'center center';
                     overlayInfo.style.transform = `rotate(${this._deviceOrientation}deg)`;
+                    
+                    // Reset lại toàn bộ tọa độ
+                    overlayInfo.style.top = 'auto';
+                    overlayInfo.style.bottom = 'auto';
+                    overlayInfo.style.left = 'auto';
+                    overlayInfo.style.right = 'auto';
+
+                    if (this._deviceOrientation === 90) {
+                        // Máy nằm ngang (đỉnh máy xoay sang phải) -> Khối chữ bị dựng dọc xuống
+                        overlayInfo.style.top = '140px';
+                        overlayInfo.style.left = '-70px'; 
+                    } else if (this._deviceOrientation === -90 || this._deviceOrientation === 270) {
+                        // Máy nằm ngang (đỉnh máy xoay sang trái) -> Khối chữ dựng dọc lên
+                        overlayInfo.style.bottom = '140px';
+                        overlayInfo.style.left = '-70px';
+                    } else {
+                        // Máy cầm dọc bình thường (0 độ)
+                        overlayInfo.style.bottom = '24px';
+                        overlayInfo.style.left = '16px';
+                    }
                 }
             };
 
@@ -13263,7 +13285,7 @@
             <video id="secure-camera-video" autoplay playsinline class="absolute min-w-full min-h-full object-cover"></video>
             <div id="secure-camera-flash" class="absolute inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-100 z-10"></div>
             
-            <div id="sc-overlay-info" class="absolute z-30 flex flex-col gap-1.5 items-start text-left transition-transform duration-300 pointer-events-none" style="bottom: 24px; left: 16px; transform-origin: center left; width: 240px;">
+            <div id="sc-overlay-info" class="absolute z-30 flex flex-col gap-1.5 items-start text-left transition-all duration-300 pointer-events-none" style="bottom: 24px; left: 16px; width: 240px;">
                 <div class="bg-black/50 backdrop-blur-md px-2.5 py-1.5 rounded-lg border border-white/20 inline-block shadow-sm pointer-events-auto">
                     <p id="sc-time-status" class="text-white text-[13px] font-mono font-black tracking-wider m-0 leading-none drop-shadow-md">--:--:--</p>
                 </div>
