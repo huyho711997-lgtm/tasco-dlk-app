@@ -9453,34 +9453,48 @@
         // HIỂN THỊ MENU LỰA CHỌN KHI BẤM NÚT "THÊM ẢNH"
         showAddOptions(id) {
             Swal.fire({
-                title: '<span class="text-sm font-black text-slate-800">Thêm hình ảnh</span>',
+                title: '<div class="text-left font-black text-lg flex items-center gap-2" style="color:var(--text-primary, #1e293b);"><div style="width:32px;height:32px;background:var(--bg-surface, #f1f5f9);border-radius:10px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div> Nguồn hình ảnh</div>',
                 html: `
                     <div class="flex flex-col gap-3 mt-4">
-                        <button onclick="Swal.close(); setTimeout(()=>SecureCamera.open('${id}'), 200)" 
-                            class="flex items-center gap-3 p-4 bg-emerald-50 border-2 border-emerald-200 rounded-2xl text-emerald-800 active:scale-95 transition-transform text-left">
-                            <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-md">
+                        <button onclick="Swal.close(); setTimeout(()=>SecureCamera.open('${id}'), 200)"
+                            style="border: 1.5px solid var(--border-light, #e2e8f0); background: var(--bg-white, #ffffff);"
+                            class="flex items-center gap-4 p-4 rounded-2xl active:scale-[0.98] transition-all text-left relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-blue-500/5 opacity-0 group-active:opacity-100 transition-opacity"></div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-500/30">
                                 <i data-lucide="camera" class="w-6 h-6"></i>
                             </div>
-                            <div>
-                                <p class="font-black text-[15px] uppercase">Chụp Hiện Trường</p>
-                                <p class="text-[11px] text-emerald-600 font-bold mt-1">Chụp liên tục, chèn tọa độ tự động</p>
+                            <div class="flex-1">
+                                <p class="font-black text-[15px] uppercase" style="color: var(--text-primary, #1e293b);">Chụp Hiện Trường</p>
+                                <p class="text-[11px] font-semibold mt-1" style="color: var(--text-secondary, #64748b);">Chụp liên tục • Tự đóng dấu GPS & Thời gian</p>
                             </div>
+                            <i data-lucide="chevron-right" class="w-5 h-5" style="color: var(--border-light, #cbd5e1);"></i>
                         </button>
 
-                        <label class="flex items-center gap-3 p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl text-slate-700 active:scale-95 transition-transform text-left cursor-pointer">
-                            <div class="w-12 h-12 bg-slate-200 text-slate-500 rounded-xl flex items-center justify-center shrink-0">
-                                <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+                        <label style="border: 1.5px solid var(--border-light, #e2e8f0); background: var(--bg-white, #ffffff);"
+                            class="flex items-center gap-4 p-4 rounded-2xl active:scale-[0.98] transition-all text-left cursor-pointer relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-emerald-500/5 opacity-0 group-active:opacity-100 transition-opacity"></div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/30">
+                                <i data-lucide="images" class="w-6 h-6"></i>
                             </div>
-                            <div>
-                                <p class="font-black text-[15px] uppercase">Tải giấy tờ từ máy</p>
-                                <p class="text-[11px] text-slate-500 font-medium mt-1">Dành cho Hóa đơn, Báo giá, Đăng kiểm...</p>
+                            <div class="flex-1">
+                                <p class="font-black text-[15px] uppercase" style="color: var(--text-primary, #1e293b);">Tải từ thiết bị</p>
+                                <p class="text-[11px] font-semibold mt-1" style="color: var(--text-secondary, #64748b);">Chọn nhiều ảnh • Dành cho Hóa đơn, Báo giá...</p>
                             </div>
+                            <i data-lucide="chevron-right" class="w-5 h-5" style="color: var(--border-light, #cbd5e1);"></i>
                             <input type="file" class="hidden" accept="image/*" multiple onchange="Swal.close(); Images.upload(event, '${id}')">
                         </label>
                     </div>
                 `,
-                showConfirmButton: false, showCloseButton: true, customClass: { popup: 'custom-rounded w-full' },
-                didOpen: () => lucide.createIcons()
+                showConfirmButton: false,
+                showCloseButton: true,
+                position: 'bottom', // Đẩy popup xuống đáy màn hình
+                customClass: { popup: 'custom-rounded w-full mb-0 rounded-b-none', title: '!pb-0 !px-1' },
+                didOpen: () => {
+                    try { lucide.createIcons(); } catch(e) {}
+                    // Căn chỉnh lại vị trí nút Close cho khớp với Header mới
+                    const closeBtn = Swal.getCloseButton();
+                    if (closeBtn) closeBtn.style.cssText = 'top: 14px; right: 16px; align-items: center; justify-content: center;';
+                }
             });
         },
 
