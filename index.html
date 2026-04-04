@@ -13074,41 +13074,64 @@
 
     
     <div id="secure-camera-modal" class="fixed inset-0 bg-black z-[99999] hidden flex-col">
-        <div class="flex justify-between items-center p-5 text-white z-20 absolute top-0 w-full bg-gradient-to-b from-black/80 to-transparent">
-            <button onclick="SecureCamera.close()" class="p-2 bg-black/50 rounded-full active:scale-90 transition-transform"><i data-lucide="x" class="w-6 h-6"></i></button>
-            <div class="text-center">
-                <p class="font-black text-sm uppercase tracking-widest text-emerald-400">Camera An Toàn</p>
-                <p class="text-[10px] font-bold text-white/70" id="sc-gps-status">Đang tìm vệ tinh GPS...</p>
+        <div class="absolute top-0 inset-x-0 p-5 flex justify-between items-start z-30 bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
+            <button onclick="SecureCamera.close()" class="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform border border-white/10 pointer-events-auto shadow-sm">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="flex flex-col items-center">
+                <div class="bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2 shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                    <span class="text-[10px] font-black text-white uppercase tracking-widest">Tasco Cam</span>
+                </div>
             </div>
-            <div class="flex items-center gap-3">
-                <button onclick="SecureCamera.toggleZoom()" id="sc-zoom-btn" class="w-8 h-8 bg-black/50 rounded-full font-black text-[11px] text-white active:scale-90 transition-transform hidden border border-white/30 flex items-center justify-center">1x</button>
-                <button onclick="SecureCamera.switchCamera()" class="p-2 bg-black/50 rounded-full active:scale-90 transition-transform"><i data-lucide="refresh-ccw" class="w-5 h-5"></i></button>
+
+            <div class="flex flex-col gap-3 items-end pointer-events-auto">
+                <button onclick="SecureCamera.switchCamera()" class="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform border border-white/10 shadow-sm">
+                    <i data-lucide="refresh-ccw" class="w-4 h-4"></i>
+                </button>
+                <button onclick="SecureCamera.toggleZoom()" id="sc-zoom-btn" class="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform border border-white/10 font-bold text-[11px] hidden shadow-sm">
+                    1x
+                </button>
             </div>
         </div>
 
-        <div class="flex-1 relative flex items-center justify-center overflow-hidden bg-black">
+        <div class="flex-1 relative bg-black overflow-hidden flex items-center justify-center">
             <video id="secure-camera-video" autoplay playsinline class="absolute min-w-full min-h-full object-cover"></video>
             <div id="secure-camera-flash" class="absolute inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-100 z-10"></div>
             
-            <div class="absolute inset-0 border border-white/20 grid grid-cols-3 grid-rows-3 pointer-events-none z-10">
-                <div class="border-r border-b border-white/20"></div><div class="border-r border-b border-white/20"></div><div class="border-b border-white/20"></div>
-                <div class="border-r border-b border-white/20"></div><div class="border-r border-b border-white/20"></div><div class="border-b border-white/20"></div>
-                <div class="border-r border-white/20"></div><div class="border-r border-white/20"></div><div></div>
+            <div class="absolute inset-4 sm:inset-8 pointer-events-none z-10 flex flex-col justify-between">
+                <div class="absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-30">
+                    <div class="border-r border-b border-white/80"></div><div class="border-r border-b border-white/80"></div><div class="border-b border-white/80"></div>
+                    <div class="border-r border-b border-white/80"></div><div class="border-r border-b border-white/80"></div><div class="border-b border-white/80"></div>
+                    <div class="border-r border-white/80"></div><div class="border-r border-white/80"></div><div></div>
+                </div>
+                
+                <div class="absolute top-0 left-0 w-10 h-10 border-t-4 border-l-4 border-amber-400 rounded-tl-xl"></div>
+                <div class="absolute top-0 right-0 w-10 h-10 border-t-4 border-r-4 border-amber-400 rounded-tr-xl"></div>
+                <div class="absolute bottom-0 left-0 w-10 h-10 border-b-4 border-l-4 border-amber-400 rounded-bl-xl"></div>
+                <div class="absolute bottom-0 right-0 w-10 h-10 border-b-4 border-r-4 border-amber-400 rounded-br-xl"></div>
+                
+                <div class="absolute bottom-6 left-0 right-0 flex justify-center">
+                    <p id="sc-gps-status" class="px-3 py-1.5 bg-black/60 backdrop-blur-md rounded-lg text-[10px] font-bold text-white border border-white/10 truncate max-w-[85%] shadow-lg">
+                        Đang tìm vệ tinh GPS...
+                    </p>
+                </div>
             </div>
         </div>
 
-        <div class="h-36 bg-black flex items-center justify-between px-8 pb-safe z-20 absolute bottom-0 w-full bg-gradient-to-t from-black to-black/80">
-            <div class="relative">
-                <div id="secure-camera-thumbs" class="w-14 h-14 rounded-xl bg-slate-800 bg-cover bg-center border-2 border-slate-600 transition-all"></div>
-                <span id="secure-camera-count" class="absolute -top-2 -right-2 bg-rose-600 text-white text-[11px] w-6 h-6 rounded-full flex items-center justify-center font-black hidden shadow-md shadow-rose-500/50 scale-in">0</span>
+        <div class="h-36 bg-black flex items-center justify-between px-10 z-30 pb-safe absolute bottom-0 w-full bg-gradient-to-t from-black to-black/60">
+            <div class="relative w-14 h-14">
+                <div id="secure-camera-thumbs" class="w-full h-full rounded-full bg-slate-800 bg-cover bg-center border-2 border-white/30 transition-all shadow-md"></div>
+                <span id="secure-camera-count" class="absolute -top-1 -right-1 bg-amber-500 text-white text-[10px] w-[22px] h-[22px] rounded-full flex items-center justify-center font-black hidden shadow-md shadow-amber-500/50">0</span>
             </div>
 
-            <button onclick="SecureCamera.takePhoto()" class="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center active:scale-90 transition-transform">
-                <div class="w-[68px] h-[68px] rounded-full bg-white border-4 border-black"></div>
+            <button onclick="SecureCamera.takePhoto()" class="w-[72px] h-[72px] rounded-full border-4 border-white/50 flex items-center justify-center active:scale-95 transition-all p-1 outline-none">
+                <div class="w-full h-full rounded-full bg-white transition-colors shadow-[0_0_15px_rgba(255,255,255,0.4)]"></div>
             </button>
 
-            <button onclick="SecureCamera.done()" class="w-14 h-14 rounded-full bg-emerald-600 text-white flex items-center justify-center active:scale-90 transition-transform shadow-lg shadow-emerald-600/40">
-                <i data-lucide="check" class="w-7 h-7"></i>
+            <button onclick="SecureCamera.done()" class="w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center active:scale-90 transition-transform shadow-lg shadow-emerald-500/40">
+                <i data-lucide="check" class="w-6 h-6"></i>
             </button>
         </div>
     </div>
