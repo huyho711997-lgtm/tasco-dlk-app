@@ -8937,7 +8937,7 @@
     };
 
     // ============================================================
-    // SECURE CAMERA — Chống fake, Zoom Lenses & Fix Khung hình
+    // SECURE CAMERA — Chống fake, Khóa xoay dọc/ngang & Zoom
     // ============================================================
     const SecureCamera = {
         _stream: null,
@@ -8948,7 +8948,6 @@
         _deviceOrientation: 0,
         _orientationHandler: null,
         
-        // Quản lý ống kính (Zoom phần cứng)
         _zoomSupported: false,
         _zoomMin: 1,
         _zoomMax: 2,
@@ -8970,26 +8969,24 @@
             gpsLabel.textContent = 'Đang tra cứu vệ tinh và địa chỉ...';
             gpsLabel.className = 'text-[10px] font-bold text-amber-400 animate-pulse';
 
-            // 1. CẢM BIẾN & KHÓA HƯỚNG MỚI
+            // 1. CẢM BIẾN & KHÓA HƯỚNG MỚI (ĐÃ SỬA CHIỀU XOAY ICON)
             this._deviceOrientation = 0;
             this._orientationHandler = (e) => {
                 if (window.innerWidth > window.innerHeight) {
                     this._deviceOrientation = 0;
                 } else {
-                    let angle = this._deviceOrientation; // Giữ nguyên trạng thái cũ làm mặc định
+                    let angle = this._deviceOrientation; 
                     
-                    // Chỉ thay đổi khi góc nghiêng trái/phải (Gamma) đủ lớn.
-                    // Loại bỏ hoàn toàn sự phụ thuộc vào Beta (trục úp/ngửa) để không bị lật ngược khi chĩa máy lên/xuống.
-                    if (e.gamma > 45) angle = -90;      // Đang cầm ngang (Đỉnh máy quay sang phải)
-                    else if (e.gamma < -45) angle = 90; // Đang cầm ngang (Đỉnh máy quay sang trái)
-                    else if (Math.abs(e.gamma) < 25) angle = 0; // Đang cầm dọc (Cho phép rung sai số 25 độ)
+                    if (e.gamma > 45) angle = -90;      // Đỉnh máy quay sang phải -> UI xoay ngược chiều kim đồng hồ
+                    else if (e.gamma < -45) angle = 90; // Đỉnh máy quay sang trái -> UI xoay cùng chiều kim đồng hồ
+                    else if (Math.abs(e.gamma) < 25) angle = 0; 
 
                     this._deviceOrientation = angle;
                 }
 
-                // Xoay Icon UI (Smooth animation)
+                // Xoay Icon UI (Bỏ dấu âm để icon luôn hướng đúng lên trên)
                 document.querySelectorAll('#secure-camera-modal .lucide, #sc-zoom-btn, #secure-camera-count').forEach(icon => {
-                    icon.style.transform = `rotate(${-this._deviceOrientation}deg)`;
+                    icon.style.transform = `rotate(${this._deviceOrientation}deg)`;
                     icon.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
                 });
             };
@@ -9003,11 +9000,9 @@
                 window.addEventListener('deviceorientation', this._orientationHandler);
             }
 
-            // 2. Mở Camera
             await this._startStream();
             lucide.createIcons();
 
-            // 3. Lấy GPS ngầm
             LocationHelper.get().then(loc => {
                 this._gpsLocation = loc;
                 gpsLabel.textContent = loc.includes('LỖI') ? loc : '📍 ' + loc;
@@ -9103,6 +9098,7 @@
             const vh = video.videoHeight;
             const angle = this._deviceOrientation || 0;
 
+            // XỬ LÝ LẬT ẢNH HOÀN HẢO VÀO CANVAS
             if (Math.abs(angle) === 90) {
                 canvas.width = vh; 
                 canvas.height = vw;
@@ -9130,7 +9126,7 @@
 
             const flash = document.getElementById('secure-camera-flash');
             flash.style.opacity = '1';
-            setTimeout(() => flash.style.opacity = '0', 75); // Flash chớp nhanh hơn
+            setTimeout(() => flash.style.opacity = '0', 75);
         },
 
         _updateThumbs() {
@@ -9174,7 +9170,7 @@
     };
 
     // ============================================================
-    // IMAGE PROCESSOR — Cấu hình Watermark siêu nét, kích thước tối ưu
+    // IMAGE PROCESSOR — Chữ cực nhỏ, GPS dưới cùng
     // ============================================================
     const ImageProcessor = {
         async addWatermark(file, bsx = '', locationStr = '') {
@@ -9202,36 +9198,35 @@
 
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // Cấu hình Font chữ NHỎ HƠN (Giảm hệ số từ 0.022 xuống 0.015)
-                        const fontSize = Math.max(12, Math.floor(width * 0.015)); 
+                        // Cỡ chữ NHỎ HƠN NỮA (hệ số 0.012)
+                        const fontSize = Math.max(10, Math.floor(width * 0.012)); 
                         ctx.textAlign = 'right';
                         ctx.textBaseline = 'bottom';
 
-                        // Đổ bóng đậm hơn một chút để chữ nhỏ vẫn đọc rõ trên nền sáng
-                        ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-                        ctx.shadowBlur = 5;
-                        ctx.shadowOffsetX = 2;
-                        ctx.shadowOffsetY = 2;
+                        // Đổ bóng sắc nét để chữ nhỏ không bị chìm vào nền sáng
+                        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+                        ctx.shadowBlur = 4;
+                        ctx.shadowOffsetX = 1.5;
+                        ctx.shadowOffsetY = 1.5;
 
                         const timeStr = moment().format('DD/MM/YYYY HH:mm:ss');
                         const labelStr = bsx ? `TASCO DLK - ${bsx}` : 'TASCO DLK';
                         const locStr = locationStr;
-                        const padding = fontSize + 10;
+                        const padding = fontSize + 6;
                         
-                        // 1. In Tọa độ GPS (Nằm sát DƯỚI CÙNG, màu vàng sáng)
+                        // 1. In Tọa độ/Địa chỉ GPS (Nằm DƯỚI CÙNG nhất, sát lề)
                         ctx.font = `700 ${fontSize * 0.85}px "Plus Jakarta Sans", sans-serif`;
                         ctx.fillStyle = 'rgba(253, 224, 71, 0.95)'; 
                         ctx.fillText(locStr, width - padding, height - padding);
 
-                        // 2. In Thời gian (Nằm ở giữa, cách định vị 1 dòng, màu trắng)
+                        // 2. In Thời gian (Nằm giữa, ngay trên GPS)
                         ctx.font = `800 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
                         ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-                        ctx.fillText(timeStr, width - padding, height - padding - fontSize * 1.3);
+                        ctx.fillText(timeStr, width - padding, height - padding - fontSize * 1.2);
 
                         // 3. In TASCO DLK (Nằm trên cùng)
-                        ctx.fillText(labelStr, width - padding, height - padding - fontSize * 2.6);
+                        ctx.fillText(labelStr, width - padding, height - padding - fontSize * 2.4);
 
-                        // Xuất ảnh
                         canvas.toBlob((blob) => {
                             if (!blob) return reject(new Error('Lỗi xử lý ảnh'));
                             const newFile = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
