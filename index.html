@@ -9961,6 +9961,7 @@
             const bsxToStamp = item.bsx || '';
             const cat = 'scene';
 
+            // Tạo mảng file tạm để hiển thị spinner
             const tempFiles = files.map(file => {
                 const tempId = 'temp_' + Math.random().toString(36).substr(2, 9);
                 const localUrl = URL.createObjectURL(file);
@@ -9970,9 +9971,10 @@
             });
 
             item.documentImages = current;
-            Images.render(id);
+            this.render(id);
 
-            Promise.all(tempFiles.map(async ({ file, tempObj, localUrl }) => {
+            // Xử lý tải lên từng file
+            await Promise.all(tempFiles.map(async ({ file, tempObj, localUrl }) => {
                 try {
                     const watermarkedFile = await ImageProcessor.addWatermark(file, bsxToStamp, gpsLocation);
                     let finalUrl = '';
@@ -9987,35 +9989,46 @@
                     } 
                     else if (targetCloud === 'drive') {
                         const base64 = await this._blobToBase64(watermarkedFile);
-                        const fileName = `TASCO_${bsxToStamp}_${Date.now()}_${Math.floor(Math.random()*1000)}.jpg`;
+                        const fileName = `TASCO_${bsxToStamp}_${Date.now()}.jpg`;
                         const res = await fetch(CONFIG.exportWordUrl, { 
                             method: 'POST', 
                             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            body: JSON.stringify({ action: 'upload_drive', fileName: fileName, mimeType: 'image/jpeg', base64: base64 })
+                            body: JSON.stringify({ 
+                                action: 'upload_drive', 
+                                fileName: fileName, 
+                                mimeType: 'image/jpeg', 
+                                base64: base64 
+                            })
                         });
                         const data = await res.json();
-                        if (data.success && data.url) finalUrl = data.url;
+                        // FIX: Kiểm tra kết quả từ Drive và gán URL
+                        if (data.success && data.url) {
+                            finalUrl = data.url;
+                        }
                     }
 
                     if (finalUrl) {
                         tempObj.url = finalUrl;
-                        delete tempObj.isUploading;
+                        delete tempObj.isUploading; // XÓA SPINNER KHI THÀNH CÔNG
                         delete tempObj.tempId;
+                    } else {
+                        throw new Error("Upload failed");
                     }
                 } catch (e) {
                     console.error("Lỗi upload:", e);
+                    // Nếu lỗi, xóa ảnh đó khỏi danh sách để không bị kẹt spinner mãi mãi
                     const idx = current.findIndex(i => i.tempId === tempObj.tempId);
                     if (idx > -1) current.splice(idx, 1);
                 } finally {
                     URL.revokeObjectURL(localUrl);
-                    Images.render(id);
+                    this.render(id);
                 }
-            })).then(() => {
-                const finalImages = current.filter(i => !i.isUploading);
-                db.ref(`Workstation/${id}/documentImages`).set(finalImages).then(() => {
-                    Toast.fire({ icon: 'success', title: `Đã lưu ${files.length} ảnh lên ${targetCloud === 'drive' ? 'Google Drive' : 'Cloudinary'}!` });
-                });
-            });
+            }));
+
+            // Lưu mảng ảnh cuối cùng vào Firebase
+            const finalImages = current.filter(i => !i.isUploading);
+            await db.ref(`Workstation/${id}/documentImages`).set(finalImages);
+            Toast.fire({ icon: 'success', title: `Đã lưu ${files.length} ảnh lên ${targetCloud === 'drive' ? 'Google Drive' : 'Cloudinary'}!` });
         },
 
         _pickCategory() {
