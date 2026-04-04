@@ -8970,6 +8970,11 @@
         _zoomMin: 1,
         _zoomMax: 2,
         _currentZoom: 1,
+        _focusTimer: null,
+
+        // THÊM 2 BIẾN NÀY ĐỂ QUẢN LÝ FLASH
+        _flashSupported: false,
+        _flashOn: false,
 
         async open(id) {
             this._id = id;
@@ -9048,31 +9053,43 @@
                 });
                 
                 const video = document.getElementById('secure-camera-video');
-                // Trả video về nguyên bản: Phủ kín màn hình, không dùng css transform rotate
                 video.style.transform = 'none';
                 video.style.width = '100%';
                 video.style.height = '100%';
                 video.style.objectFit = 'cover';
                 video.srcObject = this._stream;
 
-                // CẤU HÌNH ZOOM CHO ỐNG KÍNH (0.5x, 1x, 2x)
                 const track = this._stream.getVideoTracks()[0];
                 const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+                
+                // CẤU HÌNH ZOOM... (Đoạn code cũ giữ nguyên)
                 const zoomBtn = document.getElementById('sc-zoom-btn');
-
                 if (capabilities.zoom && this._facingMode === 'environment') {
                     this._zoomSupported = true;
                     this._zoomMin = capabilities.zoom.min || 1;
-                    this._zoomMax = Math.min(capabilities.zoom.max || 3, 3); // Khóa Max 3x để ảnh không bị vỡ
+                    this._zoomMax = Math.min(capabilities.zoom.max || 3, 3);
                     this._currentZoom = 1;
-                    
-                    if (zoomBtn) {
-                        zoomBtn.style.display = 'flex';
-                        zoomBtn.textContent = '1x';
-                    }
+                    if (zoomBtn) { zoomBtn.style.display = 'flex'; zoomBtn.textContent = '1x'; }
                 } else {
                     this._zoomSupported = false;
                     if (zoomBtn) zoomBtn.style.display = 'none';
+                }
+
+                // CẤU HÌNH FLASH (THÊM MỚI TẠI ĐÂY)
+                const flashBtn = document.getElementById('sc-flash-btn');
+                this._flashOn = false; // Reset trạng thái mỗi khi bật cam
+                if (flashBtn) {
+                    flashBtn.classList.remove('text-amber-400');
+                    flashBtn.classList.add('text-white');
+                }
+
+                // Chỉ hỗ trợ torch (đèn pin) ở camera sau và nếu API trình duyệt cho phép
+                if (capabilities.torch && this._facingMode === 'environment') {
+                    this._flashSupported = true;
+                    if (flashBtn) flashBtn.classList.remove('hidden');
+                } else {
+                    this._flashSupported = false;
+                    if (flashBtn) flashBtn.classList.add('hidden');
                 }
 
             } catch (err) {
@@ -9112,6 +9129,41 @@
         switchCamera() {
             this._facingMode = this._facingMode === 'environment' ? 'user' : 'environment';
             this._startStream();
+        },
+        
+        // HÀM MỚI: BẬT TẮT ĐÈN FLASH
+        async toggleFlash() {
+            if (!this._flashSupported || !this._stream) {
+                Toast.fire({ icon: 'info', title: 'Trình duyệt/Thiết bị không hỗ trợ bật Flash' });
+                return;
+            }
+
+            const track = this._stream.getVideoTracks()[0];
+            const flashBtn = document.getElementById('sc-flash-btn');
+            
+            try {
+                this._flashOn = !this._flashOn;
+                // Áp dụng lệnh bật/tắt đèn pin (torch) xuống phần cứng
+                await track.applyConstraints({
+                    advanced: [{ torch: this._flashOn }]
+                });
+
+                // Đổi màu nút (Trắng -> Vàng sáng)
+                if (flashBtn) {
+                    if (this._flashOn) {
+                        flashBtn.classList.remove('text-white');
+                        flashBtn.classList.add('text-amber-400');
+                    } else {
+                        flashBtn.classList.remove('text-amber-400');
+                        flashBtn.classList.add('text-white');
+                    }
+                }
+                if (window.navigator.vibrate) window.navigator.vibrate(15);
+            } catch (err) {
+                console.warn("Lỗi bật flash:", err);
+                Toast.fire({ icon: 'error', title: 'Không thể can thiệp đèn Flash' });
+                this._flashOn = false; // Trả lại trạng thái cũ
+            }
         },
 
         takePhoto() {
@@ -13194,7 +13246,18 @@
                     <span class="text-[10px] font-black text-white uppercase tracking-widest">Tasco Cam</span>
                 </div>
             </div>
+            <div class="flex flex-col gap-3 items-end pointer-events-auto">
+                <button onclick="SecureCamera.toggleFlash()" id="sc-flash-btn" class="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform border border-white/10 shadow-sm hidden">
+                    <i data-lucide="zap" class="w-5 h-5"></i>
+                </button>
 
+                <button onclick="SecureCamera.switchCamera()" class="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform border border-white/10 shadow-sm">
+                    <i data-lucide="refresh-ccw" class="w-4 h-4"></i>
+                </button>
+                <button onclick="SecureCamera.toggleZoom()" id="sc-zoom-btn" class="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform border border-white/10 font-bold text-[11px] hidden shadow-sm">
+                    1x
+                </button>
+            </div>
             <div class="flex flex-col gap-3 items-end pointer-events-auto">
                 <button onclick="SecureCamera.switchCamera()" class="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform border border-white/10 shadow-sm">
                     <i data-lucide="refresh-ccw" class="w-4 h-4"></i>
