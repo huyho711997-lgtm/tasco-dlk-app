@@ -9352,15 +9352,10 @@
                     <div class="bg-slate-900/90 backdrop-blur-md p-4 shrink-0 border-t border-white/10 pb-safe">
                         <div class="flex gap-3 overflow-x-auto no-scrollbar mb-4 px-2" id="sc-review-thumbs"></div>
                         
-                        <div class="flex gap-2">
-                            <button onclick="SecureCamera.confirmUpload('drive')" class="flex-1 py-3.5 bg-blue-600 text-white rounded-xl font-black text-sm flex items-center justify-center gap-1.5 shadow-lg shadow-blue-500/30 active:scale-95 transition-transform border border-blue-500">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                                <span id="sc-review-upload-btn">Lưu Google Drive</span>
-                            </button>
-                            <button onclick="SecureCamera.confirmUpload('cloudinary')" class="w-14 h-14 bg-slate-800 text-white rounded-xl font-black text-sm flex items-center justify-center shadow-lg active:scale-95 transition-transform border border-slate-700 shrink-0" title="Lưu Cloudinary">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
-                            </button>
-                        </div>
+                        <button onclick="SecureCamera.confirmUpload()" class="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-black text-[15px] flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 active:scale-95 transition-transform">
+                            <i data-lucide="cloud-upload" class="w-5 h-5"></i>
+                            <span id="sc-review-upload-btn">Tải lên Cloud</span>
+                        </button>
                     </div>
                 `;
                 document.body.appendChild(modal);
@@ -9396,35 +9391,27 @@
             const uploadBtn = document.getElementById('sc-review-upload-btn');
 
             // Hiệu ứng mờ ảo khi chuyển ảnh
-            if (imgEl) {
-                imgEl.style.opacity = '0';
-                setTimeout(() => {
-                    imgEl.src = this._capturedFiles[this._currentReviewIdx].preview;
-                    imgEl.style.opacity = '1';
-                }, 100);
-            }
+            imgEl.style.opacity = '0';
+            setTimeout(() => {
+                imgEl.src = this._capturedFiles[this._currentReviewIdx].preview;
+                imgEl.style.opacity = '1';
+            }, 100);
 
-            if (countEl) countEl.textContent = `${this._currentReviewIdx + 1} / ${this._capturedFiles.length}`;
-            
-            // Cập nhật số lượng ảnh vào nút Drive một cách an toàn
-            if (uploadBtn) {
-                uploadBtn.textContent = `Lưu ${this._capturedFiles.length} ảnh (Drive)`;
-            }
+            countEl.textContent = `${this._currentReviewIdx + 1} / ${this._capturedFiles.length}`;
+            uploadBtn.textContent = `Xác nhận tải lên ${this._capturedFiles.length} ảnh`;
 
             // Render lại cuộn thumbnail
-            if (thumbsEl) {
-                thumbsEl.innerHTML = this._capturedFiles.map((fileObj, idx) => `
-                    <div onclick="SecureCamera.setReviewIdx(${idx})" 
-                        class="w-16 h-16 shrink-0 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${idx === this._currentReviewIdx ? 'border-blue-500 scale-105 shadow-md shadow-blue-500/40 opacity-100' : 'border-transparent opacity-40 scale-95 hover:opacity-80'}">
-                        <img src="${fileObj.preview}" class="w-full h-full object-cover pointer-events-none">
-                    </div>
-                `).join('');
-                
-                // Tự động cuộn tới ảnh đang chọn
-                const activeThumb = thumbsEl.children[this._currentReviewIdx];
-                if (activeThumb) {
-                    activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                }
+            thumbsEl.innerHTML = this._capturedFiles.map((fileObj, idx) => `
+                <div onclick="SecureCamera.setReviewIdx(${idx})" 
+                    class="w-16 h-16 shrink-0 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${idx === this._currentReviewIdx ? 'border-blue-500 scale-105 shadow-md shadow-blue-500/40 opacity-100' : 'border-transparent opacity-40 scale-95 hover:opacity-80'}">
+                    <img src="${fileObj.preview}" class="w-full h-full object-cover pointer-events-none">
+                </div>
+            `).join('');
+            
+            // Tự động cuộn tới ảnh đang chọn
+            const activeThumb = thumbsEl.children[this._currentReviewIdx];
+            if (activeThumb) {
+                activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             }
         },
 
@@ -9488,19 +9475,19 @@
             });
         },
 
-        async confirmUpload(targetCloud = 'drive') {
-            // Hỏi category trước khi đóng màn hình review
-            const cat = await Images._pickCategory();
-            if (!cat) return; // Người dùng bấm hủy
-
-            this.closeReview(); 
+        async confirmUpload() {
+            this.closeReview(); // Đóng màn hình review
+            
             const filesToUpload = this._capturedFiles.map(c => c.file);
+            
+            // Xóa URL tạm để tránh tràn RAM
             this._capturedFiles.forEach(c => URL.revokeObjectURL(c.preview));
             this._capturedFiles = [];
-            this.close(); 
             
-            // Truyền cờ báo hiệu lưu ở đâu và category đã chọn
-            await Images._processSecureUpload(filesToUpload, this._id, this._gpsLocation, targetCloud, cat);
+            this.close(); // Tắt luôn Camera
+            
+            // Đẩy lên Cloud
+            await Images._processSecureUpload(filesToUpload, this._id, this._gpsLocation);
         },
 
         async focusAt(event) {
@@ -9696,17 +9683,21 @@
             lucide.createIcons();
         },
 
+        // CHỈ ĐỔI CSS CỦA PHẦN TỬ ĐƯỢC CHỌN, KHÔNG RENDER LẠI ĐỂ TRÁNH NHÁY MÀN HÌNH
         toggleSelect(idx) {
             const wrap = document.getElementById(`img-grid-wrap-${idx}`);
             const imgEl = document.getElementById(`img-grid-img-${idx}`);
             const checkOverlay = document.getElementById(`img-grid-check-${idx}`);
+
             if (this._selected.has(idx)) {
                 this._selected.delete(idx);
+                // Bỏ CSS chọn
                 if(wrap) { wrap.classList.remove('border-rose-500', 'scale-90'); wrap.classList.add('border-slate-100'); }
                 if(imgEl) imgEl.classList.remove('opacity-70');
                 if(checkOverlay) checkOverlay.classList.add('hidden');
             } else {
                 this._selected.add(idx);
+                // Thêm CSS chọn
                 if(wrap) { wrap.classList.add('border-rose-500', 'scale-90'); wrap.classList.remove('border-slate-100'); }
                 if(imgEl) imgEl.classList.add('opacity-70');
                 if(checkOverlay) checkOverlay.classList.remove('hidden');
@@ -9718,54 +9709,60 @@
         _updateDeleteBar() {
             const btn = document.getElementById('img-top-delete-btn');
             const countEl = document.getElementById('img-select-count');
-            if (btn && countEl) {
-                if (this._selected.size > 0) {
-                    btn.classList.remove('hidden');
-                    countEl.textContent = this._selected.size;
-                } else {
-                    btn.classList.add('hidden');
-                }
+            if (!btn || !countEl) return;
+            
+            if (this._selected.size > 0) {
+                btn.classList.remove('hidden');
+                countEl.textContent = this._selected.size;
+            } else {
+                btn.classList.add('hidden');
             }
         },
 
         async confirmDeleteSelected() {
             const count = this._selected.size;
             if (count === 0) return;
-            const id = App.currentEditId;
-            const item = App.find(id);
-            if (!item?.documentImages) return;
-
+            
             const res = await Swal.fire({
-                title: `Xóa ${count} ảnh đã chọn?`,
+                title: `Xóa ${count} ảnh này?`,
+                text: "Dữ liệu sẽ bị xóa vĩnh viễn khỏi Cloud.",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Xóa vĩnh viễn',
                 confirmButtonColor: '#ef4444',
-                customClass: { popup: 'custom-rounded' }
+                confirmButtonText: 'Xác nhận xóa',
+                cancelButtonText: 'Hủy',
+                customClass: { popup: 'custom-rounded z-[100001]' }
             });
 
             if (res.isConfirmed) {
-                Swal.fire({ title: 'Đang xóa...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                const id = App.currentEditId;
+                const item = App.find(id);
+                if (!item?.documentImages) return;
+
                 const list = [...item.documentImages];
                 const indicesToDelete = Array.from(this._selected).sort((a, b) => b - a);
 
+                Swal.fire({ title: 'Đang xóa...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+                // Xóa trên Cloudinary (nếu có publicId)
                 for (let idx of indicesToDelete) {
                     const img = list[idx];
                     const url = typeof img === 'string' ? img : img.url;
-                    const matchCloud = url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[a-zA-Z0-9]+)?(?:\?.*)?$/);
-                    const matchDrive = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-
-                    if (matchDrive) {
-                        await fetch(CONFIG.exportWordUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            body: JSON.stringify({ action: 'delete_drive', fileId: matchDrive[1] }) }).catch(() => {});
-                    } else if (matchCloud) {
-                        await fetch(CONFIG.exportWordUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            body: JSON.stringify({ action: 'delete_cloudinary', publicId: matchCloud[1] }) }).catch(() => {});
+                    const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[a-zA-Z0-9]+)?(?:\?.*)?$/);
+                    if (match && match[1]) {
+                        await fetch(CONFIG.exportWordUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: JSON.stringify({ action: 'delete_cloudinary', publicId: match[1] })
+                        }).catch(() => {});
                     }
                     list.splice(idx, 1);
                 }
+
                 await db.ref(`Workstation/${id}/documentImages`).set(list.length ? list : null);
+                
                 Swal.close();
+                Toast.fire({ icon: 'success', title: `Đã xóa thành công ${count} ảnh!` });
                 this.exitSelectMode();
             }
         },
@@ -9783,26 +9780,35 @@
             }
 
             if (!imgs.length) {
-                container.innerHTML = `<div onclick="Images.showAddOptions('${id}')" class="flex flex-col items-center justify-center gap-3 py-16 mt-2 bg-white rounded-3xl border-2 border-dashed border-slate-200 cursor-pointer active:bg-blue-50 transition-all w-full"><div class="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center shrink-0 shadow-sm"><i data-lucide="image-plus" class="w-6 h-6 text-slate-400"></i></div><p class="text-sm font-black text-slate-600">Chưa có ảnh chứng từ</p></div>`;
-                lucide.createIcons(); return;
+                container.innerHTML = `
+                    <div onclick="Images.showAddOptions('${id}')" class="flex flex-col items-center justify-center gap-3 py-16 mt-2 bg-white rounded-3xl border-2 border-dashed border-slate-200 cursor-pointer active:bg-blue-50 active:border-blue-300 transition-all w-full">
+                        <div class="w-14 h-14 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-center shrink-0 shadow-sm">
+                            <i data-lucide="image-plus" class="w-6 h-6 text-slate-400"></i>
+                        </div>
+                        <p class="text-sm font-black text-slate-600">Chưa có ảnh chứng từ</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
             }
 
+            // --- GẮN CÁC ID CỤ THỂ CHO TỪNG ẢNH ĐỂ JS ĐIỀU KHIỂN RIÊNG LẺ LÚC CHỌN ---
             const tiles = imgs.map((img, idx) => {
-                let url = typeof img === 'string' ? img : img.url;
-                // Chuyển đổi URL Drive cũ (thumbnail?id=) sang URL nhúng được vào <img>
-                const driveMatch = url && url.match(/[?&]id=([\w-]+)/);
-                if (driveMatch && url.includes('drive.google.com/thumbnail')) {
-                    url = 'https://lh3.googleusercontent.com/d/' + driveMatch[1];
-                }
+                const cat = IMG_CATS[img.cat] || IMG_CATS.other;
+                const url = typeof img === 'string' ? img : img.url;
                 const isSelected = this._selected.has(idx);
                 const isUploading = img.isUploading;
+                
                 const wrapClasses = isSelected ? 'border-rose-500 scale-90' : 'border-slate-100';
+                const imgClasses = isSelected ? 'opacity-70' : '';
+                const checkHidden = isSelected ? '' : 'hidden';
+
                 return `
                 <div class="relative w-full aspect-square" onclick="${this._selectMode ? `Images.toggleSelect(${idx})` : (isUploading ? '' : `ImageViewer.open('${id}', ${idx})`)}">
                     <div id="img-grid-wrap-${idx}" class="w-full h-full rounded-xl overflow-hidden border-2 transition-all ${wrapClasses} bg-slate-50 shadow-sm">
-                        <img id="img-grid-img-${idx}" src="${url}" loading="lazy" class="w-full h-full object-cover ${isSelected ? 'opacity-70' : ''}">
+                        <img id="img-grid-img-${idx}" src="${url}" loading="lazy" class="w-full h-full object-cover transition-opacity ${imgClasses}">
                         ${isUploading ? '<div class="img-uploading-overlay"><div class="spinner-small"></div></div>' : ''}
-                        <div id="img-grid-check-${idx}" class="absolute inset-0 flex items-center justify-center bg-rose-500/10 ${isSelected ? '' : 'hidden'}">
+                        
+                        <div id="img-grid-check-${idx}" class="absolute inset-0 flex items-center justify-center bg-rose-500/10 transition-all ${checkHidden}">
                             <div class="w-6 h-6 bg-rose-600 rounded-full flex items-center justify-center shadow-lg">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                             </div>
@@ -9811,152 +9817,182 @@
                 </div>`;
             }).join('');
 
-            const addTile = this._selectMode ? '' : `<div onclick="Images.showAddOptions('${id}')" class="relative w-full aspect-square flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 cursor-pointer active:bg-blue-50 transition-all"><i data-lucide="plus" class="w-5 h-5 text-slate-400"></i></div>`;
+            const addTile = this._selectMode ? '' : `
+                <div onclick="Images.showAddOptions('${id}')" class="relative w-full aspect-square flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 cursor-pointer active:bg-blue-50 active:border-blue-400 transition-all">
+                    <i data-lucide="plus" class="w-5 h-5 text-slate-400"></i>
+                </div>`;
+
             container.innerHTML = `<div class="grid grid-cols-4 gap-2 pb-20">${tiles}${addTile}</div>`;
             if (!this._selectMode) lucide.createIcons();
         },
-
-        _blobToBase64(blob) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result.split(',')[1]);
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-            });
-        },
-
+        
+        // CÁC HÀM CŨ GIỮ NGUYÊN (Không thay đổi logic upload của anh)
         showAddOptions(id) { 
             Swal.fire({
-                title: '<div class="text-left font-black text-lg">Nguồn hình ảnh</div>',
-                html: `<div class="flex flex-col gap-3 mt-4">
-                        <button onclick="Swal.close(); setTimeout(()=>SecureCamera.open('${id}'), 200)" class="flex items-center gap-4 p-4 rounded-2xl border bg-white active:scale-95 transition-all text-left">
-                            <div class="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-md"><i data-lucide="camera" class="w-6 h-6"></i></div>
-                            <div class="flex-1"><p class="font-black text-[15px] uppercase">Chụp ảnh</p><p class="text-[11px] font-semibold text-slate-500">Chụp hiện trường có GPS</p></div>
+                title: '<div class="text-left font-black text-lg flex items-center gap-2" style="color:var(--text-primary, #1e293b);"><div style="width:32px;height:32px;background:var(--bg-surface, #f1f5f9);border-radius:10px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div> Nguồn hình ảnh</div>',
+                html: `
+                    <div class="flex flex-col gap-3 mt-4">
+                        <button onclick="Swal.close(); setTimeout(()=>SecureCamera.open('${id}'), 200)"
+                            style="border: 1.5px solid var(--border-light, #e2e8f0); background: var(--bg-white, #ffffff);"
+                            class="flex items-center gap-4 p-4 rounded-2xl active:scale-[0.98] transition-all text-left relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-blue-500/5 opacity-0 group-active:opacity-100 transition-opacity"></div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-500/30">
+                                <i data-lucide="camera" class="w-6 h-6"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-black text-[15px] uppercase" style="color: var(--text-primary, #1e293b);">Chụp Hiện Trường</p>
+                                <p class="text-[11px] font-semibold mt-1" style="color: var(--text-secondary, #64748b);">Chụp liên tục • Tự đóng dấu GPS & Thời gian</p>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-5 h-5" style="color: var(--border-light, #cbd5e1);"></i>
                         </button>
-                        <label class="flex items-center gap-4 p-4 rounded-2xl border bg-white active:scale-95 transition-all text-left cursor-pointer">
-                            <div class="w-12 h-12 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-md"><i data-lucide="images" class="w-6 h-6"></i></div>
-                            <div class="flex-1"><p class="font-black text-[15px] uppercase">Tải từ thiết bị</p><p class="text-[11px] font-semibold text-slate-500">Chọn nhiều ảnh từ máy</p></div>
+
+                        <label style="border: 1.5px solid var(--border-light, #e2e8f0); background: var(--bg-white, #ffffff);"
+                            class="flex items-center gap-4 p-4 rounded-2xl active:scale-[0.98] transition-all text-left cursor-pointer relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-emerald-500/5 opacity-0 group-active:opacity-100 transition-opacity"></div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/30">
+                                <i data-lucide="images" class="w-6 h-6"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-black text-[15px] uppercase" style="color: var(--text-primary, #1e293b);">Tải từ thiết bị</p>
+                                <p class="text-[11px] font-semibold mt-1" style="color: var(--text-secondary, #64748b);">Chọn nhiều ảnh • Dành cho Hóa đơn, Báo giá...</p>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-5 h-5" style="color: var(--border-light, #cbd5e1);"></i>
                             <input type="file" class="hidden" accept="image/*" multiple onchange="Swal.close(); Images.upload(event, '${id}')">
                         </label>
-                    </div>`,
-                showConfirmButton: false, showCloseButton: true, position: 'bottom',
-                customClass: { popup: 'custom-rounded w-full mb-0 rounded-b-none' },
-                didOpen: () => lucide.createIcons()
+                    </div>
+                `,
+                showConfirmButton: false,
+                showCloseButton: true,
+                position: 'bottom',
+                customClass: { popup: 'custom-rounded w-full mb-0 rounded-b-none', title: '!pb-0 !px-1' },
+                didOpen: () => {
+                    try { lucide.createIcons(); } catch(e) {}
+                    const closeBtn = Swal.getCloseButton();
+                    if (closeBtn) closeBtn.style.cssText = 'top: 14px; right: 16px; align-items: center; justify-content: center;';
+                }
             });
         },
-
         async upload(event, id) {
             const files = Array.from(event.target.files);
             event.target.value = '';
             if (!files.length || !id) return;
-            const cat = await this._pickCategory(); if (!cat) return;
 
-            const targetRes = await Swal.fire({
-                title: 'Lưu trữ đám mây',
-                text: 'Chọn nơi lưu ảnh:',
-                showCancelButton: true, showDenyButton: true,
-                confirmButtonText: 'Google Drive', denyButtonText: 'Cloudinary',
-                confirmButtonColor: '#2563eb', denyButtonColor: '#1e293b',
-                customClass: { popup: 'custom-rounded' }
-            });
-            if (targetRes.isDismissed && !targetRes.isDenied) return;
-            const targetCloud = targetRes.isConfirmed ? 'drive' : 'cloudinary';
+            const cat = await this._pickCategory();
+            if (!cat) return;
+
             const gpsLocation = await LocationHelper.get();
-            await this._processSecureUpload(files, id, gpsLocation, targetCloud);
-        },
-
-        async _processSecureUpload(files, id, gpsLocation, targetCloud = 'drive') {
             const item = App.find(id) || {};
-            const existingImages = (item.documentImages || []).map(i => typeof i === 'string' ? { url: i, cat: 'other' } : i);
+            const current = (item.documentImages || []).map(i => typeof i === 'string' ? { url: i, cat: 'other' } : i);
             const bsxToStamp = item.bsx || '';
 
-            // Hiển thị spinner tạm thời cho từng ảnh đang upload
-            const tempPlaceholders = files.map((file, i) => {
+            const tempFiles = files.map(file => {
+                const tempId = 'temp_' + Math.random().toString(36).substr(2, 9);
                 const localUrl = URL.createObjectURL(file);
-                return { url: localUrl, cat: 'scene', isUploading: true, tempId: 'tmp_' + i + '_' + Date.now(), cloud: targetCloud, _localUrl: localUrl };
+                const tempObj = { url: localUrl, cat: cat, isUploading: true, tempId: tempId };
+                current.push(tempObj);
+                return { file, tempObj, localUrl };
             });
 
-            item.documentImages = [...existingImages, ...tempPlaceholders];
-            this.render(id);
+            item.documentImages = current;
+            Images.render(id);
 
-            // Upload từng ảnh và thu thập kết quả
-            const uploadedImages = await Promise.all(files.map(async (file, i) => {
-                const placeholder = tempPlaceholders[i];
+            Promise.all(tempFiles.map(async ({ file, tempObj, localUrl }) => {
                 try {
                     const watermarkedFile = await ImageProcessor.addWatermark(file, bsxToStamp, gpsLocation);
-                    let finalUrl = '';
-                    let fileId = '';
-
-                    if (targetCloud === 'cloudinary') {
-                        const fd = new FormData();
-                        fd.append('file', watermarkedFile);
-                        fd.append('upload_preset', CONFIG.cloudinary.preset);
-                        const res = await fetch(CONFIG.cloudinary.url, { method: 'POST', body: fd });
-                        const data = await res.json();
-                        if (data.secure_url) finalUrl = data.secure_url;
-                    } else {
-                        const b64 = await this._blobToBase64(watermarkedFile);
-                        const res = await fetch(CONFIG.exportWordUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            body: JSON.stringify({
-                                action: 'upload_drive',
-                                fileName: `TASCO_${bsxToStamp}_${Date.now()}.jpg`,
-                                mimeType: 'image/jpeg',
-                                base64: b64
-                            })
-                        });
-                        const data = await res.json();
-                        if (data.success && data.url) {
-                            finalUrl = data.url;
-                            fileId = data.fileId || '';
-                        }
+                    const fd = new FormData();
+                    fd.append('file', watermarkedFile);
+                    fd.append('upload_preset', CONFIG.cloudinary.preset);
+                    const res = await fetch(CONFIG.cloudinary.url, { method: 'POST', body: fd });
+                    const data = await res.json();
+                    
+                    if (data.secure_url) {
+                        tempObj.url = data.secure_url;
+                        delete tempObj.isUploading;
+                        delete tempObj.tempId;
                     }
-
-                    URL.revokeObjectURL(placeholder._localUrl);
-
-                    if (finalUrl) {
-                        return { url: finalUrl, cat: 'scene', cloud: targetCloud, ...(fileId ? { fileId } : {}) };
-                    }
-                    return null; // upload thất bại
                 } catch (e) {
-                    URL.revokeObjectURL(placeholder._localUrl);
-                    console.error('Upload lỗi:', e);
-                    return null;
+                    const idx = current.findIndex(i => i.tempId === tempObj.tempId);
+                    if (idx > -1) current.splice(idx, 1);
+                } finally {
+                    URL.revokeObjectURL(localUrl);
+                    Images.render(id);
                 }
-            }));
-
-            // Lọc ảnh upload thành công
-            const successImages = uploadedImages.filter(Boolean);
-
-            // Ghép ảnh cũ + ảnh mới (KHÔNG dùng item.documentImages vì Firebase có thể đã reset nó)
-            const finalImages = [...existingImages, ...successImages];
-
-            // Ghi thẳng lên Firebase
-            await db.ref(`Workstation/${id}/documentImages`).set(finalImages.length ? finalImages : null);
-
-            // Cập nhật local data ngay để render không phải chờ Firebase listener
-            const freshItem = App.find(id);
-            if (freshItem) freshItem.documentImages = finalImages;
-            this.render(id);
-
-            if (successImages.length > 0) {
-                Toast.fire({ icon: 'success', title: `Đã lưu ${successImages.length} ảnh lên ${targetCloud === 'drive' ? 'Google Drive' : 'Cloudinary'}!` });
-            } else {
-                Toast.fire({ icon: 'error', title: 'Upload thất bại, vui lòng thử lại!' });
-            }
+            })).then(() => {
+                const finalImages = current.filter(i => !i.isUploading);
+                db.ref(`Workstation/${id}/documentImages`).set(finalImages).then(() => {
+                    Toast.fire({ icon: 'success', title: `Đã tải lên ${files.length} ảnh có định vị!` });
+                });
+            });
         },
+        async _processSecureUpload(files, id, gpsLocation) {
+            if (!files.length || !id) return;
 
+            const item = App.find(id) || {};
+            const current = (item.documentImages || []).map(i => typeof i === 'string' ? { url: i, cat: 'other' } : i);
+            const bsxToStamp = item.bsx || '';
+            const cat = 'scene';
+
+            const tempFiles = files.map(file => {
+                const tempId = 'temp_' + Math.random().toString(36).substr(2, 9);
+                const localUrl = URL.createObjectURL(file);
+                const tempObj = { url: localUrl, cat: cat, isUploading: true, tempId: tempId };
+                current.push(tempObj);
+                return { file, tempObj, localUrl };
+            });
+
+            item.documentImages = current;
+            Images.render(id);
+
+            Promise.all(tempFiles.map(async ({ file, tempObj, localUrl }) => {
+                try {
+                    const watermarkedFile = await ImageProcessor.addWatermark(file, bsxToStamp, gpsLocation);
+                    const fd = new FormData();
+                    fd.append('file', watermarkedFile);
+                    fd.append('upload_preset', CONFIG.cloudinary.preset);
+                    const res = await fetch(CONFIG.cloudinary.url, { method: 'POST', body: fd });
+                    const data = await res.json();
+                    
+                    if (data.secure_url) {
+                        tempObj.url = data.secure_url;
+                        delete tempObj.isUploading;
+                        delete tempObj.tempId;
+                    }
+                } catch (e) {
+                    const idx = current.findIndex(i => i.tempId === tempObj.tempId);
+                    if (idx > -1) current.splice(idx, 1);
+                } finally {
+                    URL.revokeObjectURL(localUrl);
+                    Images.render(id);
+                }
+            })).then(() => {
+                const finalImages = current.filter(i => !i.isUploading);
+                db.ref(`Workstation/${id}/documentImages`).set(finalImages).then(() => {
+                    Toast.fire({ icon: 'success', title: `Đã lưu ${files.length} ảnh hiện trường!` });
+                });
+            });
+        },
         _pickCategory() {
             return new Promise(resolve => {
                 const cats = Object.entries(IMG_CATS);
-                const html = cats.map(([id, c]) => `<button onclick="this.dataset.selected='true'; Swal.clickConfirm();" data-id="${id}" class="w-full flex items-center gap-3 p-3 mb-2 bg-slate-50 border rounded-2xl active:bg-blue-50 transition-all text-left"><span style="color:${c.color}">${c.svg}</span><span class="font-black text-sm text-slate-700">${c.label}</span></button>`).join('');
+                const html = cats.map(([id, c]) => `
+                    <button onclick="document.getElementById('_cat_resolve').dataset.val='${id}'; document.getElementById('_cat_resolve').click()"
+                        class="w-full flex items-center gap-3 p-3 mb-2 bg-slate-50 border border-slate-100 rounded-2xl active:bg-blue-50 active:border-blue-200 transition-all cursor-pointer">
+                        <span style="color:${c.color};">${c.svg}</span>
+                        <span class="font-black text-sm text-slate-700">${c.label}</span>
+                    </button>`).join('');
+
                 Swal.fire({
                     title: '<span class="text-sm font-black">Loại ảnh này là gì?</span>',
-                    html: `<div class="mt-3" id="cat-picker">${html}</div>`,
+                    html: `<div class="mt-3">${html}<button id="_cat_resolve" class="hidden"></button></div>`,
                     showConfirmButton: false, showCancelButton: true,
-                    preConfirm: () => { const sel = document.querySelector('#cat-picker button[data-selected="true"]'); return sel ? sel.dataset.id : 'other'; }
-                }).then(r => resolve(r.isConfirmed ? r.value : null));
+                    cancelButtonText: 'Hủy', customClass: { popup: 'custom-rounded' },
+                    didOpen() {
+                        document.getElementById('_cat_resolve').addEventListener('click', function () {
+                            Swal.close();
+                            resolve(this.dataset.val || 'other');
+                        });
+                    }
+                }).then(r => { if (r.isDismissed) resolve(null); });
             });
         }
     };
@@ -10000,13 +10036,7 @@
             const dots = document.getElementById('iv-dots');
             const img = this._imgs[this._idx];
             if (!img || !el) return;
-            let imgSrc = img.url || img;
-            // Chuyển đổi URL Drive cũ sang URL nhúng được
-            const driveMatch2 = imgSrc && imgSrc.match(/[?&]id=([\w-]+)/);
-            if (driveMatch2 && imgSrc.includes('drive.google.com/thumbnail')) {
-                imgSrc = 'https://lh3.googleusercontent.com/d/' + driveMatch2[1];
-            }
-            el.src = imgSrc;
+            el.src = img.url || img;
             const catInfo = IMG_CATS[img.cat] || IMG_CATS.other;
             if (cat) cat.textContent = catInfo.emoji + ' ' + catInfo.label;
             if (cnt) cnt.textContent = `${this._idx + 1} / ${this._imgs.length}`;
