@@ -9445,20 +9445,38 @@
                 customClass: { popup: 'custom-rounded z-[100001]' } 
             }).then((res) => {
                 if (res.isConfirmed) {
-                    const removed = this._capturedFiles.splice(this._currentReviewIdx, 1)[0];
-                    URL.revokeObjectURL(removed.preview); // Giải phóng RAM
-                    this._updateThumbs(); // Cập nhật lại số lượng ở góc camera
-
-                    if (this._capturedFiles.length === 0) {
-                        this.closeReview();
-                        Toast.fire({ icon: 'info', title: 'Đã xóa toàn bộ ảnh. Hãy tiếp tục chụp.' });
-                    } else {
-                        // Nếu xóa ảnh cuối cùng, lùi index lại 1
-                        if (this._currentReviewIdx >= this._capturedFiles.length) {
-                            this._currentReviewIdx = this._capturedFiles.length - 1;
-                        }
-                        this.renderReviewUI();
+                    const imgEl = document.getElementById('sc-review-main-img');
+                    
+                    // Hiệu ứng mờ và thu nhỏ ảnh hiện tại
+                    if (imgEl) {
+                        imgEl.style.transition = 'all 0.25s ease-out';
+                        imgEl.style.transform = 'scale(0.8)';
+                        imgEl.style.opacity = '0';
                     }
+
+                    // Chờ 250ms cho hiệu ứng xong rồi mới xóa data
+                    setTimeout(() => {
+                        const removed = this._capturedFiles.splice(this._currentReviewIdx, 1)[0];
+                        if (removed) URL.revokeObjectURL(removed.preview); // Giải phóng RAM
+                        this._updateThumbs(); // Cập nhật lại số lượng ở góc camera
+
+                        if (this._capturedFiles.length === 0) {
+                            this.closeReview();
+                            Toast.fire({ icon: 'info', title: 'Đã xóa toàn bộ ảnh. Hãy tiếp tục chụp.' });
+                        } else {
+                            if (this._currentReviewIdx >= this._capturedFiles.length) {
+                                this._currentReviewIdx = this._capturedFiles.length - 1;
+                            }
+                            
+                            // Phục hồi lại style cho thẻ img trước khi nạp ảnh kế tiếp
+                            if (imgEl) {
+                                imgEl.style.transition = 'none';
+                                imgEl.style.transform = 'scale(1)';
+                            }
+                            
+                            this.renderReviewUI();
+                        }
+                    }, 250);
                 }
             });
         },
@@ -9727,15 +9745,29 @@
                 const item = App.find(id);
                 if (!item?.documentImages) return;
 
-                const list = [...item.documentImages];
                 const indicesToDelete = Array.from(this._selected).sort((a, b) => b - a);
 
+                // Thêm hiệu ứng thu nhỏ ảnh trước khi xóa
+                indicesToDelete.forEach(idx => {
+                    const wrap = document.getElementById(`img-grid-wrap-${idx}`);
+                    if (wrap) {
+                        wrap.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                        wrap.style.transform = 'scale(0)';
+                        wrap.style.opacity = '0';
+                    }
+                });
+
+                // Đợi hiệu ứng xong (300ms)
+                await new Promise(r => setTimeout(r, 300));
+
+                const list = [...item.documentImages];
                 Swal.fire({ title: 'Đang xóa...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
                 // Xóa trên Cloudinary (nếu có publicId)
                 for (let idx of indicesToDelete) {
                     const img = list[idx];
                     const url = typeof img === 'string' ? img : img.url;
+                    // Giữ nguyên Regex gốc, không thoát ký tự
                     const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[a-zA-Z0-9]+)?(?:\?.*)?$/);
                     if (match && match[1]) {
                         await fetch(CONFIG.exportWordUrl, {
