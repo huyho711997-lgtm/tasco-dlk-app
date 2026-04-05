@@ -9326,8 +9326,8 @@
                             <p id="sc-review-count" class="text-emerald-400 text-[10px] font-bold">1 / 5</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button onclick="SecureCamera.downloadCurrentPreview()" title="Lưu ảnh này về máy" class="w-10 h-10 flex items-center justify-center bg-blue-500/20 text-blue-400 rounded-full active:bg-blue-500/40 transition-colors shadow-sm">
-                                <i data-lucide="download" class="w-5 h-5"></i>
+                            <button onclick="SecureCamera.shareOrSaveCurrentPreview()" title="Lưu/Chia sẻ ảnh này" class="w-10 h-10 flex items-center justify-center bg-blue-500/20 text-blue-400 rounded-full active:bg-blue-500/40 transition-colors shadow-sm">
+                                <i id="sc-save-btn-icon" data-lucide="download" class="w-5 h-5"></i>
                             </button>
                             <button onclick="SecureCamera.removeCurrentPreview()" title="Xóa ảnh" class="w-10 h-10 flex items-center justify-center bg-rose-500/20 text-rose-500 rounded-full active:bg-rose-500/40 transition-colors shadow-sm">
                                 <i data-lucide="trash-2" class="w-5 h-5"></i>
@@ -9489,30 +9489,62 @@
                 }
             });
         },
-        // Hàm tải ảnh đang xem trong lúc Review về máy
-        downloadCurrentPreview() {
+        // Hàm đóng dấu nước on-the-fly và mở bảng Lưu ảnh Native của iOS
+        async shareOrSaveCurrentPreview() {
             if (this._capturedFiles.length === 0) return;
             
-            // Lấy object ảnh hiện tại đang xem
             const currentFileObj = this._capturedFiles[this._currentReviewIdx];
-            if (!currentFileObj || !currentFileObj.preview) return;
+            if (!currentFileObj || !currentFileObj.file) return;
 
-            // Tạo thẻ <a> ẩn để kích hoạt tải xuống
-            const a = document.createElement('a');
-            a.href = currentFileObj.preview;
-            
-            // Đặt tên file dễ nhớ: TascoCam_NgayThang_GioPhutGiay.jpg
-            const timestamp = moment().format('YYMMDD_HHmmss');
-            a.download = `TascoCam_${timestamp}.jpg`;
-            
-            // Thực thi click
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            // Xoay icon thành hiệu ứng loading báo hiệu đang xử lý đóng dấu
+            const btnIcon = document.getElementById('sc-save-btn-icon');
+            if (btnIcon) {
+                btnIcon.setAttribute('data-lucide', 'loader-2');
+                btnIcon.classList.add('animate-spin');
+                lucide.createIcons();
+            }
 
-            // Báo thành công và rung phản hồi nhẹ
-            Toast.fire({ icon: 'success', title: 'Đã lưu ảnh về thư viện máy!' });
-            if (window.navigator.vibrate) window.navigator.vibrate(15);
+            try {
+                // Lấy thông tin biển số và định vị hiện tại
+                const item = App.find(this._id) || {};
+                const bsxToStamp = item.bsx || '';
+                const gpsLocation = this._gpsLocation || '';
+
+                // Gọi bộ xử lý ảnh: Đóng dấu GPS + Ngày giờ (mất khoảng < 100ms)
+                const watermarkedFile = await ImageProcessor.addWatermark(currentFileObj.file, bsxToStamp, gpsLocation);
+
+                // Mở Share Sheet native của iOS/Android
+                // Trên iOS, bảng này sẽ có nút "Lưu hình ảnh" (Save Image) lưu thẳng vào Camera Roll
+                if (navigator.canShare && navigator.canShare({ files: [watermarkedFile] })) {
+                    await navigator.share({
+                        files: [watermarkedFile],
+                        title: 'Ảnh Hiện Trường'
+                    });
+                } else {
+                    // Fallback cho Máy tính PC hoặc trình duyệt cũ không hỗ trợ Share API
+                    const url = URL.createObjectURL(watermarkedFile);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `TascoCam_${moment().format('YYMMDD_HHmmss')}.jpg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    Toast.fire({ icon: 'success', title: 'Đã tải ảnh xuống!' });
+                }
+            } catch (error) {
+                // Bỏ qua lỗi AbortError do người dùng chủ động vuốt tắt bảng Share của iOS
+                if (error.name !== 'AbortError' && !error.message.includes('Share canceled')) {
+                    Toast.fire({ icon: 'error', title: 'Lỗi xử lý ảnh: ' + error.message });
+                }
+            } finally {
+                // Trả icon về trạng thái tải xuống bình thường
+                if (btnIcon) {
+                    btnIcon.classList.remove('animate-spin');
+                    btnIcon.setAttribute('data-lucide', 'download');
+                    lucide.createIcons();
+                }
+            }
         },
         async confirmUpload() {
             this.closeReview(); // Đóng màn hình review
