@@ -3862,8 +3862,9 @@
 
         _applyUserUI(user) {
             const btn = document.getElementById('header-user-btn');
-            if (btn) {
-                btn.textContent = user.avatar || user.name.charAt(0).toUpperCase();
+            const avatarText = document.getElementById('header-user-avatar-text');
+            if (btn && avatarText) {
+                avatarText.textContent = user.avatar || user.name.charAt(0).toUpperCase();
                 btn.style.background = `linear-gradient(135deg, ${user.color || '#2563eb'}, ${user.color ? user.color + 'cc' : '#7c3aed'})`;
             }
             const sub = document.getElementById('header-subtitle');
