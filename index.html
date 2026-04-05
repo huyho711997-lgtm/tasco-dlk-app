@@ -14838,10 +14838,7 @@
         document.getElementById('plate-scanner-modal').classList.add('hidden');
         Inspection.startWatcher();
         SpareParts.init();
-        // Mặc định vào Trang chủ
-        const homeBtn = document.getElementById('nav-home-btn');
-        Nav.switchView('home', homeBtn);
-        setTimeout(() => App._updateHomeDashboard(), 1000);
+        Nav.switchView('home', document.getElementById('nav-home-btn'));
 
         // 1. Scroll to top cho màn hình chính (main)
         const main = document.querySelector('main');
