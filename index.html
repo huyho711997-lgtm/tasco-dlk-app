@@ -1983,15 +1983,28 @@
                 </button>
             </div>
         </div>
-        <div class="relative">
-            <i data-lucide="search" class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-            <input type="text" id="global-search" oninput="App.debounceSearch(); document.getElementById('clear-search').classList.toggle('hidden', !this.value);" 
+        <div class="relative group">
+            <i data-lucide="search" class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-500"></i>
+            
+            <input type="text" id="global-search" 
+                oninput="App.debounceSearch(); const hasVal = !!this.value; document.getElementById('clear-search').classList.toggle('hidden', !hasVal); document.getElementById('search-divider').classList.toggle('hidden', !hasVal);" 
                 placeholder="Tìm biển số, mã hồ sơ..."
-                class="w-full bg-slate-100 pl-12 pr-10 py-3.5 rounded-2xl text-[15px] font-semibold outline-none focus:ring-2 focus:ring-blue-500/30 transition-all text-slate-700 placeholder-slate-400 border border-transparent focus:border-blue-300 focus:bg-white">
-            <button id="clear-search" onclick="document.getElementById('global-search').value=''; App.searchData(); this.classList.add('hidden')" 
-                class="hidden absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 active:text-slate-600">
-                <i data-lucide="x-circle" class="w-5 h-5"></i>
-            </button>
+                class="w-full bg-slate-100 pl-12 pr-24 py-3.5 rounded-2xl text-[15px] font-semibold outline-none focus:ring-2 focus:ring-blue-500/30 transition-all text-slate-700 placeholder-slate-400 border border-transparent focus:border-blue-300 focus:bg-white">
+            
+            <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                <button id="clear-search" title="Xóa tìm kiếm"
+                    onclick="document.getElementById('global-search').value=''; App.searchData(); this.classList.add('hidden'); document.getElementById('search-divider').classList.add('hidden');" 
+                    class="hidden w-9 h-9 flex items-center justify-center text-slate-400 active:text-slate-600 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+
+                <div id="search-divider" class="hidden w-px h-5 bg-slate-300 mx-0.5"></div>
+
+                <button onclick="PlateScanner.open()" title="Quét biển số AI"
+                    class="w-10 h-10 flex items-center justify-center text-blue-600 active:scale-90 transition-transform">
+                    <i data-lucide="scan-search" class="w-5 h-5"></i>
+                </button>
+            </div>
         </div>
     </header>
 
