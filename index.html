@@ -9489,14 +9489,18 @@
         },
 
         async confirmUpload(targetCloud = 'drive') {
+            // Hỏi category trước khi đóng màn hình review
+            const cat = await Images._pickCategory();
+            if (!cat) return; // Người dùng bấm hủy
+
             this.closeReview(); 
             const filesToUpload = this._capturedFiles.map(c => c.file);
             this._capturedFiles.forEach(c => URL.revokeObjectURL(c.preview));
             this._capturedFiles = [];
             this.close(); 
             
-            // Truyền cờ báo hiệu lưu ở đâu
-            await Images._processSecureUpload(filesToUpload, this._id, this._gpsLocation, targetCloud);
+            // Truyền cờ báo hiệu lưu ở đâu và category đã chọn
+            await Images._processSecureUpload(filesToUpload, this._id, this._gpsLocation, targetCloud, cat);
         },
 
         async focusAt(event) {
@@ -9856,77 +9860,59 @@
             await this._processSecureUpload(files, id, gpsLocation, targetCloud);
         },
 
-        async _processSecureUpload(files, id, gpsLocation, targetCloud = 'drive') {
+        async _processSecureUpload(files, id, gpsLocation, targetCloud = 'drive', cat = 'scene') {
             const item = App.find(id) || {};
-            // 1. Lấy danh sách ảnh hiện tại (chuẩn hóa về object)
-            let current = (item.documentImages || []).map(i => typeof i === 'string' ? { url: i, cat: 'other' } : i);
+            const current = (item.documentImages || []).map(i => typeof i === 'string' ? { url: i, cat: 'other' } : i);
             const bsxToStamp = item.bsx || '';
 
-            // 2. Tạo các placeholder (vòng xoay) cho ảnh đang tải
             const tempFiles = files.map(file => {
                 const tempId = 'temp_' + Math.random().toString(36).substr(2, 9);
                 const localUrl = URL.createObjectURL(file);
-                const tempObj = { url: localUrl, cat: 'scene', isUploading: true, tempId: tempId, cloud: targetCloud };
+                const tempObj = { url: localUrl, cat: cat, isUploading: true, tempId: tempId, cloud: targetCloud };
                 current.push(tempObj);
                 return { file, tempObj, localUrl };
             });
 
-            // Hiển thị vòng xoay tạm thời trên UI
+            item.documentImages = current;
             this.render(id);
 
-            // 3. Tiến hành tải lên từng ảnh
             await Promise.all(tempFiles.map(async ({ file, tempObj, localUrl }) => {
                 try {
                     const watermarkedFile = await ImageProcessor.addWatermark(file, bsxToStamp, gpsLocation);
                     let finalUrl = '';
-
                     if (targetCloud === 'cloudinary') {
-                        const fd = new FormData(); 
-                        fd.append('file', watermarkedFile); 
-                        fd.append('upload_preset', CONFIG.cloudinary.preset);
+                        const fd = new FormData(); fd.append('file', watermarkedFile); fd.append('upload_preset', CONFIG.cloudinary.preset);
                         const res = await fetch(CONFIG.cloudinary.url, { method: 'POST', body: fd });
-                        const data = await res.json(); 
-                        if (data.secure_url) finalUrl = data.secure_url;
+                        const data = await res.json(); if (data.secure_url) finalUrl = data.secure_url;
                     } else {
-                        // Tải lên Google Drive qua Apps Script
                         const b64 = await this._blobToBase64(watermarkedFile);
-                        const res = await fetch(CONFIG.exportWordUrl, { 
-                            method: 'POST', 
-                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            body: JSON.stringify({ action: 'upload_drive', fileName: `TASCO_${bsxToStamp}_${Date.now()}.jpg`, base64: b64 }) 
-                        });
-                        const data = await res.json(); 
+                        const res = await fetch(CONFIG.exportWordUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: JSON.stringify({ action: 'upload_drive', fileName: `TASCO_${bsxToStamp}_${Date.now()}.jpg`, mimeType: 'image/jpeg', base64: b64 }) });
+                        const data = await res.json();
                         if (data.success && data.url) {
-                            // QUAN TRỌNG: Dùng link thumbnail để không bị dấu ?
-                            finalUrl = data.url; 
+                            finalUrl = data.url;
+                            // Lưu fileId để có thể xóa sau này
+                            if (data.fileId) tempObj.fileId = data.fileId;
                         }
                     }
-
                     if (finalUrl) {
-                        // Cập nhật URL thật và xóa trạng thái Loading
                         tempObj.url = finalUrl;
+                        tempObj.cloud = targetCloud;
                         delete tempObj.isUploading;
                         delete tempObj.tempId;
                     }
                 } catch (e) {
-                    console.error("Lỗi tải ảnh:", e);
-                    // Nếu lỗi thì xóa ảnh tạm đó đi khỏi danh sách
                     const idx = current.findIndex(i => i.tempId === tempObj.tempId);
                     if (idx > -1) current.splice(idx, 1);
                 } finally {
-                    URL.revokeObjectURL(localUrl);
+                    // Revoke sau render để tránh ảnh bị ? do blob đã bị giải phóng
+                    this.render(id);
+                    setTimeout(() => URL.revokeObjectURL(localUrl), 500);
                 }
             }));
-
-            // 4. LỌC VÀ LƯU LẠI VÀO FIREBASE (Đây là bước ngăn việc ảnh bị mất khi load lại)
-            // Chỉ giữ lại các ảnh đã có URL thật (đã bỏ isUploading)
-            const finalImagesToSave = current.filter(i => i.url && !i.url.startsWith('blob:'));
-            
-            await db.ref(`Workstation/${id}/documentImages`).set(finalImagesToSave);
-            
-            // Cập nhật lại UI cuối cùng
-            this.render(id);
-            Toast.fire({ icon: 'success', title: `Đã lưu ${files.length} ảnh thành công!` });
+            const finalImages = current.filter(i => !i.isUploading);
+            await db.ref(`Workstation/${id}/documentImages`).set(finalImages);
+            Toast.fire({ icon: 'success', title: `Đã lưu ảnh lên ${targetCloud}!` });
         },
 
         _pickCategory() {
