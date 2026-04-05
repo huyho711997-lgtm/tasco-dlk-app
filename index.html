@@ -32,6 +32,38 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .bottom-nav-active { color: #2563eb !important; }
         .bottom-nav-active .nav-icon-bg { background-color: #eff6ff; }
+        /* ====== BOTTOM NAV PRO (FLOATING) ====== */
+        .bottom-nav-wrapper {
+            position: fixed; bottom: env(safe-area-inset-bottom, 20px); left: 50%; transform: translateX(-50%);
+            width: calc(100% - 32px); max-width: 480px;
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 28px;
+            padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;
+            z-index: 40; box-shadow: 0 12px 36px -6px rgba(0, 0, 0, 0.15), 0 8px 12px -6px rgba(0, 0, 0, 0.1);
+        }
+        .nav-btn {
+            flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+            color: #94a3b8; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; background: transparent; border: none; outline: none;
+        }
+        .nav-btn.bottom-nav-active { color: #2563eb; transform: translateY(-2px); }
+        .nav-icon-wrap { position: relative; padding: 6px; border-radius: 14px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+        .nav-btn.bottom-nav-active .nav-icon-wrap { background: #eff6ff; }
+        .nav-btn::after { content: ''; position: absolute; bottom: -6px; width: 4px; height: 4px; border-radius: 50%; background: #2563eb; opacity: 0; transform: scale(0); transition: all 0.3s; }
+        .nav-btn.bottom-nav-active::after { opacity: 1; transform: scale(1); }
+        
+        .nav-btn-center {
+            width: 52px; height: 52px; background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border-radius: 20px; display: flex; align-items: center; justify-content: center;
+            color: white; box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+            transform: translateY(-16px); transition: all 0.2s; border: none; outline: none; cursor: pointer; flex-shrink: 0;
+        }
+        .nav-btn-center:active { transform: translateY(-14px) scale(0.95); }
+
+        [data-theme="dark"] .bottom-nav-wrapper { background: rgba(30, 41, 59, 0.9); border-color: rgba(255, 255, 255, 0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        [data-theme="dark"] .nav-btn { color: var(--text-muted); }
+        [data-theme="dark"] .nav-btn.bottom-nav-active { color: #60a5fa; }
+        [data-theme="dark"] .nav-btn.bottom-nav-active .nav-icon-wrap { background: rgba(59, 130, 246, 0.2); }
+        [data-theme="dark"] .nav-btn::after { background: #60a5fa; }
         .swal2-popup.custom-rounded { border-radius: 28px !important; padding: 1.5rem !important; }
         .input-field {
             width: 100%;
@@ -2022,8 +2054,56 @@
     <!-- MAIN -->
     <main class="flex-1 overflow-y-auto no-scrollbar pb-28 relative">
 
-        <!-- VIEW: DANH SÁCH -->
-        <div id="view-list" class="view-section p-5 block">
+        <div id="view-home" class="view-section p-5 block">
+            <div class="mb-6 mt-2">
+                <h2 class="text-2xl font-black text-slate-800 tracking-tight leading-tight">Xin chào, <br><span class="text-blue-600" id="home-greeting-name">Đồng nghiệp</span>! 👋</h2>
+                <p class="text-slate-500 text-[13px] font-medium mt-1.5">Chúc bạn một ngày làm việc hiệu quả.</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-[24px] p-5 text-white shadow-lg shadow-blue-200 mb-6 relative overflow-hidden">
+                <i data-lucide="shield" class="absolute -right-4 -bottom-4 w-32 h-32 text-white opacity-10"></i>
+                <p class="text-[11px] font-black uppercase tracking-widest opacity-80 mb-1">Hồ sơ đang xử lý</p>
+                <div class="flex items-baseline gap-2">
+                    <p class="text-4xl font-black" id="home-total-active">0</p>
+                    <span class="text-sm font-bold opacity-90">vụ</span>
+                </div>
+                
+                <div class="flex gap-4 mt-5 pt-4 border-t border-white/20">
+                    <div>
+                        <p class="text-[10px] font-bold opacity-80 uppercase">Tiếp nhận mới</p>
+                        <p class="text-lg font-black mt-0.5" id="home-received-today">0</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold opacity-80 uppercase">Hoàn tất tuần</p>
+                        <p class="text-lg font-black mt-0.5" id="home-done-week">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="font-black text-slate-800 text-sm mb-3">Công cụ & Báo cáo</h3>
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <button onclick="Nav.switchView('import', document.getElementById('nav-home-btn'))" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform text-center">
+                    <div class="w-10 h-10 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center"><i data-lucide="file-input" class="w-5 h-5"></i></div>
+                    <span class="text-xs font-bold text-slate-700">AI Nhập liệu</span>
+                </button>
+                <button onclick="PlateScanner.open()" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform text-center">
+                    <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center"><i data-lucide="scan-search" class="w-5 h-5"></i></div>
+                    <span class="text-xs font-bold text-slate-700">Quét Biển số</span>
+                </button>
+                <button onclick="Nav.switchView('report', document.getElementById('nav-home-btn'))" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform text-center col-span-2">
+                    <div class="w-10 h-10 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center"><i data-lucide="bar-chart-2" class="w-5 h-5"></i></div>
+                    <span class="text-xs font-bold text-slate-700">Xem Báo cáo Tổng hợp (Dashboard)</span>
+                </button>
+            </div>
+            
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-black text-slate-800 text-sm">Cần xử lý gấp</h3>
+            </div>
+            <div id="home-urgent-list" class="space-y-3">
+                </div>
+        </div>
+
+        <div id="view-list" class="view-section p-5 hidden">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="font-bold text-slate-800 flex items-center gap-2">
                     <i data-lucide="list-todo" class="w-4 h-4 text-blue-500"></i> Hồ sơ đang xử lý
@@ -2295,41 +2375,35 @@
     </main>
 
     <!-- BOTTOM NAV -->
-    <nav class="bg-white border-t border-slate-200 fixed bottom-0 w-full px-6 py-2 pb-6 z-30 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
-        <div class="flex justify-between items-center">
-            <button onclick="Nav.switchView('list', this)" class="nav-btn flex flex-col items-center gap-1 text-slate-400 bottom-nav-active">
-                <div class="nav-icon-bg w-12 h-8 rounded-full flex items-center justify-center transition-colors">
-                    <i data-lucide="home" class="w-5 h-5"></i>
-                </div>
-                <span class="text-[10px] font-bold">Hồ sơ</span>
-            </button>
-            <button onclick="Nav.switchView('overdue', this)" class="nav-btn flex flex-col items-center gap-1 text-slate-400 hover:text-blue-500 transition-colors">
-                <div class="nav-icon-bg w-12 h-8 rounded-full flex items-center justify-center transition-colors relative">
-                    <i data-lucide="shield-alert" class="w-5 h-5"></i>
-                    <span id="warn-nav-badge" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center leading-none"></span>
-                </div>
-                <span class="text-[10px] font-bold">Cảnh báo</span>
-            </button>
-            <button onclick="Nav.switchView('calendar', this)" class="nav-btn flex flex-col items-center gap-1 text-slate-400 hover:text-blue-500 transition-colors">
-                <div class="nav-icon-bg w-12 h-8 rounded-full flex items-center justify-center transition-colors">
-                    <i data-lucide="calendar" class="w-5 h-5"></i>
-                </div>
-                <span class="text-[10px] font-bold">Lịch</span>
-            </button>
-            <button onclick="Nav.switchView('report', this)" class="nav-btn flex flex-col items-center gap-1 text-slate-400 hover:text-blue-500 transition-colors">
-                <div class="nav-icon-bg w-12 h-8 rounded-full flex items-center justify-center transition-colors">
-                    <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
-                </div>
-                <span class="text-[10px] font-bold">Báo cáo</span>
-            </button>
-            <button onclick="Nav.switchView('import', this)" class="nav-btn flex flex-col items-center gap-1 text-slate-400 hover:text-blue-500 transition-colors">
-                <div class="nav-icon-bg w-12 h-8 rounded-full flex items-center justify-center transition-colors">
-                    <i data-lucide="bot" class="w-5 h-5"></i>
-                </div>
-                <span class="text-[10px] font-bold">AI</span>
+    <div class="bottom-nav-wrapper">
+        <button id="nav-home-btn" onclick="Nav.switchView('home', this)" class="nav-btn bottom-nav-active">
+            <div class="nav-icon-wrap"><i data-lucide="layout-dashboard" class="w-5 h-5"></i></div>
+            <span class="text-[9px] font-bold">Trang chủ</span>
+        </button>
+        <button id="nav-list-btn" onclick="Nav.switchView('list', this)" class="nav-btn">
+            <div class="nav-icon-wrap"><i data-lucide="list-todo" class="w-5 h-5"></i></div>
+            <span class="text-[9px] font-bold">Hồ sơ</span>
+        </button>
+        
+        <div class="relative">
+            <button onclick="AI.toggle()" class="nav-btn-center">
+                <div class="absolute inset-0 rounded-[20px] bg-indigo-400 animate-ping opacity-30"></div>
+                <i data-lucide="sparkles" class="w-6 h-6 relative z-10"></i>
             </button>
         </div>
-    </nav>
+
+        <button id="nav-overdue-btn" onclick="Nav.switchView('overdue', this)" class="nav-btn">
+            <div class="nav-icon-wrap relative">
+                <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                <span id="warn-nav-badge" class="hidden absolute -top-1 -right-1 w-3.5 h-3.5 bg-rose-500 text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none border-2 border-white"></span>
+            </div>
+            <span class="text-[9px] font-bold">Cảnh báo</span>
+        </button>
+        <button id="nav-calendar-btn" onclick="Nav.switchView('calendar', this)" class="nav-btn">
+            <div class="nav-icon-wrap"><i data-lucide="calendar" class="w-5 h-5"></i></div>
+            <span class="text-[9px] font-bold">Lịch</span>
+        </button>
+    </div>
 
     <!-- PLATE SCANNER MODAL -->
     <div id="plate-scanner-modal">
@@ -4454,23 +4528,21 @@
     };    
     const Nav = {
         calendarInit: false,
-        viewTitles: { list:'Mobile App', overdue:'Bảng cảnh báo', import:'Tiếp nhận tự động', calendar:'Lịch làm việc', report:'Báo cáo tổng hợp' },
+        viewTitles: { home: 'Trang chủ', list:'Hồ sơ bồi thường', overdue:'Bảng cảnh báo', import:'Tiếp nhận tự động', calendar:'Lịch làm việc', report:'Báo cáo tổng hợp' },
         switchView(view, btn) {
             document.querySelectorAll('.view-section').forEach(s => { s.classList.add('hidden'); s.classList.remove('block'); });
             const target = document.getElementById('view-'+view);
             if (target) { target.classList.remove('hidden'); target.classList.add(view==='calendar'?'flex':'block'); }
-            if (btn) {
-                document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('bottom-nav-active'); b.classList.add('text-slate-400'); });
-                btn.classList.add('bottom-nav-active'); btn.classList.remove('text-slate-400');
-            }
-            document.getElementById('header-subtitle').textContent = this.viewTitles[view]||'Mobile App';
             
-            // --- THÊM LOGIC ẨN/HIỆN NÚT AI TẠI ĐÂY ---
-            const aiFab = document.getElementById('ai-fab');
-            if (aiFab) {
-                aiFab.style.display = (view === 'calendar') ? 'none' : 'flex';
+            // Áp dụng CSS cho nút bấm trên Bottom Bar
+            if (btn) {
+                document.querySelectorAll('.nav-btn').forEach(b => { 
+                    b.classList.remove('bottom-nav-active'); 
+                });
+                btn.classList.add('bottom-nav-active');
             }
-            // ------------------------------------------
+
+            document.getElementById('header-subtitle').textContent = this.viewTitles[view]||'Mobile App';
 
             if (view==='report') Report.open();
             if (view==='calendar') {
@@ -4504,7 +4576,60 @@
         },
         _updateUI() {
             this.searchData(); this._updateKPIs(); WarnBoard.render();
+            this._updateHomeDashboard(); // Render dữ liệu lên Trang Chủ
             if (Cal.instance) { Cal.instance.refetchEvents(); Cal._updateStats(); Cal._showTodayAgenda(); }
+        },
+        _updateHomeDashboard() {
+            const user = Auth.getCurrentUser();
+            if(user) document.getElementById('home-greeting-name').textContent = user.name;
+
+            const allActive = this.masterData.filter(i => parseInt(i.step) < 7);
+            document.getElementById('home-total-active').textContent = allActive.length;
+
+            const receivedToday = this.masterData.filter(i=>{ const t=i.stepUpdatedAt||i.createdAt; return t&&i.step===1&&moment(t).isSame(moment(),'day'); }).length;
+            document.getElementById('home-received-today').textContent = receivedToday;
+
+            const doneThisWeek = this.masterData.filter(i=>{ return i.invoiceDoneAt && moment(i.invoiceDoneAt).isSame(moment(),'week'); }).length;
+            document.getElementById('home-done-week').textContent = doneThisWeek;
+
+            // Lấy 3 hồ sơ gấp hoặc trễ nhất
+            const urgentList = document.getElementById('home-urgent-list');
+            const urgentItems = this.masterData.filter(i => i.urgent || (i.step === 5 && moment().diff(moment(i.stepUpdatedAt), 'days') >= 3)).slice(0, 3); 
+
+            if(!urgentItems.length) {
+                urgentList.innerHTML = `<div class="text-center py-6 bg-white rounded-2xl border border-slate-100 shadow-sm"><p class="text-xs font-bold text-emerald-500">🎉 Không có hồ sơ tồn đọng gấp.</p></div>`;
+            } else {
+                urgentList.innerHTML = urgentItems.map(item => {
+                    const isOverdue = !item.urgent; 
+                    const theme = STATUS.theme(item.step);
+                    return `
+                    <div onclick="Modal.open('${item.id}')" class="bg-white rounded-2xl shadow-sm border border-rose-100 p-3 flex justify-between items-center active:scale-[0.98] transition-transform cursor-pointer" style="border-left: 3px solid #ef4444;">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-black text-slate-800 text-sm uppercase">${item.bsx||'—'}</span>
+                                ${isOverdue ? '<span class="text-[8px] font-black bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded">CHẬM DUYỆT</span>' : '<span class="text-[8px] font-black bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded">GẤP</span>'}
+                            </div>
+                            <p class="text-[10px] text-slate-500">${item.customer||'—'} · <span class="${theme.text} font-bold">${STATUS.label(item.step)}</span></p>
+                        </div>
+                        <button class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>`;
+                }).join('');
+                lucide.createIcons();
+            }
+            
+            // Đồng bộ chấm đỏ thông báo Cảnh báo
+            const homeWarnBadge = document.getElementById('home-warn-badge');
+            const navWarnBadge = document.getElementById('warn-nav-badge');
+            if(homeWarnBadge && navWarnBadge) {
+                homeWarnBadge.textContent = navWarnBadge.textContent;
+                if(!navWarnBadge.classList.contains('hidden')) {
+                    homeWarnBadge.classList.remove('hidden');
+                } else {
+                    homeWarnBadge.classList.add('hidden');
+                }
+            }
         },
         debounceSearch() {
             clearTimeout(this._searchTimer);
@@ -14731,14 +14856,6 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round"><path d="M18 15l-6-6-6 6"/></svg>
         </button>
 
-        <!-- AI FAB — luôn hiển thị -->
-        <button id="ai-fab" onclick="AI.toggle()">
-            <div class="fab-pulse"></div>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
-                <path d="M12 2a10 10 0 0110 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"/>
-                <path d="M8 12h.01M12 12h.01M16 12h.01"/>
-            </svg>
-        </button>
 
     </div>   
     <div id="noti-panel">
