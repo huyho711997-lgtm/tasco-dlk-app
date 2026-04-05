@@ -4925,7 +4925,7 @@
             const apptLabel = item.appointmentTime ? moment(item.appointmentTime).format('HH:mm - DD/MM') : 'Chưa có lịch';
             const carModel = [item.hangXe, item.loaiXe].filter(Boolean).join(' ') || 'Chưa rõ xe';
             
-            // Nút gọi điện & Zalo nhỏ gọn
+            // Nút gọi điện & Zalo
             const cleanPhone = String(item.phone || '').replace(/\D/g,'');
             const cleanGaraPhone = String(item.garaAdvisorPhone || item.garaPhone || '').replace(/\D/g,'');
             
@@ -4942,6 +4942,18 @@
                 ? `<span class="inline-flex items-center gap-0.5 text-[9px] font-black text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded ml-1.5"><i data-lucide="layers" class="w-2.5 h-2.5"></i> ${dmCount}</span>`
                 : '';
 
+            // VẼ SVG HÌNH BIỂN SỐ XE
+            const plateSvg = `
+                <svg height="24" viewBox="0 0 110 26" class="drop-shadow-sm shrink-0">
+                    <rect x="1" y="1" width="108" height="24" rx="4" fill="#ffffff" stroke="#0f172a" stroke-width="2"/>
+                    <circle cx="6" cy="6" r="1.5" fill="#94a3b8"/>
+                    <circle cx="104" cy="6" r="1.5" fill="#94a3b8"/>
+                    <circle cx="6" cy="20" r="1.5" fill="#94a3b8"/>
+                    <circle cx="104" cy="20" r="1.5" fill="#94a3b8"/>
+                    <text x="55" y="18" font-family="monospace, sans-serif" font-size="13" font-weight="900" fill="#0f172a" text-anchor="middle" letter-spacing="1">${item.bsx || 'NO-BSX'}</text>
+                </svg>
+            `;
+
             return `
             <div onclick="Modal.open('${item.id}')" class="ticket-card cursor-pointer">
                 ${item.urgent ? `<div class="ticket-urgent-ribbon">GẤP</div>` : ''}
@@ -4949,26 +4961,31 @@
                 <div class="flex justify-between items-start mb-3">
                     <div class="pr-6">
                         <div class="flex items-center">
-                            <h3 class="font-black text-slate-800 text-[17px] tracking-tight uppercase leading-none">${item.bsx || 'CHƯA CÓ BSX'}</h3>
+                            ${plateSvg}
                             ${dmChip}
                         </div>
-                        <p class="text-[10px] text-slate-500 font-medium mt-1 truncate max-w-[200px]">${item.claimCode || '—'} • ${carModel}</p>
+                        <p class="text-[10px] text-slate-500 font-medium mt-1.5 truncate max-w-[200px]">${item.claimCode || '—'} • ${carModel}</p>
                     </div>
                     <span class="text-[9px] font-black px-2 py-1 rounded-lg ${theme.bg} ${theme.text} shrink-0 uppercase tracking-wide border border-current opacity-80">${STATUS.label(item.step)}</span>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2 mb-3">
-                    <div class="ticket-info-row mb-0">
-                        <div class="ticket-icon bg-blue-50"><i data-lucide="user" class="w-3.5 h-3.5 text-blue-500"></i></div>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div class="flex items-center gap-2.5">
+                        <div style="width:34px;height:34px;background:rgba(59,130,246,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(59,130,246,0.2);">
+                            <i data-lucide="user" style="color:#2563eb" class="w-4 h-4"></i>
+                        </div>
                         <div class="min-w-0 flex-1">
-                            <p class="text-[11px] font-bold text-slate-700 truncate">${item.customer || 'Khách hàng'}</p>
-                            <p class="text-[10px] text-slate-400 font-mono mt-0.5">${item.phone || 'Chưa có SĐT'}</p>
+                            <p class="text-[11px] font-extrabold text-slate-700 truncate">${item.customer || 'Khách hàng'}</p>
+                            <p class="text-[10px] text-slate-500 font-medium mt-0.5">${item.phone || 'Chưa có SĐT'}</p>
                         </div>
                     </div>
-                    <div class="ticket-info-row mb-0">
-                        <div class="ticket-icon bg-teal-50"><i data-lucide="wrench" class="w-3.5 h-3.5 text-teal-500"></i></div>
+                    
+                    <div class="flex items-center gap-2.5">
+                        <div style="width:34px;height:34px;background:rgba(20,184,166,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(20,184,166,0.2);">
+                            <i data-lucide="wrench" style="color:#0d9488" class="w-4 h-4"></i>
+                        </div>
                         <div class="min-w-0 flex-1">
-                            <p class="text-[11px] font-bold text-slate-700 truncate">${item.garaName || 'Chưa gán Gara'}</p>
+                            <p class="text-[11px] font-extrabold text-slate-700 truncate">${item.garaName || 'Chưa gán Gara'}</p>
                             <p class="text-[10px] ${item.appointmentTime ? 'text-amber-600 font-bold' : 'text-slate-400'} mt-0.5">${apptLabel}</p>
                         </div>
                     </div>
@@ -4990,7 +5007,7 @@
             </div>`;
         },
 
-        
+
         _timelineHTML(item) {
             const fmt = iso => iso ? moment(iso).format('DD/MM') : null;
             const diffDays = (a,b) => (!a||!b)?null:Math.floor((new Date(b)-new Date(a))/86400000);
