@@ -9788,7 +9788,12 @@
             }
 
             const tiles = imgs.map((img, idx) => {
-                const url = typeof img === 'string' ? img : img.url;
+                let url = typeof img === 'string' ? img : img.url;
+                // Chuyển đổi URL Drive cũ (thumbnail?id=) sang URL nhúng được vào <img>
+                const driveMatch = url && url.match(/[?&]id=([\w-]+)/);
+                if (driveMatch && url.includes('drive.google.com/thumbnail')) {
+                    url = 'https://lh3.googleusercontent.com/d/' + driveMatch[1];
+                }
                 const isSelected = this._selected.has(idx);
                 const isUploading = img.isUploading;
                 const wrapClasses = isSelected ? 'border-rose-500 scale-90' : 'border-slate-100';
@@ -9968,7 +9973,13 @@
             const dots = document.getElementById('iv-dots');
             const img = this._imgs[this._idx];
             if (!img || !el) return;
-            el.src = img.url || img;
+            let imgSrc = img.url || img;
+            // Chuyển đổi URL Drive cũ sang URL nhúng được
+            const driveMatch2 = imgSrc && imgSrc.match(/[?&]id=([\w-]+)/);
+            if (driveMatch2 && imgSrc.includes('drive.google.com/thumbnail')) {
+                imgSrc = 'https://lh3.googleusercontent.com/d/' + driveMatch2[1];
+            }
+            el.src = imgSrc;
             const catInfo = IMG_CATS[img.cat] || IMG_CATS.other;
             if (cat) cat.textContent = catInfo.emoji + ' ' + catInfo.label;
             if (cnt) cnt.textContent = `${this._idx + 1} / ${this._imgs.length}`;
