@@ -4720,69 +4720,103 @@
             const phone = String(item.phone||'').replace(/\D/g,'');
             const daysLate = this._daysLateHTML(item.notifyDate);
             const timeline = this._timelineHTML(item);
-            const apptLabel = item.appointmentTime ? moment(item.appointmentTime).format('HH:mm<br>DD/MM') : 'Chưa xếp';
+            const apptLabel = item.appointmentTime ? moment(item.appointmentTime).format('HH:mm DD/MM') : 'Chưa xếp lịch';
             
             // Lấy số Zalo: Ưu tiên Cố vấn dịch vụ -> Chủ xe
             const zaloPhone = item.garaAdvisorPhone || item.phone || '';
+            
+            // Nút Zalo thiết kế nét viền (Outline) mỏng, nền trắng để card trông "sạch" hơn
             const phoneBtn = zaloPhone
-                ? `<button onclick="event.stopPropagation(); ZaloHelper.showMenu('${item.id}')" class="flex-1 bg-blue-50 text-blue-700 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border border-blue-200 active:bg-blue-100 transition-colors">
-                    <svg width="14" height="14" viewBox="0 0 460 460"><path fill="#0068ff" d="M230,0C103.3,0,0,84,0,207.2c0,65.3,33.5,124,86,162.2c-7.3,25.6-26.8,61.5-27.4,62.8 c-2,3.9,1.1,8.3,5.2,6.7c25.1-8.5,75.4-29.3,95.5-38.9c22.6,4.6,46.5,7.1,71.1,7.1c126.7,0,230-84,230-207.2C460,84,356.7,0,230,0z M116.8,255.4c-4,1.8-8.2,2.8-12.7,2.8c-18.7,0-34-15.3-34-34s15.3-34,34-34s34,15.3,34,34c0,3.3-0.5,6.6-1.4,9.6l-20.9-12.6 c-2.4-1.5-5.6-0.7-7.1,1.7c-1.5,2.4-0.7,5.6,1.7,7.1l20.8,12.6C127.2,246.5,122.5,251.7,116.8,255.4z M157.9,251.5h-16.1 c-2.9,0-5.2-2.3-5.2-5.2v-73.4c0-2.9,2.3-5.2,5.2-5.2h16.1c2.9,0,5.2,2.3,5.2,5.2v73.4C163.1,249.2,160.8,251.5,157.9,251.5z M253.9,251.5h-38.5c-4.9,0-8.9-4-8.9-8.9v-64.6c0-4.9,4-8.9,8.9-8.9h38.5c4.9,0,8.9,4,8.9,8.9v10.9c0,4.9-4,8.9-8.9,8.9h-24v5.3 h24c4.9,0,8.9,4,8.9,8.9v10.9c0,4.9-4,8.9-8.9,8.9h-24v5.3h24c4.9,0,8.9,4,8.9,8.9v10.9C262.8,247.5,258.8,251.5,253.9,251.5z M323,248.8l-37,3.6c-4.2,0.4-7.9-2.7-8.3-6.8c-0.4-3.7,2.1-7.1,5.8-8.1l32.2-9.2v-11.2l-37-12c-3.8-1.2-6-5.3-4.8-9.1 c1.1-3.4,4.5-5.3,8-4.6l33.8,6v-10.4l-36-8.9c-4-1-6.4-5-5.4-9c0.9-3.5,4.3-5.6,7.8-4.9l46.2,10.6c3.1,0.7,5.3,3.5,5.3,6.7v52 C333.6,243.2,328.8,248.2,323,248.8z"/></svg>
-                    Nhắn Zalo
-                </button>`
-                : `<button disabled class="flex-1 bg-slate-50 text-slate-400 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border border-slate-100"><i data-lucide="message-square-off" class="w-3.5 h-3.5"></i> Trống SĐT</button>`;
-            const borderColors = {1:'#3b82f6',2:'#f59e0b',3:'#06b6d4',4:'#6366f1',5:'#8b5cf6',6:'#10b981',7:'#16a34a',8:'#f43f5e'};
+                ? `<button onclick="event.stopPropagation(); ZaloHelper.showMenu('${item.id}')" class="flex-1 bg-white text-blue-600 py-3 rounded-[14px] text-xs font-bold flex items-center justify-center gap-2 border border-slate-200 hover:border-blue-300 active:bg-blue-50 transition-colors">
+                    <i data-lucide="message-circle" class="w-4 h-4"></i> Zalo
+                   </button>`
+                : `<button disabled class="flex-1 bg-slate-50 text-slate-400 py-3 rounded-[14px] text-xs font-bold flex items-center justify-center gap-2 border border-slate-100"><i data-lucide="message-square-off" class="w-4 h-4"></i> Trống SĐT</button>`;
+            
             const statusIcons = {
-                1:'<svg class="w-3 h-3 inline" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 2v8M4 7l4 4 4-4"/><path d="M2 13h12"/></svg>',
-                2:'<svg class="w-3 h-3 inline" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1v3M11 1v3M2 7h12"/></svg>',
-                3:'<svg class="w-3 h-3 inline" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="6" cy="6" r="4"/><path d="M9.5 9.5L14 14"/></svg>',
-                4:'<svg class="w-3 h-3 inline" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 2h6l3 3v9H4z"/><path d="M10 2v3h3M6 8h4M6 11h3"/></svg>',
-                5:'<svg class="w-3 h-3 inline" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>',
-                6:'<svg class="w-3 h-3 inline" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 2h10v12l-2-1-2 1-2-1-2 1-2-1V2z"/><path d="M6 6h4M6 9h3"/></svg>',
-                7:'<svg class="w-3 h-3 inline" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 8l4 4 8-8"/></svg>',
-                8:'<svg class="w-3 h-3 inline" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 2v4M8 10v4M2 8h4M10 8h4"/></svg>'
+                1:'<i data-lucide="inbox" class="w-3.5 h-3.5 inline"></i>',
+                2:'<i data-lucide="calendar-clock" class="w-3.5 h-3.5 inline"></i>',
+                3:'<i data-lucide="camera" class="w-3.5 h-3.5 inline"></i>',
+                4:'<i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 inline"></i>',
+                5:'<i data-lucide="shield-alert" class="w-3.5 h-3.5 inline"></i>',
+                6:'<i data-lucide="receipt" class="w-3.5 h-3.5 inline"></i>',
+                7:'<i data-lucide="check-circle-2" class="w-3.5 h-3.5 inline"></i>',
+                8:'<i data-lucide="folder-open" class="w-3.5 h-3.5 inline"></i>'
             };
-            const cardBorderColor = borderColors[item.step]||'#3b82f6';
-            const statusIcon = statusIcons[item.step]||'';
+            const statusIcon = statusIcons[item.step] || '';
             const dmCount = (item.damageItems||[]).length;
+            
+            // Badge trạng thái thiết kế bo tròn dạng viên thuốc (Pill shape)
+            const statusBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 ${theme.bg} ${theme.text} text-[10px] font-extrabold rounded-full uppercase tracking-wide border border-current opacity-90">${statusIcon} ${STATUS.label(item.step)}</span>`;
+
+            // Badge Hạng mục thiết kế tinh tế hơn, không dùng màu chói
             const dmChip = dmCount > 0
-                ? `<span class="inline-flex items-center gap-1 text-[9px] font-black text-rose-600 bg-rose-50 border border-rose-100 px-1.5 py-0.5 rounded-md ml-1"><svg class="w-2.5 h-2.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l10 10M8 3h5v5M3 8v5h5"/></svg>${dmCount} HM</span>`
+                ? `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-slate-600 bg-slate-100 px-2.5 py-1.5 rounded-full"><i data-lucide="clipboard-list" class="w-3 h-3 text-rose-500"></i> ${dmCount} mục</span>`
                 : '';
-            const garaChip = item.garaName
-                ? (`<div class="flex items-center gap-1.5 mb-2 px-2.5 py-1.5 bg-teal-50 rounded-xl border border-teal-100"><div class="w-6 h-6 bg-teal-100 rounded-lg flex items-center justify-center shrink-0"><i data-lucide="wrench" class="w-3 h-3 text-teal-600"></i></div><div class="min-w-0 flex-1"><p class="font-bold text-teal-800 text-xs truncate">${item.garaName}</p>${item.garaAddress?'<p class="text-[10px] text-teal-500 truncate">'+item.garaAddress+'</p>':''}</div>${item.garaPhone?'<a href="tel:'+item.garaPhone+'" onclick="event.stopPropagation()" class="shrink-0 w-7 h-7 bg-teal-500 rounded-lg flex items-center justify-center active:scale-90 transition-transform"><i data-lucide="phone" class="w-3 h-3 text-white"></i></a>':''}</div>`)
+                
+            // Thông tin Gara: Phẳng, icon nằm trong hình tròn, không có khối nền xám
+            const garaInfo = item.garaName
+                ? `<div class="flex items-center gap-3">
+                     <div class="w-9 h-9 rounded-full bg-teal-50 flex items-center justify-center shrink-0">
+                         <i data-lucide="wrench" class="w-4 h-4 text-teal-600"></i>
+                     </div>
+                     <div class="min-w-0 flex-1">
+                         <p class="font-bold text-slate-800 text-[13px] truncate">${item.garaName}</p>
+                         ${item.garaAddress ? `<p class="text-[11px] text-slate-500 truncate mt-0.5">${item.garaAddress}</p>` : ''}
+                     </div>
+                   </div>`
                 : '';
+
             return `
-            <div onclick="Modal.open('${item.id}')" class="bg-white rounded-2xl shadow-sm border border-slate-100 active:scale-[0.98] transition-transform relative overflow-hidden" style="border-left: 3px solid ${cardBorderColor};">
-                ${item.urgent?`<div class="absolute top-0 right-0 w-0 h-0 border-t-[32px] border-t-rose-500 border-l-[32px] border-l-transparent z-10"></div><i data-lucide="alert-triangle" class="absolute top-1 right-1 w-3.5 h-3.5 text-white z-20"></i>`:''}
-                <div class="p-3">
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="flex-1 min-w-0 pr-2">
-                            <div class="flex items-center gap-1.5 mb-1 flex-wrap">
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 ${theme.bg} ${theme.text} text-[10px] font-black rounded-md uppercase tracking-wide">${statusIcon} ${STATUS.label(item.step)}</span>
-                                ${dmChip}
-                            </div>
-                            <h3 class="font-black text-slate-800 text-lg tracking-tight uppercase leading-none">${item.bsx||'CHƯA CÓ BSX'}</h3>
-                            ${(item.hangXe||item.loaiXe)?'<p class="text-[10px] font-bold text-orange-500 mt-0.5 uppercase">'+[item.hangXe,item.loaiXe].filter(Boolean).join(' · ')+'</p>':''}
-                            <p class="text-[10px] text-slate-400 font-mono">${item.claimCode||'—'}</p>
-                            ${daysLate}
-                        </div>
-                        ${(item.appointmentTime&&item.step<=2)?`<div class="text-right shrink-0" style="min-width:64px"><div onclick="event.stopPropagation(); Card.openApptPicker('${item.id}')" class="bg-slate-50 px-2 py-1.5 rounded-xl border border-slate-100 text-center active:bg-blue-50 active:border-blue-200 transition-colors cursor-pointer"><p class="text-[8px] text-slate-400 font-black uppercase mb-0.5">Giờ hẹn</p><p class="font-black text-[12px] leading-tight text-blue-600">${apptLabel}</p></div></div>`:''}
+            <div onclick="Modal.open('${item.id}')" class="bg-white rounded-[24px] border border-slate-200 mb-4 p-5 active:scale-[0.98] transition-transform cursor-pointer relative" style="box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                ${item.urgent ? `<div class="absolute top-0 right-0 bg-rose-500 text-white text-[9px] font-black px-3 py-1.5 rounded-bl-2xl rounded-tr-[24px] z-10 flex items-center gap-1"><i data-lucide="alert-triangle" class="w-3 h-3"></i> GẤP</div>` : ''}
+
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex flex-wrap gap-2 items-center">
+                        ${statusBadge}
+                        ${dmChip}
                     </div>
-                    <div class="flex items-center gap-2 text-sm text-slate-600 mb-2 bg-slate-50/50 px-2.5 py-2 rounded-xl border border-slate-100">
-                        <div class="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center shrink-0"><i data-lucide="user" class="w-3 h-3"></i></div>
-                        <div class="min-w-0"><p class="font-bold text-slate-800 text-xs truncate">${item.customer||'Chưa cập nhật tên'}</p><p class="text-[10px] text-slate-500">${item.phone||'Chưa có SĐT'}</p></div>
-                    </div>
-                    ${garaChip}
-                    ${timeline}
-                    <div class="flex gap-2">
-                        ${phoneBtn}
-                        <button onclick="event.stopPropagation(); Modal.openStatusSheet('${item.id}')"
-                            class="flex-1 bg-blue-600 text-white py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm shadow-blue-200 active:bg-blue-700 transition-colors">
-                            <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Tiến độ
-                        </button>
-                    </div>
-                    ${item.step===2?`<button onclick="event.stopPropagation(); Inspection.markInspected('${item.id}')" class="w-full mt-1.5 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 active:bg-emerald-700 transition-colors shadow-sm shadow-emerald-200"><i data-lucide="check-check" class="w-3.5 h-3.5"></i> Đã giám định xong</button>`:''}
-                    ${Inspection.countdownBadge(item)?`<div class="mt-1.5">${Inspection.countdownBadge(item)}</div>`:''}
+                    ${(item.appointmentTime && item.step <= 2) ? `<span onclick="event.stopPropagation(); Card.openApptPicker('${item.id}')" class="text-[11px] font-bold text-blue-600 bg-blue-50/50 px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-blue-100 hover:bg-blue-100 transition-colors"><i data-lucide="calendar-clock" class="w-3.5 h-3.5"></i> ${apptLabel}</span>` : `<span class="text-[10px] font-semibold text-slate-400">${moment(item.stepUpdatedAt).fromNow()}</span>`}
                 </div>
+
+                <div class="mb-5">
+                    <h3 class="font-black text-slate-900 text-[24px] tracking-tight uppercase leading-none mb-2">${item.bsx || 'CHƯA CÓ BSX'}</h3>
+                    <div class="flex items-center flex-wrap gap-2 text-[12px] text-slate-500 font-medium">
+                        <span class="font-mono bg-slate-100 px-2 py-0.5 rounded-md text-slate-600">${item.claimCode || 'Chưa có mã'}</span>
+                        ${(item.hangXe || item.loaiXe) ? `<span>•</span><span class="uppercase font-bold text-slate-700">${[item.hangXe, item.loaiXe].filter(Boolean).join(' ')}</span>` : ''}
+                    </div>
+                    <div class="mt-1">${daysLate}</div>
+                </div>
+
+                <hr class="border-dashed border-slate-200 mb-4">
+
+                <div class="flex flex-col gap-4 mb-5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                            <i data-lucide="user" class="w-4 h-4 text-blue-600"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[13px] font-bold text-slate-800 truncate">${item.customer || 'Chưa cập nhật KH'}</p>
+                            <p class="text-[11px] text-slate-500 font-mono mt-0.5">${item.phone || 'Chưa có SĐT'}</p>
+                        </div>
+                        ${phone ? `<a href="tel:${phone}" onclick="event.stopPropagation()" class="w-9 h-9 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center shrink-0 active:bg-emerald-100 transition-colors border border-emerald-100"><i data-lucide="phone" class="w-4 h-4"></i></a>` : ''}
+                    </div>
+
+                    ${garaInfo}
+                </div>
+
+                <div class="mb-5">
+                    ${timeline}
+                </div>
+
+                <div class="flex gap-3 mt-auto">
+                    ${phoneBtn}
+                    <button onclick="event.stopPropagation(); Modal.openStatusSheet('${item.id}')" class="flex-[1.5] bg-[#0f172a] text-white py-3 rounded-[14px] text-xs font-bold flex items-center justify-center gap-2 active:bg-slate-800 transition-colors">
+                        Cập nhật tiến độ
+                    </button>
+                </div>
+                
+                ${item.step === 2 ? `<button onclick="event.stopPropagation(); Inspection.markInspected('${item.id}')" class="w-full mt-3 py-3.5 bg-[#0d9488] text-white rounded-[14px] text-xs font-bold flex items-center justify-center gap-1.5 active:bg-teal-700 transition-colors"><i data-lucide="check-circle-2" class="w-4 h-4"></i> Đã Giám Định Xong</button>` : ''}
+                ${Inspection.countdownBadge(item) ? `<div class="mt-3 text-center">${Inspection.countdownBadge(item)}</div>` : ''}
             </div>`;
         },
         _timelineHTML(item) {
