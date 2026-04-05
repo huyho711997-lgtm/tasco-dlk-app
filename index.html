@@ -207,13 +207,28 @@
         [data-theme="dark"] body { color: var(--text-primary); }
         
         [data-theme="dark"] .bg-white,
-        [data-theme="dark"] header,
         [data-theme="dark"] nav,
         [data-theme="dark"] #ai-panel,
         [data-theme="dark"] #gd-notify-panel { 
             background-color: var(--bg-white) !important; 
             border-color: var(--border-light) !important; 
         }
+        
+        /* Tinh chỉnh riêng Header & Search Bar cho Dark Mode */
+        [data-theme="dark"] header {
+            background: var(--bg-app) !important; /* Nền header tiệp với nền app */
+            border-bottom-color: var(--border-light) !important;
+        }
+        [data-theme="dark"] #global-search {
+            background-color: var(--bg-white) !important;
+            border-color: var(--border-light) !important;
+            color: var(--text-primary) !important;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important;
+        }
+        [data-theme="dark"] #global-search::placeholder { color: var(--text-muted) !important; }
+        
+        /* Giữ màu chữ trắng trên các thẻ Gradient */
+        .quick-card-text { color: #ffffff !important; }
 
         [data-theme="dark"] .bg-slate-50, 
         [data-theme="dark"] .bg-slate-100,
@@ -2011,17 +2026,18 @@
     </div>
 
     <!-- HEADER -->
-    <header class="bg-gradient-to-b from-white to-slate-50/50 px-4 pt-4 pb-3 border-b border-slate-200/60 shrink-0 z-20 shadow-sm relative">
+    <header class="bg-white px-4 pt-4 pb-3 border-b border-slate-200/60 shrink-0 z-20 shadow-sm relative transition-colors">
         <div class="flex justify-between items-center mb-3">
             <div class="flex items-center gap-2.5">
-                <button onclick="Sidebar.open()" class="p-1.5 -ml-1.5 text-slate-500 hover:text-blue-600 active:bg-blue-50 rounded-xl transition-all">
+                <button onclick="Sidebar.open()" class="p-1.5 -ml-1.5 text-slate-500 hover:text-blue-600 active:bg-slate-100 rounded-xl transition-all">
                     <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
-                <div class="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl shadow-md shadow-blue-200 flex items-center justify-center">
-                    <i data-lucide="shield-check" class="w-5 h-5 text-white"></i>
+                <div class="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl shadow-md shadow-blue-500/30 flex items-center justify-center relative">
+                    <div class="absolute inset-0 rounded-xl border border-white/20"></div>
+                    <i data-lucide="shield-check" class="w-5 h-5 text-white drop-shadow-md"></i>
                 </div>
                 <div class="ml-1">
-                    <h1 class="font-black text-[18px] text-slate-800 tracking-tight leading-none mb-1">TASCO <span class="text-blue-600">DLK</span></h1>
+                    <h1 class="font-black text-[18px] text-slate-800 tracking-tight leading-none mb-1">TASCO <span class="text-blue-500 drop-shadow-sm">DLK</span></h1>
                     <p class="text-[9px] text-slate-500 uppercase font-extrabold tracking-widest leading-none" id="header-subtitle">Mobile App</p>
                 </div>
             </div>
@@ -2090,17 +2106,34 @@
 
             <h3 class="font-black text-slate-800 text-sm mb-3">Công cụ & Báo cáo</h3>
             <div class="grid grid-cols-2 gap-3 mb-6">
-                <button onclick="Nav.switchView('import', document.getElementById('nav-home-btn'))" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform text-center">
-                    <div class="w-10 h-10 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center"><i data-lucide="file-input" class="w-5 h-5"></i></div>
-                    <span class="text-xs font-bold text-slate-700">AI Nhập liệu</span>
+                <button onclick="Nav.switchView('import', document.getElementById('nav-home-btn'))" 
+                    class="relative p-4 rounded-2xl border-none shadow-lg shadow-indigo-500/20 flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform text-center overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 group">
+                    <div class="absolute inset-0 bg-white/10 opacity-0 group-active:opacity-100 transition-opacity"></div>
+                    <div class="w-10 h-10 bg-white/20 backdrop-blur-sm text-white rounded-full flex items-center justify-center shadow-inner border border-white/20 relative z-10">
+                        <i data-lucide="file-input" class="w-5 h-5 drop-shadow-md"></i>
+                    </div>
+                    <span class="text-xs font-bold drop-shadow-sm relative z-10 quick-card-text">AI Nhập liệu</span>
                 </button>
-                <button onclick="PlateScanner.open()" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform text-center">
-                    <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center"><i data-lucide="scan-search" class="w-5 h-5"></i></div>
-                    <span class="text-xs font-bold text-slate-700">Quét Biển số</span>
+                
+                <button onclick="PlateScanner.open()" 
+                    class="relative p-4 rounded-2xl border-none shadow-lg shadow-emerald-500/20 flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform text-center overflow-hidden bg-gradient-to-br from-teal-400 to-emerald-500 group">
+                    <div class="absolute inset-0 bg-white/10 opacity-0 group-active:opacity-100 transition-opacity"></div>
+                    <div class="w-10 h-10 bg-white/20 backdrop-blur-sm text-white rounded-full flex items-center justify-center shadow-inner border border-white/20 relative z-10">
+                        <i data-lucide="scan-search" class="w-5 h-5 drop-shadow-md"></i>
+                    </div>
+                    <span class="text-xs font-bold drop-shadow-sm relative z-10 quick-card-text">Quét Biển số</span>
                 </button>
-                <button onclick="Nav.switchView('report', document.getElementById('nav-home-btn'))" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform text-center col-span-2">
-                    <div class="w-10 h-10 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center"><i data-lucide="bar-chart-2" class="w-5 h-5"></i></div>
-                    <span class="text-xs font-bold text-slate-700">Xem Báo cáo Tổng hợp (Dashboard)</span>
+                
+                <button onclick="Nav.switchView('report', document.getElementById('nav-home-btn'))" 
+                    class="relative p-4 rounded-2xl border-none shadow-lg shadow-orange-500/20 flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform text-center col-span-2 overflow-hidden bg-gradient-to-br from-amber-400 to-orange-500 group">
+                    <div class="absolute right-0 bottom-0 opacity-10 transform translate-x-4 translate-y-4">
+                        <i data-lucide="bar-chart-2" class="w-24 h-24 text-white"></i>
+                    </div>
+                    <div class="absolute inset-0 bg-white/10 opacity-0 group-active:opacity-100 transition-opacity"></div>
+                    <div class="w-10 h-10 bg-white/20 backdrop-blur-sm text-white rounded-full flex items-center justify-center shadow-inner border border-white/20 relative z-10">
+                        <i data-lucide="pie-chart" class="w-5 h-5 drop-shadow-md"></i>
+                    </div>
+                    <span class="text-xs font-bold drop-shadow-sm relative z-10 quick-card-text">Xem Báo cáo Tổng hợp (Dashboard)</span>
                 </button>
             </div>
             
