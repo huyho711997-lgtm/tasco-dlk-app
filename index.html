@@ -4807,16 +4807,20 @@
             // Đổi màu nút Filter để cảnh báo người dùng đang bật lọc
             const mainFilterBtn = document.getElementById('main-filter-btn');
             if (mainFilterBtn) {
+                // Tự động tìm thẻ i hoặc svg để không bị lỗi sau khi Lucide render
+                const icon = mainFilterBtn.querySelector('i') || mainFilterBtn.querySelector('svg');
+                const divider = mainFilterBtn.querySelector('div');
+
                 if (activeSteps.length > 0) {
                     mainFilterBtn.classList.remove('bg-blue-50', 'text-blue-700', 'border-blue-200');
                     mainFilterBtn.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
-                    mainFilterBtn.querySelector('div').classList.replace('bg-blue-200', 'bg-blue-400');
-                    mainFilterBtn.querySelector('i').style.color = 'white';
+                    if (divider) divider.classList.replace('bg-blue-200', 'bg-blue-400');
+                    if (icon) icon.style.color = 'white';
                 } else {
                     mainFilterBtn.classList.add('bg-blue-50', 'text-blue-700', 'border-blue-200');
                     mainFilterBtn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
-                    mainFilterBtn.querySelector('div').classList.replace('bg-blue-400', 'bg-blue-200');
-                    mainFilterBtn.querySelector('i').style.color = '';
+                    if (divider) divider.classList.replace('bg-blue-400', 'bg-blue-200');
+                    if (icon) icon.style.color = '';
                 }
             }
         },
