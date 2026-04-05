@@ -9279,7 +9279,7 @@
                 this._capturedFiles = [];
             }
             
-            document.querySelectorAll('#secure-camera-modal .lucide, #sc-zoom-btn, #secure-camera-count, #sc-overlay-info').forEach(icon => {
+            document.querySelectorAll('#secure-camera-modal .lucide, #sc-zoom-btn, #secure-camera-count').forEach(icon => {
                 icon.style.transform = 'rotate(0deg)';
             });
             const modal = document.getElementById('secure-camera-modal');
@@ -9587,32 +9587,58 @@
 
                         // Cấu hình Font chữ NHỎ HƠN (Giảm hệ số từ 0.022 xuống 0.015)
                         const fontSize = Math.max(12, Math.floor(width * 0.015)); 
-                        ctx.textAlign = 'right';
+                        // ── VẼ THANH WATERMARK PHÍA DƯỚI ──────────────────────────
+                        const barH      = Math.max(52, fontSize * 3.6);
+                        const padX      = 14;
+                        const padY      = 10;
+                        const timeStr   = moment().format('HH:mm:ss  DD/MM/YYYY');
+                        const labelStr  = bsx ? `TASCO DLK  ·  ${bsx}` : 'TASCO DLK';
+                        const locStr    = locationStr || '';
+
+                        // Nền gradient mờ phía dưới
+                        const grad = ctx.createLinearGradient(0, height - barH * 1.6, 0, height);
+                        grad.addColorStop(0, 'rgba(0,0,0,0)');
+                        grad.addColorStop(1, 'rgba(0,0,0,0.78)');
+                        ctx.fillStyle = grad;
+                        ctx.fillRect(0, height - barH * 1.6, width, barH * 1.6);
+
+                        // Dòng kẻ accent màu đỏ sát đáy
+                        ctx.fillStyle = 'rgba(239,68,68,0.9)';
+                        ctx.fillRect(0, height - 3, width, 3);
+
+                        // Shadow chữ
+                        ctx.shadowColor   = 'rgba(0,0,0,0.9)';
+                        ctx.shadowBlur    = 6;
+                        ctx.shadowOffsetX = 1;
+                        ctx.shadowOffsetY = 1;
+
+                        // Dòng 1: TASCO DLK + BSX (trên cùng trong bar)
+                        ctx.textAlign    = 'left';
                         ctx.textBaseline = 'bottom';
+                        ctx.font         = `900 ${fontSize * 0.85}px monospace`;
+                        ctx.fillStyle    = 'rgba(253,224,71,0.95)';
+                        ctx.fillText(labelStr, padX, height - barH * 0.05 - fontSize * 2.2);
 
-                        // Đổ bóng đậm hơn một chút để chữ nhỏ vẫn đọc rõ trên nền sáng
-                        ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-                        ctx.shadowBlur = 5;
-                        ctx.shadowOffsetX = 2;
-                        ctx.shadowOffsetY = 2;
+                        // Dòng 2: Thời gian
+                        ctx.font      = `700 ${fontSize}px monospace`;
+                        ctx.fillStyle = 'rgba(255,255,255,0.97)';
+                        ctx.fillText(timeStr, padX, height - barH * 0.05 - fontSize * 0.9);
 
-                        const timeStr = moment().format('DD/MM/YYYY HH:mm:ss');
-                        const labelStr = bsx ? `TASCO DLK - ${bsx}` : 'TASCO DLK';
-                        const locStr = locationStr;
-                        const padding = fontSize + 10;
-                        
-                        // 1. In Tọa độ GPS (Nằm sát DƯỚI CÙNG, màu vàng sáng)
-                        ctx.font = `700 ${fontSize * 0.85}px "Plus Jakarta Sans", sans-serif`;
-                        ctx.fillStyle = 'rgba(253, 224, 71, 0.95)'; 
-                        ctx.fillText(locStr, width - padding, height - padding);
+                        // Dòng 3: GPS (nếu có, chữ nhỏ hơn, màu vàng nhạt)
+                        if (locStr) {
+                            ctx.font      = `600 ${Math.max(10, fontSize * 0.72)}px sans-serif`;
+                            ctx.fillStyle = 'rgba(251,191,36,0.82)';
+                            // Cắt ngắn nếu quá dài
+                            const maxW    = width - padX * 2;
+                            let   shortLoc = locStr;
+                            ctx.font       = `600 ${Math.max(10, fontSize * 0.72)}px sans-serif`;
+                            while (ctx.measureText(shortLoc).width > maxW && shortLoc.length > 10) {
+                                shortLoc = shortLoc.slice(0, -4) + '...';
+                            }
+                            ctx.fillText(shortLoc, padX, height - padY * 0.5);
+                        }
 
-                        // 2. In Thời gian (Nằm ở giữa, cách định vị 1 dòng, màu trắng)
-                        ctx.font = `800 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
-                        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-                        ctx.fillText(timeStr, width - padding, height - padding - fontSize * 1.3);
-
-                        // 3. In TASCO DLK (Nằm trên cùng)
-                        ctx.fillText(labelStr, width - padding, height - padding - fontSize * 2.6);
+                        ctx.shadowColor = 'transparent';
 
                         // Xuất ảnh
                         canvas.toBlob((blob) => {
@@ -13518,23 +13544,20 @@
             <video id="secure-camera-video" autoplay playsinline class="absolute min-w-full min-h-full object-cover"></video>
             <div id="secure-camera-flash" class="absolute inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-100 z-10"></div>
             
-            <div id="sc-overlay-info" class="absolute z-30 pointer-events-none" style="bottom: 16px; left: 12px; right: 12px;">
-                <div class="bg-black/65 backdrop-blur-md rounded-2xl border border-white/15 shadow-xl pointer-events-auto overflow-hidden" onclick="event.stopPropagation(); SecureCamera.refreshLocation()">
-                    <!-- Hàng trên: Thương hiệu + Thời gian -->
-                    <div class="flex items-center justify-between px-3 py-2 border-b border-white/10">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse shadow-[0_0_6px_rgba(244,63,94,0.9)] shrink-0"></span>
-                            <span class="text-[10px] font-black text-white/60 uppercase tracking-widest">TASCO DLK</span>
+            <div id="sc-overlay-info" class="absolute z-30 pointer-events-none" style="bottom: 20px; left: 0; right: 0; padding: 0 14px;">
+                <div style="background: linear-gradient(135deg, rgba(0,0,0,0.72), rgba(15,23,42,0.68)); backdrop-filter: blur(10px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.12); overflow: hidden;">
+                    <!-- Hàng 1: Logo + Thời gian realtime -->
+                    <div style="display:flex; align-items:center; justify-content:space-between; padding: 8px 12px 6px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <span style="width:7px;height:7px;border-radius:50%;background:#ef4444;display:inline-block;box-shadow:0 0 6px rgba(239,68,68,0.9);animation:pulse 1.5s ease-in-out infinite;"></span>
+                            <span style="font-size:9px;font-weight:900;color:rgba(255,255,255,0.55);letter-spacing:0.12em;text-transform:uppercase;">TASCO DLK</span>
                         </div>
-                        <p id="sc-time-status" class="text-white text-[11px] font-mono font-black tracking-wider drop-shadow-md">--:--:--</p>
+                        <p id="sc-time-status" style="font-size:12px;font-family:monospace;font-weight:900;color:white;letter-spacing:0.05em;text-shadow:0 1px 4px rgba(0,0,0,0.5);">--:--:--</p>
                     </div>
-                    <!-- Hàng dưới: Địa điểm GPS -->
-                    <div class="flex items-center gap-2 px-3 py-2">
-                        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-400 shrink-0" id="refresh-icon"></i>
-                        <p id="sc-gps-status" class="text-white/85 text-[10px] font-semibold leading-snug flex-1 line-clamp-2">Đang tìm vệ tinh GPS...</p>
-                        <div class="shrink-0 w-5 h-5 rounded-full bg-white/10 flex items-center justify-center">
-                            <i data-lucide="refresh-cw" class="w-3 h-3 text-white/50"></i>
-                        </div>
+                    <!-- Hàng 2: GPS -->
+                    <div style="display:flex; align-items:center; gap:8px; padding: 7px 12px 8px;" onclick="event.stopPropagation(); SecureCamera.refreshLocation()" class="pointer-events-auto active:opacity-70 transition-opacity cursor-pointer">
+                        <svg id="refresh-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0;"><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                        <p id="sc-gps-status" style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.82);line-height:1.4;flex:1;">Đang tìm vị trí GPS...</p>
                     </div>
                 </div>
             </div>
