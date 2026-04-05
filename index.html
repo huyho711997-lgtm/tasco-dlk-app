@@ -2161,21 +2161,6 @@
                 <i data-lucide="activity" class="absolute -right-6 -bottom-6 w-32 h-32 text-white opacity-10"></i>
             </div>
 
-            <div class="flex items-center justify-between mb-3 px-1">
-                <h3 class="font-black text-slate-800 text-sm">Lịch hẹn giám định</h3>
-                <div class="flex items-center gap-3">
-                    <button onclick="App.changeHomeWeek(-1)" class="w-7 h-7 flex items-center justify-center bg-white border border-slate-200 rounded-lg active:bg-slate-50 transition-colors shadow-sm">
-                        <i data-lucide="chevron-left" class="w-4 h-4 text-slate-500"></i>
-                    </button>
-                    <span class="text-[11px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-md border border-blue-100" id="home-week-range"></span>
-                    <button onclick="App.changeHomeWeek(1)" class="w-7 h-7 flex items-center justify-center bg-white border border-slate-200 rounded-lg active:bg-slate-50 transition-colors shadow-sm">
-                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
-                    </button>
-                </div>
-            </div>
-            <div id="home-week-calendar" class="flex justify-between bg-white p-2 rounded-2xl border border-slate-100 shadow-sm mb-6 min-h-[85px]">
-                </div>
-
             <h3 class="font-black text-slate-800 text-sm mb-3">Công cụ nhanh</h3>
             <div class="grid grid-cols-2 gap-3 mb-6">
                 <button onclick="Nav.switchView('import', document.getElementById('nav-home-btn'))" class="relative p-4 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20 flex flex-col items-center gap-2 active:scale-95 transition-transform">
@@ -2191,9 +2176,21 @@
                     <span class="text-[11px] font-bold text-white">Quét Biển số</span>
                 </button>
             </div>
-            
-            <h3 class="font-black text-slate-800 text-sm mb-3">Hồ sơ cần xử lý gấp</h3>
-            <div id="home-urgent-list" class="space-y-3"></div>
+
+            <div class="flex items-center justify-between mb-3 px-1 mt-2">
+                <h3 class="font-black text-slate-800 text-sm">Lịch hẹn giám định</h3>
+                <div class="flex items-center gap-3">
+                    <button onclick="App.changeHomeWeek(-1)" class="w-7 h-7 flex items-center justify-center bg-white border border-slate-200 rounded-lg active:bg-slate-50 transition-colors shadow-sm">
+                        <i data-lucide="chevron-left" class="w-4 h-4 text-slate-500"></i>
+                    </button>
+                    <span class="text-[11px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-md border border-blue-100" id="home-week-range"></span>
+                    <button onclick="App.changeHomeWeek(1)" class="w-7 h-7 flex items-center justify-center bg-white border border-slate-200 rounded-lg active:bg-slate-50 transition-colors shadow-sm">
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="home-week-calendar" class="flex justify-between bg-white p-2 rounded-2xl border border-slate-100 shadow-sm mb-6 min-h-[85px]">
+                </div>
         </div>
 
         <div id="view-list" class="view-section p-4 hidden">
@@ -4703,109 +4700,88 @@
         },
 
         _updateHomeDashboard() {
-            const user = Auth.getCurrentUser();
-            if (user) {
-                const greeting = document.getElementById('home-greeting-name');
-                if (greeting) greeting.textContent = user.name;
-            }
+            try {
+                const user = Auth.getCurrentUser();
+                if (user) {
+                    const greeting = document.getElementById('home-greeting-name');
+                    if (greeting) greeting.textContent = user.name;
+                }
 
-            const now = moment();
-            const data = this.masterData;
+                const now = moment();
+                const data = this.masterData || [];
 
-            // 1. FIX LỖI CẬP NHẬT SỐ LIỆU
-            const totalAll = data.length;
-            // Hồ sơ đang tồn = Tất cả hồ sơ CHƯA ĐẾN bước 7 (Đã có hóa đơn)
-            const pending = data.filter(i => i.step < 7).length; 
-            
-            // Tính số lượng tháng này
-            const thisMonthData = data.filter(i => {
-                const d = i.receivedAt ? moment(i.receivedAt) : (i.notifyDate ? moment(i.notifyDate, 'DD/MM/YYYY') : null);
-                return d && d.isValid() && d.isSame(now, 'month');
-            });
-            
-            // Tính số lượng tháng trước
-            const lastMonthData = data.filter(i => {
-                const d = i.receivedAt ? moment(i.receivedAt) : (i.notifyDate ? moment(i.notifyDate, 'DD/MM/YYYY') : null);
-                return d && d.isValid() && d.isSame(moment().subtract(1, 'month'), 'month');
-            });
-
-            // Đổ số liệu vào UI (Thêm kiểm tra null để tránh lỗi script dừng giữa chừng)
-            if (document.getElementById('home-stat-total-all')) document.getElementById('home-stat-total-all').textContent = totalAll;
-            if (document.getElementById('home-stat-pending')) document.getElementById('home-stat-pending').textContent = pending;
-            if (document.getElementById('home-stat-this-month')) document.getElementById('home-stat-this-month').textContent = thisMonthData.length;
-            if (document.getElementById('home-stat-last-month')) document.getElementById('home-stat-last-month').textContent = lastMonthData.length;
-            
-            if (document.getElementById('label-this-month')) document.getElementById('label-this-month').textContent = 'Tháng ' + now.format('MM');
-            if (document.getElementById('label-last-month')) document.getElementById('label-last-month').textContent = 'Tháng ' + moment().subtract(1, 'month').format('MM');
-
-            // 2. RENDER LỊCH TUẦN CÓ ĐIỀU HƯỚNG
-            const weekContainer = document.getElementById('home-week-calendar');
-            const weekRangeLabel = document.getElementById('home-week-range');
-            
-            if (weekContainer && weekRangeLabel) {
-                // Tính toán ngày bắt đầu dựa trên Offset (mặc định lấy Thứ 2 làm đầu tuần)
-                const targetWeek = moment().add(this._homeWeekOffset, 'weeks');
-                const startOfWeek = moment(targetWeek).startOf('isoWeek');
-                const endOfWeek = moment(targetWeek).endOf('isoWeek');
+                // 1. TÍNH TOÁN 4 THÔNG SỐ CHÍNH MỘT CÁCH AN TOÀN
+                const totalAll = data.length;
+                const pending  = data.filter(i => i.step < 7).length; 
                 
-                weekRangeLabel.textContent = `${startOfWeek.format('DD/MM')} - ${endOfWeek.format('DD/MM')}`;
+                const thisMonthData = data.filter(i => {
+                    if (i.receivedAt) return moment(i.receivedAt).isSame(now, 'month');
+                    if (i.notifyDate) return moment(i.notifyDate, ['DD/MM/YYYY', 'DD/MM/YYYY HH:mm']).isSame(now, 'month');
+                    return false;
+                });
                 
-                let weekHtml = '';
-                for (let i = 0; i < 7; i++) {
-                    const day = moment(startOfWeek).add(i, 'days');
-                    const isToday = day.isSame(moment(), 'day');
+                const lastMonthData = data.filter(i => {
+                    const lastMonth = moment().subtract(1, 'month');
+                    if (i.receivedAt) return moment(i.receivedAt).isSame(lastMonth, 'month');
+                    if (i.notifyDate) return moment(i.notifyDate, ['DD/MM/YYYY', 'DD/MM/YYYY HH:mm']).isSame(lastMonth, 'month');
+                    return false;
+                });
+
+                // Đổ dữ liệu vào giao diện (kiểm tra Element tồn tại)
+                if (document.getElementById('home-stat-total-all')) document.getElementById('home-stat-total-all').textContent = totalAll;
+                if (document.getElementById('home-stat-pending')) document.getElementById('home-stat-pending').textContent = pending;
+                if (document.getElementById('home-stat-this-month')) document.getElementById('home-stat-this-month').textContent = thisMonthData.length;
+                if (document.getElementById('home-stat-last-month')) document.getElementById('home-stat-last-month').textContent = lastMonthData.length;
+                
+                if (document.getElementById('label-this-month')) document.getElementById('label-this-month').textContent = 'Tháng ' + now.format('MM');
+                if (document.getElementById('label-last-month')) document.getElementById('label-last-month').textContent = 'Tháng ' + moment().subtract(1, 'month').format('MM');
+
+                // 2. RENDER LỊCH TUẦN CÓ ĐIỀU HƯỚNG
+                const weekContainer = document.getElementById('home-week-calendar');
+                const weekRangeLabel = document.getElementById('home-week-range');
+                
+                if (weekContainer && weekRangeLabel) {
+                    const targetWeek = moment().add(this._homeWeekOffset, 'weeks');
+                    const startOfWeek = moment(targetWeek).startOf('isoWeek');
+                    const endOfWeek = moment(targetWeek).endOf('isoWeek');
+                    
+                    weekRangeLabel.textContent = `${startOfWeek.format('DD/MM')} - ${endOfWeek.format('DD/MM')}`;
+                    
+                    let weekHtml = '';
                     const dayLabels = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
                     
-                    // Đếm số lịch hẹn/công việc trong ngày
-                    const countAppt = data.filter(item => item.appointmentTime && moment(item.appointmentTime).isSame(day, 'day')).length;
-                    const countTasks = data.reduce((acc, item) => acc + (item.tasks || []).filter(t => moment(t.time).isSame(day, 'day')).length, 0);
-                    const totalDayEvents = countAppt + countTasks;
+                    for (let i = 0; i < 7; i++) {
+                        const day = moment(startOfWeek).add(i, 'days');
+                        const isToday = day.isSame(moment(), 'day');
+                        
+                        // Đếm số lượng cuộc hẹn và lịch công việc trong ngày
+                        const countAppt = data.filter(item => item.appointmentTime && moment(item.appointmentTime).isSame(day, 'day')).length;
+                        const countTasks = data.reduce((acc, item) => acc + (item.tasks || []).filter(t => moment(t.time).isSame(day, 'day')).length, 0);
+                        const totalDayEvents = countAppt + countTasks;
 
-                    weekHtml += `
-                        <div class="week-item ${isToday ? 'today' : ''}">
-                            <span class="week-day">${dayLabels[i]}</span>
-                            <div class="week-date">${day.date()}</div>
-                            <span class="week-count ${totalDayEvents === 0 ? 'empty' : ''}">${totalDayEvents > 0 ? totalDayEvents : '•'}</span>
-                        </div>
-                    `;
-                }
-                weekContainer.innerHTML = weekHtml;
-            }
-
-            // 3. RENDER DANH SÁCH KHẨN CẤP (Urgent)
-            const urgentList = document.getElementById('home-urgent-list');
-            if (urgentList) {
-                const urgentItems = data.filter(i => i.urgent || (i.step === 5 && moment().diff(moment(i.stepUpdatedAt), 'days') >= 3)).slice(0, 5); 
-
-                if (!urgentItems.length) {
-                    urgentList.innerHTML = `<div class="text-center py-8 bg-white rounded-2xl border border-slate-100 shadow-sm"><p class="text-xs font-bold text-slate-400">🎉 Không có hồ sơ tồn đọng gấp.</p></div>`;
-                } else {
-                    urgentList.innerHTML = urgentItems.map(item => {
-                        const theme = STATUS.theme(item.step);
-                        return `
-                        <div onclick="Modal.open('${item.id}')" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-3 flex justify-between items-center active:scale-[0.98] transition-transform cursor-pointer" style="border-left: 4px solid #ef4444;">
-                            <div class="min-w-0 flex-1">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="font-black text-slate-800 text-sm uppercase">${item.bsx || '—'}</span>
-                                    <span class="text-[8px] font-black bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded">GẤP</span>
-                                </div>
-                                <p class="text-[10px] text-slate-500 truncate">${item.customer || '—'} • <span class="${theme.text} font-bold">${STATUS.label(item.step)}</span></p>
+                        weekHtml += `
+                            <div class="week-item ${isToday ? 'today' : ''}">
+                                <span class="week-day">${dayLabels[i]}</span>
+                                <div class="week-date">${day.date()}</div>
+                                <span class="week-count ${totalDayEvents === 0 ? 'empty' : ''}">${totalDayEvents > 0 ? totalDayEvents : '•'}</span>
                             </div>
-                            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 shrink-0"></i>
-                        </div>`;
-                    }).join('');
+                        `;
+                    }
+                    weekContainer.innerHTML = weekHtml;
                 }
+
+                // Cập nhật badge cảnh báo (nếu có)
+                const homeWarnBadge = document.getElementById('home-warn-badge');
+                const navWarnBadge = document.getElementById('warn-nav-badge');
+                if (homeWarnBadge && navWarnBadge) {
+                    homeWarnBadge.textContent = navWarnBadge.textContent;
+                    homeWarnBadge.classList.toggle('hidden', navWarnBadge.classList.contains('hidden'));
+                }
+                
+                lucide.createIcons();
+            } catch(e) {
+                console.error("Lỗi khi load dữ liệu Home Dashboard:", e);
             }
-            
-            // Cập nhật badge cảnh báo
-            const homeWarnBadge = document.getElementById('home-warn-badge');
-            const navWarnBadge = document.getElementById('warn-nav-badge');
-            if (homeWarnBadge && navWarnBadge) {
-                homeWarnBadge.textContent = navWarnBadge.textContent;
-                homeWarnBadge.classList.toggle('hidden', navWarnBadge.classList.contains('hidden'));
-            }
-            
-            lucide.createIcons();
         },
         debounceSearch() {
             clearTimeout(this._searchTimer);
