@@ -9325,9 +9325,14 @@
                             <p class="text-white font-black text-sm">Xem chi tiết</p>
                             <p id="sc-review-count" class="text-emerald-400 text-[10px] font-bold">1 / 5</p>
                         </div>
-                        <button onclick="SecureCamera.removeCurrentPreview()" class="w-10 h-10 flex items-center justify-center bg-rose-500/20 text-rose-500 rounded-full active:bg-rose-500/40 transition-colors shadow-sm">
-                            <i data-lucide="trash-2" class="w-5 h-5"></i>
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button onclick="SecureCamera.downloadCurrentPreview()" title="Lưu ảnh này về máy" class="w-10 h-10 flex items-center justify-center bg-blue-500/20 text-blue-400 rounded-full active:bg-blue-500/40 transition-colors shadow-sm">
+                                <i data-lucide="download" class="w-5 h-5"></i>
+                            </button>
+                            <button onclick="SecureCamera.removeCurrentPreview()" title="Xóa ảnh" class="w-10 h-10 flex items-center justify-center bg-rose-500/20 text-rose-500 rounded-full active:bg-rose-500/40 transition-colors shadow-sm">
+                                <i data-lucide="trash-2" class="w-5 h-5"></i>
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="flex-1 relative flex items-center justify-center overflow-hidden bg-black" id="sc-review-swipe-area">
@@ -9484,7 +9489,31 @@
                 }
             });
         },
+        // Hàm tải ảnh đang xem trong lúc Review về máy
+        downloadCurrentPreview() {
+            if (this._capturedFiles.length === 0) return;
+            
+            // Lấy object ảnh hiện tại đang xem
+            const currentFileObj = this._capturedFiles[this._currentReviewIdx];
+            if (!currentFileObj || !currentFileObj.preview) return;
 
+            // Tạo thẻ <a> ẩn để kích hoạt tải xuống
+            const a = document.createElement('a');
+            a.href = currentFileObj.preview;
+            
+            // Đặt tên file dễ nhớ: TascoCam_NgayThang_GioPhutGiay.jpg
+            const timestamp = moment().format('YYMMDD_HHmmss');
+            a.download = `TascoCam_${timestamp}.jpg`;
+            
+            // Thực thi click
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            // Báo thành công và rung phản hồi nhẹ
+            Toast.fire({ icon: 'success', title: 'Đã lưu ảnh về thư viện máy!' });
+            if (window.navigator.vibrate) window.navigator.vibrate(15);
+        },
         async confirmUpload() {
             this.closeReview(); // Đóng màn hình review
             
@@ -9905,10 +9934,10 @@
             const cat = await this._pickCategory();
             if (!cat) return;
 
-            const gpsLocation = await LocationHelper.get();
+            // BỎ: Không gọi LocationHelper.get() ở đây nữa để tiết kiệm thời gian chờ GPS
+
             const item = App.find(id) || {};
             const current = (item.documentImages || []).map(i => typeof i === 'string' ? { url: i, cat: 'other' } : i);
-            const bsxToStamp = item.bsx || '';
 
             const tempFiles = files.map(file => {
                 const tempId = 'temp_' + Math.random().toString(36).substr(2, 9);
@@ -9923,10 +9952,12 @@
 
             Promise.all(tempFiles.map(async ({ file, tempObj, localUrl }) => {
                 try {
-                    const watermarkedFile = await ImageProcessor.addWatermark(file, bsxToStamp, gpsLocation);
+                    // FIX: Dùng trực tiếp file gốc tải lên Cloudinary
+                    // BỎ QUA ImageProcessor.addWatermark(file, bsxToStamp, gpsLocation)
                     const fd = new FormData();
-                    fd.append('file', watermarkedFile);
+                    fd.append('file', file);
                     fd.append('upload_preset', CONFIG.cloudinary.preset);
+                    
                     const res = await fetch(CONFIG.cloudinary.url, { method: 'POST', body: fd });
                     const data = await res.json();
                     
@@ -9936,6 +9967,7 @@
                         delete tempObj.tempId;
                     }
                 } catch (e) {
+                    // Nếu lỗi thì xóa khỏi mảng hiển thị tạm
                     const idx = current.findIndex(i => i.tempId === tempObj.tempId);
                     if (idx > -1) current.splice(idx, 1);
                 } finally {
@@ -9945,7 +9977,7 @@
             })).then(() => {
                 const finalImages = current.filter(i => !i.isUploading);
                 db.ref(`Workstation/${id}/documentImages`).set(finalImages).then(() => {
-                    Toast.fire({ icon: 'success', title: `Đã tải lên ${files.length} ảnh có định vị!` });
+                    Toast.fire({ icon: 'success', title: `Đã tải lên ${files.length} ảnh nguyên bản!` });
                 });
             });
         },
