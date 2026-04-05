@@ -14836,10 +14836,10 @@
             </button>
         </div>
     </div>
-    <div id="filter-modal" class="fixed inset-0 z-[99990] hidden flex-col justify-end transition-opacity duration-300 opacity-0" style="background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px);">
+    <div id="filter-modal" class="fixed inset-0 z-[99990] hidden transition-opacity duration-300 opacity-0" style="background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px);">
         <div class="absolute inset-0" onclick="FilterManager.close()"></div>
         
-        <div id="filter-sheet" class="bg-white rounded-t-[28px] w-full max-h-[90vh] flex flex-col transform translate-y-full transition-transform duration-300 shadow-2xl pb-safe relative z-10">
+        <div id="filter-sheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[28px] w-full max-h-[90vh] flex flex-col transform translate-y-full transition-transform duration-300 shadow-2xl pb-safe z-10">
             
             <div class="px-5 pt-5 pb-4 border-b border-slate-100 flex justify-between items-center shrink-0">
                 <div class="flex items-center gap-3">
