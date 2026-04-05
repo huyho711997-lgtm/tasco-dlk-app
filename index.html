@@ -1752,6 +1752,17 @@
             transition: transform 0.15s;
         }
         #header-user-btn:active { transform: scale(0.9); }
+
+        /* Dark Mode: Filter Modal */
+        [data-theme="dark"] #filter-sheet { background-color: var(--bg-white) !important; }
+        [data-theme="dark"] #filter-sheet .border-b,
+        [data-theme="dark"] #filter-sheet .border-t { border-color: var(--border-light) !important; }
+        [data-theme="dark"] #filter-sheet .bg-white { background-color: var(--bg-white) !important; }
+        [data-theme="dark"] #filter-sheet .bg-slate-100 { background-color: var(--bg-surface) !important; color: var(--text-primary) !important; border-color: var(--border-light) !important; }
+        [data-theme="dark"] #filter-sheet .text-slate-800 { color: var(--text-primary) !important; }
+        [data-theme="dark"] #filter-sheet .text-slate-600 { color: var(--text-secondary) !important; }
+        [data-theme="dark"] #filter-sheet .text-slate-500 { color: var(--text-muted) !important; }
+        [data-theme="dark"] .filter-card-inactive { background-color: var(--bg-app) !important; border-color: var(--border-light) !important; }
     </style>
 </head>
 <body class="h-screen w-full flex flex-col overflow-hidden bg-slate-50">
@@ -8235,58 +8246,78 @@
     };
 
     // ============================================================
-    // FILTER MANAGER
+    // FILTER MANAGER PRO
     // ============================================================
     const FilterManager = {
         _active: new Set(),
-        _tempActive: new Set(), // Dùng để lưu tạm khi đang mở Modal chưa ấn Áp dụng
+        _tempActive: new Set(),
         
         open() {
             this._tempActive = new Set(this._active);
             this._renderOptions();
             const modal = document.getElementById('filter-modal');
             const sheet = document.getElementById('filter-sheet');
+            
             modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            setTimeout(() => sheet.classList.remove('translate-y-full'), 10);
+            // Ép trình duyệt render để mượt animation
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            sheet.classList.remove('translate-y-full');
         },
 
         close() {
             const modal = document.getElementById('filter-modal');
             const sheet = document.getElementById('filter-sheet');
+            
             sheet.classList.add('translate-y-full');
+            modal.classList.add('opacity-0');
             setTimeout(() => {
                 modal.classList.add('hidden');
-                modal.classList.remove('flex');
             }, 300);
         },
 
         _renderOptions() {
             const grid = document.getElementById('filter-options-grid');
+            
+            // Cấu hình cứng các class màu sắc để Tailwind CDN biên dịch được
             const steps = [
-                {id: 1, label: 'Tiếp nhận', icon: 'inbox', color: 'blue'},
-                {id: 2, label: 'Lên lịch', icon: 'calendar', color: 'amber'},
-                {id: 3, label: 'Giám định', icon: 'camera', color: 'cyan'},
-                {id: 4, label: 'Báo giá', icon: 'file-spreadsheet', color: 'indigo'},
-                {id: 5, label: 'Chờ duyệt', icon: 'shield-alert', color: 'purple'},
-                {id: 6, label: 'Chờ HĐ', icon: 'receipt', color: 'emerald'},
-                {id: 7, label: 'Đã có HĐ', icon: 'check-circle-2', color: 'green'},
-                {id: 8, label: 'Bổ sung HS', icon: 'folder-open', color: 'rose'}
+                {id: 1, label: 'Tiếp nhận', icon: 'inbox', hex: '#3b82f6', bg: 'bg-blue-50', border: 'border-blue-300', text: 'text-blue-700', iconBg: 'bg-blue-100', iconText: 'text-blue-600', ring: 'ring-blue-500/30'},
+                {id: 2, label: 'Lên lịch hẹn', icon: 'calendar-clock', hex: '#f59e0b', bg: 'bg-amber-50', border: 'border-amber-300', text: 'text-amber-700', iconBg: 'bg-amber-100', iconText: 'text-amber-600', ring: 'ring-amber-500/30'},
+                {id: 3, label: 'Đã giám định', icon: 'camera', hex: '#06b6d4', bg: 'bg-cyan-50', border: 'border-cyan-300', text: 'text-cyan-700', iconBg: 'bg-cyan-100', iconText: 'text-cyan-600', ring: 'ring-cyan-500/30'},
+                {id: 4, label: 'Đã có báo giá', icon: 'file-spreadsheet', hex: '#6366f1', bg: 'bg-indigo-50', border: 'border-indigo-300', text: 'text-indigo-700', iconBg: 'bg-indigo-100', iconText: 'text-indigo-600', ring: 'ring-indigo-500/30'},
+                {id: 5, label: 'Chờ duyệt giá', icon: 'shield-alert', hex: '#8b5cf6', bg: 'bg-purple-50', border: 'border-purple-300', text: 'text-purple-700', iconBg: 'bg-purple-100', iconText: 'text-purple-600', ring: 'ring-purple-500/30'},
+                {id: 6, label: 'Chờ hoá đơn', icon: 'receipt', hex: '#10b981', bg: 'bg-emerald-50', border: 'border-emerald-300', text: 'text-emerald-700', iconBg: 'bg-emerald-100', iconText: 'text-emerald-600', ring: 'ring-emerald-500/30'},
+                {id: 7, label: 'Đã có hoá đơn', icon: 'check-circle-2', hex: '#16a34a', bg: 'bg-green-50', border: 'border-green-300', text: 'text-green-700', iconBg: 'bg-green-100', iconText: 'text-green-600', ring: 'ring-green-500/30'},
+                {id: 8, label: 'Bổ sung HS', icon: 'folder-open', hex: '#f43f5e', bg: 'bg-rose-50', border: 'border-rose-300', text: 'text-rose-700', iconBg: 'bg-rose-100', iconText: 'text-rose-600', ring: 'ring-rose-500/30'}
             ];
 
             grid.innerHTML = steps.map(s => {
                 const isActive = this._tempActive.has(s.id);
-                const bgClass = isActive ? `bg-${s.color}-50 border-${s.color}-400` : 'bg-white border-slate-200';
-                const textClass = isActive ? `text-${s.color}-700` : 'text-slate-600';
-                const checkHtml = isActive ? `<div class="absolute top-2 right-2 w-4 h-4 bg-${s.color}-500 rounded-full flex items-center justify-center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>` : '';
                 
+                // Styles khi thẻ được Active và Inactive
+                const cardBg = isActive ? s.bg : 'filter-card-inactive bg-slate-50';
+                const cardBorder = isActive ? s.border : 'border-slate-200';
+                const cardText = isActive ? s.text : 'text-slate-600';
+                const iconBg = isActive ? s.iconBg : 'bg-white shadow-sm';
+                const iconColor = isActive ? s.iconText : 'text-slate-400';
+                const cardRing = isActive ? 'ring-2 ' + s.ring : '';
+                
+                // Icon checkmark tròn trịa
+                const checkHtml = isActive 
+                    ? `<div class="w-5 h-5 rounded-full flex items-center justify-center shadow-sm" style="background:${s.hex}">
+                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                       </div>`
+                    : `<div class="w-5 h-5 rounded-full border-2 border-slate-300 bg-white/50"></div>`;
+
                 return `
-                <div onclick="FilterManager.toggleTemp(${s.id})" class="relative p-3 rounded-xl border-2 cursor-pointer transition-all active:scale-95 ${bgClass}">
-                    <div class="w-8 h-8 rounded-lg bg-${isActive ? s.color : 'slate'}-100 flex items-center justify-center mb-2">
-                        <i data-lucide="${s.icon}" class="w-4 h-4 ${isActive ? `text-${s.color}-600` : 'text-slate-400'}"></i>
+                <div onclick="FilterManager.toggleTemp(${s.id})" class="relative p-3.5 rounded-2xl border ${cardBorder} ${cardBg} ${cardRing} cursor-pointer transition-all active:scale-[0.96] flex flex-col gap-3">
+                    <div class="flex justify-between items-start">
+                        <div class="w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center border border-black/5 shrink-0">
+                            <i data-lucide="${s.icon}" class="w-[18px] h-[18px] ${iconColor}"></i>
+                        </div>
+                        ${checkHtml}
                     </div>
-                    <p class="font-bold text-[12px] ${textClass}">${s.label}</p>
-                    ${checkHtml}
+                    <p class="font-black text-[12px] leading-tight ${cardText} mt-1">${s.label}</p>
                 </div>`;
             }).join('');
             lucide.createIcons();
@@ -8305,6 +8336,7 @@
         clearAll() {
             this._tempActive.clear();
             this._renderOptions();
+            if (window.navigator.vibrate) window.navigator.vibrate(10);
         },
 
         apply() {
@@ -14777,29 +14809,38 @@
             </button>
         </div>
     </div>
-    <div id="filter-modal" class="fixed inset-0 z-[99990] hidden flex-col justify-end" style="background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px);">
-        <div id="filter-sheet" class="bg-white rounded-t-3xl w-full flex flex-col transform translate-y-full transition-transform duration-300 shadow-2xl pb-safe">
-            <div class="px-5 pt-4 pb-3 border-b border-slate-100 flex justify-between items-center shrink-0">
-                <div>
-                    <h3 class="font-black text-slate-800 text-base">Lọc hồ sơ</h3>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Chọn trạng thái hiển thị</p>
+    <div id="filter-modal" class="fixed inset-0 z-[99990] hidden flex-col justify-end transition-opacity duration-300 opacity-0" style="background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px);">
+        <div class="absolute inset-0" onclick="FilterManager.close()"></div>
+        
+        <div id="filter-sheet" class="bg-white rounded-t-[32px] w-full flex flex-col transform translate-y-full transition-transform duration-300 shadow-2xl pb-safe relative z-10">
+            <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3 mb-1"></div>
+            
+            <div class="px-5 pt-3 pb-4 border-b border-slate-100 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-200/50">
+                        <i data-lucide="filter" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-slate-800 text-lg leading-tight">Lọc Hồ Sơ</h3>
+                        <p class="text-[11px] font-bold text-slate-500 mt-0.5">Chọn nhiều trạng thái hiển thị</p>
+                    </div>
                 </div>
-                <button onclick="FilterManager.close()" class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 active:bg-slate-200">
+                <button onclick="FilterManager.close()" class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 active:bg-slate-200 transition-colors">
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
             
-            <div class="p-5 flex-1 overflow-y-auto">
+            <div class="px-5 pb-6 pt-4 flex-1 overflow-y-auto no-scrollbar">
                 <div class="grid grid-cols-2 gap-3" id="filter-options-grid">
                     </div>
             </div>
 
-            <div class="p-4 border-t border-slate-100 bg-slate-50 flex gap-3 shrink-0">
-                <button onclick="FilterManager.clearAll()" class="flex-1 py-3.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold text-[13px] active:bg-slate-100 transition-colors">
-                    Bỏ chọn tất cả
+            <div class="p-5 border-t border-slate-100 bg-white flex gap-3 shrink-0" style="box-shadow: 0 -4px 20px rgba(0,0,0,0.02);">
+                <button onclick="FilterManager.clearAll()" class="flex-[1] py-3.5 bg-slate-100 border border-slate-200 text-slate-600 rounded-2xl font-bold text-[13px] active:bg-slate-200 transition-colors">
+                    Bỏ chọn
                 </button>
-                <button onclick="FilterManager.apply()" class="flex-[1.5] py-3.5 bg-blue-600 text-white rounded-xl font-black text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-md shadow-blue-200">
-                    <i data-lucide="check" class="w-4 h-4"></i> Áp dụng
+                <button onclick="FilterManager.apply()" class="flex-[2] py-3.5 bg-blue-600 text-white rounded-2xl font-black text-[13px] flex items-center justify-center gap-2 active:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-200">
+                    <i data-lucide="check-check" class="w-4 h-4"></i> Áp dụng bộ lọc
                 </button>
             </div>
         </div>
