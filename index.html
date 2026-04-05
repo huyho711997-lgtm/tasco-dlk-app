@@ -3664,16 +3664,34 @@
         },
 
         switchView(view, btn) {
-            this._currentView = view;
-            const views = ['top','front','rear','side'];
-            views.forEach(v => {
-                const el = document.getElementById('cd-view-' + v);
-                if (el) el.style.display = (v === view) ? 'block' : 'none';
-            });
-            document.querySelectorAll('.cd-view-tab').forEach(b => b.classList.remove('active'));
-            if (btn) btn.classList.add('active');
-            this._syncHighlight();
-        },
+            document.querySelectorAll('.view-section').forEach(s => { s.classList.add('hidden'); s.classList.remove('block'); });
+            const target = document.getElementById('view-'+view);
+            if (target) { target.classList.remove('hidden'); target.classList.add(view==='calendar'?'flex':'block'); }
+            
+            if (btn) {
+                document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('bottom-nav-active'); });
+                btn.classList.add('bottom-nav-active');
+            }
+
+            document.getElementById('header-subtitle').textContent = this.viewTitles[view]||'Mobile App';
+
+            const searchContainer = document.getElementById('header-search-container');
+            if (searchContainer) {
+                searchContainer.style.display = (view === 'home' || view === 'report' || view === 'import') ? 'none' : 'block';
+            }
+
+            // ĐOẠN FIX MỚI: Ép cập nhật dữ liệu ngay khi chuyển về trang chủ
+            if (view === 'home') {
+                App._updateHomeDashboard();
+            }
+
+            if (view==='report') Report.open();
+            if (view==='calendar') {
+                if (!this.calendarInit) { Cal.init(); this.calendarInit=true; }
+                else setTimeout(()=>{ Cal.instance?.updateSize(); Cal.instance?.refetchEvents(); },100);
+                setTimeout(()=>{ Cal._updateStats(); Cal._showTodayAgenda(); },200);
+            }
+        }
 
         async togglePart(el) {
             const name = el.getAttribute('data-name');
@@ -4669,12 +4687,16 @@
         _listen() {
             db.ref("Workstation").on("value", snapshot => {
                 const raw = snapshot.val() || {};
-                // Cập nhật masterData và ép kiểu step về Number để tính toán chính xác
-                this.masterData = Object.keys(raw).map(key => ({ 
-                    id: key, 
-                    ...raw[key],
-                    step: Number(raw[key].step || 1) 
-                })).sort((a, b) => new Date(b.stepUpdatedAt) - new Date(a.stepUpdatedAt));
+                // Chuẩn hóa dữ liệu ngay khi nhận từ Firebase
+                this.masterData = Object.keys(raw).map(key => {
+                    const item = raw[key];
+                    return {
+                        id: key,
+                        ...item,
+                        // Ép kiểu step về số để tính toán không bị lỗi
+                        step: parseInt(item.step || 1)
+                    };
+                }).sort((a, b) => new Date(b.stepUpdatedAt || 0) - new Date(a.stepUpdatedAt || 0));
                 
                 this._updateUI();
             });
@@ -4684,7 +4706,10 @@
             this.searchData(); 
             this._updateKPIs(); 
             WarnBoard.render();
-            this._updateHomeDashboard(); // Luôn gọi cập nhật dashboard khi data thay đổi
+            
+            // Dùng delay cực ngắn để đảm bảo DOM đã render xong trước khi đổ số liệu
+            setTimeout(() => this._updateHomeDashboard(), 50);
+
             if (Cal.instance) { 
                 Cal.instance.refetchEvents(); 
                 Cal._updateStats(); 
@@ -4692,7 +4717,6 @@
             }
         },
 
-        // Hàm chuyển tuần
         changeHomeWeek(offset) {
             this._homeWeekOffset += offset;
             this._updateHomeDashboard();
@@ -4702,41 +4726,43 @@
         _updateHomeDashboard() {
             try {
                 const user = Auth.getCurrentUser();
-                if (user) {
-                    const greeting = document.getElementById('home-greeting-name');
-                    if (greeting) greeting.textContent = user.name;
+                if (user && document.getElementById('home-greeting-name')) {
+                    document.getElementById('home-greeting-name').textContent = user.name;
                 }
 
-                const now = moment();
                 const data = this.masterData || [];
+                // Nếu chưa có dữ liệu, thoát ra để tránh lỗi, Firebase sẽ gọi lại hàm này khi có data
+                if (data.length === 0) return; 
 
-                // 1. TÍNH TOÁN 4 THÔNG SỐ CHÍNH MỘT CÁCH AN TOÀN
+                const now = moment();
+
+                // 1. TÍNH TOÁN 4 THÔNG SỐ CHÍNH (Sửa logic lọc an toàn hơn)
                 const totalAll = data.length;
                 const pending  = data.filter(i => i.step < 7).length; 
                 
                 const thisMonthData = data.filter(i => {
-                    if (i.receivedAt) return moment(i.receivedAt).isSame(now, 'month');
-                    if (i.notifyDate) return moment(i.notifyDate, ['DD/MM/YYYY', 'DD/MM/YYYY HH:mm']).isSame(now, 'month');
-                    return false;
+                    const d = i.receivedAt ? moment(i.receivedAt) : (i.notifyDate ? moment(i.notifyDate, 'DD/MM/YYYY') : null);
+                    return d && d.isValid() && d.isSame(now, 'month');
                 });
                 
                 const lastMonthData = data.filter(i => {
-                    const lastMonth = moment().subtract(1, 'month');
-                    if (i.receivedAt) return moment(i.receivedAt).isSame(lastMonth, 'month');
-                    if (i.notifyDate) return moment(i.notifyDate, ['DD/MM/YYYY', 'DD/MM/YYYY HH:mm']).isSame(lastMonth, 'month');
-                    return false;
+                    const lm = moment().subtract(1, 'month');
+                    const d = i.receivedAt ? moment(i.receivedAt) : (i.notifyDate ? moment(i.notifyDate, 'DD/MM/YYYY') : null);
+                    return d && d.isValid() && d.isSame(lm, 'month');
                 });
 
-                // Đổ dữ liệu vào giao diện (kiểm tra Element tồn tại)
-                if (document.getElementById('home-stat-total-all')) document.getElementById('home-stat-total-all').textContent = totalAll;
-                if (document.getElementById('home-stat-pending')) document.getElementById('home-stat-pending').textContent = pending;
-                if (document.getElementById('home-stat-this-month')) document.getElementById('home-stat-this-month').textContent = thisMonthData.length;
-                if (document.getElementById('home-stat-last-month')) document.getElementById('home-stat-last-month').textContent = lastMonthData.length;
+                // Đổ dữ liệu vào UI
+                const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
                 
-                if (document.getElementById('label-this-month')) document.getElementById('label-this-month').textContent = 'Tháng ' + now.format('MM');
-                if (document.getElementById('label-last-month')) document.getElementById('label-last-month').textContent = 'Tháng ' + moment().subtract(1, 'month').format('MM');
+                safeSet('home-stat-total-all', totalAll);
+                safeSet('home-stat-pending', pending);
+                safeSet('home-stat-this-month', thisMonthData.length);
+                safeSet('home-stat-last-month', lastMonthData.length);
+                
+                safeSet('label-this-month', 'Tháng ' + now.format('MM'));
+                safeSet('label-last-month', 'Tháng ' + moment().subtract(1, 'month').format('MM'));
 
-                // 2. RENDER LỊCH TUẦN CÓ ĐIỀU HƯỚNG
+                // 2. RENDER LỊCH TUẦN
                 const weekContainer = document.getElementById('home-week-calendar');
                 const weekRangeLabel = document.getElementById('home-week-range');
                 
@@ -4754,23 +4780,22 @@
                         const day = moment(startOfWeek).add(i, 'days');
                         const isToday = day.isSame(moment(), 'day');
                         
-                        // Đếm số lượng cuộc hẹn và lịch công việc trong ngày
                         const countAppt = data.filter(item => item.appointmentTime && moment(item.appointmentTime).isSame(day, 'day')).length;
                         const countTasks = data.reduce((acc, item) => acc + (item.tasks || []).filter(t => moment(t.time).isSame(day, 'day')).length, 0);
-                        const totalDayEvents = countAppt + countTasks;
+                        const totalEvents = countAppt + countTasks;
 
                         weekHtml += `
                             <div class="week-item ${isToday ? 'today' : ''}">
                                 <span class="week-day">${dayLabels[i]}</span>
                                 <div class="week-date">${day.date()}</div>
-                                <span class="week-count ${totalDayEvents === 0 ? 'empty' : ''}">${totalDayEvents > 0 ? totalDayEvents : '•'}</span>
+                                <span class="week-count ${totalEvents === 0 ? 'empty' : ''}">${totalEvents > 0 ? totalEvents : '•'}</span>
                             </div>
                         `;
                     }
                     weekContainer.innerHTML = weekHtml;
                 }
 
-                // Cập nhật badge cảnh báo (nếu có)
+                // Cập nhật chấm đỏ Cảnh báo
                 const homeWarnBadge = document.getElementById('home-warn-badge');
                 const navWarnBadge = document.getElementById('warn-nav-badge');
                 if (homeWarnBadge && navWarnBadge) {
@@ -4780,7 +4805,7 @@
                 
                 lucide.createIcons();
             } catch(e) {
-                console.error("Lỗi khi load dữ liệu Home Dashboard:", e);
+                console.warn("Home Dashboard chưa sẵn sàng:", e.message);
             }
         },
         debounceSearch() {
@@ -14813,7 +14838,10 @@
         document.getElementById('plate-scanner-modal').classList.add('hidden');
         Inspection.startWatcher();
         SpareParts.init();
-        Nav.switchView('home', document.getElementById('nav-home-btn'));
+        // Mặc định vào Trang chủ
+        const homeBtn = document.getElementById('nav-home-btn');
+        Nav.switchView('home', homeBtn);
+        setTimeout(() => App._updateHomeDashboard(), 1000);
 
         // 1. Scroll to top cho màn hình chính (main)
         const main = document.querySelector('main');
