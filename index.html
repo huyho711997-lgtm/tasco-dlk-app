@@ -52,8 +52,7 @@
         .nav-btn.bottom-nav-active { color: #2563eb; transform: translateY(-2px); }
         .nav-icon-wrap { position: relative; padding: 6px; border-radius: 14px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
         .nav-btn.bottom-nav-active .nav-icon-wrap { background: #eff6ff; }
-        .nav-btn::after { content: ''; position: absolute; bottom: -6px; width: 4px; height: 4px; border-radius: 50%; background: #2563eb; opacity: 0; transform: scale(0); transition: all 0.3s; }
-        .nav-btn.bottom-nav-active::after { opacity: 1; transform: scale(1); }
+        /* Đã xóa hiệu ứng dấu chấm ::after */
         
         .nav-btn-center {
             width: 52px; height: 52px; background: linear-gradient(135deg, #4f46e5, #7c3aed);
@@ -67,7 +66,7 @@
         [data-theme="dark"] .nav-btn { color: var(--text-muted); }
         [data-theme="dark"] .nav-btn.bottom-nav-active { color: #60a5fa; }
         [data-theme="dark"] .nav-btn.bottom-nav-active .nav-icon-wrap { background: rgba(59, 130, 246, 0.2); }
-        [data-theme="dark"] .nav-btn::after { background: #60a5fa; }
+        /* Đã xóa hiệu ứng dấu chấm ::after trong dark mode */
         .swal2-popup.custom-rounded { border-radius: 28px !important; padding: 1.5rem !important; }
         .input-field {
             width: 100%;
@@ -1861,10 +1860,26 @@
         .today .week-count { background: #2563eb; color: white; }
         .week-count.empty { color: #cbd5e1; background: transparent; font-weight: 500; }
 
+        /* --- MÀU SẮC THỨ 7 VÀ CHỦ NHẬT --- */
+        .week-item.sun .week-day { color: #fb7185; }
+        .week-item.sun .week-date { color: #e11d48; }
+        .week-item.sun:not(.today) { background: #fff1f2; border: 1px solid #ffe4e6; }
+        
+        .week-item.sat .week-day { color: #60a5fa; }
+        .week-item.sat .week-date { color: #2563eb; }
+        .week-item.sat:not(.today) { background: #eff6ff; border: 1px solid #dbeafe; }
+        
+        .week-item.today .week-date { color: white !important; }
+
+        /* Dark mode lịch tuần */
         [data-theme="dark"] .week-item.today { background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.3); }
         [data-theme="dark"] .week-date { color: var(--text-secondary); }
         [data-theme="dark"] .week-count { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
         [data-theme="dark"] .week-count.empty { color: #475569; }
+        [data-theme="dark"] .week-item.sun:not(.today) { background: rgba(225, 29, 72, 0.08); border-color: rgba(225, 29, 72, 0.15); }
+        [data-theme="dark"] .week-item.sat:not(.today) { background: rgba(59, 130, 246, 0.08); border-color: rgba(59, 130, 246, 0.15); }
+        [data-theme="dark"] .week-item.sun .week-date { color: #fb7185; }
+        [data-theme="dark"] .week-item.sat .week-date { color: #60a5fa; }
     </style>
 </head>
 <body class="h-screen w-full flex flex-col overflow-hidden bg-slate-50">
@@ -2461,8 +2476,7 @@
         
         <div class="relative">
             <button onclick="AI.toggle()" class="nav-btn-center">
-                <div class="absolute inset-0 rounded-[20px] bg-indigo-400 animate-ping opacity-30"></div>
-                <i data-lucide="sparkles" class="w-6 h-6 relative z-10"></i>
+                <i data-lucide="bot" class="w-6 h-6 relative z-10"></i>
             </button>
         </div>
 
@@ -4754,14 +4768,20 @@
                     for (let i = 0; i < 7; i++) {
                         const day = moment(startOfWeek).add(i, 'days');
                         const isToday = day.isSame(moment(), 'day');
+                        const isSat = (i === 5); // T7
+                        const isSun = (i === 6); // CN
                         
                         // Đếm số lượng cuộc hẹn và lịch công việc trong ngày
                         const countAppt = data.filter(item => item.appointmentTime && moment(item.appointmentTime).isSame(day, 'day')).length;
                         const countTasks = data.reduce((acc, item) => acc + (item.tasks || []).filter(t => moment(t.time).isSame(day, 'day')).length, 0);
                         const totalDayEvents = countAppt + countTasks;
 
+                        let weekendClass = '';
+                        if (isSun) weekendClass = 'sun';
+                        else if (isSat) weekendClass = 'sat';
+
                         weekHtml += `
-                            <div class="week-item ${isToday ? 'today' : ''}">
+                            <div class="week-item ${isToday ? 'today' : ''} ${weekendClass}">
                                 <span class="week-day">${dayLabels[i]}</span>
                                 <div class="week-date">${day.date()}</div>
                                 <span class="week-count ${totalDayEvents === 0 ? 'empty' : ''}">${totalDayEvents > 0 ? totalDayEvents : '•'}</span>
@@ -9167,6 +9187,11 @@
                                     Swal.clickConfirm();
                                 }, 300); // Delay nhẹ 0.3s để UI báo "Nhận dạng xong" cho người dùng thấy
                             }
+                        } else if (textareaId === 'ai-input') {
+                            // Tự động gửi lệnh cho chatbot sau khi nhận dạng giọng nói xong
+                            setTimeout(() => {
+                                AI.send();
+                            }, 300);
                         }
 
                     } else {
@@ -14958,9 +14983,9 @@
                         class="flex-1 bg-transparent text-[13px] font-semibold text-slate-800 outline-none resize-none placeholder-slate-400 max-h-24"
                         oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
                         onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();AI.send();}"></textarea>
-                    <button onclick="AI.paste()" id="ai-mic-btn"
-                        class="w-7 h-7 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 active:bg-indigo-100 active:text-indigo-600 transition-colors shrink-0">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                    <button onclick="AI.toggleMic()" id="ai-mic-btn"
+                        class="h-7 px-2.5 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 active:bg-indigo-100 transition-colors shrink-0 font-bold text-[10px] whitespace-nowrap gap-1">
+                        <i data-lucide="mic" class="w-3.5 h-3.5"></i> Nói lệnh
                     </button>
                 </div>
                 <button onclick="AI.send()" id="ai-send-btn"
