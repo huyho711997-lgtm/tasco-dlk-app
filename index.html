@@ -1814,6 +1814,11 @@
         [data-theme="dark"] #filter-sheet .text-slate-600 { color: var(--text-secondary) !important; }
         [data-theme="dark"] #filter-sheet .text-slate-500 { color: var(--text-muted) !important; }
         [data-theme="dark"] .filter-card-inactive { background-color: var(--bg-app) !important; border-color: var(--border-light) !important; }
+
+        /* Nút chuông thông báo */
+        [data-theme="dark"] #header-noti-btn { background-color: var(--bg-surface) !important; color: var(--text-secondary) !important; border: 1px solid var(--border-light); }
+        [data-theme="dark"] #header-noti-btn:active { background-color: var(--border-light) !important; }
+        [data-theme="dark"] #noti-badge { border-color: var(--bg-app) !important; }
     </style>
 </head>
 <body class="h-screen w-full flex flex-col overflow-hidden bg-slate-50">
@@ -2039,20 +2044,20 @@
                 </div>
             </div>
             
-            <div class="flex items-center gap-4">
-                <button onclick="NotificationManager.toggle()" class="relative text-slate-400 hover:text-blue-600 active:scale-90 transition-all mt-1">
-                    <i data-lucide="bell" class="w-6 h-6"></i>
-                    <span id="noti-badge" class="hidden absolute -top-0.5 right-0.5 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full animate-pulse z-10"></span>
+            <div class="flex items-center gap-3">
+                <button id="header-noti-btn" onclick="NotificationManager.toggle()" class="relative w-9 h-9 flex items-center justify-center bg-slate-100 text-slate-500 rounded-xl hover:bg-slate-200 active:scale-95 transition-all shadow-sm">
+                    <i data-lucide="bell" class="w-5 h-5"></i>
+                    <span id="noti-badge" class="hidden absolute -top-1 -right-1 w-3 h-3 bg-rose-500 border-2 border-white rounded-full animate-pulse z-10 shadow-sm"></span>
                 </button>
 
                 <button id="header-user-btn" onclick="UserMenu.open()" title="Menu chức năng" class="relative transition-transform active:scale-90 shadow-sm"
-                    style="background:linear-gradient(135deg,#2563eb,#7c3aed); width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; color: white; border: none; flex-shrink: 0;">
+                    style="background:linear-gradient(135deg,#2563eb,#7c3aed); width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; color: white; border: none; flex-shrink: 0;">
                     <span id="header-user-avatar-text">U</span>
                 </button>
             </div>
         </div>
         
-        <div id="header-search-container" class="relative group mt-1 transition-all duration-300 overflow-hidden">
+        <div id="header-search-container" style="display: none;" class="relative group mt-1 transition-all duration-300 overflow-hidden">
             <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-500"></i>
             
             <input type="text" id="global-search" 
@@ -3914,6 +3919,16 @@
             }, 400);
 
             this._applyUserUI(session);
+            document.getElementById('login-screen').classList.add('hide');
+            setTimeout(() => {
+                document.getElementById('login-screen').style.display = 'none';
+            }, 400);
+
+            this._applyUserUI(session);
+            
+            // THÊM DÒNG NÀY ĐỂ ĐỒNG BỘ UI NGAY KHI ĐĂNG NHẬP XONG
+            Nav.switchView('home', document.getElementById('nav-home-btn')); 
+
             Toast.fire({ icon: 'success', title: `Xin chào, ${user.name}!` });
         },
 
@@ -4569,7 +4584,7 @@
             });
         }
     }; 
-       
+
     const Nav = {
         calendarInit: false,
         viewTitles: { home: 'Trang chủ', list:'Hồ sơ bồi thường', overdue:'Bảng cảnh báo', import:'Tiếp nhận tự động', calendar:'Lịch làm việc', report:'Báo cáo tổng hợp' },
@@ -14697,6 +14712,7 @@
         document.getElementById('plate-scanner-modal').classList.add('hidden');
         Inspection.startWatcher();
         SpareParts.init();
+        Nav.switchView('home', document.getElementById('nav-home-btn'));
 
         // 1. Scroll to top cho màn hình chính (main)
         const main = document.querySelector('main');
