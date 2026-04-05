@@ -3741,66 +3741,20 @@
     };
 
     // ============================================================
-    // AUTH — Xác thực người dùng
+    // AUTH — Xác thực người dùng (Đã đồng bộ Firebase)
     // ============================================================
     const Auth = {
-        // Danh sách tài khoản mặc định (lưu trong localStorage)
-        // Trong thực tế, nên lưu trên Firebase hoặc backend
-        _KEY_USERS: 'tasco_users',
         _KEY_SESSION: 'tasco_session',
         _sessionStart: null,
-
-        _defaultUsers: [
-            {
-                id: 'u001',
-                username: 'admin',
-                password: 'tasco2024',
-                name: 'Quản trị viên',
-                role: 'admin',       // admin | user | viewer
-                phone: '0901234567',
-                position: 'Trưởng phòng Giám định',
-                avatar: 'QT',
-                color: '#7c3aed',
-                active: true,
-                createdAt: '01/01/2025'
-            },
-            {
-                id: 'u002',
-                username: 'giamdinvien1',
-                password: 'tasco123',
-                name: 'Nguyễn Văn A',
-                role: 'user',
-                phone: '0902345678',
-                position: 'Giám định viên',
-                avatar: 'NA',
-                color: '#2563eb',
-                active: true,
-                createdAt: '01/01/2025'
-            },
-            {
-                id: 'u003',
-                username: 'giamdinvien2',
-                password: 'tasco123',
-                name: 'Trần Thị B',
-                role: 'user',
-                phone: '0903456789',
-                position: 'Giám định viên',
-                avatar: 'TB',
-                color: '#059669',
-                active: true,
-                createdAt: '15/02/2025'
-            }
-        ],
+        _usersList: [], // Biến lưu trữ danh sách user đồng bộ từ Firebase
 
         getUsers() {
-            const stored = localStorage.getItem(this._KEY_USERS);
-            if (stored) return JSON.parse(stored);
-            localStorage.setItem(this._KEY_USERS, JSON.stringify(this._defaultUsers));
-            return this._defaultUsers;
+            return this._usersList;
         },
 
         saveUsers(users) {
-            localStorage.setItem(this._KEY_USERS, JSON.stringify(users));
+            // Lưu trực tiếp mảng users lên Firebase thay vì localStorage
+            db.ref('Users').set(users);
         },
 
         getCurrentUser() {
@@ -3834,7 +3788,16 @@
 
             btn.disabled = true;
             btn.textContent = 'Đang xác thực...';
-            await new Promise(r => setTimeout(r, 600)); // UX delay nhỏ
+            await new Promise(r => setTimeout(r, 600));
+
+            // Đề phòng trường hợp Firebase tải chậm
+            if (this._usersList.length === 0) {
+                errEl.textContent = 'Đang tải dữ liệu từ máy chủ, vui lòng thử lại sau giây lát!';
+                errEl.classList.remove('hidden');
+                btn.disabled = false;
+                btn.textContent = 'Đăng nhập';
+                return;
+            }
 
             const users = this.getUsers();
             const user = users.find(u => u.username === username && u.password === password && u.active);
@@ -3844,7 +3807,6 @@
                 errEl.classList.remove('hidden');
                 btn.disabled = false;
                 btn.textContent = 'Đăng nhập';
-                // Shake animation
                 const card = document.querySelector('.login-card');
                 card.style.animation = 'none';
                 card.style.transform = 'translateX(-8px)';
@@ -3852,35 +3814,30 @@
                 return;
             }
 
-            // Lưu session
+            // Lưu session đăng nhập vào máy cá nhân (giữ nguyên để không bắt đăng nhập lại)
             const session = { ...user, loginAt: new Date().toISOString() };
             delete session.password;
             localStorage.setItem(this._KEY_SESSION, JSON.stringify(session));
             this._sessionStart = Date.now();
 
-            // Ẩn màn hình login
             document.getElementById('login-screen').classList.add('hide');
             setTimeout(() => {
                 document.getElementById('login-screen').style.display = 'none';
             }, 400);
 
-            // Cập nhật UI
             this._applyUserUI(session);
             Toast.fire({ icon: 'success', title: `Xin chào, ${user.name}!` });
         },
 
         _applyUserUI(user) {
-            // Header avatar
             const btn = document.getElementById('header-user-btn');
             if (btn) {
                 btn.textContent = user.avatar || user.name.charAt(0).toUpperCase();
                 btn.style.background = `linear-gradient(135deg, ${user.color || '#2563eb'}, ${user.color ? user.color + 'cc' : '#7c3aed'})`;
             }
-            // Header subtitle
             const sub = document.getElementById('header-subtitle');
             if (sub) sub.textContent = user.position || 'Giám định viên';
 
-            // Admin menu section
             if (user.role === 'admin') {
                 document.getElementById('menu-admin-section')?.classList.remove('hidden');
             }
@@ -3902,7 +3859,6 @@
             UserMenu.close();
             localStorage.removeItem(this._KEY_SESSION);
 
-            // Hiện lại màn hình login
             const ls = document.getElementById('login-screen');
             ls.style.display = 'flex';
             ls.classList.remove('hide');
@@ -3914,14 +3870,38 @@
         },
 
         init() {
-            // Kiểm tra session cũ
+            db.ref('Users').on('value', snapshot => {
+                const data = snapshot.val();
+                if (!data) {
+                    // Tạo 1 tài khoản Admin mặc định lần đầu tiên đẩy lên Firebase
+                    const defaultAdmin = [{
+                        id: 'u_admin_master',
+                        username: 'admin',
+                        password: 'tasco2026',
+                        name: 'Quản trị viên',
+                        role: 'admin',
+                        phone: '0901234567',
+                        position: 'Giám đốc chi nhánh',
+                        avatar: 'AD',
+                        color: '#7c3aed',
+                        active: true,
+                        createdAt: new Date().toISOString()
+                    }];
+                    db.ref('Users').set(defaultAdmin);
+                    this._usersList = defaultAdmin;
+                } else {
+                    // Cập nhật danh sách local để các hàm khác gọi không bị lỗi đồng bộ
+                    this._usersList = Array.isArray(data) ? data : Object.values(data);
+                }
+            });
+
+            // Tự động vào app nếu đã có session
             const user = this.getCurrentUser();
             if (user) {
                 document.getElementById('login-screen').style.display = 'none';
                 this._applyUserUI(user);
                 this._sessionStart = Date.now();
             } else {
-                // Hiển thị version trong login
                 document.getElementById('login-version-text').textContent =
                     `TASCO DLK v${APP_VERSION.version} · Đăk Lăk Branch`;
             }
