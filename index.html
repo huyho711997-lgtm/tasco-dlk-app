@@ -9326,8 +9326,8 @@
                             <p id="sc-review-count" class="text-emerald-400 text-[10px] font-bold">1 / 5</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button onclick="SecureCamera.shareOrSaveCurrentPreview()" title="Lưu/Chia sẻ ảnh này" class="w-10 h-10 flex items-center justify-center bg-blue-500/20 text-blue-400 rounded-full active:bg-blue-500/40 transition-colors shadow-sm">
-                                <i id="sc-save-btn-icon" data-lucide="download" class="w-5 h-5"></i>
+                            <button onclick="SecureCamera.shareOrSaveCurrentPreview(this)" title="Lưu/Chia sẻ ảnh này" class="w-10 h-10 flex items-center justify-center bg-blue-500/20 text-blue-400 rounded-full active:bg-blue-500/40 transition-colors shadow-sm">
+                                <i data-lucide="download" class="w-5 h-5"></i>
                             </button>
                             <button onclick="SecureCamera.removeCurrentPreview()" title="Xóa ảnh" class="w-10 h-10 flex items-center justify-center bg-rose-500/20 text-rose-500 rounded-full active:bg-rose-500/40 transition-colors shadow-sm">
                                 <i data-lucide="trash-2" class="w-5 h-5"></i>
@@ -9490,19 +9490,18 @@
             });
         },
         // Hàm đóng dấu nước on-the-fly và mở bảng Lưu ảnh Native của iOS
-        async shareOrSaveCurrentPreview() {
-            if (this._capturedFiles.length === 0) return;
+        async shareOrSaveCurrentPreview(btnElement) {
+            if (this._capturedFiles.length === 0 || !btnElement) return;
             
             const currentFileObj = this._capturedFiles[this._currentReviewIdx];
             if (!currentFileObj || !currentFileObj.file) return;
 
-            // Xoay icon thành hiệu ứng loading báo hiệu đang xử lý đóng dấu
-            const btnIcon = document.getElementById('sc-save-btn-icon');
-            if (btnIcon) {
-                btnIcon.setAttribute('data-lucide', 'loader-2');
-                btnIcon.classList.add('animate-spin');
-                lucide.createIcons();
-            }
+            // Lưu lại giao diện gốc của nút (chứa icon download)
+            const originalHTML = btnElement.innerHTML;
+
+            // Ép thẳng SVG loading vào nút và khóa click để tránh bấm đúp
+            btnElement.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" class="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`;
+            btnElement.style.pointerEvents = 'none';
 
             try {
                 // Lấy thông tin biển số và định vị hiện tại
@@ -9510,18 +9509,17 @@
                 const bsxToStamp = item.bsx || '';
                 const gpsLocation = this._gpsLocation || '';
 
-                // Gọi bộ xử lý ảnh: Đóng dấu GPS + Ngày giờ (mất khoảng < 100ms)
+                // Gọi bộ xử lý ảnh: Đóng dấu GPS + Ngày giờ
                 const watermarkedFile = await ImageProcessor.addWatermark(currentFileObj.file, bsxToStamp, gpsLocation);
 
                 // Mở Share Sheet native của iOS/Android
-                // Trên iOS, bảng này sẽ có nút "Lưu hình ảnh" (Save Image) lưu thẳng vào Camera Roll
                 if (navigator.canShare && navigator.canShare({ files: [watermarkedFile] })) {
                     await navigator.share({
                         files: [watermarkedFile],
                         title: 'Ảnh Hiện Trường'
                     });
                 } else {
-                    // Fallback cho Máy tính PC hoặc trình duyệt cũ không hỗ trợ Share API
+                    // Fallback cho PC
                     const url = URL.createObjectURL(watermarkedFile);
                     const a = document.createElement('a');
                     a.href = url;
@@ -9529,21 +9527,18 @@
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
                     Toast.fire({ icon: 'success', title: 'Đã tải ảnh xuống!' });
                 }
             } catch (error) {
-                // Bỏ qua lỗi AbortError do người dùng chủ động vuốt tắt bảng Share của iOS
-                if (error.name !== 'AbortError' && !error.message.includes('Share canceled')) {
+                // Bỏ qua lỗi AbortError do người dùng chủ động vuốt tắt bảng Share
+                if (error.name !== 'AbortError' && !error.message.includes('Share canceled') && !error.message.includes('cancelled')) {
                     Toast.fire({ icon: 'error', title: 'Lỗi xử lý ảnh: ' + error.message });
                 }
             } finally {
-                // Trả icon về trạng thái tải xuống bình thường
-                if (btnIcon) {
-                    btnIcon.classList.remove('animate-spin');
-                    btnIcon.setAttribute('data-lucide', 'download');
-                    lucide.createIcons();
-                }
+                // Phục hồi lại nút bấm 100% để tiếp tục tải ảnh khác
+                btnElement.innerHTML = originalHTML;
+                btnElement.style.pointerEvents = 'auto';
             }
         },
         async confirmUpload() {
