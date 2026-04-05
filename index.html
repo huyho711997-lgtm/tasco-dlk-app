@@ -9017,30 +9017,10 @@
                     icon.style.transition = 'transform 0.3s ease';
                 });
 
-                // ĐIỀU KHIỂN KHỐI NGÀY GIỜ KHÔNG BỊ CẮT KHI XOAY NGANG
+                // Xoay overlay info theo hướng cầm máy, gốc xoay tại góc dưới trái
                 const overlayInfo = document.getElementById('sc-overlay-info');
                 if (overlayInfo) {
                     overlayInfo.style.transform = `rotate(${this._deviceOrientation}deg)`;
-                    
-                    // Reset lại toàn bộ tọa độ
-                    overlayInfo.style.top = 'auto';
-                    overlayInfo.style.bottom = 'auto';
-                    overlayInfo.style.left = 'auto';
-                    overlayInfo.style.right = 'auto';
-
-                    if (this._deviceOrientation === 90) {
-                        // Nằm ngang (Góc trên trái)
-                        overlayInfo.style.top = '110px';
-                        overlayInfo.style.left = '-75px'; 
-                    } else if (this._deviceOrientation === -90 || this._deviceOrientation === 270) {
-                        // Nằm ngang (Góc dưới trái)
-                        overlayInfo.style.bottom = '110px';
-                        overlayInfo.style.left = '-75px';
-                    } else {
-                        // Cầm dọc bình thường
-                        overlayInfo.style.bottom = '24px';
-                        overlayInfo.style.left = '16px';
-                    }
                 }
             };
 
@@ -13543,18 +13523,16 @@
             <video id="secure-camera-video" autoplay playsinline class="absolute min-w-full min-h-full object-cover"></video>
             <div id="secure-camera-flash" class="absolute inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-100 z-10"></div>
             
-            <div id="sc-overlay-info" class="absolute z-30 transition-all duration-300 pointer-events-none" style="bottom: 24px; left: 16px; width: 250px; transform-origin: center center;">
-                <div class="bg-black/60 backdrop-blur-md p-3 rounded-2xl border border-white/20 shadow-lg pointer-events-auto cursor-pointer active:bg-black/80 transition-colors" onclick="event.stopPropagation(); SecureCamera.refreshLocation()">
-                    <div class="flex items-center justify-between mb-1.5 border-b border-white/10 pb-1.5">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.8)]"></span>
-                            <p id="sc-time-status" class="text-white text-xs font-mono font-black tracking-widest drop-shadow-md">--:--:--</p>
-                        </div>
-                        <span class="text-[9px] font-black text-white/50 uppercase tracking-widest">Tasco DLK</span>
+            <div id="sc-overlay-info" class="absolute z-30 transition-all duration-300 pointer-events-none" style="bottom: 24px; left: 16px; width: 240px; transform-origin: bottom left;">
+                <div onclick="event.stopPropagation(); SecureCamera.refreshLocation()" class="pointer-events-auto cursor-pointer" style="padding: 6px 0;">
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shrink-0" style="filter: drop-shadow(0 0 4px rgba(244,63,94,0.9));"></span>
+                        <p id="sc-time-status" class="font-mono font-black text-white text-[11px] tracking-wider" style="text-shadow: 0 1px 4px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.8);">--:--:--</p>
+                        <span class="text-[8px] font-black text-white/60 ml-auto uppercase tracking-widest" style="text-shadow: 0 1px 3px rgba(0,0,0,0.9);">Tasco DLK</span>
                     </div>
-                    <div class="flex items-start gap-2">
-                        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" id="refresh-icon"></i>
-                        <p id="sc-gps-status" class="text-white/90 text-[10px] font-medium leading-relaxed line-clamp-2 drop-shadow-md">Đang tìm vệ tinh GPS...</p>
+                    <div class="flex items-start gap-1.5">
+                        <i data-lucide="map-pin" class="w-3 h-3 text-amber-400 shrink-0 mt-0.5" id="refresh-icon" style="filter: drop-shadow(0 0 3px rgba(251,191,36,0.8));"></i>
+                        <p id="sc-gps-status" class="text-white text-[10px] font-semibold leading-relaxed line-clamp-3" style="text-shadow: 0 1px 4px rgba(0,0,0,0.95), 0 0 16px rgba(0,0,0,0.9);">Đang tìm vệ tinh GPS...</p>
                     </div>
                 </div>
             </div>
