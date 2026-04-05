@@ -2023,49 +2023,35 @@
     <main class="flex-1 overflow-y-auto no-scrollbar pb-28 relative">
 
         <!-- VIEW: DANH SÁCH -->
-        <div id="view-list" class="view-section block pb-5">
-            
-            <div class="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 rounded-b-[36px] px-6 pt-6 pb-12 overflow-hidden shadow-lg shadow-indigo-200/50">
-                <div class="absolute -top-16 -right-16 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
-                <div class="absolute bottom-0 left-0 w-32 h-32 bg-blue-400/20 rounded-full blur-xl pointer-events-none"></div>
-
-                <div class="relative z-10 flex justify-between items-start mb-6">
-                    <div>
-                        <p class="text-blue-200 text-[10px] font-extrabold uppercase tracking-widest mb-1.5">Tổng quan công việc</p>
-                        <h2 class="text-white font-black text-2xl tracking-tight">Hồ sơ xử lý</h2>
-                    </div>
-                    <div class="text-right flex flex-col items-end">
-                        <div class="bg-white/20 backdrop-blur-md px-3 py-1 rounded-xl border border-white/20 mb-1">
-                            <span class="text-white font-black text-2xl leading-none" id="kpi-total">0</span>
-                        </div>
-                        <p class="text-blue-200 text-[9px] font-bold uppercase tracking-wider">Tổng số vụ</p>
-                    </div>
+        <div id="view-list" class="view-section p-5 block">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="font-bold text-slate-800 flex items-center gap-2">
+                    <i data-lucide="list-todo" class="w-4 h-4 text-blue-500"></i> Hồ sơ đang xử lý
+                </h2>
+                <button onclick="FilterManager.open()" id="main-filter-btn"
+                    class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 active:scale-95 transition-transform shadow-sm">
+                    <i data-lucide="filter" class="w-3.5 h-3.5"></i>
+                    <span class="text-[11px] font-black">Lọc</span>
+                    <div class="h-3.5 w-px bg-blue-200 mx-0.5"></div>
+                    <span id="kpi-total" class="text-[11px] font-black">0 vụ</span>
+                </button>
+            </div>
+            <div class="grid grid-cols-3 gap-2 mb-6">
+                <div class="bg-blue-50 rounded-2xl p-3 border border-blue-100">
+                    <p class="text-[9px] font-bold text-blue-600 uppercase mb-1 leading-tight">Tiếp nhận<br>hôm nay</p>
+                    <p class="text-2xl font-black text-blue-700" id="kpi-received-today">0</p>
                 </div>
-
-                <div class="relative z-10 grid grid-cols-3 gap-3">
-                    <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-3 flex flex-col items-center justify-center">
-                        <p class="text-xl font-black text-white leading-none mb-1" id="kpi-received-today">0</p>
-                        <p class="text-[9px] font-bold text-blue-200 uppercase text-center leading-tight">Nhận<br>hôm nay</p>
-                    </div>
-                    <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-3 flex flex-col items-center justify-center">
-                        <p class="text-xl font-black text-amber-300 leading-none mb-1" id="kpi-today">0</p>
-                        <p class="text-[9px] font-bold text-blue-200 uppercase text-center leading-tight">Hẹn<br>hôm nay</p>
-                    </div>
-                    <div class="bg-rose-500/20 backdrop-blur-md border border-rose-400/30 rounded-2xl p-3 flex flex-col items-center justify-center">
-                        <p class="text-xl font-black text-rose-300 leading-none mb-1" id="kpi-overdue">0</p>
-                        <p class="text-[9px] font-bold text-rose-200 uppercase text-center leading-tight">Chờ duyệt<br>quá hạn</p>
-                    </div>
+                <div class="bg-amber-50 rounded-2xl p-3 border border-amber-100">
+                    <p class="text-[9px] font-bold text-amber-600 uppercase mb-1 leading-tight">Hẹn<br>hôm nay</p>
+                    <p class="text-2xl font-black text-amber-700" id="kpi-today">0</p>
+                </div>
+                <div class="bg-rose-50 rounded-2xl p-3 border border-rose-100">
+                    <p class="text-[9px] font-bold text-rose-600 uppercase mb-1 leading-tight">Chờ duyệt<br>trễ</p>
+                    <p class="text-2xl font-black text-rose-700" id="kpi-overdue">0</p>
                 </div>
             </div>
 
-            <div class="px-5 mb-4 flex gap-2 overflow-x-auto no-scrollbar">
-                <button onclick="Sort.set('receivedAt', this)" class="sort-pill shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-black border bg-slate-800 text-white border-slate-800 transition-colors">Tiếp nhận ↓</button>
-                <button onclick="Sort.set('stepUpdatedAt', this)" class="sort-pill shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-black border bg-white text-slate-500 border-slate-200 transition-colors">Cập nhật</button>
-                <button onclick="Sort.set('appointmentTime', this)" class="sort-pill shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-black border bg-white text-slate-500 border-slate-200 transition-colors">Giờ hẹn</button>
-                <button onclick="Sort.set('notifyDate', this)" class="sort-pill shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-black border bg-white text-slate-500 border-slate-200 transition-colors">Ngày báo</button>
-            </div>
-
-            <div class="px-5 space-y-4" id="mobile-list"></div>
+            <div class="space-y-4" id="mobile-list"></div>
         </div>
 
         <!-- VIEW: CẢNH BÁO -->
