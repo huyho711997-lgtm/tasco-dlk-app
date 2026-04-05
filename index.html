@@ -2034,95 +2034,24 @@
                 </div>
             </div>
 
-            <button onclick="PlateScanner.open()"
-                class="w-full mb-4 flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-4 text-white shadow-lg shadow-blue-200 active:scale-[0.98] transition-transform">
-                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-                    <i data-lucide="scan-search" class="w-5 h-5"></i>
-                </div>
-                <div class="text-left">
-                    <p class="font-black text-sm">Quét biển số tìm hồ sơ</p>
-                    <p class="text-[11px] text-blue-100 font-medium">Chụp ảnh biển số — AI đọc tức thì</p>
-                </div>
-                <i data-lucide="chevron-right" class="w-5 h-5 ml-auto opacity-70"></i>
-            </button>
             <div class="mb-4 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-
-                <!-- Row 1: Sort + toggle filter btn -->
-                <div class="flex items-center gap-2 px-3 py-2 border-b border-slate-100">
-                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider shrink-0">Sắp xếp</span>
-                    <div class="flex gap-1 overflow-x-auto no-scrollbar flex-1">
-                        <button onclick="Sort.set('receivedAt', this)"
-                            class="sort-pill shrink-0 px-2 py-1 rounded-lg text-[10px] font-black border bg-slate-800 text-white border-slate-800">
-                            Tiếp nhận ↓
-                        </button>
-                        <button onclick="Sort.set('stepUpdatedAt', this)"
-                            class="sort-pill shrink-0 px-2 py-1 rounded-lg text-[10px] font-black border bg-white text-slate-400 border-slate-200">
-                            Cập nhật
-                        </button>
-                        <button onclick="Sort.set('appointmentTime', this)"
-                            class="sort-pill shrink-0 px-2 py-1 rounded-lg text-[10px] font-black border bg-white text-slate-400 border-slate-200">
-                            Giờ hẹn
-                        </button>
-                        <button onclick="Sort.set('notifyDate', this)"
-                            class="sort-pill shrink-0 px-2 py-1 rounded-lg text-[10px] font-black border bg-white text-slate-400 border-slate-200">
-                            Ngày báo
-                        </button>
+                <div class="flex items-center justify-between px-3 py-2.5">
+                    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar flex-1 pr-2">
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider shrink-0">Sắp xếp</span>
+                        <button onclick="Sort.set('receivedAt', this)" class="sort-pill shrink-0 px-2.5 py-1.5 rounded-xl text-[11px] font-black border bg-slate-800 text-white border-slate-800">Tiếp nhận ↓</button>
+                        <button onclick="Sort.set('stepUpdatedAt', this)" class="sort-pill shrink-0 px-2.5 py-1.5 rounded-xl text-[11px] font-black border bg-white text-slate-500 border-slate-200">Cập nhật</button>
+                        <button onclick="Sort.set('appointmentTime', this)" class="sort-pill shrink-0 px-2.5 py-1.5 rounded-xl text-[11px] font-black border bg-white text-slate-500 border-slate-200">Giờ hẹn</button>
+                        <button onclick="Sort.set('notifyDate', this)" class="sort-pill shrink-0 px-2.5 py-1.5 rounded-xl text-[11px] font-black border bg-white text-slate-500 border-slate-200">Ngày báo</button>
                     </div>
-                    <!-- Toggle filter -->
-                    <button onclick="FilterBar.toggle()" id="filter-toggle-btn"
-                        class="shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg border border-slate-200 bg-white text-slate-500 text-[10px] font-black transition-all active:bg-slate-50">
-                        <svg class="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 4h12M4 8h8M6 12h4"/></svg>
-                        <span id="filter-toggle-label">Lọc</span>
-                        <span id="filter-active-dot" class="hidden w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                    
+                    <button onclick="FilterManager.open()" id="main-filter-btn"
+                        class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 active:scale-95 transition-transform shadow-sm">
+                        <i data-lucide="filter" class="w-3.5 h-3.5"></i>
+                        <span class="text-[11px] font-black">Lọc</span>
+                        <div class="h-3.5 w-px bg-blue-200 mx-0.5"></div>
+                        <span id="filter-count-badge" class="text-[11px] font-black">0 vụ</span>
                     </button>
                 </div>
-
-                <!-- Row 2: Filter pills — ẩn/hiện -->
-                <div id="filter-bar-wrap" class="hidden px-3 py-2">
-                    <div class="flex gap-1.5 overflow-x-auto no-scrollbar" id="status-filter-row">
-                        <button onclick="Filter.toggle(0, this)" data-step="0"
-                            class="filter-pill shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-black border bg-slate-800 text-white border-slate-800">
-                            <svg class="w-2.5 h-2.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4h12M4 8h8M6 12h4"/></svg>
-                            Tất cả
-                        </button>
-                        <button onclick="Filter.toggle(1, this)" data-step="1"
-                            class="filter-pill shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-black border bg-white text-slate-400 border-slate-200">
-                            <svg class="w-2.5 h-2.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 2v8M4 7l4 4 4-4"/><path d="M2 13h12"/></svg>
-                            Tiếp nhận
-                        </button>
-                        <button onclick="Filter.toggle(2, this)" data-step="2"
-                            class="filter-pill shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-black border bg-white text-slate-400 border-slate-200">
-                            <svg class="w-2.5 h-2.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 1v3M11 1v3M2 7h12"/></svg>
-                            Lên lịch
-                        </button>
-                        <button onclick="Filter.toggle(3, this)" data-step="3"
-                            class="filter-pill shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-black border bg-white text-slate-400 border-slate-200">
-                            <svg class="w-2.5 h-2.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="4"/><path d="M9.5 9.5L14 14"/></svg>
-                            Giám định
-                        </button>
-                        <button onclick="Filter.toggle(4, this)" data-step="4"
-                            class="filter-pill shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-black border bg-white text-slate-400 border-slate-200">
-                            <svg class="w-2.5 h-2.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 2h6l3 3v9H4z"/><path d="M10 2v3h3M6 8h4M6 11h3"/></svg>
-                            Báo giá
-                        </button>
-                        <button onclick="Filter.toggle(5, this)" data-step="5"
-                            class="filter-pill shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-black border bg-white text-slate-400 border-slate-200">
-                            <svg class="w-2.5 h-2.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
-                            Chờ duyệt
-                        </button>
-                        <button onclick="Filter.toggle(6, this)" data-step="6"
-                            class="filter-pill shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-black border bg-white text-slate-400 border-slate-200">
-                            <svg class="w-2.5 h-2.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 2h10v12l-2-1-2 1-2-1-2 1-2-1V2z"/><path d="M6 6h4M6 9h3"/></svg>
-                            Chờ HĐ
-                        </button>
-                        <button onclick="Filter.toggle(8, this)" data-step="8"
-                            class="filter-pill shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-black border bg-white text-slate-400 border-slate-200">
-                            <svg class="w-2.5 h-2.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 2v4M8 10v4M2 8h4M10 8h4"/></svg>
-                            Chờ BS HS
-                        </button>
-                    </div>
-                </div>
-
             </div>
             <div class="space-y-4" id="mobile-list"></div>
         </div>
@@ -4585,7 +4514,7 @@
         },
         searchData() {
             const query = (document.getElementById('global-search').value||'').toLowerCase();
-            const activeSteps = Filter.getActive();
+            const activeSteps = FilterManager.getActive(); // Đổi tên gọi từ Filter sang FilterManager
             const filtered = this.masterData.filter(item => {
                 const matchText = [item.bsx,item.claimCode,item.customer,item.phone]
                     .some(val=>String(val||'').toLowerCase().includes(query));
@@ -4594,7 +4523,25 @@
             });
             const sorted = Sort.apply(filtered);
             List.render(sorted.slice(0,50));
+            
+            // Cập nhật số vụ lên nút Filter và các chỗ khác
             document.getElementById('kpi-total').textContent = `${filtered.length} Vụ`;
+            const filterBadge = document.getElementById('filter-count-badge');
+            if (filterBadge) filterBadge.textContent = `${filtered.length} vụ`;
+            
+            // Đổi màu nút Filter nếu có áp dụng bộ lọc
+            const mainFilterBtn = document.getElementById('main-filter-btn');
+            if (mainFilterBtn) {
+                if (activeSteps.length > 0) {
+                    mainFilterBtn.classList.remove('bg-blue-50', 'text-blue-700', 'border-blue-200');
+                    mainFilterBtn.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+                    mainFilterBtn.querySelector('div').classList.replace('bg-blue-200', 'bg-blue-400');
+                } else {
+                    mainFilterBtn.classList.add('bg-blue-50', 'text-blue-700', 'border-blue-200');
+                    mainFilterBtn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
+                    mainFilterBtn.querySelector('div').classList.replace('bg-blue-400', 'bg-blue-200');
+                }
+            }
         },
         _updateKPIs() {
             const today = this.masterData.filter(i=>i.appointmentTime&&moment(i.appointmentTime).isSame(moment(),'day')).length;
@@ -8300,17 +8247,88 @@
     };
 
     // ============================================================
-    // FILTER
+    // FILTER MANAGER
     // ============================================================
-    const Filter = {
+    const FilterManager = {
         _active: new Set(),
-        _colors: {1:{bg:'#3b82f6',border:'#3b82f6',text:'#fff'},2:{bg:'#f59e0b',border:'#f59e0b',text:'#fff'},3:{bg:'#06b6d4',border:'#06b6d4',text:'#fff'},4:{bg:'#6366f1',border:'#6366f1',text:'#fff'},5:{bg:'#8b5cf6',border:'#8b5cf6',text:'#fff'},6:{bg:'#10b981',border:'#10b981',text:'#fff'}},
-        toggle(step,btn){
-            if(step===0){this._active.clear();document.querySelectorAll('.filter-pill').forEach(b=>{const s=parseInt(b.dataset.step);if(s===0){b.style.background='#1e293b';b.style.borderColor='#1e293b';b.style.color='#fff';}else{b.style.background='';b.style.borderColor='';b.style.color='';b.classList.add('bg-white','text-slate-500','border-slate-200');b.classList.remove('text-white');}});}
-            else{const allBtn=document.querySelector('.filter-pill[data-step="0"]');if(allBtn){allBtn.style.background='';allBtn.style.borderColor='';allBtn.style.color='';allBtn.classList.remove('bg-slate-800','text-white','border-slate-800');allBtn.classList.add('bg-white','text-slate-500','border-slate-200');}if(this._active.has(step)){this._active.delete(step);btn.style.background='';btn.style.borderColor='';btn.style.color='';btn.classList.add('bg-white','text-slate-500','border-slate-200');}else{this._active.add(step);const col=this._colors[step];btn.classList.remove('bg-white','text-slate-500','border-slate-200');btn.style.background=col.bg;btn.style.borderColor=col.border;btn.style.color=col.text;}if(this._active.size===0){this.toggle(0,allBtn);return;}}
-            App.searchData();
+        _tempActive: new Set(), // Dùng để lưu tạm khi đang mở Modal chưa ấn Áp dụng
+        
+        open() {
+            this._tempActive = new Set(this._active);
+            this._renderOptions();
+            const modal = document.getElementById('filter-modal');
+            const sheet = document.getElementById('filter-sheet');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => sheet.classList.remove('translate-y-full'), 10);
         },
-        getActive(){return Array.from(this._active);}
+
+        close() {
+            const modal = document.getElementById('filter-modal');
+            const sheet = document.getElementById('filter-sheet');
+            sheet.classList.add('translate-y-full');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        },
+
+        _renderOptions() {
+            const grid = document.getElementById('filter-options-grid');
+            const steps = [
+                {id: 1, label: 'Tiếp nhận', icon: 'inbox', color: 'blue'},
+                {id: 2, label: 'Lên lịch', icon: 'calendar', color: 'amber'},
+                {id: 3, label: 'Giám định', icon: 'camera', color: 'cyan'},
+                {id: 4, label: 'Báo giá', icon: 'file-spreadsheet', color: 'indigo'},
+                {id: 5, label: 'Chờ duyệt', icon: 'shield-alert', color: 'purple'},
+                {id: 6, label: 'Chờ HĐ', icon: 'receipt', color: 'emerald'},
+                {id: 7, label: 'Đã có HĐ', icon: 'check-circle-2', color: 'green'},
+                {id: 8, label: 'Bổ sung HS', icon: 'folder-open', color: 'rose'}
+            ];
+
+            grid.innerHTML = steps.map(s => {
+                const isActive = this._tempActive.has(s.id);
+                const bgClass = isActive ? `bg-${s.color}-50 border-${s.color}-400` : 'bg-white border-slate-200';
+                const textClass = isActive ? `text-${s.color}-700` : 'text-slate-600';
+                const checkHtml = isActive ? `<div class="absolute top-2 right-2 w-4 h-4 bg-${s.color}-500 rounded-full flex items-center justify-center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>` : '';
+                
+                return `
+                <div onclick="FilterManager.toggleTemp(${s.id})" class="relative p-3 rounded-xl border-2 cursor-pointer transition-all active:scale-95 ${bgClass}">
+                    <div class="w-8 h-8 rounded-lg bg-${isActive ? s.color : 'slate'}-100 flex items-center justify-center mb-2">
+                        <i data-lucide="${s.icon}" class="w-4 h-4 ${isActive ? `text-${s.color}-600` : 'text-slate-400'}"></i>
+                    </div>
+                    <p class="font-bold text-[12px] ${textClass}">${s.label}</p>
+                    ${checkHtml}
+                </div>`;
+            }).join('');
+            lucide.createIcons();
+        },
+
+        toggleTemp(step) {
+            if (this._tempActive.has(step)) {
+                this._tempActive.delete(step);
+            } else {
+                this._tempActive.add(step);
+            }
+            this._renderOptions();
+            if (window.navigator.vibrate) window.navigator.vibrate(10);
+        },
+
+        clearAll() {
+            this._tempActive.clear();
+            this._renderOptions();
+        },
+
+        apply() {
+            this._active = new Set(this._tempActive);
+            this.close();
+            App.searchData();
+            Toast.fire({ icon: 'success', title: this._active.size > 0 ? `Đã lọc ${this._active.size} trạng thái` : 'Đã bỏ lọc' });
+        },
+
+        getActive() {
+            return Array.from(this._active);
+        }
     };
 
     // ============================================================
@@ -14771,6 +14789,32 @@
             </button>
         </div>
     </div>
-    
+    <div id="filter-modal" class="fixed inset-0 z-[99990] hidden flex-col justify-end" style="background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px);">
+        <div id="filter-sheet" class="bg-white rounded-t-3xl w-full flex flex-col transform translate-y-full transition-transform duration-300 shadow-2xl pb-safe">
+            <div class="px-5 pt-4 pb-3 border-b border-slate-100 flex justify-between items-center shrink-0">
+                <div>
+                    <h3 class="font-black text-slate-800 text-base">Lọc hồ sơ</h3>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Chọn trạng thái hiển thị</p>
+                </div>
+                <button onclick="FilterManager.close()" class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 active:bg-slate-200">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            
+            <div class="p-5 flex-1 overflow-y-auto">
+                <div class="grid grid-cols-2 gap-3" id="filter-options-grid">
+                    </div>
+            </div>
+
+            <div class="p-4 border-t border-slate-100 bg-slate-50 flex gap-3 shrink-0">
+                <button onclick="FilterManager.clearAll()" class="flex-1 py-3.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold text-[13px] active:bg-slate-100 transition-colors">
+                    Bỏ chọn tất cả
+                </button>
+                <button onclick="FilterManager.apply()" class="flex-[1.5] py-3.5 bg-blue-600 text-white rounded-xl font-black text-[13px] flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-md shadow-blue-200">
+                    <i data-lucide="check" class="w-4 h-4"></i> Áp dụng
+                </button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
