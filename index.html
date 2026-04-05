@@ -2026,12 +2026,9 @@
     </div>
 
     <!-- HEADER -->
-    <header class="bg-white px-4 pt-4 pb-3 border-b border-slate-200/60 shrink-0 z-20 shadow-sm relative transition-colors">
+    <header class="bg-gradient-to-b from-white to-slate-50/50 px-4 pt-4 pb-3 border-b border-slate-200/60 shrink-0 z-20 shadow-sm relative transition-colors">
         <div class="flex justify-between items-center mb-3">
             <div class="flex items-center gap-2.5">
-                <button onclick="Sidebar.open()" class="p-1.5 -ml-1.5 text-slate-500 hover:text-blue-600 active:bg-slate-100 rounded-xl transition-all">
-                    <i data-lucide="menu" class="w-5 h-5"></i>
-                </button>
                 <div class="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl shadow-md shadow-blue-500/30 flex items-center justify-center relative">
                     <div class="absolute inset-0 rounded-xl border border-white/20"></div>
                     <i data-lucide="shield-check" class="w-5 h-5 text-white drop-shadow-md"></i>
@@ -2041,16 +2038,21 @@
                     <p class="text-[9px] text-slate-500 uppercase font-extrabold tracking-widest leading-none" id="header-subtitle">Mobile App</p>
                 </div>
             </div>
-            <div class="flex items-center">
+            
+            <div class="flex items-center gap-4">
+                <button onclick="NotificationManager.toggle()" class="relative text-slate-400 hover:text-blue-600 active:scale-90 transition-all mt-1">
+                    <i data-lucide="bell" class="w-6 h-6"></i>
+                    <span id="noti-badge" class="hidden absolute -top-0.5 right-0.5 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full animate-pulse z-10"></span>
+                </button>
+
                 <button id="header-user-btn" onclick="UserMenu.open()" title="Menu chức năng" class="relative transition-transform active:scale-90 shadow-sm"
                     style="background:linear-gradient(135deg,#2563eb,#7c3aed); width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; color: white; border: none; flex-shrink: 0;">
                     <span id="header-user-avatar-text">U</span>
-                    <span id="noti-badge" class="hidden absolute -top-1 -right-1 w-3 h-3 bg-rose-500 border-2 border-white rounded-full animate-pulse z-10"></span>
                 </button>
             </div>
         </div>
         
-        <div class="relative group mt-1">
+        <div id="header-search-container" class="relative group mt-1 transition-all duration-300 overflow-hidden">
             <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-500"></i>
             
             <input type="text" id="global-search" 
@@ -4566,7 +4568,8 @@
                 return dir === 'desc' ? vb - va : va - vb;
             });
         }
-    };    
+    }; 
+       
     const Nav = {
         calendarInit: false,
         viewTitles: { home: 'Trang chủ', list:'Hồ sơ bồi thường', overdue:'Bảng cảnh báo', import:'Tiếp nhận tự động', calendar:'Lịch làm việc', report:'Báo cáo tổng hợp' },
@@ -4584,6 +4587,18 @@
             }
 
             document.getElementById('header-subtitle').textContent = this.viewTitles[view]||'Mobile App';
+
+            // --- LOGIC ẨN/HIỆN THANH TÌM KIẾM ---
+            const searchContainer = document.getElementById('header-search-container');
+            if (searchContainer) {
+                // Nếu đang ở màn hình Trang chủ (home) hoặc Báo cáo (report), ẩn thanh search đi cho rộng
+                if (view === 'home' || view === 'report' || view === 'import') {
+                    searchContainer.style.display = 'none';
+                } else {
+                    searchContainer.style.display = 'block';
+                }
+            }
+            // ------------------------------------
 
             if (view==='report') Report.open();
             if (view==='calendar') {
