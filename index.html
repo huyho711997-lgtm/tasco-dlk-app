@@ -4724,90 +4724,90 @@
             // Đổi format giờ hẹn thành 1 dòng để thẻ bớt cao
             const apptLabel = item.appointmentTime ? moment(item.appointmentTime).format('HH:mm DD/MM') : 'Chưa xếp lịch';
             
-            // Lấy số Zalo: Ưu tiên Cố vấn dịch vụ -> Chủ xe
             const zaloPhone = item.garaAdvisorPhone || item.phone || '';
             
-            // Nút Zalo thu nhỏ lại
+            // MÀU NÚT ZALO NHƯ BẢN GỐC (Nền xanh nhạt, chữ xanh đậm) - Thu nhỏ padding
             const phoneBtn = zaloPhone
-                ? `<button onclick="event.stopPropagation(); ZaloHelper.showMenu('${item.id}')" class="flex-[0.8] bg-white text-blue-600 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border border-slate-200 hover:border-blue-300 active:bg-blue-50 transition-colors">
+                ? `<button onclick="event.stopPropagation(); ZaloHelper.showMenu('${item.id}')" class="flex-[0.85] bg-blue-50 text-blue-700 py-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 border border-blue-200 active:bg-blue-100 transition-colors">
                     <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> Zalo
                    </button>`
-                : `<button disabled class="flex-[0.8] bg-slate-50 text-slate-400 py-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 border border-slate-100"><i data-lucide="message-square-off" class="w-3.5 h-3.5"></i> Trống</button>`;
+                : `<button disabled class="flex-[0.85] bg-slate-50 text-slate-400 py-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 border border-slate-200"><i data-lucide="message-square-off" class="w-3.5 h-3.5"></i> Trống</button>`;
             
             const statusIcons = {
-                1:'<i data-lucide="inbox" class="w-3.5 h-3.5 inline"></i>',
-                2:'<i data-lucide="calendar-clock" class="w-3.5 h-3.5 inline"></i>',
-                3:'<i data-lucide="camera" class="w-3.5 h-3.5 inline"></i>',
-                4:'<i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 inline"></i>',
-                5:'<i data-lucide="shield-alert" class="w-3.5 h-3.5 inline"></i>',
-                6:'<i data-lucide="receipt" class="w-3.5 h-3.5 inline"></i>',
-                7:'<i data-lucide="check-circle-2" class="w-3.5 h-3.5 inline"></i>',
-                8:'<i data-lucide="folder-open" class="w-3.5 h-3.5 inline"></i>'
+                1:'<i data-lucide="inbox" class="w-3 h-3 inline"></i>',
+                2:'<i data-lucide="calendar-clock" class="w-3 h-3 inline"></i>',
+                3:'<i data-lucide="camera" class="w-3 h-3 inline"></i>',
+                4:'<i data-lucide="file-spreadsheet" class="w-3 h-3 inline"></i>',
+                5:'<i data-lucide="shield-alert" class="w-3 h-3 inline"></i>',
+                6:'<i data-lucide="receipt" class="w-3 h-3 inline"></i>',
+                7:'<i data-lucide="check-circle-2" class="w-3 h-3 inline"></i>',
+                8:'<i data-lucide="folder-open" class="w-3 h-3 inline"></i>'
             };
             const statusIcon = statusIcons[item.step] || '';
             const dmCount = (item.damageItems||[]).length;
             
-            // Badge trạng thái nhỏ gọn hơn (Bo góc vừa phải)
-            const statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-1 ${theme.bg} ${theme.text} text-[10px] font-bold rounded-lg uppercase tracking-wide opacity-90">${statusIcon} ${STATUS.label(item.step)}</span>`;
+            // Badge trạng thái nhỏ lại (text-[9px], py-1)
+            const statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-1 ${theme.bg} ${theme.text} text-[9px] font-bold rounded-lg uppercase tracking-wide opacity-90">${statusIcon} ${STATUS.label(item.step)}</span>`;
 
-            // Badge Hạng mục
+            // Badge Hạng mục nhỏ gọn
             const dmChip = dmCount > 0
-                ? `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-lg"><i data-lucide="clipboard-list" class="w-3 h-3 text-rose-400"></i> ${dmCount}</span>`
+                ? `<span class="inline-flex items-center gap-1 text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-lg"><i data-lucide="clipboard-list" class="w-2.5 h-2.5 text-rose-400"></i> ${dmCount}</span>`
                 : '';
                 
-            // Thông tin Gara thu gọn với icon tròn nhỏ
+            // Thông tin Gara cực kỳ nhỏ gọn (icon w-6 h-6)
             const garaInfo = item.garaName
-                ? `<div class="flex items-center gap-2.5 mt-2">
-                     <div class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                         <i data-lucide="wrench" class="w-3.5 h-3.5 text-slate-500"></i>
+                ? `<div class="flex items-center gap-2 mt-2">
+                     <div class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                         <i data-lucide="wrench" class="w-3 h-3 text-slate-500"></i>
                      </div>
                      <div class="min-w-0 flex-1">
-                         <p class="font-bold text-slate-700 text-xs truncate">${item.garaName}</p>
-                         ${item.garaAddress ? `<p class="text-[10px] text-slate-500 truncate mt-0.5">${item.garaAddress}</p>` : ''}
+                         <p class="font-bold text-slate-700 text-[11px] truncate">${item.garaName}</p>
+                         ${item.garaAddress ? `<p class="text-[9px] text-slate-500 truncate leading-tight mt-0.5">${item.garaAddress}</p>` : ''}
                      </div>
                    </div>`
                 : '';
 
-            // KHẮC PHỤC GIỜ HẸN: Làm dịu màu (Nền xám nhạt, viền xám, chữ xám đậm), thêm icon đồng hồ màu hổ phách (amber) để tạo điểm nhấn nhẹ nhàng không bị chói
+            // GIỜ HẸN: Đã làm dịu màu (Nền xám nhạt, viền xám, chữ xám đậm), thêm icon đồng hồ màu amber và thu nhỏ
             const timeBadge = (item.appointmentTime && item.step <= 2) 
-                ? `<span onclick="event.stopPropagation(); Card.openApptPicker('${item.id}')" class="text-[11px] font-bold text-slate-600 bg-slate-50 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-200 hover:bg-slate-100 transition-colors shadow-sm cursor-pointer"><i data-lucide="clock" class="w-3.5 h-3.5 text-amber-500"></i> ${apptLabel}</span>` 
-                : `<span class="text-[10px] font-medium text-slate-400"><i data-lucide="history" class="w-3 h-3 inline align-text-bottom mr-0.5"></i> ${moment(item.stepUpdatedAt).fromNow()}</span>`;
+                ? `<span onclick="event.stopPropagation(); Card.openApptPicker('${item.id}')" class="text-[10px] font-bold text-slate-600 bg-slate-50 px-2 py-1 rounded-lg flex items-center gap-1 border border-slate-200 hover:bg-slate-100 transition-colors shadow-sm cursor-pointer"><i data-lucide="clock" class="w-3 h-3 text-amber-500"></i> ${apptLabel}</span>` 
+                : `<span class="text-[9px] font-medium text-slate-400"><i data-lucide="history" class="w-2.5 h-2.5 inline align-text-bottom mr-0.5"></i> ${moment(item.stepUpdatedAt).fromNow()}</span>`;
 
+            // Card container: Dùng padding p-3 (thay vì p-4 hay p-5), góc bo rounded-2xl
             return `
-            <div onclick="Modal.open('${item.id}')" class="bg-white rounded-[20px] border border-slate-200 mb-3 p-4 active:scale-[0.98] transition-transform cursor-pointer relative shadow-sm">
-                ${item.urgent ? `<div class="absolute top-0 right-0 bg-rose-500 text-white text-[9px] font-black px-2.5 py-1 rounded-bl-xl rounded-tr-[20px] z-10 flex items-center gap-1 shadow-sm"><i data-lucide="alert-triangle" class="w-3 h-3"></i> GẤP</div>` : ''}
+            <div onclick="Modal.open('${item.id}')" class="bg-white rounded-2xl border border-slate-200 mb-3 p-3 active:scale-[0.98] transition-transform cursor-pointer relative shadow-sm">
+                ${item.urgent ? `<div class="absolute top-0 right-0 bg-rose-500 text-white text-[8px] font-black px-2 py-1 rounded-bl-lg rounded-tr-2xl z-10 flex items-center gap-1 shadow-sm"><i data-lucide="alert-triangle" class="w-2.5 h-2.5"></i> GẤP</div>` : ''}
 
-                <div class="flex justify-between items-center mb-3">
+                <div class="flex justify-between items-center mb-2.5">
                     <div class="flex flex-wrap gap-1.5 items-center pr-2">
                         ${statusBadge}
                         ${dmChip}
                     </div>
-                    <div class="shrink-0 ${item.urgent ? 'mt-4' : ''}">
+                    <div class="shrink-0 ${item.urgent ? 'mt-3' : ''}">
                         ${timeBadge}
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <h3 class="font-black text-slate-800 text-[20px] tracking-tight uppercase leading-none mb-1.5">${item.bsx || 'CHƯA CÓ BSX'}</h3>
-                    <div class="flex items-center flex-wrap gap-1.5 text-[11px] text-slate-500 font-medium">
+                <div class="mb-2.5">
+                    <h3 class="font-black text-slate-800 text-[18px] tracking-tight uppercase leading-none mb-1.5">${item.bsx || 'CHƯA CÓ BSX'}</h3>
+                    <div class="flex items-center flex-wrap gap-1.5 text-[10px] text-slate-500 font-medium">
                         <span class="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">${item.claimCode || 'Chưa mã HS'}</span>
                         ${(item.hangXe || item.loaiXe) ? `<span>•</span><span class="uppercase text-slate-600">${[item.hangXe, item.loaiXe].filter(Boolean).join(' ')}</span>` : ''}
                     </div>
                     ${daysLate ? `<div class="mt-1">${daysLate}</div>` : ''}
                 </div>
 
-                <div class="border-t border-slate-100 my-3"></div>
+                <div class="border-t border-slate-100 my-2.5"></div>
 
                 <div class="flex flex-col gap-1 mb-3">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-                            <i data-lucide="user" class="w-3.5 h-3.5 text-blue-500"></i>
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                            <i data-lucide="user" class="w-3 h-3 text-blue-500"></i>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-xs font-bold text-slate-800 truncate">${item.customer || 'Chưa cập nhật KH'}</p>
-                            <p class="text-[10px] text-slate-500 font-mono mt-0.5">${item.phone || 'Chưa có SĐT'}</p>
+                            <p class="text-[11px] font-bold text-slate-800 truncate">${item.customer || 'Chưa cập nhật KH'}</p>
+                            <p class="text-[9px] text-slate-500 font-mono mt-0.5 leading-none">${item.phone || 'Chưa có SĐT'}</p>
                         </div>
-                        ${phone ? `<a href="tel:${phone}" onclick="event.stopPropagation()" class="w-7 h-7 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center shrink-0 active:scale-90 transition-transform"><i data-lucide="phone-call" class="w-3.5 h-3.5"></i></a>` : ''}
+                        ${phone ? `<a href="tel:${phone}" onclick="event.stopPropagation()" class="w-6 h-6 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center shrink-0 active:scale-90 transition-transform"><i data-lucide="phone-call" class="w-3 h-3"></i></a>` : ''}
                     </div>
 
                     ${garaInfo}
@@ -4819,12 +4819,12 @@
 
                 <div class="flex gap-2 mt-auto">
                     ${phoneBtn}
-                    <button onclick="event.stopPropagation(); Modal.openStatusSheet('${item.id}')" class="flex-[1.2] bg-[#0f172a] text-white py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 active:bg-slate-800 transition-colors shadow-sm">
-                        Cập nhật tiến độ
+                    <button onclick="event.stopPropagation(); Modal.openStatusSheet('${item.id}')" class="flex-[1.15] bg-blue-600 text-white py-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 active:bg-blue-700 transition-colors shadow-sm shadow-blue-200">
+                        <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Tiến độ
                     </button>
                 </div>
                 
-                ${item.step === 2 ? `<button onclick="event.stopPropagation(); Inspection.markInspected('${item.id}')" class="w-full mt-2 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 active:bg-emerald-700 transition-colors shadow-sm shadow-emerald-500/20"><i data-lucide="check-circle-2" class="w-4 h-4"></i> Đã Giám Định Xong</button>` : ''}
+                ${item.step === 2 ? `<button onclick="event.stopPropagation(); Inspection.markInspected('${item.id}')" class="w-full mt-2 py-2 bg-emerald-600 text-white rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 active:bg-emerald-700 transition-colors shadow-sm shadow-emerald-200"><i data-lucide="check-check" class="w-3.5 h-3.5"></i> Đã giám định xong</button>` : ''}
                 ${Inspection.countdownBadge(item) ? `<div class="mt-2 text-center">${Inspection.countdownBadge(item)}</div>` : ''}
             </div>`;
         },
