@@ -9098,8 +9098,12 @@
         },
 
         toggle(textareaId, btnId, statusId) {
-            // Không dùng getUserMedia nữa, gọi trực tiếp tính năng Ghi âm/Quay phim của OS
-            this._startNativeAudio(textareaId, btnId, statusId);
+            // Chuyển sang dùng trình thu âm trực tiếp trên Web
+            if (this._active) {
+                this.stop(textareaId, btnId, statusId);
+            } else {
+                this._startGemini(textareaId, btnId, statusId);
+            }
         },
 
         async _startNativeAudio(textareaId, btnId, statusId) {
@@ -9272,6 +9276,14 @@
             if (this._recognition) {
                 try { this._recognition.stop(); } catch (_) {}
                 this._recognition = null;
+                
+                // Tự động gửi lệnh
+                if (Swal.isVisible()) {
+                    const confirmBtn = Swal.getConfirmButton();
+                    if (confirmBtn && confirmBtn.style.display !== 'none') setTimeout(() => Swal.clickConfirm(), 300);
+                } else if (textareaId === 'ai-input') {
+                    setTimeout(() => AI.send(), 300);
+                }
             }
             this._setRecordingUI(btnId, statusId, false);
         },
@@ -9330,6 +9342,17 @@
                         sta.style.color = '#16a34a';
                         setTimeout(() => { if (sta) { sta.textContent = ''; sta.style.color = ''; } }, 2500);
                     }
+
+                    // --- TỰ ĐỘNG GỬI LỆNH CHO CHATBOT SAU KHI THU ÂM TRỰC TIẾP ---
+                    if (Swal.isVisible()) {
+                        const confirmBtn = Swal.getConfirmButton();
+                        if (confirmBtn && confirmBtn.style.display !== 'none') {
+                            setTimeout(() => Swal.clickConfirm(), 300);
+                        }
+                    } else if (textareaId === 'ai-input') {
+                        setTimeout(() => AI.send(), 300);
+                    }
+                    
                 } else {
                     Toast.fire({ icon: 'warning', title: 'Không nhận dạng được giọng nói' });
                 }
