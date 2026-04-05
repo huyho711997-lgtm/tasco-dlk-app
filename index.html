@@ -8246,21 +8246,18 @@
     };
 
     // ============================================================
-    // FILTER MANAGER PRO
+    // FILTER MANAGER PRO (Thiết kế thẻ danh sách)
     // ============================================================
     const FilterManager = {
         _active: new Set(),
-        _tempActive: new Set(),
         
         open() {
-            this._tempActive = new Set(this._active);
             this._renderOptions();
             const modal = document.getElementById('filter-modal');
             const sheet = document.getElementById('filter-sheet');
             
             modal.classList.remove('hidden');
-            // Ép trình duyệt render để mượt animation
-            void modal.offsetWidth;
+            void modal.offsetWidth; // Force reflow để mượt animation
             modal.classList.remove('opacity-0');
             sheet.classList.remove('translate-y-full');
         },
@@ -8277,70 +8274,100 @@
         },
 
         _renderOptions() {
-            const grid = document.getElementById('filter-options-grid');
+            const container = document.getElementById('filter-options-grid');
             
-            // Cấu hình cứng các class màu sắc để Tailwind CDN biên dịch được
+            // Định nghĩa màu sắc và nội dung y như Export Menu
             const steps = [
-                {id: 1, label: 'Tiếp nhận', icon: 'inbox', hex: '#3b82f6', bg: 'bg-blue-50', border: 'border-blue-300', text: 'text-blue-700', iconBg: 'bg-blue-100', iconText: 'text-blue-600', ring: 'ring-blue-500/30'},
-                {id: 2, label: 'Lên lịch hẹn', icon: 'calendar-clock', hex: '#f59e0b', bg: 'bg-amber-50', border: 'border-amber-300', text: 'text-amber-700', iconBg: 'bg-amber-100', iconText: 'text-amber-600', ring: 'ring-amber-500/30'},
-                {id: 3, label: 'Đã giám định', icon: 'camera', hex: '#06b6d4', bg: 'bg-cyan-50', border: 'border-cyan-300', text: 'text-cyan-700', iconBg: 'bg-cyan-100', iconText: 'text-cyan-600', ring: 'ring-cyan-500/30'},
-                {id: 4, label: 'Đã có báo giá', icon: 'file-spreadsheet', hex: '#6366f1', bg: 'bg-indigo-50', border: 'border-indigo-300', text: 'text-indigo-700', iconBg: 'bg-indigo-100', iconText: 'text-indigo-600', ring: 'ring-indigo-500/30'},
-                {id: 5, label: 'Chờ duyệt giá', icon: 'shield-alert', hex: '#8b5cf6', bg: 'bg-purple-50', border: 'border-purple-300', text: 'text-purple-700', iconBg: 'bg-purple-100', iconText: 'text-purple-600', ring: 'ring-purple-500/30'},
-                {id: 6, label: 'Chờ hoá đơn', icon: 'receipt', hex: '#10b981', bg: 'bg-emerald-50', border: 'border-emerald-300', text: 'text-emerald-700', iconBg: 'bg-emerald-100', iconText: 'text-emerald-600', ring: 'ring-emerald-500/30'},
-                {id: 7, label: 'Đã có hoá đơn', icon: 'check-circle-2', hex: '#16a34a', bg: 'bg-green-50', border: 'border-green-300', text: 'text-green-700', iconBg: 'bg-green-100', iconText: 'text-green-600', ring: 'ring-green-500/30'},
-                {id: 8, label: 'Bổ sung HS', icon: 'folder-open', hex: '#f43f5e', bg: 'bg-rose-50', border: 'border-rose-300', text: 'text-rose-700', iconBg: 'bg-rose-100', iconText: 'text-rose-600', ring: 'ring-rose-500/30'}
+                {id: 1, label: 'Tiếp nhận', sub: 'Hồ sơ mới nhận, chưa đặt hẹn', icon: 'inbox', hex: '#3b82f6', bg: 'rgba(59,130,246,0.1)'},
+                {id: 2, label: 'Lên lịch hẹn', sub: 'Đã hẹn giờ với khách hàng', icon: 'calendar-clock', hex: '#f59e0b', bg: 'rgba(245,158,11,0.1)'},
+                {id: 3, label: 'Đã giám định', sub: 'Hoàn tất chụp ảnh hiện trường', icon: 'camera', hex: '#06b6d4', bg: 'rgba(6,182,212,0.1)'},
+                {id: 4, label: 'Đã có báo giá', sub: 'Gara đã gửi báo giá sửa chữa', icon: 'file-spreadsheet', hex: '#6366f1', bg: 'rgba(99,102,241,0.1)'},
+                {id: 5, label: 'Chờ duyệt giá', sub: 'Đang trình sếp xem xét báo giá', icon: 'shield-alert', hex: '#8b5cf6', bg: 'rgba(139,92,246,0.1)'},
+                {id: 6, label: 'Chờ hoá đơn', sub: 'Đang đợi gara xuất hoá đơn', icon: 'receipt', hex: '#10b981', bg: 'rgba(16,185,129,0.1)'},
+                {id: 7, label: 'Đã có hoá đơn', sub: 'Hoàn tất chứng từ bồi thường', icon: 'check-circle-2', hex: '#16a34a', bg: 'rgba(22,163,74,0.1)'},
+                {id: 8, label: 'Bổ sung HS', sub: 'Hồ sơ bị thiếu giấy tờ', icon: 'folder-open', hex: '#f43f5e', bg: 'rgba(244,63,94,0.1)'}
             ];
 
-            grid.innerHTML = steps.map(s => {
-                const isActive = this._tempActive.has(s.id);
-                
-                // Styles khi thẻ được Active và Inactive
-                const cardBg = isActive ? s.bg : 'filter-card-inactive bg-slate-50';
-                const cardBorder = isActive ? s.border : 'border-slate-200';
-                const cardText = isActive ? s.text : 'text-slate-600';
-                const iconBg = isActive ? s.iconBg : 'bg-white shadow-sm';
-                const iconColor = isActive ? s.iconText : 'text-slate-400';
-                const cardRing = isActive ? 'ring-2 ' + s.ring : '';
-                
-                // Icon checkmark tròn trịa
-                const checkHtml = isActive 
-                    ? `<div class="w-5 h-5 rounded-full flex items-center justify-center shadow-sm" style="background:${s.hex}">
-                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                       </div>`
-                    : `<div class="w-5 h-5 rounded-full border-2 border-slate-300 bg-white/50"></div>`;
+            // CSS cốt lõi tái sử dụng logic của Export Menu
+            const customCss = `
+                <style>
+                    .flt-card { display: block; cursor: pointer; margin-bottom: 10px; -webkit-tap-highlight-color: transparent; }
+                    .flt-card:last-child { margin-bottom: 0; }
+                    .flt-card input[type="checkbox"] { display: none; }
+                    .flt-card-content { 
+                        display: flex; align-items: center; gap: 12px; padding: 12px; 
+                        background: var(--bg-surface, #f8fafc); border: 1.5px solid var(--border-light, #e2e8f0); 
+                        border-radius: 14px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+                    }
+                    .flt-card:active .flt-card-content { transform: scale(0.98); }
+                    
+                    .flt-chk-circle { 
+                        width: 22px; height: 22px; border-radius: 50%; border: 2px solid #cbd5e1; 
+                        display: flex; align-items: center; justify-content: center; 
+                        transition: all 0.2s; flex-shrink: 0; margin-left: auto; background: #fff;
+                    }
+                    .flt-chk-circle svg { opacity: 0; transform: scale(0.5); transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); stroke: white; }
+                    
+                    /* Hỗ trợ Dark Mode cơ bản */
+                    [data-theme="dark"] .flt-card-content { background: var(--bg-app); border-color: var(--border-light); }
+                    [data-theme="dark"] .flt-chk-circle { background: transparent; border-color: #475569; }
+                </style>
+            `;
 
-                return `
-                <div onclick="FilterManager.toggleTemp(${s.id})" class="relative p-3.5 rounded-2xl border ${cardBorder} ${cardBg} ${cardRing} cursor-pointer transition-all active:scale-[0.96] flex flex-col gap-3">
-                    <div class="flex justify-between items-start">
-                        <div class="w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center border border-black/5 shrink-0">
-                            <i data-lucide="${s.icon}" class="w-[18px] h-[18px] ${iconColor}"></i>
+            let html = customCss;
+            
+            steps.forEach(s => {
+                const isChecked = this._active.has(s.id) ? 'checked' : '';
+                
+                // Inject CSS động để mỗi thẻ có màu viền/nền riêng biệt khi được chọn
+                html += `
+                <style>
+                    #flt-chk-${s.id}:checked + .flt-card-content { border-color: ${s.hex}; background: ${s.bg}; }
+                    #flt-chk-${s.id}:checked + .flt-card-content .flt-chk-circle { background: ${s.hex}; border-color: ${s.hex}; }
+                    #flt-chk-${s.id}:checked + .flt-card-content .flt-chk-circle svg { opacity: 1; transform: scale(1); }
+                    [data-theme="dark"] #flt-chk-${s.id}:checked + .flt-card-content { background: ${s.hex}22; border-color: ${s.hex}; }
+                </style>
+                `;
+
+                html += `
+                <label class="flt-card">
+                    <input type="checkbox" id="flt-chk-${s.id}" class="flt-chk-item" value="${s.id}" ${isChecked}>
+                    <div class="flt-card-content">
+                        <div style="width:40px;height:40px;background:${s.bg};border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i data-lucide="${s.icon}" style="color:${s.hex}" class="w-5 h-5"></i>
                         </div>
-                        ${checkHtml}
+                        <div style="flex:1;min-width:0;">
+                            <p style="font-weight:800;font-size:13px;color:var(--text-primary, #1e293b);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.label}</p>
+                            <p style="font-size:11px;font-weight:600;color:var(--text-secondary, #94a3b8);margin-top:2px;">${s.sub}</p>
+                        </div>
+                        <div class="flt-chk-circle">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
                     </div>
-                    <p class="font-black text-[12px] leading-tight ${cardText} mt-1">${s.label}</p>
-                </div>`;
-            }).join('');
+                </label>
+                `;
+            });
+
+            container.innerHTML = html;
             lucide.createIcons();
         },
 
-        toggleTemp(step) {
-            if (this._tempActive.has(step)) {
-                this._tempActive.delete(step);
-            } else {
-                this._tempActive.add(step);
-            }
-            this._renderOptions();
+        clearAll() {
+            document.querySelectorAll('.flt-chk-item').forEach(el => el.checked = false);
             if (window.navigator.vibrate) window.navigator.vibrate(10);
         },
 
-        clearAll() {
-            this._tempActive.clear();
-            this._renderOptions();
+        selectAll() {
+            document.querySelectorAll('.flt-chk-item').forEach(el => el.checked = true);
             if (window.navigator.vibrate) window.navigator.vibrate(10);
         },
 
         apply() {
-            this._active = new Set(this._tempActive);
+            this._active.clear();
+            document.querySelectorAll('.flt-chk-item:checked').forEach(el => {
+                this._active.add(parseInt(el.value));
+            });
+            
             this.close();
             App.searchData();
             Toast.fire({ icon: 'success', title: this._active.size > 0 ? `Đã lọc ${this._active.size} trạng thái` : 'Đã bỏ lọc' });
@@ -14812,35 +14839,35 @@
     <div id="filter-modal" class="fixed inset-0 z-[99990] hidden flex-col justify-end transition-opacity duration-300 opacity-0" style="background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px);">
         <div class="absolute inset-0" onclick="FilterManager.close()"></div>
         
-        <div id="filter-sheet" class="bg-white rounded-t-[32px] w-full flex flex-col transform translate-y-full transition-transform duration-300 shadow-2xl pb-safe relative z-10">
-            <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3 mb-1"></div>
+        <div id="filter-sheet" class="bg-white rounded-t-[28px] w-full max-h-[90vh] flex flex-col transform translate-y-full transition-transform duration-300 shadow-2xl pb-safe relative z-10">
             
-            <div class="px-5 pt-3 pb-4 border-b border-slate-100 flex justify-between items-center shrink-0">
+            <div class="px-5 pt-5 pb-4 border-b border-slate-100 flex justify-between items-center shrink-0">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-200/50">
-                        <i data-lucide="filter" class="w-5 h-5 text-white"></i>
+                    <div style="width:36px;height:36px;background:var(--bg-surface, #f1f5f9);border-radius:12px;display:flex;align-items:center;justify-content:center">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                     </div>
                     <div>
-                        <h3 class="font-black text-slate-800 text-lg leading-tight">Lọc Hồ Sơ</h3>
-                        <p class="text-[11px] font-bold text-slate-500 mt-0.5">Chọn nhiều trạng thái hiển thị</p>
+                        <h3 class="font-black text-slate-800 text-lg leading-tight" style="color:var(--text-primary)">Lọc Hồ Sơ</h3>
+                        <p class="text-[11px] font-bold text-slate-500 mt-0.5" style="color:var(--text-secondary)">Chọn trạng thái để hiển thị</p>
                     </div>
                 </div>
                 <button onclick="FilterManager.close()" class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 active:bg-slate-200 transition-colors">
-                    <i data-lucide="x" class="w-4 h-4"></i>
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
                 </button>
             </div>
             
-            <div class="px-5 pb-6 pt-4 flex-1 overflow-y-auto no-scrollbar">
-                <div class="grid grid-cols-2 gap-3" id="filter-options-grid">
-                    </div>
+            <div class="px-5 pt-4 pb-2 flex justify-between items-center shrink-0">
+                <button onclick="FilterManager.selectAll()" class="text-[12px] font-extrabold text-blue-600 active:text-blue-800 transition-colors">Chọn tất cả</button>
+                <button onclick="FilterManager.clearAll()" class="text-[12px] font-extrabold text-slate-500 active:text-slate-700 transition-colors">Bỏ chọn</button>
             </div>
 
-            <div class="p-5 border-t border-slate-100 bg-white flex gap-3 shrink-0" style="box-shadow: 0 -4px 20px rgba(0,0,0,0.02);">
-                <button onclick="FilterManager.clearAll()" class="flex-[1] py-3.5 bg-slate-100 border border-slate-200 text-slate-600 rounded-2xl font-bold text-[13px] active:bg-slate-200 transition-colors">
-                    Bỏ chọn
-                </button>
-                <button onclick="FilterManager.apply()" class="flex-[2] py-3.5 bg-blue-600 text-white rounded-2xl font-black text-[13px] flex items-center justify-center gap-2 active:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-200">
-                    <i data-lucide="check-check" class="w-4 h-4"></i> Áp dụng bộ lọc
+            <div class="px-5 pb-6 pt-2 flex-1 overflow-y-auto custom-scrollbar" id="filter-options-grid">
+                </div>
+
+            <div class="p-4 border-t border-slate-100 bg-white shrink-0" style="box-shadow: 0 -4px 20px rgba(0,0,0,0.02);">
+                <button onclick="FilterManager.apply()" class="w-full py-3.5 bg-blue-600 text-white rounded-xl font-black text-[13px] flex items-center justify-center gap-2 active:bg-blue-700 active:scale-[0.98] transition-all shadow-md shadow-blue-200">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> 
+                    Áp dụng bộ lọc
                 </button>
             </div>
         </div>
