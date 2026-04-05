@@ -9447,18 +9447,21 @@
                 if (res.isConfirmed) {
                     const imgEl = document.getElementById('sc-review-main-img');
                     
-                    // Hiệu ứng mờ và thu nhỏ ảnh hiện tại
+                    // 1. GIAO DIỆN CHẠY TRƯỚC: Mờ và thu nhỏ ảnh hiện tại
                     if (imgEl) {
                         imgEl.style.transition = 'all 0.25s ease-out';
                         imgEl.style.transform = 'scale(0.8)';
                         imgEl.style.opacity = '0';
                     }
 
-                    // Chờ 250ms cho hiệu ứng xong rồi mới xóa data
+                    // 2. HỆ THỐNG CHỜ GIAO DIỆN: Đúng 250ms sau mới xóa Data và cập nhật UI phụ
                     setTimeout(() => {
+                        // Cập nhật Data
                         const removed = this._capturedFiles.splice(this._currentReviewIdx, 1)[0];
-                        if (removed) URL.revokeObjectURL(removed.preview); // Giải phóng RAM
-                        this._updateThumbs(); // Cập nhật lại số lượng ở góc camera
+                        if (removed) URL.revokeObjectURL(removed.preview);
+                        
+                        // Cập nhật UI phụ (Đồng bộ nhịp)
+                        this._updateThumbs(); 
 
                         if (this._capturedFiles.length === 0) {
                             this.closeReview();
@@ -9468,10 +9471,11 @@
                                 this._currentReviewIdx = this._capturedFiles.length - 1;
                             }
                             
-                            // Phục hồi lại style cho thẻ img trước khi nạp ảnh kế tiếp
+                            // Trả lại style chuẩn bị nạp ảnh kế tiếp
                             if (imgEl) {
                                 imgEl.style.transition = 'none';
                                 imgEl.style.transform = 'scale(1)';
+                                imgEl.style.opacity = '0'; 
                             }
                             
                             this.renderReviewUI();
@@ -9747,7 +9751,7 @@
 
                 const indicesToDelete = Array.from(this._selected).sort((a, b) => b - a);
 
-                // Thêm hiệu ứng thu nhỏ ảnh trước khi xóa
+                // 1. GIAO DIỆN CHẠY TRƯỚC: Thu nhỏ và mờ các ảnh bị xóa
                 indicesToDelete.forEach(idx => {
                     const wrap = document.getElementById(`img-grid-wrap-${idx}`);
                     if (wrap) {
@@ -9757,17 +9761,17 @@
                     }
                 });
 
-                // Đợi hiệu ứng xong (300ms)
+                // 2. HỆ THỐNG CHỜ: Đợi animation UI chạy xong (300ms)
                 await new Promise(r => setTimeout(r, 300));
 
-                const list = [...item.documentImages];
+                // 3. THỰC THI HỆ THỐNG
                 Swal.fire({ title: 'Đang xóa...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                const list = [...item.documentImages];
 
                 // Xóa trên Cloudinary (nếu có publicId)
                 for (let idx of indicesToDelete) {
                     const img = list[idx];
                     const url = typeof img === 'string' ? img : img.url;
-                    // Giữ nguyên Regex gốc, không thoát ký tự
                     const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[a-zA-Z0-9]+)?(?:\?.*)?$/);
                     if (match && match[1]) {
                         await fetch(CONFIG.exportWordUrl, {
@@ -9779,11 +9783,12 @@
                     list.splice(idx, 1);
                 }
 
+                // Cập nhật Firebase
                 await db.ref(`Workstation/${id}/documentImages`).set(list.length ? list : null);
                 
                 Swal.close();
                 Toast.fire({ icon: 'success', title: `Đã xóa thành công ${count} ảnh!` });
-                this.exitSelectMode();
+                this.exitSelectMode(); // Hàm này sẽ lo việc render lại lưới ảnh sạch sẽ
             }
         },
 
