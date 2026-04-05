@@ -4641,6 +4641,7 @@
             }
             // ------------------------------------
 
+            if (view==='home') App._updateHomeDashboard(); // Đảm bảo số liệu luôn load lại khi vào Trang chủ
             if (view==='report') Report.open();
             if (view==='calendar') {
                 if (!this.calendarInit) { Cal.init(); this.calendarInit=true; }
@@ -4823,10 +4824,14 @@
             const today = this.masterData.filter(i=>i.appointmentTime&&moment(i.appointmentTime).isSame(moment(),'day')).length;
             const overdue = this.masterData.filter(i=>i.step===5&&moment().diff(moment(i.stepUpdatedAt),'hours')>48).length;
             const receivedToday = this.masterData.filter(i=>{ const t=i.stepUpdatedAt||i.createdAt; return t&&i.step===1&&moment(t).isSame(moment(),'day'); }).length;
-            document.getElementById('kpi-today').textContent = today;
-            document.getElementById('kpi-overdue').textContent = overdue;
-            const el = document.getElementById('kpi-received-today');
-            if (el) el.textContent = receivedToday;
+            
+            const kpiTodayEl = document.getElementById('kpi-today');
+            const kpiOverdueEl = document.getElementById('kpi-overdue');
+            const kpiReceivedEl = document.getElementById('kpi-received-today');
+            
+            if (kpiTodayEl) kpiTodayEl.textContent = today;
+            if (kpiOverdueEl) kpiOverdueEl.textContent = overdue;
+            if (kpiReceivedEl) kpiReceivedEl.textContent = receivedToday;
         },
         find(id) { return this.masterData.find(i=>i.id===id); },
         toggleUrgent(id) {
