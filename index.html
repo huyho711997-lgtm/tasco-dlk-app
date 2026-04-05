@@ -9017,10 +9017,30 @@
                     icon.style.transition = 'transform 0.3s ease';
                 });
 
-                // Xoay overlay info theo hướng cầm máy, gốc xoay tại góc dưới trái
+                // ĐIỀU KHIỂN KHỐI NGÀY GIỜ KHÔNG BỊ CẮT KHI XOAY NGANG
                 const overlayInfo = document.getElementById('sc-overlay-info');
                 if (overlayInfo) {
                     overlayInfo.style.transform = `rotate(${this._deviceOrientation}deg)`;
+                    
+                    // Reset lại toàn bộ tọa độ
+                    overlayInfo.style.top = 'auto';
+                    overlayInfo.style.bottom = 'auto';
+                    overlayInfo.style.left = 'auto';
+                    overlayInfo.style.right = 'auto';
+
+                    if (this._deviceOrientation === 90) {
+                        // Nằm ngang (Góc trên trái)
+                        overlayInfo.style.top = '110px';
+                        overlayInfo.style.left = '-75px'; 
+                    } else if (this._deviceOrientation === -90 || this._deviceOrientation === 270) {
+                        // Nằm ngang (Góc dưới trái)
+                        overlayInfo.style.bottom = '110px';
+                        overlayInfo.style.left = '-75px';
+                    } else {
+                        // Cầm dọc bình thường
+                        overlayInfo.style.bottom = '24px';
+                        overlayInfo.style.left = '16px';
+                    }
                 }
             };
 
