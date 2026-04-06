@@ -661,46 +661,46 @@
         [data-theme="dark"] .modal-tab { color: var(--text-muted); }
         [data-theme="dark"] .modal-tab.active { color: #60a5fa; border-bottom-color: #60a5fa; }
 
-        /* ====== DAMAGE ITEMS ====== */
-        .dm-card {
-            background: white; border-radius: 14px;
-            border: 1.5px solid #e8edf3; border-left: 4px solid #e2e8f0;
-            padding: 12px 12px 12px 14px;
-            display: flex; align-items: flex-start; gap: 10px;
-            margin-bottom: 8px;
-            box-shadow: 0 1px 4px rgba(15,23,42,0.05);
-            transition: border-color 0.15s, background 0.15s;
+        /* ====== DAMAGE ITEMS (GIAO DIỆN MỚI ĐỒNG BỘ) ====== */
+        .dm-card-new {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            position: relative;
+            z-index: 2;
+            touch-action: pan-y;
+            user-select: none;
+            width: 100%;
+            box-sizing: border-box;
+            transition: transform 0.28s cubic-bezier(0.25,1,0.5,1), border-radius 0.28s, border-color 0.28s, box-shadow 0.28s;
+            box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.04);
         }
-        .dm-card.sc  { border-left-color: #3b82f6; background: linear-gradient(to right, #f8fbff 0%, white 60%); }
-        .dm-card.tt  { border-left-color: #f59e0b; background: linear-gradient(to right, #fffcf0 0%, white 60%); }
-        .dm-card.nd  { border-left-color: #cbd5e1; }
-        .dm-num {
-            font-size: 10px; font-weight: 900; color: #94a3b8;
-            min-width: 14px; max-width: 14px;
-            flex-shrink: 0; flex-grow: 0;
-            text-align: center; line-height: 1;
+        .dm-card-new:active { transform: scale(0.98); border-color: #cbd5e1; }
+        
+        /* Dark Mode overrides */
+        [data-theme="dark"] .dm-card-new { background: var(--bg-white); border-color: var(--border-light); box-shadow: none; }
+        [data-theme="dark"] .dm-card-new:active { border-color: #475569; }
+
+        /* Trạng thái vuốt (Swipe) */
+        .dm-swipe-wrap.swiped .dm-card-new {
+            transform: translateX(-116px);
+            border-radius: 16px 0 0 16px;
+            border-right-color: transparent;
         }
-        [data-theme="dark"] .dm-num { color: #475569; }
-        .dm-body { flex: 1; min-width: 0; }
-        .dm-name { font-size: 13px; font-weight: 800; color: #1e293b; line-height: 1.3; }
-        .dm-meta { display: flex; align-items: center; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
-        .dm-mota { font-size: 10px; color: #94a3b8; font-weight: 600; }
-        .dm-chip {
-            display: inline-flex; align-items: center; gap: 2px;
-            padding: 2px 8px; border-radius: 20px;
-            font-size: 10px; font-weight: 700; border: 1px solid transparent;
+
+        /* Trạng thái chọn nhiều (Bulk Select) */
+        .dm-card-new.bulk-selected {
+            background-color: #fff1f2 !important;
+            border-color: #f43f5e !important;
         }
-        .dm-chip.sc  { background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; }
-        .dm-chip.tt  { background:#fef3c7; color:#b45309; border-color:#fde68a; }
-        .dm-chip.thu { background:#fdf4ff; color:#7c3aed; border-color:#e9d5ff; }
-        .dm-chip.nd  { background:#f1f5f9; color:#64748b; border-color:#e2e8f0; }
-        .dm-actions {
-            display: flex; flex-direction: column;
-            align-items: flex-end; gap: 5px; flex-shrink: 0;
+        [data-theme="dark"] .dm-card-new.bulk-selected {
+            background-color: rgba(225, 29, 72, 0.15) !important;
+            border-color: rgba(225, 29, 72, 0.4) !important;
         }
-        .dm-card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; margin-top: 1px; }
-        .dm-price { font-size: 12px; font-weight: 900; color: #0f172a; white-space: nowrap; }
-        .dm-garage-label { font-size: 10px; font-weight: 600; color: #94a3b8; white-space: nowrap; }
         
         /* DARK MODE - dm-card */
         [data-theme="dark"] .dm-card { background: var(--bg-white) !important; border-color: var(--border-light) !important; box-shadow: none !important; }
@@ -5262,33 +5262,45 @@
                     </div>`;
                 }
 
-                // Hiển thị thông tin gara và chi phí bên phải card
-                const garaName = h.quoteGaraPa || h.gara || '';
-                const garaGia  = h.quoteGaraGia ? Number(h.quoteGaraGia).toLocaleString('vi-VN') + 'đ' : '';
-                const rightHtml = (garaName || garaGia)
-                    ? '<div class="dm-card-right">'
-                    +   (garaName ? '<span class="dm-garage-label">Gara: ' + garaName + '</span>' : '')
-                    +   (garaGia  ? '<span class="dm-price">' + garaGia + '</span>' : '')
-                    + '</div>'
-                    : '';
-
                 const partIconSvg = DamageItems.getPartIcon(h.chiTiet || '');
-                const partIconHtml = '<div class="dm-part-icon">' + partIconSvg + '</div>';
+
+                // Thiết lập màu sắc theo phương án
+                const isTT = h.thayThe;
+                const isSC = h.suaChua;
+                
+                const badgeBg = isTT ? 'rgba(245,158,11,0.12)' : (isSC ? 'rgba(59,130,246,0.12)' : 'rgba(148,163,184,0.12)');
+                const badgeColor = isTT ? '#d97706' : (isSC ? '#2563eb' : '#64748b');
+                const badgeBorder = isTT ? 'rgba(245,158,11,0.3)' : (isSC ? 'rgba(59,130,246,0.3)' : 'rgba(148,163,184,0.3)');
+                const textLabel = isTT ? 'THAY THẾ' : (isSC ? 'SỬA CHỮA' : 'CHỜ XĐ');
+                
+                const thuHoiTag = h.thuHoi ? `<span style="font-size:9px;font-weight:800;color:#7c3aed;background:#f3e8ff;border:1px solid #e9d5ff;padding:2px 6px;border-radius:6px;margin-left:4px;">THU HỒI</span>` : '';
+
+                // Khối Icon bọc ngoài có gắn STT nổi
+                const iconBox = `
+                    <div style="position:relative; width:44px; height:44px; background:${badgeBg}; border:1px solid ${badgeBorder}; border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <div style="position:absolute; top:-6px; left:-6px; background:#1e293b; color:white; font-size:9px; font-weight:900; width:18px; height:18px; border-radius:6px; display:flex; align-items:center; justify-content:center; border:2px solid white; box-shadow:0 2px 4px rgba(0,0,0,0.1); z-index:10;">${h.stt || i + 1}</div>
+                        <div style="width:26px; height:26px; opacity:0.8;">${partIconSvg}</div>
+                    </div>
+                `;
 
                 return '<div class="dm-swipe-wrap" id="swipe-' + i + '">'
-                    + '<div class="dm-card ' + accentClass(h) + selClass + '" id="card-' + i + '" onclick="DamageItems.handleCardClick(' + i + ')">'
-                    +   '<span class="dm-num">' + (h.stt || i + 1) + '</span>'
-                    +   partIconHtml
-                    +   '<div class="dm-body">'
-                    +     '<div class="dm-name">' + (h.chiTiet || '—') + '</div>'
-                    +     '<div class="dm-meta">'
-                    +       (h.moTa ? '<span class="dm-mota">' + h.moTa + '</span>' : '')
-                    +       moTaSep
-                    +       actionChips(h)
+                    + '<div class="dm-card-new' + selClass + '" id="card-' + i + '" onclick="DamageItems.handleCardClick(' + i + ')">'
+                    +   iconBox
+                    +   '<div style="flex:1; min-width:0; padding-top:2px;">'
+                    +     '<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">'
+                    +       '<p style="font-size:14px; font-weight:800; color:var(--text-primary, #1e293b); line-height:1.2; margin:0; flex:1;">' + (h.chiTiet || '—') + '</p>'
+                    +       '<div style="display:flex; align-items:center; flex-shrink:0;">'
+                    +         '<span style="font-size:9px; font-weight:800; color:'+badgeColor+'; background:'+badgeBg+'; border:1px solid '+badgeBorder+'; padding:2px 6px; border-radius:6px;">' + textLabel + '</span>'
+                    +         thuHoiTag
+                    +       '</div>'
                     +     '</div>'
-                    +     extraHtml
+                    +     '<div style="display:flex; align-items:center; gap:6px; margin-top:6px; flex-wrap:wrap;">'
+                    +       (h.moTa ? '<span style="font-size:11px; font-weight:600; color:var(--text-secondary, #64748b);">' + h.moTa + '</span>' : '')
+                    +       (h.moTa && h.mucDo ? '<span style="width:3px;height:3px;border-radius:50%;background:#cbd5e1;"></span>' : '')
+                    +       (h.mucDo ? '<span style="font-size:11px; font-weight:700; color:var(--text-muted, #94a3b8);">' + h.mucDo + '</span>' : '')
+                    +     '</div>'
+                    +     extraHtml // Tái sử dụng HTML báo giá / Tra kho AI bên dưới
                     +   '</div>'
-                    +   rightHtml
                     + '</div>'
                     + '<div class="dm-swipe-actions">'
                     +   '<div class="dm-swipe-edit" onclick="DamageItems._closeSwipe(' + i + '); DamageItems.editRow(\'' + id + '\',' + i + ')">'
