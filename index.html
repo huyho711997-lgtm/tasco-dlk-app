@@ -3162,24 +3162,26 @@
                             </button>
                         </div>
                         
-                        <div id="dm-normal-btns" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 mb-2 border-b border-slate-100">
-                            <button onclick="QuoteChecker.open(App.currentEditId)" class="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl text-[11px] font-black shadow-sm active:scale-95 transition-transform">
-                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg> 
-                                Duyệt BG AI
-                            </button>
-
-                            <button onclick="PriceCompare.lookup(App.currentEditId)" class="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-[11px] font-black shadow-sm active:scale-95 transition-transform">
-                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Tra giá Kho
-                            </button>
-                            <button onclick="DamageItems.addRowAI(App.currentEditId)" class="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-[11px] font-bold shadow-sm shadow-violet-200 active:scale-95 transition-transform">
-                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> AI bóc tách
-                            </button>
-                            <button onclick="DamageItems.addRow(App.currentEditId)" class="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-[11px] font-bold active:scale-95 transition-transform">
-                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Thêm tay
-                            </button>
-                            <button onclick="CarDiagram.open(App.currentEditId)" class="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-800 text-white rounded-xl text-[11px] font-bold shadow-sm shadow-slate-300 active:scale-95 transition-transform">
-                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="8" width="18" height="8" rx="2"/><path d="M5 8l1-4h12l1 4"/><circle cx="7" cy="16" r="2"/><circle cx="17" cy="16" r="2"/></svg> Sơ đồ
-                            </button> 
+                        <div id="dm-normal-btns" class="flex flex-col gap-2.5 pb-3 mb-3 border-b border-slate-100">
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <button onclick="DamageItems.addRowAI(App.currentEditId)" class="py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-[12px] font-black shadow-md shadow-indigo-200 active:scale-95 transition-transform flex items-center justify-center gap-2">
+                                    <i data-lucide="sparkles" class="w-4 h-4"></i> AI Bóc tách
+                                </button>
+                                <button onclick="CarDiagram.open(App.currentEditId)" class="py-2.5 bg-slate-800 text-white rounded-xl text-[12px] font-black shadow-md shadow-slate-300 active:scale-95 transition-transform flex items-center justify-center gap-2">
+                                    <i data-lucide="car" class="w-4 h-4"></i> Sơ đồ xe
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-2.5 overflow-x-auto no-scrollbar">
+                                <button onclick="QuoteChecker.open(App.currentEditId)" class="shrink-0 flex items-center justify-center gap-1.5 px-3.5 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl text-[11px] font-bold active:bg-rose-100 transition-colors">
+                                    <i data-lucide="file-check-2" class="w-4 h-4"></i> Duyệt BG AI
+                                </button>
+                                <button onclick="PriceCompare.lookup(App.currentEditId)" class="shrink-0 flex items-center justify-center gap-1.5 px-3.5 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-[11px] font-bold active:bg-emerald-100 transition-colors">
+                                    <i data-lucide="search" class="w-4 h-4"></i> Tra giá kho
+                                </button>
+                                <button onclick="DamageItems.addRow(App.currentEditId)" class="shrink-0 flex items-center justify-center gap-1.5 px-3.5 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-[11px] font-bold active:bg-blue-100 transition-colors">
+                                    <i data-lucide="plus" class="w-4 h-4"></i> Thêm tay
+                                </button>
+                            </div>
                         </div>
 
                         <div id="dm-select-btns" class="flex gap-2 hidden">
