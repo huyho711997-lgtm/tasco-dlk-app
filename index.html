@@ -5262,8 +5262,6 @@
                     </div>`;
                 }
 
-                const partIconSvg = DamageItems.getPartIcon(h.chiTiet || '');
-
                 // Thiết lập màu sắc theo phương án
                 const isTT = h.thayThe;
                 const isSC = h.suaChua;
@@ -5275,17 +5273,16 @@
                 
                 const thuHoiTag = h.thuHoi ? `<span style="font-size:9px;font-weight:800;color:#7c3aed;background:#f3e8ff;border:1px solid #e9d5ff;padding:2px 6px;border-radius:6px;margin-left:4px;">THU HỒI</span>` : '';
 
-                // Khối Icon bọc ngoài có gắn STT nổi
-                const iconBox = `
-                    <div style="position:relative; width:44px; height:44px; background:${badgeBg}; border:1px solid ${badgeBorder}; border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                        <div style="position:absolute; top:-6px; left:-6px; background:#1e293b; color:white; font-size:9px; font-weight:900; width:18px; height:18px; border-radius:6px; display:flex; align-items:center; justify-content:center; border:2px solid white; box-shadow:0 2px 4px rgba(0,0,0,0.1); z-index:10;">${h.stt || i + 1}</div>
-                        <div style="width:26px; height:26px; opacity:0.8;">${partIconSvg}</div>
+                // Khối hiển thị STT gọn gàng, thay thế cho icon
+                const numBadge = `
+                    <div style="background:${badgeBg}; border:1px solid ${badgeBorder}; color:${badgeColor}; font-size:11px; font-weight:900; min-width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px;">
+                        ${h.stt || i + 1}
                     </div>
                 `;
 
                 return '<div class="dm-swipe-wrap" id="swipe-' + i + '">'
                     + '<div class="dm-card-new' + selClass + '" id="card-' + i + '" onclick="DamageItems.handleCardClick(' + i + ')">'
-                    +   iconBox
+                    +   numBadge
                     +   '<div style="flex:1; min-width:0; padding-top:2px;">'
                     +     '<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">'
                     +       '<p style="font-size:14px; font-weight:800; color:var(--text-primary, #1e293b); line-height:1.2; margin:0; flex:1;">' + (h.chiTiet || '—') + '</p>'
