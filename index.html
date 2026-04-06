@@ -15012,9 +15012,9 @@
         </div>
     </div>
 
-    <div id="voice-record-modal" class="fixed inset-0 z-[100000] hidden flex-col items-center justify-end bg-slate-900/40 backdrop-blur-sm transition-opacity opacity-0">
+    <div id="voice-record-modal" style="z-index: 100005;" class="fixed inset-0 hidden bg-slate-900/40 backdrop-blur-sm transition-opacity opacity-0 duration-300">
         <div class="absolute inset-0" onclick="SpeechInput.cancel()"></div>
-        <div class="bg-white w-full rounded-t-[32px] p-6 flex flex-col items-center transform translate-y-full transition-transform duration-300 pb-safe relative z-10" id="voice-record-sheet" style="box-shadow: 0 -10px 40px rgba(0,0,0,0.1);">
+        <div class="absolute bottom-0 left-0 right-0 bg-white w-full rounded-t-[32px] p-6 flex flex-col items-center transform translate-y-full transition-transform duration-300 pb-safe" id="voice-record-sheet" style="box-shadow: 0 -10px 40px rgba(0,0,0,0.1);">
             <div class="w-12 h-1.5 bg-slate-200 rounded-full mb-8"></div>
             
             <div class="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mb-4 relative">
