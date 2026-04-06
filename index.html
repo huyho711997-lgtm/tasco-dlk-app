@@ -10397,29 +10397,96 @@
             }
         },
 
-        // Trình tạo tiếng "tách" máy ảnh bằng Web Audio API (Chạy mượt trên mọi máy)
+        // Trình tạo tiếng "Tách" chuyên nghiệp (Mô phỏng màn trập cơ học)
         _playShutterSound() {
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 if (!AudioContext) return;
                 const ctx = new AudioContext();
-                const osc = ctx.createOscillator();
+                
+                // Tạo tiếng nhiễu trắng (Snap)
+                const bufferSize = ctx.sampleRate * 0.1;
+                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+                const noise = ctx.createBufferSource();
+                noise.buffer = buffer;
+
+                // Bộ lọc để tiếng nghe "khô" và "đanh" hơn
+                const filter = ctx.createBiquadFilter();
+                filter.type = 'highpass';
+                filter.frequency.value = 1000;
+
                 const gain = ctx.createGain();
-                
-                // Cấu hình âm thanh mô phỏng tiếng màn trập cơ học
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(800, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.1);
-                
-                gain.gain.setValueAtTime(0.5, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-                
-                osc.connect(gain);
+                gain.gain.setValueAtTime(1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+
+                noise.connect(filter);
+                filter.connect(gain);
                 gain.connect(ctx.destination);
-                
-                osc.start(ctx.currentTime);
-                osc.stop(ctx.currentTime + 0.1);
-            } catch(e) { console.warn("Trình duyệt không hỗ trợ âm thanh", e); }
+
+                noise.start();
+            } catch(e) { console.warn("Audio error", e); }
+        },
+
+        // Hàm Close có cảnh báo chống mất dữ liệu
+        close() {
+            if (this._capturedFiles.length > 0) {
+                // Nếu có ảnh chưa lưu, hiện cảnh báo đỏ
+                Swal.fire({
+                    title: 'Bỏ qua ảnh đã chụp?',
+                    html: `<p class="text-sm text-slate-500">Bạn đang có <b class="text-rose-600">${this._capturedFiles.length} ảnh</b> chưa được tải lên Cloud hoặc lưu về máy.</p>
+                           <p class="text-[11px] text-slate-400 mt-2">Nếu thoát ngay, các ảnh này sẽ bị xóa khỏi bộ nhớ tạm.</p>`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Thoát và xóa ảnh',
+                    cancelButtonText: 'Tiếp tục chụp',
+                    customClass: { popup: 'custom-rounded z-[100001]' }
+                }).then((res) => {
+                    if (res.isConfirmed) this._forceClose();
+                });
+            } else {
+                this._forceClose();
+            }
+        },
+
+        // Hàm thực thi đóng Camera thực tế (Dọn dẹp tài nguyên)
+        _forceClose() {
+            if (this._stream) {
+                this._stream.getTracks().forEach(t => t.stop());
+                this._stream = null;
+            }
+            if (this._orientationHandler) {
+                window.removeEventListener('deviceorientation', this._orientationHandler);
+                this._orientationHandler = null;
+            }
+            if (this._clockInterval) {
+                clearInterval(this._clockInterval);
+                this._clockInterval = null;
+            }
+            
+            // Xóa bộ nhớ đệm ảnh nháp
+            if (this._capturedFiles && this._capturedFiles.length > 0) {
+                this._capturedFiles.forEach(c => URL.revokeObjectURL(c.preview));
+                this._capturedFiles = [];
+            }
+            
+            // Reset xoay UI
+            document.querySelectorAll('#secure-camera-modal .lucide, #sc-zoom-btn, #secure-camera-count, #sc-overlay-info').forEach(icon => {
+                icon.style.transform = 'rotate(0deg)';
+            });
+
+            const modal = document.getElementById('secure-camera-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            
+            // Hiện lại nút AI nếu không ở màn lịch
+            const aiFab = document.getElementById('ai-fab');
+            const isCalendar = !document.getElementById('view-calendar').classList.contains('hidden');
+            if(aiFab && !isCalendar) aiFab.style.display = 'flex';
         },
 
         takePhoto() {
@@ -10535,34 +10602,6 @@
 
             // Mở màn hình Review
             this.reviewPhotos();
-        },
-
-        close() {
-            if (this._stream) {
-                this._stream.getTracks().forEach(t => t.stop());
-                this._stream = null;
-            }
-            if (this._orientationHandler) {
-                window.removeEventListener('deviceorientation', this._orientationHandler);
-                this._orientationHandler = null;
-            }
-            if (this._clockInterval) {
-                clearInterval(this._clockInterval);
-                this._clockInterval = null;
-            }
-            
-            // THÊM: Dọn dẹp bộ nhớ các ảnh chụp nháp nếu người dùng thoát ngang
-            if (this._capturedFiles && this._capturedFiles.length > 0) {
-                this._capturedFiles.forEach(c => URL.revokeObjectURL(c.preview));
-                this._capturedFiles = [];
-            }
-            
-            document.querySelectorAll('#secure-camera-modal .lucide, #sc-zoom-btn, #secure-camera-count, #sc-overlay-info').forEach(icon => {
-                icon.style.transform = 'rotate(0deg)';
-            });
-            const modal = document.getElementById('secure-camera-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
         },
         
         // Khai báo thêm biến lưu vị trí ảnh đang xem
