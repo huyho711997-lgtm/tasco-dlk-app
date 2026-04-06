@@ -9033,221 +9033,109 @@
         }
     };
     // ============================================================
-    // SPEECH INPUT
+    // SPEECH INPUT - HTML5 MediaRecorder (Cấp quyền 1 lần + Form riêng)
     // ============================================================
     const SpeechInput = {
-        _recognition: null,  // Web Speech fallback
-        _active: false,
-        _mediaRecorder: null,
+        _stream: null,
+        _recorder: null,
         _chunks: [],
-        _mode: 'webspeech',  // 'webspeech' | 'gemini'
-
-        _detectMode() {
-            return 'native_upload'; // Bắt buộc dùng mẹo gọi ứng dụng hệ thống
-        },
+        _timer: null,
+        _seconds: 0,
+        _targetTextarea: null,
+        _targetBtn: null,
+        _targetStatus: null,
+        _isProcessing: false,
 
         toggle(textareaId, btnId, statusId) {
-            // Chuyển sang dùng trình thu âm trực tiếp trên Web
-            if (this._active) {
-                this.stop(textareaId, btnId, statusId);
-            } else {
-                this._startGemini(textareaId, btnId, statusId);
-            }
+            if (this._isProcessing) return;
+            this._targetTextarea = textareaId;
+            this._targetBtn = btnId;
+            this._targetStatus = statusId;
+            this.start();
         },
 
-        async _startNativeAudio(textareaId, btnId, statusId) {
-            let input = document.getElementById('native-audio-input');
-            if (!input) {
-                input = document.createElement('input');
-                input.type = 'file';
-                input.id = 'native-audio-input';
-                // ĐIỀU CHỈNH 1: Ép thiết bị mở Camera quay video (có thu âm) hoặc Máy ghi âm
-                input.accept = 'video/*,audio/*'; 
-                input.capture = 'environment'; // Ưu tiên camera sau
-                input.style.display = 'none';
-                document.body.appendChild(input);
-            }
-
-            // Gán lại sự kiện onchange mỗi lần gọi
-            input.onchange = async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                input.value = ''; // Reset input để dùng cho lần sau
-
-                const btn = document.getElementById(btnId);
-                const sta = document.getElementById(statusId);
-                
-                // Cập nhật giao diện báo đang xử lý
-                if (btn) {
-                    btn.style.pointerEvents = 'none';
-                    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="animation:img-spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Đang xử lý...`;
-                }
-                if (sta) { sta.textContent = '⏳ Tasco AI đang nghe...'; sta.style.color = '#d97706'; }
-
-                try {
-                    // Chuyển file thu được sang Base64
-                    const base64 = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result.split(',')[1]);
-                        reader.onerror = reject;
-                        reader.readAsDataURL(file);
-                    });
-
-                    // Prompt ép AI tự nắn lại từ chuyên ngành giám định
-                    const PROMPT = 'Bạn là chuyên gia giám định bồi thường xe cơ giới. Hãy chuyển đổi giọng nói trong file media này thành văn bản tiếng Việt. LƯU Ý NGỮ CẢNH: Người nói đang đọc danh sách các bộ phận xe ô tô bị hư hỏng và phương án xử lý. Hãy tự động nắn lại các từ địa phương hoặc nói ngọng về đúng chính tả thuật ngữ kỹ thuật ô tô (Ví dụ: cảng -> cản, lường -> lườn, dè -> vè, mốp -> móp...). CHỈ trả về nội dung văn bản đã nhận dạng, tuyệt đối không thêm giải thích.';
-
-                    // Gửi lên Gemini 
-                    const res = await fetch(
-                        `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${GeminiKeys.next()}`,
-                        {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contents: [{
-                                    parts: [
-                                        { text: PROMPT },
-                                        { inline_data: { mime_type: file.type || 'video/mp4', data: base64 } } // Hỗ trợ linh hoạt MIME Type (video/audio)
-                                    ]
-                                }],
-                                generationConfig: { temperature: 0.1, maxOutputTokens: 800 }
-                            })
-                        }
-                    );
-
-                    const data = await res.json();
-                    if (data.error) throw new Error(data.error.message);
-
-                    const text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
-                    
-                    if (text) {
-                        const ta = document.getElementById(textareaId);
-                        if (ta) {
-                            ta.value = (ta.value ? ta.value + ' ' : '') + text;
-                            ta.dispatchEvent(new Event('input'));
-                            ta.scrollTop = ta.scrollHeight;
-                        }
-                        if (sta) {
-                            sta.textContent = '✓ Nhận dạng xong, đang phân tích...';
-                            sta.style.color = '#16a34a';
-                        }
-                        
-                        // ĐIỀU CHỈNH 2: TỰ ĐỘNG CHUYỂN TIẾP (BỎ QUA BƯỚC NHẤN NÚT)
-                        // Nếu đang hiển thị trong popup Swal, tự động click nút Confirm
-                        if (Swal.isVisible()) {
-                            const confirmBtn = Swal.getConfirmButton();
-                            if (confirmBtn && confirmBtn.style.display !== 'none') {
-                                setTimeout(() => {
-                                    Swal.clickConfirm();
-                                }, 300); // Delay nhẹ 0.3s để UI báo "Nhận dạng xong" cho người dùng thấy
-                            }
-                        } else if (textareaId === 'ai-input') {
-                            // Tự động gửi lệnh cho chatbot sau khi nhận dạng giọng nói xong
-                            setTimeout(() => {
-                                AI.send();
-                            }, 300);
-                        }
-
-                    } else {
-                        Toast.fire({ icon: 'warning', title: 'Không nghe rõ, vui lòng nói lại' });
-                        if (sta) { sta.textContent = 'Lỗi nhận dạng'; sta.style.color = '#ef4444'; }
-                    }
-                } catch (error) {
-                    Toast.fire({ icon: 'error', title: 'Lỗi nhận dạng: ' + error.message });
-                    if (sta) { sta.textContent = 'Lỗi nhận dạng'; sta.style.color = '#ef4444'; }
-                } finally {
-                    // Khôi phục lại trạng thái nút bấm
-                    if (btn) {
-                        btn.style.pointerEvents = 'auto';
-                        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg> Bắt đầu Quay/Đọc`;
-                    }
-                }
-            };
-
-            // Kích hoạt nút ẩn để mở app thu âm/quay phim của hệ điều hành
-            input.click();
-        },
-
-        // ── GEMINI MODE ─────────────────────────────────────────
-        async _startGemini(textareaId, btnId, statusId) {
+        async start() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                // Xin quyền mic 1 lần, trình duyệt tự nhớ (yêu cầu HTTPS)
+                this._stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                // Hỗ trợ đa nền tảng (iOS Safari thường dùng mp4/aac, Android dùng webm)
+                const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : (MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4');
+                this._recorder = new MediaRecorder(this._stream, { mimeType });
                 this._chunks = [];
-                this._active = true;
-                this._setRecordingUI(btnId, statusId, true);
-
-                const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-                    ? 'audio/webm;codecs=opus'
-                    : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
-
-                this._mediaRecorder = new MediaRecorder(stream, { mimeType });
-                this._mediaRecorder.ondataavailable = e => { if (e.data.size > 0) this._chunks.push(e.data); };
-                this._mediaRecorder.onstop = () => this._transcribeGemini(textareaId, btnId, statusId, mimeType, stream);
-                this._mediaRecorder.start(200);
-
-                // Auto stop sau 60s
-                this._autoStop = setTimeout(() => {
-                    if (this._active) this.stop(textareaId, btnId, statusId);
-                }, 60000);
-
-              } catch (e) {
-                  // Fallback về Web Speech nếu không được dùng mic
-                  this._active = false;
-                  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                      this._mode = 'webspeech';
-                      this._startWebSpeech(textareaId, btnId, statusId);
-                  } else {
-                      Toast.fire({ icon: 'warning', title: 'Vui lòng cấp quyền microphone trong cài đặt trình duyệt' });
-                  }
-              }
-        },
-
-        async stop(textareaId, btnId, statusId) {
-            this._active = false;
-            clearTimeout(this._autoStop);
-
-            // Dừng Gemini recorder
-            if (this._mediaRecorder && this._mediaRecorder.state !== 'inactive') {
-                this._mediaRecorder.stop();
-                // UI "đang xử lý" — _transcribeGemini sẽ reset sau khi xong
-                const btn = document.getElementById(btnId);
-                const sta = document.getElementById(statusId);
-                if (btn) {
-                    btn.style.background = '#fef3c7';
-                    btn.style.borderColor = '#fde68a';
-                    btn.style.color = '#d97706';
-                    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Đang xử lý...`;
-                }
-                if (sta) { sta.textContent = '⏳ Đang nhận dạng giọng nói...'; sta.style.color = '#d97706'; }
-                return;
-            }
-
-            // Dừng Web Speech
-            if (this._recognition) {
-                try { this._recognition.stop(); } catch (_) {}
-                this._recognition = null;
                 
-                // Tự động gửi lệnh
-                if (Swal.isVisible()) {
-                    const confirmBtn = Swal.getConfirmButton();
-                    if (confirmBtn && confirmBtn.style.display !== 'none') setTimeout(() => Swal.clickConfirm(), 300);
-                } else if (textareaId === 'ai-input') {
-                    setTimeout(() => AI.send(), 300);
-                }
+                this._recorder.ondataavailable = e => { if (e.data.size > 0) this._chunks.push(e.data); };
+                this._recorder.onstop = () => this._processAudio(mimeType);
+                
+                this._recorder.start(200); // Lấy data mỗi 200ms cho an toàn
+                this._openUI();
+            } catch (e) {
+                Toast.fire({ icon: 'error', title: 'Vui lòng cấp quyền Micro cho trình duyệt!' });
             }
-            this._setRecordingUI(btnId, statusId, false);
         },
 
-        async _transcribeGemini(textareaId, btnId, statusId, mimeType, stream) {
-            // Dừng stream mic
-            stream.getTracks().forEach(t => t.stop());
+        _openUI() {
+            const modal = document.getElementById('voice-record-modal');
+            const sheet = document.getElementById('voice-record-sheet');
+            document.getElementById('voice-timer').textContent = '00:00';
+            this._seconds = 0;
+            
+            modal.classList.remove('hidden');
+            // Force reflow để mượt animation
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            sheet.classList.remove('translate-y-full');
+            
+            this._timer = setInterval(() => {
+                this._seconds++;
+                const m = String(Math.floor(this._seconds / 60)).padStart(2, '0');
+                const s = String(this._seconds % 60).padStart(2, '0');
+                document.getElementById('voice-timer').textContent = `${m}:${s}`;
+                
+                // Giới hạn thu âm tối đa 2 phút (120s)
+                if (this._seconds >= 120) this.stopAndSend();
+            }, 1000);
+            lucide.createIcons();
+        },
 
+        _closeUI() {
+            const modal = document.getElementById('voice-record-modal');
+            const sheet = document.getElementById('voice-record-sheet');
+            clearInterval(this._timer);
+            
+            sheet.classList.add('translate-y-full');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        },
+
+        stopAndSend() {
+            if (this._recorder && this._recorder.state !== 'inactive') {
+                this._isProcessing = true;
+                this._recorder.stop(); // Kích hoạt sự kiện onstop -> gọi _processAudio
+                this._closeUI();
+                this._setProcessingUI(true);
+            }
+        },
+
+        cancel() {
+            if (this._recorder && this._recorder.state !== 'inactive') {
+                this._recorder.stop();
+                this._chunks = []; // Xóa data để _processAudio hủy bỏ quá trình
+            }
+            this._cleanup();
+            this._closeUI();
+        },
+
+        async _processAudio(mimeType) {
+            // Nếu bấm Hủy, mảng chunks sẽ rỗng -> không làm gì cả
             if (!this._chunks.length) {
-                this._setRecordingUI(btnId, statusId, false);
+                this._cleanup();
+                this._setProcessingUI(false);
                 return;
             }
 
             try {
-                const blob   = new Blob(this._chunks, { type: mimeType });
+                const blob = new Blob(this._chunks, { type: mimeType });
                 const base64 = await new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onloadend = () => resolve(reader.result.split(',')[1]);
@@ -9255,142 +9143,97 @@
                     reader.readAsDataURL(blob);
                 });
 
-                const PROMPT = 'Hãy chuyển đổi giọng nói trong file audio này thành văn bản tiếng Việt. CHỈ trả về nội dung văn bản đã nhận dạng, không thêm bất kỳ giải thích nào.';
+                // Chọn Prompt phù hợp: Bot trò chuyện hay Nhập liệu chuyên ngành
+                let PROMPT = 'Hãy chuyển đổi giọng nói trong file audio này thành văn bản tiếng Việt. CHỈ trả về nội dung văn bản đã nhận dạng, không thêm bất kỳ giải thích nào.';
+                if (['edit-htDienBien', 'edit-htNhanDinh', 'bbgd-input'].includes(this._targetTextarea)) {
+                     PROMPT = 'Bạn là chuyên gia giám định bồi thường xe cơ giới. Hãy chuyển đổi giọng nói thành văn bản tiếng Việt. Tự động nắn lại các từ địa phương hoặc nói ngọng về đúng chính tả thuật ngữ kỹ thuật ô tô (Ví dụ: cảng -> cản, lường -> lườn, dè -> vè, mốp -> móp...). CHỈ trả về nội dung văn bản đã nhận dạng.';
+                }
 
-                const res = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${GeminiKeys.next()}`,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{
-                                parts: [
-                                    { text: PROMPT },
-                                    { inline_data: { mime_type: mimeType, data: base64 } }
-                                ]
-                            }],
-                            generationConfig: { temperature: 0.1, maxOutputTokens: 500 }
-                        })
-                    }
-                );
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${GeminiKeys.next()}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: mimeType, data: base64 } }] }],
+                        generationConfig: { temperature: 0.1 }
+                    })
+                });
 
                 const data = await res.json();
                 if (data.error) throw new Error(data.error.message);
 
                 const text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+                
                 if (text) {
-                    const ta = document.getElementById(textareaId);
+                    const ta = document.getElementById(this._targetTextarea);
                     if (ta) {
                         ta.value = (ta.value ? ta.value + ' ' : '') + text;
                         ta.dispatchEvent(new Event('input'));
                         ta.scrollTop = ta.scrollHeight;
                     }
-                    const sta = document.getElementById(statusId);
+                    
+                    const sta = document.getElementById(this._targetStatus);
                     if (sta) {
                         sta.textContent = '✓ Nhận dạng xong';
                         sta.style.color = '#16a34a';
                         setTimeout(() => { if (sta) { sta.textContent = ''; sta.style.color = ''; } }, 2500);
                     }
 
-                    // --- TỰ ĐỘNG GỬI LỆNH CHO CHATBOT SAU KHI THU ÂM TRỰC TIẾP ---
+                    // TỰ ĐỘNG GỬI LỆNH
                     if (Swal.isVisible()) {
                         const confirmBtn = Swal.getConfirmButton();
-                        if (confirmBtn && confirmBtn.style.display !== 'none') {
-                            setTimeout(() => Swal.clickConfirm(), 300);
-                        }
-                    } else if (textareaId === 'ai-input') {
+                        if (confirmBtn && confirmBtn.style.display !== 'none') setTimeout(() => Swal.clickConfirm(), 300);
+                    } else if (this._targetTextarea === 'ai-input') {
                         setTimeout(() => AI.send(), 300);
                     }
-                    
                 } else {
-                    Toast.fire({ icon: 'warning', title: 'Không nhận dạng được giọng nói' });
+                    Toast.fire({ icon: 'warning', title: 'Không nghe rõ, vui lòng thử lại' });
                 }
-
             } catch (e) {
                 Toast.fire({ icon: 'error', title: 'Lỗi nhận dạng: ' + e.message });
-            }
-
-            this._setRecordingUI(btnId, statusId, false);
-            this._chunks = [];
-        },
-
-        // ── WEB SPEECH FALLBACK ──────────────────────────────────
-        _startWebSpeech(textareaId, btnId, statusId) {
-            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-            this._recognition = new SR();
-            this._recognition.lang = 'vi-VN';
-            this._recognition.continuous = true;
-            this._recognition.interimResults = true;
-            this._active = true;
-
-            let finalText = document.getElementById(textareaId)?.value || '';
-
-            this._recognition.onstart = () => this._setRecordingUI(btnId, statusId, true);
-
-            this._recognition.onresult = e => {
-                let interim = '';
-                for (let i = e.resultIndex; i < e.results.length; i++) {
-                    if (e.results[i].isFinal) finalText += e.results[i][0].transcript + ' ';
-                    else interim += e.results[i][0].transcript;
-                }
-                const ta = document.getElementById(textareaId);
-                if (ta) { ta.value = finalText + interim; ta.scrollTop = ta.scrollHeight; }
-            };
-
-            this._recognition.onerror = e => {
-                const msgs = { 'not-allowed':'Cần cấp quyền mic!', 'no-speech':'Không nghe thấy', 'network':'Lỗi mạng' };
-                Toast.fire({ icon: 'warning', title: msgs[e.error] || 'Lỗi: ' + e.error });
-                this.stop(textareaId, btnId, statusId);
-            };
-
-            this._recognition.onend = () => {
-                if (this._active) try { this._recognition.start(); } catch (_) {}
-            };
-
-            try { this._recognition.start(); } catch (e) {
-                Toast.fire({ icon: 'error', title: 'Không thể khởi động mic!' });
-                this._active = false;
+            } finally {
+                this._cleanup();
+                this._setProcessingUI(false);
             }
         },
 
-        // ── UI ───────────────────────────────────────────────────
-        _setRecordingUI(btnId, statusId, isRecording) {
-            const btn = document.getElementById(btnId);
-            const sta = document.getElementById(statusId);
+        _setProcessingUI(isProcessing) {
+            const btn = document.getElementById(this._targetBtn);
             if (btn) {
-                if (isRecording) {
-                    btn.style.background = '#fee2e2';
-                    btn.style.borderColor = '#fca5a5';
-                    btn.style.color = '#dc2626';
-                    btn.innerHTML = `
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#dc2626" stroke="#dc2626" stroke-width="2" stroke-linecap="round">
-                            <rect x="6" y="6" width="12" height="12" rx="2"/>
-                        </svg> Nhấn để dừng`;
+                if (isProcessing) {
+                    btn.style.pointerEvents = 'none';
+                    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="animation:img-spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Đang xử lý...`;
                 } else {
-                    btn.style.background = '';
-                    btn.style.borderColor = '';
-                    btn.style.color = '';
-                    btn.innerHTML = `
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                            <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
-                            <path d="M19 10v2a7 7 0 01-14 0v-2"/>
-                            <line x1="12" y1="19" x2="12" y2="23"/>
-                            <line x1="8" y1="23" x2="16" y2="23"/>
-                        </svg> Nhấn để nói`;
+                    btn.style.pointerEvents = 'auto';
+                    // Phục hồi lại HTML gốc tùy theo nút gọi
+                    if (this._targetBtn === 'ai-mic-btn') {
+                        btn.innerHTML = `<i data-lucide="mic" class="w-3.5 h-3.5"></i> Nói lệnh`;
+                    } else if (this._targetBtn === 'bbgd-mic-btn') {
+                        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg> Nhấn để nói`;
+                    } else {
+                        btn.innerHTML = `<i data-lucide="mic" class="w-3 h-3"></i> Nói`;
+                    }
+                    lucide.createIcons();
                 }
             }
-            if (sta && isRecording) {
-                sta.textContent = '🔴 Đang ghi — nói xong nhấn dừng';
-                sta.style.color = '#dc2626';
+            const sta = document.getElementById(this._targetStatus);
+            if (sta && isProcessing) {
+                sta.textContent = '⏳ AI đang giải mã văn bản...';
+                sta.style.color = '#d97706';
             }
         },
 
-        cleanup() {
-            if (this._active) {
-                if (this._mediaRecorder?.state !== 'inactive') this._mediaRecorder?.stop();
-                if (this._recognition) try { this._recognition.stop(); } catch (_) {}
-                this._active = false;
+        _cleanup() {
+            if (this._stream) {
+                this._stream.getTracks().forEach(t => t.stop());
+                this._stream = null;
             }
+            this._recorder = null;
+            this._isProcessing = false;
+        },
+        
+        cleanup() { 
+            // Hàm gọi khi đóng modal (vd: tắt ngang Swal)
+            this.cancel();
         }
     };
 
@@ -15164,6 +15007,31 @@
                 <button onclick="FilterManager.apply()" class="w-full py-3.5 bg-blue-600 text-white rounded-xl font-black text-[13px] flex items-center justify-center gap-2 active:bg-blue-700 active:scale-[0.98] transition-all shadow-md shadow-blue-200">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> 
                     Áp dụng bộ lọc
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="voice-record-modal" class="fixed inset-0 z-[100000] hidden flex-col items-center justify-end bg-slate-900/40 backdrop-blur-sm transition-opacity opacity-0">
+        <div class="absolute inset-0" onclick="SpeechInput.cancel()"></div>
+        <div class="bg-white w-full rounded-t-[32px] p-6 flex flex-col items-center transform translate-y-full transition-transform duration-300 pb-safe relative z-10" id="voice-record-sheet" style="box-shadow: 0 -10px 40px rgba(0,0,0,0.1);">
+            <div class="w-12 h-1.5 bg-slate-200 rounded-full mb-8"></div>
+            
+            <div class="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mb-4 relative">
+                <div class="absolute inset-0 bg-indigo-400 rounded-full animate-ping opacity-20" style="animation-duration: 1.5s;"></div>
+                <div class="absolute inset-2 bg-indigo-400 rounded-full animate-ping opacity-40" style="animation-duration: 2s;"></div>
+                <i data-lucide="mic" class="w-10 h-10 text-indigo-600 relative z-10"></i>
+            </div>
+            
+            <h3 class="text-xl font-black text-slate-800 mb-2 mt-2">Tasco AI đang nghe...</h3>
+            <p class="text-sm text-slate-400 font-bold mb-8 tracking-widest font-mono" id="voice-timer">00:00</p>
+            
+            <div class="flex gap-3 w-full max-w-sm">
+                <button onclick="SpeechInput.cancel()" class="flex-1 py-4 bg-slate-100 text-slate-600 border border-slate-200 rounded-2xl font-bold text-[13px] active:bg-slate-200 transition-colors">
+                    Hủy bỏ
+                </button>
+                <button onclick="SpeechInput.stopAndSend()" class="flex-[2] py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl font-black text-[13px] flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 active:scale-95 transition-transform">
+                    <i data-lucide="send" class="w-4 h-4"></i> Gửi lệnh ngay
                 </button>
             </div>
         </div>
