@@ -3162,25 +3162,27 @@
                             </button>
                         </div>
                         
-                        <div id="dm-normal-btns" class="flex flex-col gap-2.5 pb-4 mb-4 border-b border-slate-100">
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <button onclick="DamageItems.addRowAI(App.currentEditId)" class="flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-[12px] font-black shadow-md shadow-indigo-200 active:scale-95 transition-transform">
+                        <div id="dm-normal-btns" class="flex flex-col gap-2 pb-3 mb-3 border-b border-slate-100">
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="DamageItems.addRowAI(App.currentEditId)" class="flex items-center justify-center gap-1.5 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-[12px] font-black shadow-sm shadow-indigo-200 active:scale-95 transition-transform">
                                     <i data-lucide="sparkles" class="w-4 h-4"></i> AI Bóc tách
                                 </button>
-                                <button onclick="QuoteChecker.open(App.currentEditId)" class="flex items-center justify-center gap-2 py-2.5 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl text-[12px] font-black active:scale-95 transition-transform">
-                                    <i data-lucide="file-check-2" class="w-4 h-4"></i> Duyệt BG AI
-                                </button>
-                                <button onclick="PriceCompare.lookup(App.currentEditId)" class="flex items-center justify-center gap-2 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-[12px] font-black active:scale-95 transition-transform">
-                                    <i data-lucide="search" class="w-4 h-4"></i> Tra giá kho
-                                </button>
-                                <button onclick="CarDiagram.open(App.currentEditId)" class="flex items-center justify-center gap-2 py-2.5 bg-slate-800 text-white border border-slate-700 rounded-xl text-[12px] font-black shadow-sm shadow-slate-300 active:scale-95 transition-transform">
+                                <button onclick="CarDiagram.open(App.currentEditId)" class="flex items-center justify-center gap-1.5 py-2 bg-slate-800 text-white rounded-xl text-[12px] font-black shadow-sm shadow-slate-300 active:scale-95 transition-transform">
                                     <i data-lucide="car" class="w-4 h-4"></i> Sơ đồ xe
                                 </button>
                             </div>
                             
-                            <button onclick="DamageItems.addRow(App.currentEditId)" class="w-full flex items-center justify-center gap-2 py-2.5 bg-blue-50 text-blue-600 border border-blue-200 border-dashed rounded-xl text-[12px] font-bold active:bg-blue-100 transition-colors">
-                                <i data-lucide="plus" class="w-4 h-4"></i> Thêm hạng mục thủ công
-                            </button>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="QuoteChecker.open(App.currentEditId)" class="flex items-center justify-center gap-1 py-1.5 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-[10px] font-bold active:bg-rose-100 transition-colors">
+                                    <i data-lucide="file-check-2" class="w-3.5 h-3.5"></i> Duyệt BG
+                                </button>
+                                <button onclick="PriceCompare.lookup(App.currentEditId)" class="flex items-center justify-center gap-1 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-[10px] font-bold active:bg-emerald-100 transition-colors">
+                                    <i data-lucide="search" class="w-3.5 h-3.5"></i> Tra giá
+                                </button>
+                                <button onclick="DamageItems.addRow(App.currentEditId)" class="flex items-center justify-center gap-1 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-[10px] font-bold active:bg-blue-100 transition-colors">
+                                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> Thêm tay
+                                </button>
+                            </div>
                         </div>
 
                         <div id="dm-select-btns" class="flex gap-2 hidden">
