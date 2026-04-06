@@ -424,9 +424,14 @@
         [data-theme="dark"] .dm-chip.nd { background-color: rgba(148, 163, 184, 0.15) !important; color: #94a3b8 !important; border: 1px solid rgba(148, 163, 184, 0.3) !important; }
 
         /* 2. Ép màu nền đục nhạt cho 3 ô tổng hợp số lượng (Sửa chữa, Thay thế, Thu hồi) */
-        [data-theme="dark"] #dm-summary .bg-blue-50 { background-color: rgba(59, 130, 246, 0.1) !important; border-color: rgba(59, 130, 246, 0.2) !important; }
-        [data-theme="dark"] #dm-summary .bg-amber-50 { background-color: rgba(245, 158, 11, 0.1) !important; border-color: rgba(245, 158, 11, 0.2) !important; }
-        [data-theme="dark"] #dm-summary .bg-rose-50 { background-color: rgba(225, 29, 72, 0.1) !important; border-color: rgba(225, 29, 72, 0.2) !important; }
+        [data-theme="dark"] #dm-summary .bg-blue-50 { background-color: rgba(59, 130, 246, 0.08) !important; border-color: rgba(59, 130, 246, 0.2) !important; }
+        [data-theme="dark"] #dm-summary .bg-amber-50 { background-color: rgba(245, 158, 11, 0.08) !important; border-color: rgba(245, 158, 11, 0.2) !important; }
+        [data-theme="dark"] #dm-summary .bg-purple-50 { background-color: rgba(168, 85, 247, 0.08) !important; border-color: rgba(168, 85, 247, 0.2) !important; }
+        
+        /* Đồng bộ màu text trong Dark Mode */
+        [data-theme="dark"] #dm-summary .text-blue-700 { color: #60a5fa !important; }
+        [data-theme="dark"] #dm-summary .text-amber-700 { color: #fbbf24 !important; }
+        [data-theme="dark"] #dm-summary .text-purple-700 { color: #c084fc !important; }
 
         /* 3. Đồng bộ các đường viền xám ranh giới (border) thành màu tối chuyên dụng */
         [data-theme="dark"] .border-slate-100, 
@@ -696,43 +701,7 @@
         .dm-card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; margin-top: 1px; }
         .dm-price { font-size: 12px; font-weight: 900; color: #0f172a; white-space: nowrap; }
         .dm-garage-label { font-size: 10px; font-weight: 600; color: #94a3b8; white-space: nowrap; }
-        /* Summary Cards */
-        .dm-summary-card {
-            border-radius: 16px; padding: 10px 8px 10px;
-            text-align: center; border: 1.5px solid transparent;
-        }
-        .dm-summary-icon {
-            width: 24px; height: 24px; border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 4px;
-        }
-        .dm-summary-label { font-size: 8px; font-weight: 900; letter-spacing: 0.06em; margin-bottom: 2px; }
-        .dm-summary-num { font-size: 24px; font-weight: 900; line-height: 1; }
-        .dm-summary-sc { background: linear-gradient(135deg,#eff6ff,#dbeafe); border-color: #bfdbfe; }
-        .dm-summary-sc .dm-summary-icon { background: #dbeafe; color: #1d4ed8; }
-        .dm-summary-sc .dm-summary-label { color: #1d4ed8; }
-        .dm-summary-sc .dm-summary-num { color: #1d4ed8; }
-        .dm-summary-tt { background: linear-gradient(135deg,#fffbeb,#fef3c7); border-color: #fde68a; }
-        .dm-summary-tt .dm-summary-icon { background: #fde68a; color: #b45309; }
-        .dm-summary-tt .dm-summary-label { color: #b45309; }
-        .dm-summary-tt .dm-summary-num { color: #b45309; }
-        .dm-summary-th { background: linear-gradient(135deg,#fdf4ff,#f3e8ff); border-color: #e9d5ff; }
-        .dm-summary-th .dm-summary-icon { background: #e9d5ff; color: #7c3aed; }
-        .dm-summary-th .dm-summary-label { color: #7c3aed; }
-        .dm-summary-th .dm-summary-num { color: #7c3aed; }
-        /* Dark mode summary */
-        [data-theme="dark"] .dm-summary-sc { background: rgba(59,130,246,0.12) !important; border-color: rgba(59,130,246,0.25) !important; }
-        [data-theme="dark"] .dm-summary-sc .dm-summary-icon { background: rgba(59,130,246,0.2) !important; color: #60a5fa; }
-        [data-theme="dark"] .dm-summary-sc .dm-summary-label,
-        [data-theme="dark"] .dm-summary-sc .dm-summary-num { color: #60a5fa !important; }
-        [data-theme="dark"] .dm-summary-tt { background: rgba(245,158,11,0.12) !important; border-color: rgba(245,158,11,0.25) !important; }
-        [data-theme="dark"] .dm-summary-tt .dm-summary-icon { background: rgba(245,158,11,0.2) !important; color: #fbbf24; }
-        [data-theme="dark"] .dm-summary-tt .dm-summary-label,
-        [data-theme="dark"] .dm-summary-tt .dm-summary-num { color: #fbbf24 !important; }
-        [data-theme="dark"] .dm-summary-th { background: rgba(168,85,247,0.12) !important; border-color: rgba(168,85,247,0.25) !important; }
-        [data-theme="dark"] .dm-summary-th .dm-summary-icon { background: rgba(168,85,247,0.2) !important; color: #c084fc; }
-        [data-theme="dark"] .dm-summary-th .dm-summary-label,
-        [data-theme="dark"] .dm-summary-th .dm-summary-num { color: #c084fc !important; }
+        
         /* DARK MODE - dm-card */
         [data-theme="dark"] .dm-card { background: var(--bg-white) !important; border-color: var(--border-light) !important; box-shadow: none !important; }
         [data-theme="dark"] .dm-card.sc { background: linear-gradient(to right, rgba(59,130,246,0.08) 0%, var(--bg-white) 60%) !important; border-left-color: #3b82f6 !important; }
@@ -3223,26 +3192,20 @@
 
                     <!-- Summary stats -->
                     <div id="dm-summary" class="grid grid-cols-3 gap-2 mb-4 hidden">
-                        <div class="dm-summary-card dm-summary-sc">
-                            <div class="dm-summary-icon">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
-                            </div>
-                            <p class="dm-summary-label">SỬA CHỮA</p>
-                            <p class="dm-summary-num" id="dm-count-sc">0</p>
+                        <div class="bg-blue-50 rounded-2xl p-3 border border-blue-100 flex flex-col justify-between relative overflow-hidden">
+                            <p class="text-[9px] font-black text-blue-500 uppercase mb-1 z-10 relative tracking-wider">Sửa chữa</p>
+                            <p class="text-2xl font-black text-blue-700 z-10 relative leading-none" id="dm-count-sc">0</p>
+                            <i data-lucide="hammer" class="absolute -right-3 -bottom-3 w-12 h-12 text-blue-500 opacity-10 -rotate-12 pointer-events-none"></i>
                         </div>
-                        <div class="dm-summary-card dm-summary-tt">
-                            <div class="dm-summary-icon">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
-                            </div>
-                            <p class="dm-summary-label">THAY THẾ</p>
-                            <p class="dm-summary-num" id="dm-count-tt">0</p>
+                        <div class="bg-amber-50 rounded-2xl p-3 border border-amber-100 flex flex-col justify-between relative overflow-hidden">
+                            <p class="text-[9px] font-black text-amber-500 uppercase mb-1 z-10 relative tracking-wider">Thay thế</p>
+                            <p class="text-2xl font-black text-amber-700 z-10 relative leading-none" id="dm-count-tt">0</p>
+                            <i data-lucide="refresh-cw" class="absolute -right-3 -bottom-3 w-12 h-12 text-amber-500 opacity-10 -rotate-12 pointer-events-none"></i>
                         </div>
-                        <div class="dm-summary-card dm-summary-th">
-                            <div class="dm-summary-icon">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 100-6"/></svg>
-                            </div>
-                            <p class="dm-summary-label">THU HỒI</p>
-                            <p class="dm-summary-num" id="dm-count-th">0</p>
+                        <div class="bg-purple-50 rounded-2xl p-3 border border-purple-100 flex flex-col justify-between relative overflow-hidden">
+                            <p class="text-[9px] font-black text-purple-500 uppercase mb-1 z-10 relative tracking-wider">Thu hồi</p>
+                            <p class="text-2xl font-black text-purple-700 z-10 relative leading-none" id="dm-count-th">0</p>
+                            <i data-lucide="archive-restore" class="absolute -right-3 -bottom-3 w-12 h-12 text-purple-500 opacity-10 -rotate-12 pointer-events-none"></i>
                         </div>
                     </div>
 
