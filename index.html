@@ -14959,10 +14959,12 @@
 
         <div class="h-[140px] bg-black flex items-center justify-between px-8 z-30 pb-safe absolute bottom-0 w-full bg-gradient-to-t from-black to-transparent">
             
-            <button onclick="SecureCamera.done()" class="relative w-14 h-14 rounded-full border-2 border-white/30 active:scale-90 transition-transform overflow-hidden shadow-lg bg-slate-800">
-                <div id="secure-camera-thumbs" class="w-full h-full bg-cover bg-center transition-transform duration-200"></div>
-                <span id="secure-camera-count" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[11px] w-6 h-6 rounded-full flex items-center justify-center font-black hidden shadow-md border-2 border-black transition-transform duration-200">0</span>
-            </button>
+            <div class="relative w-14 h-14 active:scale-90 transition-transform cursor-pointer" onclick="SecureCamera.done()">
+                <div class="w-full h-full rounded-full border-2 border-white/30 overflow-hidden shadow-lg bg-slate-800">
+                    <div id="secure-camera-thumbs" class="w-full h-full bg-cover bg-center transition-transform duration-200"></div>
+                </div>
+                <span id="secure-camera-count" class="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[11px] w-6 h-6 rounded-full flex items-center justify-center font-black hidden shadow-md border-2 border-black transition-transform duration-200 z-10">0</span>
+            </div>
 
             <button onclick="SecureCamera.takePhoto()" class="w-[84px] h-[84px] rounded-full border-[5px] border-white/40 flex items-center justify-center p-1 outline-none">
                 <div class="w-full h-full rounded-full bg-white shadow-[0_0_20px_rgba(255,255,255,0.5)] transition-all duration-150"></div>
