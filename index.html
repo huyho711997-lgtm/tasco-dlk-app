@@ -2659,7 +2659,16 @@
                                 </button>
                                 <input type="hidden" id="edit-appointmentTime">
                             </div>
-                            <div><label class="input-label">Địa điểm</label><input type="text" id="edit-location" class="input-field"></div>
+                            <div class="relative">
+                                <label class="input-label">Địa điểm / Chi phí đi lại</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="edit-location" class="input-field flex-1" placeholder="Nhập địa điểm...">
+                                    <button type="button" onclick="CostCalculator.calculateForCase(App.currentEditId)" 
+                                        class="shrink-0 px-3 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl text-xs font-bold active:scale-95 transition-all flex items-center gap-1.5 shadow-sm">
+                                        <i data-lucide="calculator" class="w-3.5 h-3.5"></i> Tính phí
+                                    </button>
+                                </div>
+                            </div>
                             <div><label class="input-label">Nguyên nhân</label><input type="text" id="edit-cause" class="input-field"></div>
                             <div><label class="input-label">Mô tả tổn thất</label><textarea id="edit-description" rows="2" class="input-field resize-none"></textarea></div>
                         </div>
@@ -3832,6 +3841,130 @@
                 items: ['Quản lý hồ sơ bồi thường', 'Lịch hẹn giám định', 'Firebase realtime sync', 'Tìm kiếm biển số']
             }
         ]
+    };
+
+    // ============================================================
+    // COST CALCULATOR — Tính toán chi phí đi hiện trường
+    // ============================================================
+    const CostCalculator = {
+        // Tọa độ công ty/chi nhánh mặc định (VD: Trung tâm BMT, Đăk Lăk)
+        // Bạn có thể lên Google Maps lấy tọa độ chính xác của văn phòng thay vào đây
+        BRANCH_LOCATION: { lat: 12.67973, lng: 108.04403 }, 
+        BASE_FEE_PER_KM: 5000, // Đơn giá 1km (VNĐ)
+
+        // Công thức Haversine tính khoảng cách đường chim bay giữa 2 tọa độ GPS
+        getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Bán kính Trái Đất (km)
+            const dLat = this.deg2rad(lat2 - lat1);
+            const dLon = this.deg2rad(lon2 - lon1);
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2); 
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+            return R * c;
+        },
+        deg2rad(deg) { return deg * (Math.PI/180) },
+
+        // Phân tích thời điểm nhận hiện trường
+        analyzeTime(timestamp) {
+            const m = moment(timestamp);
+            const hour = m.hour();
+            const dayOfWeek = m.day(); // 0 là Chủ Nhật
+            
+            const isSunday = (dayOfWeek === 0);
+            const isOutsideHours = (hour < 8 || hour >= 18);
+
+            // Khai báo các ngày lễ dương lịch cố định (có thể mở rộng thêm)
+            const holidays = ['01/01', '30/04', '01/05', '02/09']; 
+            const dateStr = m.format('DD/MM');
+            const isHoliday = holidays.includes(dateStr);
+
+            let multiplier = 1;
+            let reason = 'Trong giờ HC (x1)';
+            let color = '#10b981'; // Xanh lá
+
+            // Ưu tiên kiểm tra ngày Lễ / Chủ nhật trước (x3)
+            if (isSunday || isHoliday) {
+                multiplier = 3;
+                reason = isHoliday ? 'Ngày Lễ (x3)' : 'Chủ Nhật (x3)';
+                color = '#e11d48'; // Đỏ
+            } 
+            // Nếu ngày thường nhưng ngoài giờ hành chính (Giả sử x1.5, bạn có thể chỉnh lại)
+            else if (isOutsideHours) {
+                multiplier = 1.5; 
+                reason = 'Ngoài giờ HC (x1.5)';
+                color = '#f59e0b'; // Cam
+            }
+
+            return { multiplier, reason, color };
+        },
+
+        calculateForCase(id) {
+            const item = App.find(id);
+            if (!item) return;
+
+            Swal.fire({ title: 'Đang định vị...', html: 'Đang lấy tọa độ hiện tại của bạn.', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            // Lấy tọa độ thực tế của người dùng ngay lúc bấm nút
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        const lat = pos.coords.latitude;
+                        const lng = pos.coords.longitude;
+                        
+                        // Tính số km
+                        const distance = this.getDistanceFromLatLonInKm(this.BRANCH_LOCATION.lat, this.BRANCH_LOCATION.lng, lat, lng).toFixed(2);
+                        
+                        // Lấy mốc thời gian: Ưu tiên giờ nhận hồ sơ (receivedAt) hoặc giờ tạo
+                        const receiveTime = item.receivedAt || item.createdAt || new Date().toISOString();
+                        const timeInfo = this.analyzeTime(receiveTime);
+
+                        // Tính tiền
+                        const baseCost = distance * this.BASE_FEE_PER_KM;
+                        const totalCost = baseCost * timeInfo.multiplier;
+
+                        Swal.close();
+                        Swal.fire({
+                            title: '<div class="flex items-center gap-2"><i data-lucide="calculator" class="w-5 h-5 text-emerald-600"></i> Báo cáo Chi phí HT</div>',
+                            html: `
+                                <div style="text-align:left; font-size:13px; line-height:1.6; background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:12px;">
+                                    <div class="flex justify-between border-b border-slate-200 pb-2 mb-2">
+                                        <span class="text-slate-500 font-bold">Biển số:</span>
+                                        <span class="font-black text-slate-800 uppercase">${item.bsx || 'Chưa rõ'}</span>
+                                    </div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-slate-500 font-bold">Khoảng cách:</span>
+                                        <span class="font-black text-slate-800">${distance} km</span>
+                                    </div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-slate-500 font-bold">Thời điểm nhận:</span>
+                                        <span class="font-bold text-slate-800">${moment(receiveTime).format('HH:mm DD/MM/YYYY')}</span>
+                                    </div>
+                                    <div class="flex justify-between mb-3">
+                                        <span class="text-slate-500 font-bold">Khung giờ:</span>
+                                        <span class="font-black" style="color:${timeInfo.color};">${timeInfo.reason}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-emerald-200">
+                                        <span class="text-emerald-700 font-black">TỔNG CHI PHÍ:</span>
+                                        <span class="font-black text-lg text-emerald-600">${Math.round(totalCost).toLocaleString('vi-VN')} đ</span>
+                                    </div>
+                                </div>
+                            `,
+                            confirmButtonText: 'Đóng',
+                            confirmButtonColor: '#059669',
+                            customClass: { popup: 'custom-rounded' },
+                            didOpen: () => lucide.createIcons()
+                        });
+                    },
+                    (err) => {
+                        Swal.fire('Lỗi định vị', 'Không thể lấy GPS. Vui lòng bật định vị trên thiết bị.', 'error');
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            } else {
+                Swal.fire('Lỗi', 'Trình duyệt không hỗ trợ GPS', 'error');
+            }
+        }
     };
 
     // ============================================================
