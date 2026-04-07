@@ -1977,13 +1977,18 @@
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10 4l-4 4 4 4"/></svg>
             </button>
             <div>
-                <p class="font-black text-slate-800 text-sm">Quản lý người dùng</p>
+                <p class="font-black text-slate-800 text-sm">Quản trị hệ thống</p>
                 <p class="text-[10px] text-slate-400 font-bold">Tasco DLK — Đăk Lăk</p>
             </div>
-            <button onclick="AdminPanel.addUser()" class="ml-auto flex items-center gap-1.5 bg-blue-600 text-white px-3 py-2 rounded-xl text-xs font-bold active:bg-blue-700">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-                Thêm
-            </button>
+            <div class="ml-auto flex items-center gap-2">
+                <button onclick="CostCalculator.openSettings()" class="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 active:bg-slate-200" title="Cấu hình hệ thống">
+                    <i data-lucide="settings" class="w-4 h-4"></i>
+                </button>
+                <button onclick="AdminPanel.addUser()" class="flex items-center gap-1.5 bg-blue-600 text-white px-3 py-2 rounded-xl text-xs font-bold active:bg-blue-700">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                    Thêm
+                </button>
+            </div>
         </div>
 
         <!-- Stats -->
@@ -3847,14 +3852,75 @@
     // COST CALCULATOR — Tính toán chi phí đi hiện trường
     // ============================================================
     const CostCalculator = {
-        // Tọa độ công ty/chi nhánh mặc định (VD: Trung tâm BMT, Đăk Lăk)
-        // Bạn có thể lên Google Maps lấy tọa độ chính xác của văn phòng thay vào đây
-        BRANCH_LOCATION: { lat: 12.67973, lng: 108.04403 }, 
-        BASE_FEE_PER_KM: 5000, // Đơn giá 1km (VNĐ)
+        settings: {
+            lat: 12.67973, // Mặc định Đăk Lăk
+            lng: 108.04403,
+            baseFee: 5000,
+            oohMultiplier: 1.5,
+            holidayMultiplier: 3.0,
+            holidays: '01/01, 30/04, 01/05, 02/09'
+        },
 
-        // Công thức Haversine tính khoảng cách đường chim bay giữa 2 tọa độ GPS
+        init() {
+            db.ref('Settings/FieldTrip').on('value', snap => {
+                if (snap.exists()) {
+                    this.settings = { ...this.settings, ...snap.val() };
+                }
+            });
+        },
+
+        openSettings() {
+            Swal.fire({
+                title: '<span style="font-size:16px;font-weight:900;">Cấu hình Chi phí & Hiện trường</span>',
+                html: `
+                    <div style="text-align:left;display:flex;flex-direction:column;gap:12px;margin-top:10px;">
+                        <div class="bg-blue-50 border border-blue-200 p-3 rounded-xl">
+                            <p class="text-[10px] font-black text-blue-600 uppercase mb-2">Tọa độ Công ty / Chi nhánh</p>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div><label class="input-label">Vĩ độ (Lat)</label><input id="set-lat" type="number" step="any" class="input-field" value="${this.settings.lat}"></div>
+                                <div><label class="input-label">Kinh độ (Lng)</label><input id="set-lng" type="number" step="any" class="input-field" value="${this.settings.lng}"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="input-label">Đơn giá 1km (VNĐ)</label>
+                            <input id="set-baseFee" type="number" class="input-field font-bold" value="${this.settings.baseFee}">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div><label class="input-label">Hệ số Ngoài giờ</label><input id="set-oohMult" type="number" step="0.1" class="input-field" value="${this.settings.oohMultiplier}"></div>
+                            <div><label class="input-label">Hệ số Lễ/CN</label><input id="set-holMult" type="number" step="0.1" class="input-field" value="${this.settings.holidayMultiplier}"></div>
+                        </div>
+                        <div>
+                            <label class="input-label">Ngày nghỉ lễ (Định dạng DD/MM, cách nhau dấu phẩy)</label>
+                            <textarea id="set-holidays" rows="2" class="input-field resize-none">${this.settings.holidays}</textarea>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Lưu cấu hình',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#2563eb',
+                customClass: { popup: 'custom-rounded' },
+                preConfirm: () => {
+                    return {
+                        lat: parseFloat(document.getElementById('set-lat').value) || 0,
+                        lng: parseFloat(document.getElementById('set-lng').value) || 0,
+                        baseFee: parseInt(document.getElementById('set-baseFee').value) || 0,
+                        oohMultiplier: parseFloat(document.getElementById('set-oohMult').value) || 1,
+                        holidayMultiplier: parseFloat(document.getElementById('set-holMult').value) || 1,
+                        holidays: document.getElementById('set-holidays').value.trim()
+                    }
+                }
+            }).then(res => {
+                if (res.isConfirmed) {
+                    db.ref('Settings/FieldTrip').set(res.value).then(() => {
+                        Toast.fire({ icon: 'success', title: 'Đã lưu cấu hình chi phí!' });
+                    });
+                }
+            });
+        },
+
         getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-            const R = 6371; // Bán kính Trái Đất (km)
+            const R = 6371; 
             const dLat = this.deg2rad(lat2 - lat1);
             const dLon = this.deg2rad(lon2 - lon1);
             const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -3865,35 +3931,31 @@
         },
         deg2rad(deg) { return deg * (Math.PI/180) },
 
-        // Phân tích thời điểm nhận hiện trường
         analyzeTime(timestamp) {
             const m = moment(timestamp);
             const hour = m.hour();
-            const dayOfWeek = m.day(); // 0 là Chủ Nhật
+            const dayOfWeek = m.day(); 
             
             const isSunday = (dayOfWeek === 0);
             const isOutsideHours = (hour < 8 || hour >= 18);
 
-            // Khai báo các ngày lễ dương lịch cố định (có thể mở rộng thêm)
-            const holidays = ['01/01', '30/04', '01/05', '02/09']; 
+            const holidayArr = this.settings.holidays.split(',').map(s => s.trim()); 
             const dateStr = m.format('DD/MM');
-            const isHoliday = holidays.includes(dateStr);
+            const isHoliday = holidayArr.includes(dateStr);
 
             let multiplier = 1;
             let reason = 'Trong giờ HC (x1)';
-            let color = '#10b981'; // Xanh lá
+            let color = '#10b981';
 
-            // Ưu tiên kiểm tra ngày Lễ / Chủ nhật trước (x3)
             if (isSunday || isHoliday) {
-                multiplier = 3;
-                reason = isHoliday ? 'Ngày Lễ (x3)' : 'Chủ Nhật (x3)';
-                color = '#e11d48'; // Đỏ
+                multiplier = this.settings.holidayMultiplier;
+                reason = isHoliday ? `Ngày Lễ (x${multiplier})` : `Chủ Nhật (x${multiplier})`;
+                color = '#e11d48'; 
             } 
-            // Nếu ngày thường nhưng ngoài giờ hành chính (Giả sử x1.5, bạn có thể chỉnh lại)
             else if (isOutsideHours) {
-                multiplier = 1.5; 
-                reason = 'Ngoài giờ HC (x1.5)';
-                color = '#f59e0b'; // Cam
+                multiplier = this.settings.oohMultiplier; 
+                reason = `Ngoài giờ HC (x${multiplier})`;
+                color = '#f59e0b';
             }
 
             return { multiplier, reason, color };
@@ -3905,22 +3967,18 @@
 
             Swal.fire({ title: 'Đang định vị...', html: 'Đang lấy tọa độ hiện tại của bạn.', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-            // Lấy tọa độ thực tế của người dùng ngay lúc bấm nút
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
                         const lat = pos.coords.latitude;
                         const lng = pos.coords.longitude;
                         
-                        // Tính số km
-                        const distance = this.getDistanceFromLatLonInKm(this.BRANCH_LOCATION.lat, this.BRANCH_LOCATION.lng, lat, lng).toFixed(2);
+                        const distance = this.getDistanceFromLatLonInKm(this.settings.lat, this.settings.lng, lat, lng).toFixed(2);
                         
-                        // Lấy mốc thời gian: Ưu tiên giờ nhận hồ sơ (receivedAt) hoặc giờ tạo
                         const receiveTime = item.receivedAt || item.createdAt || new Date().toISOString();
                         const timeInfo = this.analyzeTime(receiveTime);
 
-                        // Tính tiền
-                        const baseCost = distance * this.BASE_FEE_PER_KM;
+                        const baseCost = distance * this.settings.baseFee;
                         const totalCost = baseCost * timeInfo.multiplier;
 
                         Swal.close();
@@ -4771,6 +4829,7 @@
         init() {
             lucide.createIcons();
             Auth.init();
+            CostCalculator.init(); // Kích hoạt lấy setting từ Firebase
             DateUtil.setup();
             this._listen();
         },
