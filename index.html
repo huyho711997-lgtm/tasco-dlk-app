@@ -1935,6 +1935,11 @@
                         <div><p class="user-menu-label">Quản lý người dùng</p><p class="user-menu-sub">Thêm, sửa, phân quyền tài khoản</p></div>
                         <svg class="ml-auto" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"><path d="M6 4l4 4-4 4"/></svg>
                     </div>
+                    <div class="user-menu-item" onclick="CostCalculator.openSettings()">
+                        <div class="user-menu-icon bg-emerald-50"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></div>
+                        <div><p class="user-menu-label">Cấu hình Hệ thống</p><p class="user-menu-sub">Tọa độ, Chi phí, Ngày lễ</p></div>
+                        <svg class="ml-auto" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"><path d="M6 4l4 4-4 4"/></svg>
+                    </div>
                 </div>
 
                 <div class="px-4 pt-4 pb-1">
@@ -1977,18 +1982,13 @@
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10 4l-4 4 4 4"/></svg>
             </button>
             <div>
-                <p class="font-black text-slate-800 text-sm">Quản trị hệ thống</p>
+                <p class="font-black text-slate-800 text-sm">Quản lý người dùng</p>
                 <p class="text-[10px] text-slate-400 font-bold">Tasco DLK — Đăk Lăk</p>
             </div>
-            <div class="ml-auto flex items-center gap-2">
-                <button onclick="CostCalculator.openSettings()" class="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 active:bg-slate-200" title="Cấu hình hệ thống">
-                    <i data-lucide="settings" class="w-4 h-4"></i>
-                </button>
-                <button onclick="AdminPanel.addUser()" class="flex items-center gap-1.5 bg-blue-600 text-white px-3 py-2 rounded-xl text-xs font-bold active:bg-blue-700">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-                    Thêm
-                </button>
-            </div>
+            <button onclick="AdminPanel.addUser()" class="ml-auto flex items-center gap-1.5 bg-blue-600 text-white px-3 py-2 rounded-xl text-xs font-bold active:bg-blue-700">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Thêm
+            </button>
         </div>
 
         <!-- Stats -->
@@ -3849,76 +3849,145 @@
     };
 
     // ============================================================
-    // COST CALCULATOR — Tính toán chi phí đi hiện trường
+    // COST CALCULATOR — Tính toán chi phí đi hiện trường (Version UI Mới)
     // ============================================================
     const CostCalculator = {
         settings: {
-            lat: 12.67973, // Mặc định Đăk Lăk
+            lat: 12.67973, 
             lng: 108.04403,
             baseFee: 5000,
             oohMultiplier: 1.5,
             holidayMultiplier: 3.0,
-            holidays: '01/01, 30/04, 01/05, 02/09'
+            holidays: ['01/01', '30/04', '01/05', '02/09'] // Đổi thành mảng để dễ render Chips
         },
 
         init() {
             db.ref('Settings/FieldTrip').on('value', snap => {
                 if (snap.exists()) {
-                    this.settings = { ...this.settings, ...snap.val() };
-                }
-            });
-        },
-
-        openSettings() {
-            Swal.fire({
-                title: '<span style="font-size:16px;font-weight:900;">Cấu hình Chi phí & Hiện trường</span>',
-                html: `
-                    <div style="text-align:left;display:flex;flex-direction:column;gap:12px;margin-top:10px;">
-                        <div class="bg-blue-50 border border-blue-200 p-3 rounded-xl">
-                            <p class="text-[10px] font-black text-blue-600 uppercase mb-2">Tọa độ Công ty / Chi nhánh</p>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div><label class="input-label">Vĩ độ (Lat)</label><input id="set-lat" type="number" step="any" class="input-field" value="${this.settings.lat}"></div>
-                                <div><label class="input-label">Kinh độ (Lng)</label><input id="set-lng" type="number" step="any" class="input-field" value="${this.settings.lng}"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="input-label">Đơn giá 1km (VNĐ)</label>
-                            <input id="set-baseFee" type="number" class="input-field font-bold" value="${this.settings.baseFee}">
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div><label class="input-label">Hệ số Ngoài giờ</label><input id="set-oohMult" type="number" step="0.1" class="input-field" value="${this.settings.oohMultiplier}"></div>
-                            <div><label class="input-label">Hệ số Lễ/CN</label><input id="set-holMult" type="number" step="0.1" class="input-field" value="${this.settings.holidayMultiplier}"></div>
-                        </div>
-                        <div>
-                            <label class="input-label">Ngày nghỉ lễ (Định dạng DD/MM, cách nhau dấu phẩy)</label>
-                            <textarea id="set-holidays" rows="2" class="input-field resize-none">${this.settings.holidays}</textarea>
-                        </div>
-                    </div>
-                `,
-                showCancelButton: true,
-                confirmButtonText: 'Lưu cấu hình',
-                cancelButtonText: 'Hủy',
-                confirmButtonColor: '#2563eb',
-                customClass: { popup: 'custom-rounded' },
-                preConfirm: () => {
-                    return {
-                        lat: parseFloat(document.getElementById('set-lat').value) || 0,
-                        lng: parseFloat(document.getElementById('set-lng').value) || 0,
-                        baseFee: parseInt(document.getElementById('set-baseFee').value) || 0,
-                        oohMultiplier: parseFloat(document.getElementById('set-oohMult').value) || 1,
-                        holidayMultiplier: parseFloat(document.getElementById('set-holMult').value) || 1,
-                        holidays: document.getElementById('set-holidays').value.trim()
+                    const data = snap.val();
+                    // Đảm bảo holidays luôn là mảng
+                    if (typeof data.holidays === 'string') {
+                        data.holidays = data.holidays.split(',').map(s => s.trim()).filter(Boolean);
                     }
-                }
-            }).then(res => {
-                if (res.isConfirmed) {
-                    db.ref('Settings/FieldTrip').set(res.value).then(() => {
-                        Toast.fire({ icon: 'success', title: 'Đã lưu cấu hình chi phí!' });
-                    });
+                    this.settings = { ...this.settings, ...data };
                 }
             });
         },
 
+        // 1. Mở Giao diện Cài đặt
+        openSettings() {
+            UserMenu.close(); // Đóng menu User trước
+            
+            // Đổ dữ liệu vào UI
+            document.getElementById('cfg-lat').value = this.settings.lat;
+            document.getElementById('cfg-lng').value = this.settings.lng;
+            document.getElementById('cfg-baseFee').value = this.settings.baseFee;
+            document.getElementById('cfg-oohMult').value = this.settings.oohMultiplier;
+            document.getElementById('cfg-holMult').value = this.settings.holidayMultiplier;
+            
+            this.renderHolidayChips();
+
+            const panel = document.getElementById('settings-panel');
+            panel.classList.remove('hidden');
+            void panel.offsetWidth; // Force reflow
+            panel.classList.remove('translate-y-full');
+            lucide.createIcons();
+        },
+
+        closeSettings() {
+            const panel = document.getElementById('settings-panel');
+            panel.classList.add('translate-y-full');
+            setTimeout(() => panel.classList.add('hidden'), 300);
+        },
+
+        // 2. Chức năng Lấy vị trí ngay lập tức
+        fetchCurrentLocation() {
+            if (!navigator.geolocation) {
+                Toast.fire({ icon: 'error', title: 'Trình duyệt không hỗ trợ GPS' });
+                return;
+            }
+            
+            Swal.fire({ title: 'Đang định vị...', text: 'Đang lấy tọa độ công ty của bạn', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    Swal.close();
+                    document.getElementById('cfg-lat').value = pos.coords.latitude.toFixed(6);
+                    document.getElementById('cfg-lng').value = pos.coords.longitude.toFixed(6);
+                    Toast.fire({ icon: 'success', title: 'Đã lấy tọa độ thành công!' });
+                },
+                (err) => {
+                    Swal.close();
+                    Toast.fire({ icon: 'error', title: 'Lấy GPS thất bại. Hãy bật định vị thiết bị.' });
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        },
+
+        // 3. Quản lý Chips Ngày Lễ (Từ bộ lịch)
+        addHolidayFromPicker(inputEl) {
+            const dateVal = inputEl.value; // YYYY-MM-DD
+            if (!dateVal) return;
+            
+            // Chuyển đổi thành DD/MM
+            const parts = dateVal.split('-');
+            const dd_mm = `${parts[2]}/${parts[1]}`;
+            
+            if (!this.settings.holidays.includes(dd_mm)) {
+                this.settings.holidays.push(dd_mm);
+                // Sắp xếp lại theo tháng -> ngày cho đẹp
+                this.settings.holidays.sort((a, b) => {
+                    const [da, ma] = a.split('/');
+                    const [db, mb] = b.split('/');
+                    return ma !== mb ? ma - mb : da - db;
+                });
+                this.renderHolidayChips();
+            } else {
+                Toast.fire({ icon: 'info', title: 'Ngày lễ này đã có trong danh sách' });
+            }
+            inputEl.value = ''; // Reset input để có thể chọn lại đúng ngày đó (nếu lỡ xóa)
+        },
+
+        removeHoliday(index) {
+            this.settings.holidays.splice(index, 1);
+            this.renderHolidayChips();
+        },
+
+        renderHolidayChips() {
+            const container = document.getElementById('cfg-holiday-chips');
+            if (!this.settings.holidays || this.settings.holidays.length === 0) {
+                container.innerHTML = '<span class="text-[11px] text-slate-400 italic">Chưa có ngày lễ nào</span>';
+                return;
+            }
+
+            container.innerHTML = this.settings.holidays.map((date, idx) => `
+                <div class="flex items-center gap-1.5 bg-rose-50 border border-rose-200 text-rose-700 px-2.5 py-1.5 rounded-lg text-[11px] font-bold shadow-sm">
+                    ${date}
+                    <button onclick="CostCalculator.removeHoliday(${idx})" class="w-4 h-4 bg-rose-200 text-rose-700 rounded-full flex items-center justify-center active:scale-90 hover:bg-rose-300 transition-transform">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+            `).join('');
+        },
+
+        // 4. Lưu cấu hình
+        saveSettings() {
+            const payload = {
+                lat: parseFloat(document.getElementById('cfg-lat').value) || 0,
+                lng: parseFloat(document.getElementById('cfg-lng').value) || 0,
+                baseFee: parseInt(document.getElementById('cfg-baseFee').value) || 0,
+                oohMultiplier: parseFloat(document.getElementById('cfg-oohMult').value) || 1,
+                holidayMultiplier: parseFloat(document.getElementById('cfg-holMult').value) || 1,
+                holidays: this.settings.holidays // Lưu dưới dạng mảng lên Firebase
+            };
+
+            db.ref('Settings/FieldTrip').set(payload).then(() => {
+                Toast.fire({ icon: 'success', title: 'Đã lưu cấu hình hệ thống!' });
+                this.closeSettings();
+            });
+        },
+
+        // --- CÁC HÀM TÍNH TOÁN NGHIỆP VỤ ---
         getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
             const R = 6371; 
             const dLat = this.deg2rad(lat2 - lat1);
@@ -3939,7 +4008,7 @@
             const isSunday = (dayOfWeek === 0);
             const isOutsideHours = (hour < 8 || hour >= 18);
 
-            const holidayArr = this.settings.holidays.split(',').map(s => s.trim()); 
+            const holidayArr = this.settings.holidays || [];
             const dateStr = m.format('DD/MM');
             const isHoliday = holidayArr.includes(dateStr);
 
@@ -3965,7 +4034,7 @@
             const item = App.find(id);
             if (!item) return;
 
-            Swal.fire({ title: 'Đang định vị...', html: 'Đang lấy tọa độ hiện tại của bạn.', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            Swal.fire({ title: 'Đang định vị...', html: 'Đang lấy tọa độ hiện trường của bạn.', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -3983,7 +4052,7 @@
 
                         Swal.close();
                         Swal.fire({
-                            title: '<div class="flex items-center gap-2"><i data-lucide="calculator" class="w-5 h-5 text-emerald-600"></i> Báo cáo Chi phí HT</div>',
+                            title: '<div class="flex items-center gap-2"><i data-lucide="calculator" class="w-5 h-5 text-emerald-600"></i> Chi phí Đi hiện trường</div>',
                             html: `
                                 <div style="text-align:left; font-size:13px; line-height:1.6; background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:12px;">
                                     <div class="flex justify-between border-b border-slate-200 pb-2 mb-2">
@@ -3995,16 +4064,16 @@
                                         <span class="font-black text-slate-800">${distance} km</span>
                                     </div>
                                     <div class="flex justify-between mb-1">
-                                        <span class="text-slate-500 font-bold">Thời điểm nhận:</span>
-                                        <span class="font-bold text-slate-800">${moment(receiveTime).format('HH:mm DD/MM/YYYY')}</span>
+                                        <span class="text-slate-500 font-bold">Thời gian nhận HS:</span>
+                                        <span class="font-bold text-slate-800">${moment(receiveTime).format('HH:mm DD/MM')}</span>
                                     </div>
                                     <div class="flex justify-between mb-3">
-                                        <span class="text-slate-500 font-bold">Khung giờ:</span>
+                                        <span class="text-slate-500 font-bold">Khung giờ áp dụng:</span>
                                         <span class="font-black" style="color:${timeInfo.color};">${timeInfo.reason}</span>
                                     </div>
-                                    <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-emerald-200">
-                                        <span class="text-emerald-700 font-black">TỔNG CHI PHÍ:</span>
-                                        <span class="font-black text-lg text-emerald-600">${Math.round(totalCost).toLocaleString('vi-VN')} đ</span>
+                                    <div class="flex justify-between items-center bg-emerald-50 p-3 rounded-xl border border-emerald-200">
+                                        <span class="text-emerald-700 font-black text-[11px]">TỔNG CHI PHÍ:</span>
+                                        <span class="font-black text-xl text-emerald-600">${Math.round(totalCost).toLocaleString('vi-VN')} đ</span>
                                     </div>
                                 </div>
                             `,
@@ -4015,7 +4084,7 @@
                         });
                     },
                     (err) => {
-                        Swal.fire('Lỗi định vị', 'Không thể lấy GPS. Vui lòng bật định vị trên thiết bị.', 'error');
+                        Swal.fire('Lỗi định vị', 'Không thể lấy GPS. Vui lòng bật định vị trên thiết bị điện thoại của bạn.', 'error');
                     },
                     { enableHighAccuracy: true, timeout: 10000 }
                 );
@@ -15299,6 +15368,68 @@
                 <button onclick="SpeechInput.stopAndSend()" class="flex-[2] py-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl font-black text-[13px] flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 active:scale-95 transition-transform">
                     <i data-lucide="send" class="w-4 h-4"></i> Gửi lệnh ngay
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-panel" class="fixed inset-0 z-[9996] bg-slate-50 transform translate-y-full transition-transform duration-300 flex flex-col hidden">
+        <div class="bg-white border-b border-slate-200 px-4 py-4 flex items-center justify-between shrink-0" style="padding-top: calc(16px + env(safe-area-inset-top,0px))">
+            <div class="flex items-center gap-3">
+                <button onclick="CostCalculator.closeSettings()" class="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 active:bg-slate-200">
+                    <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                </button>
+                <div>
+                    <p class="font-black text-slate-800 text-sm">Cấu hình Hệ thống</p>
+                    <p class="text-[10px] text-slate-400 font-bold">Tọa độ, Chi phí, Ngày nghỉ</p>
+                </div>
+            </div>
+            <button onclick="CostCalculator.saveSettings()" class="flex items-center gap-1.5 bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold active:bg-emerald-700 shadow-md shadow-emerald-200">
+                <i data-lucide="save" class="w-3.5 h-3.5"></i> Lưu
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4 pb-safe">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-center mb-3">
+                    <p class="text-xs font-black text-blue-600 uppercase flex items-center gap-1.5"><i data-lucide="map-pin" class="w-4 h-4"></i> Tọa độ Công ty</p>
+                    <button onclick="CostCalculator.fetchCurrentLocation()" class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1.5 rounded-lg font-bold flex items-center gap-1 active:bg-blue-100 transition-colors">
+                        <i data-lucide="crosshair" class="w-3 h-3"></i> Lấy GPS hiện tại
+                    </button>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="input-label">Vĩ độ (Lat)</label><input id="cfg-lat" type="number" step="any" class="input-field bg-slate-50 font-mono"></div>
+                    <div><label class="input-label">Kinh độ (Lng)</label><input id="cfg-lng" type="number" step="any" class="input-field bg-slate-50 font-mono"></div>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-2 font-medium">Bấm "Lấy GPS hiện tại" khi bạn đang đứng ở công ty để hệ thống lưu mốc tính khoảng cách tự động.</p>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                <p class="text-xs font-black text-amber-600 uppercase flex items-center gap-1.5 mb-3"><i data-lucide="calculator" class="w-4 h-4"></i> Công thức Chi phí</p>
+                <div class="space-y-3">
+                    <div>
+                        <label class="input-label">Đơn giá 1 km (VNĐ)</label>
+                        <input id="cfg-baseFee" type="number" class="input-field font-black text-slate-800 text-lg">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label class="input-label">Hệ số Ngoài giờ (x)</label><input id="cfg-oohMult" type="number" step="0.1" class="input-field text-center font-bold"></div>
+                        <div><label class="input-label">Hệ số Chủ Nhật/Lễ (x)</label><input id="cfg-holMult" type="number" step="0.1" class="input-field text-center font-bold"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-center mb-3">
+                    <p class="text-xs font-black text-rose-500 uppercase flex items-center gap-1.5"><i data-lucide="calendar-heart" class="w-4 h-4"></i> Danh sách Ngày lễ</p>
+                    <div class="relative overflow-hidden rounded-lg">
+                        <input type="date" id="native-date-picker" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="CostCalculator.addHolidayFromPicker(this)">
+                        <div class="text-[10px] bg-rose-50 text-rose-600 px-2 py-1.5 font-bold flex items-center gap-1 pointer-events-none">
+                            <i data-lucide="plus" class="w-3 h-3"></i> Thêm từ lịch
+                        </div>
+                    </div>
+                </div>
+                <div id="cfg-holiday-chips" class="flex flex-wrap gap-2 min-h-[40px] items-center">
+                    </div>
+                <p class="text-[10px] text-slate-400 mt-2 font-medium">Chọn ngày nghỉ lễ hằng năm. Hệ thống sẽ tự động nhân hệ số khi hiện trường rơi vào ngày này.</p>
             </div>
         </div>
     </div>
