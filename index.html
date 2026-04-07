@@ -3849,23 +3849,21 @@
     };
 
     // ============================================================
-    // COST CALCULATOR — Tính toán chi phí đi hiện trường (Version UI Mới)
+    // COST CALCULATOR — Tính toán chi phí đi hiện trường (Mới Nhất)
     // ============================================================
     const CostCalculator = {
         settings: {
             lat: 12.67973, 
             lng: 108.04403,
-            baseFee: 5000,
             oohMultiplier: 1.5,
             holidayMultiplier: 3.0,
-            holidays: ['01/01', '30/04', '01/05', '02/09'] // Đổi thành mảng để dễ render Chips
+            holidays: ['01/01', '30/04', '01/05', '02/09'] 
         },
 
         init() {
             db.ref('Settings/FieldTrip').on('value', snap => {
                 if (snap.exists()) {
                     const data = snap.val();
-                    // Đảm bảo holidays luôn là mảng
                     if (typeof data.holidays === 'string') {
                         data.holidays = data.holidays.split(',').map(s => s.trim()).filter(Boolean);
                     }
@@ -3874,14 +3872,11 @@
             });
         },
 
-        // 1. Mở Giao diện Cài đặt
         openSettings() {
-            UserMenu.close(); // Đóng menu User trước
+            UserMenu.close(); 
             
-            // Đổ dữ liệu vào UI
             document.getElementById('cfg-lat').value = this.settings.lat;
             document.getElementById('cfg-lng').value = this.settings.lng;
-            document.getElementById('cfg-baseFee').value = this.settings.baseFee;
             document.getElementById('cfg-oohMult').value = this.settings.oohMultiplier;
             document.getElementById('cfg-holMult').value = this.settings.holidayMultiplier;
             
@@ -3889,9 +3884,15 @@
 
             const panel = document.getElementById('settings-panel');
             panel.classList.remove('hidden');
-            void panel.offsetWidth; // Force reflow
+            void panel.offsetWidth; 
             panel.classList.remove('translate-y-full');
             lucide.createIcons();
+            
+            // Ẩn ô Đơn giá 1km trong HTML cũ (nếu có) để giao diện không bị rác
+            const baseFeeInput = document.getElementById('cfg-baseFee');
+            if (baseFeeInput && baseFeeInput.parentElement) {
+                baseFeeInput.parentElement.style.display = 'none';
+            }
         },
 
         closeSettings() {
@@ -3900,7 +3901,6 @@
             setTimeout(() => panel.classList.add('hidden'), 300);
         },
 
-        // 2. Chức năng Lấy vị trí ngay lập tức
         fetchCurrentLocation() {
             if (!navigator.geolocation) {
                 Toast.fire({ icon: 'error', title: 'Trình duyệt không hỗ trợ GPS' });
@@ -3924,18 +3924,15 @@
             );
         },
 
-        // 3. Quản lý Chips Ngày Lễ (Từ bộ lịch)
         addHolidayFromPicker(inputEl) {
-            const dateVal = inputEl.value; // YYYY-MM-DD
+            const dateVal = inputEl.value; 
             if (!dateVal) return;
             
-            // Chuyển đổi thành DD/MM
             const parts = dateVal.split('-');
             const dd_mm = `${parts[2]}/${parts[1]}`;
             
             if (!this.settings.holidays.includes(dd_mm)) {
                 this.settings.holidays.push(dd_mm);
-                // Sắp xếp lại theo tháng -> ngày cho đẹp
                 this.settings.holidays.sort((a, b) => {
                     const [da, ma] = a.split('/');
                     const [db, mb] = b.split('/');
@@ -3945,7 +3942,7 @@
             } else {
                 Toast.fire({ icon: 'info', title: 'Ngày lễ này đã có trong danh sách' });
             }
-            inputEl.value = ''; // Reset input để có thể chọn lại đúng ngày đó (nếu lỡ xóa)
+            inputEl.value = ''; 
         },
 
         removeHoliday(index) {
@@ -3970,15 +3967,13 @@
             `).join('');
         },
 
-        // 4. Lưu cấu hình
         saveSettings() {
             const payload = {
                 lat: parseFloat(document.getElementById('cfg-lat').value) || 0,
                 lng: parseFloat(document.getElementById('cfg-lng').value) || 0,
-                baseFee: parseInt(document.getElementById('cfg-baseFee').value) || 0,
                 oohMultiplier: parseFloat(document.getElementById('cfg-oohMult').value) || 1,
                 holidayMultiplier: parseFloat(document.getElementById('cfg-holMult').value) || 1,
-                holidays: this.settings.holidays // Lưu dưới dạng mảng lên Firebase
+                holidays: this.settings.holidays 
             };
 
             db.ref('Settings/FieldTrip').set(payload).then(() => {
@@ -4041,8 +4036,8 @@
             if (!item) return;
 
             Swal.fire({ 
-                title: 'Đang xử lý...', 
-                html: '<p class="text-xs text-slate-500">Đang lấy tọa độ hiện tại và tính toán lộ trình di chuyển thực tế.</p>', 
+                title: 'Đang tính toán...', 
+                html: '<p class="text-xs text-slate-500">Đang phân tích lộ trình đường bộ thực tế.</p>', 
                 allowOutsideClick: false, 
                 didOpen: () => Swal.showLoading() 
             });
@@ -4053,56 +4048,101 @@
                         const lat = pos.coords.latitude;
                         const lng = pos.coords.longitude;
                         
-                        // Lấy quãng đường thực tế qua đường bộ
-                        const distance = await this.getRoadDistance(this.settings.lat, this.settings.lng, lat, lng);
+                        // Lấy quãng đường 1 chiều thực tế (km)
+                        const distanceStr = await this.getRoadDistance(this.settings.lat, this.settings.lng, lat, lng);
                         
-                        if (!distance) {
-                            Swal.fire('Lỗi lộ trình', 'Không thể tính toán quãng đường di chuyển bằng đường bộ giữa 2 điểm này.', 'error');
+                        if (!distanceStr) {
+                            Swal.fire('Lỗi lộ trình', 'Không thể tính toán quãng đường di chuyển bằng đường bộ.', 'error');
                             return;
                         }
 
+                        const oneWayKm = parseFloat(distanceStr);
+                        const roundTripKm = parseFloat((oneWayKm * 2).toFixed(2));
+
+                        // 1. TÍNH CHI PHÍ THÙ LAO (Dựa trên quãng đường 1 chiều)
+                        let baseThulao = 0;
+                        if (oneWayKm <= 20) {
+                            baseThulao = 100000;
+                        } else if (oneWayKm <= 60) {
+                            baseThulao = 200000;
+                        } else {
+                            baseThulao = 300000;
+                        }
+
+                        // Lấy mốc thời gian và áp dụng hệ số cho Thù lao
                         const receiveTime = item.receivedAt || item.createdAt || new Date().toISOString();
                         const timeInfo = this.analyzeTime(receiveTime);
+                        const thulaoThucTe = baseThulao * timeInfo.multiplier;
 
-                        const baseCost = distance * this.settings.baseFee;
-                        const totalCost = baseCost * timeInfo.multiplier;
+                        // 2. TÍNH CHI PHÍ XĂNG XE (Dựa trên quãng đường 2 chiều)
+                        let unitPriceXangXe = 0;
+                        if (roundTripKm <= 100) { // Đã sửa lại thành <= 100km theo logic thông thường để bao phủ mốc 100
+                            unitPriceXangXe = 3000;
+                        } else {
+                            unitPriceXangXe = 2500;
+                        }
+                        const xangxeCost = roundTripKm * unitPriceXangXe;
+
+                        // 3. TỔNG CỘNG
+                        const totalCost = thulaoThucTe + xangxeCost;
 
                         Swal.close();
                         Swal.fire({
-                            title: '<div class="flex items-center gap-2"><i data-lucide="map" class="w-5 h-5 text-emerald-600"></i> Chi phí Di chuyển Thực tế</div>',
+                            title: '<div class="flex items-center gap-2"><i data-lucide="receipt" class="w-5 h-5 text-blue-600"></i> Phiếu Tính Chi Phí</div>',
                             html: `
-                                <div style="text-align:left; font-size:13px; line-height:1.6; background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:12px;">
-                                    <div class="flex justify-between border-b border-slate-200 pb-2 mb-2">
-                                        <span class="text-slate-500 font-bold">Biển số:</span>
-                                        <span class="font-black text-slate-800 uppercase">${item.bsx || 'Chưa rõ'}</span>
+                                <div style="text-align:left; font-size:13px; line-height:1.6; background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:16px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                                    
+                                    <div class="flex justify-between border-b border-slate-200 pb-3 mb-3">
+                                        <span class="text-slate-500 font-bold">Biển số xe:</span>
+                                        <span class="font-black text-slate-800 uppercase text-sm">${item.bsx || 'Chưa rõ'}</span>
+                                    </div>
+
+                                    <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2 mt-1">1. Phí di chuyển (Xăng xe)</p>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-slate-500 font-medium">Khoảng cách 1 chiều:</span>
+                                        <span class="font-bold text-slate-700">${oneWayKm} km</span>
                                     </div>
                                     <div class="flex justify-between mb-1">
-                                        <span class="text-slate-500 font-bold">Quãng đường bộ:</span>
-                                        <span class="font-black text-blue-600">${distance} km</span>
+                                        <span class="text-slate-500 font-medium">Tính phí 2 chiều:</span>
+                                        <span class="font-bold text-slate-700">${roundTripKm} km</span>
                                     </div>
                                     <div class="flex justify-between mb-1">
-                                        <span class="text-slate-500 font-bold">Thời gian nhận:</span>
-                                        <span class="font-bold text-slate-800">${moment(receiveTime).format('HH:mm DD/MM')}</span>
+                                        <span class="text-slate-500 font-medium">Đơn giá áp dụng:</span>
+                                        <span class="font-bold text-slate-700">${unitPriceXangXe.toLocaleString('vi-VN')} đ/km</span>
                                     </div>
-                                    <div class="flex justify-between mb-3">
-                                        <span class="text-slate-500 font-bold">Hệ số khung giờ:</span>
-                                        <span class="font-black" style="color:${timeInfo.color};">${timeInfo.reason}</span>
+                                    <div class="flex justify-between mb-4 border-b border-dashed border-slate-300 pb-3">
+                                        <span class="text-slate-700 font-bold">Thành tiền xăng xe:</span>
+                                        <span class="font-black text-blue-600">${Math.round(xangxeCost).toLocaleString('vi-VN')} đ</span>
                                     </div>
-                                    <div class="flex justify-between items-center bg-emerald-50 p-3 rounded-xl border border-emerald-200">
-                                        <span class="text-emerald-700 font-black text-[11px]">TỔNG CHI PHÍ:</span>
-                                        <span class="font-black text-xl text-emerald-600">${Math.round(totalCost).toLocaleString('vi-VN')} đ</span>
+
+                                    <p class="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-2">2. Thù lao giám định</p>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-slate-500 font-medium">Khung thù lao gốc:</span>
+                                        <span class="font-bold text-slate-700">${baseThulao.toLocaleString('vi-VN')} đ</span>
                                     </div>
-                                    <p class="text-[9px] text-slate-400 mt-2 italic text-center">* Dữ liệu quãng đường tính theo lộ trình di chuyển ngắn nhất trên bản đồ.</p>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-slate-500 font-medium">TG Nhận: ${moment(receiveTime).format('HH:mm DD/MM')}</span>
+                                        <span class="font-bold text-rose-500">${timeInfo.reason}</span>
+                                    </div>
+                                    <div class="flex justify-between mb-4">
+                                        <span class="text-slate-700 font-bold">Thù lao thực tế:</span>
+                                        <span class="font-black text-rose-500">${Math.round(thulaoThucTe).toLocaleString('vi-VN')} đ</span>
+                                    </div>
+
+                                    <div class="flex justify-between items-center bg-gradient-to-r from-emerald-500 to-teal-500 p-4 rounded-xl text-white shadow-md shadow-emerald-200 mt-2">
+                                        <span class="font-black text-sm">TỔNG CHI PHÍ:</span>
+                                        <span class="font-black text-xl tracking-tight">${Math.round(totalCost).toLocaleString('vi-VN')} VNĐ</span>
+                                    </div>
                                 </div>
                             `,
-                            confirmButtonText: 'Đóng',
-                            confirmButtonColor: '#059669',
-                            customClass: { popup: 'custom-rounded' },
+                            confirmButtonText: 'Xác nhận & Đóng',
+                            confirmButtonColor: '#2563eb',
+                            customClass: { popup: 'custom-rounded w-full max-w-sm' },
                             didOpen: () => lucide.createIcons()
                         });
                     },
                     (err) => {
-                        Swal.fire('Lỗi định vị', 'Vui lòng bật GPS trên điện thoại để tính toán quãng đường.', 'error');
+                        Swal.fire('Lỗi định vị', 'Vui lòng bật GPS trên thiết bị điện thoại của bạn.', 'error');
                     },
                     { enableHighAccuracy: true, timeout: 10000 }
                 );
