@@ -4102,12 +4102,11 @@
                         Swal.fire({
                             title: false, 
                             html: `
-                                <div class="text-left flex flex-col" style="background:var(--bg-white,#fff);border-radius:24px;overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                                <div class="text-left flex flex-col" style="background:var(--bg-white,#fff); border-radius:24px; overflow:hidden; border: 2px solid var(--border-light, #cbd5e1); box-shadow: 0 15px 40px rgba(0,0,0,0.15), 0 5px 10px rgba(0,0,0,0.05);">
                                     
                                     <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 20px; position: relative; overflow: hidden; border-bottom: 2px dashed var(--border-light, #cbd5e1);">
-                                        <div style="position:absolute; bottom:-12px; left:-12px; width:24px; height:24px; background:var(--bg-white, #fff); border-radius:50%; border-top:2px dashed var(--border-light, #cbd5e1); border-right:2px dashed var(--border-light, #cbd5e1); transform:rotate(45deg);"></div>
-                                        <div style="position:absolute; bottom:-12px; right:-12px; width:24px; height:24px; background:var(--bg-white, #fff); border-radius:50%; border-top:2px dashed var(--border-light, #cbd5e1); border-left:2px dashed var(--border-light, #cbd5e1); transform:rotate(-45deg);"></div>
-
+                                        <div style="position:absolute; bottom:-12px; left:-12px; width:24px; height:24px; background:var(--bg-white, #fff); border-radius:50%; border-top:2px dashed var(--border-light, #cbd5e1); border-right:2px dashed var(--border-light, #cbd5e1); transform:rotate(45deg); z-index:5;"></div>
+                                        <div style="position:absolute; bottom:-12px; right:-12px; width:24px; height:24px; background:var(--bg-white, #fff); border-radius:50%; border-top:2px dashed var(--border-light, #cbd5e1); border-left:2px dashed var(--border-light, #cbd5e1); transform:rotate(-45deg); z-index:5;"></div>
                                         <div style="position: relative; z-index: 10; display: flex; justify-content: space-between; align-items: flex-start;">
                                             <div style="display:flex; align-items:center; gap:12px;">
                                                 <div style="width:42px; height:42px; background:linear-gradient(135deg, #10b981, #059669); border-radius:12px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(16,185,129,0.4);">
@@ -4153,7 +4152,7 @@
                                         </div>
                                     </div>
 
-                                    <div style="background:linear-gradient(135deg, #10b981, #059669); padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
+                                    <div style="background:linear-gradient(135deg, #10b981, #059669); padding:16px 20px; display:flex; justify-content:space-between; align-items:center; border-radius: 0 0 22px 22px; margin: 0 -1px -1px -1px;">
                                         <span style="font-weight:900; color:#fff; font-size:13px;">TỔNG CỘNG</span>
                                         <span style="font-weight:900; font-size:22px; color:#fff; letter-spacing:-0.5px;">${fmt(totalCost)} VNĐ</span>
                                     </div>
