@@ -2436,7 +2436,7 @@
                 <div class="flex-1 overflow-y-auto px-4 py-3 space-y-2" id="cal-panel-events"></div>
             </div>   
         </div>
-        
+
         </div> <div id="view-cloud" class="view-section p-4 hidden">
             <div class="flex items-center justify-between mb-4 mt-2">
                 <div>
@@ -5055,6 +5055,8 @@
                 else setTimeout(()=>{ Cal.instance?.updateSize(); Cal.instance?.refetchEvents(); },100);
                 setTimeout(()=>{ Cal._updateStats(); Cal._showTodayAgenda(); },200);
             }
+            // THÊM DÒNG NÀY ĐỂ FIX LỖI TREO CLOUD:
+            if (view==='cloud') { MyCloud.init(); MyCloud.render(); }
         }
     };
 
@@ -15184,9 +15186,13 @@
         render() {
             const grid = document.getElementById('mycloud-grid');
             const countLabel = document.getElementById('mycloud-count');
-            if (!grid) return;
+            const loadingEl = document.getElementById('mycloud-loading'); // Thêm biến này
+            
+            if (!grid || !countLabel) return;
 
+            // Xóa chữ "Đang tải..." ngay khi render
             countLabel.textContent = this.items.length > 0 ? `Đã lưu ${this.items.length} file` : 'Chưa có file nào';
+            if (loadingEl) loadingEl.classList.add('hidden'); // Ép ẩn vòng xoay loading
 
             if (this.items.length === 0) {
                 grid.innerHTML = `
