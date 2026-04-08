@@ -12057,10 +12057,9 @@
                 if (iframeEl) {
                     const fileUrl = encodeURIComponent(item.url);
                     
-                    if (isPdf) {
-                        // CÁCH MỚI NHẤT: Nhúng thẳng trình đọc PDF chuẩn quốc tế của Mozilla. 
-                        // Cách này bypass mọi lỗi CORS và tương thích 100% Mobile/Desktop.
-                        iframeEl.src = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${fileUrl}`;
+                if (isPdf) {
+                    // Dùng Google Docs Viewer thay thế — tương thích tốt hơn với Cloudinary URL
+                    iframeEl.src = `https://docs.google.com/gview?embedded=true&url=${fileUrl}`;
                     } else {
                         // Đối với Word/Excel, dùng Office Viewer và kẹp thêm đuôi t=Date.now() để chống lỗi lưu cache trắng màn hình
                         iframeEl.src = `https://view.officeapps.live.com/op/embed.aspx?src=${fileUrl}&t=${Date.now()}`;
