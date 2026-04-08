@@ -3975,40 +3975,7 @@
                 this.closeSettings();
             });
         },
-        // Hàm mới: Trích xuất tọa độ từ URL Google Maps/Zalo
-        async parseLocationUrl(url) {
-            if (!url) return null;
-            
-            // 1. Nếu là link rút gọn (maps.app.goo.gl), cần giải mã (expand) URL trước
-            if (url.includes('goo.gl') || url.includes('maps.app.goo.gl')) {
-                try {
-                    // Lưu ý: Việc giải mã link rút gọn cần qua một proxy hoặc xử lý server-side 
-                    // vì giới hạn CORS của trình duyệt. 
-                    // Ở đây ta sẽ gợi ý người dùng nếu link không chứa tọa độ trực tiếp.
-                    Toast.fire({ icon: 'info', title: 'Đang giải mã liên kết rút gọn...' });
-                } catch (e) {}
-            }
 
-            // 2. Regex tìm tọa độ dạng @lat,lng hoặc q=lat,lng
-            const regex = /([-+]?\d+\.\d+)\s*,\s*([-+]?\d+\.\d+)/;
-            const match = url.match(regex);
-            
-            if (match) {
-                return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
-            }
-            
-            // 3. Fallback: Nếu không tìm thấy tọa độ, thử tìm trong chuỗi query
-            const urlObj = new URL(url.includes('http') ? url : 'https://' + url);
-            const params = new URLSearchParams(urlObj.search);
-            const q = params.get('q') || params.get('query');
-            if (q && q.match(regex)) {
-                const qMatch = q.match(regex);
-                return { lat: parseFloat(qMatch[1]), lng: parseFloat(qMatch[2]) };
-            }
-
-            return null;
-        },
-        // Tính khoảng cách thực tế qua OSRM API
         // Tính khoảng cách thực tế qua OSRM API
         async getRoadDistance(lat1, lon1, lat2, lon2) {
             try {
@@ -4024,29 +3991,6 @@
                 console.error("Lỗi OSRM:", err);
                 return null;
             }
-        },
-
-        // Trích xuất tọa độ từ URL Google Maps/Zalo
-        async parseLocationUrl(url) {
-            if (!url) return null;
-            if (url.includes('goo.gl') || url.includes('maps.app.goo.gl') || url.includes('googleusercontent.com')) {
-                try { Toast.fire({ icon: 'info', title: 'Đang phân tích liên kết...' }); } catch (e) {}
-            }
-            
-            const regex = /([-+]?\d+\.\d+)\s*,\s*([-+]?\d+\.\d+)/;
-            const match = url.match(regex);
-            if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
-            
-            try {
-                const urlObj = new URL(url.includes('http') ? url : 'https://' + url);
-                const params = new URLSearchParams(urlObj.search);
-                const q = params.get('q') || params.get('query') || params.get('ll');
-                if (q && q.match(regex)) {
-                    const qMatch = q.match(regex);
-                    return { lat: parseFloat(qMatch[1]), lng: parseFloat(qMatch[2]) };
-                }
-            } catch (e) {}
-            return null;
         },
 
         analyzeTime(timestamp) {
@@ -4086,104 +4030,18 @@
             const item = App.find(id);
             if (!item) return;
 
-            // Bảng chọn nguồn định vị
-            const { value: mode } = await Swal.fire({
-                title: '<span class="text-sm font-black uppercase text-slate-800">Nguồn định vị hiện trường</span>',
-                html: `
-                    <div class="grid grid-cols-1 gap-3 mt-4">
-                        <button id="btn-gps-now" class="flex items-center gap-4 p-4 bg-blue-50 border border-blue-200 rounded-2xl active:scale-95 transition-all text-left">
-                            <div class="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-blue-200"><i data-lucide="map-pin" class="w-6 h-6"></i></div>
-                            <div>
-                                <p class="font-black text-blue-700 text-[15px]">Vị trí hiện tại</p>
-                                <p class="text-[11px] text-blue-500 font-bold mt-0.5">Lấy GPS ngay tại hiện trường</p>
-                            </div>
-                        </button>
-                        <button id="btn-link-zalo" class="flex items-center gap-4 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl active:scale-95 transition-all text-left">
-                            <div class="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-emerald-200"><i data-lucide="link-2" class="w-6 h-6"></i></div>
-                            <div>
-                                <p class="font-black text-emerald-700 text-[15px]">Nhập Link định vị</p>
-                                <p class="text-[11px] text-emerald-500 font-bold mt-0.5">Dán link khách gửi qua Zalo</p>
-                            </div>
-                        </button>
-                    </div>
-                `,
-                showConfirmButton: false,
-                showCloseButton: true,
-                customClass: { popup: 'custom-rounded w-full max-w-sm' },
-                didOpen: () => {
-                    lucide.createIcons();
-                    document.getElementById('btn-gps-now').onclick = () => Swal.clickDeny(); 
-                    document.getElementById('btn-link-zalo').onclick = () => Swal.clickConfirm();
-                }
-            });
-
-            let targetLat, targetLng;
-
-            // XỬ LÝ NHẬP LINK
-            if (mode === true) { 
-                const { value: url } = await Swal.fire({
-                    title: '<span class="text-sm font-black">Dán link định vị</span>',
-                    input: 'text',
-                    inputPlaceholder: 'https://maps.google.com/...',
-                    showCancelButton: true,
-                    confirmButtonText: 'Phân tích & Tính phí',
-                    cancelButtonText: 'Hủy',
-                    confirmButtonColor: '#10b981',
-                    customClass: { popup: 'custom-rounded', input: 'input-field !mt-4 !text-[13px]', confirmButton: 'shadow-md shadow-emerald-200' }
-                });
-                
-                if (!url) return;
-                const coords = await this.parseLocationUrl(url);
-                if (!coords) {
-                    Swal.fire({ title: 'Lỗi', text: 'Không tìm thấy tọa độ trong link này. Vui lòng dán link có chứa tọa độ cụ thể.', icon: 'error', customClass: { popup: 'custom-rounded' } });
-                    return;
-                }
-                targetLat = coords.lat;
-                targetLng = coords.lng;
-                this._executeFinalCalculation(id, targetLat, targetLng, 'link');
-            } 
-            // XỬ LÝ LẤY GPS HIỆN TẠI
-            else if (mode === false) {
-                 if (!navigator.geolocation) return Swal.fire('Lỗi', 'Trình duyệt không hỗ trợ GPS', 'error');
-                 
-                 Swal.fire({ 
-                    html: `
-                        <div style="display:flex; flex-direction:column; align-items:center; padding: 24px 0 10px;">
-                            <div style="position:relative; width:76px; height:76px; border-radius:50%; background:linear-gradient(135deg, #3b82f6, #8b5cf6); display:flex; align-items:center; justify-content:center; box-shadow:0 8px 25px rgba(59, 130, 246, 0.4); margin-bottom:20px;">
-                                <svg style="position:absolute; inset:0; width:100%; height:100%; animation:img-spin 1.5s linear infinite; color:white; opacity:0.6;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position:relative; z-index:10;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                            </div>
-                            <p style="font-size:18px; font-weight:900; color:var(--text-primary, #0f172a); margin:0; letter-spacing:-0.02em;">Đang tìm vệ tinh</p>
-                            <p style="font-size:12px; font-weight:600; color:var(--text-secondary, #64748b); margin-top:6px;">Vui lòng giữ thiết bị ổn định...</p>
-                        </div>
-                    `,
-                    showConfirmButton: false,
-                    allowOutsideClick: false, 
-                    customClass: { popup: 'custom-rounded' }
-                });
-
-                 navigator.geolocation.getCurrentPosition(
-                    (pos) => this._executeFinalCalculation(id, pos.coords.latitude, pos.coords.longitude, 'gps'),
-                    (err) => Swal.fire({ title: 'Lỗi định vị', text: 'Không lấy được GPS. Hãy bật định vị thiết bị.', icon: 'error', customClass: { popup: 'custom-rounded' } }),
-                    { enableHighAccuracy: true, timeout: 10000 }
-                 );
-            }
-        },
-
-        async _executeFinalCalculation(id, lat, lng, sourceMode) {
-            const item = App.find(id);
-            
+            // Giao diện Animation mới chuyên nghiệp hơn
             Swal.fire({ 
                 html: `
                     <div style="display:flex; flex-direction:column; align-items:center; padding: 24px 0 10px;">
                         <div style="position:relative; width:76px; height:76px; border-radius:50%; background:linear-gradient(135deg, #10b981, #0ea5e9); display:flex; align-items:center; justify-content:center; box-shadow:0 8px 25px rgba(16, 185, 129, 0.4); margin-bottom:20px;">
                             <svg style="position:absolute; inset:0; width:100%; height:100%; animation:img-spin 1.5s linear infinite; color:white; opacity:0.6;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position:relative; z-index:10;"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position:relative; z-index:10;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
                         </div>
                         <p style="font-size:18px; font-weight:900; color:var(--text-primary, #0f172a); margin:0; letter-spacing:-0.02em;">Đang phân tích lộ trình</p>
                         <div style="display:flex; align-items:center; gap:8px; margin-top:14px; background:var(--bg-surface, #f8fafc); padding:8px 16px; border-radius:12px; border:1px solid var(--border-light, #e2e8f0);">
-                            <span class="animate-pulse" style="width:8px; height:8px; background:#3b82f6; border-radius:50%; box-shadow:0 0 8px rgba(59,130,246,0.8);"></span>
-                            <span style="font-size:12px; font-weight:800; color:var(--text-secondary, #64748b);">Đang đo khoảng cách đường bộ...</span>
+                            <span class="animate-pulse" style="width:8px; height:8px; background:#10b981; border-radius:50%; box-shadow:0 0 8px rgba(16,185,129,0.8);" id="calc-status-dot"></span>
+                            <span style="font-size:12px; font-weight:800; color:var(--text-secondary, #64748b);" id="calc-status-text">Đang kết nối vệ tinh GPS...</span>
                         </div>
                     </div>
                 `,
@@ -4192,156 +4050,185 @@
                 customClass: { popup: 'custom-rounded' }
             });
 
-            const distanceStr = await this.getRoadDistance(this.settings.lat, this.settings.lng, lat, lng);
-            
-            if (!distanceStr) {
-                Swal.fire({ title: 'Lỗi lộ trình', text: 'Không thể tính toán quãng đường di chuyển bằng đường bộ.', icon: 'error', customClass: { popup: 'custom-rounded' } });
-                return;
-            }
-
-            const oneWayKm = parseFloat(distanceStr);
-            const roundTripKm = parseFloat((oneWayKm * 2).toFixed(2));
-
-            // 1. TÍNH CHI PHÍ THÙ LAO
-            let baseThulao = 0;
-            if (oneWayKm <= 20) {
-                baseThulao = 100000;
-            } else if (oneWayKm <= 60) {
-                baseThulao = 200000;
-            } else {
-                baseThulao = 300000;
-            }
-
-            const receiveTime = item.receivedAt || item.createdAt || new Date().toISOString();
-            const timeInfo = this.analyzeTime(receiveTime);
-            const thulaoThucTe = baseThulao * timeInfo.multiplier;
-
-            // 2. TÍNH CHI PHÍ XĂNG XE 
-            let unitPriceXangXe = 0;
-            if (roundTripKm <= 100) {
-                unitPriceXangXe = 3000;
-            } else {
-                unitPriceXangXe = 2500;
-            }
-            const xangxeCost = roundTripKm * unitPriceXangXe;
-
-            // 3. TỔNG CỘNG
-            const totalCost = thulaoThucTe + xangxeCost;
-
-            const costDataToSave = {
-                oneWayKm: oneWayKm,
-                roundTripKm: roundTripKm,
-                baseThulao: baseThulao,
-                multiplier: timeInfo.multiplier,
-                timeReason: timeInfo.reason,
-                thulaoThucTe: thulaoThucTe,
-                unitPriceXangXe: unitPriceXangXe,
-                xangxeCost: xangxeCost,
-                totalCost: totalCost,
-                calculatedAt: new Date().toISOString(),
-                locationLat: lat,
-                locationLng: lng,
-                sourceMode: sourceMode 
-            };
-
-            const fmt = n => Math.round(n).toLocaleString('vi-VN');
-            const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${this.settings.lat},${this.settings.lng}&destination=${lat},${lng}&travelmode=driving`;
-
-            Swal.close();
-            Swal.fire({
-                title: false, 
-                html: `
-                    <div class="text-left flex flex-col" style="background:var(--bg-white,#fff); border-radius:24px; overflow:hidden; border: 2px solid var(--border-light, #cbd5e1); box-shadow: 0 15px 40px rgba(0,0,0,0.15), 0 5px 10px rgba(0,0,0,0.05);">
-                        
-                        <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 20px; position: relative; overflow: hidden; border-bottom: 2px dashed var(--border-light, #cbd5e1);">
-                            <div style="position:absolute; bottom:-12px; left:-12px; width:24px; height:24px; background:var(--bg-white, #fff); border-radius:50%; border-top:2px dashed var(--border-light, #cbd5e1); border-right:2px dashed var(--border-light, #cbd5e1); transform:rotate(45deg); z-index:5;"></div>
-                            <div style="position:absolute; bottom:-12px; right:-12px; width:24px; height:24px; background:var(--bg-white, #fff); border-radius:50%; border-top:2px dashed var(--border-light, #cbd5e1); border-left:2px dashed var(--border-light, #cbd5e1); transform:rotate(-45deg); z-index:5;"></div>
-                            <div style="position: relative; z-index: 10; display: flex; justify-content: space-between; align-items: flex-start;">
-                                <div style="display:flex; align-items:center; gap:12px;">
-                                    <div style="width:42px; height:42px; background:linear-gradient(135deg, #10b981, #059669); border-radius:12px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(16,185,129,0.4);">
-                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-2 2 2 2-2 2 2 2-2 2 2 2-2 2 2V2l-2 2-2-2-2 2-2-2-2 2-2-2-2 2Z"/><path d="M16 14h-6"/><path d="M16 10h-6"/><path d="M10 6h-2"/></svg>
-                                    </div>
-                                    <div>
-                                        <p style="color:#ffffff; font-weight:900; font-size:15px; letter-spacing:0.02em; text-transform:uppercase; margin:0 0 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Phiếu Chi Phí</p>
-                                        <p style="color:#94a3b8; font-size:10px; font-family:monospace; margin:0; font-weight:600;">ID: ${item.claimCode || item.id.substring(0,8)}</p>
-                                    </div>
-                                </div>
-                                <div style="text-align:right;">
-                                    <p style="color:#34d399; font-weight:900; font-size:18px; text-transform:uppercase; margin:0 0 4px; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">${item.bsx || '---'}</p>
-                                    <span style="font-size:9px; font-weight:800; background:rgba(255,255,255,0.15); color:#ffffff; padding:3px 8px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); backdrop-filter: blur(4px);">${timeInfo.badge}</span>
-                                </div>
-                            </div>
-                            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; right:-20px; top:-20px; color:#ffffff; opacity:0.04; transform:rotate(-15deg); pointer-events:none;"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
-                        </div>
-
-                        <div style="padding:16px 20px; background:var(--bg-white, #ffffff);">
-                            <div style="margin-bottom:16px;">
-                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-                                    <div style="width:22px; height:22px; border-radius:50%; background:rgba(37,99,235,0.15); display:flex; align-items:center; justify-content:center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><path d="M3 22L15 22"/><path d="M4 9a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v13"/><path d="M10 7V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M14 22V9a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v2"/><path d="M19 13v9"/></svg></div>
-                                    <p style="font-size:12px; font-weight:900; color:var(--text-primary, #1e293b); text-transform:uppercase; margin:0;">1. Phí Di Chuyển</p>
-                                </div>
-                                <div style="padding-left:30px; font-size:11px;">
-                                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span style="color:var(--text-secondary, #64748b); font-weight:600;">KC 1 chiều:</span><span style="font-weight:800; color:var(--text-primary, #334155);">${oneWayKm} km</span></div>
-                                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span style="color:var(--text-secondary, #64748b); font-weight:600;">Khứ hồi (x2):</span><span style="font-weight:800; color:var(--text-primary, #334155);">${roundTripKm} km</span></div>
-                                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span style="color:var(--text-secondary, #64748b); font-weight:600;">Đơn giá:</span><span style="font-weight:800; color:var(--text-primary, #334155);">${fmt(unitPriceXangXe)} đ/km</span></div>
-                                    <div style="display:flex; justify-content:space-between; margin-top:6px; padding-top:6px; border-top:1px dashed var(--border-light, #e2e8f0);"><span style="color:var(--text-primary, #475569); font-weight:800;">Thành tiền:</span><span style="font-weight:900; color:#2563eb; font-size:13px;">${fmt(xangxeCost)} đ</span></div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-                                    <div style="width:22px; height:22px; border-radius:50%; background:rgba(225,29,72,0.15); display:flex; align-items:center; justify-content:center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
-                                    <p style="font-size:12px; font-weight:900; color:var(--text-primary, #1e293b); text-transform:uppercase; margin:0;">2. Thù Lao Giám Định</p>
-                                </div>
-                                <div style="padding-left:30px; font-size:11px;">
-                                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span style="color:var(--text-secondary, #64748b); font-weight:600;">Định mức gốc:</span><span style="font-weight:800; color:var(--text-primary, #334155);">${fmt(baseThulao)} đ</span></div>
-                                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span style="color:var(--text-secondary, #64748b); font-weight:600;">Hệ số thời gian:</span><span style="font-weight:800; color:#e11d48;">${timeInfo.reason}</span></div>
-                                    <div style="display:flex; justify-content:space-between; margin-top:6px; padding-top:6px; border-top:1px dashed var(--border-light, #e2e8f0);"><span style="color:var(--text-primary, #475569); font-weight:800;">Thành tiền:</span><span style="font-weight:900; color:#e11d48; font-size:13px;">${fmt(thulaoThucTe)} đ</span></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style="background:linear-gradient(135deg, #10b981, #059669); padding:16px 20px; display:flex; justify-content:space-between; align-items:center; border-radius: 0 0 22px 22px; margin: 0 -1px -1px -1px;">
-                            <span style="font-weight:900; color:#fff; font-size:13px;">TỔNG CỘNG</span>
-                            <span style="font-weight:900; font-size:22px; color:#fff; letter-spacing:-0.5px;">${fmt(totalCost)} VNĐ</span>
-                        </div>
-                    </div>
-                    
-                    <a href="${googleMapsUrl}" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:16px; padding:12px; background:var(--bg-surface, #eff6ff); color:#2563eb; border:1px solid var(--border-light, #bfdbfe); border-radius:14px; font-weight:800; font-size:13px; text-decoration:none; transition:all 0.2s;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                        Xem lộ trình bản đồ
-                    </a>
-                `,
-                showCancelButton: true,
-                showConfirmButton: true,
-                confirmButtonText: '<div style="display:flex;align-items:center;justify-content:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Lưu Bảng Kê</div>',
-                cancelButtonText: 'Đóng',
-                buttonsStyling: false,
-                customClass: { 
-                    popup: 'custom-rounded w-full max-w-sm !p-4 !bg-transparent !shadow-none', 
-                    htmlContainer: '!m-0 !p-0',
-                    actions: 'w-full gap-3 px-0 pb-0 mt-4 flex'
-                },
-                didOpen: () => {
-                    lucide.createIcons();
-                    const confirmBtn = Swal.getConfirmButton();
-                    const cancelBtn = Swal.getCancelButton();
-                    if(confirmBtn) confirmBtn.style.cssText = 'flex: 2; padding: 14px; background: linear-gradient(135deg, #2563eb, #4f46e5); color: white; border-radius: 14px; font-weight: 800; font-size: 13px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); transition: transform 0.1s;';
-                    if(cancelBtn) cancelBtn.style.cssText = 'flex: 1; padding: 14px; background: var(--bg-surface, #f1f5f9); color: var(--text-secondary, #64748b); border-radius: 14px; font-weight: 800; font-size: 13px; border: 1.5px solid var(--border-light, #e2e8f0); cursor: pointer;';
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    db.ref(`Workstation/${id}/costData`).set(costDataToSave).then(() => {
-                        Toast.fire({ icon: 'success', title: 'Đã lưu chi phí vào hồ sơ!' });
-                        const btn = document.querySelector(`button[onclick="CostCalculator.calculateForCase('${id}')"]`);
-                        if(btn) {
-                            btn.className = 'shrink-0 px-3 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-xs font-bold active:scale-95 transition-all flex items-center gap-1.5 shadow-sm';
-                            btn.innerHTML = '<i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Đã lưu phí';
-                            lucide.createIcons();
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    async (pos) => {
+                        // Chuyển trạng thái khi đã lấy được GPS
+                        const statusText = document.getElementById('calc-status-text');
+                        const statusDot = document.getElementById('calc-status-dot');
+                        if (statusText && statusDot) {
+                            statusText.textContent = 'Đang đo khoảng cách đường bộ...';
+                            statusDot.style.background = '#3b82f6';
+                            statusDot.style.boxShadow = '0 0 8px rgba(59,130,246,0.8)';
                         }
-                    });
-                }
-            });
+
+                        const lat = pos.coords.latitude;
+                        const lng = pos.coords.longitude;
+                        
+                        const distanceStr = await this.getRoadDistance(this.settings.lat, this.settings.lng, lat, lng);
+                        
+                        if (!distanceStr) {
+                            Swal.fire('Lỗi lộ trình', 'Không thể tính toán quãng đường di chuyển bằng đường bộ.', 'error');
+                            return;
+                        }
+
+                        const oneWayKm = parseFloat(distanceStr);
+                        const roundTripKm = parseFloat((oneWayKm * 2).toFixed(2));
+
+                        // 1. TÍNH CHI PHÍ THÙ LAO
+                        let baseThulao = 0;
+                        if (oneWayKm <= 20) {
+                            baseThulao = 100000;
+                        } else if (oneWayKm <= 60) {
+                            baseThulao = 200000;
+                        } else {
+                            baseThulao = 300000;
+                        }
+
+                        const receiveTime = item.receivedAt || item.createdAt || new Date().toISOString();
+                        const timeInfo = this.analyzeTime(receiveTime);
+                        const thulaoThucTe = baseThulao * timeInfo.multiplier;
+
+                        // 2. TÍNH CHI PHÍ XĂNG XE 
+                        let unitPriceXangXe = 0;
+                        if (roundTripKm <= 100) {
+                            unitPriceXangXe = 3000;
+                        } else {
+                            unitPriceXangXe = 2500;
+                        }
+                        const xangxeCost = roundTripKm * unitPriceXangXe;
+
+                        // 3. TỔNG CỘNG
+                        const totalCost = thulaoThucTe + xangxeCost;
+
+                        // Object Dữ liệu để lưu Database
+                        const costDataToSave = {
+                            oneWayKm: oneWayKm,
+                            roundTripKm: roundTripKm,
+                            baseThulao: baseThulao,
+                            multiplier: timeInfo.multiplier,
+                            timeReason: timeInfo.reason,
+                            thulaoThucTe: thulaoThucTe,
+                            unitPriceXangXe: unitPriceXangXe,
+                            xangxeCost: xangxeCost,
+                            totalCost: totalCost,
+                            calculatedAt: new Date().toISOString(),
+                            locationLat: lat,
+                            locationLng: lng
+                        };
+
+                        const fmt = n => Math.round(n).toLocaleString('vi-VN');
+                        
+                        // Link Google Maps chuẩn xác
+                        const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${this.settings.lat},${this.settings.lng}&destination=${lat},${lng}&travelmode=driving`;
+
+                        Swal.close();
+                        Swal.fire({
+                            title: false, 
+                            html: `
+                                <div class="text-left flex flex-col" style="background:var(--bg-white,#fff); border-radius:24px; overflow:hidden; border: 2px solid var(--border-light, #cbd5e1); box-shadow: 0 15px 40px rgba(0,0,0,0.15), 0 5px 10px rgba(0,0,0,0.05);">
+                                    
+                                    <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 20px; position: relative; overflow: hidden; border-bottom: 2px dashed var(--border-light, #cbd5e1);">
+                                        <div style="position:absolute; bottom:-12px; left:-12px; width:24px; height:24px; background:var(--bg-white, #fff); border-radius:50%; border-top:2px dashed var(--border-light, #cbd5e1); border-right:2px dashed var(--border-light, #cbd5e1); transform:rotate(45deg); z-index:5;"></div>
+                                        <div style="position:absolute; bottom:-12px; right:-12px; width:24px; height:24px; background:var(--bg-white, #fff); border-radius:50%; border-top:2px dashed var(--border-light, #cbd5e1); border-left:2px dashed var(--border-light, #cbd5e1); transform:rotate(-45deg); z-index:5;"></div>
+                                        <div style="position: relative; z-index: 10; display: flex; justify-content: space-between; align-items: flex-start;">
+                                            <div style="display:flex; align-items:center; gap:12px;">
+                                                <div style="width:42px; height:42px; background:linear-gradient(135deg, #10b981, #059669); border-radius:12px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(16,185,129,0.4);">
+                                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-2 2 2 2-2 2 2 2-2 2 2 2-2 2 2V2l-2 2-2-2-2 2-2-2-2 2-2-2-2 2Z"/><path d="M16 14h-6"/><path d="M16 10h-6"/><path d="M10 6h-2"/></svg>
+                                                </div>
+                                                <div>
+                                                    <p style="color:#ffffff; font-weight:900; font-size:15px; letter-spacing:0.02em; text-transform:uppercase; margin:0 0 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Phiếu Chi Phí</p>
+                                                    <p style="color:#94a3b8; font-size:10px; font-family:monospace; margin:0; font-weight:600;">ID: ${item.claimCode || item.id.substring(0,8)}</p>
+                                                </div>
+                                            </div>
+                                            <div style="text-align:right;">
+                                                <p style="color:#34d399; font-weight:900; font-size:18px; text-transform:uppercase; margin:0 0 4px; letter-spacing: 0.05em; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">${item.bsx || '---'}</p>
+                                                <span style="font-size:9px; font-weight:800; background:rgba(255,255,255,0.15); color:#ffffff; padding:3px 8px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); backdrop-filter: blur(4px);">${timeInfo.badge}</span>
+                                            </div>
+                                        </div>
+                                        <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; right:-20px; top:-20px; color:#ffffff; opacity:0.04; transform:rotate(-15deg); pointer-events:none;"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+                                    </div>
+
+                                    <div style="padding:16px 20px; background:var(--bg-white, #ffffff);">
+                                        <div style="margin-bottom:16px;">
+                                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                                                <div style="width:22px; height:22px; border-radius:50%; background:rgba(37,99,235,0.15); display:flex; align-items:center; justify-content:center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><path d="M3 22L15 22"/><path d="M4 9a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v13"/><path d="M10 7V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M14 22V9a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v2"/><path d="M19 13v9"/></svg></div>
+                                                <p style="font-size:12px; font-weight:900; color:var(--text-primary, #1e293b); text-transform:uppercase; margin:0;">1. Phí Di Chuyển</p>
+                                            </div>
+                                            <div style="padding-left:30px; font-size:11px;">
+                                                <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span style="color:var(--text-secondary, #64748b); font-weight:600;">KC 1 chiều:</span><span style="font-weight:800; color:var(--text-primary, #334155);">${oneWayKm} km</span></div>
+                                                <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span style="color:var(--text-secondary, #64748b); font-weight:600;">Khứ hồi (x2):</span><span style="font-weight:800; color:var(--text-primary, #334155);">${roundTripKm} km</span></div>
+                                                <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span style="color:var(--text-secondary, #64748b); font-weight:600;">Đơn giá:</span><span style="font-weight:800; color:var(--text-primary, #334155);">${fmt(unitPriceXangXe)} đ/km</span></div>
+                                                <div style="display:flex; justify-content:space-between; margin-top:6px; padding-top:6px; border-top:1px dashed var(--border-light, #e2e8f0);"><span style="color:var(--text-primary, #475569); font-weight:800;">Thành tiền:</span><span style="font-weight:900; color:#2563eb; font-size:13px;">${fmt(xangxeCost)} đ</span></div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                                                <div style="width:22px; height:22px; border-radius:50%; background:rgba(225,29,72,0.15); display:flex; align-items:center; justify-content:center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+                                                <p style="font-size:12px; font-weight:900; color:var(--text-primary, #1e293b); text-transform:uppercase; margin:0;">2. Thù Lao Giám Định</p>
+                                            </div>
+                                            <div style="padding-left:30px; font-size:11px;">
+                                                <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span style="color:var(--text-secondary, #64748b); font-weight:600;">Định mức gốc:</span><span style="font-weight:800; color:var(--text-primary, #334155);">${fmt(baseThulao)} đ</span></div>
+                                                <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span style="color:var(--text-secondary, #64748b); font-weight:600;">Hệ số thời gian:</span><span style="font-weight:800; color:#e11d48;">${timeInfo.reason}</span></div>
+                                                <div style="display:flex; justify-content:space-between; margin-top:6px; padding-top:6px; border-top:1px dashed var(--border-light, #e2e8f0);"><span style="color:var(--text-primary, #475569); font-weight:800;">Thành tiền:</span><span style="font-weight:900; color:#e11d48; font-size:13px;">${fmt(thulaoThucTe)} đ</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style="background:linear-gradient(135deg, #10b981, #059669); padding:16px 20px; display:flex; justify-content:space-between; align-items:center; border-radius: 0 0 22px 22px; margin: 0 -1px -1px -1px;">
+                                        <span style="font-weight:900; color:#fff; font-size:13px;">TỔNG CỘNG</span>
+                                        <span style="font-weight:900; font-size:22px; color:#fff; letter-spacing:-0.5px;">${fmt(totalCost)} VNĐ</span>
+                                    </div>
+                                </div>
+                                
+                                <a href="${googleMapsUrl}" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:16px; padding:12px; background:var(--bg-surface, #eff6ff); color:#2563eb; border:1px solid #bfdbfe; border-radius:14px; font-weight:800; font-size:13px; text-decoration:none; transition:all 0.2s;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                                    Xem lộ trình trên Google Maps
+                                </a>
+                            `,
+                            showCancelButton: true,
+                            showConfirmButton: true,
+                            confirmButtonText: '<div style="display:flex;align-items:center;justify-content:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Lưu Bảng Kê</div>',
+                            cancelButtonText: 'Đóng',
+                            buttonsStyling: false,
+                            customClass: { 
+                                popup: 'custom-rounded w-full max-w-sm !p-4', 
+                                htmlContainer: '!m-0 !p-0',
+                                actions: 'w-full gap-3 px-4 pb-4 mt-2 flex'
+                            },
+                            didOpen: () => {
+                                lucide.createIcons();
+                                const confirmBtn = Swal.getConfirmButton();
+                                const cancelBtn = Swal.getCancelButton();
+                                if(confirmBtn) confirmBtn.style.cssText = 'flex: 2; padding: 14px; background: linear-gradient(135deg, #2563eb, #4f46e5); color: white; border-radius: 14px; font-weight: 800; font-size: 13px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); transition: transform 0.1s;';
+                                if(cancelBtn) cancelBtn.style.cssText = 'flex: 1; padding: 14px; background: var(--bg-surface, #f1f5f9); color: var(--text-secondary, #64748b); border-radius: 14px; font-weight: 800; font-size: 13px; border: 1.5px solid var(--border-light, #e2e8f0); cursor: pointer;';
+                            }
+                        }).then((result) => {
+                            // XỬ LÝ LƯU VÀO FIREBASE
+                            if (result.isConfirmed) {
+                                db.ref(`Workstation/${id}/costData`).set(costDataToSave).then(() => {
+                                    Toast.fire({ icon: 'success', title: 'Đã lưu chi phí vào hồ sơ!' });
+                                    
+                                    // Cập nhật lại nút tính phí để người dùng biết là đã lưu
+                                    const btn = document.querySelector(`button[onclick="CostCalculator.calculateForCase('${id}')"]`);
+                                    if(btn) {
+                                        btn.className = 'shrink-0 px-3 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-xs font-bold active:scale-95 transition-all flex items-center gap-1.5 shadow-sm';
+                                        btn.innerHTML = '<i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Đã lưu phí';
+                                        lucide.createIcons();
+                                    }
+                                });
+                            }
+                        });
+                    },
+                    (err) => {
+                        Swal.fire('Lỗi định vị', 'Vui lòng bật GPS trên thiết bị điện thoại của bạn.', 'error');
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            } else {
+                Swal.fire('Lỗi', 'Trình duyệt không hỗ trợ GPS', 'error');
+            }
         }
     };
 
