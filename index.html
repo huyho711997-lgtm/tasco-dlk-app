@@ -12036,13 +12036,12 @@
         },
 
         _render() {
-            const imgEl        = document.getElementById('img-viewer-img');
-            const iframeEl     = document.getElementById('img-viewer-iframe');
-            const pdfContainer = document.getElementById('pdf-viewer-container');
-            const cat          = document.getElementById('iv-cat');
-            const cnt          = document.getElementById('iv-count');
-            const dots         = document.getElementById('iv-dots');
-            const actions      = document.querySelector('.iv-actions');
+            const imgEl    = document.getElementById('img-viewer-img');
+            const iframeEl = document.getElementById('img-viewer-iframe');
+            const cat      = document.getElementById('iv-cat');
+            const cnt      = document.getElementById('iv-count');
+            const dots     = document.getElementById('iv-dots');
+            const actions  = document.querySelector('.iv-actions');
             
             const item = this._imgs[this._idx];
             if (!item) return;
@@ -12051,28 +12050,27 @@
             const isDoc = item.type === 'document';
             const isPdf = isDoc && (item.url.toLowerCase().includes('.pdf') || (item.name || '').toLowerCase().includes('.pdf'));
 
-            // Ẩn tất cả đi trước khi xử lý
-            if (imgEl) imgEl.style.display = 'none';
-            if (iframeEl) iframeEl.style.display = 'none';
-            if (pdfContainer) pdfContainer.style.display = 'none';
-
             if (isDoc) {
-                if (isPdf) {
-                    // Hiện khung PDF và tiến hành "vẽ"
-                    if (pdfContainer) {
-                        pdfContainer.style.display = 'block';
-                        this._renderPDF(item.url);
+                // Đóng ảnh
+                if (imgEl) imgEl.style.display = 'none';
+                
+                if (iframeEl) {
+                    const fileUrl = encodeURIComponent(item.url);
+                    
+                    if (isPdf) {
+                        // CÁCH MỚI NHẤT: Nhúng thẳng trình đọc PDF chuẩn quốc tế của Mozilla. 
+                        // Cách này bypass mọi lỗi CORS và tương thích 100% Mobile/Desktop.
+                        iframeEl.src = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${fileUrl}`;
+                    } else {
+                        // Đối với Word/Excel, dùng Office Viewer và kẹp thêm đuôi t=Date.now() để chống lỗi lưu cache trắng màn hình
+                        iframeEl.src = `https://view.officeapps.live.com/op/embed.aspx?src=${fileUrl}&t=${Date.now()}`;
                     }
-                } else {
-                    // File Word, Excel -> vẫn dùng iframe Office Viewer
-                    if (iframeEl) {
-                        const fileUrl = encodeURIComponent(item.url);
-                        iframeEl.src = `https://view.officeapps.live.com/op/embed.aspx?src=${fileUrl}`;
-                        iframeEl.style.display = 'block';
-                    }
+                    
+                    iframeEl.style.display = 'block';
                 }
             } else {
-                // Hình ảnh bình thường
+                // Xử lý hiển thị Hình ảnh
+                if (iframeEl) iframeEl.style.display = 'none';
                 if (imgEl) {
                     imgEl.src = item.url;
                     imgEl.style.display = 'block';
@@ -15790,14 +15788,6 @@
         <img id="img-viewer-img" src="" alt="" style="display:none; max-width:94vw; max-height:72vh; object-fit:contain; border-radius:14px; z-index:10; position:relative;">
         
         <iframe id="img-viewer-iframe" src="" style="display:none; width:94vw; height:72vh; border-radius:14px; border:none; background:#fff; z-index:10; position:relative;"></iframe>
-        
-        <div id="pdf-viewer-container" style="display:none; width:94vw; height:72vh; border-radius:14px; background:#fff; overflow-y:auto; position:relative; z-index:10;">
-            <canvas id="pdf-canvas" style="width:100%; display:block;"></canvas>
-            <div id="pdf-loading" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" class="animate-spin mb-2 mx-auto"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                <span style="color:#64748b; font-size:12px; font-weight:700;">Đang vẽ PDF...</span>
-            </div>
-        </div>
         
         <div class="iv-dots" id="iv-dots"></div>
         <div class="iv-actions" style="width: 100%; justify-content: center; padding: 0 16px;"></div>
