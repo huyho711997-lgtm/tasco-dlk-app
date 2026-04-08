@@ -11954,7 +11954,7 @@
             if (!window._cloudItems || !window._cloudItems.length) return;
             this._imgs = window._cloudItems.map(i => {
                 const isImg = i.url.match(/\.(jpeg|jpg|gif|png|webp)/i) != null || i.url.includes('image');
-                const isPdfFile = (i.fileName || '').toLowerCase().endsWith('.pdf') || i.url.toLowerCase().includes('.pdf');
+                const isPdfFile = i.fileType === 'pdf' || (i.fileName || '').toLowerCase().endsWith('.pdf');
                 return { url: i.url, cat: 'cloud', type: isImg ? 'image' : 'document', isPdf: isPdfFile, name: i.fileName };
             });
             this._id = 'cloud'; this._idx = idx;
@@ -12056,18 +12056,26 @@
                 if (imgEl) imgEl.style.display = 'none';
 
                 if (isPdf) {
-                    // Chuyển URL Cloudinary sang dạng inline (không download) rồi nhúng vào iframe
-                    let pdfUrl = item.url;
-                    // Cloudinary: thêm fl_attachment:false để trả về inline thay vì download
-                    pdfUrl = pdfUrl.replace('/upload/', '/upload/fl_attachment:false/');
-                    const encodedUrl = encodeURIComponent(pdfUrl);
-                    if (iframeEl) {
-                        iframeEl.src = `https://docs.google.com/viewer?url=${encodedUrl}&embedded=true`;
-                        iframeEl.style.display = 'block';
-                    }
+                    if (iframeEl) iframeEl.style.display = 'none';
                     const canvas = document.getElementById('pdf-canvas');
                     const loading = document.getElementById('pdf-loading');
                     if (canvas) canvas.style.display = 'none';
+                    // Xóa object cũ nếu có
+                    const oldObj = document.getElementById('pdf-object-viewer');
+                    if (oldObj) oldObj.remove();
+                    // Tạo thẻ <object> nhúng thẳng PDF
+                    const obj = document.createElement('object');
+                    obj.id = 'pdf-object-viewer';
+                    obj.data = item.url;
+                    obj.type = 'application/pdf';
+                    obj.style.cssText = 'width:94vw;height:72vh;border-radius:14px;border:none;background:#fff;z-index:10;position:relative;display:block;';
+                    obj.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;">
+                        <p style="font-size:13px;font-weight:700;color:#64748b;">Không thể hiển thị PDF trực tiếp</p>
+                        <a href="${item.url}" target="_blank" style="padding:10px 20px;background:#3b82f6;color:white;border-radius:10px;font-size:12px;font-weight:bold;text-decoration:none;">Mở PDF trong tab mới</a>
+                    </div>`;
+                    // Chèn object vào viewer, trước iv-dots
+                    const dots = document.getElementById('iv-dots');
+                    if (dots) dots.parentNode.insertBefore(obj, dots);
                     if (loading) loading.style.display = 'none';
                 } else {
                     // Đối với Word/Excel, dùng Office Viewer
@@ -15653,9 +15661,19 @@
 
                     if (data.secure_url) {
                         const newKey = 'file_' + Date.now() + '_' + i;
+                        const isPdfUpload = files[i].name.toLowerCase().endsWith('.pdf');
+                        // Với PDF: chuyển URL từ /raw/upload/ sang /image/upload/ + .pdf để Cloudinary trả về đúng
+                        let finalUrl = data.secure_url;
+                        if (isPdfUpload) {
+                            finalUrl = data.secure_url
+                                .replace('/raw/upload/', '/image/upload/fl_attachment:false/')
+                                .replace('/auto/upload/', '/image/upload/fl_attachment:false/');
+                            if (!finalUrl.toLowerCase().endsWith('.pdf')) finalUrl += '.pdf';
+                        }
                         await db.ref(`Users/${user.id}/myCloud/${newKey}`).set({
-                            url: data.secure_url,
+                            url: finalUrl,
                             fileName: files[i].name,
+                            fileType: isPdfUpload ? 'pdf' : (files[i].type || 'other'),
                             timestamp: Date.now()
                         });
                         successCount++;
