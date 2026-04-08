@@ -12030,10 +12030,10 @@
                     const fileName = (item.name || '').toLowerCase();
                     
                     if (fileName.includes('.pdf') || item.url.toLowerCase().includes('.pdf')) {
-                        // PDF thì mở trực tiếp để trình duyệt tự render cho mượt
-                        iframeEl.src = item.url;
+                        // Trình duyệt Mobile không tự đọc được PDF trong iframe, nên ta dùng Google Docs Viewer
+                        iframeEl.src = `https://docs.google.com/gview?url=${fileUrl}&embedded=true`;
                     } else {
-                        // Word, Excel thì dùng Microsoft Office Viewer (nhanh và ít lỗi hơn Google)
+                        // Word, Excel thì dùng Microsoft Office Viewer cho chuẩn form
                         iframeEl.src = `https://view.officeapps.live.com/op/embed.aspx?src=${fileUrl}`;
                     }
                     iframeEl.style.display = 'block';
