@@ -11919,39 +11919,39 @@
         }
     };
     // ============================================================
-    // IMAGE VIEWER — fullscreen lightbox
+    // IMAGE VIEWER — fullscreen lightbox (Nâng cấp Gestures)
     // ============================================================
     const ImageViewer = {
         _id: null, _idx: 0, _imgs: [],
-        _rotation: 0, _scale: 1,
+        
+        // Transform state
+        _rotation: 0, _scale: 1, _posX: 0, _posY: 0,
+        
+        // Touch tracking
+        _startX: 0, _startY: 0,
+        _lastPinchDist: null,
+        _isDragging: false,
+        _isPinching: false,
+        _isBound: false,
 
         openCloud(idx) {
             if (!window._cloudItems || !window._cloudItems.length) return;
             this._imgs = window._cloudItems.map(i => {
                 const isImg = i.url.match(/\.(jpeg|jpg|gif|png|webp)/i) != null || i.url.includes('image');
-                return { 
-                    url: i.url, 
-                    cat: 'cloud',
-                    type: isImg ? 'image' : 'document',
-                    name: i.fileName // Dùng tên file làm tiêu đề
-                };
+                return { url: i.url, cat: 'cloud', type: isImg ? 'image' : 'document', name: i.fileName };
             });
-            this._id = 'cloud';
-            this._idx = idx;
-            this._resetTransform();
-            this._render();
+            this._id = 'cloud'; this._idx = idx;
+            this._resetTransform(); this._render();
             document.getElementById('img-viewer').classList.add('open');
             this._bindSwipe();
         },
 
         openScene() {
-            const id = App.currentEditId;
-            const item = App.find(id);
+            const id = App.currentEditId; const item = App.find(id);
             if (!item || !item.sceneDiagram) return;
             this._id = id; this._idx = 0;
             this._imgs = [{ url: item.sceneDiagram, cat: 'scene', type: 'image' }];
-            this._resetTransform();
-            this._render();
+            this._resetTransform(); this._render();
             document.getElementById('img-viewer').classList.add('open');
             this._bindSwipe();
         },
@@ -11964,15 +11964,13 @@
                 return { ...i, type: isImg ? 'image' : 'document' };
             });
             if (!this._imgs.length) return;
-            this._resetTransform();
-            this._render();
+            this._resetTransform(); this._render();
             document.getElementById('img-viewer').classList.add('open');
             this._bindSwipe();
         },
 
         close() { 
             document.getElementById('img-viewer').classList.remove('open'); 
-            // Xóa iframe src để ngắt load/giải phóng bộ nhớ
             const iframeEl = document.getElementById('img-viewer-iframe');
             if (iframeEl) iframeEl.src = '';
         },
@@ -11980,7 +11978,9 @@
         _resetTransform() {
             this._rotation = 0;
             this._scale = 1;
-            this._applyTransform();
+            this._posX = 0;
+            this._posY = 0;
+            this._applyTransform(true); // Có hiệu ứng khi reset
         },
 
         rotate() {
@@ -11990,20 +11990,25 @@
             } else {
                 this._scale = 1;
             }
-            this._applyTransform();
+            this._posX = 0;
+            this._posY = 0;
+            this._applyTransform(true);
         },
 
         zoom(direction) {
             if (direction === 'in') this._scale += 0.5;
-            else if (direction === 'out') this._scale = Math.max(0.5, this._scale - 0.5);
-            this._applyTransform();
+            else if (direction === 'out') {
+                this._scale = Math.max(1, this._scale - 0.5);
+                if (this._scale === 1) { this._posX = 0; this._posY = 0; }
+            }
+            this._applyTransform(true);
         },
 
-        _applyTransform() {
+        _applyTransform(animate = false) {
             const el = document.getElementById('img-viewer-img');
             if (el) {
-                el.style.transform = `rotate(${this._rotation}deg) scale(${this._scale})`;
-                el.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+                el.style.transition = animate ? 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)' : 'none';
+                el.style.transform = `translate(${this._posX}px, ${this._posY}px) rotate(${this._rotation}deg) scale(${this._scale})`;
             }
         },
 
@@ -12019,21 +12024,16 @@
             if (!item) return;
             
             this._resetTransform();
-
             const isDoc = item.type === 'document';
 
-            // XỬ LÝ HIỂN THỊ DỰA VÀO LOẠI FILE
             if (isDoc) {
                 if (imgEl) imgEl.style.display = 'none';
                 if (iframeEl) {
                     const fileUrl = encodeURIComponent(item.url);
                     const fileName = (item.name || '').toLowerCase();
-                    
                     if (fileName.includes('.pdf') || item.url.toLowerCase().includes('.pdf')) {
-                        // Trình duyệt Mobile không tự đọc được PDF trong iframe, nên ta dùng Google Docs Viewer
                         iframeEl.src = `https://docs.google.com/gview?url=${fileUrl}&embedded=true`;
                     } else {
-                        // Word, Excel thì dùng Microsoft Office Viewer cho chuẩn form
                         iframeEl.src = `https://view.officeapps.live.com/op/embed.aspx?src=${fileUrl}`;
                     }
                     iframeEl.style.display = 'block';
@@ -12054,7 +12054,6 @@
             const arrows = document.querySelector('.iv-arrow');
             if (arrows) arrows.style.display = this._imgs.length > 1 ? 'flex' : 'none';
 
-            // CẬP NHẬT THANH CÔNG CỤ (Ẩn xoay/zoom nếu là PDF/Word)
             if (actions) {
                 actions.innerHTML = `
                     <div class="flex gap-2 w-full justify-between max-w-sm">
@@ -12107,17 +12106,81 @@
         },
 
         _bindSwipe() {
+            if (this._isBound) return;
+            this._isBound = true;
             const el = document.getElementById('img-viewer');
-            let sx = 0;
-            el.ontouchstart = e => { sx = e.touches[0].clientX; };
-            el.ontouchend   = e => {
-                // Vô hiệu hóa vuốt đổi ảnh khi đang zoom
-                if (this._scale > 1) return;
-                
-                const dx = e.changedTouches[0].clientX - sx;
-                if (dx < -50) this.next();
-                else if (dx > 50) this.prev();
-            };
+            let swipeStartX = 0, swipeStartY = 0;
+
+            el.addEventListener('touchstart', e => {
+                if (e.touches.length === 2) {
+                    // Pinch to zoom (2 ngón)
+                    this._isPinching = true;
+                    this._isDragging = false;
+                    this._lastPinchDist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                } else if (e.touches.length === 1) {
+                    // Pan / Swipe (1 ngón)
+                    this._isPinching = false;
+                    if (this._scale > 1) {
+                        this._isDragging = true;
+                        this._startX = e.touches[0].clientX - this._posX;
+                        this._startY = e.touches[0].clientY - this._posY;
+                    } else {
+                        swipeStartX = e.touches[0].clientX;
+                        swipeStartY = e.touches[0].clientY;
+                    }
+                }
+            }, { passive: false });
+
+            el.addEventListener('touchmove', e => {
+                const isDoc = this._imgs[this._idx]?.type === 'document';
+                if (isDoc) return; // Không can thiệp nếu là iframe tài liệu
+
+                if (this._isPinching && e.touches.length === 2) {
+                    e.preventDefault(); // Ngăn trình duyệt cuộn
+                    const dist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    const zoomFactor = dist / this._lastPinchDist;
+                    this._scale = Math.max(1, Math.min(this._scale * zoomFactor, 5)); // Giới hạn zoom tới 5x
+                    this._lastPinchDist = dist;
+                    this._applyTransform(false); // Không animation để mượt
+                } else if (this._isDragging && e.touches.length === 1 && this._scale > 1) {
+                    e.preventDefault();
+                    this._posX = e.touches[0].clientX - this._startX;
+                    this._posY = e.touches[0].clientY - this._startY;
+                    this._applyTransform(false);
+                }
+            }, { passive: false });
+
+            el.addEventListener('touchend', e => {
+                if (this._isPinching || this._isDragging) {
+                    this._isPinching = false;
+                    this._isDragging = false;
+                    // Reset về trung tâm nếu thu nhỏ về 1x
+                    if (this._scale <= 1) {
+                        this._scale = 1;
+                        this._posX = 0;
+                        this._posY = 0;
+                        this._applyTransform(true);
+                    }
+                    return;
+                }
+
+                // Nhận diện Swipe để chuyển ảnh
+                if (this._scale === 1 && e.changedTouches.length === 1) {
+                    const dx = e.changedTouches[0].clientX - swipeStartX;
+                    const dy = e.changedTouches[0].clientY - swipeStartY;
+                    // Ưu tiên vuốt ngang
+                    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+                        if (dx < -50) this.next();
+                        else if (dx > 50) this.prev();
+                    }
+                }
+            }, { passive: false });
         }
     };
 
