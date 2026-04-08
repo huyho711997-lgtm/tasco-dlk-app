@@ -2437,7 +2437,7 @@
             </div>   
         </div>
 
-        </div> <div id="view-cloud" class="view-section p-4 hidden">
+        <div id="view-cloud" class="view-section p-4 hidden">
             <div class="flex items-center justify-between mb-4 mt-2">
                 <div>
                     <h2 class="font-black text-slate-800 text-lg tracking-tight flex items-center gap-2">
@@ -2445,20 +2445,42 @@
                     </h2>
                     <p class="text-xs text-slate-500 font-medium mt-1" id="mycloud-count">Đang tải dữ liệu...</p>
                 </div>
-                <label class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white active:scale-95 transition-all shadow-md cursor-pointer">
-                    <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-                    <span class="text-[12px] font-black">Tải lên</span>
-                    <input type="file" id="mycloud-upload-input" class="hidden" accept="image/*" multiple onchange="MyCloud.uploadFiles(event)">
-                </label>
+                <div class="flex items-center gap-2">
+                    <button id="mycloud-select-btn" onclick="MyCloud.toggleSelectMode()" class="hidden px-3 py-2 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs transition-colors">
+                        Chọn
+                    </button>
+                    <label class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white active:scale-95 transition-all shadow-md cursor-pointer">
+                        <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+                        <span class="text-[12px] font-black">Tải lên</span>
+                        <input type="file" id="mycloud-upload-input" class="hidden" accept="image/*, .pdf, .doc, .docx, .xls, .xlsx" multiple onchange="MyCloud.uploadFiles(event)">
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex gap-1 mb-4 bg-slate-100 p-1 rounded-xl">
+                <button class="cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-cyan-600 shadow-sm" onclick="MyCloud.setTab('all', this)">Tất cả</button>
+                <button class="cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500" onclick="MyCloud.setTab('image', this)">Hình ảnh</button>
+                <button class="cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500" onclick="MyCloud.setTab('document', this)">Tài liệu</button>
+            </div>
+
+            <div id="mycloud-delete-bar" class="hidden mb-4 p-3 bg-rose-50 border border-rose-200 rounded-xl flex justify-between items-center transition-all">
+                <div class="flex items-center gap-2">
+                    <button onclick="MyCloud.selectAll()" class="text-rose-600 text-xs font-bold underline">Chọn tất cả</button>
+                    <span class="text-rose-400 text-xs">|</span>
+                    <span class="text-rose-600 font-black text-xs" id="mycloud-selected-count">Đã chọn 0</span>
+                </div>
+                <button onclick="MyCloud.deleteSelected()" class="bg-rose-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 active:scale-95 shadow-sm shadow-rose-200">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Xóa
+                </button>
             </div>
             
             <div id="mycloud-loading" class="hidden text-center py-4">
                 <div class="w-6 h-6 border-2 border-cyan-200 border-t-cyan-500 rounded-full animate-spin mx-auto mb-2"></div>
-                <p class="text-[10px] font-bold text-slate-400" id="mycloud-loading-text">Đang tải ảnh lên...</p>
+                <p class="text-[10px] font-bold text-slate-400" id="mycloud-loading-text">Đang tải lên...</p>
             </div>
 
-            <div id="mycloud-grid" class="grid grid-cols-3 gap-2 pb-10"></div>
-        </div>        
+            <div id="mycloud-list" class="pb-10 space-y-5"></div>
+        </div>      
     </main>
 
     <!-- BOTTOM NAV -->
@@ -5040,7 +5062,7 @@
             const searchContainer = document.getElementById('header-search-container');
             if (searchContainer) {
                 // Nếu đang ở màn hình Trang chủ (home) hoặc Báo cáo (report), ẩn thanh search đi cho rộng
-                if (view === 'home' || view === 'report' || view === 'import') {
+                if (view === 'home' || view === 'report' || view === 'import' || view === 'cloud') { // Thêm view === 'cloud' vào đây
                     searchContainer.style.display = 'none';
                 } else {
                     searchContainer.style.display = 'block';
@@ -11901,50 +11923,111 @@
     // ============================================================
     const ImageViewer = {
         _id: null, _idx: 0, _imgs: [],
+        _rotation: 0, _scale: 1,
+
+        openCloud(idx) {
+            if (!window._cloudImages || !window._cloudImages.length) return;
+            this._imgs = window._cloudImages.map(i => ({ url: i.url, cat: 'cloud' }));
+            this._id = 'cloud';
+            this._idx = idx;
+            this._resetTransform();
+            this._render();
+            document.getElementById('img-viewer').classList.add('open');
+            this._bindSwipe();
+        },
 
         openScene() {
             const id = App.currentEditId;
             const item = App.find(id);
             if (!item || !item.sceneDiagram) return;
-            
-            this._id = id;
-            this._idx = 0;
-            // Gán ảnh sơ đồ vào mảng viewer dưới dạng cat 'other'
+            this._id = id; this._idx = 0;
             this._imgs = [{ url: item.sceneDiagram, cat: 'scene' }];
+            this._resetTransform();
             this._render();
             document.getElementById('img-viewer').classList.add('open');
             this._bindSwipe();
         },
 
         open(id, idx) {
-            this._id  = id;
-            this._idx = idx;
+            this._id  = id; this._idx = idx;
             this._imgs = (App.find(id)?.documentImages || []).map(i => typeof i === 'string' ? { url: i, cat: 'other' } : i);
             if (!this._imgs.length) return;
+            this._resetTransform();
             this._render();
             document.getElementById('img-viewer').classList.add('open');
-            // Swipe gesture
             this._bindSwipe();
         },
 
         close() { document.getElementById('img-viewer').classList.remove('open'); },
+
+        _resetTransform() {
+            this._rotation = 0;
+            this._scale = 1;
+            this._applyTransform();
+        },
+
+        rotate() {
+            this._rotation = (this._rotation + 90) % 360;
+            // Tự động scale nhỏ lại nếu xoay ngang để không bị tràn màn hình đt
+            if (this._rotation === 90 || this._rotation === 270) {
+                this._scale = 0.8;
+            } else {
+                this._scale = 1;
+            }
+            this._applyTransform();
+        },
+
+        zoom(direction) {
+            if (direction === 'in') this._scale += 0.5;
+            else if (direction === 'out') this._scale = Math.max(0.5, this._scale - 0.5);
+            this._applyTransform();
+        },
+
+        _applyTransform() {
+            const el = document.getElementById('img-viewer-img');
+            if (el) {
+                el.style.transform = `rotate(${this._rotation}deg) scale(${this._scale})`;
+                el.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+            }
+        },
 
         _render() {
             const el  = document.getElementById('img-viewer-img');
             const cat = document.getElementById('iv-cat');
             const cnt = document.getElementById('iv-count');
             const dots = document.getElementById('iv-dots');
+            const actions = document.querySelector('.iv-actions');
+            
             const img = this._imgs[this._idx];
             if (!img || !el) return;
+            
             el.src = img.url || img;
-            const catInfo = IMG_CATS[img.cat] || IMG_CATS.other;
+            this._resetTransform();
+
+            const catInfo = IMG_CATS[img.cat] || { label: 'Cloud Cá Nhân', emoji: '☁️' };
             if (cat) cat.textContent = catInfo.emoji + ' ' + catInfo.label;
             if (cnt) cnt.textContent = `${this._idx + 1} / ${this._imgs.length}`;
-            if (dots) dots.innerHTML = this._imgs.map((_, i) =>
-                `<div class="iv-dot ${i === this._idx ? 'on' : ''}"></div>`).join('');
-            // Ẩn mũi tên nếu chỉ 1 ảnh
+            if (dots) dots.innerHTML = this._imgs.map((_, i) => `<div class="iv-dot ${i === this._idx ? 'on' : ''}"></div>`).join('');
+            
             const arrows = document.querySelector('.iv-arrow');
             if (arrows) arrows.style.display = this._imgs.length > 1 ? 'flex' : 'none';
+
+            // Cập nhật lại thanh công cụ để thêm nút Zoom và Rotate
+            if (actions) {
+                actions.innerHTML = `
+                    <div class="flex gap-2">
+                        <button class="iv-btn" onclick="ImageViewer.zoom('out')"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
+                        <button class="iv-btn" onclick="ImageViewer.zoom('in')"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
+                        <button class="iv-btn" onclick="ImageViewer.rotate()"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>
+                    </div>
+                    <div class="flex gap-2 ml-4">
+                        <button class="iv-action" onclick="ImageViewer.download()"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
+                        <button class="iv-action" onclick="ImageViewer.share()"><i data-lucide="share-2" class="w-3.5 h-3.5"></i></button>
+                        ${this._id !== 'cloud' ? `<button class="iv-action del" onclick="ImageViewer.remove()"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>` : ''}
+                    </div>
+                `;
+                lucide.createIcons();
+            }
         },
 
         prev() { this._idx = (this._idx - 1 + this._imgs.length) % this._imgs.length; this._render(); },
@@ -11969,8 +12052,10 @@
         },
 
         remove() {
-            Images.remove(this._id, this._idx);
-            this.close();
+            if (this._id !== 'cloud') {
+                Images.remove(this._id, this._idx);
+                this.close();
+            }
         },
 
         _bindSwipe() {
@@ -11978,6 +12063,9 @@
             let sx = 0;
             el.ontouchstart = e => { sx = e.touches[0].clientX; };
             el.ontouchend   = e => {
+                // Nếu đang zoom to thì tắt vuốt chuyển ảnh để dễ xem chi tiết
+                if (this._scale > 1) return;
+                
                 const dx = e.changedTouches[0].clientX - sx;
                 if (dx < -50) this.next();
                 else if (dx > 50) this.prev();
@@ -15163,19 +15251,19 @@
     const MyCloud = {
         items: [],
         _isInit: false,
+        _activeTab: 'all',
+        _selectMode: false,
+        _selectedKeys: new Set(),
 
         init() {
-            if (this._isInit) return; // Chỉ khởi tạo listener 1 lần
+            if (this._isInit) return;
             const user = Auth.getCurrentUser();
             if (!user) return;
 
-            // Lắng nghe dữ liệu riêng của User hiện tại trên Firebase
             db.ref(`Users/${user.id}/myCloud`).on('value', snap => {
                 const data = snap.val() || {};
-                // Convert object sang array và xếp ảnh mới lên đầu
                 this.items = Object.keys(data).map(k => ({ key: k, ...data[k] })).sort((a,b) => b.timestamp - a.timestamp);
                 
-                // Nếu đang mở tab Cloud thì render lại
                 if (!document.getElementById('view-cloud').classList.contains('hidden')) {
                     this.render();
                 }
@@ -15183,52 +15271,161 @@
             this._isInit = true;
         },
 
-        render() {
-            const grid = document.getElementById('mycloud-grid');
-            const countLabel = document.getElementById('mycloud-count');
-            const loadingEl = document.getElementById('mycloud-loading'); // Thêm biến này
+        setTab(tab, btn) {
+            this._activeTab = tab;
+            this._selectMode = false;
+            this._selectedKeys.clear();
+            document.querySelectorAll('.cloud-tab').forEach(b => b.className = 'cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500');
+            if(btn) btn.className = 'cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-cyan-600 shadow-sm';
+            this.render();
+        },
+
+        toggleSelectMode() {
+            this._selectMode = !this._selectMode;
+            this._selectedKeys.clear();
+            this.render();
+        },
+
+        toggleSelect(key) {
+            if (!this._selectMode) return;
+            if (this._selectedKeys.has(key)) this._selectedKeys.delete(key);
+            else this._selectedKeys.add(key);
             
-            if (!grid || !countLabel) return;
+            const wrap = document.getElementById(`mc-wrap-${key}`);
+            const chk = document.getElementById(`mc-chk-${key}`);
+            if (wrap && chk) {
+                const isSelected = this._selectedKeys.has(key);
+                wrap.classList.toggle('border-rose-500', isSelected);
+                wrap.classList.toggle('scale-95', isSelected);
+                chk.classList.toggle('hidden', !isSelected);
+            }
+            this._updateDeleteBar();
+            if (window.navigator.vibrate) window.navigator.vibrate(10);
+        },
 
-            // Xóa chữ "Đang tải..." ngay khi render
-            countLabel.textContent = this.items.length > 0 ? `Đã lưu ${this.items.length} file` : 'Chưa có file nào';
-            if (loadingEl) loadingEl.classList.add('hidden'); // Ép ẩn vòng xoay loading
+        selectAll() {
+            const filtered = this._getFilteredItems();
+            filtered.forEach(i => this._selectedKeys.add(i.key));
+            this.render();
+        },
 
-            if (this.items.length === 0) {
-                grid.innerHTML = `
-                    <div class="col-span-3 text-center py-12 bg-white rounded-3xl border border-slate-100 shadow-sm mt-4">
+        _updateDeleteBar() {
+            const count = this._selectedKeys.size;
+            document.getElementById('mycloud-selected-count').textContent = `Đã chọn ${count}`;
+            document.querySelector('#mycloud-delete-bar button').style.opacity = count > 0 ? '1' : '0.5';
+            document.querySelector('#mycloud-delete-bar button').style.pointerEvents = count > 0 ? 'auto' : 'none';
+        },
+
+        _getFilteredItems() {
+            return this.items.filter(i => {
+                const isImg = i.url.match(/\.(jpeg|jpg|gif|png|webp)/i) != null || i.url.includes('image');
+                if (this._activeTab === 'image') return isImg;
+                if (this._activeTab === 'document') return !isImg;
+                return true;
+            });
+        },
+
+        render() {
+            const listEl = document.getElementById('mycloud-list');
+            const countLabel = document.getElementById('mycloud-count');
+            const selectBtn = document.getElementById('mycloud-select-btn');
+            const deleteBar = document.getElementById('mycloud-delete-bar');
+            
+            if (!listEl) return;
+
+            const filteredItems = this._getFilteredItems();
+            countLabel.textContent = filteredItems.length > 0 ? `Đã lưu ${filteredItems.length} file` : 'Chưa có file nào';
+            
+            // Xử lý ẩn hiện nút Chọn và thanh Xóa
+            if (filteredItems.length > 0) {
+                selectBtn.classList.remove('hidden');
+                selectBtn.textContent = this._selectMode ? 'Hủy chọn' : 'Chọn';
+                selectBtn.classList.toggle('bg-rose-100', this._selectMode);
+                selectBtn.classList.toggle('text-rose-600', this._selectMode);
+            } else {
+                selectBtn.classList.add('hidden');
+                this._selectMode = false;
+            }
+            
+            deleteBar.classList.toggle('hidden', !this._selectMode);
+            if(this._selectMode) this._updateDeleteBar();
+
+            if (filteredItems.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-12 bg-white rounded-3xl border border-slate-100 shadow-sm mt-4">
                         <div class="w-14 h-14 bg-cyan-50 rounded-full flex items-center justify-center mx-auto mb-3">
                             <i data-lucide="cloud-off" class="w-6 h-6 text-cyan-300"></i>
                         </div>
-                        <p class="text-slate-500 font-bold text-sm">Cloud trống</p>
-                        <p class="text-slate-400 text-xs mt-1">Nhấn "Tải lên" để thêm hình ảnh</p>
+                        <p class="text-slate-500 font-bold text-sm">Không có dữ liệu</p>
+                        <p class="text-slate-400 text-xs mt-1">Nhấn "Tải lên" để thêm file</p>
                     </div>`;
                 lucide.createIcons();
                 return;
             }
 
-            grid.innerHTML = this.items.map((item, idx) => `
-                <div class="relative w-full aspect-square rounded-xl overflow-hidden border border-slate-200 bg-slate-50 shadow-sm group">
-                    <a data-fslightbox="mycloud-gallery" href="${item.url}">
-                        <img src="${item.url}" loading="lazy" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
-                    </a>
-                    <button onclick="MyCloud.deleteFile('${item.key}')" class="absolute top-1.5 right-1.5 w-6 h-6 bg-black/50 text-white rounded-full flex items-center justify-center backdrop-blur-sm active:scale-90 transition-transform z-10">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                    </button>
-                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-1.5 pointer-events-none">
-                        <p class="text-white text-[8px] font-bold text-center">${moment(item.timestamp).format('DD/MM/YY')}</p>
-                    </div>
-                </div>
-            `).join('');
-            
-            // Refresh fslightbox để nó nhận diện các thẻ <a> mới
-            if (typeof refreshFsLightbox === 'function') refreshFsLightbox();
+            // Gom nhóm theo ngày
+            const groups = {};
+            filteredItems.forEach(item => {
+                const m = moment(item.timestamp);
+                let dateKey = m.format('DD/MM/YYYY');
+                if (m.isSame(moment(), 'day')) dateKey = 'Hôm nay';
+                else if (m.isSame(moment().subtract(1, 'day'), 'day')) dateKey = 'Hôm qua';
+                
+                if (!groups[dateKey]) groups[dateKey] = [];
+                groups[dateKey].push(item);
+            });
+
+            // Lọc riêng mảng ảnh để đưa vào ImageViewer
+            window._cloudImages = filteredItems.filter(i => i.url.match(/\.(jpeg|jpg|gif|png|webp)/i) || i.url.includes('image'));
+
+            let html = '';
+            for (const [date, items] of Object.entries(groups)) {
+                html += `
+                <div>
+                    <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3 pl-1">${date}</p>
+                    <div class="grid grid-cols-3 gap-2">`;
+                
+                html += items.map(item => {
+                    const isImg = item.url.match(/\.(jpeg|jpg|gif|png|webp)/i) != null || item.url.includes('image');
+                    const isSelected = this._selectedKeys.has(item.key);
+                    const wrapClasses = isSelected ? 'border-rose-500 scale-95' : 'border-slate-200';
+                    const checkClasses = isSelected ? '' : 'hidden';
+
+                    // Lấy index của ảnh này trong mảng ảnh chung để truyền vào Viewer
+                    const imgIndex = isImg ? window._cloudImages.findIndex(img => img.key === item.key) : -1;
+                    
+                    const clickAction = this._selectMode 
+                        ? `MyCloud.toggleSelect('${item.key}')` 
+                        : (isImg ? `ImageViewer.openCloud(${imgIndex})` : `window.open('${item.url}', '_blank')`);
+
+                    return `
+                    <div class="relative w-full aspect-square rounded-xl overflow-hidden border-2 bg-white shadow-sm transition-all cursor-pointer ${wrapClasses}" 
+                         id="mc-wrap-${item.key}" onclick="${clickAction}">
+                        ${isImg 
+                            ? `<img src="${item.url}" loading="lazy" class="w-full h-full object-cover">`
+                            : `<div class="w-full h-full flex flex-col items-center justify-center bg-slate-50"><i data-lucide="file-text" class="w-8 h-8 text-blue-400 mb-1"></i><span class="text-[9px] font-bold text-slate-500 px-2 truncate w-full text-center">${item.fileName}</span></div>`
+                        }
+                        
+                        <div id="mc-chk-${item.key}" class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-rose-500 border-2 border-white flex items-center justify-center shadow-md transition-all ${checkClasses} z-10">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-1.5 pointer-events-none">
+                            <p class="text-white text-[9px] font-bold text-left drop-shadow-md">${moment(item.timestamp).format('HH:mm')}</p>
+                        </div>
+                    </div>`;
+                }).join('');
+                
+                html += `</div></div>`;
+            }
+
+            listEl.innerHTML = html;
             lucide.createIcons();
         },
 
         async uploadFiles(event) {
             const files = Array.from(event.target.files);
-            event.target.value = ''; // Reset input
+            event.target.value = '';
             if (!files.length) return;
 
             const user = Auth.getCurrentUser();
@@ -15243,7 +15440,6 @@
             for (let i = 0; i < files.length; i++) {
                 loadingText.textContent = `Đang tải lên ${i + 1}/${files.length}...`;
                 try {
-                    // Upload lên Cloudinary số 2
                     const fd = new FormData();
                     fd.append('file', files[i]);
                     fd.append('upload_preset', CONFIG.cloudinaryCloud.preset);
@@ -15252,7 +15448,6 @@
                     const data = await res.json();
 
                     if (data.secure_url) {
-                        // Lưu link vào Firebase
                         const newKey = 'file_' + Date.now() + '_' + i;
                         await db.ref(`Users/${user.id}/myCloud/${newKey}`).set({
                             url: data.secure_url,
@@ -15274,22 +15469,32 @@
             }
         },
 
-        deleteFile(key) {
+        deleteSelected() {
+            if (this._selectedKeys.size === 0) return;
             Swal.fire({
-                title: 'Xóa file này?',
-                text: "File sẽ bị xóa khỏi Cloud cá nhân của bạn.",
+                title: `Xóa ${this._selectedKeys.size} file?`,
+                text: "Dữ liệu sẽ bị xóa vĩnh viễn khỏi Cloud cá nhân.",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
                 cancelButtonColor: '#64748b',
-                confirmButtonText: 'Xóa',
+                confirmButtonText: 'Xóa vĩnh viễn',
                 cancelButtonText: 'Hủy',
                 customClass: { popup: 'custom-rounded' }
             }).then((result) => {
                 if (result.isConfirmed) {
                     const user = Auth.getCurrentUser();
-                    db.ref(`Users/${user.id}/myCloud/${key}`).remove().then(() => {
+                    Swal.fire({ title: 'Đang xóa...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    
+                    const updates = {};
+                    this._selectedKeys.forEach(key => updates[key] = null);
+                    
+                    db.ref(`Users/${user.id}/myCloud`).update(updates).then(() => {
+                        Swal.close();
                         Toast.fire({ icon: 'success', title: 'Đã xóa file!' });
+                        this._selectMode = false;
+                        this._selectedKeys.clear();
+                        this.render();
                     });
                 }
             });
