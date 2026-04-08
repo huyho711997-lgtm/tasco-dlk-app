@@ -11954,7 +11954,8 @@
             if (!window._cloudItems || !window._cloudItems.length) return;
             this._imgs = window._cloudItems.map(i => {
                 const isImg = i.url.match(/\.(jpeg|jpg|gif|png|webp)/i) != null || i.url.includes('image');
-                return { url: i.url, cat: 'cloud', type: isImg ? 'image' : 'document', name: i.fileName };
+                const isPdfFile = (i.fileName || '').toLowerCase().endsWith('.pdf') || i.url.toLowerCase().includes('.pdf');
+                return { url: i.url, cat: 'cloud', type: isImg ? 'image' : 'document', isPdf: isPdfFile, name: i.fileName };
             });
             this._id = 'cloud'; this._idx = idx;
             this._resetTransform(); this._render();
@@ -12048,16 +12049,26 @@
             
             this._resetTransform();
             const isDoc = item.type === 'document';
-            const isPdf = isDoc && (item.url.toLowerCase().includes('.pdf') || (item.name || '').toLowerCase().includes('.pdf'));
+            const isPdf = isDoc && (item.isPdf || item.url.toLowerCase().includes('.pdf') || (item.name || '').toLowerCase().includes('.pdf'));
 
             if (isDoc) {
                 // Đóng ảnh
                 if (imgEl) imgEl.style.display = 'none';
 
                 if (isPdf) {
-                    // Dùng pdf.js để render PDF từ Cloudinary
-                    if (iframeEl) iframeEl.style.display = 'none';
-                    this._renderPDF(item.url);
+                    // Chuyển URL Cloudinary sang dạng inline (không download) rồi nhúng vào iframe
+                    let pdfUrl = item.url;
+                    // Cloudinary: thêm fl_attachment:false để trả về inline thay vì download
+                    pdfUrl = pdfUrl.replace('/upload/', '/upload/fl_attachment:false/');
+                    const encodedUrl = encodeURIComponent(pdfUrl);
+                    if (iframeEl) {
+                        iframeEl.src = `https://docs.google.com/viewer?url=${encodedUrl}&embedded=true`;
+                        iframeEl.style.display = 'block';
+                    }
+                    const canvas = document.getElementById('pdf-canvas');
+                    const loading = document.getElementById('pdf-loading');
+                    if (canvas) canvas.style.display = 'none';
+                    if (loading) loading.style.display = 'none';
                 } else {
                     // Đối với Word/Excel, dùng Office Viewer
                     if (iframeEl) {
