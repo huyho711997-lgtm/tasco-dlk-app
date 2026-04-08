@@ -3635,8 +3635,8 @@
         },
         // THÊM CẤU HÌNH CLOUDINARY THỨ 2 DÀNH CHO "CLOUD CỦA TÔI"
         cloudinaryCloud: {
-            url: "https://api.cloudinary.com/v1_1/dm7zocpmr/image/upload", // Sửa lại tên cloud
-            preset: "my_personal_cloud" // Sửa lại preset
+            url: "https://api.cloudinary.com/v1_1/dm7zocpmr/auto/upload", // SỬA CHỮ 'image' THÀNH 'auto' ĐỂ NHẬN MỌI LOẠI FILE
+            preset: "my_personal_cloud" 
         },
         gemini: {
             model: "gemini-2.5-flash",
@@ -12026,9 +12026,16 @@
             if (isDoc) {
                 if (imgEl) imgEl.style.display = 'none';
                 if (iframeEl) {
-                    // Dùng Google Docs Viewer nhúng qua iframe
                     const fileUrl = encodeURIComponent(item.url);
-                    iframeEl.src = `https://docs.google.com/gview?url=${fileUrl}&embedded=true`;
+                    const fileName = (item.name || '').toLowerCase();
+                    
+                    if (fileName.includes('.pdf') || item.url.toLowerCase().includes('.pdf')) {
+                        // PDF thì mở trực tiếp để trình duyệt tự render cho mượt
+                        iframeEl.src = item.url;
+                    } else {
+                        // Word, Excel thì dùng Microsoft Office Viewer (nhanh và ít lỗi hơn Google)
+                        iframeEl.src = `https://view.officeapps.live.com/op/embed.aspx?src=${fileUrl}`;
+                    }
                     iframeEl.style.display = 'block';
                 }
             } else {
