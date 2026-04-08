@@ -11719,9 +11719,15 @@
             }
 
             // --- GẮN CÁC ID CỤ THỂ CHO TỪNG ẢNH ĐỂ JS ĐIỀU KHIỂN RIÊNG LẺ LÚC CHỌN ---
+            // --- GẮN CÁC ID CỤ THỂ CHO TỪNG ẢNH ĐỂ JS ĐIỀU KHIỂN RIÊNG LẺ LÚC CHỌN ---
             const tiles = imgs.map((img, idx) => {
                 const cat = IMG_CATS[img.cat] || IMG_CATS.other;
                 const url = typeof img === 'string' ? img : img.url;
+                const fileName = typeof img === 'string' ? 'Tài liệu' : (img.fileName || 'Tài liệu');
+                
+                const isPdf = url.toLowerCase().includes('.pdf') || fileName.toLowerCase().includes('.pdf');
+                const isImg = url.match(/\.(jpeg|jpg|gif|png|webp)/i) != null && !isPdf;
+                
                 const isSelected = this._selected.has(idx);
                 const isUploading = img.isUploading;
                 
@@ -11732,7 +11738,13 @@
                 return `
                 <div class="relative w-full aspect-square" onclick="${this._selectMode ? `Images.toggleSelect(${idx})` : (isUploading ? '' : `ImageViewer.open('${id}', ${idx})`)}">
                     <div id="img-grid-wrap-${idx}" class="w-full h-full rounded-xl overflow-hidden border-2 transition-all ${wrapClasses} bg-slate-50 shadow-sm">
-                        <img id="img-grid-img-${idx}" src="${url}" loading="lazy" class="w-full h-full object-cover transition-opacity ${imgClasses}">
+                        ${isImg 
+                            ? `<img id="img-grid-img-${idx}" src="${url}" loading="lazy" class="w-full h-full object-cover transition-opacity ${imgClasses}">`
+                            : `<div id="img-grid-img-${idx}" class="w-full h-full flex flex-col items-center justify-center ${isPdf ? 'bg-red-50' : 'bg-slate-50'} transition-opacity ${imgClasses}">
+                                  <i data-lucide="file-text" class="w-6 h-6 ${isPdf ? 'text-red-500' : 'text-blue-400'} mb-1"></i>
+                                  ${isPdf ? `<span class="text-[8px] font-black text-red-600 bg-red-100 px-1 rounded border border-red-200">PDF</span>` : `<span class="text-[8px] font-bold text-slate-400">DOC</span>`}
+                               </div>`
+                        }
                         ${isUploading ? '<div class="img-uploading-overlay"><div class="spinner-small"></div></div>' : ''}
                         
                         <div id="img-grid-check-${idx}" class="absolute inset-0 flex items-center justify-center bg-rose-500/10 transition-all ${checkHidden}">
@@ -12031,9 +12043,13 @@
                 if (iframeEl) {
                     const fileUrl = encodeURIComponent(item.url);
                     const fileName = (item.name || '').toLowerCase();
-                    if (fileName.includes('.pdf') || item.url.toLowerCase().includes('.pdf')) {
-                        iframeEl.src = `https://docs.google.com/gview?url=${fileUrl}&embedded=true`;
+                    const urlLower = item.url.toLowerCase();
+
+                    // SỬA Ở ĐÂY: Trình duyệt tự đọc PDF cực tốt, không qua Google Docs Viewer nữa để tránh lỗi màn hình trắng
+                    if (fileName.includes('.pdf') || urlLower.includes('.pdf')) {
+                        iframeEl.src = item.url;
                     } else {
+                        // Các file Word, Excel thì vẫn dùng Office Viewer
                         iframeEl.src = `https://view.officeapps.live.com/op/embed.aspx?src=${fileUrl}`;
                     }
                     iframeEl.style.display = 'block';
@@ -15495,7 +15511,8 @@
                     <div class="grid grid-cols-3 gap-2">`;
                 
                 html += items.map(item => {
-                    const isImg = item.url.match(/\.(jpeg|jpg|gif|png|webp)/i) != null || item.url.includes('image');
+                    const isImg = item.url.match(/\.(jpeg|jpg|gif|png|webp)/i) != null && !item.fileName?.toLowerCase().includes('.pdf');
+                    const isPdf = item.fileName?.toLowerCase().includes('.pdf') || item.url.toLowerCase().includes('.pdf');
                     const isSelected = this._selectedKeys.has(item.key);
                     const wrapClasses = isSelected ? 'border-rose-500 scale-95' : 'border-slate-200';
                     const checkClasses = isSelected ? '' : 'hidden';
@@ -15512,8 +15529,9 @@
                          id="mc-wrap-${item.key}" onclick="${clickAction}">
                         ${isImg 
                             ? `<img src="${item.url}" loading="lazy" class="w-full h-full object-cover">`
-                            : `<div class="w-full h-full flex flex-col items-center justify-center bg-slate-50 p-2 text-center">
-                                 <i data-lucide="file-text" class="w-8 h-8 text-blue-400 mb-2"></i>
+                            : `<div class="w-full h-full flex flex-col items-center justify-center ${isPdf ? 'bg-red-50' : 'bg-slate-50'} p-2 text-center">
+                                 <i data-lucide="file-text" class="w-8 h-8 ${isPdf ? 'text-red-500' : 'text-blue-400'} mb-1"></i>
+                                 ${isPdf ? `<span class="text-[9px] font-black text-red-600 bg-red-100 px-1.5 py-0.5 rounded border border-red-200 mb-1">PDF</span>` : ''}
                                  <span class="text-[9px] font-bold text-slate-500 w-full break-words line-clamp-2">${item.fileName}</span>
                                </div>`
                         }
