@@ -12053,19 +12053,18 @@
             if (isDoc) {
                 // Đóng ảnh
                 if (imgEl) imgEl.style.display = 'none';
-                
-                if (iframeEl) {
-                    const fileUrl = encodeURIComponent(item.url);
-                    
+
                 if (isPdf) {
-                    // Dùng Google Docs Viewer thay thế — tương thích tốt hơn với Cloudinary URL
-                    iframeEl.src = `https://docs.google.com/gview?embedded=true&url=${fileUrl}`;
-                    } else {
-                        // Đối với Word/Excel, dùng Office Viewer và kẹp thêm đuôi t=Date.now() để chống lỗi lưu cache trắng màn hình
+                    // Dùng pdf.js để render PDF từ Cloudinary
+                    if (iframeEl) iframeEl.style.display = 'none';
+                    this._renderPDF(item.url);
+                } else {
+                    // Đối với Word/Excel, dùng Office Viewer
+                    if (iframeEl) {
+                        const fileUrl = encodeURIComponent(item.url);
                         iframeEl.src = `https://view.officeapps.live.com/op/embed.aspx?src=${fileUrl}&t=${Date.now()}`;
+                        iframeEl.style.display = 'block';
                     }
-                    
-                    iframeEl.style.display = 'block';
                 }
             } else {
                 // Xử lý hiển thị Hình ảnh
