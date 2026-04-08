@@ -11926,8 +11926,16 @@
         _rotation: 0, _scale: 1,
 
         openCloud(idx) {
-            if (!window._cloudImages || !window._cloudImages.length) return;
-            this._imgs = window._cloudImages.map(i => ({ url: i.url, cat: 'cloud' }));
+            if (!window._cloudItems || !window._cloudItems.length) return;
+            this._imgs = window._cloudItems.map(i => {
+                const isImg = i.url.match(/\.(jpeg|jpg|gif|png|webp)/i) != null || i.url.includes('image');
+                return { 
+                    url: i.url, 
+                    cat: 'cloud',
+                    type: isImg ? 'image' : 'document',
+                    name: i.fileName // Dùng tên file làm tiêu đề
+                };
+            });
             this._id = 'cloud';
             this._idx = idx;
             this._resetTransform();
@@ -11941,7 +11949,7 @@
             const item = App.find(id);
             if (!item || !item.sceneDiagram) return;
             this._id = id; this._idx = 0;
-            this._imgs = [{ url: item.sceneDiagram, cat: 'scene' }];
+            this._imgs = [{ url: item.sceneDiagram, cat: 'scene', type: 'image' }];
             this._resetTransform();
             this._render();
             document.getElementById('img-viewer').classList.add('open');
@@ -11950,7 +11958,11 @@
 
         open(id, idx) {
             this._id  = id; this._idx = idx;
-            this._imgs = (App.find(id)?.documentImages || []).map(i => typeof i === 'string' ? { url: i, cat: 'other' } : i);
+            this._imgs = (App.find(id)?.documentImages || []).map(i => {
+                if (typeof i === 'string') return { url: i, cat: 'other', type: 'image' };
+                const isImg = i.url.match(/\.(jpeg|jpg|gif|png|webp)/i) != null || i.url.includes('image');
+                return { ...i, type: isImg ? 'image' : 'document' };
+            });
             if (!this._imgs.length) return;
             this._resetTransform();
             this._render();
@@ -11958,7 +11970,12 @@
             this._bindSwipe();
         },
 
-        close() { document.getElementById('img-viewer').classList.remove('open'); },
+        close() { 
+            document.getElementById('img-viewer').classList.remove('open'); 
+            // Xóa iframe src để ngắt load/giải phóng bộ nhớ
+            const iframeEl = document.getElementById('img-viewer-iframe');
+            if (iframeEl) iframeEl.src = '';
+        },
 
         _resetTransform() {
             this._rotation = 0;
@@ -11968,7 +11985,6 @@
 
         rotate() {
             this._rotation = (this._rotation + 90) % 360;
-            // Tự động scale nhỏ lại nếu xoay ngang để không bị tràn màn hình đt
             if (this._rotation === 90 || this._rotation === 270) {
                 this._scale = 0.8;
             } else {
@@ -11992,38 +12008,61 @@
         },
 
         _render() {
-            const el  = document.getElementById('img-viewer-img');
-            const cat = document.getElementById('iv-cat');
-            const cnt = document.getElementById('iv-count');
-            const dots = document.getElementById('iv-dots');
-            const actions = document.querySelector('.iv-actions');
+            const imgEl    = document.getElementById('img-viewer-img');
+            const iframeEl = document.getElementById('img-viewer-iframe');
+            const cat      = document.getElementById('iv-cat');
+            const cnt      = document.getElementById('iv-count');
+            const dots     = document.getElementById('iv-dots');
+            const actions  = document.querySelector('.iv-actions');
             
-            const img = this._imgs[this._idx];
-            if (!img || !el) return;
+            const item = this._imgs[this._idx];
+            if (!item) return;
             
-            el.src = img.url || img;
             this._resetTransform();
 
-            const catInfo = IMG_CATS[img.cat] || { label: 'Cloud Cá Nhân', emoji: '☁️' };
-            if (cat) cat.textContent = catInfo.emoji + ' ' + catInfo.label;
+            const isDoc = item.type === 'document';
+
+            // XỬ LÝ HIỂN THỊ DỰA VÀO LOẠI FILE
+            if (isDoc) {
+                if (imgEl) imgEl.style.display = 'none';
+                if (iframeEl) {
+                    // Dùng Google Docs Viewer nhúng qua iframe
+                    const fileUrl = encodeURIComponent(item.url);
+                    iframeEl.src = `https://docs.google.com/gview?url=${fileUrl}&embedded=true`;
+                    iframeEl.style.display = 'block';
+                }
+            } else {
+                if (iframeEl) iframeEl.style.display = 'none';
+                if (imgEl) {
+                    imgEl.src = item.url;
+                    imgEl.style.display = 'block';
+                }
+            }
+
+            const catInfo = IMG_CATS[item.cat] || { label: 'Cloud Cá Nhân', emoji: '☁️' };
+            if (cat) cat.textContent = catInfo.emoji + ' ' + (item.name || catInfo.label);
             if (cnt) cnt.textContent = `${this._idx + 1} / ${this._imgs.length}`;
             if (dots) dots.innerHTML = this._imgs.map((_, i) => `<div class="iv-dot ${i === this._idx ? 'on' : ''}"></div>`).join('');
             
             const arrows = document.querySelector('.iv-arrow');
             if (arrows) arrows.style.display = this._imgs.length > 1 ? 'flex' : 'none';
 
-            // Cập nhật lại thanh công cụ để thêm nút Zoom và Rotate
+            // CẬP NHẬT THANH CÔNG CỤ (Ẩn xoay/zoom nếu là PDF/Word)
             if (actions) {
                 actions.innerHTML = `
-                    <div class="flex gap-2">
-                        <button class="iv-btn" onclick="ImageViewer.zoom('out')"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
-                        <button class="iv-btn" onclick="ImageViewer.zoom('in')"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
-                        <button class="iv-btn" onclick="ImageViewer.rotate()"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>
-                    </div>
-                    <div class="flex gap-2 ml-4">
-                        <button class="iv-action" onclick="ImageViewer.download()"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
-                        <button class="iv-action" onclick="ImageViewer.share()"><i data-lucide="share-2" class="w-3.5 h-3.5"></i></button>
-                        ${this._id !== 'cloud' ? `<button class="iv-action del" onclick="ImageViewer.remove()"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>` : ''}
+                    <div class="flex gap-2 w-full justify-between max-w-sm">
+                        <div class="flex gap-2">
+                            ${!isDoc ? `
+                            <button class="iv-btn" onclick="ImageViewer.zoom('out')"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
+                            <button class="iv-btn" onclick="ImageViewer.zoom('in')"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
+                            <button class="iv-btn" onclick="ImageViewer.rotate()"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>
+                            ` : '<div style="width:130px"></div>'}
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="iv-action" onclick="ImageViewer.download()"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
+                            <button class="iv-action" onclick="ImageViewer.share()"><i data-lucide="share-2" class="w-3.5 h-3.5"></i></button>
+                            ${this._id !== 'cloud' ? `<button class="iv-action del" onclick="ImageViewer.remove()"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>` : ''}
+                        </div>
                     </div>
                 `;
                 lucide.createIcons();
@@ -12036,7 +12075,9 @@
         download() {
             const url = this._imgs[this._idx]?.url || this._imgs[this._idx];
             if (!url) return;
-            const a = document.createElement('a'); a.href = url; a.download = 'anh_' + Date.now() + '.jpg';
+            const a = document.createElement('a'); 
+            a.href = url; 
+            a.download = this._imgs[this._idx].name || ('file_' + Date.now());
             a.target = '_blank'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
         },
 
@@ -12047,7 +12088,7 @@
                 try { await navigator.share({ url }); } catch (_) {}
             } else {
                 navigator.clipboard?.writeText(url);
-                Toast.fire({ icon: 'success', title: 'Đã sao chép link ảnh!' });
+                Toast.fire({ icon: 'success', title: 'Đã sao chép link!' });
             }
         },
 
@@ -12063,7 +12104,7 @@
             let sx = 0;
             el.ontouchstart = e => { sx = e.touches[0].clientX; };
             el.ontouchend   = e => {
-                // Nếu đang zoom to thì tắt vuốt chuyển ảnh để dễ xem chi tiết
+                // Vô hiệu hóa vuốt đổi ảnh khi đang zoom
                 if (this._scale > 1) return;
                 
                 const dx = e.changedTouches[0].clientX - sx;
@@ -15336,7 +15377,6 @@
             const filteredItems = this._getFilteredItems();
             countLabel.textContent = filteredItems.length > 0 ? `Đã lưu ${filteredItems.length} file` : 'Chưa có file nào';
             
-            // Xử lý ẩn hiện nút Chọn và thanh Xóa
             if (filteredItems.length > 0) {
                 selectBtn.classList.remove('hidden');
                 selectBtn.textContent = this._selectMode ? 'Hủy chọn' : 'Chọn';
@@ -15363,7 +15403,6 @@
                 return;
             }
 
-            // Gom nhóm theo ngày
             const groups = {};
             filteredItems.forEach(item => {
                 const m = moment(item.timestamp);
@@ -15375,8 +15414,8 @@
                 groups[dateKey].push(item);
             });
 
-            // Lọc riêng mảng ảnh để đưa vào ImageViewer
-            window._cloudImages = filteredItems.filter(i => i.url.match(/\.(jpeg|jpg|gif|png|webp)/i) || i.url.includes('image'));
+            // LƯU TOÀN BỘ FILE (ẢNH + DOC) VÀO MẢNG ĐỂ XEM
+            window._cloudItems = filteredItems;
 
             let html = '';
             for (const [date, items] of Object.entries(groups)) {
@@ -15391,19 +15430,22 @@
                     const wrapClasses = isSelected ? 'border-rose-500 scale-95' : 'border-slate-200';
                     const checkClasses = isSelected ? '' : 'hidden';
 
-                    // Lấy index của ảnh này trong mảng ảnh chung để truyền vào Viewer
-                    const imgIndex = isImg ? window._cloudImages.findIndex(img => img.key === item.key) : -1;
+                    // Lấy index chung để vuốt qua lại giữa các file
+                    const itemIndex = window._cloudItems.findIndex(i => i.key === item.key);
                     
                     const clickAction = this._selectMode 
                         ? `MyCloud.toggleSelect('${item.key}')` 
-                        : (isImg ? `ImageViewer.openCloud(${imgIndex})` : `window.open('${item.url}', '_blank')`);
+                        : `ImageViewer.openCloud(${itemIndex})`;
 
                     return `
                     <div class="relative w-full aspect-square rounded-xl overflow-hidden border-2 bg-white shadow-sm transition-all cursor-pointer ${wrapClasses}" 
                          id="mc-wrap-${item.key}" onclick="${clickAction}">
                         ${isImg 
                             ? `<img src="${item.url}" loading="lazy" class="w-full h-full object-cover">`
-                            : `<div class="w-full h-full flex flex-col items-center justify-center bg-slate-50"><i data-lucide="file-text" class="w-8 h-8 text-blue-400 mb-1"></i><span class="text-[9px] font-bold text-slate-500 px-2 truncate w-full text-center">${item.fileName}</span></div>`
+                            : `<div class="w-full h-full flex flex-col items-center justify-center bg-slate-50 p-2 text-center">
+                                 <i data-lucide="file-text" class="w-8 h-8 text-blue-400 mb-2"></i>
+                                 <span class="text-[9px] font-bold text-slate-500 w-full break-words line-clamp-2">${item.fileName}</span>
+                               </div>`
                         }
                         
                         <div id="mc-chk-${item.key}" class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-rose-500 border-2 border-white flex items-center justify-center shadow-md transition-all ${checkClasses} z-10">
@@ -15575,8 +15617,8 @@
             <button class="iv-btn" onclick="ImageViewer.close()">
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
             </button>
-            <div class="text-center">
-                <p id="iv-cat" class="text-[11px] font-black text-white uppercase tracking-widest"></p>
+            <div class="text-center" style="flex:1; padding: 0 10px; overflow: hidden;">
+                <p id="iv-cat" class="text-[11px] font-black text-white uppercase tracking-widest truncate"></p>
                 <p id="iv-count" class="text-[10px] text-white/50 font-bold mt-0.5"></p>
             </div>
             <div style="width:38px"></div>
@@ -15589,22 +15631,13 @@
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M6 4l4 4-4 4"/></svg>
             </button>
         </div>
-        <img id="img-viewer-img" src="" alt="">
+        
+        <img id="img-viewer-img" src="" alt="" style="display:none;">
+        
+        <iframe id="img-viewer-iframe" src="" style="display:none; width:94vw; height:72vh; border-radius:14px; border:none; background:#fff;"></iframe>
+        
         <div class="iv-dots" id="iv-dots"></div>
-        <div class="iv-actions">
-            <button class="iv-action" onclick="ImageViewer.download()">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Tải xuống
-            </button>
-            <button class="iv-action" onclick="ImageViewer.share()">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                Chia sẻ
-            </button>
-            <button class="iv-action del" onclick="ImageViewer.remove()">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-                Xóa
-            </button>
-        </div>
+        <div class="iv-actions" style="width: 100%; justify-content: center; padding: 0 16px;"></div>
     </div>
 
     <!-- AI PANEL -->
