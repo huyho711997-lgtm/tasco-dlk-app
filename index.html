@@ -15971,6 +15971,7 @@
         },
 
         // --- CHÈN THÊM HÀM NÀY VÀO TRƯỚC DẤU ĐÓNG CỦA MyCloud ---
+        // --- ĐÃ SỬA LỖI TÍNH TOÁN DUNG LƯỢNG CLOUDINARY ---
         async updateQuota() {
             const bar = document.getElementById('mycloud-quota-bar');
             const text = document.getElementById('mycloud-quota-text');
@@ -15988,7 +15989,12 @@
                 
                 if (result.success && result.storage) {
                     const usedBytes = result.storage.usage;
-                    const limitBytes = result.storage.limit; 
+                    
+                    // SỬA Ở ĐÂY: Gói Free của Cloudinary cho tối đa 25GB lưu trữ
+                    // Ta quy đổi 25GB ra bytes (25 * 1024 * 1024 * 1024)
+                    const limitBytes = 25 * 1024 * 1024 * 1024; 
+                    
+                    // Tính phần trăm
                     const percent = Math.min((usedBytes / limitBytes) * 100, 100).toFixed(1);
 
                     const formatSize = (bytes) => {
@@ -16010,15 +16016,12 @@
                         }
                     }
                     if (text) {
-                        text.textContent = `${formatSize(usedBytes)} / ${formatSize(limitBytes)} (${percent}%)`;
+                        text.textContent = `${formatSize(usedBytes)} / 25 GB (${percent}%)`;
                     }
                 } else {
-                    // In lỗi thẳng ra màn hình để biết tại sao
-                    if (text) text.textContent = "Lỗi: " + (result.error || "Không rõ");
-                    console.log("CHI TIẾT LỖI TỪ SERVER:", result);
+                    if (text) text.textContent = "Không lấy được dữ liệu";
                 }
             } catch (error) {
-                console.error("Lỗi lấy dung lượng:", error);
                 if (text) text.textContent = "Lỗi kết nối";
             }
         }
