@@ -15742,12 +15742,37 @@
                 preConfirm: () => document.getElementById('mc-note-input').value.trim()
             });
 
-            // Nếu người dùng bấm Hủy (trả về undefined) -> Dừng tải
             if (noteText === undefined) return;
 
-            const loadingEl = document.getElementById('mycloud-loading');
-            const loadingText = document.getElementById('mycloud-loading-text');
-            loadingEl.classList.remove('hidden');
+            // =========================================================
+            // GIAO DIỆN LOADING MỚI CHUYÊN NGHIỆP ĐỒNG BỘ VỚI APP
+            // =========================================================
+            const totalFiles = files.length;
+            let uploadedCount = 0;
+
+            Swal.fire({
+                html: `
+                    <div style="display:flex; flex-direction:column; align-items:center; padding: 20px 0 10px;">
+                        <div style="position:relative; width:68px; height:68px; border-radius:50%; background:linear-gradient(135deg, #06b6d4, #3b82f6); display:flex; align-items:center; justify-content:center; box-shadow:0 8px 25px rgba(6, 182, 212, 0.4); margin-bottom:20px;">
+                            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="position:absolute; animation:img-spin 1.2s linear infinite; opacity:0.8;">
+                                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                            </svg>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position:relative; z-index:10; transform: translateY(-2px);">
+                                <path d="M12 12v9"/><path d="m16 16-4-4-4 4"/><path d="M4.39 9c0-3.31 2.69-6 6-6h1.22c2.05 0 3.86 1.34 4.39 3.25A5.5 5.5 0 0 1 20 11.5a5.5 5.5 0 0 1-5.5 5.5H16"/>
+                            </svg>
+                        </div>
+                        <p style="font-size:18px; font-weight:900; color:var(--text-primary, #0f172a); margin:0;">Đang đồng bộ lên Cloud</p>
+                        <div style="display:flex; align-items:center; gap:8px; margin-top:14px; background:var(--bg-surface, #f8fafc); padding:8px 16px; border-radius:12px; border:1px solid var(--border-light, #e2e8f0);">
+                            <span class="animate-pulse" style="width:8px; height:8px; background:#06b6d4; border-radius:50%; box-shadow:0 0 8px rgba(6,182,212,0.8);"></span>
+                            <span style="font-size:13px; font-weight:800; color:var(--text-secondary, #64748b);" id="mc-upload-progress">Hoàn tất 0 / ${totalFiles} file</span>
+                        </div>
+                    </div>
+                `,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                customClass: { popup: 'custom-rounded' }
+            });
+            // =========================================================
 
             const uploadPromises = files.map(async (file, i) => {
                 try {
@@ -15770,14 +15795,21 @@
                             if (!finalUrl.toLowerCase().endsWith('.pdf')) finalUrl += '.pdf';
                         }
 
-                        // Lưu vào Firebase kèm theo Ghi chú (note)
+                        // Lưu vào Firebase kèm theo Ghi chú (note) và Size
                         return db.ref(`Users/${user.id}/myCloud/${newKey}`).set({
                             url: finalUrl,
                             fileName: file.name,
                             fileType: isPdfUpload ? 'pdf' : (file.type || 'other'),
                             timestamp: Date.now(),
-                            note: noteText || '' // Lưu giá trị note
-                        }).then(() => true);
+                            note: noteText || '',
+                            size: file.size || 0
+                        }).then(() => {
+                            // CẬP NHẬT GIAO DIỆN SỐ ĐẾM KHI 1 FILE XONG
+                            uploadedCount++;
+                            const progressText = document.getElementById('mc-upload-progress');
+                            if (progressText) progressText.textContent = `Hoàn tất ${uploadedCount} / ${totalFiles} file`;
+                            return true;
+                        });
                     }
                     return false;
                 } catch (e) {
@@ -15785,19 +15817,19 @@
                     return false;
                 }
             });
-
-            loadingText.textContent = `Đang tải lên ${files.length} file...`;
             
             const results = await Promise.all(uploadPromises);
             const successCount = results.filter(r => r === true).length;
 
-            loadingEl.classList.add('hidden');
+            Swal.close(); // ĐÓNG GIAO DIỆN CHỜ
+            
             if (successCount > 0) {
                 Toast.fire({ icon: 'success', title: `Đã lưu ${successCount} file lên Cloud!` });
             } else {
                 Toast.fire({ icon: 'error', title: 'Tải lên thất bại!' });
             }
-            this.updateQuota(); // Làm mới dung lượng sau khi up
+            
+            this.updateQuota(); // Làm mới thanh dung lượng
         },
 
         // 1. HÀM XÓA CÓ ANIMATION MƯỢT MÀ VÀ XÓA TẬN GỐC CLOUDINARY
