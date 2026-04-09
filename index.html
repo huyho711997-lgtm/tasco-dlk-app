@@ -1879,27 +1879,42 @@
         /* ============================================================
            HIỆU ỨNG GIỌT NƯỚC (LIQUID) BOTTOM NAV
            ============================================================ */
+        /* Đảm bảo giọt nước luôn nằm dưới cùng */
         .liquid-indicator {
             position: absolute;
-            top: 8px; /* Khớp chính xác với chiều cao của icon-wrap */
+            top: 8px; 
             left: 0;
             width: 32px;
             height: 32px;
-            background-color: #eff6ff;
+            background-color: #eff6ff; /* Màu nền giọt nước ở chế độ sáng */
             border-radius: 50%;
-            z-index: 1; /* Nằm dưới icon nhưng trên nền nav */
+            z-index: 0; /* Đưa xuống lớp thấp nhất */
             pointer-events: none;
-            /* Lướt mượt mà khi đổi vị trí left */
             transition: left 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
         }
-        
-        [data-theme="dark"] .liquid-indicator {
-            background-color: rgba(59, 130, 246, 0.2);
+
+        /* Đảm bảo Icon và chữ luôn nổi lên trên giọt nước */
+        .nav-btn {
+            position: relative;
+            z-index: 10; /* Đẩy toàn bộ nút lên trên */
         }
+
+        .nav-icon-wrap { 
+            position: relative; 
+            z-index: 20; /* Đẩy riêng phần icon lên cao nhất */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Fix màu cho giọt nước trong Dark Mode để không bị chói */
+        [data-theme="dark"] .liquid-indicator {
+            background-color: rgba(59, 130, 246, 0.25);
+        }
+        
 
         /* Ẩn cái nền tĩnh mặc định cũ đi vì đã có giọt nước chạy */
         .nav-btn.bottom-nav-active .nav-icon-wrap { background-color: transparent !important; }
-        .nav-icon-wrap { position: relative; z-index: 2; }
 
         /* Animation khi giọt nước lướt qua (bị ép dẹp lại theo chiều ngang) */
         .liquid-stretching {
