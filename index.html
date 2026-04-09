@@ -16013,9 +16013,12 @@
                         text.textContent = `${formatSize(usedBytes)} / ${formatSize(limitBytes)} (${percent}%)`;
                     }
                 } else {
-                    if (text) text.textContent = "Không lấy được dữ liệu";
+                    // In lỗi thẳng ra màn hình để biết tại sao
+                    if (text) text.textContent = "Lỗi: " + (result.error || "Không rõ");
+                    console.log("CHI TIẾT LỖI TỪ SERVER:", result);
                 }
             } catch (error) {
+                console.error("Lỗi lấy dung lượng:", error);
                 if (text) text.textContent = "Lỗi kết nối";
             }
         }
