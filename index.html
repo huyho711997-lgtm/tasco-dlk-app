@@ -2464,10 +2464,23 @@
                     </div>
                 </div>
 
-                <div class="flex gap-1 bg-slate-100 p-1 rounded-xl">
+                <div class="flex gap-1 bg-slate-100 p-1 rounded-xl mb-3">
                     <button class="cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-cyan-600 shadow-sm" onclick="MyCloud.setTab('all', this)">Tất cả</button>
                     <button class="cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500" onclick="MyCloud.setTab('image', this)">Hình ảnh</button>
                     <button class="cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500" onclick="MyCloud.setTab('document', this)">Tài liệu</button>
+                </div>
+
+                <div id="mycloud-quota-container" class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm transition-all">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center gap-1.5">
+                            <i data-lucide="hard-drive" class="w-3.5 h-3.5 text-slate-400"></i>
+                            <span class="text-[10px] font-black text-slate-500 uppercase tracking-wider">Dung lượng Cloud</span>
+                        </div>
+                        <span class="text-[10px] font-black text-cyan-600 bg-cyan-50 px-2 py-0.5 rounded-md" id="mycloud-quota-text">Đang tải...</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                        <div id="mycloud-quota-bar" class="h-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-700 ease-out" style="width: 0%"></div>
+                    </div>
                 </div>
 
                 <div id="mycloud-delete-bar" class="hidden mt-3 p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center transition-all">
@@ -15497,6 +15510,7 @@
                 }
             });
             this._isInit = true;
+            this.updateQuota(); // Kích hoạt lấy dung lượng lần đầu
         },
 
         setTab(tab, btn) {
@@ -15783,6 +15797,7 @@
             } else {
                 Toast.fire({ icon: 'error', title: 'Tải lên thất bại!' });
             }
+            this.updateQuota(); // Làm mới dung lượng sau khi up
         },
 
         // 1. HÀM XÓA CÓ ANIMATION MƯỢT MÀ VÀ XÓA TẬN GỐC CLOUDINARY
@@ -15851,6 +15866,7 @@
                         this._selectMode = false;
                         this._selectedKeys.clear();
                         this.render();
+                        this.updateQuota(); // Làm mới dung lượng sau khi xóa
                     });
                 }
             });
@@ -15952,6 +15968,56 @@
                     document.body.removeChild(a);
                 }, index * 600); // Trễ 600ms mỗi file để trình duyệt không chặn pop-up
             });
+        },
+
+        // --- CHÈN THÊM HÀM NÀY VÀO TRƯỚC DẤU ĐÓNG CỦA MyCloud ---
+        async updateQuota() {
+            const bar = document.getElementById('mycloud-quota-bar');
+            const text = document.getElementById('mycloud-quota-text');
+            
+            if (text) text.textContent = "Đang đồng bộ...";
+
+            try {
+                const res = await fetch(CONFIG.exportWordUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'get_cloudinary_usage' })
+                });
+                
+                const result = await res.json();
+                
+                if (result.success && result.storage) {
+                    const usedBytes = result.storage.usage;
+                    const limitBytes = result.storage.limit; 
+                    const percent = Math.min((usedBytes / limitBytes) * 100, 100).toFixed(1);
+
+                    const formatSize = (bytes) => {
+                        if (bytes === 0) return '0 MB';
+                        const k = 1024;
+                        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                        const i = Math.floor(Math.log(bytes) / Math.log(k));
+                        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                    };
+
+                    if (bar) {
+                        bar.style.width = `${percent}%`;
+                        if (percent > 90) {
+                            bar.className = 'h-full bg-gradient-to-r from-orange-400 to-rose-500 transition-all duration-700 ease-out';
+                            text.className = 'text-[10px] font-black text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md';
+                        } else {
+                            bar.className = 'h-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-700 ease-out';
+                            text.className = 'text-[10px] font-black text-cyan-600 bg-cyan-50 px-2 py-0.5 rounded-md';
+                        }
+                    }
+                    if (text) {
+                        text.textContent = `${formatSize(usedBytes)} / ${formatSize(limitBytes)} (${percent}%)`;
+                    }
+                } else {
+                    if (text) text.textContent = "Không lấy được dữ liệu";
+                }
+            } catch (error) {
+                if (text) text.textContent = "Lỗi kết nối";
+            }
         }
     };
 
