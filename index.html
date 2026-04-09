@@ -15702,7 +15702,7 @@
             if (this._selectedKeys.size === 0) return;
             Swal.fire({
                 title: `Xóa ${this._selectedKeys.size} file?`,
-                text: "Dữ liệu sẽ bị xóa vĩnh viễn khỏi Cloud cá nhân.",
+                text: "Dữ liệu và file thực tế sẽ bị xóa vĩnh viễn khỏi Cloud.",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
@@ -15710,17 +15710,47 @@
                 confirmButtonText: 'Xóa vĩnh viễn',
                 cancelButtonText: 'Hủy',
                 customClass: { popup: 'custom-rounded' }
-            }).then((result) => {
+            }).then(async (result) => { // Chuyển callback thành async
                 if (result.isConfirmed) {
                     const user = Auth.getCurrentUser();
-                    Swal.fire({ title: 'Đang xóa...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    Swal.fire({ title: 'Đang dọn dẹp Cloud...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                     
+                    // 1. Lấy danh sách URL của các file cần xóa
+                    const keysToDelete = Array.from(this._selectedKeys);
+                    const urlsToDelete = keysToDelete.map(key => {
+                        const item = this.items.find(i => i.key === key);
+                        return item ? item.url : null;
+                    }).filter(Boolean);
+
+                    // 2. Gửi lệnh xóa song song lên Cloudinary thông qua AppScript
+                    const deletePromises = urlsToDelete.map(async (url) => {
+                        // Trích xuất publicId từ URL của Cloudinary
+                        const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[a-zA-Z0-9]+)?(?:\?.*)?$/);
+                        const pubId = match ? match[1] : null;
+                        
+                        if (pubId) {
+                            try {
+                                await fetch(CONFIG.exportWordUrl, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                                    body: JSON.stringify({ action: 'delete_cloudinary', publicId: pubId })
+                                });
+                            } catch (err) {
+                                console.error('Lỗi xóa file trên Cloudinary:', err);
+                            }
+                        }
+                    });
+
+                    // Chờ tất cả lệnh xóa vật lý hoàn tất (Dùng allSettled để nếu 1 file lỗi mạng thì các file khác vẫn được xử lý)
+                    await Promise.allSettled(deletePromises);
+
+                    // 3. Xóa dữ liệu trên Firebase
                     const updates = {};
                     this._selectedKeys.forEach(key => updates[key] = null);
                     
                     db.ref(`Users/${user.id}/myCloud`).update(updates).then(() => {
                         Swal.close();
-                        Toast.fire({ icon: 'success', title: 'Đã xóa file!' });
+                        Toast.fire({ icon: 'success', title: 'Đã xóa file sạch sẽ khỏi hệ thống!' });
                         this._selectMode = false;
                         this._selectedKeys.clear();
                         this.render();
