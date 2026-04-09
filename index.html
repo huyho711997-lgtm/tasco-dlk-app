@@ -219,8 +219,8 @@
 
         body { background-color: var(--bg-app); transition: background-color 0.3s ease, color 0.3s ease; }
         
-        /* 1. TẮT TOÀN BỘ HIỆU ỨNG ĐỔ BÓNG (GLOW/SHADOW) */
-        [data-theme="dark"] * { box-shadow: none !important; }
+        /* 1. TẮT TOÀN BỘ HIỆU ỨNG ĐỔ BÓNG (GLOW/SHADOW) - Ngoại trừ Bottom Nav */
+        [data-theme="dark"] *:not(.bottom-nav-wrapper) { box-shadow: none !important; }
 
         /* 2. RESET NỀN CƠ BẢN */
         [data-theme="dark"] body { color: var(--text-primary); }
