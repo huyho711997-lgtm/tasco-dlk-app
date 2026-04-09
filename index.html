@@ -2467,15 +2467,20 @@
                 <button class="cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500" onclick="MyCloud.setTab('document', this)">Tài liệu</button>
             </div>
 
-            <div id="mycloud-delete-bar" class="hidden mb-4 p-3 bg-rose-50 border border-rose-200 rounded-xl flex justify-between items-center transition-all">
+            <div id="mycloud-delete-bar" class="hidden mb-4 p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center transition-all">
                 <div class="flex items-center gap-2">
-                    <button onclick="MyCloud.selectAll()" class="text-rose-600 text-xs font-bold underline">Chọn tất cả</button>
-                    <span class="text-rose-400 text-xs">|</span>
-                    <span class="text-rose-600 font-black text-xs" id="mycloud-selected-count">Đã chọn 0</span>
+                    <button onclick="MyCloud.selectAll()" class="text-blue-600 text-xs font-bold underline">Chọn tất cả</button>
+                    <span class="text-slate-300 text-xs">|</span>
+                    <span class="text-slate-700 font-black text-xs" id="mycloud-selected-count">Đã chọn 0</span>
                 </div>
-                <button onclick="MyCloud.deleteSelected()" class="bg-rose-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 active:scale-95 shadow-sm shadow-rose-200">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Xóa
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="MyCloud.downloadSelected()" class="bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 active:scale-95 shadow-sm shadow-emerald-200 transition-opacity">
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i> Tải
+                    </button>
+                    <button onclick="MyCloud.deleteSelected()" class="bg-rose-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 active:scale-95 shadow-sm shadow-rose-200 transition-opacity">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Xóa
+                    </button>
+                </div>
             </div>
             
             <div id="mycloud-loading" class="hidden text-center py-4">
@@ -15521,8 +15526,54 @@
         _updateDeleteBar() {
             const count = this._selectedKeys.size;
             document.getElementById('mycloud-selected-count').textContent = `Đã chọn ${count}`;
-            document.querySelector('#mycloud-delete-bar button').style.opacity = count > 0 ? '1' : '0.5';
-            document.querySelector('#mycloud-delete-bar button').style.pointerEvents = count > 0 ? 'auto' : 'none';
+            // Cập nhật mờ/sáng cho cả nút Xóa và Tải
+            const actionBtns = document.querySelectorAll('#mycloud-delete-bar button:not(:first-child)');
+            actionBtns.forEach(btn => {
+                btn.style.opacity = count > 0 ? '1' : '0.5';
+                btn.style.pointerEvents = count > 0 ? 'auto' : 'none';
+            });
+        },
+
+        // HÀM MỚI: TẢI XUỐNG HÀNG LOẠT
+        downloadSelected() {
+            if (this._selectedKeys.size === 0) return;
+            
+            const keysToDownload = Array.from(this._selectedKeys);
+            const itemsToDownload = keysToDownload.map(key => this.items.find(i => i.key === key)).filter(Boolean);
+            
+            if (itemsToDownload.length === 0) return;
+
+            Toast.fire({ icon: 'info', title: `Đang tải xuống ${itemsToDownload.length} file...` });
+
+            // Tải từng file với độ trễ nhỏ để trình duyệt không chặn popup tải nhiều file
+            itemsToDownload.forEach((item, index) => {
+                setTimeout(() => {
+                    const a = document.createElement('a');
+                    a.href = item.url;
+                    
+                    // Nếu có ghi chú, ghép ghi chú vào tên file để dễ phân biệt
+                    let dlName = item.fileName || ('TascoCloud_' + Date.now() + '.jpg');
+                    if (item.note) {
+                        const extMatch = dlName.match(/\.[^/.]+$/);
+                        const ext = extMatch ? extMatch[0] : '';
+                        const baseName = dlName.replace(ext, '');
+                        // Chuyển ghi chú thành dạng không dấu, gạch ngang để tên file an toàn
+                        const safeNote = item.note.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '_');
+                        dlName = `${safeNote}_${baseName}${ext}`;
+                    }
+                    
+                    a.download = dlName;
+                    a.target = '_blank';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }, index * 600); // 600ms / 1 file
+            });
+            
+            // Thoát chế độ chọn sau khi tải xong
+            this._selectMode = false;
+            this._selectedKeys.clear();
+            this.render();
         },
 
         _getFilteredItems() {
@@ -15548,8 +15599,8 @@
             if (filteredItems.length > 0) {
                 selectBtn.classList.remove('hidden');
                 selectBtn.textContent = this._selectMode ? 'Hủy chọn' : 'Chọn';
-                selectBtn.classList.toggle('bg-rose-100', this._selectMode);
-                selectBtn.classList.toggle('text-rose-600', this._selectMode);
+                selectBtn.classList.toggle('bg-blue-100', this._selectMode);
+                selectBtn.classList.toggle('text-blue-700', this._selectMode);
             } else {
                 selectBtn.classList.add('hidden');
                 this._selectMode = false;
@@ -15582,7 +15633,6 @@
                 groups[dateKey].push(item);
             });
 
-            // LƯU TOÀN BỘ FILE (ẢNH + DOC) VÀO MẢNG ĐỂ XEM
             window._cloudItems = filteredItems;
 
             let html = '';
@@ -15596,15 +15646,19 @@
                     const isImg = item.url.match(/\.(jpeg|jpg|gif|png|webp)/i) != null && !item.fileName?.toLowerCase().includes('.pdf');
                     const isPdf = item.fileName?.toLowerCase().includes('.pdf') || item.url.toLowerCase().includes('.pdf');
                     const isSelected = this._selectedKeys.has(item.key);
-                    const wrapClasses = isSelected ? 'border-rose-500 scale-95' : 'border-slate-200';
+                    const wrapClasses = isSelected ? 'border-blue-500 scale-95 ring-2 ring-blue-200' : 'border-slate-200';
                     const checkClasses = isSelected ? '' : 'hidden';
 
-                    // Lấy index chung để vuốt qua lại giữa các file
                     const itemIndex = window._cloudItems.findIndex(i => i.key === item.key);
                     
                     const clickAction = this._selectMode 
                         ? `MyCloud.toggleSelect('${item.key}')` 
                         : `ImageViewer.openCloud(${itemIndex})`;
+
+                    // Khối HTML hiển thị Tag ghi chú nếu có
+                    const noteTag = item.note 
+                        ? `<div class="absolute top-1.5 left-1.5 right-1.5 z-10"><div class="bg-black/60 backdrop-blur-sm text-white px-1.5 py-0.5 rounded text-[8px] font-bold truncate border border-white/20">${item.note}</div></div>` 
+                        : '';
 
                     return `
                     <div class="relative w-full aspect-square rounded-xl overflow-hidden border-2 bg-white shadow-sm transition-all cursor-pointer ${wrapClasses}" 
@@ -15618,7 +15672,9 @@
                                </div>`
                         }
                         
-                        <div id="mc-chk-${item.key}" class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-rose-500 border-2 border-white flex items-center justify-center shadow-md transition-all ${checkClasses} z-10">
+                        ${noteTag}
+                        
+                        <div id="mc-chk-${item.key}" class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center shadow-md transition-all ${checkClasses} z-20">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
                         </div>
                         
@@ -15643,11 +15699,25 @@
             const user = Auth.getCurrentUser();
             if (!user) return;
 
+            // HỎI NGƯỜI DÙNG CÓ MUỐN GHI CHÚ KHÔNG
+            const { value: noteText } = await Swal.fire({
+                title: 'Thêm ghi chú?',
+                html: '<p class="text-xs text-slate-500 mb-3">Phân loại ảnh (VD: Cản trước, Báo giá, Góc trái...) để dễ tìm và tải về sau này.</p><input id="mc-note-input" class="input-field" placeholder="Nhập ghi chú (Không bắt buộc)...">',
+                showCancelButton: true,
+                confirmButtonText: 'Tải lên ngay',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#06b6d4',
+                customClass: { popup: 'custom-rounded' },
+                preConfirm: () => document.getElementById('mc-note-input').value.trim()
+            });
+
+            // Nếu người dùng bấm Hủy (trả về undefined) -> Dừng tải
+            if (noteText === undefined) return;
+
             const loadingEl = document.getElementById('mycloud-loading');
             const loadingText = document.getElementById('mycloud-loading-text');
             loadingEl.classList.remove('hidden');
 
-            // TỐI ƯU: Chạy tất cả upload cùng lúc thay vì đợi từng file
             const uploadPromises = files.map(async (file, i) => {
                 try {
                     const fd = new FormData();
@@ -15669,12 +15739,13 @@
                             if (!finalUrl.toLowerCase().endsWith('.pdf')) finalUrl += '.pdf';
                         }
 
-                        // Lưu vào Firebase
+                        // Lưu vào Firebase kèm theo Ghi chú (note)
                         return db.ref(`Users/${user.id}/myCloud/${newKey}`).set({
                             url: finalUrl,
                             fileName: file.name,
                             fileType: isPdfUpload ? 'pdf' : (file.type || 'other'),
-                            timestamp: Date.now()
+                            timestamp: Date.now(),
+                            note: noteText || '' // Lưu giá trị note
                         }).then(() => true);
                     }
                     return false;
@@ -15684,9 +15755,8 @@
                 }
             });
 
-            loadingText.textContent = `Đang tải lên song song ${files.length} file...`;
+            loadingText.textContent = `Đang tải lên ${files.length} file...`;
             
-            // Đợi tất cả các tiến trình hoàn thành
             const results = await Promise.all(uploadPromises);
             const successCount = results.filter(r => r === true).length;
 
