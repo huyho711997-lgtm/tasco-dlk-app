@@ -2299,53 +2299,47 @@
 
         <!-- VIEW: CẢNH BÁO -->
         <div id="view-overdue" class="view-section p-5 hidden">
+            <div class="mb-5 mt-2">
+                <h2 class="text-xl font-black text-slate-800 tracking-tight">Tiến độ Xử lý</h2>
+                <p class="text-xs text-slate-500 font-medium mt-1">Phân loại hồ sơ theo các giai đoạn chính</p>
+            </div>
 
-            <!-- Tổng quan -->
-            <div class="grid grid-cols-2 gap-3 mb-5">
-                <div class="bg-rose-50 rounded-2xl p-3 border border-rose-100">
-                    <p class="text-[9px] font-black text-rose-500 uppercase mb-1">Trễ lịch hẹn</p>
-                    <p class="text-2xl font-black text-rose-600" id="wb-count-1">0</p>
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div onclick="ProgressBoard.switchTab(1)" id="pb-card-1" class="bg-blue-50 rounded-2xl p-3 border-2 border-blue-300 cursor-pointer transition-all active:scale-95 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-8 h-8 rounded-full bg-blue-200/60 flex items-center justify-center"><i data-lucide="inbox" class="w-4 h-4 text-blue-600"></i></div>
+                        <span class="text-3xl font-black text-blue-700 leading-none tracking-tight" id="pb-count-1">0</span>
+                    </div>
+                    <p class="text-[10px] font-black text-blue-600 uppercase tracking-wide">Tiếp nhận</p>
                 </div>
-                <div class="bg-amber-50 rounded-2xl p-3 border border-amber-100">
-                    <p class="text-[9px] font-black text-amber-500 uppercase mb-1">Chưa đặt hẹn</p>
-                    <p class="text-2xl font-black text-amber-600" id="wb-count-2">0</p>
+                <div onclick="ProgressBoard.switchTab(2)" id="pb-card-2" class="bg-amber-50 rounded-2xl p-3 border-2 border-transparent cursor-pointer transition-all active:scale-95 opacity-50 hover:opacity-100">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-8 h-8 rounded-full bg-amber-200/60 flex items-center justify-center"><i data-lucide="calendar-clock" class="w-4 h-4 text-amber-600"></i></div>
+                        <span class="text-3xl font-black text-amber-700 leading-none tracking-tight" id="pb-count-2">0</span>
+                    </div>
+                    <p class="text-[10px] font-black text-amber-600 uppercase tracking-wide">Lên lịch hẹn</p>
                 </div>
-                <div class="bg-purple-50 rounded-2xl p-3 border border-purple-100">
-                    <p class="text-[9px] font-black text-purple-500 uppercase mb-1">Chờ báo giá lâu</p>
-                    <p class="text-2xl font-black text-purple-600" id="wb-count-3">0</p>
+                <div onclick="ProgressBoard.switchTab(3)" id="pb-card-3" class="bg-cyan-50 rounded-2xl p-3 border-2 border-transparent cursor-pointer transition-all active:scale-95 opacity-50 hover:opacity-100">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-8 h-8 rounded-full bg-cyan-200/60 flex items-center justify-center"><i data-lucide="camera" class="w-4 h-4 text-cyan-600"></i></div>
+                        <span class="text-3xl font-black text-cyan-700 leading-none tracking-tight" id="pb-count-3">0</span>
+                    </div>
+                    <p class="text-[10px] font-black text-cyan-600 uppercase tracking-wide">Đã giám định</p>
                 </div>
-                <div class="bg-indigo-50 rounded-2xl p-3 border border-indigo-100">
-                    <p class="text-[9px] font-black text-indigo-500 uppercase mb-1">Chờ duyệt lâu</p>
-                    <p class="text-2xl font-black text-indigo-600" id="wb-count-4">0</p>
+                <div onclick="ProgressBoard.switchTab(4)" id="pb-card-4" class="bg-indigo-50 rounded-2xl p-3 border-2 border-transparent cursor-pointer transition-all active:scale-95 opacity-50 hover:opacity-100">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-8 h-8 rounded-full bg-indigo-200/60 flex items-center justify-center"><i data-lucide="file-spreadsheet" class="w-4 h-4 text-indigo-600"></i></div>
+                        <span class="text-3xl font-black text-indigo-700 leading-none tracking-tight" id="pb-count-4">0</span>
+                    </div>
+                    <p class="text-[10px] font-black text-indigo-600 uppercase tracking-wide">Đã có báo giá</p>
                 </div>
             </div>
 
-            <!-- Tabs -->
-            <div class="flex gap-1 bg-slate-100 rounded-2xl p-1 mb-4">
-                <button onclick="WarnBoard.switchTab(1, this)" id="wb-tab-1"
-                    class="wb-tab flex-1 py-1.5 rounded-xl text-[10px] font-black bg-white text-rose-600 shadow-sm transition-all">
-                    Trễ hẹn
-                </button>
-                <button onclick="WarnBoard.switchTab(2, this)" id="wb-tab-2"
-                    class="wb-tab flex-1 py-1.5 rounded-xl text-[10px] font-black text-slate-400 transition-all">
-                    Chưa hẹn
-                </button>
-                <button onclick="WarnBoard.switchTab(3, this)" id="wb-tab-3"
-                    class="wb-tab flex-1 py-1.5 rounded-xl text-[10px] font-black text-slate-400 transition-all">
-                    Chờ BG
-                </button>
-                <button onclick="WarnBoard.switchTab(4, this)" id="wb-tab-4"
-                    class="wb-tab flex-1 py-1.5 rounded-xl text-[10px] font-black text-slate-400 transition-all">
-                    Chờ duyệt
-                </button>
+            <div class="flex items-center justify-between mb-3 px-1">
+                <h3 class="font-black text-slate-700 text-sm" id="pb-list-title">Danh sách Mới tiếp nhận</h3>
             </div>
 
-            <!-- List panels -->
-            <div id="wb-panel-1" class="wb-panel space-y-3"></div>
-            <div id="wb-panel-2" class="wb-panel hidden space-y-3"></div>
-            <div id="wb-panel-3" class="wb-panel hidden space-y-3"></div>
-            <div id="wb-panel-4" class="wb-panel hidden space-y-3"></div>
-
+            <div id="pb-list-container" class="space-y-3 pb-20"></div>
         </div>
 
         <!-- VIEW: TIẾP NHẬN AI -->
@@ -2620,10 +2614,10 @@
 
         <button id="nav-overdue-btn" onclick="Nav.switchView('overdue', this)" class="nav-btn">
             <div class="nav-icon-wrap relative">
-                <i data-lucide="shield-alert" class="w-5 h-5"></i>
-                <span id="warn-nav-badge" class="hidden absolute -top-1 -right-1 w-3.5 h-3.5 bg-rose-500 text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none border-2 border-white"></span>
+                <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+                <span id="warn-nav-badge" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white text-[9px] font-black rounded-full flex items-center justify-center leading-none border-2 border-white"></span>
             </div>
-            <span class="text-[9px] font-bold">Cảnh báo</span>
+            <span class="text-[9px] font-bold">Tiến độ</span>
         </button>
         <button id="nav-calendar-btn" onclick="Nav.switchView('calendar', this)" class="nav-btn">
             <div class="nav-icon-wrap"><i data-lucide="calendar" class="w-5 h-5"></i></div>
@@ -5160,7 +5154,7 @@
 
     const Nav = {
         calendarInit: false,
-        viewTitles: { home: 'Trang chủ', list:'Hồ sơ bồi thường', overdue:'Bảng cảnh báo', import:'Tiếp nhận tự động', calendar:'Lịch làm việc', report:'Báo cáo tổng hợp', cloud: 'Cloud của tôi' },
+        viewTitles: { home: 'Trang chủ', list:'Hồ sơ bồi thường', overdue:'Tiến độ hồ sơ', import:'Tiếp nhận tự động', calendar:'Lịch làm việc', report:'Báo cáo tổng hợp', cloud: 'Cloud của tôi' },
         switchView(view, btn) {
             document.querySelectorAll('.view-section').forEach(s => { s.classList.add('hidden'); s.classList.remove('block'); });
             const target = document.getElementById('view-'+view);
@@ -5251,7 +5245,7 @@
         _updateUI() {
             this.searchData(); 
             this._updateKPIs(); 
-            WarnBoard.render();
+            ProgressBoard.render();
             this._updateHomeDashboard(); // Luôn gọi cập nhật dashboard khi data thay đổi
             if (Cal.instance) { 
                 Cal.instance.refetchEvents(); 
@@ -13062,197 +13056,87 @@
     };  
 
     // ============================================================
-    // WARN BOARD — Bảng cảnh báo hồ sơ
+    // PROGRESS BOARD — Quản lý hồ sơ theo Tab (Thay thế WarnBoard)
     // ============================================================
-    const WarnBoard = {
+    const ProgressBoard = {
         _activeTab: 1,
+        _dataMap: { 1: [], 2: [], 3: [], 4: [] },
 
         render() {
             const data = App.masterData;
 
-            // ── Nhóm 1: Trễ lịch hẹn (có hẹn, step < 3, đã qua giờ) ──
-            const g1 = data.filter(i =>
-                i.appointmentTime && parseInt(i.step) < 3 &&
-                moment(i.appointmentTime).isBefore(moment())
-            ).sort((a, b) => new Date(a.appointmentTime) - new Date(b.appointmentTime));
+            // Lọc và gom nhóm hồ sơ vào 4 mảng
+            this._dataMap[1] = data.filter(i => parseInt(i.step) === 1).sort((a,b) => new Date(b.receivedAt||0) - new Date(a.receivedAt||0));
+            this._dataMap[2] = data.filter(i => parseInt(i.step) === 2).sort((a,b) => new Date(a.appointmentTime||0) - new Date(b.appointmentTime||0));
+            this._dataMap[3] = data.filter(i => parseInt(i.step) === 3).sort((a,b) => new Date(b.inspectedAt||0) - new Date(a.inspectedAt||0));
+            this._dataMap[4] = data.filter(i => parseInt(i.step) === 4).sort((a,b) => new Date(b.quotedAt||0) - new Date(a.quotedAt||0));
 
-            // ── Nhóm 2: Đã tiếp nhận nhưng chưa đặt hẹn > 1 ngày ──
-            const g2 = data.filter(i =>
-                parseInt(i.step) === 1 &&
-                i.receivedAt &&
-                moment().diff(moment(i.receivedAt), 'hours') > 24
-            ).sort((a, b) => new Date(a.receivedAt) - new Date(b.receivedAt));
+            // Cập nhật số liệu lên mặt thẻ
+            document.getElementById('pb-count-1').textContent = this._dataMap[1].length;
+            document.getElementById('pb-count-2').textContent = this._dataMap[2].length;
+            document.getElementById('pb-count-3').textContent = this._dataMap[3].length;
+            document.getElementById('pb-count-4').textContent = this._dataMap[4].length;
 
-            // ── Nhóm 3: Đã giám định > 3h chưa có báo giá ──
-            const g3 = data.filter(i =>
-                parseInt(i.step) === 3 &&
-                i.inspectedAt &&
-                moment().diff(moment(i.inspectedAt), 'hours') >= 3
-            ).sort((a, b) => new Date(a.inspectedAt) - new Date(b.inspectedAt));
-
-            // ── Nhóm 4: Chờ duyệt giá > 3 ngày ──
-            const g4 = data.filter(i =>
-                parseInt(i.step) === 5 &&
-                i.stepUpdatedAt &&
-                moment().diff(moment(i.stepUpdatedAt), 'days') >= 3
-            ).sort((a, b) => new Date(a.stepUpdatedAt) - new Date(b.stepUpdatedAt));
-
-            // Update counts
-            document.getElementById('wb-count-1').textContent = g1.length;
-            document.getElementById('wb-count-2').textContent = g2.length;
-            document.getElementById('wb-count-3').textContent = g3.length;
-            document.getElementById('wb-count-4').textContent = g4.length;
-
-            // Nav badge
-            const total = g1.length + g2.length + g3.length + g4.length;
+            // Gắn số liệu tổng (hoặc cảnh báo chung) lên Bottom Nav Badge
+            const totalActive = this._dataMap[1].length + this._dataMap[2].length + this._dataMap[3].length + this._dataMap[4].length;
             const badge = document.getElementById('warn-nav-badge');
             if (badge) {
-                badge.textContent = total > 99 ? '99+' : total;
-                badge.classList.toggle('hidden', total === 0);
+                badge.textContent = totalActive;
+                badge.classList.toggle('hidden', totalActive === 0);
             }
 
-            // Render từng panel
-            this._renderPanel('wb-panel-1', g1, 'overdue');
-            this._renderPanel('wb-panel-2', g2, 'no_appt');
-            this._renderPanel('wb-panel-3', g3, 'no_quote');
-            this._renderPanel('wb-panel-4', g4, 'no_approve');
-
-            lucide.createIcons();
+            // Gọi render lại danh sách bên dưới thẻ
+            this._renderList();
         },
 
-        _renderPanel(panelId, items, type) {
-            const panel = document.getElementById(panelId);
-            if (!panel) return;
+        switchTab(step) {
+            this._activeTab = step;
+            
+            // Màu sắc tương ứng với cấu hình hệ thống
+            const themes = { 
+                1: { color: 'blue',   title: 'Hồ sơ Mới tiếp nhận' }, 
+                2: { color: 'amber',  title: 'Hồ sơ Đã lên lịch hẹn' }, 
+                3: { color: 'cyan',   title: 'Hồ sơ Đã giám định' }, 
+                4: { color: 'indigo', title: 'Hồ sơ Đã có báo giá' } 
+            };
+            
+            // Xử lý hiệu ứng CSS đóng mở Tab
+            [1, 2, 3, 4].forEach(i => {
+                const card = document.getElementById(`pb-card-${i}`);
+                if (!card) return;
+                
+                if (i === step) {
+                    card.classList.remove('border-transparent', 'opacity-50');
+                    card.classList.add(`border-${themes[i].color}-300`);
+                } else {
+                    card.classList.add('border-transparent', 'opacity-50');
+                    card.classList.remove(`border-${themes[i].color}-300`);
+                }
+            });
+
+            document.getElementById('pb-list-title').textContent = themes[step].title;
+            this._renderList();
+        },
+
+        _renderList() {
+            const container = document.getElementById('pb-list-container');
+            const items = this._dataMap[this._activeTab] || [];
 
             if (!items.length) {
-                panel.innerHTML = `
-                    <div class="text-center py-12 bg-white rounded-3xl border border-slate-100">
-                        <div class="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <svg class="w-7 h-7 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                container.innerHTML = `
+                    <div class="text-center py-12 bg-white rounded-3xl border border-slate-100 shadow-sm mt-2">
+                        <div class="w-14 h-14 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="check-circle" class="w-6 h-6 text-slate-300"></i>
                         </div>
-                        <p class="font-black text-slate-400 text-sm">Không có hồ sơ cần xử lý</p>
+                        <p class="font-bold text-slate-400 text-sm">Không có hồ sơ ở bước này</p>
                     </div>`;
-                return;
+            } else {
+                // Tái sử dụng chính giao diện Thẻ hồ sơ chuẩn của ứng dụng
+                container.innerHTML = items.map(item => List._card(item)).join('');
             }
-
-            panel.innerHTML = items.map(item => this._card(item, type)).join('');
-        },
-
-        _card(item, type) {
-            const configs = {
-                overdue: {
-                    color: '#ef4444', bg: '#fee2e2', border: '#fca5a5',
-                    icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
-                    label: () => {
-                        const h = moment().diff(moment(item.appointmentTime), 'hours');
-                        const d = Math.floor(h / 24);
-                        return d > 0 ? `Trễ ${d} ngày ${h % 24}h` : `Trễ ${h} giờ`;
-                    },
-                    sub: () => `Hẹn lúc: ${moment(item.appointmentTime).format('HH:mm DD/MM/YYYY')}`,
-                    action: () => `<button onclick="event.stopPropagation();Inspection.markInspected('${item.id}')"
-                        class="w-full mt-2 py-2 bg-emerald-600 text-white rounded-xl text-[11px] font-black flex items-center justify-center gap-1.5 active:scale-95 transition-transform">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                        Đánh dấu đã giám định
-                    </button>`
-                },
-                no_appt: {
-                    color: '#f59e0b', bg: '#fef3c7', border: '#fde68a',
-                    icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="10" y1="14" x2="10" y2="14"/></svg>',
-                    label: () => {
-                        const h = moment().diff(moment(item.receivedAt), 'hours');
-                        const d = Math.floor(h / 24);
-                        return `Chờ ${d > 0 ? d + ' ngày' : h + ' giờ'} chưa đặt hẹn`;
-                    },
-                    sub: () => `Tiếp nhận: ${moment(item.receivedAt).format('HH:mm DD/MM/YYYY')}`,
-                    action: () => `<button onclick="event.stopPropagation();Modal.openStatusSheet('${item.id}')"
-                        class="w-full mt-2 py-2 bg-amber-500 text-white rounded-xl text-[11px] font-black flex items-center justify-center gap-1.5 active:scale-95 transition-transform">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                        Đặt lịch hẹn ngay
-                    </button>`
-                },
-                no_quote: {
-                    color: '#8b5cf6', bg: '#f5f3ff', border: '#c4b5fd',
-                    icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
-                    label: () => {
-                        const h = moment().diff(moment(item.inspectedAt), 'hours');
-                        return `GĐ xong ${h} giờ, chưa có báo giá`;
-                    },
-                    sub: () => `Giám định: ${moment(item.inspectedAt).format('HH:mm DD/MM/YYYY')}`,
-                    action: () => {
-                        const callBtn = item.garaPhone ? `<a href="tel:${item.garaPhone}" onclick="event.stopPropagation()" class="flex-1 py-2 bg-purple-100 text-purple-700 rounded-xl text-[11px] font-black flex items-center justify-center gap-1.5 active:scale-95 transition-transform"><i data-lucide="phone" class="w-3.5 h-3.5"></i> Gọi Gara</a>` : '';
-                        const zaloBtn = item.garaAdvisorPhone ? `<button onclick="event.stopPropagation(); ZaloHelper.send('${item.garaAdvisorPhone}', 'nhacBaoGia', '${item.id}')" class="flex-1 py-2 bg-blue-500 text-white rounded-xl text-[11px] font-black flex items-center justify-center gap-1.5 active:scale-95 transition-transform shadow-md shadow-blue-200"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i> Nhắn CVDV</button>` : '';
-                        return (callBtn || zaloBtn) ? `<div class="flex gap-2 mt-2 w-full">${callBtn}${zaloBtn}</div>` : '';
-                    }
-                },
-                no_approve: {
-                    color: '#6366f1', bg: '#eef2ff', border: '#a5b4fc',
-                    icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
-                    label: () => {
-                        const d = moment().diff(moment(item.stepUpdatedAt), 'days');
-                        return `Chờ duyệt giá ${d} ngày`;
-                    },
-                    sub: () => `Gửi duyệt: ${moment(item.stepUpdatedAt).format('HH:mm DD/MM/YYYY')}`,
-                    action: () => `<button onclick="event.stopPropagation();Modal.open('${item.id}')"
-                        class="w-full mt-2 py-2 bg-indigo-600 text-white rounded-xl text-[11px] font-black flex items-center justify-center gap-1.5 active:scale-95 transition-transform">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        Xem hồ sơ
-                    </button>`
-                }
-            };
-
-            const cfg = configs[type];
-            const phone = String(item.phone || '').replace(/\D/g, '');
-
-            return `
-            <div onclick="Modal.open('${item.id}')"
-                class="bg-white rounded-2xl border active:scale-[0.98] transition-transform cursor-pointer overflow-hidden"
-                style="border-color:${cfg.border};border-left:3px solid ${cfg.color};">
-                <!-- Tag -->
-                <div style="background:${cfg.bg};padding:6px 12px;display:flex;align-items:center;justify-content:space-between;">
-                    <div style="display:flex;align-items:center;gap:6px;color:${cfg.color};">
-                        ${cfg.icon}
-                        <span style="font-size:10px;font-weight:900;color:${cfg.color};">${cfg.label()}</span>
-                    </div>
-                    ${item.urgent ? '<span style="font-size:9px;font-weight:800;background:#ef4444;color:white;padding:2px 7px;border-radius:6px;">🚨 GẤPGẤP</span>' : ''}
-                </div>
-                <!-- Body -->
-                <div class="p-3">
-                    <div class="flex items-start justify-between gap-2 mb-2">
-                        <div>
-                            <p class="font-black text-slate-800 text-lg uppercase leading-none">${item.bsx || '—'}</p>
-                            <p class="text-[10px] font-mono text-slate-400 mt-0.5">${item.claimCode || '—'}</p>
-                        </div>
-                        <span class="text-[9px] font-black px-2 py-1 rounded-lg ${STATUS.theme(item.step).bg} ${STATUS.theme(item.step).text}">${STATUS.label(item.step)}</span>
-                    </div>
-                    <div class="flex items-center gap-2 bg-slate-50 rounded-xl px-2.5 py-2 mb-2">
-                        <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        <div class="min-w-0">
-                            <p class="text-xs font-bold text-slate-700 truncate">${item.customer || 'Chưa có tên'}</p>
-                            <p class="text-[10px] text-slate-400">${item.phone || 'Chưa có SĐT'}</p>
-                        </div>
-                        ${phone ? `<a href="tel:${phone}" onclick="event.stopPropagation()"
-                            class="ml-auto w-7 h-7 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0 active:scale-90">
-                            <svg class="w-3.5 h-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.19 9.8a19.79 19.79 0 01-3.07-8.67A2 2 0 013.1 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L7.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-                        </a>` : ''}
-                    </div>
-                    ${item.garaName ? `<p class="text-[10px] text-teal-600 font-bold mb-1.5 flex items-center gap-1"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>${item.garaName}</p>` : ''}
-                    <p style="font-size:10px;color:#94a3b8;font-weight:600;">${cfg.sub()}</p>
-                    ${cfg.action()}
-                </div>
-            </div>`;
-        },
-
-        switchTab(tab, btn) {
-            this._activeTab = tab;
-            document.querySelectorAll('.wb-panel').forEach(p => p.classList.add('hidden'));
-            document.querySelectorAll('.wb-tab').forEach(b => {
-                b.className = 'wb-tab flex-1 py-1.5 rounded-xl text-[10px] font-black text-slate-400 transition-all';
-            });
-            document.getElementById(`wb-panel-${tab}`).classList.remove('hidden');
-            const colors = { 1:'text-rose-600', 2:'text-amber-600', 3:'text-purple-600', 4:'text-indigo-600' };
-            btn.className = `wb-tab flex-1 py-1.5 rounded-xl text-[10px] font-black bg-white shadow-sm transition-all ${colors[tab]}`;
+            lucide.createIcons();
         }
-    };    
+    };   
     // ============================================================
     // FORM UI - Trải nghiệm thao tác trên form
     // ============================================================
