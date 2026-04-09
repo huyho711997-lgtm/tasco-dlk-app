@@ -2442,54 +2442,57 @@
         </div>
 
         <div id="view-cloud" class="view-section p-4 hidden">
-            <div class="flex items-center justify-between mb-4 mt-2">
-                <div>
-                    <h2 class="font-black text-slate-800 text-lg tracking-tight flex items-center gap-2">
-                        <i data-lucide="cloud" class="w-5 h-5 text-cyan-500"></i> Cloud của tôi
-                    </h2>
-                    <p class="text-xs text-slate-500 font-medium mt-1" id="mycloud-count">Đang tải dữ liệu...</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button id="mycloud-select-btn" onclick="MyCloud.toggleSelectMode()" class="hidden px-3 py-2 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs transition-colors">
-                        Chọn
-                    </button>
-                    <label class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white active:scale-95 transition-all shadow-md cursor-pointer">
-                        <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-                        <span class="text-[12px] font-black">Tải lên</span>
-                        <input type="file" id="mycloud-upload-input" class="hidden" accept="image/*, .pdf, .doc, .docx, .xls, .xlsx" multiple onchange="MyCloud.uploadFiles(event)">
-                    </label>
-                </div>
-            </div>
-
-            <div class="flex gap-1 mb-4 bg-slate-100 p-1 rounded-xl">
-                <button class="cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-cyan-600 shadow-sm" onclick="MyCloud.setTab('all', this)">Tất cả</button>
-                <button class="cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500" onclick="MyCloud.setTab('image', this)">Hình ảnh</button>
-                <button class="cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500" onclick="MyCloud.setTab('document', this)">Tài liệu</button>
-            </div>
-
-            <div id="mycloud-delete-bar" class="hidden mb-4 p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center transition-all">
-                <div class="flex items-center gap-2">
-                    <button onclick="MyCloud.selectAll()" class="text-blue-600 text-xs font-bold underline">Chọn tất cả</button>
-                    <span class="text-slate-300 text-xs">|</span>
-                    <span class="text-slate-700 font-black text-xs" id="mycloud-selected-count">Đã chọn 0</span>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="MyCloud.downloadSelected()" class="bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 active:scale-95 shadow-sm shadow-emerald-200 transition-opacity">
-                        <i data-lucide="download" class="w-3.5 h-3.5"></i> Tải
-                    </button>
-                    <button onclick="MyCloud.deleteSelected()" class="bg-rose-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 active:scale-95 shadow-sm shadow-rose-200 transition-opacity">
-                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Xóa
-                    </button>
-                </div>
-            </div>
             
-            <div id="mycloud-loading" class="hidden text-center py-4">
+            <div class="sticky top-0 z-40 -mx-4 -mt-4 px-4 pt-4 pb-3 shadow-[0_8px_15px_-5px_rgba(0,0,0,0.05)] transition-colors" style="background-color: var(--bg-app);">
+                
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="font-black text-slate-800 text-lg tracking-tight flex items-center gap-2">
+                            <i data-lucide="cloud" class="w-5 h-5 text-cyan-500"></i> Cloud của tôi
+                        </h2>
+                        <p class="text-xs text-slate-500 font-medium mt-1" id="mycloud-count">Đang tải dữ liệu...</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="mycloud-select-btn" onclick="MyCloud.toggleSelectMode()" class="hidden px-3 py-2 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs transition-colors">
+                            Chọn
+                        </button>
+                        <label class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white active:scale-95 transition-all shadow-md cursor-pointer">
+                            <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+                            <span class="text-[12px] font-black">Tải lên</span>
+                            <input type="file" id="mycloud-upload-input" class="hidden" accept="image/*, .pdf, .doc, .docx, .xls, .xlsx" multiple onchange="MyCloud.uploadFiles(event)">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex gap-1 bg-slate-100 p-1 rounded-xl">
+                    <button class="cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-cyan-600 shadow-sm" onclick="MyCloud.setTab('all', this)">Tất cả</button>
+                    <button class="cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500" onclick="MyCloud.setTab('image', this)">Hình ảnh</button>
+                    <button class="cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500" onclick="MyCloud.setTab('document', this)">Tài liệu</button>
+                </div>
+
+                <div id="mycloud-delete-bar" class="hidden mt-3 p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center transition-all">
+                    <div class="flex items-center gap-2">
+                        <button onclick="MyCloud.selectAll()" class="text-blue-600 text-xs font-bold underline">Chọn tất cả</button>
+                        <span class="text-slate-300 text-xs">|</span>
+                        <span class="text-slate-700 font-black text-xs" id="mycloud-selected-count">Đã chọn 0</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="MyCloud.downloadSelected()" class="bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 active:scale-95 shadow-sm shadow-emerald-200 transition-opacity">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i> Tải
+                        </button>
+                        <button onclick="MyCloud.deleteSelected()" class="bg-rose-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 active:scale-95 shadow-sm shadow-rose-200 transition-opacity">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Xóa
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="mycloud-loading" class="hidden text-center py-4 mt-2">
                 <div class="w-6 h-6 border-2 border-cyan-200 border-t-cyan-500 rounded-full animate-spin mx-auto mb-2"></div>
                 <p class="text-[10px] font-bold text-slate-400" id="mycloud-loading-text">Đang tải lên...</p>
             </div>
 
-            <div id="mycloud-list" class="pb-10 space-y-5"></div>
-        </div>      
+            <div id="mycloud-list" class="pb-10 space-y-5 pt-4"></div>
+        </div>     
     </main>
 
     <!-- BOTTOM NAV -->
