@@ -46,7 +46,14 @@
             background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 28px;
             padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;
-            z-index: 40; box-shadow: 0 12px 36px -6px rgba(0, 0, 0, 0.15), 0 8px 12px -6px rgba(0, 0, 0, 0.1);
+            z-index: 40; 
+            /* Hiệu ứng ánh sáng tỏa nhẹ màu xanh tím */
+            animation: navGlowLight 3s infinite alternate ease-in-out;
+        }
+
+        @keyframes navGlowLight {
+            0% { box-shadow: 0 12px 36px -6px rgba(0, 0, 0, 0.15), 0 0 12px rgba(79, 70, 229, 0.15); }
+            100% { box-shadow: 0 12px 36px -6px rgba(0, 0, 0, 0.15), 0 0 32px rgba(79, 70, 229, 0.45); }
         }
         .nav-btn {
             flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -65,7 +72,17 @@
         }
         .nav-btn-center:active { transform: translateY(-14px) scale(0.95); }
 
-        [data-theme="dark"] .bottom-nav-wrapper { background: rgba(30, 41, 59, 0.9); border-color: rgba(255, 255, 255, 0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        [data-theme="dark"] .bottom-nav-wrapper { 
+            background: rgba(30, 41, 59, 0.9); 
+            border-color: rgba(255, 255, 255, 0.1); 
+            /* Hiệu ứng ánh sáng tỏa nhẹ màu xanh dương pastel cho dark mode */
+            animation: navGlowDark 3s infinite alternate ease-in-out; 
+        }
+
+        @keyframes navGlowDark {
+            0% { box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 12px rgba(96, 165, 250, 0.1); }
+            100% { box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 32px rgba(96, 165, 250, 0.35); }
+        }
         [data-theme="dark"] .nav-btn { color: var(--text-muted); }
         [data-theme="dark"] .nav-btn.bottom-nav-active { color: #60a5fa; }
         [data-theme="dark"] .nav-btn.bottom-nav-active .nav-icon-wrap { background: rgba(59, 130, 246, 0.2); }
