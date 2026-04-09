@@ -1875,6 +1875,42 @@
         [data-theme="dark"] #upload-progress-toast .text-slate-500 { color: #94a3b8; }
         [data-theme="dark"] #upload-progress-toast .bg-slate-100 { background: rgba(0, 0, 0, 0.4); }
         [data-theme="dark"] #upload-progress-toast #upt-percent { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+
+        /* ============================================================
+           HIỆU ỨNG GIỌT NƯỚC (LIQUID) BOTTOM NAV
+           ============================================================ */
+        .liquid-indicator {
+            position: absolute;
+            top: 8px; /* Khớp chính xác với chiều cao của icon-wrap */
+            left: 0;
+            width: 32px;
+            height: 32px;
+            background-color: #eff6ff;
+            border-radius: 50%;
+            z-index: 1; /* Nằm dưới icon nhưng trên nền nav */
+            pointer-events: none;
+            /* Lướt mượt mà khi đổi vị trí left */
+            transition: left 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+        }
+        
+        [data-theme="dark"] .liquid-indicator {
+            background-color: rgba(59, 130, 246, 0.2);
+        }
+
+        /* Ẩn cái nền tĩnh mặc định cũ đi vì đã có giọt nước chạy */
+        .nav-btn.bottom-nav-active .nav-icon-wrap { background-color: transparent !important; }
+        .nav-icon-wrap { position: relative; z-index: 2; }
+
+        /* Animation khi giọt nước lướt qua (bị ép dẹp lại theo chiều ngang) */
+        .liquid-stretching {
+            animation: gooeyStretch 0.4s ease-in-out forwards;
+        }
+
+        @keyframes gooeyStretch {
+            0% { transform: scaleX(1) scaleY(1); border-radius: 50%; }
+            50% { transform: scaleX(1.6) scaleY(0.7); border-radius: 40%; } /* Dãn chiều ngang, xẹp chiều dọc */
+            100% { transform: scaleX(1) scaleY(1); border-radius: 50%; }
+        }
     </style>
 </head>
 <body class="h-screen w-full flex flex-col overflow-hidden bg-slate-50">
@@ -2533,6 +2569,8 @@
 
     <!-- BOTTOM NAV -->
     <div class="bottom-nav-wrapper">
+        <div id="nav-liquid-indicator" class="liquid-indicator"></div>
+
         <button id="nav-home-btn" onclick="Nav.switchView('home', this)" class="nav-btn bottom-nav-active">
             <div class="nav-icon-wrap"><i data-lucide="layout-dashboard" class="w-5 h-5"></i></div>
             <span class="text-[9px] font-bold">Trang chủ</span>
@@ -5102,6 +5140,25 @@
                     b.classList.remove('bottom-nav-active'); 
                 });
                 btn.classList.add('bottom-nav-active');
+
+                // --- ĐOẠN MÃ MỚI: TÍNH TOÁN TỌA ĐỘ VÀ NÉM GIỌT NƯỚC ĐI ---
+                const indicator = document.getElementById('nav-liquid-indicator');
+                if (indicator) {
+                    const wrapperRect = btn.parentElement.getBoundingClientRect();
+                    const btnRect = btn.getBoundingClientRect();
+                    
+                    // Vị trí X mới = Mép trái của nút + (1/2 chiều rộng nút) - (1/2 chiều rộng giọt nước là 16px)
+                    const targetX = (btnRect.left - wrapperRect.left) + (btnRect.width / 2) - 16; 
+                    
+                    // Di chuyển giọt nước
+                    indicator.style.left = `${targetX}px`;
+                    
+                    // Kích hoạt hiệu ứng dãn nở (gooey)
+                    indicator.classList.remove('liquid-stretching');
+                    void indicator.offsetWidth; // Mẹo: Ép trình duyệt reset lại animation ngay lập tức
+                    indicator.classList.add('liquid-stretching');
+                }
+                // ---------------------------------------------------------
             }
 
             document.getElementById('header-subtitle').textContent = this.viewTitles[view]||'Mobile App';
@@ -5109,8 +5166,7 @@
             // --- LOGIC ẨN/HIỆN THANH TÌM KIẾM ---
             const searchContainer = document.getElementById('header-search-container');
             if (searchContainer) {
-                // Nếu đang ở màn hình Trang chủ (home) hoặc Báo cáo (report), ẩn thanh search đi cho rộng
-                if (view === 'home' || view === 'report' || view === 'import' || view === 'cloud') { // Thêm view === 'cloud' vào đây
+                if (view === 'home' || view === 'report' || view === 'import' || view === 'cloud') { 
                     searchContainer.style.display = 'none';
                 } else {
                     searchContainer.style.display = 'block';
@@ -5118,14 +5174,13 @@
             }
             // ------------------------------------
 
-            if (view==='home') App._updateHomeDashboard(); // Đảm bảo số liệu luôn load lại khi vào Trang chủ
+            if (view==='home') App._updateHomeDashboard();
             if (view==='report') Report.open();
             if (view==='calendar') {
                 if (!this.calendarInit) { Cal.init(); this.calendarInit=true; }
                 else setTimeout(()=>{ Cal.instance?.updateSize(); Cal.instance?.refetchEvents(); },100);
                 setTimeout(()=>{ Cal._updateStats(); Cal._showTodayAgenda(); },200);
             }
-            // THÊM DÒNG NÀY ĐỂ FIX LỖI TREO CLOUD:
             if (view==='cloud') { MyCloud.init(); MyCloud.render(); }
         }
     };
