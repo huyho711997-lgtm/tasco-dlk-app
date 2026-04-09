@@ -1848,6 +1848,33 @@
         [data-theme="dark"] .week-count.empty { color: #475569; }
         [data-theme="dark"] .week-item.sun .week-date { color: #fb7185; }
         [data-theme="dark"] .week-item.sat .week-date { color: #60a5fa; }
+
+        /* ============================================================
+           HIỆU ỨNG CHUYỂN TAB (VIEW TRANSITION)
+           ============================================================ */
+        @keyframes viewTransition {
+            0% { 
+                opacity: 0; 
+                transform: translateY(12px) scale(0.99); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+        
+        /* CSS sẽ tự động kích hoạt animation mỗi khi class .hidden bị gỡ bỏ */
+        .view-section:not(.hidden) {
+            animation: viewTransition 0.35s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+            will-change: opacity, transform; /* Báo cho trình duyệt biết để tối ưu GPU trên điện thoại */
+        }
+
+        /* Hỗ trợ Dark Mode cho Upload Toast */
+        [data-theme="dark"] #upload-progress-toast { background: rgba(30, 41, 59, 0.85); border-color: rgba(255, 255, 255, 0.1); }
+        [data-theme="dark"] #upload-progress-toast .text-slate-800 { color: #f8fafc; }
+        [data-theme="dark"] #upload-progress-toast .text-slate-500 { color: #94a3b8; }
+        [data-theme="dark"] #upload-progress-toast .bg-slate-100 { background: rgba(0, 0, 0, 0.4); }
+        [data-theme="dark"] #upload-progress-toast #upt-percent { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
     </style>
 </head>
 <body class="h-screen w-full flex flex-col overflow-hidden bg-slate-50">
@@ -2498,10 +2525,6 @@
                         </button>
                     </div>
                 </div>
-            </div>
-            <div id="mycloud-loading" class="hidden text-center py-4 mt-2">
-                <div class="w-6 h-6 border-2 border-cyan-200 border-t-cyan-500 rounded-full animate-spin mx-auto mb-2"></div>
-                <p class="text-[10px] font-bold text-slate-400" id="mycloud-loading-text">Đang tải lên...</p>
             </div>
 
             <div id="mycloud-list" class="pb-10 space-y-5 pt-4"></div>
@@ -15730,10 +15753,10 @@
             const user = Auth.getCurrentUser();
             if (!user) return;
 
-            // HỎI NGƯỜI DÙNG CÓ MUỐN GHI CHÚ KHÔNG
+            // Hỏi ghi chú (Vẫn giữ popup này vì nó cần thiết)
             const { value: noteText } = await Swal.fire({
                 title: 'Thêm ghi chú?',
-                html: '<p class="text-xs text-slate-500 mb-3">Phân loại ảnh (VD: Cản trước, Báo giá, Góc trái...) để dễ tìm và tải về sau này.</p><input id="mc-note-input" class="input-field" placeholder="Nhập ghi chú (Không bắt buộc)...">',
+                html: '<p class="text-xs text-slate-500 mb-3">Phân loại ảnh (VD: Cản trước, Báo giá...) để dễ tìm kiếm.</p><input id="mc-note-input" class="input-field" placeholder="Nhập ghi chú (Không bắt buộc)...">',
                 showCancelButton: true,
                 confirmButtonText: 'Tải lên ngay',
                 cancelButtonText: 'Hủy',
@@ -15744,35 +15767,20 @@
 
             if (noteText === undefined) return;
 
-            // =========================================================
-            // GIAO DIỆN LOADING MỚI CHUYÊN NGHIỆP ĐỒNG BỘ VỚI APP
-            // =========================================================
-            const totalFiles = files.length;
+            // --- KÍCH HOẠT GIAO DIỆN UPLOAD TOAST ---
+            const toast = document.getElementById('upload-progress-toast');
+            const bar = document.getElementById('upt-bar');
+            const txt = document.getElementById('upt-text');
+            const pct = document.getElementById('upt-percent');
+            
             let uploadedCount = 0;
+            const totalFiles = files.length;
 
-            Swal.fire({
-                html: `
-                    <div style="display:flex; flex-direction:column; align-items:center; padding: 20px 0 10px;">
-                        <div style="position:relative; width:68px; height:68px; border-radius:50%; background:linear-gradient(135deg, #06b6d4, #3b82f6); display:flex; align-items:center; justify-content:center; box-shadow:0 8px 25px rgba(6, 182, 212, 0.4); margin-bottom:20px;">
-                            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" style="position:absolute; animation:img-spin 1.2s linear infinite; opacity:0.8;">
-                                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                            </svg>
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position:relative; z-index:10; transform: translateY(-2px);">
-                                <path d="M12 12v9"/><path d="m16 16-4-4-4 4"/><path d="M4.39 9c0-3.31 2.69-6 6-6h1.22c2.05 0 3.86 1.34 4.39 3.25A5.5 5.5 0 0 1 20 11.5a5.5 5.5 0 0 1-5.5 5.5H16"/>
-                            </svg>
-                        </div>
-                        <p style="font-size:18px; font-weight:900; color:var(--text-primary, #0f172a); margin:0;">Đang đồng bộ lên Cloud</p>
-                        <div style="display:flex; align-items:center; gap:8px; margin-top:14px; background:var(--bg-surface, #f8fafc); padding:8px 16px; border-radius:12px; border:1px solid var(--border-light, #e2e8f0);">
-                            <span class="animate-pulse" style="width:8px; height:8px; background:#06b6d4; border-radius:50%; box-shadow:0 0 8px rgba(6,182,212,0.8);"></span>
-                            <span style="font-size:13px; font-weight:800; color:var(--text-secondary, #64748b);" id="mc-upload-progress">Hoàn tất 0 / ${totalFiles} file</span>
-                        </div>
-                    </div>
-                `,
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                customClass: { popup: 'custom-rounded' }
-            });
-            // =========================================================
+            // Hiệu ứng trượt lên
+            toast.classList.remove('translate-y-[200%]', 'opacity-0');
+            bar.style.width = '0%';
+            pct.textContent = '0%';
+            txt.textContent = `Đang nén và chuẩn bị ${totalFiles} file...`;
 
             const uploadPromises = files.map(async (file, i) => {
                 try {
@@ -15795,21 +15803,27 @@
                             if (!finalUrl.toLowerCase().endsWith('.pdf')) finalUrl += '.pdf';
                         }
 
-                        // Lưu vào Firebase kèm theo Ghi chú (note) và Size
-                        return db.ref(`Users/${user.id}/myCloud/${newKey}`).set({
+                        await db.ref(`Users/${user.id}/myCloud/${newKey}`).set({
                             url: finalUrl,
                             fileName: file.name,
                             fileType: isPdfUpload ? 'pdf' : (file.type || 'other'),
                             timestamp: Date.now(),
                             note: noteText || '',
                             size: file.size || 0
-                        }).then(() => {
-                            // CẬP NHẬT GIAO DIỆN SỐ ĐẾM KHI 1 FILE XONG
-                            uploadedCount++;
-                            const progressText = document.getElementById('mc-upload-progress');
-                            if (progressText) progressText.textContent = `Hoàn tất ${uploadedCount} / ${totalFiles} file`;
-                            return true;
                         });
+
+                        // CẬP NHẬT THANH TIẾN ĐỘ THỰC TẾ
+                        uploadedCount++;
+                        const currentPercent = Math.round((uploadedCount / totalFiles) * 100);
+                        
+                        // Cập nhật UI ngay lập tức
+                        requestAnimationFrame(() => {
+                            bar.style.width = `${currentPercent}%`;
+                            pct.textContent = `${currentPercent}%`;
+                            txt.textContent = `Hoàn tất ${uploadedCount} / ${totalFiles} file`;
+                        });
+                        
+                        return true;
                     }
                     return false;
                 } catch (e) {
@@ -15821,15 +15835,22 @@
             const results = await Promise.all(uploadPromises);
             const successCount = results.filter(r => r === true).length;
 
-            Swal.close(); // ĐÓNG GIAO DIỆN CHỜ
+            // XỬ LÝ UI SAU KHI TẢI XONG
+            txt.textContent = "Đang đồng bộ dữ liệu...";
             
-            if (successCount > 0) {
-                Toast.fire({ icon: 'success', title: `Đã lưu ${successCount} file lên Cloud!` });
-            } else {
-                Toast.fire({ icon: 'error', title: 'Tải lên thất bại!' });
-            }
-            
-            this.updateQuota(); // Làm mới thanh dung lượng
+            setTimeout(() => {
+                // Hiệu ứng trượt xuống biến mất sau 1 giây
+                toast.classList.add('translate-y-[200%]', 'opacity-0');
+                
+                if (successCount > 0) {
+                    Toast.fire({ icon: 'success', title: `Đã lưu ${successCount} file lên Cloud!` });
+                } else {
+                    Toast.fire({ icon: 'error', title: 'Tải lên thất bại!' });
+                }
+                
+                // Refresh lại Grid và Thanh dung lượng
+                if (typeof this.updateQuota === 'function') this.updateQuota();
+            }, 1000);
         },
 
         // 1. HÀM XÓA CÓ ANIMATION MƯỢT MÀ VÀ XÓA TẬN GỐC CLOUDINARY
@@ -16506,5 +16527,22 @@
         </div>
     
     </div>
+
+    <div id="upload-progress-toast" class="fixed bottom-[100px] left-4 right-4 bg-white/95 backdrop-blur-xl border border-slate-200/60 p-4 rounded-[20px] z-[100000] transform translate-y-[200%] opacity-0 transition-all duration-500 ease-out shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)]">
+        <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shrink-0 shadow-inner shadow-white/20">
+                <i data-lucide="cloud-upload" class="w-5 h-5 text-white animate-bounce" style="animation-duration: 2s;"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-[13px] font-black text-slate-800 uppercase tracking-wide">Đang đồng bộ Cloud</p>
+                <p id="upt-text" class="text-[11px] font-bold text-slate-500 truncate mt-0.5">Đang xử lý dữ liệu...</p>
+            </div>
+            <div id="upt-percent" class="text-sm font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">0%</div>
+        </div>
+        <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+            <div id="upt-bar" class="h-full bg-gradient-to-r from-cyan-400 to-blue-600 w-0 transition-all duration-300 ease-out"></div>
+        </div>
+    </div>
+
 </body>
 </html>
