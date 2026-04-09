@@ -1877,55 +1877,39 @@
         [data-theme="dark"] #upload-progress-toast #upt-percent { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
 
         /* ============================================================
-           NÂNG CẤP HIỆU ỨNG LIQUID BOTTOM NAV (ĐỒNG BỘ THEME)
+           HIỆU ỨNG GIỌT NƯỚC (LIQUID) BOTTOM NAV
            ============================================================ */
         .liquid-indicator {
             position: absolute;
-            top: 6px; /* Canh chỉnh chuẩn xác với độ cao icon */
-            width: 36px;
-            height: 36px;
-            background: #eff6ff; /* Màu nền xanh lam nhạt */
-            border: 1px solid #bfdbfe; /* Thêm viền nhẹ để nét hơn trên nền trắng */
-            border-radius: 14px; /* Bo góc chuẩn form vuông bo tròn của app */
-            z-index: 1;
+            top: 8px; /* Khớp chính xác với chiều cao của icon-wrap */
+            left: 0;
+            width: 32px;
+            height: 32px;
+            background-color: #eff6ff;
+            border-radius: 50%;
+            z-index: 1; /* Nằm dưới icon nhưng trên nền nav */
             pointer-events: none;
-            transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); /* Gia tốc đàn hồi Apple */
+            /* Lướt mượt mà khi đổi vị trí left */
+            transition: left 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
         }
         
         [data-theme="dark"] .liquid-indicator {
-            background: rgba(59, 130, 246, 0.2);
-            border-color: rgba(59, 130, 246, 0.3);
+            background-color: rgba(59, 130, 246, 0.2);
         }
 
+        /* Ẩn cái nền tĩnh mặc định cũ đi vì đã có giọt nước chạy */
+        .nav-btn.bottom-nav-active .nav-icon-wrap { background-color: transparent !important; }
+        .nav-icon-wrap { position: relative; z-index: 2; }
+
+        /* Animation khi giọt nước lướt qua (bị ép dẹp lại theo chiều ngang) */
         .liquid-stretching {
-            animation: gooeyStretch 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation: gooeyStretch 0.4s ease-in-out forwards;
         }
 
         @keyframes gooeyStretch {
-            0% { transform: scaleX(1) scaleY(1); }
-            40% { transform: scaleX(1.35) scaleY(0.85); } /* Dãn nhẹ nhàng hơn, không bị méo */
-            100% { transform: scaleX(1) scaleY(1); }
-        }
-
-        /* ============================================================
-           NÂNG CẤP UPLOAD TOAST (DYNAMIC ISLAND STYLE)
-           ============================================================ */
-        .toast-shimmer {
-            position: absolute;
-            top: 0; left: 0; bottom: 0; width: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            animation: shimmer 1.5s infinite;
-        }
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-        
-        .upload-toast-active {
-            transform: translate(-50%, 0) !important;
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
+            0% { transform: scaleX(1) scaleY(1); border-radius: 50%; }
+            50% { transform: scaleX(1.6) scaleY(0.7); border-radius: 40%; } /* Dãn chiều ngang, xẹp chiều dọc */
+            100% { transform: scaleX(1) scaleY(1); border-radius: 50%; }
         }
     </style>
 </head>
