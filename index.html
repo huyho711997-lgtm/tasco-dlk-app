@@ -15782,6 +15782,7 @@
             }
         },
 
+        // 1. HÀM XÓA CÓ ANIMATION MƯỢT MÀ VÀ XÓA TẬN GỐC CLOUDINARY
         deleteSelected() {
             if (this._selectedKeys.size === 0) return;
             Swal.fire({
@@ -15794,24 +15795,37 @@
                 confirmButtonText: 'Xóa vĩnh viễn',
                 cancelButtonText: 'Hủy',
                 customClass: { popup: 'custom-rounded' }
-            }).then(async (result) => { // Chuyển callback thành async
+            }).then(async (result) => {
                 if (result.isConfirmed) {
                     const user = Auth.getCurrentUser();
+                    const keysToDelete = Array.from(this._selectedKeys);
+                    
+                    // --- ANIMATION UI: Thu nhỏ và làm mờ ảnh trước khi xóa ---
+                    keysToDelete.forEach(key => {
+                        const wrap = document.getElementById(`mc-wrap-${key}`);
+                        if (wrap) {
+                            wrap.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                            wrap.style.transform = 'scale(0)';
+                            wrap.style.opacity = '0';
+                        }
+                    });
+
+                    // Đợi animation chạy xong (300ms)
+                    await new Promise(r => setTimeout(r, 300));
+                    // --------------------------------------------------------
+
                     Swal.fire({ title: 'Đang dọn dẹp Cloud...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                     
-                    // 1. Lấy danh sách URL của các file cần xóa
-                    const keysToDelete = Array.from(this._selectedKeys);
+                    // Lấy danh sách URL để gọi lệnh xóa trên Cloudinary
                     const urlsToDelete = keysToDelete.map(key => {
                         const item = this.items.find(i => i.key === key);
                         return item ? item.url : null;
                     }).filter(Boolean);
 
-                    // 2. Gửi lệnh xóa song song lên Cloudinary thông qua AppScript
+                    // Xóa vật lý trên Cloudinary (Chạy song song)
                     const deletePromises = urlsToDelete.map(async (url) => {
-                        // Trích xuất publicId từ URL của Cloudinary
                         const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[a-zA-Z0-9]+)?(?:\?.*)?$/);
                         const pubId = match ? match[1] : null;
-                        
                         if (pubId) {
                             try {
                                 await fetch(CONFIG.exportWordUrl, {
@@ -15819,18 +15833,14 @@
                                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                                     body: JSON.stringify({ action: 'delete_cloudinary', publicId: pubId })
                                 });
-                            } catch (err) {
-                                console.error('Lỗi xóa file trên Cloudinary:', err);
-                            }
+                            } catch (err) {}
                         }
                     });
-
-                    // Chờ tất cả lệnh xóa vật lý hoàn tất (Dùng allSettled để nếu 1 file lỗi mạng thì các file khác vẫn được xử lý)
                     await Promise.allSettled(deletePromises);
 
-                    // 3. Xóa dữ liệu trên Firebase
+                    // Xóa dữ liệu trên Firebase
                     const updates = {};
-                    this._selectedKeys.forEach(key => updates[key] = null);
+                    keysToDelete.forEach(key => updates[key] = null);
                     
                     db.ref(`Users/${user.id}/myCloud`).update(updates).then(() => {
                         Swal.close();
@@ -15840,6 +15850,104 @@
                         this.render();
                     });
                 }
+            });
+        },
+
+        // 2. HÀM TẢI XUỐNG HỖ TRỢ LƯU THẲNG VÀO THƯ VIỆN ẢNH IPHONE
+        async downloadSelected() {
+            if (this._selectedKeys.size === 0) return;
+            
+            const keysToDownload = Array.from(this._selectedKeys);
+            const itemsToDownload = keysToDownload.map(key => this.items.find(i => i.key === key)).filter(Boolean);
+            
+            if (itemsToDownload.length === 0) return;
+
+            // Hiện loading vì việc tải data ảnh về RAM để gộp mất một chút thời gian
+            Swal.fire({
+                title: 'Đang chuẩn bị file...',
+                html: '<p class="text-xs text-slate-500">Đang gộp dữ liệu ảnh để lưu về máy tính/điện thoại...</p>',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading(),
+                customClass: { popup: 'custom-rounded' }
+            });
+
+            try {
+                // Fetch tất cả các URL để chuyển thành mảng đối tượng File thực tế
+                const files = await Promise.all(itemsToDownload.map(async (item) => {
+                    const res = await fetch(item.url);
+                    const blob = await res.blob();
+                    
+                    // Ghép tên file chứa ghi chú (nếu có)
+                    let dlName = item.fileName || ('TascoCloud_' + Date.now() + '.jpg');
+                    if (item.note) {
+                        const extMatch = dlName.match(/\.[^/.]+$/);
+                        const ext = extMatch ? extMatch[0] : '';
+                        const baseName = dlName.replace(ext, '');
+                        // Loại bỏ dấu tiếng việt và ký tự đặc biệt để tên file an toàn
+                        const safeNote = item.note.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '_');
+                        dlName = `${safeNote}_${baseName}${ext}`;
+                    }
+                    
+                    return new File([blob], dlName, { type: blob.type });
+                }));
+
+                Swal.close();
+
+                // ⚡ Kích hoạt Bảng chia sẻ gốc của Hệ điều hành (Nơi có nút "Lưu Hình Ảnh" trên iPhone)
+                if (navigator.canShare && navigator.canShare({ files: files })) {
+                    try {
+                        await navigator.share({
+                            title: 'Lưu ảnh từ Tasco Cloud',
+                            text: 'Trọn bộ ảnh đã chọn',
+                            files: files
+                        });
+                        Toast.fire({ icon: 'success', title: 'Đã mở bảng lưu/chia sẻ ảnh!' });
+                    } catch (e) {
+                        // Bỏ qua lỗi nếu người dùng tự vuốt tắt bảng chia sẻ
+                        if (e.name !== 'AbortError' && !e.message.includes('Share canceled') && !e.message.includes('cancelled')) {
+                            // Nếu lỗi khác, fallback về cách tải truyền thống
+                            this._fallbackDownload(itemsToDownload);
+                        }
+                    }
+                } else {
+                    // Fallback cho trình duyệt PC (Tự động bấm tải từng link một)
+                    this._fallbackDownload(itemsToDownload);
+                }
+
+            } catch (error) {
+                Swal.close();
+                Toast.fire({ icon: 'error', title: 'Lỗi tải file: ' + error.message });
+            }
+
+            // Thoát chế độ chọn sau khi xong
+            this._selectMode = false;
+            this._selectedKeys.clear();
+            this.render();
+        },
+
+        // Hàm phụ tải xuống kiểu truyền thống cho PC (Giữ lại hàm này ngay dưới hàm tải)
+        _fallbackDownload(itemsToDownload) {
+            Toast.fire({ icon: 'info', title: `Đang tải xuống ${itemsToDownload.length} file...` });
+            itemsToDownload.forEach((item, index) => {
+                setTimeout(() => {
+                    const a = document.createElement('a');
+                    a.href = item.url;
+                    
+                    let dlName = item.fileName || ('TascoCloud_' + Date.now() + '.jpg');
+                    if (item.note) {
+                        const extMatch = dlName.match(/\.[^/.]+$/);
+                        const ext = extMatch ? extMatch[0] : '';
+                        const baseName = dlName.replace(ext, '');
+                        const safeNote = item.note.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '_');
+                        dlName = `${safeNote}_${baseName}${ext}`;
+                    }
+                    
+                    a.download = dlName;
+                    a.target = '_blank';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }, index * 600); // Trễ 600ms mỗi file để trình duyệt không chặn pop-up
             });
         }
     };
