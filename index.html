@@ -5432,7 +5432,15 @@
             link.href = 'data:text/csv;charset=utf-8,\uFEFF'+header+rows;
             link.download = 'BaoCao.csv';
             document.body.appendChild(link); link.click(); document.body.removeChild(link);
-        }
+        },
+
+        getThumb(url) {
+            if (!url || typeof url !== 'string' || !url.includes('cloudinary.com') || !url.includes('/image/upload/')) return url;
+            // Nếu URL đã có tham số transform rồi thì bỏ qua
+            if (url.includes('/upload/c_')) return url; 
+            // Ép Cloudinary crop vuông 250x250, giảm chất lượng xuống Low và tự định dạng webp
+            return url.replace('/upload/', '/upload/c_fill,w_250,h_250,q_auto:low,f_auto/');
+        }        
     };
 
     // ============================================================
@@ -11734,6 +11742,9 @@
                 const url = typeof img === 'string' ? img : img.url;
                 const fileName = typeof img === 'string' ? 'Tài liệu' : (img.fileName || 'Tài liệu');
                 
+                // THÊM DÒNG NÀY: Lấy link Thumbnail siêu nhẹ
+                const thumbUrl = App.getThumb(url);
+                
                 const isPdf = url.toLowerCase().includes('.pdf') || fileName.toLowerCase().includes('.pdf');
                 const isImg = url.match(/\.(jpeg|jpg|gif|png|webp)/i) != null && !isPdf;
                 
@@ -11748,7 +11759,7 @@
                 <div class="relative w-full aspect-square" onclick="${this._selectMode ? `Images.toggleSelect(${idx})` : (isUploading ? '' : `ImageViewer.open('${id}', ${idx})`)}">
                     <div id="img-grid-wrap-${idx}" class="w-full h-full rounded-xl overflow-hidden border-2 transition-all ${wrapClasses} bg-slate-50 shadow-sm">
                         ${isImg 
-                            ? `<img id="img-grid-img-${idx}" src="${url}" loading="lazy" class="w-full h-full object-cover transition-opacity ${imgClasses}">`
+                            ? `<img id="img-grid-img-${idx}" src="${thumbUrl}" loading="lazy" decoding="async" class="w-full h-full object-cover transition-opacity ${imgClasses}">`
                             : `<div id="img-grid-img-${idx}" class="w-full h-full flex flex-col items-center justify-center ${isPdf ? 'bg-red-50' : 'bg-slate-50'} transition-opacity ${imgClasses}">
                                   <i data-lucide="file-text" class="w-6 h-6 ${isPdf ? 'text-red-500' : 'text-blue-400'} mb-1"></i>
                                   ${isPdf ? `<span class="text-[8px] font-black text-red-600 bg-red-100 px-1 rounded border border-red-200">PDF</span>` : `<span class="text-[8px] font-bold text-slate-400">DOC</span>`}
@@ -15645,6 +15656,9 @@
                 html += items.map(item => {
                     const isImg = item.url.match(/\.(jpeg|jpg|gif|png|webp)/i) != null && !item.fileName?.toLowerCase().includes('.pdf');
                     const isPdf = item.fileName?.toLowerCase().includes('.pdf') || item.url.toLowerCase().includes('.pdf');
+                    
+                    // THÊM DÒNG NÀY: Lấy link Thumbnail
+                    const thumbUrl = App.getThumb(item.url);
                     const isSelected = this._selectedKeys.has(item.key);
                     const wrapClasses = isSelected ? 'border-blue-500 scale-95 ring-2 ring-blue-200' : 'border-slate-200';
                     const checkClasses = isSelected ? '' : 'hidden';
@@ -15664,8 +15678,8 @@
                     <div class="relative w-full aspect-square rounded-xl overflow-hidden border-2 bg-white shadow-sm transition-all cursor-pointer ${wrapClasses}" 
                          id="mc-wrap-${item.key}" onclick="${clickAction}">
                         ${isImg 
-                            ? `<img src="${item.url}" loading="lazy" class="w-full h-full object-cover">`
-                            : `<div class="w-full h-full flex flex-col items-center justify-center ${isPdf ? 'bg-red-50' : 'bg-slate-50'} p-2 text-center">
+                            ? `<img src="${thumbUrl}" loading="lazy" decoding="async" class="w-full h-full object-cover">`
+                            : `<div class="w-full h-full flex flex-col items-center justify-cente ${isPdf ? 'bg-red-50' : 'bg-slate-50'} p-2 text-center">
                                  <i data-lucide="file-text" class="w-8 h-8 ${isPdf ? 'text-red-500' : 'text-blue-400'} mb-1"></i>
                                  ${isPdf ? `<span class="text-[9px] font-black text-red-600 bg-red-100 px-1.5 py-0.5 rounded border border-red-200 mb-1">PDF</span>` : ''}
                                  <span class="text-[9px] font-bold text-slate-500 w-full break-words line-clamp-2">${item.fileName}</span>
