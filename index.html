@@ -15647,22 +15647,20 @@
             const loadingText = document.getElementById('mycloud-loading-text');
             loadingEl.classList.remove('hidden');
 
-            let successCount = 0;
-
-            for (let i = 0; i < files.length; i++) {
-                loadingText.textContent = `Đang tải lên ${i + 1}/${files.length}...`;
+            // TỐI ƯU: Chạy tất cả upload cùng lúc thay vì đợi từng file
+            const uploadPromises = files.map(async (file, i) => {
                 try {
                     const fd = new FormData();
-                    fd.append('file', files[i]);
+                    fd.append('file', file);
                     fd.append('upload_preset', CONFIG.cloudinaryCloud.preset);
                     
                     const res = await fetch(CONFIG.cloudinaryCloud.url, { method: 'POST', body: fd });
                     const data = await res.json();
 
                     if (data.secure_url) {
-                        const newKey = 'file_' + Date.now() + '_' + i;
-                        const isPdfUpload = files[i].name.toLowerCase().endsWith('.pdf');
-                        // Với PDF: chuyển URL từ /raw/upload/ sang /image/upload/ + .pdf để Cloudinary trả về đúng
+                        const newKey = 'file_' + Date.now() + '_' + i + '_' + Math.random().toString(36).substr(2, 5);
+                        const isPdfUpload = file.name.toLowerCase().endsWith('.pdf');
+                        
                         let finalUrl = data.secure_url;
                         if (isPdfUpload) {
                             finalUrl = data.secure_url
@@ -15670,18 +15668,27 @@
                                 .replace('/auto/upload/', '/image/upload/fl_attachment:false/');
                             if (!finalUrl.toLowerCase().endsWith('.pdf')) finalUrl += '.pdf';
                         }
-                        await db.ref(`Users/${user.id}/myCloud/${newKey}`).set({
+
+                        // Lưu vào Firebase
+                        return db.ref(`Users/${user.id}/myCloud/${newKey}`).set({
                             url: finalUrl,
-                            fileName: files[i].name,
-                            fileType: isPdfUpload ? 'pdf' : (files[i].type || 'other'),
+                            fileName: file.name,
+                            fileType: isPdfUpload ? 'pdf' : (file.type || 'other'),
                             timestamp: Date.now()
-                        });
-                        successCount++;
+                        }).then(() => true);
                     }
+                    return false;
                 } catch (e) {
                     console.error('Lỗi upload file:', e);
+                    return false;
                 }
-            }
+            });
+
+            loadingText.textContent = `Đang tải lên song song ${files.length} file...`;
+            
+            // Đợi tất cả các tiến trình hoàn thành
+            const results = await Promise.all(uploadPromises);
+            const successCount = results.filter(r => r === true).length;
 
             loadingEl.classList.add('hidden');
             if (successCount > 0) {
