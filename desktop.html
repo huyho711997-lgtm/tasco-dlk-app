@@ -3049,12 +3049,17 @@ function goView(v) {
   }
   if(v === 'kanban') renderKanban();
   if(v === 'garages') renderGaraTable();
+  
   if(v === 'partsprices') {
-  _partsPgCur = 1;
-  renderPartsTable();
-  renderPartsKPIs();
-  populatePartsFilters();
-  if(v === 'cloud') MyCloud.init();
+    _partsPgCur = 1;
+    renderPartsTable();
+    renderPartsKPIs();
+    populatePartsFilters();
+  } // <-- Thêm dấu ngoặc đóng ở đây để kết thúc partsprices
+  
+  if(v === 'cloud') {
+    MyCloud.init(); // <-- Tách riêng điều kiện cloud ra ngoài
+  }
 }
 }
 
@@ -10914,12 +10919,15 @@ const MyCloud = {
         
         // FIX LỖI 1: Dùng hàm Auth để lấy đúng User của Desktop
         const user = Auth.getCurrentUser();
-        if (!user || !user.id) {
+        // Lấy id, nếu không có id thì dùng username làm khóa lưu trữ
+        const userId = user ? (user.id || user.username) : null; 
+
+        if (!userId) {
             document.getElementById('desk-mycloud-count').textContent = 'Vui lòng đăng nhập';
             return;
         }
 
-        db.ref('Users/' + user.id + '/myCloud').on('value', snap => {
+        db.ref('Users/' + userId + '/myCloud').on('value', snap => {
             const data = snap.val() || {};
             this.items = Object.keys(data).map(k => Object.assign({ key: k }, data[k])).sort((a,b) => b.timestamp - a.timestamp);
             
