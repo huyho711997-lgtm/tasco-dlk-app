@@ -3055,13 +3055,13 @@ function goView(v) {
     renderPartsTable();
     renderPartsKPIs();
     populatePartsFilters();
-  } // <-- Thêm dấu ngoặc đóng ở đây để kết thúc partsprices
+  }
   
   if(v === 'cloud') {
-    MyCloud.init(); // <-- Tách riêng điều kiện cloud ra ngoài
+    MyCloud.init();
   }
 }
-}
+
 
 /* ═══════════════════════════════════════
    FILTER PILLS
@@ -10917,9 +10917,7 @@ const MyCloud = {
     init() {
         if (this._isInit) return;
         
-        // FIX LỖI 1: Dùng hàm Auth để lấy đúng User của Desktop
         const user = Auth.getCurrentUser();
-        // Lấy id, nếu không có id thì dùng username làm khóa lưu trữ
         const userId = user ? (user.id || user.username) : null; 
 
         if (!userId) {
@@ -10930,8 +10928,6 @@ const MyCloud = {
         db.ref('Users/' + userId + '/myCloud').on('value', snap => {
             const data = snap.val() || {};
             this.items = Object.keys(data).map(k => Object.assign({ key: k }, data[k])).sort((a,b) => b.timestamp - a.timestamp);
-            
-            // Render giao diện ngay khi có dữ liệu
             this.render();
         });
         
