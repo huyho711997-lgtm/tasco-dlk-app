@@ -10925,6 +10925,17 @@ const MyCloud = {
             return;
         }
 
+        // Tự động fix lỗi không cuộn được chuột bằng Javascript
+        const viewCloud = document.getElementById('view-cloud');
+        if (viewCloud) {
+            viewCloud.style.overflowY = 'auto';
+            viewCloud.classList.remove('h-full'); 
+        }
+        const listEl = document.getElementById('desk-mycloud-list');
+        if (listEl) {
+            listEl.style.overflowY = 'visible';
+        }
+
         db.ref('Users/' + userId + '/myCloud').on('value', snap => {
             const data = snap.val() || {};
             this.items = Object.keys(data).map(k => Object.assign({ key: k }, data[k])).sort((a,b) => b.timestamp - a.timestamp);
@@ -11065,44 +11076,50 @@ const MyCloud = {
                 const wrapClasses = isSelected ? 'border-rose-500 scale-[0.96] ring-4 ring-rose-100' : 'border-slate-200 hover:border-blue-400 hover:shadow-lg';
                 const checkClasses = isSelected ? '' : 'hidden';
 
-                const itemIndex = window._cloudItems.findIndex(i => i.key === item.key);
+                // FIX CẬP NHẬT CLICK: Dùng thẻ a ẩn để mở fslightbox thay vì ImageViewer
                 const clickAction = this._selectMode 
-                    ? 'MyCloud.toggleSelect(\'' + item.key + '\')' 
-                    : (isImg ? 'ImageViewer.openCloud(' + itemIndex + ')' : 'window.open(\'' + item.url + '\', \'_blank\')');
+                    ? `MyCloud.toggleSelect('${item.key}')` 
+                    : (isImg ? `document.getElementById('lb-mc-${item.key}').click()` : `window.open('${item.url}', '_blank')`);
 
                 const noteTag = item.note 
-                    ? '<div class="absolute top-2 left-2 right-2 z-10"><div class="bg-black/70 backdrop-blur-sm text-white px-2 py-1.5 rounded-lg text-[10px] font-bold truncate border border-white/20" title="' + item.note + '">' + item.note + '</div></div>' 
+                    ? `<div class="absolute top-2 left-2 right-2 z-10"><div class="bg-black/70 backdrop-blur-sm text-white px-2 py-1.5 rounded-lg text-[10px] font-bold truncate border border-white/20" title="${item.note}">${item.note}</div></div>` 
                     : '';
 
-                const bodyHTML = isImg 
-                    ? '<img src="' + thumbUrl + '" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">'
-                    : '<div class="w-full h-full flex flex-col items-center justify-center ' + (isPdf ? 'bg-rose-50' : 'bg-slate-50') + ' p-4 text-center group-hover:bg-blue-50 transition-colors">' +
-                         '<svg class="w-10 h-10 ' + (isPdf ? 'text-rose-500' : 'text-blue-400') + ' mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>' +
-                         (isPdf ? '<span class="text-[10px] font-black text-rose-600 bg-rose-100 px-2 py-0.5 rounded border border-rose-200 mb-2">PDF</span>' : '') +
-                         '<span class="text-xs font-bold text-slate-600 w-full break-words line-clamp-3">' + (item.fileName||'Tài liệu') + '</span>' +
-                       '</div>';
+                // Thẻ a ẩn dùng để mồi cho fslightbox mở ảnh
+                const lightBoxLink = isImg ? `<a id="lb-mc-${item.key}" href="${item.url}" data-fslightbox="mycloud" class="hidden"></a>` : '';
 
-                return '<div class="relative w-full aspect-square rounded-2xl overflow-hidden border-2 bg-white shadow-sm transition-all cursor-pointer group ' + wrapClasses + '" ' +
-                     'id="mc-wrap-' + item.key + '" onclick="' + clickAction + '">' +
-                    bodyHTML +
-                    noteTag +
-                    '<div id="mc-chk-' + item.key + '" class="absolute top-2 right-2 w-6 h-6 rounded-full bg-rose-500 border-2 border-white flex items-center justify-center shadow-md transition-all ' + checkClasses + ' z-20">' +
-                        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>' +
-                    '</div>' +
-                    '<div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">' +
-                        '<p class="text-white text-[11px] font-bold text-left flex items-center gap-1.5">' +
-                            '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
-                            moment(item.timestamp).format('HH:mm') +
-                        '</p>' +
-                    '</div>' +
-                '</div>';
+                const bodyHTML = isImg 
+                    ? `<img src="${thumbUrl}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">${lightBoxLink}`
+                    : `<div class="w-full h-full flex flex-col items-center justify-center ${isPdf ? 'bg-rose-50' : 'bg-slate-50'} p-4 text-center group-hover:bg-blue-50 transition-colors">
+                         <svg class="w-10 h-10 ${isPdf ? 'text-rose-500' : 'text-blue-400'} mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                         ${isPdf ? '<span class="text-[10px] font-black text-rose-600 bg-rose-100 px-2 py-0.5 rounded border border-rose-200 mb-2">PDF</span>' : ''}
+                         <span class="text-xs font-bold text-slate-600 w-full break-words line-clamp-3">${item.fileName||'Tài liệu'}</span>
+                       </div>`;
+
+                return `<div class="relative w-full aspect-square rounded-2xl overflow-hidden border-2 bg-white shadow-sm transition-all cursor-pointer group ${wrapClasses}" id="mc-wrap-${item.key}" onclick="${clickAction}">
+                    ${bodyHTML}
+                    ${noteTag}
+                    <div id="mc-chk-${item.key}" class="absolute top-2 right-2 w-6 h-6 rounded-full bg-rose-500 border-2 border-white flex items-center justify-center shadow-md transition-all ${checkClasses} z-20">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                        <p class="text-white text-[11px] font-bold text-left flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            ${moment(item.timestamp).format('HH:mm')}
+                        </p>
+                    </div>
+                </div>`;
             }).join('');
             
             html += '</div></div>';
         }
 
         listEl.innerHTML = html;
-        try { lucide.createIcons(); } catch(e){}
+        
+        // Bắt buộc gọi lệnh này để fslightbox nhận diện các thẻ <a> vừa được tạo ra
+        if (typeof refreshFsLightbox === 'function') {
+            setTimeout(refreshFsLightbox, 100);
+        }
     },
 
     async uploadFiles(event) {
