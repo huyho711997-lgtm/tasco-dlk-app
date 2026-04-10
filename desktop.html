@@ -11396,6 +11396,7 @@ const MyCloud = {
             
             if (result.success && result.storage) {
                 const usedBytes = result.storage.usage;
+                // Cloudinary Free Tier giới hạn 25GB
                 const limitBytes = 25 * 1024 * 1024 * 1024;
                 const percent = Math.min((usedBytes / limitBytes) * 100, 100).toFixed(1);
 
@@ -11411,17 +11412,23 @@ const MyCloud = {
                     bar.style.width = percent + '%';
                     if (percent > 90) {
                         bar.className = 'h-full bg-gradient-to-r from-orange-400 to-rose-500 transition-all duration-700 ease-out';
-                        text.className = 'text-[11px] font-black text-rose-300 bg-rose-900/40 border border-rose-700/50 px-2.5 py-1 rounded-md';
+                        if (text) text.className = 'text-[11px] font-black text-rose-300 bg-rose-900/40 border border-rose-700/50 px-2.5 py-1 rounded-md';
                     } else {
                         bar.className = 'h-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-700 ease-out';
-                        text.className = 'text-[11px] font-black text-cyan-300 bg-cyan-900/40 border border-cyan-700/50 px-2.5 py-1 rounded-md';
+                        if (text) text.className = 'text-[11px] font-black text-cyan-300 bg-cyan-900/40 border border-cyan-700/50 px-2.5 py-1 rounded-md';
                     }
                 }
                 if (text) {
-                    text.textContent = formatSize(usedBytes) + ' / 25GB (' + percent + '%)';
+                    text.textContent = formatSize(usedBytes) + ' / 25 GB (' + percent + '%)';
                 }
+            } else {
+                if (text) text.textContent = "Lỗi tải dung lượng";
+                console.error("Lỗi lấy dung lượng:", result.error);
             }
-        } catch (error) {}
+        } catch (error) {
+            if (text) text.textContent = "Không lấy được dung lượng";
+            console.error(error);
+        }
     }
 };
 /* ═══════════════════════════════════════
