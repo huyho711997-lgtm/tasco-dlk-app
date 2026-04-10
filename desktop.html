@@ -3031,14 +3031,27 @@ function toggleSidebar() {
 var viewTitles={dashboard:'Bảng điều khiển',manage:'Quản lý Hồ sơ',calendar:'Lịch giám định',overdue:'Hồ sơ trễ hẹn',import:'Tiếp nhận AI',stats:'Thống kê & Báo cáo',kanban:'Kanban Hồ sơ',cloud:'Cloud của tôi'};
 
 function goView(v) {
-  document.querySelectorAll('.view').forEach(function(el){ el.classList.add('hidden'); el.classList.remove('flex'); });
+  document.querySelectorAll('.view').forEach(function(el){ 
+    el.classList.add('hidden'); 
+    el.classList.remove('flex'); 
+    el.style.display = ''; // Xóa style inline gây kẹt không ẩn được tab
+  });
+  
   var t=document.getElementById('view-'+v);
-  if(t){t.classList.remove('hidden'); if(v==='calendar'||v==='kanban')t.classList.add('flex');}
+  if(t){
+    t.classList.remove('hidden'); 
+    // Bật lại flex cho các tab cần thiết để không hỏng layout
+    if(['calendar','kanban','cloud','manage','garages','partsprices'].includes(v)) {
+        t.classList.add('flex');
+    }
+  }
+  
   document.querySelectorAll('.nav-btn').forEach(function(el){ el.classList.remove('sidebar-active'); });
   var nb=document.getElementById('nav-'+v); if(nb)nb.classList.add('sidebar-active');
   document.getElementById('page-title').textContent=viewTitles[v]||'';
   var fb = document.getElementById('filter-bar');
   if(fb) fb.style.display = 'none';
+  
   if(v==='calendar'&&calObj){setTimeout(function(){calObj.updateSize();calObj.refetchEvents();},80);}
   if(v==='stats'&&!statsInited){
     statsInited=true;
@@ -10925,24 +10938,20 @@ const MyCloud = {
             return;
         }
 
-        // --- BẢN VÁ LỖI CUỘN BẰNG CHIỀU CAO TUYỆT ĐỐI ---
         const viewCloud = document.getElementById('view-cloud');
         if (viewCloud) {
-            // Ép chiều cao phần Cloud bằng chính xác màn hình (100vh) trừ đi thanh Header trên cùng (68px) và Padding (64px)
+            // Chỉ giữ lại tính toán chiều cao để cuộn mượt
             viewCloud.style.height = 'calc(100vh - 132px)';
-            viewCloud.style.display = 'flex';
-            viewCloud.style.flexDirection = 'column';
             viewCloud.style.overflow = 'hidden'; 
         }
         
         const listEl = document.getElementById('desk-mycloud-list');
         if (listEl) {
             listEl.style.flex = '1';
-            listEl.style.minHeight = '0'; // Ép Flexbox sinh thanh cuộn
+            listEl.style.minHeight = '0'; 
             listEl.style.overflowY = 'auto';
-            listEl.style.paddingBottom = '20px'; // Thêm chút khoảng không dưới cùng cho đẹp
+            listEl.style.paddingBottom = '20px'; 
         }
-        // ------------------------------------------------
 
         db.ref('Users/' + userId + '/myCloud').on('value', snap => {
             const data = snap.val() || {};
@@ -11151,16 +11160,20 @@ const MyCloud = {
 
         Swal.fire({
             title: 'Đang tải lên ' + files.length + ' file...',
+            html: '<p id="mc-up-progress" class="text-sm text-slate-500 font-bold mt-2">Đang xử lý 0 / ' + files.length + '</p>',
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading(),
             customClass: { popup: 'rnd' }
         });
 
         let successCount = 0;
-        for (let i = 0; i < files.length; i++) {
+        let processedCount = 0;
+
+        // Chạy đa luồng (Parallel) bằng Promise.all
+        const uploadPromises = files.map(async (file, i) => {
             try {
                 const fd = new FormData();
-                fd.append('file', files[i]);
+                fd.append('file', file);
                 fd.append('upload_preset', CL_CLOUD_PRESET); 
                 
                 const res = await fetch(CL_CLOUD_URL, { method: 'POST', body: fd });
@@ -11168,7 +11181,7 @@ const MyCloud = {
 
                 if (data.secure_url) {
                     const newKey = 'file_' + Date.now() + '_' + i + '_' + Math.random().toString(36).substr(2, 5);
-                    const isPdfUpload = files[i].name.toLowerCase().endsWith('.pdf');
+                    const isPdfUpload = file.name.toLowerCase().endsWith('.pdf');
                     
                     let finalUrl = data.secure_url;
                     if (isPdfUpload) {
@@ -11178,16 +11191,26 @@ const MyCloud = {
 
                     await db.ref('Users/' + userId + '/myCloud/' + newKey).set({
                         url: finalUrl,
-                        fileName: files[i].name,
-                        fileType: isPdfUpload ? 'pdf' : (files[i].type || 'other'),
+                        fileName: file.name,
+                        fileType: isPdfUpload ? 'pdf' : (file.type || 'other'),
                         timestamp: Date.now(),
                         note: noteText || '',
-                        size: files[i].size || 0
+                        size: file.size || 0
                     });
                     successCount++;
                 }
-            } catch (e) {}
-        }
+            } catch (e) {
+                console.error("Lỗi upload: ", e);
+            } finally {
+                // Cập nhật tiến độ trên giao diện
+                processedCount++;
+                const progEl = document.getElementById('mc-up-progress');
+                if (progEl) progEl.textContent = `Đang xử lý ${processedCount} / ${files.length}`;
+            }
+        });
+
+        // Đợi tất cả các luồng hoàn tất
+        await Promise.all(uploadPromises);
         
         Swal.close();
         if (successCount > 0) {
