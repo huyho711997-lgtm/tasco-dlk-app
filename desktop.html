@@ -19,24 +19,38 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 * { box-sizing: border-box; }
 body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; color: #1e293b; }
-/* ── SIDEBAR THU GỌN ── */
-/* ── HIỆU ỨNG NÚT ĐÓNG/MỞ SIDEBAR ── */
+/* ── SIDEBAR REDESIGN ── */
 #sidebar-toggle-btn .icon-close { opacity: 1; transform: rotate(0deg) scale(1); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 #sidebar-toggle-btn .icon-open { opacity: 0; transform: rotate(-90deg) scale(0.5); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 
 #sidebar-toggle-btn.is-collapsed .icon-close { opacity: 0; transform: rotate(90deg) scale(0.5); }
 #sidebar-toggle-btn.is-collapsed .icon-open { opacity: 1; transform: rotate(0deg) scale(1); }
+
 #sidebar { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow-x: hidden; }
-#sidebar.collapsed { width: 88px !important; }
+#sidebar.collapsed { width: 80px !important; }
 #sidebar.collapsed .sidebar-text { opacity: 0; display: none; }
 #sidebar.collapsed .section-title { display: none; }
 #sidebar.collapsed .nav-btn { padding-left: 0; padding-right: 0; justify-content: center; position: relative; }
 #sidebar.collapsed .nav-btn svg { margin: 0; }
-#sidebar.collapsed .logo-wrap { padding: 1.75rem 0; justify-content: center; }
-#sidebar.collapsed #notif-badge { position: absolute; top: 6px; right: 22px; margin: 0; border: 2px solid #fff; }
+#sidebar.collapsed .logo-wrap { padding: 0; justify-content: center; }
+
+/* Trạng thái Active mềm mại, hiện đại */
+.nav-btn { position: relative; }
+.sidebar-active { background: #eff6ff !important; color: #1d4ed8 !important; box-shadow: none !important; }
+.sidebar-active svg { color: #2563eb !important; }
+
+/* Vạch chỉ báo bên trái tab active */
+.sidebar-active::before {
+  content: ''; position: absolute; left: -16px; top: 50%; transform: translateY(-50%);
+  width: 4px; height: 20px; background: #2563eb; border-radius: 0 4px 4px 0;
+}
+#sidebar.collapsed .sidebar-active::before { left: 0; }
+
+/* Xử lý Badge thông báo khi thu gọn */
+#sidebar.collapsed #notif-badge { position: absolute; top: 6px; right: 22px; margin: 0; border: 2px solid #fff; padding: 0; width: 10px; height: 10px; font-size: 0; }
+
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
-.sidebar-active { background: #2563eb !important; color: #fff !important; box-shadow: 0 8px 16px rgba(37,99,235,.25); }
 .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 0.5rem; }
 .inp { width:100%; background:#f8fafc; border:1px solid #e2e8f0; border-radius:.625rem; padding:.5rem .75rem; font-size:.8125rem; font-weight:600; color:#0f172a; outline:none; transition:border .2s,box-shadow .2s,background .2s; }
 .inp:focus { background:#fff; border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.12); }
@@ -1268,59 +1282,77 @@ textarea.inp { resize:vertical; }
 </div>
 
 <!-- SIDEBAR -->
-<aside id="sidebar" class="bg-white border-r border-slate-200 flex flex-col z-20 shadow-sm" style="width:272px;flex-shrink:0">
-  <div class="logo-wrap p-7 flex items-center gap-3">
-    <div class="p-2.5 bg-blue-600 rounded-xl shadow-lg shadow-blue-200 shrink-0"><svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
-    <div class="sidebar-text whitespace-nowrap">
-      <h1 class="font-extrabold text-lg text-slate-900 leading-none">TASCO <span class="text-blue-600">DLK</span></h1>
-      <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Hệ thống bồi thường</p>
+<aside id="sidebar" class="bg-white border-r border-slate-200 flex flex-col z-20" style="width:260px;flex-shrink:0">
+  
+  <div class="logo-wrap h-[68px] flex items-center px-5 border-b border-slate-100 shrink-0 gap-3 overflow-hidden">
+    <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center shadow-md shadow-blue-200/50 shrink-0">
+      <svg class="w-4.5 h-4.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+    </div>
+    <div class="sidebar-text whitespace-nowrap min-w-0">
+      <h1 class="font-black text-[15px] text-slate-800 tracking-tight leading-none">TASCO <span class="text-blue-600">DLK</span></h1>
+      <p class="text-[9px] text-slate-400 font-bold uppercase tracking-[0.15em] mt-1">Hệ thống bồi thường</p>
     </div>
   </div>
-  <nav class="flex-1 px-4 space-y-1 overflow-y-auto">
-    <button title="Dashboard" onclick="goView('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all sidebar-active">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg> 
-      <span class="sidebar-text whitespace-nowrap">Dashboard</span>
+  
+  <nav class="flex-1 px-4 py-5 space-y-1 overflow-y-auto custom-scrollbar">
+    
+    <button title="Dashboard" onclick="goView('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all sidebar-active">
+      <svg class="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg> 
+      <span class="sidebar-text whitespace-nowrap">Bảng điều khiển</span>
     </button>
-    <button title="Kanban B1-B6" onclick="goView('kanban')" id="nav-kanban" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="4" height="15" rx="1"/></svg>
+    
+    <button title="Kanban B1-B6" onclick="goView('kanban')" id="nav-kanban" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all">
+      <svg class="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="4" height="15" rx="1"/></svg>
       <span class="sidebar-text whitespace-nowrap">Kanban Hồ sơ</span>
     </button>   
-    <button title="Quản lý hồ sơ" onclick="goView('manage')" id="nav-manage" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v1"/><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v5z"/></svg> 
+    
+    <button title="Quản lý hồ sơ" onclick="goView('manage')" id="nav-manage" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all">
+      <svg class="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v1"/><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v5z"/></svg> 
       <span class="sidebar-text whitespace-nowrap">Quản lý hồ sơ</span>
     </button>
-    <button title="Lịch giám định" onclick="goView('calendar')" id="nav-calendar" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="8" cy="15" r="1" fill="currentColor"/><circle cx="12" cy="15" r="1" fill="currentColor"/><circle cx="16" cy="15" r="1" fill="currentColor"/></svg> 
+    
+    <button title="Lịch giám định" onclick="goView('calendar')" id="nav-calendar" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all">
+      <svg class="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="8" cy="15" r="1" fill="currentColor"/><circle cx="12" cy="15" r="1" fill="currentColor"/><circle cx="16" cy="15" r="1" fill="currentColor"/></svg> 
       <span class="sidebar-text whitespace-nowrap">Lịch giám định</span>
     </button>
-    <button title="Quá hạn hẹn" onclick="goView('overdue')" id="nav-overdue" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-rose-500 hover:bg-rose-50 transition-all">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6M22 6l-3-3"/></svg> 
-      <span class="sidebar-text whitespace-nowrap">Quá hạn hẹn</span>
+    
+    <button title="Quá hạn hẹn" onclick="goView('overdue')" id="nav-overdue" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-bold text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-all">
+      <svg class="w-[18px] h-[18px] shrink-0 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6M22 6l-3-3"/></svg> 
+      <span class="sidebar-text whitespace-nowrap text-rose-500">Quá hạn hẹn</span>
     </button>
-    <button title="Nhắc nhở" onclick="checkNotifications()" id="nav-notif" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all relative">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+    
+    <button title="Nhắc nhở" onclick="checkNotifications()" id="nav-notif" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all relative">
+      <svg class="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
       <span class="sidebar-text whitespace-nowrap">Nhắc nhở</span>
       <span id="notif-badge" class="ml-auto hidden bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full min-w-[18px] text-center shrink-0"></span>
     </button>
-    <button title="Thống kê" onclick="goView('stats')" id="nav-stats" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg> 
+    
+    <button title="Thống kê" onclick="goView('stats')" id="nav-stats" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all">
+      <svg class="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg> 
       <span class="sidebar-text whitespace-nowrap">Thống kê</span>
     </button>
-    <button title="Cloud của tôi" onclick="goView('cloud')" id="nav-cloud" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all mt-1 border border-transparent hover:border-cyan-100">
-      <svg class="w-5 h-5 shrink-0 text-cyan-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/><path d="M12 12v6"/><path d="M9 15l3 3 3-3"/></svg>
+
+    <button title="Cloud của tôi" onclick="goView('cloud')" id="nav-cloud" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-bold text-slate-500 hover:bg-cyan-50 hover:text-cyan-700 transition-all mt-2">
+      <svg class="w-[18px] h-[18px] shrink-0 text-cyan-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/><path d="M12 12v6"/><path d="M9 15l3 3 3-3"/></svg>
       <span class="sidebar-text whitespace-nowrap">Cloud của tôi</span>
     </button>
-    <div class="section-title pt-6 pb-2 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Nghiệp vụ</div>
-    <button title="Tiếp nhận AI" onclick="goView('import')" id="nav-import" class="nav-btn w-full flex items-center gap-3 px-4 py-4 bg-slate-900 text-white rounded-2xl text-sm font-bold hover:bg-blue-600 transition-all shadow-lg mt-1">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 15h.01M16 15h.01"/></svg> 
-      <span class="sidebar-text whitespace-nowrap">Tiếp nhận AI</span>
+    
+    <div class="section-title pt-6 pb-1 px-2 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest whitespace-nowrap">Nghiệp vụ</div>
+    
+    <button title="Tiếp nhận AI" onclick="goView('import')" id="nav-import" class="nav-btn group w-full flex items-center gap-3 px-3 py-3 bg-gradient-to-b from-slate-800 to-slate-900 text-white rounded-xl text-[13px] font-bold hover:shadow-lg hover:shadow-slate-900/20 transition-all mt-2">
+      <div class="bg-white/10 p-1.5 rounded-lg group-hover:bg-white/20 transition-colors">
+         <svg class="w-[15px] h-[15px] shrink-0 text-indigo-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 15h.01M16 15h.01"/></svg> 
+      </div>
+      <span class="sidebar-text whitespace-nowrap text-slate-100 group-hover:text-white">Tiếp nhận AI</span>
     </button>
-    <button title="Quản lý Gara" onclick="goView('garages')" id="nav-garages" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all mt-1">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+    
+    <button title="Quản lý Gara" onclick="goView('garages')" id="nav-garages" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all mt-2">
+      <svg class="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
       <span class="sidebar-text whitespace-nowrap">Quản lý Gara</span>
     </button>  
-    <button title="Kho giá phụ tùng" onclick="goView('partsprices')" id="nav-partsprices" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+    
+    <button title="Kho giá phụ tùng" onclick="goView('partsprices')" id="nav-partsprices" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all">
+      <svg class="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
       <span class="sidebar-text whitespace-nowrap">Kho giá phụ tùng</span>
     </button>      
   </nav>
