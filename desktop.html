@@ -10925,21 +10925,24 @@ const MyCloud = {
             return;
         }
 
-        // --- BẢN VÁ LỖI CỐ ĐỊNH HEADER & CHỈ CUỘN DANH SÁCH ---
+        // --- BẢN VÁ LỖI CUỘN BẰNG CHIỀU CAO TUYỆT ĐỐI ---
         const viewCloud = document.getElementById('view-cloud');
         if (viewCloud) {
-            // Khôi phục chiều cao cố định cho khung ngoài
-            viewCloud.classList.add('h-full');
-            viewCloud.style.overflowY = 'hidden'; 
+            // Ép chiều cao phần Cloud bằng chính xác màn hình (100vh) trừ đi thanh Header trên cùng (68px) và Padding (64px)
+            viewCloud.style.height = 'calc(100vh - 132px)';
+            viewCloud.style.display = 'flex';
+            viewCloud.style.flexDirection = 'column';
+            viewCloud.style.overflow = 'hidden'; 
         }
         
         const listEl = document.getElementById('desk-mycloud-list');
         if (listEl) {
-            // Ép danh sách con nhận diện giới hạn để tự sinh thanh cuộn bên trong
-            listEl.style.minHeight = '0px'; 
+            listEl.style.flex = '1';
+            listEl.style.minHeight = '0'; // Ép Flexbox sinh thanh cuộn
             listEl.style.overflowY = 'auto';
+            listEl.style.paddingBottom = '20px'; // Thêm chút khoảng không dưới cùng cho đẹp
         }
-        // -----------------------------------------------------
+        // ------------------------------------------------
 
         db.ref('Users/' + userId + '/myCloud').on('value', snap => {
             const data = snap.val() || {};
