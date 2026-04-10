@@ -11285,39 +11285,102 @@ const MyCloud = {
         });
     },
 
-    downloadSelected() {
+    async downloadSelected() {
         if (this._selectedKeys.size === 0) return;
         const keysToDownload = Array.from(this._selectedKeys);
         const itemsToDownload = keysToDownload.map(key => this.items.find(i => i.key === key)).filter(Boolean);
         if (itemsToDownload.length === 0) return;
 
-        Toast.fire({ icon: 'info', title: 'Đang tải xuống ' + itemsToDownload.length + ' file...' });
+        Swal.fire({
+            title: 'Đang chuẩn bị file...',
+            html: '<p class="text-xs text-slate-500 mt-2 text-center">Vui lòng chọn nơi lưu ở hộp thoại tiếp theo.</p>',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading(),
+            customClass: { popup: 'rnd' }
+        });
 
-        itemsToDownload.forEach((item, index) => {
-            setTimeout(() => {
-                const a = document.createElement('a');
-                a.href = item.url;
+        try {
+            let blobToSave;
+            let defaultFileName = 'TascoCloud_Download_' + moment().format('DDMMYYYY_HHmm');
+            let acceptTypes = {};
+
+            // Nếu chỉ tải 1 file -> Lưu nguyên định dạng gốc
+            if (itemsToDownload.length === 1) {
+                const item = itemsToDownload[0];
+                const res = await fetch(item.url);
+                blobToSave = await res.blob();
                 
-                let dlName = item.fileName || ('TascoCloud_' + Date.now() + '.jpg');
-                if (item.note) {
-                    const extMatch = dlName.match(/\.[^/.]+$/);
-                    const ext = extMatch ? extMatch[0] : '';
-                    const baseName = dlName.replace(ext, '');
-                    const safeNote = item.note.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '_');
-                    dlName = safeNote + '_' + baseName + ext;
+                const extMatch = (item.fileName || item.url).match(/\.[0-9a-z]+$/i);
+                const ext = extMatch ? extMatch[0] : '';
+                defaultFileName = item.fileName || (defaultFileName + ext);
+                acceptTypes = { 'application/octet-stream': [ext] }; 
+            } 
+            // Nếu tải nhiều file -> Gom thành 1 file ZIP
+            else {
+                const zip = new JSZip();
+                for (let i = 0; i < itemsToDownload.length; i++) {
+                    const item = itemsToDownload[i];
+                    try {
+                        const res = await fetch(item.url);
+                        const blob = await res.blob();
+                        
+                        let dlName = item.fileName || ('TaiLieu_' + i + '.jpg');
+                        if (item.note) {
+                            const extMatch = dlName.match(/\.[^/.]+$/);
+                            const ext = extMatch ? extMatch[0] : '';
+                            const baseName = dlName.replace(ext, '');
+                            const safeNote = item.note.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '_');
+                            dlName = safeNote + '_' + baseName + ext;
+                        }
+                        zip.file(dlName, blob);
+                    } catch (e) { console.error("Lỗi gom file:", e); }
                 }
-                
-                a.download = dlName;
-                a.target = '_blank';
+                blobToSave = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+                defaultFileName += '.zip';
+                acceptTypes = { 'application/zip': ['.zip'] };
+            }
+
+            Swal.close();
+
+            // Kích hoạt hộp thoại "Save As" chọn thư mục lưu (Hỗ trợ Chrome, Edge, Cốc Cốc, Opera)
+            if (window.showSaveFilePicker) {
+                try {
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: defaultFileName,
+                        types: [{ description: 'Tệp tải xuống', accept: acceptTypes }]
+                    });
+                    const writable = await handle.createWritable();
+                    await writable.write(blobToSave);
+                    await writable.close();
+                    
+                    Toast.fire({ icon: 'success', title: 'Đã lưu file thành công!' });
+                } catch (err) {
+                    // Bỏ qua lỗi nếu người dùng bấm nút "Cancel" trong hộp thoại Save
+                    if (err.name !== 'AbortError') {
+                        Toast.fire({ icon: 'error', title: 'Lỗi khi lưu: ' + err.message });
+                    }
+                }
+            } else {
+                // Fallback (Dự phòng) cho các trình duyệt cũ không hỗ trợ showSaveFilePicker
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blobToSave);
+                a.download = defaultFileName;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-            }, index * 600);
-        });
-        
-        this._selectMode = false;
-        this._selectedKeys.clear();
-        this.render();
+                URL.revokeObjectURL(a.href);
+                Toast.fire({ icon: 'success', title: 'Đã tải xuống!' });
+            }
+
+            // Reset UI
+            this._selectMode = false;
+            this._selectedKeys.clear();
+            this.render();
+
+        } catch (e) {
+            Swal.close();
+            Toast.fire({ icon: 'error', title: 'Lỗi xử lý tải xuống!' });
+        }
     },
 
     async updateQuota() {
