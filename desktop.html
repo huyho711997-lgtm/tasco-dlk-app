@@ -10900,7 +10900,7 @@ const SceneCanvas = {
 };
 
 /* ═══════════════════════════════════════
-   MY CLOUD (DESKTOP VERSION)
+   MY CLOUD (DESKTOP VERSION) - ĐÃ FIX LỖI TREO
 ═══════════════════════════════════════ */
 const MyCloud = {
     items: [],
@@ -10910,22 +10910,23 @@ const MyCloud = {
     _selectedKeys: new Set(),
 
     init() {
-        // Chỉ chạy 1 lần để listener Firebase
         if (this._isInit) return;
         
-        // Lấy Session người dùng (Sử dụng cách lấy từ localStorage giống ở màn Login)
-        const sessionStr = localStorage.getItem('tasco_session');
-        if (!sessionStr) return;
-        const user = JSON.parse(sessionStr);
+        // FIX LỖI 1: Dùng hàm Auth để lấy đúng User của Desktop
+        const user = Auth.getCurrentUser();
+        if (!user || !user.id) {
+            document.getElementById('desk-mycloud-count').textContent = 'Vui lòng đăng nhập';
+            return;
+        }
 
         db.ref('Users/' + user.id + '/myCloud').on('value', snap => {
             const data = snap.val() || {};
             this.items = Object.keys(data).map(k => Object.assign({ key: k }, data[k])).sort((a,b) => b.timestamp - a.timestamp);
             
-            if (!document.getElementById('view-cloud').classList.contains('hidden')) {
-                this.render();
-            }
+            // Render giao diện ngay khi có dữ liệu
+            this.render();
         });
+        
         this._isInit = true;
         this.updateQuota();
     },
@@ -10935,7 +10936,6 @@ const MyCloud = {
         this._selectMode = false;
         this._selectedKeys.clear();
         
-        // Đổi màu nút Tab
         const buttons = btn.parentElement.querySelectorAll('.mn-fp');
         buttons.forEach(b => b.classList.remove('active'));
         if(btn) btn.classList.add('active');
@@ -11004,7 +11004,6 @@ const MyCloud = {
         const filteredItems = this._getFilteredItems();
         countLabel.textContent = filteredItems.length > 0 ? filteredItems.length + ' file' : '0 file';
         
-        // Điều khiển thanh Select
         if (filteredItems.length > 0) {
             selectBtn.classList.remove('hidden');
             selectBtn.innerHTML = this._selectMode 
@@ -11029,7 +11028,6 @@ const MyCloud = {
             return;
         }
 
-        // Nhóm theo ngày
         const groups = {};
         filteredItems.forEach(item => {
             const m = moment(item.timestamp);
@@ -11041,7 +11039,6 @@ const MyCloud = {
             groups[dateKey].push(item);
         });
 
-        // Biến toàn cục để ImageViewer xem được ảnh
         window._cloudItems = filteredItems;
 
         let html = '';
@@ -11055,7 +11052,6 @@ const MyCloud = {
                 const isImg = item.url.match(/\.(jpeg|jpg|gif|png|webp)/i) != null && !(item.fileName||'').toLowerCase().includes('.pdf');
                 const isPdf = (item.fileName||'').toLowerCase().includes('.pdf') || item.url.toLowerCase().includes('.pdf');
                 
-                // Thay thế link để tải ảnh thumbnail nhẹ
                 let thumbUrl = item.url;
                 if(isImg && item.url.includes('cloudinary.com')) {
                     thumbUrl = item.url.replace('/upload/', '/upload/c_fill,w_300,h_300,q_auto:low,f_auto/');
@@ -11066,7 +11062,6 @@ const MyCloud = {
                 const checkClasses = isSelected ? '' : 'hidden';
 
                 const itemIndex = window._cloudItems.findIndex(i => i.key === item.key);
-                // Nếu chế độ chọn thì click => toggle. Nếu không thì click => xem ảnh (hoặc tải nếu là PDF)
                 const clickAction = this._selectMode 
                     ? 'MyCloud.toggleSelect(\'' + item.key + '\')' 
                     : (isImg ? 'ImageViewer.openCloud(' + itemIndex + ')' : 'window.open(\'' + item.url + '\', \'_blank\')');
@@ -11111,9 +11106,9 @@ const MyCloud = {
         event.target.value = '';
         if (!files.length) return;
 
-        const sessionStr = localStorage.getItem('tasco_session');
-        if (!sessionStr) return;
-        const user = JSON.parse(sessionStr);
+        // FIX LỖI 2: Dùng Auth.getCurrentUser()
+        const user = Auth.getCurrentUser();
+        if (!user) return;
 
         const { value: noteText } = await Swal.fire({
             title: 'Thêm ghi chú?',
@@ -11140,9 +11135,9 @@ const MyCloud = {
             try {
                 const fd = new FormData();
                 fd.append('file', files[i]);
-                fd.append('upload_preset', CONFIG.cloudinaryCloud.preset);
+                fd.append('upload_preset', CL_CLOUD_PRESET); 
                 
-                const res = await fetch(CONFIG.cloudinaryCloud.url, { method: 'POST', body: fd });
+                const res = await fetch(CL_CLOUD_URL, { method: 'POST', body: fd });
                 const data = await res.json();
 
                 if (data.secure_url) {
@@ -11191,21 +11186,19 @@ const MyCloud = {
             customClass: { popup: 'rnd' }
         }).then(async (result) => {
             if (result.isConfirmed) {
-                const sessionStr = localStorage.getItem('tasco_session');
-                const user = sessionStr ? JSON.parse(sessionStr) : null;
+                // FIX LỖI 3: Dùng Auth.getCurrentUser()
+                const user = Auth.getCurrentUser();
                 if(!user) return;
 
                 const keysToDelete = Array.from(this._selectedKeys);
 
                 Swal.fire({ title: 'Đang dọn dẹp...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                 
-                // Get URLs to delete from Cloudinary
                 const urlsToDelete = keysToDelete.map(key => {
                     const item = this.items.find(i => i.key === key);
                     return item ? item.url : null;
                 }).filter(Boolean);
 
-                // Try delete physically on Cloudinary
                 for (let i = 0; i < urlsToDelete.length; i++) {
                     const url = urlsToDelete[i];
                     const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[a-zA-Z0-9]+)?(?:\?.*)?$/);
@@ -11221,7 +11214,6 @@ const MyCloud = {
                     }
                 }
 
-                // Delete from Firebase
                 const updates = {};
                 keysToDelete.forEach(key => updates[key] = null);
                 
@@ -11263,7 +11255,7 @@ const MyCloud = {
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-            }, index * 600); // Trễ 600ms chống block popup
+            }, index * 600);
         });
         
         this._selectMode = false;
@@ -11288,7 +11280,7 @@ const MyCloud = {
             
             if (result.success && result.storage) {
                 const usedBytes = result.storage.usage;
-                const limitBytes = 25 * 1024 * 1024 * 1024; // 25GB Free
+                const limitBytes = 25 * 1024 * 1024 * 1024;
                 const percent = Math.min((usedBytes / limitBytes) * 100, 100).toFixed(1);
 
                 const formatSize = (bytes) => {
