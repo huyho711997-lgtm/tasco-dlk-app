@@ -10925,16 +10925,21 @@ const MyCloud = {
             return;
         }
 
-        // Tự động fix lỗi không cuộn được chuột bằng Javascript
+        // --- BẢN VÁ LỖI CỐ ĐỊNH HEADER & CHỈ CUỘN DANH SÁCH ---
         const viewCloud = document.getElementById('view-cloud');
         if (viewCloud) {
-            viewCloud.style.overflowY = 'auto';
-            viewCloud.classList.remove('h-full'); 
+            // Khôi phục chiều cao cố định cho khung ngoài
+            viewCloud.classList.add('h-full');
+            viewCloud.style.overflowY = 'hidden'; 
         }
+        
         const listEl = document.getElementById('desk-mycloud-list');
         if (listEl) {
-            listEl.style.overflowY = 'visible';
+            // Ép danh sách con nhận diện giới hạn để tự sinh thanh cuộn bên trong
+            listEl.style.minHeight = '0px'; 
+            listEl.style.overflowY = 'auto';
         }
+        // -----------------------------------------------------
 
         db.ref('Users/' + userId + '/myCloud').on('value', snap => {
             const data = snap.val() || {};
@@ -11076,7 +11081,6 @@ const MyCloud = {
                 const wrapClasses = isSelected ? 'border-rose-500 scale-[0.96] ring-4 ring-rose-100' : 'border-slate-200 hover:border-blue-400 hover:shadow-lg';
                 const checkClasses = isSelected ? '' : 'hidden';
 
-                // FIX CẬP NHẬT CLICK: Dùng thẻ a ẩn để mở fslightbox thay vì ImageViewer
                 const clickAction = this._selectMode 
                     ? `MyCloud.toggleSelect('${item.key}')` 
                     : (isImg ? `document.getElementById('lb-mc-${item.key}').click()` : `window.open('${item.url}', '_blank')`);
@@ -11085,7 +11089,6 @@ const MyCloud = {
                     ? `<div class="absolute top-2 left-2 right-2 z-10"><div class="bg-black/70 backdrop-blur-sm text-white px-2 py-1.5 rounded-lg text-[10px] font-bold truncate border border-white/20" title="${item.note}">${item.note}</div></div>` 
                     : '';
 
-                // Thẻ a ẩn dùng để mồi cho fslightbox mở ảnh
                 const lightBoxLink = isImg ? `<a id="lb-mc-${item.key}" href="${item.url}" data-fslightbox="mycloud" class="hidden"></a>` : '';
 
                 const bodyHTML = isImg 
@@ -11116,7 +11119,6 @@ const MyCloud = {
 
         listEl.innerHTML = html;
         
-        // Bắt buộc gọi lệnh này để fslightbox nhận diện các thẻ <a> vừa được tạo ra
         if (typeof refreshFsLightbox === 'function') {
             setTimeout(refreshFsLightbox, 100);
         }
@@ -11127,9 +11129,9 @@ const MyCloud = {
         event.target.value = '';
         if (!files.length) return;
 
-        // FIX LỖI 2: Dùng Auth.getCurrentUser()
         const user = Auth.getCurrentUser();
-        if (!user) return;
+        const userId = user ? (user.id || user.username) : null; 
+        if (!userId) return;
 
         const { value: noteText } = await Swal.fire({
             title: 'Thêm ghi chú?',
@@ -11171,7 +11173,7 @@ const MyCloud = {
                         if (!finalUrl.toLowerCase().endsWith('.pdf')) finalUrl += '.pdf';
                     }
 
-                    await db.ref('Users/' + user.id + '/myCloud/' + newKey).set({
+                    await db.ref('Users/' + userId + '/myCloud/' + newKey).set({
                         url: finalUrl,
                         fileName: files[i].name,
                         fileType: isPdfUpload ? 'pdf' : (files[i].type || 'other'),
@@ -11207,9 +11209,9 @@ const MyCloud = {
             customClass: { popup: 'rnd' }
         }).then(async (result) => {
             if (result.isConfirmed) {
-                // FIX LỖI 3: Dùng Auth.getCurrentUser()
                 const user = Auth.getCurrentUser();
-                if(!user) return;
+                const userId = user ? (user.id || user.username) : null; 
+                if(!userId) return;
 
                 const keysToDelete = Array.from(this._selectedKeys);
 
@@ -11238,7 +11240,7 @@ const MyCloud = {
                 const updates = {};
                 keysToDelete.forEach(key => updates[key] = null);
                 
-                db.ref('Users/' + user.id + '/myCloud').update(updates).then(() => {
+                db.ref('Users/' + userId + '/myCloud').update(updates).then(() => {
                     Swal.close();
                     Toast.fire({ icon: 'success', title: 'Đã xóa file sạch sẽ!' });
                     this._selectMode = false;
@@ -11329,7 +11331,6 @@ const MyCloud = {
         } catch (error) {}
     }
 };
-
 /* ═══════════════════════════════════════
    AUTH - QUẢN LÝ ĐĂNG NHẬP
 ═══════════════════════════════════════ */
