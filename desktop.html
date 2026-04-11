@@ -11293,20 +11293,17 @@ const MyCloud = {
 
         Swal.fire({
             title: 'Đang chuẩn bị tải xuống...',
-            html: '<p class="text-xs text-slate-500 mt-2 text-center">Vui lòng chọn <b>thư mục</b> để lưu các file này.</p>',
+            html: '<p class="text-xs text-slate-500 mt-2 text-center">Vui lòng chờ giây lát...</p>',
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading(),
             customClass: { popup: 'rnd' }
         });
 
         try {
-            // Thử dùng API chọn thư mục (Modern Desktop Browsers)
+            // 1. NẾU TRÌNH DUYỆT HỖ TRỢ CHỌN FOLDER -> LƯU RỜI RẠC
             if (window.showDirectoryPicker) {
                 try {
-                    const dirHandle = await window.showDirectoryPicker({
-                        mode: 'readwrite'
-                    });
-
+                    const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
                     let successCount = 0;
                     for (let i = 0; i < itemsToDownload.length; i++) {
                         const item = itemsToDownload[i];
@@ -11323,7 +11320,6 @@ const MyCloud = {
                                 dlName = safeNote + '_' + baseName + ext;
                             }
 
-                            // Tạo file trong thư mục đã chọn và ghi dữ liệu
                             const fileHandle = await dirHandle.getFileHandle(dlName, { create: true });
                             const writable = await fileHandle.createWritable();
                             await writable.write(blob);
@@ -11333,41 +11329,51 @@ const MyCloud = {
                     }
                     Swal.close();
                     Toast.fire({ icon: 'success', title: `Đã lưu thành công ${successCount} file!` });
+                    
+                    this._selectMode = false;
+                    this._selectedKeys.clear();
+                    this.render();
+                    return;
                 } catch (err) {
                     Swal.close();
-                    if (err.name !== 'AbortError') {
-                        Toast.fire({ icon: 'error', title: 'Lỗi truy cập thư mục: ' + err.message });
-                    }
-                    return; // Người dùng bấm Hủy
+                    if (err.name !== 'AbortError') Toast.fire({ icon: 'error', title: 'Lỗi: ' + err.message });
+                    return; 
                 }
-            } else {
-                // Fallback: Tải từng file qua thẻ <a> (Cũ)
-                Swal.close();
-                Toast.fire({ icon: 'info', title: 'Đang tải xuống ' + itemsToDownload.length + ' file...' });
-                itemsToDownload.forEach((item, index) => {
-                    setTimeout(async () => {
-                        try {
-                            const res = await fetch(item.url);
-                            const blob = await res.blob();
-                            const a = document.createElement('a');
-                            a.href = URL.createObjectURL(blob);
-                            let dlName = item.fileName || ('TaiLieu_' + Date.now() + '.jpg');
-                            if (item.note) {
-                                const extMatch = dlName.match(/\.[^/.]+$/);
-                                const ext = extMatch ? extMatch[0] : '';
-                                const baseName = dlName.replace(ext, '');
-                                const safeNote = item.note.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '_');
-                                dlName = safeNote + '_' + baseName + ext;
-                            }
-                            a.download = dlName;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            URL.revokeObjectURL(a.href);
-                        } catch (e) { console.error(e); }
-                    }, index * 500); // Delay 500ms mỗi file để trình duyệt không block
-                });
+            } 
+            
+            // 2. NẾU TRÌNH DUYỆT CHẶN (FALLBACK) -> NÉN ZIP LẠI ĐỂ TRÁNH BỊ HỎI NHIỀU LẦN
+            const zip = new JSZip();
+            for (let i = 0; i < itemsToDownload.length; i++) {
+                const item = itemsToDownload[i];
+                try {
+                    const res = await fetch(item.url);
+                    const blob = await res.blob();
+                    
+                    let dlName = item.fileName || ('TaiLieu_' + i + '.jpg');
+                    if (item.note) {
+                        const extMatch = dlName.match(/\.[^/.]+$/);
+                        const ext = extMatch ? extMatch[0] : '';
+                        const baseName = dlName.replace(ext, '');
+                        const safeNote = item.note.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '_');
+                        dlName = safeNote + '_' + baseName + ext;
+                    }
+                    zip.file(dlName, blob);
+                } catch (e) { console.error("Lỗi gom file:", e); }
             }
+            
+            const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+            Swal.close();
+
+            const defaultFileName = 'TascoCloud_Download_' + moment().format('DDMMYYYY_HHmm') + '.zip';
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(zipBlob);
+            a.download = defaultFileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+            
+            Toast.fire({ icon: 'success', title: 'Đã tải xuống dạng ZIP (Do trình duyệt không hỗ trợ thư mục)!' });
 
             this._selectMode = false;
             this._selectedKeys.clear();
