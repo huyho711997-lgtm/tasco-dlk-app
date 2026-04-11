@@ -10909,10 +10909,12 @@
 
         // Quản lý timer đồng hồ hiển thị live
         _clockInterval: null, 
+        _isSaved: false,
 
         async open(id) {
             this._id = id;
             this._capturedFiles = [];
+            this._isSaved = false; // Reset trạng thái
             this._updateThumbs();
             
             const modal = document.getElementById('secure-camera-modal');
@@ -11165,8 +11167,8 @@
 
         // Hàm Close có cảnh báo chống mất dữ liệu
         close() {
-            if (this._capturedFiles.length > 0) {
-                // Nếu có ảnh chưa lưu, hiện cảnh báo đỏ
+            // Nếu có ảnh VÀ chưa từng bấm lưu/tải về -> Hiện cảnh báo
+            if (this._capturedFiles.length > 0 && !this._isSaved) {
                 Swal.fire({
                     title: 'Bỏ qua ảnh đã chụp?',
                     html: `<p class="text-sm text-slate-500">Bạn đang có <b class="text-rose-600">${this._capturedFiles.length} ảnh</b> chưa được tải lên Cloud hoặc lưu về máy.</p>
@@ -11176,12 +11178,13 @@
                     confirmButtonColor: '#ef4444',
                     cancelButtonColor: '#64748b',
                     confirmButtonText: 'Thoát và xóa ảnh',
-                    cancelButtonText: 'Tiếp tục chụp',
+                    cancelButtonText: 'Tiếp tục xử lý',
                     customClass: { popup: 'custom-rounded z-[100001]' }
                 }).then((res) => {
                     if (res.isConfirmed) this._forceClose();
                 });
             } else {
+                // Nếu đã lưu rồi, hoặc không có ảnh nào -> Thoát im lặng
                 this._forceClose();
             }
         },
@@ -11224,6 +11227,7 @@
 
         takePhoto() {
             if (!this._stream) return;
+            this._isSaved = false;
             
             // 1. Phản hồi Âm thanh (Tiếng TÁCH)
             this._playShutterSound();
