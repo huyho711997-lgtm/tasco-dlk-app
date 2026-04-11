@@ -11495,15 +11495,36 @@
         },
 
         closeReview() {
+            // NẾU ẢNH ĐÃ ĐƯỢC TẢI VỀ MÁY, KHI BẤM "X" SẼ ĐÓNG LUÔN CAMERA (Khỏi phải ấn X 2 lần)
+            if (this._isSaved) {
+                this._forceClose();
+                return;
+            }
+
             const modal = document.getElementById('sc-review-modal');
             if (modal) {
                 modal.classList.add('translate-y-full'); // Trượt xuống
             }
             
-            // NẾU NGƯỜI DÙNG QUAY LẠI MÀN HÌNH CHỤP, BẬT LẠI CAMERA
+            // NẾU CHƯA LƯU MÀ QUAY LẠI MÀN HÌNH CHỤP, BẬT LẠI CAMERA
             if (!this._stream) {
                 this._startStream();
             }
+        },
+
+        async confirmUpload() {
+            // Ẩn UI review trượt xuống (KHÔNG gọi closeReview để tránh kích hoạt lại Camera)
+            const modal = document.getElementById('sc-review-modal');
+            if (modal) modal.classList.add('translate-y-full');
+            
+            const filesToUpload = this._capturedFiles.map(c => c.file);
+            this._isSaved = true; // Đánh dấu đã upload thành công
+            
+            // GỌI THẲNG HÀM DỌN DẸP, TẮT MỌI THỨ
+            this._forceClose(); 
+            
+            // Đẩy lên Cloud
+            await Images._processSecureUpload(filesToUpload, this._id, this._gpsLocation);
         },
 
         removeCurrentPreview() {
@@ -11611,8 +11632,8 @@
                 btnElement.style.pointerEvents = 'auto';
             }
         },
-        // Hàm đóng dấu nước hàng loạt và mở bảng Lưu toàn bộ ảnh của iOS
-        // Hàm đóng dấu nước hàng loạt và mở bảng Lưu toàn bộ ảnh của iOS
+        
+        // Hàm đóng dấu nước hàng loạt và mở bảng Lưu toàn bộ ảnh
         async shareOrSaveAllPreviews(btnElement) {
             if (this._capturedFiles.length === 0 || !btnElement) return;
 
@@ -11628,37 +11649,34 @@
                 const bsxToStamp = item.bsx || '';
                 const gpsLocation = this._gpsLocation || '';
 
-                // SỬA LỖI TRÀN RAM GÂY TREO APP Ở ĐÂY:
-                // Xử lý TUẦN TỰ từng ảnh thay vì Promise.all để tránh quá tải bộ nhớ di động
                 const watermarkedFiles = [];
                 const loadingText = btnElement.querySelector('span');
 
+                // SỬA LỖI TRÀN RAM: Dùng vòng lặp tuần tự thay cho Promise.all
                 for (let i = 0; i < this._capturedFiles.length; i++) {
-                    // Cập nhật text để người dùng biết app vẫn đang chạy chứ không bị đơ
                     if (loadingText) loadingText.textContent = `Đang xử lý ${i + 1}/${this._capturedFiles.length}...`;
                     
-                    // Nghỉ 50ms giữa mỗi ảnh để trình duyệt kịp vẽ lại UI (nhường luồng xử lý)
+                    // Nghỉ 50ms giữa mỗi ảnh để nhường luồng cho trình duyệt cập nhật UI (chống đơ)
                     await new Promise(resolve => setTimeout(resolve, 50));
-
-                    // Đóng dấu từng ảnh một
                     const processedFile = await ImageProcessor.addWatermark(this._capturedFiles[i].file, bsxToStamp, gpsLocation);
                     watermarkedFiles.push(processedFile);
                 }
 
-                if (loadingText) loadingText.textContent = `Đang mở bảng chia sẻ...`;
+                if (loadingText) loadingText.textContent = `Đang hoàn tất...`;
                 await new Promise(resolve => setTimeout(resolve, 100));
 
                 // Mở Share Sheet native của iOS/Android
-                // iOS sẽ gộp tất cả ảnh này lại và hiển thị nút "Lưu X hình ảnh" (Save X Images)
                 if (navigator.canShare && navigator.canShare({ files: watermarkedFiles })) {
                     await navigator.share({
                         files: watermarkedFiles,
                         title: 'Toàn bộ ảnh Hiện Trường'
                     });
+                    this._isSaved = true; // Đánh dấu đã lưu
+                    Toast.fire({ icon: 'success', title: 'Đã lưu/chia sẻ ảnh thành công!' });
                 } else {
-                    // Fallback cho PC hoặc trình duyệt cũ: Tự động tải từng file xuống máy
+                    // Fallback tải xuống tự động cho thiết bị/trình duyệt cũ
                     watermarkedFiles.forEach((file, index) => {
-                        // Cài độ trễ 600ms giữa mỗi file để trình duyệt không chặn hành vi tải hàng loạt
+                        // Trễ 600ms mỗi ảnh để không bị Google Chrome chặn vì nghi ngờ spam tải file
                         setTimeout(() => {
                             const url = URL.createObjectURL(file);
                             const a = document.createElement('a');
@@ -11670,10 +11688,21 @@
                             setTimeout(() => URL.revokeObjectURL(url), 1000);
                         }, index * 600); 
                     });
-                    Toast.fire({ icon: 'success', title: `Đã tải ${watermarkedFiles.length} ảnh xuống!` });
+                    
+                    this._isSaved = true; // Đánh dấu đã lưu
+                    
+                    // THÔNG BÁO RÕ RÀNG CHO NGƯỜI DÙNG SAU KHI TẢI THÀNH CÔNG
+                    Swal.fire({
+                        title: 'Đã tải ảnh về máy!',
+                        html: `<p class="text-sm text-slate-500"><b>${watermarkedFiles.length} ảnh</b> đã được đưa vào thư mục Tải xuống (Downloads) của thiết bị.</p>`,
+                        icon: 'success',
+                        confirmButtonText: 'Đóng',
+                        confirmButtonColor: '#10b981',
+                        customClass: { popup: 'custom-rounded z-[100001]' }
+                    });
                 }
             } catch (error) {
-                // Bỏ qua lỗi khi người dùng bấm Hủy (Cancel) trên bảng Share của iOS
+                // Bỏ qua lỗi nếu người dùng chủ động tắt bảng Share của iOS
                 if (error.name !== 'AbortError' && !error.message.includes('Share canceled') && !error.message.includes('cancelled')) {
                     Toast.fire({ icon: 'error', title: 'Lỗi xử lý ảnh: ' + error.message });
                 }
@@ -11682,20 +11711,6 @@
                 btnElement.innerHTML = originalHTML;
                 btnElement.style.pointerEvents = 'auto';
             }
-        },
-        async confirmUpload() {
-            this.closeReview(); // Đóng màn hình review
-            
-            const filesToUpload = this._capturedFiles.map(c => c.file);
-            
-            // Xóa URL tạm để tránh tràn RAM
-            this._capturedFiles.forEach(c => URL.revokeObjectURL(c.preview));
-            this._capturedFiles = [];
-            
-            this.close(); // Tắt luôn Camera
-            
-            // Đẩy lên Cloud
-            await Images._processSecureUpload(filesToUpload, this._id, this._gpsLocation);
         },
 
         async focusAt(event) {
