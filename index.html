@@ -3451,6 +3451,9 @@
                             <button onclick="Images.exitSelectMode()" class="px-3 py-1.5 bg-slate-100 text-slate-600 border border-slate-200 rounded-xl text-xs font-bold active:bg-slate-200 transition-colors">
                                 Hủy
                             </button>
+                            <button id="img-ai-scan-btn" onclick="AIVision.scan(App.currentEditId)" class="hidden px-3 py-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-xs font-black flex items-center gap-1.5 active:scale-95 transition-transform shadow-md shadow-violet-200">
+                                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Quét AI (<span id="img-ai-count">0</span>)
+                            </button>
                             <button id="img-top-delete-btn" onclick="Images.confirmDeleteSelected()" class="hidden px-3 py-1.5 bg-rose-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-transform shadow-md shadow-rose-200">
                                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Xóa (<span id="img-select-count">0</span>)
                             </button>
@@ -11888,7 +11891,219 @@
             });
         }
     };
-        
+    const AIVision = {
+        _id: null,
+        _results: [],
+        _selected: new Set(),
+
+        async scan(id) {
+            const item = App.find(id);
+            if (!item) return;
+
+            // Lấy các ảnh được chọn từ Images._selected
+            const selectedIndices = Array.from(Images._selected);
+            if (selectedIndices.length === 0) {
+                Toast.fire({ icon: 'warning', title: 'Hãy chọn ít nhất 1 ảnh để AI quét!' });
+                return;
+            }
+            const imgs = item.documentImages || [];
+            const selectedImgs = selectedIndices
+                .map(idx => imgs[idx])
+                .filter(img => img && (typeof img === 'string' ? img : img.url).match(/\.(jpeg|jpg|png|webp)/i));
+
+            if (selectedImgs.length === 0) {
+                Toast.fire({ icon: 'warning', title: 'Ảnh được chọn không hợp lệ (chỉ hỗ trợ JPG/PNG)!' });
+                return;
+            }
+
+            this._id = id;
+            Images.exitSelectMode();
+
+            // Loading screen
+            Swal.fire({
+                html: `
+                    <div style="display:flex;flex-direction:column;align-items:center;padding:16px 0 8px;">
+                        <div style="width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 32px rgba(124,58,237,0.45);margin-bottom:18px;position:relative;">
+                            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" style="animation:img-spin 1.2s linear infinite;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                        </div>
+                        <p style="font-size:17px;font-weight:900;color:var(--text-primary,#0f172a);margin:0 0 6px;">Tasco AI Vision đang quét...</p>
+                        <p id="aiv-loading-status" style="font-size:12px;font-weight:600;color:var(--text-secondary,#64748b);text-align:center;line-height:1.5;">Đang tải & nén ${selectedImgs.length} ảnh hiện trường...</p>
+                    </div>
+                `,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                customClass: { popup: 'custom-rounded' }
+            });
+
+            try {
+                const statusEl = () => document.getElementById('aiv-loading-status');
+
+                // Nén từng ảnh xuống 800px để tránh timeout
+                const base64Images = [];
+                for (let i = 0; i < selectedImgs.length; i++) {
+                    if (statusEl()) statusEl().textContent = `Đang chuẩn bị ảnh ${i + 1}/${selectedImgs.length}...`;
+                    const url = typeof selectedImgs[i] === 'string' ? selectedImgs[i] : selectedImgs[i].url;
+                    // Fetch ảnh từ URL về dạng Blob rồi nén
+                    const resp = await fetch(url);
+                    const blob = await resp.blob();
+                    const file = new File([blob], `img_${i}.jpg`, { type: blob.type || 'image/jpeg' });
+                    const b64 = await OCR._compressImage(file, 800);
+                    base64Images.push(b64);
+                }
+
+                if (statusEl()) statusEl().textContent = 'Tasco AI đang phân tích hư hỏng...';
+
+                // Xây dựng nội dung gửi Gemini — mảng parts gồm nhiều ảnh + prompt
+                const parts = base64Images.map(b64 => ({
+                    inline_data: { mime_type: 'image/jpeg', data: b64 }
+                }));
+                parts.push({ text: `Bạn là chuyên gia giám định xe cơ giới Việt Nam. Phân tích TẤT CẢ các bộ phận xe bị hư hỏng trong các hình ảnh hiện trường được cung cấp.
+
+                Quy tắc:
+                - Gọi đúng tên phụ tùng ô tô thực tế (VD: Cản trước, Cụm đèn pha trái, Vè trước trái, Tai xe, Nắp capo, Cửa trước trái, Kính chắn gió).
+                - Xác định mức độ: Trầy xước, Móp méo, Bể vỡ, Rách thủng, Gãy.
+                - Phán đoán: Móp/Trầy nhẹ → suaChua:true. Bể/Rách/Gãy/Móp nặng → thayThe:true.
+                - confidence: 0-100 (mức chắc chắn AI nhìn thấy hư hỏng này).
+
+                Trả về CHỈ JSON, KHÔNG markdown, KHÔNG giải thích:
+                [{"chiTiet":"Cản trước","moTa":"Trầy xước nặng, móp nhẹ","suaChua":true,"thayThe":false,"mucDo":"Trung bình","confidence":92}]` });
+
+                const apiKey = typeof GEMINI_KEYS !== 'undefined' && GEMINI_KEYS.length ? GEMINI_KEYS[0] : '';
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const resp2 = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts }] }),
+                    signal: AbortSignal.timeout(30000)
+                });
+
+                const data = await resp2.json();
+                let text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                text = text.replace(/```json|```/g, '').trim();
+                const parsed = JSON.parse(text);
+
+                if (!Array.isArray(parsed) || parsed.length === 0) throw new Error('AI không phát hiện hư hỏng nào trong ảnh này.');
+
+                // So sánh với damageItems hiện có để đánh dấu trùng
+                const existing = (item.damageItems || []).map(d => (d.chiTiet || '').toLowerCase().trim());
+                this._results = parsed.map(r => ({
+                    ...r,
+                    _isDuplicate: existing.some(e => e.includes((r.chiTiet || '').toLowerCase().trim().substring(0, 5)))
+                }));
+
+                Swal.close();
+                this._renderReview(id);
+
+            } catch (err) {
+                Swal.close();
+                Toast.fire({ icon: 'error', title: 'Lỗi AI: ' + (err.message || 'Thử lại sau') });
+            }
+        },
+
+        _renderReview(id) {
+            const item = App.find(id);
+            // Tự động pre-select những món AI tự tin >80% và không trùng lặp
+            this._selected = new Set(
+                this._results
+                    .map((r, i) => ({ r, i }))
+                    .filter(({ r }) => r.confidence >= 80 && !r._isDuplicate)
+                    .map(({ i }) => i)
+            );
+
+            const renderList = () => {
+                const container = document.getElementById('aiv-result-list');
+                if (!container) return;
+                container.innerHTML = this._results.map((r, i) => {
+                    const isChecked = this._selected.has(i);
+                    const phuongAn = r.thayThe
+                        ? `<span style="background:#fff3e0;color:#e65100;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;border:1px solid #ffb74d;">THAY THẾ</span>`
+                        : `<span style="background:#e3f2fd;color:#1565c0;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;border:1px solid #90caf9;">SỬA CHỮA</span>`;
+                    const confidence = r.confidence >= 85 ? `<span style="background:rgba(6,182,212,0.12);color:#0891b2;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;">🤖 ${r.confidence}%</span>` : `<span style="background:rgba(100,116,139,0.1);color:#64748b;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;">🤖 ${r.confidence}%</span>`;
+                    const dupBadge = r._isDuplicate ? `<span style="background:#fef9c3;color:#92400e;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;border:1px solid #fde047;">⚡ Đã có</span>` : '';
+                    return `
+                    <div onclick="AIVision._toggle(${i})" style="display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:14px;border:2px solid ${isChecked ? '#6366f1' : 'var(--border,#e2e8f0)'};background:${isChecked ? 'rgba(99,102,241,0.06)' : 'var(--bg-white,#fff)'};margin-bottom:8px;cursor:pointer;transition:all 0.2s;${r._isDuplicate ? 'opacity:0.55;' : ''}">
+                        <div style="width:22px;height:22px;border-radius:8px;border:2px solid ${isChecked ? '#6366f1' : '#cbd5e1'};background:${isChecked ? '#6366f1' : 'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all 0.2s;">
+                            ${isChecked ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+                        </div>
+                        <div style="flex:1;min-width:0;">
+                            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px;">
+                                <span style="font-size:13px;font-weight:800;color:var(--text-primary,#0f172a);">${r.chiTiet}</span>
+                                ${phuongAn}${confidence}${dupBadge}
+                            </div>
+                            <p style="font-size:11px;font-weight:600;color:var(--text-secondary,#64748b);margin:0;">${r.moTa} — <b style="color:var(--text-primary,#475569);">${r.mucDo}</b></p>
+                        </div>
+                    </div>`;
+                }).join('');
+                const addBtn = document.getElementById('aiv-add-btn');
+                if (addBtn) {
+                    const n = this._selected.size;
+                    addBtn.textContent = n > 0 ? `✓ Thêm ${n} hạng mục vào Biên bản` : 'Chọn ít nhất 1 hạng mục';
+                    addBtn.style.opacity = n > 0 ? '1' : '0.5';
+                    addBtn.style.pointerEvents = n > 0 ? 'auto' : 'none';
+                }
+            };
+
+            const duplicateCount = this._results.filter(r => r._isDuplicate).length;
+            const summaryText = duplicateCount > 0
+                ? `<div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#b45309;padding:8px 12px;border-radius:10px;font-size:12px;font-weight:800;margin-bottom:12px;">Phát hiện ${this._results.length} hư hỏng · ${duplicateCount} mục đã có trong biên bản (mờ đi)</div>`
+                : `<div style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);color:#4f46e5;padding:8px 12px;border-radius:10px;font-size:12px;font-weight:800;margin-bottom:12px;">✨ AI phát hiện ${this._results.length} hư hỏng · Bỏ tick những mục không chính xác</div>`;
+
+            Swal.fire({
+                title: `<div style="text-align:left;font-size:16px;font-weight:900;color:var(--text-primary,#0f172a);display:flex;align-items:center;gap:8px;"><div style="width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>AI Vision — Kết quả phân tích</div>`,
+                html: `<div class="text-left">${summaryText}<div id="aiv-result-list"></div></div>`,
+                showConfirmButton: false,
+                showCloseButton: true,
+                footer: `<div style="width:100%;padding:0;">
+                    <button id="aiv-add-btn" onclick="AIVision._mergeSelected('${id}')" style="width:100%;padding:14px;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;font-size:13px;font-weight:900;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 20px rgba(124,58,237,0.35);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Thêm vào Biên bản
+                    </button>
+                </div>`,
+                position: 'bottom',
+                customClass: { popup: 'custom-rounded w-full mb-0 rounded-b-none !pb-0', title: '!pb-0 !px-1', footer: '!p-3 !border-0 !bg-transparent' },
+                didOpen: () => { renderList(); lucide.createIcons(); }
+            });
+
+            // Gắn renderList vào AIVision để _toggle có thể gọi
+            this._renderList = renderList;
+        },
+
+        _toggle(idx) {
+            if (this._selected.has(idx)) this._selected.delete(idx);
+            else this._selected.add(idx);
+            if (this._renderList) this._renderList();
+        },
+
+        _mergeSelected(id) {
+            const item = App.find(id);
+            if (!item) return;
+            const existing = item.damageItems || [];
+            const toAdd = Array.from(this._selected).map(i => {
+                const r = this._results[i];
+                return {
+                    chiTiet: r.chiTiet,
+                    moTa: r.moTa || '',
+                    mucDo: r.mucDo || 'Trung bình',
+                    suaChua: !!r.suaChua,
+                    thayThe: !!r.thayThe,
+                    thuHoi: !!r.thayThe,
+                    stt: existing.length + 1,
+                    soLuong: 1,
+                    donGia: 0,
+                    ghiChu: ''
+                };
+            });
+            if (toAdd.length === 0) return;
+            DamageItems._mergeAndSave(id, existing, toAdd);
+            Swal.close();
+            setTimeout(() => {
+                // Chuyển sang tab hạng mục để GĐV thấy kết quả ngay
+                const dmTab = document.querySelector('[onclick*="damage"]');
+                if (dmTab) dmTab.click();
+            }, 300);
+        }
+    };        
     const Images = {
         _selectMode: false,
         _selected: new Set(),
@@ -11943,13 +12158,17 @@
         _updateDeleteBar() {
             const btn = document.getElementById('img-top-delete-btn');
             const countEl = document.getElementById('img-select-count');
+            const aiBtn = document.getElementById('img-ai-scan-btn');
+            const aiCountEl = document.getElementById('img-ai-count');
             if (!btn || !countEl) return;
             
             if (this._selected.size > 0) {
                 btn.classList.remove('hidden');
                 countEl.textContent = this._selected.size;
+                if (aiBtn && aiCountEl) { aiBtn.classList.remove('hidden'); aiCountEl.textContent = this._selected.size; }
             } else {
                 btn.classList.add('hidden');
+                if (aiBtn) aiBtn.classList.add('hidden');
             }
         },
 
