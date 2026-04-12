@@ -975,9 +975,42 @@
             display:flex; align-items:center; justify-content:center;
             cursor:pointer; pointer-events:all; backdrop-filter:blur(6px);
         }
-        .iv-dots { display:flex; gap:5px; position:absolute; bottom:88px; }
-        .iv-dot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.3); transition:all 0.2s; }
-        .iv-dot.on { background:white; width:16px; border-radius:3px; }
+        /* Filmstrip thay thế dots */
+        .iv-dots {
+            position: absolute;
+            bottom: 88px;
+            left: 0; right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            padding: 0 16px;
+            pointer-events: none;
+        }
+        .iv-thumb {
+            width: 44px; height: 44px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid transparent;
+            opacity: 0.4;
+            transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+            cursor: pointer;
+            pointer-events: all;
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.08);
+        }
+        .iv-thumb img { width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; }
+        .iv-thumb.iv-thumb-doc {
+            display:flex; align-items:center; justify-content:center;
+            background: rgba(255,255,255,0.12);
+        }
+        .iv-thumb.on {
+            border-color: rgba(255,255,255,0.9);
+            opacity: 1;
+            transform: scale(1.12);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+        }
+        .iv-thumb.near { opacity: 0.65; }
         .iv-actions {
             position:absolute; bottom:40px; display:flex; gap:8px;
         }
@@ -12590,17 +12623,15 @@
             this._bindSwipe();
         },
 
-        close() { 
-            document.getElementById('img-viewer').classList.remove('open'); 
+        close() {
+            document.getElementById('img-viewer').classList.remove('open');
             const iframeEl = document.getElementById('img-viewer-iframe');
             if (iframeEl) iframeEl.src = '';
-            
-            // Xóa trắng canvas PDF khi đóng để không bị dính ảnh cũ
             const canvas = document.getElementById('pdf-canvas');
-            if (canvas) {
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-            }
+            if (canvas) { const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height); }
+            // Reset cờ để actions được rebuild đúng khi mở lại với hồ sơ khác
+            const actions = document.querySelector('.iv-actions');
+            if (actions) delete actions.dataset.built;
         },
 
         _resetTransform() {
@@ -12647,86 +12678,134 @@
             const cnt      = document.getElementById('iv-count');
             const dots     = document.getElementById('iv-dots');
             const actions  = document.querySelector('.iv-actions');
-            
+
             const item = this._imgs[this._idx];
             if (!item) return;
-            
+
             this._resetTransform();
             const isDoc = item.type === 'document';
-            const isPdf = isDoc && (item.isPdf || item.url.toLowerCase().includes('.pdf') || (item.name || '').toLowerCase().includes('.pdf'));
+            const isPdf = isDoc && (item.isPdf || item.url.toLowerCase().includes('.pdf') || (item.name||'').toLowerCase().includes('.pdf'));
 
+            // ── 1. HIỂN THỊ NỘI DUNG CHÍNH ───────────────────────
             if (isDoc) {
-                // Đóng ảnh
-                if (imgEl) imgEl.style.display = 'none';
-
+                if (imgEl) { imgEl.style.opacity = '0'; imgEl.style.display = 'none'; }
                 if (isPdf) {
                     if (iframeEl) iframeEl.style.display = 'none';
                     const canvas = document.getElementById('pdf-canvas');
                     const loading = document.getElementById('pdf-loading');
                     if (canvas) canvas.style.display = 'none';
-                    // Xóa object cũ nếu có
                     const oldObj = document.getElementById('pdf-object-viewer');
                     if (oldObj) oldObj.remove();
-                    // Tạo thẻ <object> nhúng thẳng PDF
                     const obj = document.createElement('object');
                     obj.id = 'pdf-object-viewer';
                     obj.data = item.url;
                     obj.type = 'application/pdf';
                     obj.style.cssText = 'width:94vw;height:72vh;border-radius:14px;border:none;background:#fff;z-index:10;position:relative;display:block;';
-                    obj.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;">
-                        <p style="font-size:13px;font-weight:700;color:#64748b;">Không thể hiển thị PDF trực tiếp</p>
-                        <a href="${item.url}" target="_blank" style="padding:10px 20px;background:#3b82f6;color:white;border-radius:10px;font-size:12px;font-weight:bold;text-decoration:none;">Mở PDF trong tab mới</a>
-                    </div>`;
-                    // Chèn object vào viewer, trước iv-dots
-                    const dots = document.getElementById('iv-dots');
+                    obj.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;"><p style="font-size:13px;font-weight:700;color:#64748b;">Không thể hiển thị PDF trực tiếp</p><a href="${item.url}" target="_blank" style="padding:10px 20px;background:#3b82f6;color:white;border-radius:10px;font-size:12px;font-weight:bold;text-decoration:none;">Mở PDF trong tab mới</a></div>`;
                     if (dots) dots.parentNode.insertBefore(obj, dots);
                     if (loading) loading.style.display = 'none';
                 } else {
-                    // Đối với Word/Excel, dùng Office Viewer
                     if (iframeEl) {
-                        const fileUrl = encodeURIComponent(item.url);
-                        iframeEl.src = `https://view.officeapps.live.com/op/embed.aspx?src=${fileUrl}&t=${Date.now()}`;
+                        iframeEl.src = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(item.url)}&t=${Date.now()}`;
                         iframeEl.style.display = 'block';
                     }
                 }
             } else {
-                // Xử lý hiển thị Hình ảnh
                 if (iframeEl) iframeEl.style.display = 'none';
+                const oldObj = document.getElementById('pdf-object-viewer');
+                if (oldObj) oldObj.remove();
+
                 if (imgEl) {
-                    imgEl.src = item.url;
+                    // Preload — fade in mượt, không giật
+                    imgEl.style.transition = 'none';
+                    imgEl.style.opacity = '0';
                     imgEl.style.display = 'block';
+
+                    // Dùng Image() preload trước, rồi mới swap src
+                    const preloader = new Image();
+                    preloader.onload = () => {
+                        imgEl.src = preloader.src;
+                        requestAnimationFrame(() => {
+                            imgEl.style.transition = 'opacity 0.2s ease';
+                            imgEl.style.opacity = '1';
+                        });
+                    };
+                    preloader.onerror = () => { imgEl.src = item.url; imgEl.style.opacity = '1'; };
+                    preloader.src = item.url;
                 }
+
+                // Preload ảnh kề bên để chuyển tức thì lần sau
+                const preNext = this._imgs[this._idx + 1];
+                const prePrev = this._imgs[this._idx - 1];
+                if (preNext && preNext.type !== 'document') { const p = new Image(); p.src = preNext.url; }
+                if (prePrev && prePrev.type !== 'document') { const p = new Image(); p.src = prePrev.url; }
             }
 
+            // ── 2. HEADER ────────────────────────────────────────
             const catInfo = IMG_CATS[item.cat] || { label: 'Cloud Cá Nhân', emoji: '☁️' };
             if (cat) cat.textContent = catInfo.emoji + ' ' + (item.name || catInfo.label);
             if (cnt) cnt.textContent = `${this._idx + 1} / ${this._imgs.length}`;
-            if (dots) dots.innerHTML = this._imgs.map((_, i) => `<div class="iv-dot ${i === this._idx ? 'on' : ''}"></div>`).join('');
-            
+
             const arrows = document.querySelector('.iv-arrow');
             if (arrows) arrows.style.display = this._imgs.length > 1 ? 'flex' : 'none';
 
-            if (actions) {
+            // ── 3. FILMSTRIP THUMBNAIL (thay dots) ───────────────
+            if (dots) {
+                const total = this._imgs.length;
+                if (total <= 1) { dots.innerHTML = ''; }
+                else {
+                    // Hiện tối đa 5 thumb xung quanh ảnh hiện tại
+                    const half = 2;
+                    let start = Math.max(0, this._idx - half);
+                    let end   = Math.min(total - 1, start + 4);
+                    if (end - start < 4) start = Math.max(0, end - 4);
+
+                    dots.innerHTML = Array.from({ length: end - start + 1 }, (_, k) => {
+                        const i = start + k;
+                        const img = this._imgs[i];
+                        const isActive = i === this._idx;
+                        const isNear   = Math.abs(i - this._idx) === 1;
+                        const isDocThumb = img.type === 'document';
+                        const cls = `iv-thumb${isActive ? ' on' : ''}${isNear ? ' near' : ''}${isDocThumb ? ' iv-thumb-doc' : ''}`;
+
+                        if (isDocThumb) {
+                            return `<div class="${cls}" onclick="ImageViewer.goTo(${i})">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            </div>`;
+                        }
+                        return `<div class="${cls}" onclick="ImageViewer.goTo(${i})">
+                            <img src="${App.getThumb ? App.getThumb(img.url) : img.url}" loading="lazy">
+                        </div>`;
+                    }).join('');
+                }
+            }
+
+            // ── 4. ACTIONS — chỉ rebuild khi lần đầu (tránh lucide lag) ──
+            if (actions && !actions.dataset.built) {
+                actions.dataset.built = '1';
                 actions.innerHTML = `
-                    <div class="flex gap-2 w-full justify-between max-w-sm">
-                        <div class="flex gap-2">
-                            ${!isDoc ? `
+                    <div class="flex gap-2 w-full justify-between max-w-sm" id="iv-actions-inner">
+                        <div class="flex gap-2" id="iv-zoom-btns">
                             <button class="iv-btn" onclick="ImageViewer.zoom('out')"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
                             <button class="iv-btn" onclick="ImageViewer.zoom('in')"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
                             <button class="iv-btn" onclick="ImageViewer.rotate()"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>
-                            ` : '<div style="width:130px"></div>'}
                         </div>
                         <div class="flex gap-2">
                             <button class="iv-action" onclick="ImageViewer.download()"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
                             <button class="iv-action" onclick="ImageViewer.share()"><i data-lucide="share-2" class="w-3.5 h-3.5"></i></button>
-                            ${this._id !== 'cloud' ? `<button class="iv-action del" onclick="ImageViewer.remove()"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>` : ''}
+                            <button class="iv-action del" id="iv-del-btn" onclick="ImageViewer.remove()" style="${this._id === 'cloud' ? 'display:none' : ''}"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                         </div>
-                    </div>
-                `;
-                try { lucide.createIcons(); } catch(e){}
+                    </div>`;
+                try { lucide.createIcons(); } catch(e) {}
+            } else if (actions) {
+                // Chỉ toggle zoom buttons và nút xóa, không rebuild
+                const zoomBtns = document.getElementById('iv-zoom-btns');
+                if (zoomBtns) zoomBtns.style.display = isDoc ? 'none' : 'flex';
+                const delBtn = document.getElementById('iv-del-btn');
+                if (delBtn) delBtn.style.display = this._id === 'cloud' ? 'none' : '';
             }
 
-            // Hiện/ẩn nút AI góc phải tuỳ loại ảnh
+            // ── 5. NÚT AI TRÊN ẢNH ───────────────────────────────
             const aiBtn = document.getElementById('iv-ai-btn');
             if (aiBtn) {
                 const canAI = this._id && this._id !== 'cloud' && !isDoc;
@@ -12786,8 +12865,9 @@
             }
         },
 
-        prev() { this._idx = (this._idx - 1 + this._imgs.length) % this._imgs.length; this._render(); },
-        next() { this._idx = (this._idx + 1) % this._imgs.length; this._render(); },
+        prev()      { this._idx = (this._idx - 1 + this._imgs.length) % this._imgs.length; this._render(); },
+        next()      { this._idx = (this._idx + 1) % this._imgs.length; this._render(); },
+        goTo(idx)   { if (idx !== this._idx) { this._idx = idx; this._render(); } },
 
         download() {
             const url = this._imgs[this._idx]?.url || this._imgs[this._idx];
