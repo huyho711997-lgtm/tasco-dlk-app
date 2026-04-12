@@ -11598,7 +11598,8 @@
                     a.click();
                     document.body.removeChild(a);
                     setTimeout(() => URL.revokeObjectURL(url), 1000);
-                    Toast.fire({ icon: 'success', title: 'Đã tải ảnh xuống!' });
+                    SecureCamera._isSaved = true;
+                    Swal.fire({ icon: 'success', title: 'Đã lưu ảnh về máy!', text: 'Ảnh đã được tải xuống thành công.', confirmButtonText: 'OK', confirmButtonColor: '#2563eb', timer: 3000, timerProgressBar: true, customClass: { popup: 'custom-rounded' } });
                 }
             } catch (error) {
                 // Bỏ qua lỗi AbortError do người dùng chủ động vuốt tắt bảng Share
@@ -11647,29 +11648,17 @@
                 if (loadingText) loadingText.textContent = `Đang mở bảng chia sẻ...`;
                 await new Promise(resolve => setTimeout(resolve, 100));
 
-                // Mở Share Sheet native của iOS/Android
-                // iOS sẽ gộp tất cả ảnh này lại và hiển thị nút "Lưu X hình ảnh" (Save X Images)
                 if (navigator.canShare && navigator.canShare({ files: watermarkedFiles })) {
                     await navigator.share({
                         files: watermarkedFiles,
                         title: 'Toàn bộ ảnh Hiện Trường'
                     });
-                    // Thông báo sau khi người dùng đã hoàn tất lưu qua Share Sheet
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Lưu ảnh thành công!',
-                        html: `<p style="font-size:14px;color:#475569;">Đã lưu <b>${watermarkedFiles.length} ảnh</b> về máy thành công.</p>`,
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#2563eb',
-                        customClass: { popup: 'custom-rounded' },
-                        timer: 3000,
-                        timerProgressBar: true
-                    });
+                    SecureCamera._isSaved = true;
+                    Swal.fire({ icon: 'success', title: 'Lưu ảnh thành công!', html: `<p style="font-size:14px;color:#475569;">Đã lưu <b>${watermarkedFiles.length} ảnh</b> về máy thành công.</p>`, confirmButtonText: 'OK', confirmButtonColor: '#2563eb', timer: 3000, timerProgressBar: true, customClass: { popup: 'custom-rounded' } });
                 } else {
                     // Fallback cho PC hoặc trình duyệt cũ: Tự động tải từng file xuống máy
                     const totalFiles = watermarkedFiles.length;
                     watermarkedFiles.forEach((file, index) => {
-                        // Cài độ trễ 600ms giữa mỗi file để trình duyệt không chặn hành vi tải hàng loạt
                         setTimeout(() => {
                             const url = URL.createObjectURL(file);
                             const a = document.createElement('a');
@@ -11679,23 +11668,14 @@
                             a.click();
                             document.body.removeChild(a);
                             setTimeout(() => URL.revokeObjectURL(url), 1000);
-
-                            // Thông báo lưu xong khi ảnh cuối cùng đã được xử lý
+                            // Thông báo sau khi ảnh cuối cùng được tải xong
                             if (index === totalFiles - 1) {
                                 setTimeout(() => {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Lưu ảnh thành công!',
-                                        html: `<p style="font-size:14px;color:#475569;">Đã tải <b>${totalFiles} ảnh</b> về máy thành công.</p>`,
-                                        confirmButtonText: 'OK',
-                                        confirmButtonColor: '#2563eb',
-                                        customClass: { popup: 'custom-rounded' },
-                                        timer: 3000,
-                                        timerProgressBar: true
-                                    });
+                                    SecureCamera._isSaved = true;
+                                    Swal.fire({ icon: 'success', title: 'Lưu ảnh thành công!', html: `<p style="font-size:14px;color:#475569;">Đã tải <b>${totalFiles} ảnh</b> về máy thành công.</p>`, confirmButtonText: 'OK', confirmButtonColor: '#2563eb', timer: 3000, timerProgressBar: true, customClass: { popup: 'custom-rounded' } });
                                 }, 500);
                             }
-                        }, index * 600); 
+                        }, index * 600);
                     });
                 }
             } catch (error) {
