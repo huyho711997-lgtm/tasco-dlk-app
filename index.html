@@ -6100,9 +6100,9 @@
             DamageItems._bindSwipe(list.length);
         },
 
+        // HÀM MỚI XỬ LÝ CLICK CARD
         handleCardClick(idx) {
-            if (this._selectMode) {
-            this.toggleSelect(idx);
+            if (this._selectMode) this.toggleSelect(idx);
         },
 
         toggleSelectMode() {
@@ -11902,20 +11902,30 @@
                         const timeStr = moment().format('DD/MM/YYYY HH:mm:ss');
                         const labelStr = bsx ? `TASCO DLK - ${bsx}` : 'TASCO DLK';
                         const locStr = locationStr;
+                        const currentUser = Auth.getCurrentUser();
+                        const gdvStr = currentUser?.name ? `Giám định viên: ${currentUser.name}` : '';
                         const padding = fontSize + 10;
-                        
-                        // 1. In Tọa độ GPS (Nằm sát DƯỚI CÙNG, màu vàng sáng)
+                        const lineH = fontSize * 1.3;
+
+                        // 1. In Tọa độ GPS (sát đáy, màu vàng)
                         ctx.font = `700 ${fontSize * 0.85}px "Plus Jakarta Sans", sans-serif`;
-                        ctx.fillStyle = 'rgba(253, 224, 71, 0.95)'; 
+                        ctx.fillStyle = 'rgba(253, 224, 71, 0.95)';
                         ctx.fillText(locStr, width - padding, height - padding);
 
-                        // 2. In Thời gian (Nằm ở giữa, cách định vị 1 dòng, màu trắng)
+                        // 2. In Thời gian (dòng 2 từ dưới, màu trắng)
                         ctx.font = `800 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
                         ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-                        ctx.fillText(timeStr, width - padding, height - padding - fontSize * 1.3);
+                        ctx.fillText(timeStr, width - padding, height - padding - lineH);
 
-                        // 3. In TASCO DLK (Nằm trên cùng)
-                        ctx.fillText(labelStr, width - padding, height - padding - fontSize * 2.6);
+                        // 3. In TASCO DLK - BSX (dòng 3)
+                        ctx.fillText(labelStr, width - padding, height - padding - lineH * 2);
+
+                        // 4. In tên Giám định viên (dòng 4, màu xanh nhạt)
+                        if (gdvStr) {
+                            ctx.font = `700 ${fontSize * 0.9}px "Plus Jakarta Sans", sans-serif`;
+                            ctx.fillStyle = 'rgba(147, 197, 253, 0.95)';
+                            ctx.fillText(gdvStr, width - padding, height - padding - lineH * 3.3);
+                        }
 
                         // Xuất ảnh
                         canvas.toBlob((blob) => {
@@ -12153,11 +12163,6 @@
             if (toAdd.length === 0) return;
             DamageItems._mergeAndSave(id, existing, toAdd);
             Swal.close();
-            setTimeout(() => {
-                // Chuyển sang tab hạng mục để GĐV thấy kết quả ngay
-                const dmTab = document.querySelector('[onclick*="damage"]');
-                if (dmTab) dmTab.click();
-            }, 300);
         },
         async scanSingle(id, imgIdx) {
             const item = App.find(id);
@@ -12876,10 +12881,41 @@
         },
 
         remove() {
-            if (this._id !== 'cloud') {
-                Images.remove(this._id, this._idx);
-                this.close();
-            }
+            if (this._id === 'cloud') return;
+            const id = this._id;
+            const idx = this._idx;
+            Swal.fire({
+                title: 'Xóa ảnh này?',
+                text: 'Ảnh sẽ bị xóa vĩnh viễn khỏi Cloud.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'Xóa ngay',
+                cancelButtonText: 'Hủy',
+                customClass: { popup: 'custom-rounded' }
+            }).then(async res => {
+                if (!res.isConfirmed) return;
+                const item = App.find(id);
+                if (!item?.documentImages) return;
+                const list = [...item.documentImages];
+                const img = list[idx];
+                const url = typeof img === 'string' ? img : img.url;
+                // Xóa trên Cloudinary
+                const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[a-zA-Z0-9]+)?(?:\?.*)?$/);
+                if (match?.[1]) {
+                    fetch(CONFIG.exportWordUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action: 'delete_cloudinary', publicId: match[1] })
+                    }).catch(() => {});
+                }
+                list.splice(idx, 1);
+                await db.ref(`Workstation/${id}/documentImages`).set(list.length ? list : null);
+                item.documentImages = list;
+                ImageViewer.close();
+                Images.render(id);
+                Toast.fire({ icon: 'success', title: 'Đã xóa ảnh!' });
+            });
         },
 
         _bindSwipe() {
