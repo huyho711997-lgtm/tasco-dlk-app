@@ -11968,20 +11968,27 @@
                 Trả về CHỈ JSON, KHÔNG markdown, KHÔNG giải thích:
                 [{"chiTiet":"Cản trước","moTa":"Trầy xước nặng, móp nhẹ","suaChua":true,"thayThe":false,"mucDo":"Trung bình","confidence":92}]` });
 
-                const apiKey = typeof GEMINI_KEYS !== 'undefined' && GEMINI_KEYS.length ? GEMINI_KEYS[0] : '';
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${GeminiKeys.next()}`;
 
                 const resp2 = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts }] }),
+                    body: JSON.stringify({
+                        contents: [{ parts }],
+                        generationConfig: { responseMimeType: 'application/json', temperature: 0.1 }
+                    }),
                     signal: AbortSignal.timeout(30000)
                 });
 
                 const data = await resp2.json();
+                // Kiểm tra lỗi API trả về (quota, key sai...)
+                if (data.error) throw new Error('Gemini: ' + (data.error.message || 'API lỗi'));
+
                 let text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                text = text.replace(/```json|```/g, '').trim();
-                const parsed = JSON.parse(text);
+                // Bóc tách mảng JSON dù model có trả thêm text thừa bên ngoài
+                const match = text.match(/\[[\s\S]*\]/);
+                if (!match) throw new Error('AI không phát hiện hư hỏng nào trong ảnh này.');
+                const parsed = JSON.parse(match[0]);
 
                 if (!Array.isArray(parsed) || parsed.length === 0) throw new Error('AI không phát hiện hư hỏng nào trong ảnh này.');
 
