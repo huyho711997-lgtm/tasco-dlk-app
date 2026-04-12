@@ -11635,31 +11635,58 @@
             if (this._capturedFiles.length === 0) return;
             
             const imgEl = document.getElementById('sc-review-main-img');
-            const bgBlurEl = document.getElementById('sc-review-bg-blur'); // Phần tử nền mờ
+            const bgBlurEl = document.getElementById('sc-review-bg-blur');
             const countEl = document.getElementById('sc-review-count');
             const thumbsEl = document.getElementById('sc-review-thumbs');
             const uploadBtn = document.getElementById('sc-review-upload-btn');
+            const currentFileObj = this._capturedFiles[this._currentReviewIdx];
 
-            // 1. Cho cả ảnh chính và ảnh nền mờ đi (Tạo hiệu ứng fade out)
             if (imgEl) imgEl.style.opacity = '0';
             if (bgBlurEl) bgBlurEl.style.opacity = '0';
 
-            // 2. Chờ 150ms để trình duyệt hoàn tất việc xóa ảnh cũ, sau đó nạp ảnh mới
             setTimeout(() => {
-                const currentPreview = this._capturedFiles[this._currentReviewIdx].preview;
-                
-                if (imgEl) {
-                    imgEl.src = currentPreview;
-                    imgEl.style.opacity = '1';
-                }
-                if (bgBlurEl) {
-                    bgBlurEl.src = currentPreview;
-                    bgBlurEl.style.opacity = '0.5'; // Mức độ hiển thị của nền mờ
+                const currentPreview = currentFileObj.preview;
+
+                if (currentFileObj.isVideo) {
+                    // Hiển thị video thay vì ảnh
+                    if (imgEl) imgEl.style.display = 'none';
+                    if (bgBlurEl) { bgBlurEl.src = ''; bgBlurEl.style.opacity = '0'; }
+
+                    let videoEl = document.getElementById('sc-review-video-player');
+                    if (!videoEl) {
+                        videoEl = document.createElement('video');
+                        videoEl.id = 'sc-review-video-player';
+                        videoEl.controls = true;
+                        videoEl.playsInline = true;
+                        videoEl.className = 'max-w-full max-h-full object-contain z-10 relative';
+                        const swipeArea = document.getElementById('sc-review-swipe-area');
+                        if (swipeArea) swipeArea.appendChild(videoEl);
+                    }
+                    videoEl.src = currentPreview;
+                    videoEl.style.display = 'block';
+                } else {
+                    // Ẩn video player nếu đang xem ảnh
+                    const videoEl = document.getElementById('sc-review-video-player');
+                    if (videoEl) videoEl.style.display = 'none';
+
+                    if (imgEl) {
+                        imgEl.style.display = '';
+                        imgEl.src = currentPreview;
+                        imgEl.style.opacity = '1';
+                    }
+                    if (bgBlurEl) {
+                        bgBlurEl.src = currentPreview;
+                        bgBlurEl.style.opacity = '0.5';
+                    }
                 }
             }, 150);
 
             countEl.textContent = `${this._currentReviewIdx + 1} / ${this._capturedFiles.length}`;
-            if(uploadBtn) uploadBtn.textContent = `Xác nhận tải lên ${this._capturedFiles.length} ảnh`;
+            const totalCount = this._capturedFiles.length;
+            const videoCount = this._capturedFiles.filter(f => f.isVideo).length;
+            if(uploadBtn) uploadBtn.textContent = videoCount > 0
+                ? `Xác nhận tải lên ${totalCount} file (${videoCount} video)`
+                : `Xác nhận tải lên ${totalCount} ảnh`;
 
             // Render lại cuộn thumbnail
             if(thumbsEl) {
@@ -11784,48 +11811,55 @@
             const currentFileObj = this._capturedFiles[this._currentReviewIdx];
             if (!currentFileObj || !currentFileObj.file) return;
 
-            // Lưu lại giao diện gốc của nút (chứa icon download)
             const originalHTML = btnElement.innerHTML;
-
-            // Ép thẳng SVG loading vào nút và khóa click để tránh bấm đúp
             btnElement.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" class="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`;
             btnElement.style.pointerEvents = 'none';
 
             try {
-                // Lấy thông tin biển số và định vị hiện tại
-                const item = App.find(this._id) || {};
-                const bsxToStamp = item.bsx || '';
-                const gpsLocation = this._gpsLocation || '';
-
-                // Gọi bộ xử lý ảnh: Đóng dấu GPS + Ngày giờ
-                const watermarkedFile = await ImageProcessor.addWatermark(currentFileObj.file, bsxToStamp, gpsLocation);
-
-                // Mở Share Sheet native của iOS/Android
-                if (navigator.canShare && navigator.canShare({ files: [watermarkedFile] })) {
-                    await navigator.share({
-                        files: [watermarkedFile],
-                        title: 'Ảnh Hiện Trường'
-                    });
+                if (currentFileObj.isVideo) {
+                    // Xử lý tải video về máy (không cần watermark)
+                    const ext = currentFileObj.file.name.endsWith('.mp4') ? 'mp4' : 'webm';
+                    const fileName = `TascoVid_${moment().format('YYMMDD_HHmmss')}.${ext}`;
+                    if (navigator.canShare && navigator.canShare({ files: [currentFileObj.file] })) {
+                        await navigator.share({ files: [currentFileObj.file], title: 'Video Hiện Trường' });
+                    } else {
+                        const url = URL.createObjectURL(currentFileObj.file);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = fileName;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        setTimeout(() => URL.revokeObjectURL(url), 1000);
+                        SecureCamera._isSaved = true;
+                        SecureCamera._showSaveSuccess(1);
+                    }
                 } else {
-                    // Fallback cho PC
-                    const url = URL.createObjectURL(watermarkedFile);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `TascoCam_${moment().format('YYMMDD_HHmmss')}.jpg`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    setTimeout(() => URL.revokeObjectURL(url), 1000);
-                    SecureCamera._isSaved = true;
-                    SecureCamera._showSaveSuccess(1);
+                    const item = App.find(this._id) || {};
+                    const bsxToStamp = item.bsx || '';
+                    const gpsLocation = this._gpsLocation || '';
+                    const watermarkedFile = await ImageProcessor.addWatermark(currentFileObj.file, bsxToStamp, gpsLocation);
+
+                    if (navigator.canShare && navigator.canShare({ files: [watermarkedFile] })) {
+                        await navigator.share({ files: [watermarkedFile], title: 'Ảnh Hiện Trường' });
+                    } else {
+                        const url = URL.createObjectURL(watermarkedFile);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `TascoCam_${moment().format('YYMMDD_HHmmss')}.jpg`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        setTimeout(() => URL.revokeObjectURL(url), 1000);
+                        SecureCamera._isSaved = true;
+                        SecureCamera._showSaveSuccess(1);
+                    }
                 }
             } catch (error) {
-                // Bỏ qua lỗi AbortError do người dùng chủ động vuốt tắt bảng Share
                 if (error.name !== 'AbortError' && !error.message.includes('Share canceled') && !error.message.includes('cancelled')) {
-                    Toast.fire({ icon: 'error', title: 'Lỗi xử lý ảnh: ' + error.message });
+                    Toast.fire({ icon: 'error', title: 'Lỗi xử lý file: ' + error.message });
                 }
             } finally {
-                // Phục hồi lại nút bấm 100% để tiếp tục tải ảnh khác
                 btnElement.innerHTML = originalHTML;
                 btnElement.style.pointerEvents = 'auto';
             }
@@ -11852,15 +11886,17 @@
                 const loadingText = btnElement.querySelector('span');
 
                 for (let i = 0; i < this._capturedFiles.length; i++) {
-                    // Cập nhật text để người dùng biết app vẫn đang chạy chứ không bị đơ
                     if (loadingText) loadingText.textContent = `Đang xử lý ${i + 1}/${this._capturedFiles.length}...`;
-                    
-                    // Nghỉ 50ms giữa mỗi ảnh để trình duyệt kịp vẽ lại UI (nhường luồng xử lý)
                     await new Promise(resolve => setTimeout(resolve, 50));
 
-                    // Đóng dấu từng ảnh một
-                    const processedFile = await ImageProcessor.addWatermark(this._capturedFiles[i].file, bsxToStamp, gpsLocation);
-                    watermarkedFiles.push(processedFile);
+                    const fileObj = this._capturedFiles[i];
+                    if (fileObj.isVideo) {
+                        // Video: dùng trực tiếp, không watermark
+                        watermarkedFiles.push(fileObj.file);
+                    } else {
+                        const processedFile = await ImageProcessor.addWatermark(fileObj.file, bsxToStamp, gpsLocation);
+                        watermarkedFiles.push(processedFile);
+                    }
                 }
 
                 if (loadingText) loadingText.textContent = `Đang mở bảng chia sẻ...`;
@@ -11869,24 +11905,25 @@
                 if (navigator.canShare && navigator.canShare({ files: watermarkedFiles })) {
                     await navigator.share({
                         files: watermarkedFiles,
-                        title: 'Toàn bộ ảnh Hiện Trường'
+                        title: 'Toàn bộ ảnh & video Hiện Trường'
                     });
                     SecureCamera._isSaved = true;
                     SecureCamera._showSaveSuccess(watermarkedFiles.length);
                 } else {
-                    // Fallback cho PC hoặc trình duyệt cũ: Tự động tải từng file xuống máy
                     const totalFiles = watermarkedFiles.length;
                     watermarkedFiles.forEach((file, index) => {
                         setTimeout(() => {
                             const url = URL.createObjectURL(file);
                             const a = document.createElement('a');
                             a.href = url;
-                            a.download = `TascoCam_${moment().format('YYMMDD_HHmmss')}_${index + 1}.jpg`;
+                            const isVid = file.type.startsWith('video/');
+                            const ext = isVid ? (file.name.endsWith('.mp4') ? 'mp4' : 'webm') : 'jpg';
+                            const prefix = isVid ? 'TascoVid' : 'TascoCam';
+                            a.download = `${prefix}_${moment().format('YYMMDD_HHmmss')}_${index + 1}.${ext}`;
                             document.body.appendChild(a);
                             a.click();
                             document.body.removeChild(a);
                             setTimeout(() => URL.revokeObjectURL(url), 1000);
-                            // Thông báo sau khi ảnh cuối cùng được tải xong
                             if (index === totalFiles - 1) {
                                 setTimeout(() => {
                                     SecureCamera._isSaved = true;
@@ -17163,9 +17200,14 @@
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
             
-            <div class="bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-2 shadow-sm">
-                <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                <span class="text-[10px] font-black text-white uppercase tracking-widest">Tasco Cam</span>
+            <!-- Mode switcher: Ảnh / Video — đặt ở giữa top bar -->
+            <div class="flex items-center gap-2 pointer-events-auto">
+                <button id="sc-mode-photo" onclick="SecureCamera.setMode('photo')" class="text-white text-[12px] font-black px-4 py-1.5 rounded-full bg-white/20 border border-white/40 backdrop-blur-sm active:scale-95 transition-all flex items-center gap-1">
+                    <i data-lucide="camera" class="w-3.5 h-3.5"></i>Ảnh
+                </button>
+                <button id="sc-mode-video" onclick="SecureCamera.setMode('video')" class="text-white/60 text-[12px] font-bold px-4 py-1.5 rounded-full border border-white/20 active:scale-95 transition-all flex items-center gap-1">
+                    <i data-lucide="video" class="w-3.5 h-3.5"></i>Video
+                </button>
             </div>
 
             <div class="flex flex-col gap-3 pointer-events-auto">
@@ -17213,16 +17255,6 @@
         </div>
 
         <div class="z-50 pb-safe absolute bottom-0 w-full bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none">
-            
-            <!-- Mode switcher: Ảnh / Video -->
-            <div class="flex justify-center gap-6 mb-4 pointer-events-auto">
-                <button id="sc-mode-photo" onclick="SecureCamera.setMode('photo')" class="text-white text-[12px] font-black px-4 py-1 rounded-full bg-white/20 border border-white/40 backdrop-blur-sm active:scale-95 transition-all">
-                    <i data-lucide="camera" class="w-3.5 h-3.5 inline-block mr-1"></i>Ảnh
-                </button>
-                <button id="sc-mode-video" onclick="SecureCamera.setMode('video')" class="text-white/50 text-[12px] font-bold px-4 py-1 rounded-full border border-white/20 active:scale-95 transition-all">
-                    <i data-lucide="video" class="w-3.5 h-3.5 inline-block mr-1"></i>Video
-                </button>
-            </div>
 
             <!-- Timer quay video -->
             <div id="sc-rec-timer" class="hidden justify-center mb-2 pointer-events-none">
