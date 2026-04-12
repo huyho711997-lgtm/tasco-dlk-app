@@ -2756,6 +2756,10 @@
                         <button id="mycloud-select-btn" onclick="MyCloud.toggleSelectMode()" class="hidden px-3 py-2 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs transition-colors">
                             Chọn
                         </button>
+                        <button onclick="MyCloud.openCamera()" class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 text-slate-700 active:scale-95 transition-all border border-slate-200">
+                            <i data-lucide="camera" class="w-4 h-4"></i>
+                            <span class="text-[12px] font-black">Chụp</span>
+                        </button>
                         <label class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white active:scale-95 transition-all shadow-md cursor-pointer">
                             <i data-lucide="upload-cloud" class="w-4 h-4"></i>
                             <span class="text-[12px] font-black">Tải lên</span>
@@ -11778,7 +11782,6 @@
             }
         },
         async confirmUpload() {
-            // Đóng màn review và tắt hẳn camera ngay lập tức trước khi xử lý
             const reviewModal = document.getElementById('sc-review-modal');
             if (reviewModal) reviewModal.classList.add('translate-y-full');
             if (this._stream) { this._stream.getTracks().forEach(t => t.stop()); this._stream = null; }
@@ -11787,10 +11790,15 @@
             this._capturedFiles.forEach(c => URL.revokeObjectURL(c.preview));
             this._capturedFiles = [];
 
-            this._forceClose(); // Tắt hẳn camera modal
-            
-            // Đẩy lên Cloud
-            await Images._processSecureUpload(filesToUpload, this._id, this._gpsLocation);
+            this._forceClose();
+
+            if (this._cloudMode) {
+                // Chế độ Cloud: đóng dấu không BSX rồi upload MyCloud
+                this._cloudMode = false;
+                await MyCloud._uploadFromCamera(filesToUpload, this._gpsLocation);
+            } else {
+                await Images._processSecureUpload(filesToUpload, this._id, this._gpsLocation);
+            }
         },
 
         async focusAt(event) {
@@ -16459,7 +16467,77 @@
                 if (typeof this.updateQuota === 'function') this.updateQuota();
             }, 1000);
         },
+        openCamera() {
+            // Mở SecureCamera ở chế độ Cloud — không có id hồ sơ, truyền '_cloud_'
+            SecureCamera._cloudMode = true;
+            SecureCamera.open('_cloud_');
+        },
+        async _uploadFromCamera(files, gpsLocation) {
+            if (!files.length) return;
+            const user = Auth.getCurrentUser();
+            if (!user) return;
 
+            // Hỏi ghi chú
+            const { value: noteText } = await Swal.fire({
+                title: 'Thêm ghi chú?',
+                html: '<p class="text-xs text-slate-500 mb-3">Phân loại ảnh để dễ tìm kiếm.</p><input id="mc-note-input" class="input-field" placeholder="Nhập ghi chú (Không bắt buộc)...">',
+                showCancelButton: true,
+                confirmButtonText: 'Lưu lên Cloud',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#06b6d4',
+                customClass: { popup: 'custom-rounded' },
+                preConfirm: () => document.getElementById('mc-note-input').value.trim()
+            });
+            if (noteText === undefined) return;
+
+            const toast = document.getElementById('upload-progress-toast');
+            const bar   = document.getElementById('upt-bar');
+            const txt   = document.getElementById('upt-text');
+            const pct   = document.getElementById('upt-percent');
+            let done = 0;
+            toast.classList.remove('translate-y-[200%]', 'opacity-0');
+            bar.style.width = '0%'; pct.textContent = '0%';
+            txt.textContent = `Đang xử lý ${files.length} ảnh...`;
+
+            for (let i = 0; i < files.length; i++) {
+                try {
+                    // Đóng dấu watermark — truyền bsx='' để không hiện biển số
+                    const watermarked = await ImageProcessor.addWatermark(files[i], '', gpsLocation);
+
+                    const fd = new FormData();
+                    fd.append('file', watermarked);
+                    fd.append('upload_preset', CONFIG.cloudinaryCloud.preset);
+
+                    const res  = await fetch(CONFIG.cloudinaryCloud.url, { method: 'POST', body: fd });
+                    const data = await res.json();
+
+                    if (data.secure_url) {
+                        const newKey = 'file_' + Date.now() + '_' + i + '_' + Math.random().toString(36).substr(2,5);
+                        await db.ref(`Users/${user.id}/myCloud/${newKey}`).set({
+                            url: data.secure_url,
+                            fileName: `TascoCloud_${moment().format('YYMMDD_HHmmss')}_${i+1}.jpg`,
+                            fileType: 'image/jpeg',
+                            timestamp: Date.now(),
+                            note: noteText || '',
+                            size: watermarked.size || 0
+                        });
+                    }
+                } catch(e) { console.error('Lỗi upload camera cloud:', e); }
+
+                done++;
+                const p = Math.round((done / files.length) * 100);
+                requestAnimationFrame(() => {
+                    bar.style.width = `${p}%`;
+                    pct.textContent = `${p}%`;
+                    txt.textContent = `Hoàn tất ${done} / ${files.length} ảnh`;
+                });
+            }
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-[200%]', 'opacity-0');
+                Toast.fire({ icon: 'success', title: `Đã lưu ${files.length} ảnh lên Cloud!` });
+            }, 1200);
+        },
         // 1. HÀM XÓA CÓ ANIMATION MƯỢT MÀ VÀ XÓA TẬN GỐC CLOUDINARY
         deleteSelected() {
             if (this._selectedKeys.size === 0) return;
