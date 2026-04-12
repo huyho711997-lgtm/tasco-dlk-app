@@ -11612,7 +11612,6 @@
             }
         },
         // Hàm đóng dấu nước hàng loạt và mở bảng Lưu toàn bộ ảnh của iOS
-        // Hàm đóng dấu nước hàng loạt và mở bảng Lưu toàn bộ ảnh của iOS
         async shareOrSaveAllPreviews(btnElement) {
             if (this._capturedFiles.length === 0 || !btnElement) return;
 
@@ -11655,6 +11654,8 @@
                         files: watermarkedFiles,
                         title: 'Toàn bộ ảnh Hiện Trường'
                     });
+                    // Thêm thông báo Lưu xong khi thao tác Share/Save hoàn tất
+                    Toast.fire({ icon: 'success', title: 'Lưu xong' });
                 } else {
                     // Fallback cho PC hoặc trình duyệt cũ: Tự động tải từng file xuống máy
                     watermarkedFiles.forEach((file, index) => {
@@ -11668,9 +11669,13 @@
                             a.click();
                             document.body.removeChild(a);
                             setTimeout(() => URL.revokeObjectURL(url), 1000);
+                            
+                            // Nếu đã chạy đến file cuối cùng, hiển thị thông báo Lưu xong
+                            if (index === watermarkedFiles.length - 1) {
+                                Toast.fire({ icon: 'success', title: 'Lưu xong' });
+                            }
                         }, index * 600); 
                     });
-                    Toast.fire({ icon: 'success', title: `Đã tải ${watermarkedFiles.length} ảnh xuống!` });
                 }
             } catch (error) {
                 // Bỏ qua lỗi khi người dùng bấm Hủy (Cancel) trên bảng Share của iOS
