@@ -11957,16 +11957,18 @@
                 const parts = base64Images.map(b64 => ({
                     inline_data: { mime_type: 'image/jpeg', data: b64 }
                 }));
-                parts.push({ text: `Bạn là chuyên gia giám định xe cơ giới Việt Nam. Phân tích TẤT CẢ các bộ phận xe bị hư hỏng trong các hình ảnh hiện trường được cung cấp.
+                parts.push({ text: `Bạn là chuyên gia giám định xe cơ giới Việt Nam. Phân tích TẤT CẢ bộ phận xe bị hư hỏng trong ảnh.
 
-                Quy tắc:
-                - Gọi đúng tên phụ tùng ô tô thực tế (VD: Cản trước, Cụm đèn pha trái, Vè trước trái, Tai xe, Nắp capo, Cửa trước trái, Kính chắn gió).
-                - Xác định mức độ: Trầy xước, Móp méo, Bể vỡ, Rách thủng, Gãy.
-                - Phán đoán: Móp/Trầy nhẹ → suaChua:true. Bể/Rách/Gãy/Móp nặng → thayThe:true.
-                - confidence: 0-100 (mức chắc chắn AI nhìn thấy hư hỏng này).
+                QUAN TRỌNG - XÁC ĐỊNH ĐÚNG BÊN: Nhìn kỹ hướng đầu xe trong ảnh. Nếu đầu xe quay về phía người chụp thì: bên TRÁI của xe là bên PHẢI ảnh, bên PHẢI của xe là bên TRÁI ảnh. Ghi đúng tên theo hướng xe thực tế, không theo hướng ảnh.
 
-                Trả về CHỈ JSON, KHÔNG markdown, KHÔNG giải thích:
-                [{"chiTiet":"Cản trước","moTa":"Trầy xước nặng, móp nhẹ","suaChua":true,"thayThe":false,"mucDo":"Trung bình","confidence":92}]` });
+                Quy tắc đặt tên:
+                - Dùng tên đúng: Cản trước, Cụm đèn pha trái/phải, Vè trước trái/phải, Nắp capo, Tai xe trái/phải, Cửa trước/sau trái/phải, Kính chắn gió, Lưới tản nhiệt, Biển số.
+                - moTa: CHỈ dùng 1-3 từ ngắn gọn: "Bể vỡ", "Móp méo", "Trầy xước", "Rách thủng", "Móp + trầy", "Bể + rách".
+                - Phán đoán: Trầy/Móp nhẹ → suaChua:true. Bể/Rách/Gãy/Móp nặng → thayThe:true.
+                - confidence: 0-100.
+
+                Trả về CHỈ JSON:
+                [{"chiTiet":"Cản trước","moTa":"Bể vỡ","suaChua":false,"thayThe":true,"mucDo":"Nặng","confidence":98}]` });
 
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${GeminiKeys.next()}`;
 
@@ -12024,8 +12026,8 @@
                 container.innerHTML = this._results.map((r, i) => {
                     const isChecked = this._selected.has(i);
                     const phuongAn = r.thayThe
-                        ? `<span style="background:#fff3e0;color:#e65100;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;border:1px solid #ffb74d;">THAY THẾ</span>`
-                        : `<span style="background:#e3f2fd;color:#1565c0;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;border:1px solid #90caf9;">SỬA CHỮA</span>`;
+                        ? `<button onclick="event.stopPropagation();AIVision._togglePA(${i})" style="background:#fff3e0;color:#e65100;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;border:1px solid #ffb74d;cursor:pointer;">THAY THẾ ⇄</button>`
+                        : `<button onclick="event.stopPropagation();AIVision._togglePA(${i})" style="background:#e3f2fd;color:#1565c0;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;border:1px solid #90caf9;cursor:pointer;">SỬA CHỮA ⇄</button>`;
                     const confidence = r.confidence >= 85 ? `<span style="background:rgba(6,182,212,0.12);color:#0891b2;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;">🤖 ${r.confidence}%</span>` : `<span style="background:rgba(100,116,139,0.1);color:#64748b;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;">🤖 ${r.confidence}%</span>`;
                     const dupBadge = r._isDuplicate ? `<span style="background:#fef9c3;color:#92400e;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;border:1px solid #fde047;">⚡ Đã có</span>` : '';
                     return `
@@ -12081,7 +12083,13 @@
             else this._selected.add(idx);
             if (this._renderList) this._renderList();
         },
-
+        _togglePA(idx) {
+            const r = this._results[idx];
+            if (!r) return;
+            r.thayThe = !r.thayThe;
+            r.suaChua = !r.thayThe;
+            if (this._renderList) this._renderList();
+        },
         _mergeSelected(id) {
             const item = App.find(id);
             if (!item) return;
@@ -12109,6 +12117,22 @@
                 const dmTab = document.querySelector('[onclick*="damage"]');
                 if (dmTab) dmTab.click();
             }, 300);
+        },
+        async scanSingle(id, imgIdx) {
+            const item = App.find(id);
+            if (!item) return;
+            const imgs = item.documentImages || [];
+            const imgObj = imgs[imgIdx];
+            if (!imgObj) return;
+            const url = typeof imgObj === 'string' ? imgObj : imgObj.url;
+            if (!url.match(/\.(jpeg|jpg|png|webp)/i)) {
+                Toast.fire({ icon: 'warning', title: 'Chỉ hỗ trợ ảnh JPG/PNG!' });
+                return;
+            }
+            ImageViewer.close();
+            // Giả lập Images._selected để tái dụng hàm scan
+            Images._selected = new Set([imgIdx]);
+            await this.scan(id);
         }
     };        
     const Images = {
@@ -12650,19 +12674,27 @@
             if (arrows) arrows.style.display = this._imgs.length > 1 ? 'flex' : 'none';
 
             if (actions) {
+                const canAIScan = this._id && this._id !== 'cloud' && !isDoc;
                 actions.innerHTML = `
-                    <div class="flex gap-2 w-full justify-between max-w-sm">
-                        <div class="flex gap-2">
-                            ${!isDoc ? `
-                            <button class="iv-btn" onclick="ImageViewer.zoom('out')"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
-                            <button class="iv-btn" onclick="ImageViewer.zoom('in')"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
-                            <button class="iv-btn" onclick="ImageViewer.rotate()"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>
-                            ` : '<div style="width:130px"></div>'}
-                        </div>
-                        <div class="flex gap-2">
-                            <button class="iv-action" onclick="ImageViewer.download()"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
-                            <button class="iv-action" onclick="ImageViewer.share()"><i data-lucide="share-2" class="w-3.5 h-3.5"></i></button>
-                            ${this._id !== 'cloud' ? `<button class="iv-action del" onclick="ImageViewer.remove()"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>` : ''}
+                    <div class="flex flex-col gap-2 w-full max-w-sm">
+                        ${canAIScan ? `
+                        <button onclick="AIVision.scanSingle('${this._id}', ${this._idx})" style="width:100%;padding:11px;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;font-size:12px;font-weight:900;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 4px 16px rgba(124,58,237,0.4);">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            ✨ AI Quét tổn thất ảnh này
+                        </button>` : ''}
+                        <div class="flex gap-2 w-full justify-between">
+                            <div class="flex gap-2">
+                                ${!isDoc ? `
+                                <button class="iv-btn" onclick="ImageViewer.zoom('out')"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
+                                <button class="iv-btn" onclick="ImageViewer.zoom('in')"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
+                                <button class="iv-btn" onclick="ImageViewer.rotate()"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>
+                                ` : '<div style="width:130px"></div>'}
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="iv-action" onclick="ImageViewer.download()"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
+                                <button class="iv-action" onclick="ImageViewer.share()"><i data-lucide="share-2" class="w-3.5 h-3.5"></i></button>
+                                ${this._id !== 'cloud' ? `<button class="iv-action del" onclick="ImageViewer.remove()"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>` : ''}
+                            </div>
                         </div>
                     </div>
                 `;
