@@ -10983,6 +10983,12 @@
         // Quản lý timer đồng hồ hiển thị live
         _clockInterval: null, 
         _isSaved: false,
+        // Quản lý Video Recording
+        _isRecording: false,
+        _mediaRecorder: null,
+        _recordedChunks: [],
+        _recordTimer: null,
+        _recordSeconds: 0,
 
         async open(id) {
             this._id = id;
@@ -11301,6 +11307,10 @@
         takePhoto() {
             if (!this._stream) return;
             this._isSaved = false;
+            this._cameraMode = 'photo';
+            this._isRecording = false;
+            this._recordedChunks = [];
+            if (this._recordTimer) { clearInterval(this._recordTimer); this._recordTimer = null; }
             
             // 1. Phản hồi Âm thanh (Tiếng TÁCH)
             this._playShutterSound();
@@ -11364,23 +11374,139 @@
                 this._updateThumbs();
             }, 'image/jpeg', 0.95);
         },
+        // ── QUẢN LÝ MODE ──────────────────────────────────────────
+        _cameraMode: 'photo', // 'photo' | 'video'
 
+        setMode(mode) {
+            this._cameraMode = mode;
+            const photBtn = document.getElementById('sc-mode-photo');
+            const vidBtn  = document.getElementById('sc-mode-video');
+            const inner   = document.getElementById('sc-capture-inner');
+
+            if (mode === 'video') {
+                if (photBtn) { photBtn.className = 'text-white/50 text-[12px] font-bold px-4 py-1 rounded-full border border-white/20 active:scale-95 transition-all'; }
+                if (vidBtn)  { vidBtn.className  = 'text-white text-[12px] font-black px-4 py-1 rounded-full bg-rose-500/80 border border-rose-400 backdrop-blur-sm active:scale-95 transition-all'; }
+                // Đổi nút chụp thành hình tròn đỏ nhỏ (style video)
+                if (inner) { inner.style.background = '#ef4444'; inner.style.borderRadius = '12px'; inner.style.transform = 'scale(0.85)'; }
+            } else {
+                if (photBtn) { photBtn.className = 'text-white text-[12px] font-black px-4 py-1 rounded-full bg-white/20 border border-white/40 backdrop-blur-sm active:scale-95 transition-all'; }
+                if (vidBtn)  { vidBtn.className  = 'text-white/50 text-[12px] font-bold px-4 py-1 rounded-full border border-white/20 active:scale-95 transition-all'; }
+                if (inner) { inner.style.background = '#ffffff'; inner.style.borderRadius = '9999px'; inner.style.transform = 'scale(1)'; }
+                // Dừng quay nếu đang quay
+                if (this._isRecording) this._stopRecording();
+            }
+        },
+
+        // ── NÚT BẤM CHÍNH — phân nhánh ảnh/video ─────────────────
+        _mainBtnTap() {
+            if (this._cameraMode === 'video') {
+                if (this._isRecording) this._stopRecording();
+                else this._startRecording();
+            } else {
+                this.takePhoto();
+            }
+        },
+
+        // ── BẮT ĐẦU QUAY ──────────────────────────────────────────
+        _startRecording() {
+            if (!this._stream || this._isRecording) return;
+
+            this._recordedChunks = [];
+            const mimeType = MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4'
+                           : MediaRecorder.isTypeSupported('video/webm;codecs=h264') ? 'video/webm;codecs=h264'
+                           : 'video/webm';
+
+            try {
+                this._mediaRecorder = new MediaRecorder(this._stream, { mimeType, videoBitsPerSecond: 8_000_000 });
+            } catch(e) {
+                this._mediaRecorder = new MediaRecorder(this._stream);
+            }
+
+            this._mediaRecorder.ondataavailable = e => { if (e.data.size > 0) this._recordedChunks.push(e.data); };
+            this._mediaRecorder.onstop = () => this._onRecordingStop();
+            this._mediaRecorder.start(200); // chunk mỗi 200ms
+
+            this._isRecording = true;
+            this._recordSeconds = 0;
+
+            // Cập nhật UI — nút đổi thành hình vuông dừng
+            const inner = document.getElementById('sc-capture-inner');
+            if (inner) { inner.style.borderRadius = '8px'; inner.style.background = '#ef4444'; inner.style.transform = 'scale(0.6)'; }
+
+            // Hiện timer
+            const timerWrap = document.getElementById('sc-rec-timer');
+            if (timerWrap) timerWrap.classList.replace('hidden','flex');
+
+            this._recordTimer = setInterval(() => {
+                this._recordSeconds++;
+                const m = String(Math.floor(this._recordSeconds / 60)).padStart(2,'0');
+                const s = String(this._recordSeconds % 60).padStart(2,'0');
+                const el = document.getElementById('sc-rec-time');
+                if (el) el.textContent = `${m}:${s}`;
+
+                // Giới hạn 3 phút tự động dừng
+                if (this._recordSeconds >= 180) this._stopRecording();
+            }, 1000);
+
+            if (window.navigator.vibrate) window.navigator.vibrate(30);
+        },
+
+        // ── DỪNG QUAY ─────────────────────────────────────────────
+        _stopRecording() {
+            if (!this._isRecording || !this._mediaRecorder) return;
+            clearInterval(this._recordTimer);
+            this._isRecording = false;
+            this._mediaRecorder.stop();
+
+            // Reset UI nút về hình tròn đỏ (chờ)
+            const inner = document.getElementById('sc-capture-inner');
+            if (inner) { inner.style.borderRadius = '12px'; inner.style.background = '#ef4444'; inner.style.transform = 'scale(0.85)'; }
+
+            const timerWrap = document.getElementById('sc-rec-timer');
+            if (timerWrap) timerWrap.classList.replace('flex','hidden');
+
+            if (window.navigator.vibrate) window.navigator.vibrate([30,50,30]);
+        },
+
+        // ── XỬ LÝ SAU KHI DỪNG QUAY ──────────────────────────────
+        _onRecordingStop() {
+            if (this._recordedChunks.length === 0) return;
+
+            const ext  = this._mediaRecorder?.mimeType?.includes('mp4') ? 'mp4' : 'webm';
+            const mime = this._mediaRecorder?.mimeType || 'video/webm';
+            const blob = new Blob(this._recordedChunks, { type: mime });
+            const file = new File([blob], `TASCO_VID_${Date.now()}.${ext}`, { type: mime });
+            const previewUrl = URL.createObjectURL(blob);
+
+            this._capturedFiles.push({ file, preview: previewUrl, isVideo: true, duration: this._recordSeconds });
+            this._recordedChunks = [];
+            this._updateThumbs();
+            Toast.fire({ icon: 'success', title: `Đã lưu video ${this._recordSeconds}s` });
+        },
         _updateThumbs() {
             const thumb = document.getElementById('secure-camera-thumbs');
             const count = document.getElementById('secure-camera-count');
+            if (!thumb || !count) return;
+
             if (this._capturedFiles.length > 0) {
-                thumb.style.backgroundImage = `url(${this._capturedFiles[this._capturedFiles.length - 1].preview})`;
-                
+                const last = this._capturedFiles[this._capturedFiles.length - 1];
+                if (last.isVideo) {
+                    // Hiện icon play cho video
+                    thumb.style.backgroundImage = 'none';
+                    thumb.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="1.5"><circle cx="12" cy="12" r="10" fill="rgba(239,68,68,0.7)"/><polygon points="10 8 16 12 10 16" fill="white"/></svg>`;
+                } else {
+                    thumb.innerHTML = '';
+                    thumb.style.backgroundImage = `url(${last.preview})`;
+                }
                 thumb.style.transform = 'scale(0.8)';
                 setTimeout(() => thumb.style.transform = 'scale(1)', 150);
-                
                 count.textContent = this._capturedFiles.length;
                 count.classList.remove('hidden');
-                count.style.display = 'flex'; // Ép hiển thị dạng flex để căn giữa số
-                
+                count.style.display = 'flex';
                 count.style.transform = 'scale(1.3)';
                 setTimeout(() => count.style.transform = 'scale(1)', 150);
             } else {
+                thumb.innerHTML = '';
                 thumb.style.backgroundImage = 'none';
                 count.classList.add('hidden');
                 count.style.display = 'none';
@@ -17086,22 +17212,45 @@
             <div id="sc-focus-ring" class="hidden absolute w-14 h-14 border-[1.5px] border-amber-400 rounded-lg pointer-events-none z-20 transition-all duration-300 transform -translate-x-1/2 -translate-y-1/2 shadow-[0_0_8px_rgba(251,191,36,0.5)]"></div>
         </div>
 
-        <div class="h-[140px] flex items-center justify-between px-8 z-50 pb-safe absolute bottom-0 w-full bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none">
+        <div class="z-50 pb-safe absolute bottom-0 w-full bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none">
             
-            <div class="relative w-[56px] h-[56px] cursor-pointer pointer-events-auto active:scale-90 transition-transform" onclick="SecureCamera.done()">
-                <div class="w-full h-full rounded-full border-[2.5px] border-white/50 overflow-hidden shadow-lg bg-slate-800 relative z-10">
-                    <div id="secure-camera-thumbs" class="w-full h-full bg-cover bg-center transition-transform duration-200"></div>
-                </div>
-                <div id="secure-camera-count" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[12px] w-6 h-6 rounded-full hidden items-center justify-center font-black shadow-md border-2 border-black transition-transform duration-200 z-20">0</div>
+            <!-- Mode switcher: Ảnh / Video -->
+            <div class="flex justify-center gap-6 mb-4 pointer-events-auto">
+                <button id="sc-mode-photo" onclick="SecureCamera.setMode('photo')" class="text-white text-[12px] font-black px-4 py-1 rounded-full bg-white/20 border border-white/40 backdrop-blur-sm active:scale-95 transition-all">
+                    <i data-lucide="camera" class="w-3.5 h-3.5 inline-block mr-1"></i>Ảnh
+                </button>
+                <button id="sc-mode-video" onclick="SecureCamera.setMode('video')" class="text-white/50 text-[12px] font-bold px-4 py-1 rounded-full border border-white/20 active:scale-95 transition-all">
+                    <i data-lucide="video" class="w-3.5 h-3.5 inline-block mr-1"></i>Video
+                </button>
             </div>
 
-            <button onclick="SecureCamera.takePhoto()" class="w-[84px] h-[84px] rounded-full border-[4px] border-white/50 flex items-center justify-center p-1 outline-none pointer-events-auto active:scale-95 transition-transform">
-                <div id="sc-capture-inner" class="w-full h-full rounded-full bg-white shadow-[0_0_20px_rgba(255,255,255,0.6)] transition-all duration-100"></div>
-            </button>
+            <!-- Timer quay video -->
+            <div id="sc-rec-timer" class="hidden justify-center mb-2 pointer-events-none">
+                <div class="flex items-center gap-2 bg-black/60 px-4 py-1.5 rounded-full border border-rose-500/50">
+                    <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                    <span id="sc-rec-time" class="text-white font-black text-[13px] font-mono tracking-widest">00:00</span>
+                </div>
+            </div>
 
-            <button onclick="SecureCamera.done()" class="w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center active:scale-90 transition-transform shadow-lg border border-emerald-400 pointer-events-auto">
-                <i data-lucide="check" class="w-7 h-7"></i>
-            </button>
+            <div class="h-[120px] flex items-center justify-between px-8 pointer-events-none">
+                <!-- Thumbnail ảnh đã chụp / video đã quay -->
+                <div class="relative w-[56px] h-[56px] cursor-pointer pointer-events-auto active:scale-90 transition-transform" onclick="SecureCamera.done()">
+                    <div class="w-full h-full rounded-full border-[2.5px] border-white/50 overflow-hidden shadow-lg bg-slate-800 relative z-10">
+                        <div id="secure-camera-thumbs" class="w-full h-full bg-cover bg-center transition-transform duration-200 flex items-center justify-center"></div>
+                    </div>
+                    <div id="secure-camera-count" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[12px] w-6 h-6 rounded-full hidden items-center justify-center font-black shadow-md border-2 border-black transition-transform duration-200 z-20">0</div>
+                </div>
+
+                <!-- Nút chụp / quay chính -->
+                <button id="sc-main-btn" onclick="SecureCamera._mainBtnTap()" class="w-[84px] h-[84px] rounded-full border-[4px] border-white/50 flex items-center justify-center p-1.5 outline-none pointer-events-auto active:scale-95 transition-transform">
+                    <div id="sc-capture-inner" class="w-full h-full rounded-full bg-white shadow-[0_0_20px_rgba(255,255,255,0.6)] transition-all duration-200"></div>
+                </button>
+
+                <!-- Nút Done -->
+                <button onclick="SecureCamera.done()" class="w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center active:scale-90 transition-transform shadow-lg border border-emerald-400 pointer-events-auto">
+                    <i data-lucide="check" class="w-7 h-7"></i>
+                </button>
+            </div>
         </div>
     </div>
     <div id="filter-modal" class="fixed inset-0 z-[99990] hidden transition-opacity duration-300 opacity-0" style="background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px);">
