@@ -11654,10 +11654,20 @@
                         files: watermarkedFiles,
                         title: 'Toàn bộ ảnh Hiện Trường'
                     });
-                    // Thêm thông báo Lưu xong khi thao tác Share/Save hoàn tất
-                    Toast.fire({ icon: 'success', title: 'Lưu xong' });
+                    // Thông báo sau khi người dùng đã hoàn tất lưu qua Share Sheet
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Lưu ảnh thành công!',
+                        html: `<p style="font-size:14px;color:#475569;">Đã lưu <b>${watermarkedFiles.length} ảnh</b> về máy thành công.</p>`,
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#2563eb',
+                        customClass: { popup: 'custom-rounded' },
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
                 } else {
                     // Fallback cho PC hoặc trình duyệt cũ: Tự động tải từng file xuống máy
+                    const totalFiles = watermarkedFiles.length;
                     watermarkedFiles.forEach((file, index) => {
                         // Cài độ trễ 600ms giữa mỗi file để trình duyệt không chặn hành vi tải hàng loạt
                         setTimeout(() => {
@@ -11669,10 +11679,21 @@
                             a.click();
                             document.body.removeChild(a);
                             setTimeout(() => URL.revokeObjectURL(url), 1000);
-                            
-                            // Nếu đã chạy đến file cuối cùng, hiển thị thông báo Lưu xong
-                            if (index === watermarkedFiles.length - 1) {
-                                Toast.fire({ icon: 'success', title: 'Lưu xong' });
+
+                            // Thông báo lưu xong khi ảnh cuối cùng đã được xử lý
+                            if (index === totalFiles - 1) {
+                                setTimeout(() => {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Lưu ảnh thành công!',
+                                        html: `<p style="font-size:14px;color:#475569;">Đã tải <b>${totalFiles} ảnh</b> về máy thành công.</p>`,
+                                        confirmButtonText: 'OK',
+                                        confirmButtonColor: '#2563eb',
+                                        customClass: { popup: 'custom-rounded' },
+                                        timer: 3000,
+                                        timerProgressBar: true
+                                    });
+                                }, 500);
                             }
                         }, index * 600); 
                     });
