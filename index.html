@@ -11913,43 +11913,47 @@
 
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // Cấu hình Font chữ NHỎ HƠN (Giảm hệ số từ 0.022 xuống 0.015)
-                        const fontSize = Math.max(12, Math.floor(width * 0.015)); 
-                        ctx.textAlign = 'right';
-                        ctx.textBaseline = 'bottom';
-
-                        // Đổ bóng đậm hơn một chút để chữ nhỏ vẫn đọc rõ trên nền sáng
-                        ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-                        ctx.shadowBlur = 5;
-                        ctx.shadowOffsetX = 2;
-                        ctx.shadowOffsetY = 2;
-
-                        const timeStr = moment().format('DD/MM/YYYY HH:mm:ss');
-                        const labelStr = bsx ? `TASCO DLK - ${bsx}` : 'TASCO DLK';
-                        const locStr = locationStr;
+                        const fontSize = Math.max(12, Math.floor(width * 0.015));
+                        const padding = fontSize + 10;
+                        const lineH = fontSize * 1.35;
                         const currentUser = Auth.getCurrentUser();
                         const gdvStr = currentUser?.name ? `Giám định viên: ${currentUser.name}` : '';
-                        const padding = fontSize + 10;
-                        const lineH = fontSize * 1.3;
+                        const timeStr = moment().format('DD/MM/YYYY HH:mm:ss');
+                        const labelStr = bsx ? `TASCO DLK – ${bsx}` : 'TASCO DLK';
+                        const locStr = locationStr;
 
-                        // 1. In Tọa độ GPS (sát đáy, màu vàng)
+                        ctx.shadowColor = 'rgba(0,0,0,0.9)';
+                        ctx.shadowBlur = 6;
+                        ctx.shadowOffsetX = 1;
+                        ctx.shadowOffsetY = 1;
+                        ctx.textBaseline = 'bottom';
+
+                        const yGPS   = height - padding;
+                        const yTime  = yGPS - lineH;
+                        const yLabel = yTime - lineH;
+
+                        // Dòng 1 (trên cùng): GPS — vàng, căn phải
                         ctx.font = `700 ${fontSize * 0.85}px "Plus Jakarta Sans", sans-serif`;
-                        ctx.fillStyle = 'rgba(253, 224, 71, 0.95)';
-                        ctx.fillText(locStr, width - padding, height - padding);
+                        ctx.fillStyle = 'rgba(253,224,71,0.95)';
+                        ctx.textAlign = 'right';
+                        ctx.fillText(locStr, width - padding, yGPS);
 
-                        // 2. In Thời gian (dòng 2 từ dưới, màu trắng)
+                        // Dòng 2: Ngày giờ — trắng, căn phải
                         ctx.font = `800 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
-                        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-                        ctx.fillText(timeStr, width - padding, height - padding - lineH);
+                        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+                        ctx.textAlign = 'right';
+                        ctx.fillText(timeStr, width - padding, yTime);
 
-                        // 3. In TASCO DLK - BSX (dòng 3)
-                        ctx.fillText(labelStr, width - padding, height - padding - lineH * 2);
+                        // Dòng 3: TASCO DLK – góc phải | GĐV – góc trái, cùng hàng, cùng font
+                        ctx.font = `800 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
+                        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+                        ctx.textAlign = 'right';
+                        ctx.fillText(labelStr, width - padding, yLabel);
 
-                        // 4. In tên Giám định viên (dòng 4, màu xanh nhạt)
                         if (gdvStr) {
-                            ctx.font = `700 ${fontSize * 0.9}px "Plus Jakarta Sans", sans-serif`;
-                            ctx.fillStyle = 'rgba(147, 197, 253, 0.95)';
-                            ctx.fillText(gdvStr, width - padding, height - padding - lineH * 3.3);
+                            ctx.textAlign = 'left';
+                            ctx.fillStyle = 'rgba(147,197,253,0.95)';
+                            ctx.fillText(gdvStr, padding, yLabel);
                         }
 
                         // Xuất ảnh
