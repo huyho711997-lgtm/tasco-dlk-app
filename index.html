@@ -1060,99 +1060,44 @@
             line-height: 1;
         }
 
-        /* ── OCR OVERLAY (Windows Photos style) ── */
-        #iv-ocr-wrap {
+        /* ── OCR TEXT PANEL ── */
+        #iv-ocr-panel {
             position: absolute;
-            z-index: 20;
-            pointer-events: none;
-            border-radius: 14px;
-            overflow: hidden;
-            display: none;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(10,15,30,0.97);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px 24px 0 0;
+            padding: 0 0 env(safe-area-inset-bottom, 16px);
+            z-index: 50;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.34,1.2,0.64,1);
+            max-height: 65vh;
+            display: flex;
+            flex-direction: column;
         }
-        #iv-ocr-wrap.active { display: block; pointer-events: all; }
-
-        .ocr-block {
-            position: absolute;
-            border: 1.5px solid rgba(99,179,255,0.7);
-            border-radius: 4px;
-            background: rgba(59,130,246,0.12);
-            cursor: pointer;
-            transition: background 0.15s, border-color 0.15s;
-            box-sizing: border-box;
-            backdrop-filter: none;
+        #iv-ocr-panel.open { transform: translateY(0); }
+        #iv-ocr-panel-handle { width:36px; height:4px; background:rgba(255,255,255,0.2); border-radius:2px; margin:12px auto 0; flex-shrink:0; }
+        #iv-ocr-content { overflow-y:auto; flex:1; padding:12px 16px 16px; }
+        #iv-ocr-content::-webkit-scrollbar { display:none; }
+        .iv-ocr-line {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 10px 12px; border-radius: 12px; cursor: pointer;
+            transition: background 0.15s; position: relative;
+            border: 1px solid transparent;
         }
-        .ocr-block:hover, .ocr-block:active {
-            background: rgba(59,130,246,0.35);
-            border-color: rgba(99,179,255,1);
+        .iv-ocr-line:active, .iv-ocr-line.copied { background: rgba(59,130,246,0.18); border-color: rgba(59,130,246,0.3); }
+        .iv-ocr-line-text { flex:1; font-size:13px; font-weight:600; color:#f1f5f9; line-height:1.55; word-break:break-all; }
+        .iv-ocr-line-copy { width:28px; height:28px; border-radius:8px; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+        .iv-ocr-btn {
+            display:flex; align-items:center; gap:6px; padding:10px 16px;
+            border-radius:12px; border:1px solid rgba(255,255,255,0.15);
+            font-size:11px; font-weight:800; cursor:pointer; backdrop-filter:blur(8px);
+            transition:all 0.15s; background:rgba(255,255,255,0.1); color:white;
         }
-        .ocr-block.copied {
-            background: rgba(16,185,129,0.35);
-            border-color: rgba(52,211,153,1);
-            animation: ocr-pop 0.3s ease;
-        }
-        @keyframes ocr-pop {
-            0%   { transform: scale(1); }
-            40%  { transform: scale(1.04); }
-            100% { transform: scale(1); }
-        }
-        .ocr-block-tooltip {
-            position: absolute;
-            bottom: calc(100% + 6px);
-            left: 50%; transform: translateX(-50%);
-            background: rgba(10,14,30,0.95);
-            color: #f1f5f9;
-            font-size: 11px; font-weight: 700;
-            padding: 5px 10px; border-radius: 8px;
-            white-space: nowrap; max-width: 260px;
-            overflow: hidden; text-overflow: ellipsis;
-            pointer-events: none;
-            opacity: 0; transition: opacity 0.15s;
-            border: 1px solid rgba(255,255,255,0.12);
-            z-index: 10;
-        }
-        .ocr-block:hover .ocr-block-tooltip { opacity: 1; }
-        .ocr-block.copied .ocr-block-tooltip {
-            opacity: 1;
-            content: 'Đã sao chép!';
-            background: rgba(6,78,59,0.95);
-            border-color: rgba(52,211,153,0.4);
-            color: #6ee7b7;
-        }
-
-        /* Bottom bar OCR */
-        #iv-ocr-bar {
-            position: absolute;
-            bottom: 96px; left: 50%; transform: translateX(-50%);
-            display: none; align-items: center; gap: 8px;
-            background: rgba(10,14,30,0.92);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 20px;
-            padding: 8px 14px;
-            z-index: 30;
-            white-space: nowrap;
-        }
-        #iv-ocr-bar.visible { display: flex; }
-        #iv-ocr-bar-count { font-size:12px; font-weight:800; color:#93c5fd; }
-        #iv-ocr-bar-hint  { font-size:11px; font-weight:600; color:rgba(255,255,255,0.45); }
-
-        /* Loading scanner animation */
-        #iv-ocr-scan-line {
-            position: absolute; left: 0; right: 0; height: 2px;
-            background: linear-gradient(90deg, transparent, #3b82f6, #60a5fa, #3b82f6, transparent);
-            box-shadow: 0 0 12px rgba(59,130,246,0.8);
-            animation: ocr-scan 1.6s ease-in-out infinite;
-            display: none; z-index: 25;
-        }
-        #iv-ocr-scan-line.scanning { display: block; }
-        @keyframes ocr-scan {
-            0%   { top: 0%;   opacity: 0; }
-            10%  { opacity: 1; }
-            90%  { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
-        }
-
-        /* ── AI ASSISTANT ── */
+        .iv-ocr-btn:active { transform:scale(0.95); }
+        .iv-ocr-btn.active { background:rgba(99,102,241,0.35); border-color:rgba(99,102,241,0.5); color:#a5b4fc; }
 
         /* ── AI ASSISTANT ── */
         #ai-fab {
@@ -13216,11 +13161,6 @@
                         requestAnimationFrame(() => {
                             imgEl.style.transition = 'opacity 0.2s ease';
                             imgEl.style.opacity = '1';
-                            // Re-sync overlay nếu OCR đang bật
-                            const wrap = document.getElementById('iv-ocr-wrap');
-                            if (wrap && wrap.classList.contains('active')) {
-                                this._syncWrapToImage();
-                            }
                         });
                     };
                     preloader.onerror = () => { imgEl.src = item.url; imgEl.style.opacity = '1'; };
@@ -13430,45 +13370,46 @@
             });
         },
 
-        // ── OCR: WINDOWS PHOTOS STYLE — bounding box overlay ──────
-        _ocrCache: {},
-        _ocrBlocks: [],   // [{text, x, y, w, h}] — tỉ lệ 0-1 so với ảnh gốc
+        // ── OCR: NHẬN DẠNG VĂN BẢN TRÊN ẢNH ──────────────────────
+        _ocrCache: {}, // Cache kết quả theo URL để không gọi API lại
 
         async toggleOCR() {
-            const wrap = document.getElementById('iv-ocr-wrap');
-            if (!wrap) return;
+            const panel = document.getElementById('iv-ocr-panel');
+            if (!panel) return;
 
-            // Nếu đang bật → tắt
-            if (wrap.classList.contains('active')) {
+            const isOpen = panel.classList.contains('open');
+
+            if (isOpen) {
                 this.closeOCR();
                 return;
             }
 
+            // Kiểm tra ảnh hiện tại có phải image không
             const item = this._imgs[this._idx];
             if (!item || item.type === 'document') {
                 Toast.fire({ icon: 'info', title: 'Chỉ hỗ trợ OCR trên hình ảnh' });
                 return;
             }
 
-            // Bật nút active
+            panel.classList.add('open');
             const btn = document.getElementById('iv-ocr-toggle-btn');
             if (btn) btn.classList.add('active');
 
-            // Nếu cache → vẽ luôn
+            // Nếu đã có cache cho ảnh này → hiện ngay, không gọi lại API
             const cacheKey = item.url;
             if (this._ocrCache[cacheKey]) {
-                this._ocrBlocks = this._ocrCache[cacheKey];
-                this._paintOverlay();
+                this._renderOCRLines(this._ocrCache[cacheKey]);
                 return;
             }
 
-            // Bắt đầu scan animation
-            this._startScanAnim();
+            // Hiện trạng thái loading
+            this._showOCRLoading();
 
             try {
+                // Tải ảnh về, nén xuống, gửi Gemini
                 const resp = await fetch(item.url);
                 const blob = await resp.blob();
-                const file = new File([blob], 'ocr.jpg', { type: blob.type || 'image/jpeg' });
+                const file = new File([blob], 'ocr_img.jpg', { type: blob.type || 'image/jpeg' });
                 const b64  = await OCR._compressImage(file, 1600);
 
                 const key = GeminiKeys.next();
@@ -13481,205 +13422,130 @@
                             contents: [{
                                 parts: [
                                     { inline_data: { mime_type: 'image/jpeg', data: b64 } },
-                                    { text: `Phân tích ảnh và trả về TẤT CẢ các vùng text dưới dạng JSON array.
+                                    { text: `Hãy đọc và trích xuất TOÀN BỘ văn bản có trong ảnh này theo đúng thứ tự từ trên xuống dưới, từ trái sang phải.
 
-Mỗi phần tử gồm:
-- "text": nội dung văn bản chính xác của vùng đó (không dịch, không sửa)
-- "x": tọa độ trái (0.0 đến 1.0, tính từ trái sang)
-- "y": tọa độ trên (0.0 đến 1.0, tính từ trên xuống)
-- "w": chiều rộng (0.0 đến 1.0)
-- "h": chiều cao (0.0 đến 1.0)
-
-Tọa độ tính theo tỉ lệ so với toàn bộ ảnh. Gom các chữ cùng dòng/cùng ô thành 1 block.
-Nếu ảnh không có chữ, trả về mảng rỗng: []
-
-CHỈ trả về JSON array thuần túy, không markdown, không giải thích:
-[{"text":"...","x":0.1,"y":0.05,"w":0.4,"h":0.04}, ...]` }
+QUAN TRỌNG:
+- Giữ nguyên 100% nội dung, không dịch, không sửa, không bổ sung
+- Mỗi dòng văn bản trong ảnh xuất ra thành một dòng riêng biệt trong kết quả
+- Nếu là bảng, xuất từng ô theo thứ tự hàng ngang
+- Nếu ảnh không có chữ, trả về chính xác: [KHÔNG CÓ VĂN BẢN]
+- Không giải thích, không thêm bất kỳ chú thích nào — chỉ xuất text thuần túy` }
                                 ]
                             }],
-                            generationConfig: { temperature: 0, responseMimeType: 'application/json' }
+                            generationConfig: { temperature: 0 }
                         }),
-                        signal: AbortSignal.timeout(28000)
+                        signal: AbortSignal.timeout(25000)
                     }
                 );
 
                 const data = await apiResp.json();
                 if (data.error) throw new Error(data.error.message);
 
-                let raw = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
-                raw = raw.replace(/```json|```/g, '').trim();
+                const raw = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
 
-                let blocks = [];
-                try { blocks = JSON.parse(raw); } catch(_) { blocks = []; }
-                if (!Array.isArray(blocks)) blocks = [];
+                // Lưu cache
+                this._ocrCache[cacheKey] = raw;
+                this._renderOCRLines(raw);
 
-                // Lọc block hợp lệ
-                blocks = blocks.filter(b =>
-                    b && typeof b.text === 'string' && b.text.trim() &&
-                    typeof b.x === 'number' && typeof b.y === 'number' &&
-                    typeof b.w === 'number' && typeof b.h === 'number'
-                );
-
-                this._ocrCache[cacheKey] = blocks;
-                this._ocrBlocks = blocks;
-
-            } catch(err) {
-                this._stopScanAnim();
-                Toast.fire({ icon: 'error', title: 'OCR thất bại: ' + (err.message || 'Lỗi không xác định') });
-                const btn2 = document.getElementById('iv-ocr-toggle-btn');
-                if (btn2) btn2.classList.remove('active');
-                return;
+            } catch (err) {
+                const content = document.getElementById('iv-ocr-content');
+                if (content) content.innerHTML = `<div class="iv-ocr-empty" style="color:#fca5a5;">⚠️ Lỗi: ${err.message || 'Không thể nhận dạng'}</div>`;
+                const sub = document.getElementById('iv-ocr-sub');
+                if (sub) sub.textContent = 'Thất bại — thử lại';
             }
-
-            this._stopScanAnim();
-            this._paintOverlay();
         },
 
-        _startScanAnim() {
-            // Căn overlay wrapper theo ảnh ngay, rồi bật scan line
-            this._syncWrapToImage();
-            const wrap = document.getElementById('iv-ocr-wrap');
-            const scanLine = document.getElementById('iv-ocr-scan-line');
-            if (wrap) wrap.classList.add('active');
-            if (scanLine) scanLine.classList.add('scanning');
+        _showOCRLoading() {
+            const content = document.getElementById('iv-ocr-content');
+            const sub = document.getElementById('iv-ocr-sub');
+            const copyAllBtn = document.getElementById('iv-ocr-copy-all');
+            if (copyAllBtn) copyAllBtn.style.display = 'none';
+            if (sub) sub.textContent = 'Đang nhận dạng...';
+            if (content) content.innerHTML = `
+                <div style="display:flex;flex-direction:column;align-items:center;padding:28px 0;gap:14px;">
+                    <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" style="animation:spin 1.2s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                    </div>
+                    <div style="text-align:center;">
+                        <p style="font-size:13px;font-weight:800;color:#e2e8f0;margin:0 0 4px;">AI đang đọc văn bản...</p>
+                        <p style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.35);margin:0;">Gemini Vision đang phân tích ảnh</p>
+                    </div>
+                </div>`;
         },
 
-        _stopScanAnim() {
-            const scanLine = document.getElementById('iv-ocr-scan-line');
-            if (scanLine) scanLine.classList.remove('scanning');
-        },
+        _renderOCRLines(rawText) {
+            const content = document.getElementById('iv-ocr-content');
+            const sub = document.getElementById('iv-ocr-sub');
+            const copyAllBtn = document.getElementById('iv-ocr-copy-all');
+            if (!content) return;
 
-        // Căn #iv-ocr-wrap khớp chính xác với vùng ảnh hiển thị
-        _syncWrapToImage() {
-            const imgEl = document.getElementById('img-viewer-img');
-            const viewer = document.getElementById('img-viewer');
-            const wrap   = document.getElementById('iv-ocr-wrap');
-            if (!imgEl || !viewer || !wrap || imgEl.style.display === 'none') return;
-
-            // Lấy bounding rect thực tế của ảnh render trong viewer
-            const vRect = viewer.getBoundingClientRect();
-            const iRect = imgEl.getBoundingClientRect();
-
-            wrap.style.left   = (iRect.left - vRect.left) + 'px';
-            wrap.style.top    = (iRect.top  - vRect.top)  + 'px';
-            wrap.style.width  = iRect.width  + 'px';
-            wrap.style.height = iRect.height + 'px';
-        },
-
-        _paintOverlay() {
-            this._syncWrapToImage();
-            const wrap = document.getElementById('iv-ocr-wrap');
-            const bar  = document.getElementById('iv-ocr-bar');
-            const cnt  = document.getElementById('iv-ocr-bar-count');
-            if (!wrap) return;
-
-            wrap.classList.add('active');
-
-            if (!this._ocrBlocks || this._ocrBlocks.length === 0) {
-                // Không có text
-                if (cnt) cnt.textContent = 'Không tìm thấy văn bản';
-                if (bar) bar.classList.add('visible');
-                // Ẩn copy-all
-                const copyAllBtn = document.getElementById('iv-ocr-copyall-btn');
+            if (!rawText || rawText === '[KHÔNG CÓ VĂN BẢN]' || rawText.includes('KHÔNG CÓ VĂN BẢN')) {
+                content.innerHTML = `<div class="iv-ocr-empty">🔍 Không phát hiện văn bản trong ảnh này</div>`;
+                if (sub) sub.textContent = 'Không có văn bản';
                 if (copyAllBtn) copyAllBtn.style.display = 'none';
                 return;
             }
 
-            // Xóa các block cũ (giữ scan-line)
-            const scanLine = document.getElementById('iv-ocr-scan-line');
-            wrap.innerHTML = '';
-            if (scanLine) wrap.appendChild(scanLine);
+            const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            if (sub) sub.textContent = `${lines.length} dòng — nhấn để sao chép`;
+            if (copyAllBtn) copyAllBtn.style.display = 'flex';
 
-            // Vẽ từng bounding box
-            this._ocrBlocks.forEach((block, idx) => {
-                const el = document.createElement('div');
-                el.className = 'ocr-block';
-                el.style.left   = (block.x * 100) + '%';
-                el.style.top    = (block.y * 100) + '%';
-                el.style.width  = (block.w * 100) + '%';
-                el.style.height = (block.h * 100) + '%';
-
-                // Tooltip hiện text khi hover
-                const tip = document.createElement('div');
-                tip.className = 'ocr-block-tooltip';
-                tip.textContent = block.text;
-                el.appendChild(tip);
-
-                el.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this._copyBlock(el, block.text);
-                });
-
-                wrap.appendChild(el);
-            });
-
-            // Hiện bottom bar
-            if (cnt) cnt.textContent = this._ocrBlocks.length + ' vùng text';
-            if (bar) bar.classList.add('visible');
+            content.innerHTML = lines.map((line, i) => `
+                <div class="iv-ocr-line" onclick="ImageViewer._copyOCRLine(this, ${JSON.stringify(line)})">
+                    <span class="iv-ocr-line-text">${line.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
+                    <span class="iv-ocr-copy-icon">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </span>
+                </div>`).join('');
         },
 
-        _copyBlock(el, text) {
-            const copy = (t) => {
-                if (navigator.clipboard) {
-                    return navigator.clipboard.writeText(t);
-                }
-                // Fallback
+        _copyOCRLine(el, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                el.classList.add('copied');
+                // Đổi icon sang dấu tick
+                const icon = el.querySelector('.iv-ocr-copy-icon');
+                if (icon) icon.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.8" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+                setTimeout(() => {
+                    el.classList.remove('copied');
+                    if (icon) icon.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+                }, 1800);
+            }).catch(() => {
+                // Fallback cho iOS Safari cũ
                 const ta = document.createElement('textarea');
-                ta.value = t;
-                ta.style.cssText = 'position:fixed;opacity:0;';
+                ta.value = text;
+                ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
                 document.body.appendChild(ta);
                 ta.focus(); ta.select();
                 document.execCommand('copy');
                 document.body.removeChild(ta);
-                return Promise.resolve();
-            };
-
-            copy(text).then(() => {
-                el.classList.add('copied');
-                // Đổi tooltip thành "Đã sao chép!"
-                const tip = el.querySelector('.ocr-block-tooltip');
-                const origText = tip ? tip.textContent : '';
-                if (tip) { tip.textContent = '✓ Đã sao chép!'; tip.style.opacity = '1'; }
-                if (window.navigator.vibrate) window.navigator.vibrate(20);
-                setTimeout(() => {
-                    el.classList.remove('copied');
-                    if (tip) { tip.textContent = origText; tip.style.opacity = ''; }
-                }, 1800);
-            }).catch(() => {
-                Toast.fire({ icon: 'success', title: 'Đã sao chép: ' + text.substring(0, 30) });
+                Toast.fire({ icon: 'success', title: 'Đã sao chép!' });
             });
         },
 
         copyAllOCR() {
-            if (!this._ocrBlocks || !this._ocrBlocks.length) return;
-            const fullText = this._ocrBlocks.map(b => b.text).join('\n');
-            const btn = document.getElementById('iv-ocr-copyall-btn');
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(fullText).then(() => {
-                    if (btn) {
-                        const orig = btn.textContent;
-                        btn.textContent = '✓ Đã sao chép!';
-                        btn.style.background = 'rgba(16,185,129,0.25)';
-                        btn.style.borderColor = 'rgba(52,211,153,0.5)';
-                        btn.style.color = '#6ee7b7';
-                        setTimeout(() => {
-                            btn.textContent = orig;
-                            btn.style.background = '';
-                            btn.style.borderColor = '';
-                            btn.style.color = '';
-                        }, 2000);
-                    }
-                });
-            }
+            const content = document.getElementById('iv-ocr-content');
+            if (!content) return;
+            const lines = Array.from(content.querySelectorAll('.iv-ocr-line-text')).map(el => el.textContent.trim());
+            if (!lines.length) return;
+            const fullText = lines.join('\n');
+            navigator.clipboard.writeText(fullText).then(() => {
+                const btn = document.getElementById('iv-ocr-copy-all');
+                if (btn) {
+                    const orig = btn.innerHTML;
+                    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.8" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Đã sao chép!`;
+                    btn.style.background = 'rgba(16,185,129,0.2)';
+                    btn.style.borderColor = 'rgba(16,185,129,0.4)';
+                    btn.style.color = '#34d399';
+                    setTimeout(() => { btn.innerHTML = orig; btn.style = ''; }, 2000);
+                }
+            }).catch(() => Toast.fire({ icon: 'success', title: 'Đã sao chép tất cả!' }));
         },
 
         closeOCR() {
-            const wrap = document.getElementById('iv-ocr-wrap');
-            const bar  = document.getElementById('iv-ocr-bar');
-            const btn  = document.getElementById('iv-ocr-toggle-btn');
-            if (wrap) { wrap.classList.remove('active'); wrap.innerHTML = '<div id="iv-ocr-scan-line"></div>'; }
-            if (bar)  bar.classList.remove('visible');
-            if (btn)  btn.classList.remove('active');
+            const panel = document.getElementById('iv-ocr-panel');
+            if (panel) panel.classList.remove('open');
+            const btn = document.getElementById('iv-ocr-toggle-btn');
+            if (btn) btn.classList.remove('active');
         },
 
         _bindSwipe() {
@@ -17621,30 +17487,36 @@ CHỈ trả về JSON array thuần túy, không markdown, không giải thích:
         <canvas id="pdf-canvas" style="display:none; max-width:94vw; max-height:72vh; border-radius:14px; z-index:10; position:relative;"></canvas>
         <div id="pdf-loading" style="display:none; flex-direction:column; align-items:center; justify-content:center; width:94vw; height:72vh; z-index:10; position:relative;"></div>
 
-        <!-- OCR overlay — bounding boxes vẽ đè lên ảnh -->
-        <div id="iv-ocr-wrap">
-            <div id="iv-ocr-scan-line"></div>
-        </div>
-
-        <!-- Copy-all bar hiện ở dưới ảnh khi OCR xong -->
-        <div id="iv-ocr-bar">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.2" stroke-linecap="round"><path d="M4 7V4h3M17 4h3v3M4 17v3h3M17 20h3v-3"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg>
-            <span id="iv-ocr-bar-count">0 vùng text</span>
-            <span id="iv-ocr-bar-hint">· nhấn vùng sáng để copy</span>
-            <div style="width:1px;height:14px;background:rgba(255,255,255,0.15);margin:0 2px;"></div>
-            <button onclick="ImageViewer.copyAllOCR()" id="iv-ocr-copyall-btn"
-                style="font-size:11px;font-weight:800;color:#93c5fd;background:rgba(59,130,246,0.2);border:1px solid rgba(59,130,246,0.35);border-radius:8px;padding:4px 10px;cursor:pointer;transition:all 0.15s;">
-                Sao chép tất cả
-            </button>
-            <button onclick="ImageViewer.closeOCR()"
-                style="width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.4);cursor:pointer;flex-shrink:0;">
-                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
-            </button>
-        </div>
-
         <div class="iv-dots" id="iv-dots"></div>
         <div class="iv-actions" style="width: 100%; justify-content: center; padding: 0 16px;"></div>
-    </div>
+
+        <!-- OCR Text Panel — trượt lên từ đáy -->
+        <div id="iv-ocr-panel">
+            <div id="iv-ocr-panel-handle" onclick="ImageViewer.closeOCR()"></div>
+            <div id="iv-ocr-header">
+                <div class="flex items-center gap-2">
+                    <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M4 7V4h3M17 4h3v3M4 17v3h3M17 20h3v-3"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg>
+                    </div>
+                    <div>
+                        <p style="font-size:13px;font-weight:900;color:#f1f5f9;">Nhận dạng văn bản</p>
+                        <p id="iv-ocr-sub" style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.4);">Nhấn dòng để sao chép</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="iv-ocr-copy-all" onclick="ImageViewer.copyAllOCR()" style="display:none;padding:7px 12px;border-radius:10px;background:rgba(99,102,241,0.25);border:1px solid rgba(99,102,241,0.4);color:#a5b4fc;font-size:11px;font-weight:800;display:flex;align-items:center;gap:5px;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        Sao chép tất cả
+                    </button>
+                    <button onclick="ImageViewer.closeOCR()" style="width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="iv-ocr-content">
+                <div class="iv-ocr-empty">Bấm nút <strong>OCR</strong> bên dưới để nhận dạng văn bản</div>
+            </div>
+        </div>
     </div>
 
     <!-- AI PANEL -->
