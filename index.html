@@ -989,7 +989,35 @@
             transition:all 0.15s;
         }
         .iv-action:active { background:rgba(255,255,255,0.22); transform:scale(0.96); }
-        .iv-action.del { background:rgba(239,68,68,0.18); border-color:rgba(239,68,68,0.35); color:#fca5a5; }          
+        .iv-action.del { background:rgba(239,68,68,0.18); border-color:rgba(239,68,68,0.35); color:#fca5a5; }     
+        .iv-ai-btn {
+            position: absolute;
+            top: 100px;
+            right: 16px;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.18);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            cursor: pointer;
+            z-index: 20;
+            transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .iv-ai-btn:active { transform: scale(0.88); background: rgba(124,58,237,0.45); }
+        .iv-ai-btn .iv-ai-label {
+            font-size: 8px;
+            font-weight: 900;
+            color: rgba(255,255,255,0.85);
+            letter-spacing: 0.05em;
+            line-height: 1;
+        }     
         /* ── AI ASSISTANT ── */
         #ai-fab {
             position: relative; bottom: unset; right: unset;
@@ -12133,6 +12161,11 @@
             // Giả lập Images._selected để tái dụng hàm scan
             Images._selected = new Set([imgIdx]);
             await this.scan(id);
+        },
+        _scanFromViewer() {
+            const btn = document.getElementById('iv-ai-btn');
+            if (!btn || !btn._scanId) return;
+            this.scanSingle(btn._scanId, btn._scanIdx);
         }
     };        
     const Images = {
@@ -12674,31 +12707,32 @@
             if (arrows) arrows.style.display = this._imgs.length > 1 ? 'flex' : 'none';
 
             if (actions) {
-                const canAIScan = this._id && this._id !== 'cloud' && !isDoc;
                 actions.innerHTML = `
-                    <div class="flex flex-col gap-2 w-full max-w-sm">
-                        ${canAIScan ? `
-                        <button onclick="AIVision.scanSingle('${this._id}', ${this._idx})" style="width:100%;padding:11px;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;font-size:12px;font-weight:900;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 4px 16px rgba(124,58,237,0.4);">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                            ✨ AI Quét tổn thất ảnh này
-                        </button>` : ''}
-                        <div class="flex gap-2 w-full justify-between">
-                            <div class="flex gap-2">
-                                ${!isDoc ? `
-                                <button class="iv-btn" onclick="ImageViewer.zoom('out')"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
-                                <button class="iv-btn" onclick="ImageViewer.zoom('in')"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
-                                <button class="iv-btn" onclick="ImageViewer.rotate()"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>
-                                ` : '<div style="width:130px"></div>'}
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="iv-action" onclick="ImageViewer.download()"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
-                                <button class="iv-action" onclick="ImageViewer.share()"><i data-lucide="share-2" class="w-3.5 h-3.5"></i></button>
-                                ${this._id !== 'cloud' ? `<button class="iv-action del" onclick="ImageViewer.remove()"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>` : ''}
-                            </div>
+                    <div class="flex gap-2 w-full justify-between max-w-sm">
+                        <div class="flex gap-2">
+                            ${!isDoc ? `
+                            <button class="iv-btn" onclick="ImageViewer.zoom('out')"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
+                            <button class="iv-btn" onclick="ImageViewer.zoom('in')"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
+                            <button class="iv-btn" onclick="ImageViewer.rotate()"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>
+                            ` : '<div style="width:130px"></div>'}
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="iv-action" onclick="ImageViewer.download()"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
+                            <button class="iv-action" onclick="ImageViewer.share()"><i data-lucide="share-2" class="w-3.5 h-3.5"></i></button>
+                            ${this._id !== 'cloud' ? `<button class="iv-action del" onclick="ImageViewer.remove()"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>` : ''}
                         </div>
                     </div>
                 `;
                 try { lucide.createIcons(); } catch(e){}
+            }
+
+            // Hiện/ẩn nút AI góc phải tuỳ loại ảnh
+            const aiBtn = document.getElementById('iv-ai-btn');
+            if (aiBtn) {
+                const canAI = this._id && this._id !== 'cloud' && !isDoc;
+                aiBtn.classList.toggle('hidden', !canAI);
+                aiBtn._scanId  = this._id;
+                aiBtn._scanIdx = this._idx;
             }
         },
 
@@ -16598,6 +16632,22 @@
             </button>
         </div>
         
+        <!-- Nút AI Vision nằm trên ảnh góc phải -->
+        <button id="iv-ai-btn" class="iv-ai-btn hidden" onclick="AIVision._scanFromViewer()">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="url(#ai-grad)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <defs>
+                    <linearGradient id="ai-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#a78bfa"/>
+                        <stop offset="100%" stop-color="#818cf8"/>
+                    </linearGradient>
+                </defs>
+                <path d="M9.663 17h4.673M12 3v1M4.22 4.22l.707.707M1 12h1M3 19l1-1M21 12h1M20 19l-1-1M20.78 4.22l-.707.707"/>
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 8v1M12 15v1M8 12h1M15 12h1"/>
+            </svg>
+            <span class="iv-ai-label">AI</span>
+        </button>
+
         <img id="img-viewer-img" src="" alt="" style="display:none; max-width:94vw; max-height:72vh; object-fit:contain; border-radius:14px; z-index:10; position:relative;">
         
         <iframe id="img-viewer-iframe" src="" style="display:none; width:94vw; height:72vh; border-radius:14px; border:none; background:#fff; z-index:10; position:relative;"></iframe>
