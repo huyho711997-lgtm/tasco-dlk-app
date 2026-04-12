@@ -11928,33 +11928,31 @@
                         ctx.shadowOffsetY = 1;
                         ctx.textBaseline = 'bottom';
 
+                        // Tính từ dưới lên: GPS → Giờ → GĐV → TASCO DLK
                         const yGPS   = height - padding;
-                        const yTime  = yGPS - lineH;
-                        const yLabel = yTime - lineH;
+                        const yTime  = yGPS  - lineH;
+                        const yGDV   = yTime - lineH;
+                        const yLabel = yGDV  - lineH;
 
-                        // Dòng 1 (trên cùng): GPS — vàng, căn phải
-                        ctx.font = `700 ${fontSize * 0.85}px "Plus Jakarta Sans", sans-serif`;
-                        ctx.fillStyle = 'rgba(253,224,71,0.95)';
                         ctx.textAlign = 'right';
-                        ctx.fillText(locStr, width - padding, yGPS);
-
-                        // Dòng 2: Ngày giờ — trắng, căn phải
                         ctx.font = `800 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
-                        ctx.fillStyle = 'rgba(255,255,255,0.95)';
-                        ctx.textAlign = 'right';
-                        ctx.fillText(timeStr, width - padding, yTime);
 
-                        // Dòng 3: TASCO DLK – góc phải | GĐV – góc trái, cùng hàng, cùng font
-                        ctx.font = `800 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
+                        // Dòng 4 (trên cùng): TASCO DLK — trắng
                         ctx.fillStyle = 'rgba(255,255,255,0.95)';
-                        ctx.textAlign = 'right';
                         ctx.fillText(labelStr, width - padding, yLabel);
 
+                        // Dòng 3: Giám định viên — trắng, cùng font cùng màu TASCO DLK
                         if (gdvStr) {
-                            ctx.textAlign = 'left';
-                            ctx.fillStyle = 'rgba(147,197,253,0.95)';
-                            ctx.fillText(gdvStr, padding, yLabel);
+                            ctx.fillText(gdvStr, width - padding, yGDV);
                         }
+
+                        // Dòng 2: Ngày giờ — trắng
+                        ctx.fillText(timeStr, width - padding, yTime);
+
+                        // Dòng 1 (sát đáy): GPS — vàng, font nhỏ hơn
+                        ctx.font = `700 ${fontSize * 0.85}px "Plus Jakarta Sans", sans-serif`;
+                        ctx.fillStyle = 'rgba(253,224,71,0.95)';
+                        ctx.fillText(locStr, width - padding, yGPS);
 
                         // Xuất ảnh
                         canvas.toBlob((blob) => {
