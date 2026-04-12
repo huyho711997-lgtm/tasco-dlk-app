@@ -15,7 +15,6 @@
     <script defer src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/fslightbox/3.3.1/index.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script>
         window.pdfjsLib = window['pdfjs-dist/build/pdf'];
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -17154,86 +17153,6 @@
         }
     };
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const fileInput = document.getElementById('ocr-image-input');
-        const previewImg = document.getElementById('ocr-preview');
-        const workspace = document.getElementById('ocr-workspace');
-        const loadingOverlay = document.getElementById('ocr-loading');
-        const statusText = document.getElementById('ocr-status');
-        const resultTextArea = document.getElementById('ocr-result');
-        const copyBtn = document.getElementById('copy-ocr-btn');
-
-        // Khi người dùng chọn ảnh
-        fileInput.addEventListener('change', async function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            // Hiển thị ảnh xem trước
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                previewImg.src = event.target.result;
-                workspace.classList.remove('hidden');
-                workspace.classList.add('flex');
-                
-                // Bắt đầu quá trình nhận diện chữ
-                processOCR(file);
-            };
-            reader.readAsDataURL(file);
-        });
-
-        // Hàm xử lý OCR cốt lõi
-        async function processOCR(imageFile) {
-            try {
-                // Hiển thị loading
-                loadingOverlay.classList.remove('hidden');
-                resultTextArea.value = '';
-                
-                // Khởi tạo Tesseract với ngôn ngữ Tiếng Việt ('vie')
-                statusText.innerText = "Đang khởi tạo AI...";
-                const worker = await Tesseract.createWorker('vie', 1, {
-                    logger: m => {
-                        // Cập nhật % tiến độ cho người dùng thấy
-                        if(m.status === 'recognizing text') {
-                            statusText.innerText = `Đang quét chữ: ${Math.round(m.progress * 100)}%`;
-                        }
-                    }
-                });
-
-                // Bắt đầu đọc ảnh
-                const ret = await worker.recognize(imageFile);
-                
-                // Đổ kết quả ra Textarea
-                resultTextArea.value = ret.data.text;
-                
-                // Tắt worker để giải phóng bộ nhớ RAM cho điện thoại
-                await worker.terminate();
-
-            } catch (error) {
-                console.error(error);
-                Swal.fire('Lỗi OCR', 'Không thể đọc được chữ từ ảnh này. Vui lòng thử ảnh rõ nét hơn.', 'error');
-            } finally {
-                // Ẩn loading
-                loadingOverlay.classList.add('hidden');
-                // Cập nhật lại icon Lucide
-                lucide.createIcons();
-            }
-        }
-
-        // Nút copy nhanh kết quả
-        copyBtn.addEventListener('click', () => {
-            if (!resultTextArea.value) return;
-            navigator.clipboard.writeText(resultTextArea.value).then(() => {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Đã copy',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-            });
-        });
-    });
     // ============================================================
     // BOOT
     // ============================================================
@@ -17735,39 +17654,6 @@
             <div id="upt-bar" class="h-full bg-gradient-to-r from-cyan-400 to-blue-600 w-0 transition-all duration-300 ease-out"></div>
         </div>
     </div>
-    
-    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4">
-        <h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
-            <i data-lucide="scan-text" class="w-5 h-5 text-blue-500"></i>
-            Quét chữ từ hình ảnh (OCR Offline)
-        </h3>
-        
-        <div class="mb-4">
-            <label class="block w-full text-center px-4 py-3 bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors">
-                <span class="text-sm font-medium text-slate-600">📸 Chọn hoặc chụp ảnh để quét chữ</span>
-                <input type="file" id="ocr-image-input" accept="image/*" class="hidden">
-            </label>
-        </div>
 
-        <div id="ocr-workspace" class="hidden flex-col gap-3">
-            <div class="relative rounded-lg overflow-hidden border border-slate-200 bg-black/5">
-                <img id="ocr-preview" class="w-full max-h-[300px] object-contain" src="" alt="Preview">
-                
-                <div id="ocr-loading" class="hidden absolute inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center">
-                    <div class="text-center">
-                        <i data-lucide="loader-2" class="w-8 h-8 text-white animate-spin mx-auto mb-2"></i>
-                        <p class="text-white text-xs font-medium" id="ocr-status">Đang nạp mô hình AI...</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="relative">
-                <textarea id="ocr-result" rows="4" class="w-full p-3 text-sm border border-slate-200 rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Kết quả chữ sẽ hiển thị ở đây..."></textarea>
-                <button id="copy-ocr-btn" class="absolute top-2 right-2 p-1.5 bg-white rounded-md shadow-sm border border-slate-200 hover:bg-blue-50 text-slate-600">
-                    <i data-lucide="copy" class="w-4 h-4"></i>
-                </button>
-            </div>
-        </div>
-    </div>
 </body>
 </html>
