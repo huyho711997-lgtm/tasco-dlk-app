@@ -11097,8 +11097,13 @@
 
             try {
                 this._stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: this._facingMode, width: { ideal: 4096 }, height: { ideal: 2160 } },
-                    audio: false
+                    video: {
+                        facingMode: this._facingMode,
+                        width:  { ideal: 1920, max: 1920 },
+                        height: { ideal: 1080, max: 1080 },
+                        frameRate: { ideal: 30, max: 30 }
+                    },
+                    audio: true
                 });
                 
                 const video = document.getElementById('secure-camera-video');
@@ -11410,19 +11415,33 @@
             if (!this._stream || this._isRecording) return;
 
             this._recordedChunks = [];
-            const mimeType = MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4'
-                           : MediaRecorder.isTypeSupported('video/webm;codecs=h264') ? 'video/webm;codecs=h264'
-                           : 'video/webm';
+
+            // Chọn codec tốt nhất thiết bị hỗ trợ — ưu tiên avc (H.264) vì tương thích cao nhất
+            const MIME_CANDIDATES = [
+                'video/mp4;codecs=avc1',
+                'video/webm;codecs=h264',
+                'video/webm;codecs=vp9',
+                'video/webm;codecs=vp8',
+                'video/webm',
+                'video/mp4',
+            ];
+            const mimeType = MIME_CANDIDATES.find(m => MediaRecorder.isTypeSupported(m)) || '';
+
+            // Bitrate vừa đủ cho 1080p mobile: 4 Mbps video + 128k audio
+            const recOptions = { videoBitsPerSecond: 4_000_000, audioBitsPerSecond: 128_000 };
+            if (mimeType) recOptions.mimeType = mimeType;
 
             try {
-                this._mediaRecorder = new MediaRecorder(this._stream, { mimeType, videoBitsPerSecond: 8_000_000 });
+                this._mediaRecorder = new MediaRecorder(this._stream, recOptions);
             } catch(e) {
-                this._mediaRecorder = new MediaRecorder(this._stream);
+                try { this._mediaRecorder = new MediaRecorder(this._stream, { mimeType }); }
+                catch(e2) { this._mediaRecorder = new MediaRecorder(this._stream); }
             }
 
             this._mediaRecorder.ondataavailable = e => { if (e.data.size > 0) this._recordedChunks.push(e.data); };
             this._mediaRecorder.onstop = () => this._onRecordingStop();
-            this._mediaRecorder.start(200); // chunk mỗi 200ms
+            // timeslice 1000ms — ít chunk hơn, giảm overhead, buffer đủ để không mất dữ liệu
+            this._mediaRecorder.start(1000);
 
             this._isRecording = true;
             this._recordSeconds = 0;
@@ -11476,10 +11495,21 @@
             const file = new File([blob], `TASCO_VID_${Date.now()}.${ext}`, { type: mime });
             const previewUrl = URL.createObjectURL(blob);
 
-            this._capturedFiles.push({ file, preview: previewUrl, isVideo: true, duration: this._recordSeconds });
+            // Lưu thêm thời điểm quay và GPS lúc quay để watermark chính xác
+            this._capturedFiles.push({
+                file,
+                preview: previewUrl,
+                isVideo: true,
+                duration: this._recordSeconds,
+                recordedAt: moment().format('DD/MM/YYYY HH:mm:ss'),
+                gpsAtRecord: this._gpsLocation || ''
+            });
             this._recordedChunks = [];
             this._updateThumbs();
-            Toast.fire({ icon: 'success', title: `Đã lưu video ${this._recordSeconds}s` });
+
+            const m = String(Math.floor(this._recordSeconds / 60)).padStart(2,'0');
+            const s = String(this._recordSeconds % 60).padStart(2,'0');
+            Toast.fire({ icon: 'success', title: `Đã lưu video ${m}:${s} ✓` });
         },
         _updateThumbs() {
             const thumb = document.getElementById('secure-camera-thumbs');
@@ -11818,7 +11848,12 @@
                     // Đóng dấu watermark lên video trước khi tải về
                     btnElement.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" class="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`;
                     const item = App.find(this._id) || {};
-                    const wmVideo = await ImageProcessor.addVideoWatermark(currentFileObj.file, item.bsx || '', this._gpsLocation || '');
+                    const wmVideo = await ImageProcessor.addVideoWatermark(
+                        currentFileObj.file,
+                        item.bsx || '',
+                        currentFileObj.gpsAtRecord || this._gpsLocation || '',
+                        currentFileObj.recordedAt || ''
+                    );
                     const ext = wmVideo.name.endsWith('.mp4') ? 'mp4' : 'webm';
                     const fileName = `TascoVid_${moment().format('YYMMDD_HHmmss')}.${ext}`;
                     if (navigator.canShare && navigator.canShare({ files: [wmVideo] })) {
@@ -11894,7 +11929,12 @@
                     if (fileObj.isVideo) {
                         // Video: đóng dấu watermark trước khi tải
                         const item = App.find(this._id) || {};
-                        const wmVideo = await ImageProcessor.addVideoWatermark(fileObj.file, item.bsx || '', bsxToStamp ? gpsLocation : gpsLocation);
+                        const wmVideo = await ImageProcessor.addVideoWatermark(
+                            fileObj.file,
+                            item.bsx || '',
+                            fileObj.gpsAtRecord || gpsLocation,
+                            fileObj.recordedAt || ''
+                        );
                         watermarkedFiles.push(wmVideo);
                     } else {
                         const processedFile = await ImageProcessor.addWatermark(fileObj.file, bsxToStamp, gpsLocation);
@@ -12144,92 +12184,158 @@
         },
 
         // Đóng dấu watermark lên video bằng cách vẽ text lên canvas rồi record lại
-        async addVideoWatermark(file, bsx = '', locationStr = '') {
-            return new Promise((resolve) => {
+        async addVideoWatermark(file, bsx = '', locationStr = '', recordedAt = '') {
+            // Hiện toast báo đang xử lý
+            const toast = document.getElementById('upload-progress-toast');
+            const bar   = document.getElementById('upt-bar');
+            const txt   = document.getElementById('upt-text');
+            const pct   = document.getElementById('upt-percent');
+            if (toast) {
+                toast.classList.remove('translate-y-[200%]', 'opacity-0');
+                bar.style.width = '0%'; pct.textContent = '0%';
+                txt.textContent = 'Đang đóng dấu video...';
+            }
+
+            return new Promise((resolve, reject) => {
+                const srcUrl = URL.createObjectURL(file);
                 const videoEl = document.createElement('video');
                 videoEl.muted = true;
                 videoEl.playsInline = true;
-                videoEl.src = URL.createObjectURL(file);
+                videoEl.crossOrigin = 'anonymous';
+                videoEl.src = srcUrl;
+                videoEl.preload = 'auto';
 
-                videoEl.onloadedmetadata = () => {
-                    const W = videoEl.videoWidth  || 1280;
-                    const H = videoEl.videoHeight || 720;
+                videoEl.onloadedmetadata = async () => {
+                    const W   = videoEl.videoWidth  || 1280;
+                    const H   = videoEl.videoHeight || 720;
+                    const dur = videoEl.duration    || 0;
 
                     const canvas = document.createElement('canvas');
                     canvas.width  = W;
                     canvas.height = H;
-                    const ctx = canvas.getContext('2d');
+                    const ctx = canvas.getContext('2d', { alpha: false });
 
-                    const currentUser  = Auth.getCurrentUser();
+                    // Chuẩn bị text watermark
+                    const currentUser = Auth.getCurrentUser();
                     const gdvStr   = currentUser?.name ? `Giám định viên: ${currentUser.name}` : '';
-                    const timeStr  = moment().format('DD/MM/YYYY HH:mm:ss');
+                    const timeStr  = recordedAt || moment().format('DD/MM/YYYY HH:mm:ss');
                     const labelStr = bsx ? `TASCO DLK – ${bsx}` : 'TASCO DLK';
-                    const fontSize = Math.max(14, Math.floor(W * 0.018));
-                    const padding  = fontSize + 12;
-                    const lineH    = fontSize * 1.4;
+                    const fontSize = Math.max(16, Math.floor(W * 0.02));
+                    const padding  = fontSize + 16;
+                    const lineH    = fontSize * 1.45;
 
-                    function drawWatermark() {
-                        ctx.drawImage(videoEl, 0, 0, W, H);
+                    const _drawOverlay = () => {
+                        ctx.save();
+                        // Nền mờ cho watermark block
+                        const blkH = lineH * (gdvStr ? 4 : 3) + padding;
+                        ctx.fillStyle = 'rgba(0,0,0,0.45)';
+                        ctx.fillRect(W - 340, H - blkH - 8, 332, blkH);
 
-                        ctx.shadowColor    = 'rgba(0,0,0,0.95)';
-                        ctx.shadowBlur     = 8;
-                        ctx.shadowOffsetX  = 1;
-                        ctx.shadowOffsetY  = 1;
-                        ctx.textBaseline   = 'bottom';
-                        ctx.textAlign      = 'right';
-                        ctx.font = `800 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
+                        ctx.shadowColor   = 'rgba(0,0,0,0.9)';
+                        ctx.shadowBlur    = 5;
+                        ctx.textBaseline  = 'bottom';
+                        ctx.textAlign     = 'right';
 
-                        const yGPS   = H - padding;
+                        const yGPS   = H - padding + lineH * 0.1;
                         const yTime  = yGPS  - lineH;
-                        const yGDV   = yTime - lineH;
-                        const yLabel = yGDV  - lineH;
+                        const yGDV   = yTime - (gdvStr ? lineH : 0);
+                        const yLabel = (gdvStr ? yGDV : yTime) - lineH;
 
-                        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+                        ctx.font = `800 ${fontSize}px "Plus Jakarta Sans",sans-serif`;
+                        ctx.fillStyle = 'rgba(255,255,255,0.97)';
                         ctx.fillText(labelStr, W - padding, yLabel);
-                        if (gdvStr) ctx.fillText(gdvStr, W - padding, yGDV);
+                        if (gdvStr) { ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.fillText(gdvStr, W - padding, yGDV); }
                         ctx.fillText(timeStr, W - padding, yTime);
 
-                        ctx.font = `700 ${fontSize * 0.85}px "Plus Jakarta Sans", sans-serif`;
-                        ctx.fillStyle = 'rgba(253,224,71,0.95)';
+                        ctx.font = `700 ${Math.round(fontSize*0.82)}px "Plus Jakarta Sans",sans-serif`;
+                        ctx.fillStyle = 'rgba(253,224,71,0.97)';
                         ctx.fillText(locationStr, W - padding, yGPS);
+                        ctx.restore();
+                    };
+
+                    // Chọn codec tốt nhất
+                    const CANDIDATES = [
+                        'video/mp4;codecs=avc1',
+                        'video/webm;codecs=h264',
+                        'video/webm;codecs=vp9',
+                        'video/webm;codecs=vp8',
+                        'video/webm',
+                        'video/mp4',
+                    ];
+                    const outMime = CANDIDATES.find(m => MediaRecorder.isTypeSupported(m)) || 'video/webm';
+
+                    // Lấy audio track từ file gốc qua AudioContext
+                    let audioStream = null;
+                    try {
+                        const audioCtx = new AudioContext();
+                        const arrBuf   = await file.arrayBuffer();
+                        const decoded  = await audioCtx.decodeAudioData(arrBuf);
+                        const dest     = audioCtx.createMediaStreamDestination();
+                        const src2     = audioCtx.createBufferSource();
+                        src2.buffer    = decoded;
+                        src2.connect(dest);
+                        audioStream    = dest.stream;
+                        // Phát audio đồng bộ khi video seek
+                        videoEl.addEventListener('play', () => src2.start(0), { once: true });
+                    } catch(_) { /* video không có audio hoặc trình duyệt không hỗ trợ */ }
+
+                    const canvasStream = canvas.captureStream(30);
+                    if (audioStream) {
+                        audioStream.getAudioTracks().forEach(t => canvasStream.addTrack(t));
                     }
 
-                    // Lấy stream từ canvas và audio từ video (nếu có)
-                    const canvasStream = canvas.captureStream(30);
-                    const mime = MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4'
-                               : MediaRecorder.isTypeSupported('video/webm;codecs=h264') ? 'video/webm;codecs=h264'
-                               : 'video/webm';
+                    const recOpts = { videoBitsPerSecond: 4_000_000, audioBitsPerSecond: 128_000 };
+                    if (outMime) recOpts.mimeType = outMime;
+
                     let recorder;
-                    try {
-                        recorder = new MediaRecorder(canvasStream, { mimeType: mime, videoBitsPerSecond: 6_000_000 });
-                    } catch(e) {
-                        recorder = new MediaRecorder(canvasStream);
-                    }
+                    try { recorder = new MediaRecorder(canvasStream, recOpts); }
+                    catch(e) { recorder = new MediaRecorder(canvasStream); }
 
                     const chunks = [];
                     recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
                     recorder.onstop = () => {
-                        URL.revokeObjectURL(videoEl.src);
-                        const ext  = recorder.mimeType.includes('mp4') ? 'mp4' : 'webm';
-                        const blob = new Blob(chunks, { type: recorder.mimeType });
-                        const outFile = new File([blob], `TASCO_VID_WM_${Date.now()}.${ext}`, { type: recorder.mimeType });
-                        resolve(outFile);
+                        URL.revokeObjectURL(srcUrl);
+                        const finalMime = recorder.mimeType || outMime;
+                        const ext  = finalMime.includes('mp4') ? 'mp4' : 'webm';
+                        const blob = new Blob(chunks, { type: finalMime });
+                        const out  = new File([blob], `TASCO_VID_WM_${Date.now()}.${ext}`, { type: finalMime });
+                        if (toast) setTimeout(() => toast.classList.add('translate-y-[200%]', 'opacity-0'), 800);
+                        resolve(out);
                     };
 
-                    recorder.start(200);
-                    videoEl.play();
+                    recorder.start(1000);
 
-                    // Vẽ từng frame trong khi video đang phát
-                    const drawLoop = () => {
-                        if (videoEl.ended || videoEl.paused) {
-                            recorder.stop();
-                            return;
+                    // Vẽ frame theo thời gian thực khi video phát — muted để không lag audio
+                    const drawFrame = () => {
+                        if (!videoEl.ended && !videoEl.paused) {
+                            ctx.drawImage(videoEl, 0, 0, W, H);
+                            _drawOverlay();
+                            // Cập nhật progress
+                            if (dur > 0 && toast) {
+                                const p = Math.min(99, Math.round((videoEl.currentTime / dur) * 100));
+                                bar.style.width = `${p}%`;
+                                pct.textContent = `${p}%`;
+                                txt.textContent = `Đóng dấu video: ${p}%`;
+                            }
                         }
-                        drawWatermark();
-                        requestAnimationFrame(drawLoop);
+                        if (!videoEl.ended) {
+                            requestAnimationFrame(drawFrame);
+                        } else {
+                            // Vẽ frame cuối rồi dừng recorder
+                            ctx.drawImage(videoEl, 0, 0, W, H);
+                            _drawOverlay();
+                            setTimeout(() => recorder.stop(), 300);
+                        }
                     };
-                    videoEl.onplay = () => requestAnimationFrame(drawLoop);
-                    videoEl.onended = () => recorder.stop();
+
+                    videoEl.onplay = () => requestAnimationFrame(drawFrame);
+                    videoEl.play().catch(reject);
+                };
+
+                videoEl.onerror = () => {
+                    URL.revokeObjectURL(srcUrl);
+                    // Fallback: trả về file gốc nếu không xử lý được
+                    resolve(file);
                 };
 
                 videoEl.load();
@@ -16773,7 +16879,7 @@
 
                     if (isVideo) {
                         txt.textContent = `Đang đóng dấu video ${i+1}/${files.length}...`;
-                        processedFile = await ImageProcessor.addVideoWatermark(files[i], '', gpsLocation);
+                        processedFile = await ImageProcessor.addVideoWatermark(files[i], '', gpsLocation, '');
                     } else {
                         processedFile = await ImageProcessor.addWatermark(files[i], '', gpsLocation);
                     }
