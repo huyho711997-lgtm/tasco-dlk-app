@@ -11136,6 +11136,8 @@
             if (this._stream) this._stream.getTracks().forEach(t => t.stop());
 
             try {
+                // Chỉ bật mic khi quay video — chụp ảnh không cần audio, tránh vọng tiếng
+                const needAudio = this._cameraMode === 'video';
                 this._stream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: this._facingMode,
@@ -11143,7 +11145,7 @@
                         height: { ideal: 1080, max: 1080 },
                         frameRate: { ideal: 30, max: 30 }
                     },
-                    audio: true
+                    audio: needAudio
                 });
                 
                 const video = document.getElementById('secure-camera-video');
@@ -11432,11 +11434,15 @@
                 if (photBtn) { photBtn.className = 'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 text-white/50'; }
                 if (vidBtn)  { vidBtn.className  = 'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 bg-rose-500 text-white shadow-sm'; }
                 if (inner) { inner.style.background = '#ef4444'; inner.style.borderRadius = '12px'; inner.style.transform = 'scale(0.85)'; }
+                // Restart stream để BẬT mic khi chuyển sang video
+                this._startStream();
             } else {
                 if (photBtn) { photBtn.className = 'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 bg-white text-slate-900 shadow-sm'; }
                 if (vidBtn)  { vidBtn.className  = 'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 text-white/50'; }
                 if (inner) { inner.style.background = '#ffffff'; inner.style.borderRadius = '9999px'; inner.style.transform = 'scale(1)'; }
                 if (this._isRecording) this._stopRecording();
+                // Restart stream để TẮT mic khi về chụp ảnh (tránh vọng tiếng)
+                this._startStream();
             }
         },
 
