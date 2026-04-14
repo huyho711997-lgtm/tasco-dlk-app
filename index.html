@@ -12475,21 +12475,38 @@
                 Trả về CHỈ JSON:
                 [{"chiTiet":"Cản trước","moTa":"Bể vỡ","suaChua":false,"thayThe":true,"mucDo":"Nặng","confidence":98}]` });
 
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${GeminiKeys.next()}`;
-
-                const resp2 = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts }],
-                        generationConfig: { responseMimeType: 'application/json', temperature: 0.1 }
-                    }),
-                    signal: AbortSignal.timeout(30000)
-                });
-
-                const data = await resp2.json();
-                // Kiểm tra lỗi API trả về (quota, key sai...)
-                if (data.error) throw new Error('Gemini: ' + (data.error.message || 'API lỗi'));
+                // Thử lần lượt tất cả keys nếu bị quota/lỗi
+                const maxRetries = CONFIG.gemini.keys.length;
+                let data = null;
+                let lastError = null;
+                for (let attempt = 0; attempt < maxRetries; attempt++) {
+                    try {
+                        const key = GeminiKeys.next();
+                        if (statusEl()) statusEl().textContent = `Tasco AI đang phân tích... (thử ${attempt + 1}/${maxRetries})`;
+                        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${key}`;
+                        const resp2 = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contents: [{ parts }],
+                                generationConfig: { responseMimeType: 'application/json', temperature: 0.1 }
+                            }),
+                            signal: AbortSignal.timeout(45000)
+                        });
+                        data = await resp2.json();
+                        if (data.error) {
+                            lastError = 'Gemini: ' + (data.error.message || 'API lỗi');
+                            data = null;
+                            continue; // Thử key tiếp theo
+                        }
+                        break; // Thành công, thoát vòng lặp
+                    } catch (fetchErr) {
+                        lastError = fetchErr.message;
+                        // Nếu là timeout hoặc lỗi mạng, thử key tiếp
+                        continue;
+                    }
+                }
+                if (!data) throw new Error(lastError || 'Tất cả API key đều lỗi. Thử lại sau!');
 
                 let text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
                 // Bóc tách mảng JSON dù model có trả thêm text thừa bên ngoài
