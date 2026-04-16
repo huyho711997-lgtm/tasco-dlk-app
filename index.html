@@ -3278,6 +3278,71 @@
                             </div>
                         </div>
                     </div>
+                    <div class="p-4 rounded-2xl border border-violet-200 bg-violet-50/30 overflow-hidden">
+                        <div class="flex justify-between items-center cursor-pointer select-none" onclick="FormUI.toggle('sec-baolanh', this)">
+                            <h4 class="text-xs font-black text-violet-700 uppercase flex items-center gap-2">
+                                <i data-lucide="file-check-2" class="w-4 h-4"></i> Bảo lãnh & PASC
+                            </h4>
+                            <i data-lucide="chevron-up" class="w-4 h-4 text-violet-500 chevron-icon transition-transform duration-200"></i>
+                        </div>
+                        <div id="sec-baolanh" class="form-section-body grid grid-cols-1 gap-4 mt-4">
+
+                            <!-- Đường dẫn PASC -->
+                            <div>
+                                <label class="input-label">🔗 Đường dẫn PASC (Phương án sửa chữa)</label>
+                                <div class="flex gap-2">
+                                    <input type="url" id="edit-pascUrl" class="input-field font-mono flex-1 text-[11px]" placeholder="https://storage.baohiemtasco.vn/...">
+                                    <button onclick="BaoLanh.openUrl('pascUrl')" class="shrink-0 px-3 py-2 bg-violet-100 text-violet-700 border border-violet-200 rounded-xl text-xs font-bold active:bg-violet-200 transition-colors flex items-center gap-1">
+                                        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Đường dẫn Bảo lãnh -->
+                            <div>
+                                <label class="input-label">🔗 Đường dẫn Bảo lãnh sửa chữa</label>
+                                <div class="flex gap-2">
+                                    <input type="url" id="edit-baoLanhUrl" class="input-field font-mono flex-1 text-[11px]" placeholder="https://storage.baohiemtasco.vn/..." oninput="BaoLanh.parseFromUrl(this.value)">
+                                    <button onclick="BaoLanh.openUrl('baoLanhUrl')" class="shrink-0 px-3 py-2 bg-violet-100 text-violet-700 border border-violet-200 rounded-xl text-xs font-bold active:bg-violet-200 transition-colors flex items-center gap-1">
+                                        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Các số tiền bảo lãnh -->
+                            <div class="pt-3 border-t border-violet-100/70">
+                                <p class="text-[10px] font-black text-violet-600 uppercase mb-3 flex items-center gap-1.5">
+                                    <i data-lucide="coins" class="w-3.5 h-3.5"></i> Số tiền bảo lãnh
+                                </p>
+                                <div class="grid grid-cols-1 gap-3">
+                                    <div>
+                                        <label class="input-label">Chi phí sửa chữa xe (đồng)</label>
+                                        <input type="text" id="edit-blChiPhiSuaChua" class="input-field font-bold text-slate-800" placeholder="VD: 21.500.000" oninput="BaoLanh.formatNumber(this)">
+                                    </div>
+                                    <div>
+                                        <label class="input-label">Phần khách hàng tự trả (đồng)</label>
+                                        <input type="text" id="edit-blKhachHangTuTra" class="input-field font-bold text-rose-700" placeholder="VD: 500.000" oninput="BaoLanh.formatNumber(this)">
+                                    </div>
+                                    <div>
+                                        <label class="input-label">Phần giảm giá sửa chữa (đồng)</label>
+                                        <input type="text" id="edit-blGiamGia" class="input-field font-bold text-amber-700" placeholder="VD: 2.150.000" oninput="BaoLanh.formatNumber(this)">
+                                    </div>
+                                    <div>
+                                        <label class="input-label">Số tiền Bảo hiểm Tasco bảo lãnh thanh toán (đồng)</label>
+                                        <input type="text" id="edit-blBaoHiemBaoLanh" class="input-field font-bold text-emerald-700 text-base" placeholder="VD: 18.850.000" oninput="BaoLanh.formatNumber(this)">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Nút gửi tin nhắn bảo lãnh -->
+                            <div class="pt-3 border-t border-violet-100/70">
+                                <button onclick="BaoLanh.sendMessage(App.currentEditId)"
+                                    class="w-full py-3 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl text-xs font-black flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md shadow-violet-200">
+                                    <i data-lucide="send" class="w-4 h-4"></i> Gửi PASC & Bảo lãnh cho Cố vấn
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="p-4 rounded-2xl border border-cyan-200 bg-cyan-50/30 overflow-hidden">
                         <div class="flex justify-between items-center cursor-pointer select-none" onclick="FormUI.toggle('sec-recv', this)">
                             <h4 class="text-xs font-black text-cyan-700 uppercase flex items-center gap-2">
@@ -7125,7 +7190,9 @@
         'ownerType', 'htDienBien', 'htNhanDinh', 'htUocTonThat', 'htDeXuat',
         'garaBankNo', 'garaBankName', 'garaBankOwner',
         'ownerBankNo', 'ownerBankName', 'ownerBankOwner', 'xnbtRecv',
-        'garaAdvisorName', 'garaAdvisorPhone'
+        'garaAdvisorName', 'garaAdvisorPhone',
+        'pascUrl', 'baoLanhUrl',
+        'blChiPhiSuaChua', 'blKhachHangTuTra', 'blGiamGia', 'blBaoHiemBaoLanh'
     ];
 
     const Modal = {
@@ -15599,7 +15666,95 @@ QUAN TRỌNG:
             }
         }
     };    
+    // ============================================================
+    // BAO LANH & PASC HELPER
+    // ============================================================
+    const BaoLanh = {
+        openUrl(fieldId) {
+            const url = document.getElementById(`edit-${fieldId}`)?.value.trim();
+            if (!url) { Toast.fire({icon:'warning', title:'Chưa có đường dẫn!'}); return; }
+            window.open(url, '_blank');
+        },
 
+        formatNumber(input) {
+            let raw = input.value.replace(/\D/g, '');
+            if (!raw) { input.value = ''; return; }
+            input.value = parseInt(raw).toLocaleString('vi-VN');
+        },
+
+        parseFromUrl(url) {
+            // Hàm này để mở rộng sau — tự động lấy số tiền từ PDF nếu cần
+        },
+
+        sendMessage(id) {
+            const item = App.find(id) || {};
+            const phone = document.getElementById('edit-garaAdvisorPhone')?.value.trim()
+                        || item.garaAdvisorPhone || item.garaPhone || '';
+
+            const pascUrl = document.getElementById('edit-pascUrl')?.value.trim() || item.pascUrl || '';
+            const baoLanhUrl = document.getElementById('edit-baoLanhUrl')?.value.trim() || item.baoLanhUrl || '';
+            const bsx = document.getElementById('edit-bsx')?.value.trim() || item.bsx || '';
+
+            if (!pascUrl && !baoLanhUrl) {
+                Toast.fire({icon:'warning', title:'Chưa nhập đường dẫn PASC hoặc Bảo lãnh!'});
+                return;
+            }
+
+            const msg = [
+                'Phương án sửa chữa',
+                pascUrl || '(chưa có)',
+                '',
+                'Bảo lãnh',
+                baoLanhUrl || '(chưa có)',
+                '',
+                `Phương án sửa chữa và bảo lãnh sửa chữa xe + ${bsx}`
+            ].join('\n');
+
+            // Hiển thị preview trước khi gửi
+            Swal.fire({
+                title: `<div class="text-left font-black text-base text-violet-700 flex items-center gap-2"><i data-lucide="send" class="w-5 h-5"></i> Gửi PASC & Bảo lãnh</div>`,
+                html: `
+                    <div class="text-left mt-2">
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-3">
+                            <pre class="text-[11px] text-slate-700 font-mono whitespace-pre-wrap break-all leading-relaxed">${msg}</pre>
+                        </div>
+                        ${phone
+                            ? `<p class="text-[11px] text-slate-500 font-semibold flex items-center gap-1.5"><i data-lucide="phone" class="w-3.5 h-3.5 text-blue-500"></i> Gửi đến: <span class="font-black text-blue-700 font-mono">${phone}</span></p>`
+                            : `<p class="text-[11px] text-rose-500 font-bold flex items-center gap-1.5"><i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> Chưa có SĐT cố vấn — sẽ chỉ copy!</p>`
+                        }
+                    </div>`,
+                showCancelButton: true,
+                confirmButtonText: phone ? 'Copy & Mở Zalo' : 'Copy tin nhắn',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#7c3aed',
+                customClass: { popup: 'custom-rounded w-full' },
+                didOpen: () => lucide.createIcons()
+            }).then(res => {
+                if (!res.isConfirmed) return;
+                // Copy
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(msg).catch(() => {});
+                } else {
+                    const ta = document.createElement('textarea');
+                    ta.value = msg;
+                    ta.style.cssText = `position:absolute;opacity:0;top:${window.scrollY}px;left:0;`;
+                    document.body.appendChild(ta);
+                    ta.focus({ preventScroll: true });
+                    ta.select();
+                    try { document.execCommand('copy'); } catch(e) {}
+                    document.body.removeChild(ta);
+                }
+                Toast.fire({icon:'success', title:'Đã copy! Đang mở Zalo...'});
+                if (phone) {
+                    const cleanPhone = phone.replace(/\D/g,'');
+                    setTimeout(() => {
+                        const w = window.open(`https://zalo.me/${cleanPhone}`, '_blank');
+                        if (w) w.focus();
+                    }, 300);
+                }
+            });
+        }
+    };
     // ============================================================
     // ZALO INTEGRATION
     // ============================================================
