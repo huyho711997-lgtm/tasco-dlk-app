@@ -5533,7 +5533,7 @@ async function runOCR(files) {
     customClass: { popup: 'rnd' }
   });
 
-  // Helper: cập nhật trạng thái từng file
+  // Helper: cập nhật trạng thái UI
   function setDot(i, state, msg) {
     var dot  = document.getElementById('ocr-dot-' + i);
     var row  = document.getElementById('ocr-prog-' + i);
@@ -5564,19 +5564,52 @@ async function runOCR(files) {
     if (fill) fill.style.width = pct + '%';
   }
 
-  // ── Gemini prompt ──
-  var PROMPT = 'Bạn là chuyên gia đọc giấy tờ xe Việt Nam. Xác định loại giấy tờ và trả về CHỈ JSON.\n\n'
-    + 'Nếu là CÀ VẸT (giấy đăng ký xe):\n'
-    + '{"docType":"cavet","data":{"chuXe":"họ tên chủ","diaChi":"địa chỉ","soKhung":"số khung","soMay":"số máy","hangXe":"hãng xe","loaiXe":"model"}}\n\n'
-    + 'Nếu là GPLX (bằng lái xe):\n'
-    + '{"docType":"gplx","data":{"soGPLX":"số bằng","hangGPLX":"hạng B1/B2/C...","ngayCapGPLX":"DD/MM/YYYY","hetHanGPLX":"DD/MM/YYYY"}}\n\n'
-    + 'Nếu là SỔ ĐĂNG KIỂM:\n'
-    + '{"docType":"dangkiem","data":{"soDangKiem":"số đăng kiểm","ngayCapDK":"DD/MM/YYYY","hetHanDK":"DD/MM/YYYY","hangXe":"hãng","hieuXe":"model","namSanXuat":"năm","soChoNgoi":"số chỗ"}}\n\n'
-    + 'Nếu là CCCD/CMND:\n'
-    + '{"docType":"cccd","data":{"soId":"số CCCD","hoTen":"họ tên","ngaySinh":"DD/MM/YYYY","gioiTinh":"nam/nữ","queQuan":"quê quán","thuongTru":"thường trú"}}\n\n'
-    + 'Nếu không xác định được:\n'
-    + '{"docType":"other","data":{}}\n\n'
-    + 'CHỈ trả về JSON, không giải thích.';
+  // Helper nén ảnh giảm tải cho AI
+  function compressImg(file, maxW) {
+      return new Promise(function(resolve, reject) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+              var img = new Image();
+              img.onload = function() {
+                  var canvas = document.createElement('canvas');
+                  var w = img.width, h = img.height;
+                  if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+                  canvas.width = w; canvas.height = h;
+                  var ctx = canvas.getContext('2d');
+                  ctx.imageSmoothingEnabled = true;
+                  ctx.imageSmoothingQuality = 'high';
+                  ctx.drawImage(img, 0, 0, w, h);
+                  resolve(canvas.toDataURL('image/jpeg', 0.85).split(',')[1]);
+              };
+              img.onerror = reject;
+              img.src = e.target.result;
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+      });
+  }
+
+  // ── Gemini prompt (Đồng bộ chuẩn xác từ Mobile) ──
+  var PROMPT = 'Xac dinh loai giay to xe Viet Nam trong anh va trich xuat du lieu.\n'
+    + 'BAT BUOC TRA VE CHI 1 DOI TUONG JSON. KHONG DUNG markdown. KHONG GIAI THICH.\n\n'
+    + '1. CA VET - co chu GIAY CHUNG NHAN DANG KY XE:\n'
+    + '{"docType":"cavet","data":{"chuXe":"","diaChi":"","soKhung":"","soMay":"","hangXe":"","loaiXe":"","soChoNgoi":""}}\n\n'
+    + '2. DANG KIEM - nhan dien khi thay: CHUNG NHAN KIEM DINH hoac CUC DANG KIEM hoac MOT Vietnam Register hoac PERIODICAL INSPECTION CERTIFICATE hoac PERIODICAL TECHNICAL INSPECTION STATION:\n'
+    + 'NGUYEN TAC LAY SO DANG KIEM (rat quan trong, doc ky):\n'
+    + '  - UU TIEN 1: Tim dong "No:" hoac "So:" o TRANG BIA (cover), lay gia tri ngay sau do. Vi du: "No: DB 3164695" -> "DB-3164695", "No: XA 0047255" -> "XA-0047255".\n'
+    + '  - UU TIEN 2: Neu khong co trang bia rieng (mau giay trang, in ca 2 mat), tim dong "So seri tem KD" hoac "Inspection sticker serial" va lay gia tri do. Vi du: "VA-4076110" -> "VA-4076110".\n'
+    + '  - TUYET DOI KHONG lay "So quan ly PT" hoac "Vehicle Inspection No" (dang 4701D-xxxxx, 4702D-xxxxx) lam soDangKiem.\n'
+    + '  - FORMAT CHUAN: Luon 2 chu cai IN HOA + dau gach ngang + so. Vi du: DB-3164695, XA-0047255, VA-4076110.\n'
+    + '  - Neu khong tim duoc so hop le thi de chuoi rong.\n'
+    + 'Trang bia / thong tin chinh: bsx=Bien dang ky (Registration plate), hangXe=Nhan hieu/Mark/Trademark, namSanXuat=4 chu so nam, soKhung=So khung.\n'
+    + 'Trang trong / thong tin kiem dinh: hetHanDK=ngay het hieu luc DD/MM/YYYY (tim "Co hieu luc den het ngay" hoac "Valid until"), ngayCapDK=ngay cap DD/MM/YYYY (tim "Ngay KD" hoac "Inspection date"), soPhieuKD=So phieu kiem dinh (tim "So phieu KD" hoac "Inspection report No", lay phan so nhu "4702D-00342/25" hoac "02170/26").\n'
+    + 'Neu chi thay 1 trang thi chi tra ve truong doc duoc, de trong cac truong khac.\n'
+    + '{"docType":"dangkiem","data":{"soDangKiem":"","bsx":"","hangXe":"","loaiXe":"","namSanXuat":"","soKhung":"","ngayCapDK":"","hetHanDK":"","soPhieuKD":""}}\n\n'
+    + '3. GPLX - co chu GIAY PHEP LAI XE:\n'
+    + '{"docType":"gplx","data":{"soGPLX":"","hangGPLX":"","ngayCapGPLX":"","hetHanGPLX":""}}\n\n'
+    + '4. CCCD hoac CMND - co chu CAN CUOC CONG DAN hoac CHUNG MINH NHAN DAN:\n'
+    + '{"docType":"cccd","data":{"soId":"","hoTen":"","ngaySinh":"","thuongTru":""}}\n\n'
+    + 'Neu khong nhan dien duoc thi van tra ve JSON voi docType gan nhat. Truong nao khong doc duoc de chuoi rong. Chi tra ve JSON.';
 
   var rec = allData.find(function(r) { return r.id === curId; });
   var updates = {};
@@ -5590,12 +5623,11 @@ async function runOCR(files) {
 
   // ── Xử lý song song từng file ──
   var tasks = files.map(function(file, idx) {
-    var assignedKey = validKeys[idx % validKeys.length] || nextGemKey();
-    setDot(idx, 'loading', 'Đang tải lên...');
+    setDot(idx, 'loading', 'Đang tải lên & nén...');
 
     return (async function() {
       try {
-        // 1. Upload Cloudinary — gán cat = 'doc' (Giấy tờ)
+        // 1. Upload Cloudinary
         var fd = new FormData();
         fd.append('file', file);
         fd.append('upload_preset', CL_PRESET);
@@ -5603,94 +5635,134 @@ async function runOCR(files) {
         var upData = await upRes.json();
         if (!upData.secure_url) throw new Error('Upload thất bại');
         
-        // Lưu vào danh sách ảnh với nhãn 'doc'
         imgs.push({ url: upData.secure_url, cat: 'doc' });
+        setDot(idx, 'loading', 'AI đang nhận dạng...');
 
-        setDot(idx, 'loading', 'Đang nhận dạng...');
+        // 2. Nén ảnh giảm tải cho API
+        var b64 = await compressImg(file, 1024);
 
-        // 2. Encode base64 để gọi Gemini
-        var b64 = await new Promise(function(res, rej) {
-          var r = new FileReader();
-          r.onloadend = function() { res(r.result.replace(/^data:[^;]+;base64,/, '')); };
-          r.onerror = rej;
-          r.readAsDataURL(file);
-        });
-
-        // 3. Gọi AI
-        var gemRes  = await fetch(
-          'https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent?key=' + assignedKey,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: file.type, data: b64 } }] }]
-            })
-          }
-        );
-        var gemData = await gemRes.json();
-        var rawText = ((gemData.candidates || [])[0] || {}).content
-          && gemData.candidates[0].content.parts[0].text || '';
-
-        // 4. Parse JSON
-        var parsed = null;
-        try { parsed = JSON.parse(rawText.replace(/```json|```/gi, '').trim()); } catch (_) {
-          var m = rawText.match(/\{[\s\S]*\}/);
-          if (m) try { parsed = JSON.parse(m[0]); } catch (_) {}
+        // 3. Gọi AI với vòng lặp Retry (Tự chuyển Key nếu quá tải)
+        var dataResponse = null;
+        for (var attempt = 0; attempt < validKeys.length; attempt++) {
+            var assignedKey = validKeys[(idx + attempt) % validKeys.length];
+            try {
+                var gemRes = await fetch(
+                  'https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent?key=' + assignedKey,
+                  {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: 'image/jpeg', data: b64 } }] }],
+                      generationConfig: { temperature: 0.1 }
+                    })
+                  }
+                );
+                dataResponse = await gemRes.json();
+                if (gemRes.status !== 429 && !dataResponse.error) break; 
+                await new Promise(r => setTimeout(r, 1000));
+            } catch(e) {
+                if (attempt === validKeys.length - 1) throw e;
+            }
         }
 
-        if (!parsed || !parsed.data) throw new Error('Không nhận dạng được');
+        if (!dataResponse || dataResponse.error) throw new Error('Máy chủ AI đang quá tải');
+
+        var rawText = ((dataResponse.candidates || [])[0] || {}).content
+          && dataResponse.candidates[0].content.parts[0].text || '';
+
+        // 4. Parse JSON thông minh
+        var parsed = null;
+        var cleaned = rawText.replace(/```json|```/gi, '').trim();
+        var startIdx = cleaned.indexOf('{');
+        var endIdx   = cleaned.lastIndexOf('}');
+        if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+            cleaned = cleaned.substring(startIdx, endIdx + 1);
+        }
+        try { 
+            parsed = JSON.parse(cleaned); 
+            if (Array.isArray(parsed) && parsed.length > 0) parsed = parsed[0];
+        } catch (_) {
+            var m = rawText.match(/\{[\s\S]*\}/);
+            if (m) try { parsed = JSON.parse(m[0]); } catch (_) {}
+        }
+
+        // Fallback: Nếu AI trả thẳng data không bọc trong root
+        if (parsed && !parsed.data) {
+            var isFlatData = Object.keys(parsed).some(function(k) { 
+                return ['bsx', 'soKhung', 'soDangKiem', 'chuXe', 'soGPLX', 'soId', 'hangXe', 'hoTen', 'ngayCapDK', 'hetHanDK'].includes(k);
+            });
+            if (isFlatData) {
+                var tempDocType = parsed.docType || 'dangkiem';
+                delete parsed.docType;
+                parsed = { docType: tempDocType, data: parsed };
+            }
+        }
+
+        if (!parsed || !parsed.data) throw new Error('Không trích xuất được dữ liệu hợp lệ');
 
         var docType = parsed.docType;
         var data    = parsed.data;
-
-        // 5. Map dữ liệu vào updates
         var docLabels = { cavet:'Cà vẹt xe', gplx:'GPLX', dangkiem:'Sổ đăng kiểm', cccd:'CCCD/CMND', other:'Khác' };
 
-        if (docType === 'cavet') {
-          if (data.chuXe)   updates.chuXe   = data.chuXe;
-          if (data.diaChi)  updates.diaChi  = data.diaChi;
-          if (data.soKhung) updates.soKhung = data.soKhung;
-          if (data.soMay)   updates.soMay   = data.soMay;
-          if (data.hangXe)  updates.hangXe  = data.hangXe;
-          if (data.loaiXe)  updates.loaiXe  = data.loaiXe;
-        } else if (docType === 'gplx') {
-          if (data.soGPLX)      updates.soGPLX      = data.soGPLX;
-          if (data.hangGPLX)    updates.hangGPLX    = data.hangGPLX;
-          if (data.ngayCapGPLX) updates.ngayCapGPLX = data.ngayCapGPLX;
-          if (data.hetHanGPLX)  updates.hetHanGPLX  = data.hetHanGPLX;
-        } else if (docType === 'dangkiem') {
-          if (data.soDangKiem)  updates.soDangKiem  = data.soDangKiem;
-          if (data.ngayCapDK)   updates.ngayCapDK   = data.ngayCapDK;
-          if (data.hetHanDK)    updates.hetHanDK    = data.hetHanDK;
-          if (data.hangXe)      updates.hangXe      = data.hangXe;
-          if (data.hieuXe)      updates.loaiXe      = data.hieuXe;
-          if (data.namSanXuat)  updates.namSanXuat  = data.namSanXuat;
-          if (data.soChoNgoi) {
-            var sc = parseInt(String(data.soChoNgoi).replace(/\D/g, ''));
-            if (sc >= 2 && sc <= 99) updates.soChoNgoi = String(sc);
-          }
-        } else if (docType === 'cccd') {
-          if (data.soId)      updates.ownerCccd   = data.soId;
-          if (data.hoTen)     updates.ownerName   = data.hoTen;
-          if (data.ngaySinh)  updates.ownerDob    = data.ngaySinh;
-          if (data.thuongTru) updates.ownerAddress = data.thuongTru;
+        // 5. Chuẩn hoá dữ liệu (Rules từ Mobile)
+        if (docType === 'dangkiem') {
+            if (data.hieuXe)      data.hangXe     = data.hieuXe;
+            if (data.nhanHieu)    data.hangXe     = data.nhanHieu;
+            if (data.soNo)        data.soDangKiem = data.soNo;
+            if (data.so_no)       data.soDangKiem = data.so_no;
+            if (data.soKiemDinh)  data.soDangKiem = data.soKiemDinh;
+            if (data.seriTem)     data.soDangKiem = data.seriTem;
+            if (data.soSeriTem)   data.soDangKiem = data.soSeriTem;
+            if (data.ngayKD)      data.ngayCapDK  = data.ngayKD;
+            if (data.validUntil)  data.hetHanDK   = data.validUntil;
+
+            if (data.soDangKiem) {
+                var dk = String(data.soDangKiem).replace(/^(so\s*no[:\s]*|no[:\s]*|nº[:\s]*|so[:\s]*)/i, '').replace(/\s+/g, '').trim().toUpperCase();
+                dk = dk.replace(/^([A-Z]{2})-?(\d+)$/, '$1-$2');
+                if (/^[A-Z]{2}-\d+$/.test(dk)) {
+                    data.soDangKiem = dk;
+                } else {
+                    data.soDangKiem = ""; 
+                }
+            }
+            delete data.soChoNgoi;
         }
+        if (docType === 'cavet' && data.soChoNgoi) {
+            var sc = parseInt(String(data.soChoNgoi).replace(/\D/g, ''));
+            if (sc >= 2 && sc <= 99) data.soChoNgoi = String(sc);
+            else delete data.soChoNgoi;
+        }
+        if (docType === 'cccd') {
+            if (data.soId)      data.ownerCccd    = data.soId;
+            if (data.hoTen)     data.ownerName    = data.hoTen;
+            if (data.ngaySinh)  data.ownerDob     = data.ngaySinh;
+            if (data.thuongTru) data.ownerAddress = data.thuongTru;
+        }
+
+        // Đẩy data đã lọc vào bộ updates chung của form
+        Object.keys(data).forEach(function(key) {
+            var val = String(data[key] || '').trim();
+            if (!val || val === 'null' || val === 'undefined') return;
+            // Chỉ ghi đè nếu dữ liệu mới có độ dài tốt hơn
+            if (!updates[key] || val.length > updates[key].length) {
+                updates[key] = val;
+            }
+        });
 
         setDot(idx, 'done', '✓ ' + (docLabels[docType] || 'Hoàn tất'));
 
       } catch (e) {
-        setDot(idx, 'error', 'Lỗi: ' + (e.message || 'Thử lại'));
-        console.error('OCR lỗi file #' + idx, e);
+        setDot(idx, 'error', 'Lỗi: ' + (e.message || 'Hệ thống bận'));
+        console.error('OCR Desktop Error File #' + idx, e);
       }
 
-      // Cập nhật progress bar
       setProgress(Math.round(((idx + 1) / files.length) * 90));
     })();
   });
 
   await Promise.all(tasks);
 
-  // ── Lưu vào Firebase ──
+  // ── Cập nhật Firebase ──
   setProgress(95);
   updates.documentImages = imgs;
   await db.ref('Workstation/' + curId).update(updates);
@@ -5699,9 +5771,9 @@ async function runOCR(files) {
   await new Promise(function(r) { setTimeout(r, 400); });
   Swal.close();
 
-  Toast.fire({ icon: 'success', title: 'Hoàn tất! Đã lưu ảnh vào mục Giấy tờ.' });
+  Toast.fire({ icon: 'success', title: 'Hoàn tất! Hệ thống đã trích xuất và điền dữ liệu.' });
 
-  // Reload modal để cập nhật dữ liệu mới
+  // Load lại form
   setTimeout(function() { openRecord(curId); }, 500);
 }
 
