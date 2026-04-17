@@ -343,6 +343,19 @@
         [data-theme="dark"] .border-purple-200 { border-color: rgba(168, 85, 247, 0.2) !important; }
         [data-theme="dark"] .border-teal-200 { border-color: rgba(20, 184, 166, 0.2) !important; }
         [data-theme="dark"] .border-amber-200 { border-color: rgba(245, 158, 11, 0.2) !important; }
+        [data-theme="dark"] .bg-violet-50\/30 { background-color: rgba(139, 92, 246, 0.05) !important; }
+        [data-theme="dark"] .border-violet-200 { border-color: rgba(139, 92, 246, 0.2) !important; }
+        [data-theme="dark"] .text-violet-700 { color: #a78bfa !important; }
+        [data-theme="dark"] .text-violet-600 { color: #a78bfa !important; }
+        [data-theme="dark"] .text-violet-500 { color: #c4b5fd !important; }
+        [data-theme="dark"] .border-violet-100\/70 { border-color: rgba(139, 92, 246, 0.12) !important; }
+        [data-theme="dark"] .bg-violet-100 { background-color: rgba(139, 92, 246, 0.15) !important; }
+        [data-theme="dark"] .text-rose-700 { color: #fb7185 !important; }
+        [data-theme="dark"] .text-amber-700 { color: #fbbf24 !important; }
+        [data-theme="dark"] input.text-rose-700, [data-theme="dark"] input.text-amber-700, [data-theme="dark"] input.text-emerald-700 { color: inherit !important; }
+        [data-theme="dark"] input.text-rose-700 { color: #fb7185 !important; }
+        [data-theme="dark"] input.text-amber-700 { color: #fbbf24 !important; }
+        [data-theme="dark"] input.text-emerald-700 { color: #34d399 !important; }
 
         /* Các text cơ bản */
         [data-theme="dark"] .text-slate-800, [data-theme="dark"] .text-slate-900, [data-theme="dark"] .text-slate-700 { color: var(--text-primary) !important; }
@@ -3278,6 +3291,8 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- ====== SECTION: BẢO LÃNH & PASC ====== -->
                     <div class="p-4 rounded-2xl border border-violet-200 bg-violet-50/30 overflow-hidden">
                         <div class="flex justify-between items-center cursor-pointer select-none" onclick="FormUI.toggle('sec-baolanh', this)">
                             <h4 class="text-xs font-black text-violet-700 uppercase flex items-center gap-2">
@@ -3298,15 +3313,24 @@
                                 </div>
                             </div>
 
-                            <!-- Đường dẫn Bảo lãnh -->
+                            <!-- Đường dẫn Bảo lãnh + nút Gemini -->
                             <div>
-                                <label class="input-label">🔗 Đường dẫn Bảo lãnh sửa chữa</label>
+                                <div class="flex justify-between items-center mb-[0.25rem]">
+                                    <label class="input-label !mb-0">🔗 Đường dẫn Bảo lãnh sửa chữa</label>
+                                    <button onclick="BaoLanh.analyzeWithGemini()" id="btn-gemini-analyze"
+                                        class="text-[9px] bg-gradient-to-r from-violet-500 to-purple-600 text-white px-2 py-1 rounded-md font-bold active:scale-95 transition-all flex items-center gap-1 shadow-sm">
+                                        <i data-lucide="sparkles" class="w-3 h-3"></i> Phân tích AI
+                                    </button>
+                                </div>
                                 <div class="flex gap-2">
-                                    <input type="url" id="edit-baoLanhUrl" class="input-field font-mono flex-1 text-[11px]" placeholder="https://storage.baohiemtasco.vn/..." oninput="BaoLanh.parseFromUrl(this.value)">
+                                    <input type="url" id="edit-baoLanhUrl" class="input-field font-mono flex-1 text-[11px]" placeholder="https://storage.baohiemtasco.vn/...">
                                     <button onclick="BaoLanh.openUrl('baoLanhUrl')" class="shrink-0 px-3 py-2 bg-violet-100 text-violet-700 border border-violet-200 rounded-xl text-xs font-bold active:bg-violet-200 transition-colors flex items-center gap-1">
                                         <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
                                     </button>
                                 </div>
+                                <p id="bl-analyze-status" class="hidden mt-1.5 text-[11px] font-bold text-violet-600 animate-pulse text-center">
+                                    ✨ Gemini đang đọc PDF bảo lãnh...
+                                </p>
                             </div>
 
                             <!-- Các số tiền bảo lãnh -->
@@ -3328,7 +3352,7 @@
                                         <input type="text" id="edit-blGiamGia" class="input-field font-bold text-amber-700" placeholder="VD: 2.150.000" oninput="BaoLanh.formatNumber(this)">
                                     </div>
                                     <div>
-                                        <label class="input-label">Số tiền Bảo hiểm Tasco bảo lãnh thanh toán (đồng)</label>
+                                        <label class="input-label">Tasco bảo lãnh thanh toán (đồng)</label>
                                         <input type="text" id="edit-blBaoHiemBaoLanh" class="input-field font-bold text-emerald-700 text-base" placeholder="VD: 18.850.000" oninput="BaoLanh.formatNumber(this)">
                                     </div>
                                 </div>
@@ -3343,6 +3367,8 @@
                             </div>
                         </div>
                     </div>
+                    <!-- ====== END SECTION BẢO LÃNH ====== -->
+
                     <div class="p-4 rounded-2xl border border-cyan-200 bg-cyan-50/30 overflow-hidden">
                         <div class="flex justify-between items-center cursor-pointer select-none" onclick="FormUI.toggle('sec-recv', this)">
                             <h4 class="text-xs font-black text-cyan-700 uppercase flex items-center gap-2">
@@ -15670,6 +15696,7 @@ QUAN TRỌNG:
     // BAO LANH & PASC HELPER
     // ============================================================
     const BaoLanh = {
+
         openUrl(fieldId) {
             const url = document.getElementById(`edit-${fieldId}`)?.value.trim();
             if (!url) { Toast.fire({icon:'warning', title:'Chưa có đường dẫn!'}); return; }
@@ -15677,45 +15704,137 @@ QUAN TRỌNG:
         },
 
         formatNumber(input) {
+            const pos = input.selectionStart;
+            const rawBefore = input.value.substring(0, pos).replace(/\D/g, '').length;
             let raw = input.value.replace(/\D/g, '');
             if (!raw) { input.value = ''; return; }
-            input.value = parseInt(raw).toLocaleString('vi-VN');
+            const formatted = parseInt(raw).toLocaleString('vi-VN');
+            input.value = formatted;
+            // Giữ con trỏ ở vị trí đúng sau khi format
+            let count = 0, newPos = 0;
+            for (let i = 0; i < formatted.length; i++) {
+                if (/\d/.test(formatted[i])) count++;
+                if (count === rawBefore) { newPos = i + 1; break; }
+            }
+            try { input.setSelectionRange(newPos, newPos); } catch(e) {}
         },
 
-        parseFromUrl(url) {
-            // Hàm này để mở rộng sau — tự động lấy số tiền từ PDF nếu cần
+        // ── Dùng pdf.js render trang 1 của PDF thành base64, rồi gửi Gemini phân tích
+        async analyzeWithGemini() {
+            const url = document.getElementById('edit-baoLanhUrl')?.value.trim();
+            if (!url) {
+                Toast.fire({icon:'warning', title:'Hãy nhập đường dẫn Bảo lãnh trước!'});
+                return;
+            }
+
+            const btn    = document.getElementById('btn-gemini-analyze');
+            const status = document.getElementById('bl-analyze-status');
+            if (btn) btn.disabled = true;
+            if (status) { status.classList.remove('hidden'); status.textContent = '✨ Đang tải PDF bảo lãnh...'; }
+
+            try {
+                // Bước 1: dùng pdf.js load PDF từ URL (hỗ trợ CORS của storage.baohiemtasco.vn)
+                const loadingTask = pdfjsLib.getDocument({ url, withCredentials: false });
+                const pdf = await loadingTask.promise;
+
+                if (status) status.textContent = '✨ Đang vẽ PDF thành ảnh...';
+
+                // Bước 2: render trang 1 ra canvas rồi lấy base64
+                const page = await pdf.getPage(1);
+                const viewport = page.getViewport({ scale: 2.0 }); // scale cao để chữ nét
+                const canvas = document.createElement('canvas');
+                canvas.width  = viewport.width;
+                canvas.height = viewport.height;
+                await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+                const base64 = canvas.toDataURL('image/jpeg', 0.92).split(',')[1];
+
+                if (status) status.textContent = '✨ Gemini đang đọc nội dung bảo lãnh...';
+
+                // Bước 3: gửi ảnh lên Gemini với prompt trích xuất số tiền
+                const PROMPT = `Đây là ảnh chụp trang đầu của văn bản "Bảo lãnh sửa chữa xe" của công ty bảo hiểm Tasco.
+                Hãy đọc kỹ và trả về JSON với đúng 4 trường sau (chỉ số, không có đơn vị, không có dấu chấm/phẩy):
+                {
+                "chiPhiSuaChua": <số nguyên - Chi phí sửa chữa xe>,
+                "khachHangTuTra": <số nguyên - Phần khách hàng tự trả (bao gồm giảm trừ, khấu hao, khấu trừ)>,
+                "giamGia": <số nguyên - Phần giảm giá sửa chữa>,
+                "baoHiemBaoLanh": <số nguyên - Số tiền Bảo hiểm Tasco bảo lãnh thanh toán>
+                }
+                Nếu không tìm thấy một giá trị nào, để 0. Chỉ trả về JSON thuần, không giải thích.`;
+
+                const maxRetries = CONFIG.gemini.keys.length;
+                let dataResponse = null;
+                for (let attempt = 0; attempt < maxRetries; attempt++) {
+                    const key = GeminiKeys.next();
+                    const r = await fetch(
+                        `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${key}`,
+                        {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contents: [{ parts: [
+                                    { text: PROMPT },
+                                    { inline_data: { mime_type: 'image/jpeg', data: base64 } }
+                                ]}],
+                                generationConfig: { temperature: 0.0, maxOutputTokens: 512 }
+                            })
+                        }
+                    );
+                    dataResponse = await r.json();
+                    if (r.status !== 429 && !dataResponse.error) break;
+                    await new Promise(res => setTimeout(res, 1200 * (attempt + 1)));
+                }
+
+                if (!dataResponse || dataResponse.error)
+                    throw new Error(dataResponse?.error?.message || 'Gemini không phản hồi');
+
+                let raw = '';
+                try { raw = dataResponse.candidates[0].content.parts[0].text || ''; } catch(e) {}
+                const cleanJson = raw.replace(/```json|```/gi,'').trim();
+                const si = cleanJson.indexOf('{'), ei = cleanJson.lastIndexOf('}');
+                if (si === -1 || ei === -1) throw new Error('Gemini không trả về JSON hợp lệ');
+                const parsed = JSON.parse(cleanJson.substring(si, ei + 1));
+
+                // Bước 4: điền vào các input (format số có dấu chấm kiểu Việt)
+                const fmt = v => v && v > 0 ? parseInt(v).toLocaleString('vi-VN') : '';
+                const setField = (id, val) => { const el = document.getElementById(id); if (el) el.value = fmt(val); };
+                setField('edit-blChiPhiSuaChua',  parsed.chiPhiSuaChua);
+                setField('edit-blKhachHangTuTra', parsed.khachHangTuTra);
+                setField('edit-blGiamGia',        parsed.giamGia);
+                setField('edit-blBaoHiemBaoLanh', parsed.baoHiemBaoLanh);
+
+                if (status) { status.textContent = '✅ Đã điền xong! Kiểm tra lại các số tiền nhé.'; status.classList.remove('animate-pulse','text-violet-600'); status.classList.add('text-emerald-600'); }
+                setTimeout(() => { if (status) status.classList.add('hidden'); }, 4000);
+
+            } catch(err) {
+                console.error('BaoLanh.analyzeWithGemini:', err);
+                if (status) { status.textContent = '❌ Lỗi: ' + (err.message || 'Không đọc được PDF'); status.classList.remove('animate-pulse','text-violet-600'); status.classList.add('text-rose-600'); }
+                setTimeout(() => { if (status) { status.classList.add('hidden'); status.classList.remove('text-rose-600'); status.classList.add('text-violet-600','animate-pulse'); } }, 5000);
+            } finally {
+                if (btn) btn.disabled = false;
+            }
         },
 
         sendMessage(id) {
             const item = App.find(id) || {};
             const phone = document.getElementById('edit-garaAdvisorPhone')?.value.trim()
                         || item.garaAdvisorPhone || item.garaPhone || '';
-
-            const pascUrl = document.getElementById('edit-pascUrl')?.value.trim() || item.pascUrl || '';
+            const pascUrl    = document.getElementById('edit-pascUrl')?.value.trim()    || item.pascUrl    || '';
             const baoLanhUrl = document.getElementById('edit-baoLanhUrl')?.value.trim() || item.baoLanhUrl || '';
-            const bsx = document.getElementById('edit-bsx')?.value.trim() || item.bsx || '';
+            const bsx        = document.getElementById('edit-bsx')?.value.trim()        || item.bsx        || '';
 
             if (!pascUrl && !baoLanhUrl) {
                 Toast.fire({icon:'warning', title:'Chưa nhập đường dẫn PASC hoặc Bảo lãnh!'});
                 return;
             }
 
-            const msg = [
-                'Phương án sửa chữa',
-                pascUrl || '(chưa có)',
-                '',
-                'Bảo lãnh',
-                baoLanhUrl || '(chưa có)',
-                '',
-                `Phương án sửa chữa và bảo lãnh sửa chữa xe + ${bsx}`
-            ].join('\n');
+            const msg = `Phương án sửa chữa\n${pascUrl || '(chưa có)'}\n\nBảo lãnh \n${baoLanhUrl || '(chưa có)'}\n\nPhương án sửa chữa và bảo lãnh sửa chữa xe + ${bsx}`;
 
-            // Hiển thị preview trước khi gửi
+            // Preview rồi gửi
             Swal.fire({
                 title: `<div class="text-left font-black text-base text-violet-700 flex items-center gap-2"><i data-lucide="send" class="w-5 h-5"></i> Gửi PASC & Bảo lãnh</div>`,
                 html: `
                     <div class="text-left mt-2">
-                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-3">
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-3 max-h-[40vh] overflow-y-auto">
                             <pre class="text-[11px] text-slate-700 font-mono whitespace-pre-wrap break-all leading-relaxed">${msg}</pre>
                         </div>
                         ${phone
@@ -15724,14 +15843,13 @@ QUAN TRỌNG:
                         }
                     </div>`,
                 showCancelButton: true,
-                confirmButtonText: phone ? 'Copy & Mở Zalo' : 'Copy tin nhắn',
+                confirmButtonText: phone ? '📋 Copy & Mở Zalo' : '📋 Copy tin nhắn',
                 cancelButtonText: 'Hủy',
                 confirmButtonColor: '#7c3aed',
                 customClass: { popup: 'custom-rounded w-full' },
                 didOpen: () => lucide.createIcons()
             }).then(res => {
                 if (!res.isConfirmed) return;
-                // Copy
                 if (navigator.clipboard && window.isSecureContext) {
                     navigator.clipboard.writeText(msg).catch(() => {});
                 } else {
@@ -15747,17 +15865,12 @@ QUAN TRỌNG:
                 Toast.fire({icon:'success', title:'Đã copy! Đang mở Zalo...'});
                 if (phone) {
                     const cleanPhone = phone.replace(/\D/g,'');
-                    setTimeout(() => {
-                        const w = window.open(`https://zalo.me/${cleanPhone}`, '_blank');
-                        if (w) w.focus();
-                    }, 300);
+                    setTimeout(() => { const w = window.open(`https://zalo.me/${cleanPhone}`, '_blank'); if (w) w.focus(); }, 300);
                 }
             });
         }
     };
-    // ============================================================
-    // ZALO INTEGRATION
-    // ============================================================
+
     const ZaloHelper = {
         templates: {
             // Mẫu tin nhắn Khách hàng (Bước 1, 2, 3)
