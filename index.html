@@ -3023,6 +3023,11 @@
                         class="shrink-0 px-4 py-2 bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-all shadow-md shadow-indigo-200/50">
                         <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Quét AI
                     </button>
+
+                    <button onclick="AIDropZone.open()"
+                        class="shrink-0 px-4 py-2 bg-gradient-to-r from-fuchsia-500 to-pink-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-all shadow-md shadow-fuchsia-200/50">
+                        <i data-lucide="wand-2" class="w-3.5 h-3.5"></i> AI Điền
+                    </button>
                     
                     <div class="relative shrink-0" id="export-btn-wrap">
                         <button onclick="ExportMenu.toggle()"
@@ -17680,7 +17685,361 @@ QUAN TRỌNG:
             }
         }
     };
+    // ============================================================
+    // AI DROP ZONE — Smart auto-fill from URL / image
+    // ============================================================
+    const AIDropZone = (() => {
+        let _pendingFiles = []; // [{type:'image', base64, name}, ...]
+        let _pendingUrl   = '';
+        let _lastResult   = null; // parsed fields to apply
 
+        // ── Helpers ──────────────────────────────────────────────
+        function setStatus(text, sub = '') {
+            const t = document.getElementById('ai-dz-status-text');
+            const s = document.getElementById('ai-dz-status-sub');
+            if (t) t.textContent = text;
+            if (s) s.textContent = sub;
+        }
+
+        function showState(state) {
+            // state: 'idle' | 'analyzing' | 'result'
+            ['idle','analyzing','result'].forEach(s => {
+                const el = document.getElementById(`ai-dz-${s}`);
+                if (el) el.classList.toggle('hidden', s !== state);
+            });
+        }
+
+        function renderResult(fields) {
+            const container = document.getElementById('ai-dz-result');
+            if (!container) return;
+            container.innerHTML = '';
+            if (!fields || Object.keys(fields).length === 0) {
+                container.innerHTML = `<div class="text-center py-4 text-slate-400 text-[12px] font-bold">Không trích xuất được dữ liệu nào.</div>`;
+                return;
+            }
+
+            const labelMap = {
+                pascUrl:          { label: '🔗 Link PASC',            color: 'blue',    id: 'edit-pascUrl' },
+                baoLanhUrl:       { label: '🔗 Link Bảo lãnh',        color: 'violet',  id: 'edit-baoLanhUrl' },
+                blChiPhiSuaChua:  { label: '💰 Chi phí sửa chữa',     color: 'slate',   id: 'edit-blChiPhiSuaChua',   fmt: true },
+                blKhachHangTuTra: { label: '💸 Khách hàng tự trả',    color: 'rose',    id: 'edit-blKhachHangTuTra',  fmt: true },
+                blGiamGia:        { label: '🏷️ Giảm giá',             color: 'amber',   id: 'edit-blGiamGia',         fmt: true },
+                blBaoHiemBaoLanh: { label: '✅ Bảo hiểm bảo lãnh',   color: 'emerald', id: 'edit-blBaoHiemBaoLanh',  fmt: true },
+                ownerName:        { label: '👤 Họ và tên chủ xe',     color: 'blue',    id: 'edit-ownerName' },
+                ownerCccd:        { label: '🪪 Số CCCD',              color: 'indigo',  id: 'edit-ownerCccd' },
+                ownerDob:         { label: '🎂 Ngày sinh',            color: 'pink',    id: 'edit-ownerDob' },
+                ownerAddress:     { label: '📍 Địa chỉ',             color: 'slate',   id: 'edit-ownerAddress' },
+                chuXe:            { label: '🚗 Chủ xe (đăng ký)',     color: 'blue',    id: 'edit-chuXe' },
+                soKhung:          { label: '🔩 Số khung',             color: 'slate',   id: 'edit-soKhung' },
+                soMay:            { label: '⚙️ Số máy',              color: 'slate',   id: 'edit-soMay' },
+                hangXe:           { label: '🚘 Hiệu xe',             color: 'blue',    id: 'edit-hangXe' },
+                loaiXe:           { label: '🚙 Loại xe',             color: 'blue',    id: 'edit-loaiXe' },
+                accidentDate:     { label: '📅 Ngày tai nạn',        color: 'amber',   id: 'edit-accidentDate' },
+                location:         { label: '📍 Địa điểm TN',         color: 'rose',    id: 'edit-location' },
+                cause:            { label: '⚡ Nguyên nhân',         color: 'orange',  id: 'edit-cause' },
+                description:      { label: '📝 Mô tả tổn thất',      color: 'slate',   id: 'edit-description' },
+            };
+
+            const colorClasses = {
+                blue:    'bg-blue-50 text-blue-700 border-blue-100',
+                violet:  'bg-violet-50 text-violet-700 border-violet-100',
+                rose:    'bg-rose-50 text-rose-700 border-rose-100',
+                amber:   'bg-amber-50 text-amber-700 border-amber-100',
+                emerald: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+                indigo:  'bg-indigo-50 text-indigo-700 border-indigo-100',
+                pink:    'bg-pink-50 text-pink-700 border-pink-100',
+                orange:  'bg-orange-50 text-orange-700 border-orange-100',
+                slate:   'bg-slate-50 text-slate-700 border-slate-100',
+            };
+
+            const fmt = v => v && v > 0 ? parseInt(v).toLocaleString('vi-VN') : String(v || '');
+
+            Object.entries(fields).forEach(([key, val]) => {
+                if (!val || val === 0 || val === '0') return;
+                const meta = labelMap[key] || { label: key, color: 'slate', id: null };
+                const cls = colorClasses[meta.color] || colorClasses.slate;
+                const displayVal = meta.fmt ? fmt(val) + ' đ' : val;
+                const row = document.createElement('div');
+                row.className = `flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl border ${cls}`;
+                row.innerHTML = `
+                    <span class="text-[11px] font-black">${meta.label}</span>
+                    <span class="text-[11px] font-bold truncate max-w-[55%] text-right opacity-80">${displayVal}</span>
+                `;
+                container.appendChild(row);
+            });
+
+            // Apply button
+            const applyBtn = document.getElementById('ai-dz-btn-apply');
+            const analyzeBtn = document.getElementById('ai-dz-btn-analyze');
+            if (applyBtn) { applyBtn.classList.remove('hidden'); applyBtn.classList.add('flex'); }
+            if (analyzeBtn) analyzeBtn.classList.add('hidden');
+        }
+
+        // ── Classify URL ─────────────────────────────────────────
+        function classifyUrl(url) {
+            const lower = url.toLowerCase();
+            if (lower.includes('baohiemtasco') && lower.endsWith('.pdf')) return 'baolanh_pdf';
+            if (lower.includes('baohiemtasco') && (lower.includes('pasc') || lower.includes('phuongan') || lower.includes('suachua'))) return 'pasc';
+            if (lower.includes('baohiemtasco')) return 'baolanh_pdf'; // mặc định là bảo lãnh
+            if (lower.endsWith('.pdf')) return 'generic_pdf';
+            if (/\.(jpg|jpeg|png|webp|gif)$/i.test(lower)) return 'image_url';
+            return 'unknown_url';
+        }
+
+        // ── Render PDF page → base64 ──────────────────────────────
+        async function pdfPageToBase64(url) {
+            const loadingTask = pdfjsLib.getDocument({ url, withCredentials: false });
+            const pdf = await loadingTask.promise;
+            const page = await pdf.getPage(1);
+            const viewport = page.getViewport({ scale: 1.5 });
+            const canvas = document.createElement('canvas');
+            canvas.width = viewport.width; canvas.height = viewport.height;
+            await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+            return canvas.toDataURL('image/jpeg', 0.80).split(',')[1];
+        }
+
+        // ── Call Gemini with retry ────────────────────────────────
+        async function callGemini(promptText, base64Image = null) {
+            const MODELS = ['gemini-2.5-flash-lite', 'gemini-2.0-flash', CONFIG.gemini.model];
+            const maxRetries = CONFIG.gemini.keys.length * MODELS.length;
+            let lastErr = null;
+            for (let i = 0; i < maxRetries; i++) {
+                const key = GeminiKeys.next();
+                const model = MODELS[Math.floor(i / CONFIG.gemini.keys.length) % MODELS.length];
+                try {
+                    const parts = [{ text: promptText }];
+                    if (base64Image) parts.push({ inline_data: { mime_type: 'image/jpeg', data: base64Image } });
+                    const r = await fetch(
+                        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+                        { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ contents: [{ parts }], generationConfig: { temperature: 0.0, maxOutputTokens: 512 } }) }
+                    );
+                    const data = await r.json();
+                    if (r.ok && !data.error) {
+                        const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                        const clean = raw.replace(/```json|```/gi, '').trim();
+                        const si = clean.indexOf('{'), ei = clean.lastIndexOf('}');
+                        if (si !== -1 && ei !== -1) return JSON.parse(clean.substring(si, ei + 1));
+                    }
+                    lastErr = data?.error?.message || 'Lỗi không xác định';
+                    if (r.status !== 429 && r.status !== 503) break;
+                } catch(e) { lastErr = e.message; }
+                await new Promise(res => setTimeout(res, Math.min(1000 * Math.pow(2, i), 6000)));
+            }
+            throw new Error(lastErr || 'Gemini không phản hồi');
+        }
+
+        // ── Main analyze ──────────────────────────────────────────
+        async function _analyze() {
+            const urlRaw = (document.getElementById('ai-dz-input')?.value || '').trim();
+            const urls = urlRaw.split(/[\n\s]+/).map(s => s.trim()).filter(s => s.startsWith('http'));
+            const allFields = {};
+
+            showState('analyzing');
+            document.getElementById('ai-dz-btn-analyze')?.classList.add('hidden');
+
+            try {
+                // ── Xử lý từng URL ──
+                for (const url of urls) {
+                    const type = classifyUrl(url);
+
+                    if (type === 'pasc') {
+                        setStatus('Nhận ra link PASC...', url.substring(0, 50) + '...');
+                        allFields.pascUrl = url;
+                        continue;
+                    }
+
+                    if (type === 'baolanh_pdf' || type === 'generic_pdf') {
+                        setStatus('Đang tải PDF bảo lãnh...', 'Render trang đầu...');
+                        allFields.baoLanhUrl = url;
+                        const base64 = await pdfPageToBase64(url);
+                        setStatus('AI đang đọc PDF bảo lãnh...', 'Trích xuất số tiền...');
+                        const prompt = `Đây là ảnh trang đầu văn bản "Bảo lãnh sửa chữa xe" của Tasco. Trả về JSON với đúng 4 trường (chỉ số nguyên, không đơn vị):
+                        {"chiPhiSuaChua":<số>,"khachHangTuTra":<số>,"giamGia":<số>,"baoHiemBaoLanh":<số>}
+                        Nếu không tìm thấy để 0. Chỉ JSON thuần.`;
+                        const parsed = await callGemini(prompt, base64);
+                        if (parsed.chiPhiSuaChua)  allFields.blChiPhiSuaChua  = parsed.chiPhiSuaChua;
+                        if (parsed.khachHangTuTra) allFields.blKhachHangTuTra = parsed.khachHangTuTra;
+                        if (parsed.giamGia)         allFields.blGiamGia        = parsed.giamGia;
+                        if (parsed.baoHiemBaoLanh)  allFields.blBaoHiemBaoLanh = parsed.baoHiemBaoLanh;
+                        continue;
+                    }
+                }
+
+                // ── Xử lý từng ảnh upload ──
+                for (let i = 0; i < _pendingFiles.length; i++) {
+                    const file = _pendingFiles[i];
+                    setStatus(`Phân tích ảnh ${i + 1}/${_pendingFiles.length}...`, file.name || '');
+                    const prompt = `Đây là ảnh giấy tờ xe/bảo hiểm Việt Nam. Hãy nhận dạng loại giấy tờ và trích xuất thông tin.
+                    Trả về JSON với các trường phù hợp (chỉ điền những trường có dữ liệu rõ ràng):
+                    {
+                    "docType": "cccd|dkx|baolanh|bienban|hientruong|khac",
+                    "ownerName": "họ tên",
+                    "ownerCccd": "số cccd/cmnd",
+                    "ownerDob": "DD/MM/YYYY",
+                    "ownerAddress": "địa chỉ thường trú",
+                    "chuXe": "tên chủ xe",
+                    "hangXe": "hãng xe",
+                    "loaiXe": "loại xe",
+                    "soKhung": "số khung",
+                    "soMay": "số máy",
+                    "accidentDate": "DD/MM/YYYY",
+                    "location": "địa điểm",
+                    "cause": "nguyên nhân",
+                    "description": "mô tả tổn thất",
+                    "blChiPhiSuaChua": 0,
+                    "blKhachHangTuTra": 0,
+                    "blGiamGia": 0,
+                    "blBaoHiemBaoLanh": 0
+                    }
+                    Chỉ trả về JSON thuần, bỏ qua trường không có dữ liệu.`;
+                    const parsed = await callGemini(prompt, file.base64);
+                    delete parsed.docType;
+                    Object.assign(allFields, Object.fromEntries(Object.entries(parsed).filter(([, v]) => v && v !== '0' && v !== 0)));
+                }
+
+                _lastResult = allFields;
+                renderResult(allFields);
+                showState('result');
+
+            } catch(err) {
+                showState('idle');
+                document.getElementById('ai-dz-btn-analyze')?.classList.remove('hidden');
+                Toast.fire({ icon: 'error', title: '❌ ' + (err.message || 'Lỗi phân tích') });
+            }
+        }
+
+        // ── Apply all fields to form ──────────────────────────────
+        function _applyAll() {
+            if (!_lastResult) return;
+            const fmt = v => v && parseInt(v) > 0 ? parseInt(v).toLocaleString('vi-VN') : String(v || '');
+            const numericFields = new Set(['blChiPhiSuaChua','blKhachHangTuTra','blGiamGia','blBaoHiemBaoLanh']);
+            let count = 0;
+            Object.entries(_lastResult).forEach(([key, val]) => {
+                if (!val || val === 0 || val === '0') return;
+                const el = document.getElementById('edit-' + key) || document.getElementById(key === 'pascUrl' ? 'edit-pascUrl' : key === 'baoLanhUrl' ? 'edit-baoLanhUrl' : null);
+                if (!el) return;
+                el.value = numericFields.has(key) ? fmt(val) : val;
+                el.dispatchEvent(new Event('input'));
+                count++;
+            });
+            Toast.fire({ icon: 'success', title: `✅ Đã điền ${count} trường!` });
+            close();
+        }
+
+        // ── Public API ────────────────────────────────────────────
+        function open() {
+            const modal = document.getElementById('ai-dropzone-modal');
+            const sheet = document.getElementById('ai-dropzone-sheet');
+            if (!modal || !sheet) return;
+            _pendingFiles = []; _pendingUrl = ''; _lastResult = null;
+            document.getElementById('ai-dz-input').value = '';
+            document.getElementById('ai-dz-previews')?.classList.add('hidden');
+            document.getElementById('ai-dz-previews').innerHTML = '';
+            const applyBtn = document.getElementById('ai-dz-btn-apply');
+            const analyzeBtn = document.getElementById('ai-dz-btn-analyze');
+            if (applyBtn) { applyBtn.classList.add('hidden'); applyBtn.classList.remove('flex'); }
+            if (analyzeBtn) analyzeBtn.classList.remove('hidden');
+            showState('idle');
+            modal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                modal.classList.add('opacity-100'); modal.classList.remove('opacity-0');
+                sheet.classList.remove('translate-y-full');
+            });
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function close() {
+            const modal = document.getElementById('ai-dropzone-modal');
+            const sheet = document.getElementById('ai-dropzone-sheet');
+            if (!modal || !sheet) return;
+            modal.classList.remove('opacity-100'); modal.classList.add('opacity-0');
+            sheet.classList.add('translate-y-full');
+            setTimeout(() => modal.classList.add('hidden'), 310);
+        }
+
+        function pasteClipboard() {
+            navigator.clipboard.readText().then(text => {
+                if (text) {
+                    const inp = document.getElementById('ai-dz-input');
+                    if (inp) inp.value = (inp.value ? inp.value + '\n' : '') + text.trim();
+                }
+            }).catch(() => Toast.fire({ icon: 'warning', title: 'Không đọc được clipboard' }));
+        }
+
+        function clearInput() {
+            const inp = document.getElementById('ai-dz-input');
+            if (inp) inp.value = '';
+            _pendingFiles = [];
+            const prev = document.getElementById('ai-dz-previews');
+            if (prev) { prev.innerHTML = ''; prev.classList.add('hidden'); }
+            showState('idle');
+            const applyBtn = document.getElementById('ai-dz-btn-apply');
+            const analyzeBtn = document.getElementById('ai-dz-btn-analyze');
+            if (applyBtn) { applyBtn.classList.add('hidden'); applyBtn.classList.remove('flex'); }
+            if (analyzeBtn) analyzeBtn.classList.remove('hidden');
+        }
+
+        function onTextInput(el) { /* optional live logic */ }
+
+        async function onFileSelect(input) {
+            const files = Array.from(input.files || []);
+            for (const f of files) {
+                const base64 = await new Promise((res, rej) => {
+                    const r = new FileReader();
+                    r.onload = () => res(r.result.split(',')[1]);
+                    r.onerror = rej;
+                    r.readAsDataURL(f);
+                });
+                _pendingFiles.push({ base64, name: f.name, objectUrl: URL.createObjectURL(f) });
+            }
+            _renderPreviews();
+            input.value = '';
+        }
+
+        function _renderPreviews() {
+            const container = document.getElementById('ai-dz-previews');
+            if (!container) return;
+            container.innerHTML = '';
+            _pendingFiles.forEach((f, i) => {
+                const wrap = document.createElement('div');
+                wrap.className = 'relative shrink-0';
+                wrap.innerHTML = `
+                    <img src="${f.objectUrl}" class="w-16 h-16 rounded-xl object-cover border-2 border-fuchsia-200">
+                    <button onclick="AIDropZone._removeFile(${i})" class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-rose-500 text-white rounded-full flex items-center justify-center text-[10px] font-black">×</button>
+                `;
+                container.appendChild(wrap);
+            });
+            container.classList.toggle('hidden', _pendingFiles.length === 0);
+        }
+
+        function _removeFile(i) {
+            _pendingFiles.splice(i, 1);
+            _renderPreviews();
+        }
+
+        function onDragOver(e) {
+            e.preventDefault();
+            document.getElementById('ai-dz-drop-area')?.classList.add('border-fuchsia-400', 'bg-fuchsia-100/50');
+        }
+        function onDragLeave(e) {
+            document.getElementById('ai-dz-drop-area')?.classList.remove('border-fuchsia-400', 'bg-fuchsia-100/50');
+        }
+        async function onDrop(e) {
+            e.preventDefault();
+            onDragLeave(e);
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            const inp = { files }; // fake input
+            await onFileSelect(inp);
+            const text = e.dataTransfer.getData('text');
+            if (text?.startsWith('http')) {
+                const ta = document.getElementById('ai-dz-input');
+                if (ta) ta.value = (ta.value ? ta.value + '\n' : '') + text.trim();
+            }
+        }
+
+        return { open, close, analyze: _analyze, applyAll: _applyAll, pasteClipboard, clearInput, onTextInput, onFileSelect, onDragOver, onDragLeave, onDrop, _removeFile };
+    })();
     // ============================================================
     // BOOT
     // ============================================================
@@ -18210,6 +18569,119 @@ QUAN TRỌNG:
             <div id="upt-bar" class="h-full bg-gradient-to-r from-cyan-400 to-blue-600 w-0 transition-all duration-300 ease-out"></div>
         </div>
     </div>
+    <!-- ====== AI DROP ZONE SHEET ====== -->
+    <div id="ai-dropzone-modal" style="z-index: 100010;" class="fixed inset-0 hidden bg-slate-900/50 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="absolute inset-0" onclick="AIDropZone.close()"></div>
+        <div id="ai-dropzone-sheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[32px] transform translate-y-full transition-transform duration-300 flex flex-col max-h-[90vh]"
+            style="box-shadow: 0 -16px 48px rgba(0,0,0,0.15);">
 
+            <!-- Handle + Header -->
+            <div class="px-5 pt-4 pb-3 shrink-0">
+                <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-4"></div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 bg-gradient-to-br from-fuchsia-500 to-pink-600 rounded-xl flex items-center justify-center shadow-md shadow-fuchsia-200">
+                            <i data-lucide="wand-2" class="w-4 h-4 text-white"></i>
+                        </div>
+                        <div>
+                            <p class="font-black text-slate-800 text-sm">AI Điền Thông Minh</p>
+                            <p class="text-[10px] text-slate-400 font-semibold">Thả URL hoặc ảnh — AI tự phân tích & điền</p>
+                        </div>
+                    </div>
+                    <button onclick="AIDropZone.close()" class="w-8 h-8 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 active:bg-slate-200">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Input area -->
+            <div class="px-5 pb-3 shrink-0">
+                <div id="ai-dz-drop-area"
+                    class="relative rounded-2xl border-2 border-dashed border-fuchsia-200 bg-fuchsia-50/40 transition-all duration-200"
+                    ondragover="AIDropZone.onDragOver(event)" ondragleave="AIDropZone.onDragLeave(event)" ondrop="AIDropZone.onDrop(event)">
+                    <textarea id="ai-dz-input" rows="3"
+                        placeholder="📎 Dán URL bảo lãnh, PASC...&#10;🖼️ Hoặc kéo thả / chọn ảnh giấy tờ"
+                        class="w-full bg-transparent px-4 pt-3 pb-2 text-[13px] font-semibold text-slate-700 outline-none resize-none placeholder:text-slate-400 placeholder:font-normal placeholder:text-[12px]"
+                        oninput="AIDropZone.onTextInput(this)"></textarea>
+                    <div class="flex items-center gap-2 px-4 pb-3">
+                        <button onclick="document.getElementById('ai-dz-file-input').click()"
+                            class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-[11px] font-bold text-slate-600 active:bg-slate-50 transition-colors shadow-sm">
+                            <i data-lucide="image-plus" class="w-3.5 h-3.5 text-fuchsia-500"></i> Chọn ảnh
+                        </button>
+                        <button onclick="AIDropZone.pasteClipboard()"
+                            class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-[11px] font-bold text-slate-600 active:bg-slate-50 transition-colors shadow-sm">
+                            <i data-lucide="clipboard" class="w-3.5 h-3.5 text-fuchsia-500"></i> Dán
+                        </button>
+                        <button onclick="AIDropZone.clearInput()"
+                            class="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold text-slate-400 active:bg-slate-100 transition-colors">
+                            <i data-lucide="x" class="w-3 h-3"></i> Xóa
+                        </button>
+                    </div>
+                    <input type="file" id="ai-dz-file-input" accept="image/*" multiple class="hidden" onchange="AIDropZone.onFileSelect(this)">
+                </div>
+            </div>
+
+            <!-- Preview thumbnails -->
+            <div id="ai-dz-previews" class="hidden px-5 pb-3 flex gap-2 overflow-x-auto no-scrollbar shrink-0"></div>
+
+            <!-- Status / result area -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar px-5 pb-5">
+                <!-- Idle state -->
+                <div id="ai-dz-idle" class="py-4">
+                    <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3">AI có thể nhận biết</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="flex items-center gap-2 bg-violet-50 rounded-xl px-3 py-2.5">
+                            <span class="text-base">📄</span>
+                            <div><p class="text-[11px] font-black text-violet-700">PDF Bảo lãnh</p><p class="text-[10px] text-violet-400">→ Trích 4 số tiền</p></div>
+                        </div>
+                        <div class="flex items-center gap-2 bg-blue-50 rounded-xl px-3 py-2.5">
+                            <span class="text-base">🔗</span>
+                            <div><p class="text-[11px] font-black text-blue-700">Link PASC</p><p class="text-[10px] text-blue-400">→ Lưu đường dẫn</p></div>
+                        </div>
+                        <div class="flex items-center gap-2 bg-emerald-50 rounded-xl px-3 py-2.5">
+                            <span class="text-base">🪪</span>
+                            <div><p class="text-[11px] font-black text-emerald-700">CCCD/CMND</p><p class="text-[10px] text-emerald-400">→ Họ tên, số, ngày sinh</p></div>
+                        </div>
+                        <div class="flex items-center gap-2 bg-amber-50 rounded-xl px-3 py-2.5">
+                            <span class="text-base">📋</span>
+                            <div><p class="text-[11px] font-black text-amber-700">Đăng ký xe</p><p class="text-[10px] text-amber-400">→ BSX, khung, máy</p></div>
+                        </div>
+                        <div class="flex items-center gap-2 bg-rose-50 rounded-xl px-3 py-2.5">
+                            <span class="text-base">📝</span>
+                            <div><p class="text-[11px] font-black text-rose-700">Biên bản TN</p><p class="text-[10px] text-rose-400">→ Ngày, địa điểm</p></div>
+                        </div>
+                        <div class="flex items-center gap-2 bg-slate-50 rounded-xl px-3 py-2.5">
+                            <span class="text-base">🖼️</span>
+                            <div><p class="text-[11px] font-black text-slate-700">Ảnh hiện trường</p><p class="text-[10px] text-slate-400">→ Mô tả tổn thất</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analyzing state -->
+                <div id="ai-dz-analyzing" class="hidden py-6 text-center">
+                    <div class="w-14 h-14 bg-gradient-to-br from-fuchsia-100 to-pink-100 rounded-2xl flex items-center justify-center mx-auto mb-3 relative">
+                        <div class="absolute inset-0 bg-fuchsia-400 rounded-2xl animate-ping opacity-20"></div>
+                        <i data-lucide="wand-2" class="w-6 h-6 text-fuchsia-600 relative z-10"></i>
+                    </div>
+                    <p class="font-black text-slate-700 text-sm" id="ai-dz-status-text">AI đang phân tích...</p>
+                    <p class="text-[11px] text-slate-400 mt-1" id="ai-dz-status-sub"></p>
+                </div>
+
+                <!-- Result state -->
+                <div id="ai-dz-result" class="hidden space-y-2"></div>
+            </div>
+
+            <!-- Footer buttons -->
+            <div class="px-5 py-4 border-t border-slate-100 shrink-0 flex gap-3">
+                <button id="ai-dz-btn-analyze" onclick="AIDropZone.analyze()"
+                    class="flex-[2] py-3.5 bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white rounded-2xl font-black text-[13px] flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-lg shadow-fuchsia-200 disabled:opacity-50 disabled:pointer-events-none">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i> Phân tích ngay
+                </button>
+                <button id="ai-dz-btn-apply" onclick="AIDropZone.applyAll()" class="hidden flex-[2] py-3.5 bg-emerald-600 text-white rounded-2xl font-black text-[13px] flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-lg shadow-emerald-200">
+                    <i data-lucide="check-check" class="w-4 h-4"></i> Áp dụng tất cả
+                </button>
+            </div>
+        </div>
+    </div>    
 </body>
 </html>
