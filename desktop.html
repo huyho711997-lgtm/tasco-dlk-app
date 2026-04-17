@@ -2215,33 +2215,6 @@ textarea.inp { resize:vertical; }
             </div>
           </div>
 
-          <!-- Gara -->
-          <div class="section-card">
-            <div class="section-header">
-              <div class="section-header-title text-teal-700">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                Gara sửa chữa
-              </div>
-            </div>
-            <div class="section-body space-y-2.5">
-              <div class="grid grid-cols-3 gap-2.5">
-                <div class="relative">
-                  <label class="lbl">Tên Gara</label>
-                  <input id="f-garaname" class="inp text-teal-900" placeholder="Nhập tên gara..." autocomplete="off" oninput="garaSearch(this)" onblur="setTimeout(garaHide,200)">
-                  <div id="gara-drop" class="gdrop hidden"></div>
-                </div>
-                <div><label class="lbl">SĐT Gara</label><input id="f-garaphone" class="inp" placeholder="0909..."></div>
-                <div><label class="lbl">Mã số thuế</label><input id="f-garatax" class="inp font-mono" placeholder="MST..."></div>
-              </div>
-              <div><label class="lbl">Địa chỉ Gara</label><input id="f-garaaddr" class="inp"></div>
-              <div class="grid grid-cols-3 gap-2.5 pt-2 border-t border-slate-100">
-                <div><label class="lbl">Số tài khoản</label><input id="f-garabankno" class="inp font-mono" placeholder="0123456789..."></div>
-                <div><label class="lbl">Ngân hàng</label><input id="f-garabankname" class="inp" placeholder="VD: Vietcombank..."></div>
-                <div><label class="lbl">Chủ tài khoản</label><input id="f-garabankowner" class="inp uppercase" placeholder="Tên chủ TK..."></div>>                
-              </div>
-            </div>
-          </div>
-
           <!-- Ghi chú -->
           <div class="section-card">
             <div class="section-header">
@@ -2314,6 +2287,32 @@ textarea.inp { resize:vertical; }
 
         <!-- ═══ CỘT PHẢI: Giấy tờ ═══ -->
         <div class="space-y-3">
+          <div class="section-card" style="border-left:3px solid #0d9488">
+            <div class="section-header cursor-pointer hover:bg-slate-100 transition-colors select-none" onclick="const body = this.nextElementSibling; body.classList.toggle('hidden'); const icon = this.querySelector('.chevron-icon'); if(icon) icon.style.transform = body.classList.contains('hidden') ? 'rotate(180deg)' : 'rotate(0deg)';">
+              <div class="section-header-title text-teal-700">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                Gara sửa chữa
+              </div>
+              <svg class="chevron-icon w-4 h-4 text-slate-400 transition-transform duration-200" style="transform: rotate(180deg);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+            </div>
+            <div class="section-body space-y-2.5 hidden">
+              <div class="grid grid-cols-3 gap-2.5">
+                <div class="relative">
+                  <label class="lbl">Tên Gara</label>
+                  <input id="f-garaname" class="inp text-teal-900" placeholder="Nhập tên gara..." autocomplete="off" oninput="garaSearch(this)" onblur="setTimeout(garaHide,200)">
+                  <div id="gara-drop" class="gdrop hidden"></div>
+                </div>
+                <div><label class="lbl">SĐT Gara</label><input id="f-garaphone" class="inp" placeholder="0909..."></div>
+                <div><label class="lbl">Mã số thuế</label><input id="f-garatax" class="inp font-mono" placeholder="MST..."></div>
+              </div>
+              <div><label class="lbl">Địa chỉ Gara</label><input id="f-garaaddr" class="inp"></div>
+              <div class="grid grid-cols-3 gap-2.5 pt-2 border-t border-slate-100">
+                <div><label class="lbl">Số tài khoản</label><input id="f-garabankno" class="inp font-mono" placeholder="0123456789..."></div>
+                <div><label class="lbl">Ngân hàng</label><input id="f-garabankname" class="inp" placeholder="VD: Vietcombank..."></div>
+                <div><label class="lbl">Chủ tài khoản</label><input id="f-garabankowner" class="inp uppercase" placeholder="Tên chủ TK..."></div>
+              </div>
+            </div>
+          </div>
           <!-- Người thụ hưởng bồi thường -->
           <div class="section-card" style="border-left:3px solid #0d9488">
             <div class="section-header cursor-pointer hover:bg-slate-100 transition-colors select-none" onclick="const body = this.nextElementSibling; body.classList.toggle('hidden'); const icon = this.querySelector('.chevron-icon'); if(icon) icon.style.transform = body.classList.contains('hidden') ? 'rotate(180deg)' : 'rotate(0deg)';">
