@@ -382,6 +382,69 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .content { padding: 16px; }
 }
+
+/* ── ADMIN PANEL ── */
+.admin-sidebar {
+  width: 220px; flex-shrink: 0;
+  background: #0f172a;
+  display: flex; flex-direction: column;
+  border-right: 1px solid rgba(255,255,255,.06);
+  transition: width .2s;
+}
+.admin-nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 16px; margin: 2px 8px; border-radius: 10px;
+  font-size: 12px; font-weight: 700; color: rgba(255,255,255,.45);
+  cursor: pointer; transition: all .15s; border: none; background: none;
+  font-family: inherit; width: calc(100% - 16px); text-align: left;
+}
+.admin-nav-item:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.8); }
+.admin-nav-item.active { background: rgba(37,99,235,.25); color: #93c5fd; }
+.admin-nav-item .nav-icon { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.admin-nav-item.active .nav-icon { background: rgba(37,99,235,.3); }
+.admin-nav-item:hover:not(.active) .nav-icon { background: rgba(255,255,255,.06); }
+.admin-nav-section { font-size: 9px; font-weight: 800; color: rgba(255,255,255,.2); text-transform: uppercase; letter-spacing: .1em; padding: 14px 24px 6px; }
+
+.admin-content { flex: 1; overflow-y: auto; padding: 24px; background: #f0f4ff; }
+
+/* Table actions */
+.act-btn { padding: 5px 11px; border-radius: 7px; font-size: 11px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; transition: all .15s; }
+.act-btn-edit { background: #eff6ff; color: #2563eb; }
+.act-btn-edit:hover { background: #dbeafe; }
+.act-btn-del { background: #fff1f2; color: #e11d48; }
+.act-btn-del:hover { background: #ffe4e6; }
+
+/* Role badge */
+.role-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 800; }
+.role-admin { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.role-gara { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.role-nv { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+
+/* Stat mini card */
+.stat-mini { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; }
+.stat-mini-val { font-size: 28px; font-weight: 900; line-height: 1; letter-spacing: -1px; }
+.stat-mini-lbl { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; }
+
+/* Modal form group */
+.fgrp { margin-bottom: 14px; }
+.fgrp .lbl { margin-bottom: 5px; }
+
+/* Active toggle */
+.toggle-wrap { display: flex; align-items: center; gap: 10px; }
+.toggle { width: 40px; height: 22px; border-radius: 11px; background: #e2e8f0; cursor: pointer; position: relative; transition: background .2s; border: none; padding: 0; flex-shrink: 0; }
+.toggle.on { background: #2563eb; }
+.toggle::after { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: #fff; top: 3px; left: 3px; transition: left .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+.toggle.on::after { left: 21px; }
+
+/* Workstation config */
+.wk-config-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.wk-step-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 9px; margin-bottom: 8px; background: #f8fafc; }
+
+/* Notification item */
+.notif-item { display: flex; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #f8fafc; cursor: pointer; transition: background .1s; }
+.notif-item:hover { background: #f8fafc; }
+.notif-item.unread { background: #f0f7ff; }
+.notif-dot { width: 8px; height: 8px; border-radius: 50%; background: #2563eb; flex-shrink: 0; margin-top: 5px; }
 </style>
 </head>
 <body>
@@ -589,6 +652,11 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
     <button class="tab-btn" id="tab-guarantee" onclick="goTab('guarantee')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
       Bảo lãnh & In ấn
+    </button>
+    <button class="tab-btn" id="tab-admin" onclick="goTab('admin')" style="display:none">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Quản trị
+      <span id="admin-badge" class="badge badge-red hidden">!</span>
     </button>
   </div>
 
@@ -824,7 +892,277 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
 
       </div>
     </div>
+    <!-- ══ ADMIN PANEL ══ -->
+    <div id="view-admin" class="view animate-in" style="padding:0;margin:-24px;min-height:calc(100vh - 120px)">
+      <div style="display:flex;min-height:calc(100vh - 120px)">
 
+        <!-- SIDEBAR -->
+        <div class="admin-sidebar">
+          <div style="padding:20px 16px 8px">
+            <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2);border-radius:10px">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <div>
+                <div style="font-size:10px;font-weight:800;color:#fca5a5">ADMIN MODE</div>
+                <div id="adm-user-label" style="font-size:9px;color:rgba(255,255,255,.3);font-weight:600">Đang tải...</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-nav-section">Tổng quan</div>
+          <button class="admin-nav-item active" id="anav-overview" onclick="switchAdminView('overview')">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></div>
+            Dashboard Admin
+          </button>
+
+          <div class="admin-nav-section">Hệ thống</div>
+          <button class="admin-nav-item" id="anav-users" onclick="switchAdminView('users')">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            Quản lý tài khoản
+          </button>
+          <button class="admin-nav-item" id="anav-workstation" onclick="switchAdminView('workstation')">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11v12H5z"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg></div>
+            Hồ sơ Workstation
+          </button>
+          <button class="admin-nav-item" id="anav-finance-all" onclick="switchAdminView('finance-all')">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            Tài chính toàn hệ thống
+          </button>
+
+          <div class="admin-nav-section">Vận hành</div>
+          <button class="admin-nav-item" id="anav-settings" onclick="switchAdminView('settings')">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></div>
+            Cấu hình hệ thống
+          </button>
+          <button class="admin-nav-item" id="anav-log" onclick="switchAdminView('log')">
+            <div class="nav-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+            Nhật ký hoạt động
+          </button>
+
+          <div style="margin-top:auto;padding:16px">
+            <div style="padding:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;text-align:center">
+              <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.08em">Firebase Status</div>
+              <div style="display:flex;align-items:center;justify-content:center;gap:5px;margin-top:6px">
+                <div style="width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e"></div>
+                <span style="font-size:11px;color:rgba(255,255,255,.4);font-weight:600">Kết nối ổn định</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="admin-content" style="flex:1">
+
+          <!-- ── OVERVIEW ── -->
+          <div id="adm-overview" class="adm-section">
+            <div style="margin-bottom:20px">
+              <h2 style="font-size:20px;font-weight:900;color:#0f172a;letter-spacing:-.4px">Tổng quan hệ thống</h2>
+              <p style="font-size:12px;color:var(--muted);margin-top:3px;font-weight:600">Thống kê toàn bộ hoạt động Tasco DLK</p>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px">
+              <div class="stat-mini">
+                <div class="stat-mini-val" id="adm-stat-users" style="color:#2563eb">—</div>
+                <div class="stat-mini-lbl">Tổng tài khoản</div>
+              </div>
+              <div class="stat-mini">
+                <div class="stat-mini-val" id="adm-stat-garas" style="color:#7c3aed">—</div>
+                <div class="stat-mini-lbl">Gara đối tác</div>
+              </div>
+              <div class="stat-mini">
+                <div class="stat-mini-val" id="adm-stat-cases" style="color:#059669">—</div>
+                <div class="stat-mini-lbl">Tổng hồ sơ</div>
+              </div>
+              <div class="stat-mini">
+                <div class="stat-mini-val" id="adm-stat-pending" style="color:#d97706">—</div>
+                <div class="stat-mini-lbl">Đang xử lý</div>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              <div class="card">
+                <div class="card-header"><div class="card-title">Phân bổ hồ sơ theo gara</div></div>
+                <div id="adm-gara-breakdown" style="padding:12px"></div>
+              </div>
+              <div class="card">
+                <div class="card-header"><div class="card-title">Trạng thái hồ sơ</div></div>
+                <div id="adm-status-breakdown" style="padding:12px"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── USERS ── -->
+          <div id="adm-users" class="adm-section hidden">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+              <div>
+                <h2 style="font-size:20px;font-weight:900;color:#0f172a;letter-spacing:-.4px">Quản lý tài khoản</h2>
+                <p style="font-size:12px;color:var(--muted);margin-top:3px;font-weight:600">Thêm, sửa, xoá tài khoản gara và nhân viên</p>
+              </div>
+              <button onclick="openUserModal()" style="padding:10px 18px;background:#0f172a;color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Thêm tài khoản
+              </button>
+            </div>
+
+            <div class="card">
+              <div style="padding:12px 16px;background:#f8fafc;border-bottom:1px solid var(--border);display:flex;gap:10px">
+                <div style="position:relative;flex:1">
+                  <svg width="13" height="13" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#94a3b8;pointer-events:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                  <input id="usr-search" type="text" class="inp" style="padding-left:34px;background:#fff" placeholder="Tìm tên, username..." oninput="renderUsersTable()">
+                </div>
+                <select id="usr-role-filter" class="inp" style="width:160px;background:#fff" onchange="renderUsersTable()">
+                  <option value="">Tất cả vai trò</option>
+                  <option value="admin">Admin</option>
+                  <option value="gara">Gara</option>
+                  <option value="nhanvien">Nhân viên</option>
+                </select>
+              </div>
+              <div style="overflow-x:auto">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th style="padding-left:18px">Tài khoản</th>
+                      <th>Tên / Gara</th>
+                      <th>Vai trò</th>
+                      <th>SĐT</th>
+                      <th>Trạng thái</th>
+                      <th style="text-align:center">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody id="usr-tbody"></tbody>
+                </table>
+              </div>
+              <div style="padding:10px 16px;background:#f8fafc;border-top:1px solid var(--border)">
+                <span id="usr-count" style="font-size:12px;color:var(--muted);font-weight:700"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── WORKSTATION ── -->
+          <div id="adm-workstation" class="adm-section hidden">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+              <div>
+                <h2 style="font-size:20px;font-weight:900;color:#0f172a;letter-spacing:-.4px">Hồ sơ Workstation</h2>
+                <p style="font-size:12px;color:var(--muted);margin-top:3px;font-weight:600">Toàn bộ hồ sơ xe trong hệ thống</p>
+              </div>
+              <div style="display:flex;gap:8px">
+                <select id="wk-gara-filter" class="inp" style="width:200px;background:#fff" onchange="renderWorkstationTable()">
+                  <option value="">Tất cả gara</option>
+                </select>
+                <select id="wk-step-filter" class="inp" style="width:180px;background:#fff" onchange="renderWorkstationTable()">
+                  <option value="">Tất cả trạng thái</option>
+                  <option value="1">Đã nhận xe</option>
+                  <option value="2">Đang giám định</option>
+                  <option value="3">Chờ báo giá</option>
+                  <option value="4">Đã có báo giá</option>
+                  <option value="5">Đang sửa chữa</option>
+                  <option value="6">Chờ hoá đơn</option>
+                  <option value="7">Đã thanh toán</option>
+                  <option value="8">Chờ bổ sung HS</option>
+                </select>
+              </div>
+            </div>
+            <div class="card">
+              <div style="overflow-x:auto">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th style="padding-left:18px">Mã vụ / Biển số</th>
+                      <th>Xe / Chủ xe</th>
+                      <th>Gara</th>
+                      <th>Trạng thái</th>
+                      <th>Ngày tiếp nhận</th>
+                      <th>Số tiền BL</th>
+                      <th style="text-align:center;width:80px">Sửa bước</th>
+                    </tr>
+                  </thead>
+                  <tbody id="wk-tbody"></tbody>
+                </table>
+              </div>
+              <div style="padding:10px 16px;background:#f8fafc;border-top:1px solid var(--border)">
+                <span id="wk-count" style="font-size:12px;color:var(--muted);font-weight:700"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── FINANCE ALL ── -->
+          <div id="adm-finance-all" class="adm-section hidden">
+            <div style="margin-bottom:20px">
+              <h2 style="font-size:20px;font-weight:900;color:#0f172a;letter-spacing:-.4px">Tài chính toàn hệ thống</h2>
+              <p style="font-size:12px;color:var(--muted);margin-top:3px;font-weight:600">Doanh thu tổng hợp từ tất cả gara</p>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
+              <div class="stat-mini"><div class="stat-mini-val" id="fadm-total" style="color:#059669;font-size:18px">—</div><div class="stat-mini-lbl">Tổng doanh thu</div></div>
+              <div class="stat-mini"><div class="stat-mini-val" id="fadm-paid" style="color:#0891b2;font-size:18px">—</div><div class="stat-mini-lbl">Đã thanh toán</div></div>
+              <div class="stat-mini"><div class="stat-mini-val" id="fadm-debt" style="color:#e11d48;font-size:18px">—</div><div class="stat-mini-lbl">Công nợ tổng</div></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">Chi tiết theo gara</div></div>
+              <div style="overflow-x:auto">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th style="padding-left:18px">Gara</th>
+                      <th style="text-align:right">Số xe</th>
+                      <th style="text-align:right">Đang xử lý</th>
+                      <th style="text-align:right">Đã xong</th>
+                      <th style="text-align:right">Doanh thu</th>
+                      <th style="text-align:right">Đã TT</th>
+                      <th style="text-align:right">Công nợ</th>
+                    </tr>
+                  </thead>
+                  <tbody id="fadm-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── SETTINGS ── -->
+          <div id="adm-settings" class="adm-section hidden">
+            <div style="margin-bottom:20px">
+              <h2 style="font-size:20px;font-weight:900;color:#0f172a;letter-spacing:-.4px">Cấu hình hệ thống</h2>
+              <p style="font-size:12px;color:var(--muted);margin-top:3px;font-weight:600">Điều chỉnh các thông số vận hành</p>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              <div class="card" style="padding:20px">
+                <h4 style="font-size:13px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:7px">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07"/><path d="M2 2l20 20"/></svg>
+                  Tên công ty
+                </h4>
+                <div class="fgrp"><label class="lbl">Tên hiển thị</label><input class="inp" value="TASCO Đắk Lắk" id="cfg-company-name"></div>
+                <div class="fgrp"><label class="lbl">Số điện thoại hotline</label><input class="inp" value="1900 xxx xxx" id="cfg-hotline"></div>
+                <div class="fgrp"><label class="lbl">Địa chỉ</label><input class="inp" value="Buôn Ma Thuột, Đắk Lắk" id="cfg-address"></div>
+                <button onclick="saveSettings()" style="padding:9px 18px;background:#0f172a;color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Lưu cấu hình</button>
+              </div>
+              <div class="card" style="padding:20px">
+                <h4 style="font-size:13px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:7px">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                  Các bước xử lý hồ sơ
+                </h4>
+                <div id="steps-config-list">
+                  ${[{s:1,l:'Đã nhận xe'},{s:2,l:'Đang giám định'},{s:3,l:'Chờ báo giá'},{s:4,l:'Đã có báo giá'},{s:5,l:'Đang sửa chữa'},{s:6,l:'Chờ hoá đơn'},{s:7,l:'Đã thanh toán'},{s:8,l:'Chờ bổ sung HS'}].map(x=>`
+                  <div class="wk-step-item">
+                    <div style="width:22px;height:22px;border-radius:6px;background:#eff6ff;color:#2563eb;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${x.s}</div>
+                    <span style="font-size:12px;font-weight:600;flex:1">${x.l}</span>
+                    <span class="chip chip-${x.s}" style="font-size:9px">Active</span>
+                  </div>`).join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── LOG ── -->
+          <div id="adm-log" class="adm-section hidden">
+            <div style="margin-bottom:20px">
+              <h2 style="font-size:20px;font-weight:900;color:#0f172a;letter-spacing:-.4px">Nhật ký hoạt động</h2>
+              <p style="font-size:12px;color:var(--muted);margin-top:3px;font-weight:600">Lịch sử đăng nhập và thao tác hệ thống</p>
+            </div>
+            <div class="card">
+              <div id="log-list" style="max-height:500px;overflow-y:auto"></div>
+            </div>
+          </div>
+
+        </div><!-- /admin-content -->
+      </div>
+    </div>
   </div><!-- /content -->
 </div><!-- /app -->
 
@@ -1845,6 +2183,514 @@ function autoCreateGaraAccount() {
 setTimeout(() => {
   autoCreateGaraAccount();
 }, 2000);
+
+
+/* ═══════════════════════════════════
+   ADMIN — STATE & DATA
+═══════════════════════════════════ */
+let allUsers = {};
+let allWorkstation = {};
+let adminLogs = [];
+let activeUserToggle = true;
+let selectedColor = '#2563eb';
+
+/* Kiểm tra quyền admin và hiện tab */
+function checkAdminRole() {
+  if (!currentUser) return;
+  if (currentUser.role === 'admin') {
+    document.getElementById('tab-admin').style.display = 'flex';
+    document.getElementById('adm-user-label').textContent = currentUser.garaName || currentUser.name;
+    loadAdminData();
+  }
+}
+
+function loadAdminData() {
+  // Load users
+  db.ref('Users').on('value', snap => {
+    allUsers = snap.val() || {};
+    renderUsersTable();
+    renderAdminOverview();
+    renderFinanceAll();
+  });
+
+  // Load workstation
+  db.ref('Workstation').on('value', snap => {
+    allWorkstation = snap.val() || {};
+    renderAdminOverview();
+    renderWorkstationTable();
+    renderFinanceAll();
+    populateGaraFilter();
+  });
+}
+
+/* ── SWITCH ADMIN VIEW ── */
+function switchAdminView(view) {
+  document.querySelectorAll('.adm-section').forEach(s => s.classList.add('hidden'));
+  document.querySelectorAll('.admin-nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('adm-' + view.replace('-','') )?.classList.remove('hidden');
+  // fallback cho finance-all
+  const sectionId = 'adm-' + view.replace(/-/g, '');
+  const el = document.getElementById(sectionId);
+  if (el) el.classList.remove('hidden');
+  document.getElementById('anav-' + view)?.classList.add('active');
+
+  if (view === 'log') renderLogs();
+}
+
+/* ── OVERVIEW ── */
+function renderAdminOverview() {
+  const users = Object.values(allUsers);
+  const garas = users.filter(u => u.role === 'gara');
+  const cases = Object.values(allWorkstation);
+  const pending = cases.filter(r => r.step && r.step < 7);
+
+  document.getElementById('adm-stat-users').textContent = users.length;
+  document.getElementById('adm-stat-garas').textContent = garas.length;
+  document.getElementById('adm-stat-cases').textContent = cases.length;
+  document.getElementById('adm-stat-pending').textContent = pending.length;
+
+  // Gara breakdown
+  const garaCount = {};
+  cases.forEach(r => {
+    const g = r.garaName || r.tenGara || r.gara || 'Không rõ';
+    garaCount[g] = (garaCount[g] || 0) + 1;
+  });
+  const maxG = Math.max(...Object.values(garaCount), 1);
+  document.getElementById('adm-gara-breakdown').innerHTML = Object.entries(garaCount)
+    .sort((a,b) => b[1]-a[1]).slice(0,8)
+    .map(([name, cnt]) => `
+      <div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:11px;font-weight:700;color:#0f172a">${name}</span>
+          <span style="font-size:11px;font-weight:800;color:#2563eb">${cnt} xe</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:6px;overflow:hidden">
+          <div style="height:100%;background:#2563eb;border-radius:4px;width:${(cnt/maxG)*100}%;transition:width .5s"></div>
+        </div>
+      </div>`).join('') || '<p style="color:var(--muted);font-size:12px">Không có dữ liệu</p>';
+
+  // Status breakdown
+  const stepCount = {};
+  cases.forEach(r => { const s = r.step||1; stepCount[s] = (stepCount[s]||0)+1; });
+  document.getElementById('adm-status-breakdown').innerHTML = STEPS.map(st => {
+    const cnt = stepCount[st.step] || 0;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f8fafc">
+      <span class="chip ${chipClass(st.step)}">${st.label}</span>
+      <span style="font-size:13px;font-weight:800;color:#0f172a">${cnt}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ── USERS TABLE ── */
+function renderUsersTable() {
+  const search = (document.getElementById('usr-search')?.value||'').toLowerCase();
+  const roleF = document.getElementById('usr-role-filter')?.value||'';
+
+  let entries = Object.entries(allUsers);
+  if (search) entries = entries.filter(([k,v]) =>
+    (v.username||'').toLowerCase().includes(search) ||
+    (v.garaName||v.name||'').toLowerCase().includes(search));
+  if (roleF) entries = entries.filter(([k,v]) => v.role === roleF);
+
+  const roleClass = { admin:'role-admin', gara:'role-gara', nhanvien:'role-nv' };
+  const roleLabel = { admin:'Admin', gara:'Gara', nhanvien:'Nhân viên' };
+
+  document.getElementById('usr-tbody').innerHTML = entries.length
+    ? entries.map(([key, u]) => `
+        <tr>
+          <td style="padding-left:18px">
+            <div style="display:flex;align-items:center;gap:9px">
+              <div style="width:30px;height:30px;border-radius:9px;background:${u.color||'#2563eb'}22;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:${u.color||'#2563eb'};flex-shrink:0">${(u.garaName||u.name||'?').charAt(0)}</div>
+              <div>
+                <p style="font-size:12px;font-weight:800">${u.username||'—'}</p>
+                <p style="font-size:10px;color:var(--muted);font-family:monospace">${key}</p>
+              </div>
+            </div>
+          </td>
+          <td style="font-size:12px;font-weight:600">${u.garaName||u.name||'—'}</td>
+          <td><span class="role-badge ${roleClass[u.role]||'role-gara'}">${roleLabel[u.role]||u.role}</span></td>
+          <td style="font-size:12px;color:var(--muted)">${u.garaPhone||u.phone||'—'}</td>
+          <td>
+            <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:${u.active!==false?'#059669':'#e11d48'}">
+              <div style="width:6px;height:6px;border-radius:50%;background:${u.active!==false?'#059669':'#e11d48'}"></div>
+              ${u.active!==false?'Hoạt động':'Bị khóa'}
+            </span>
+          </td>
+          <td style="text-align:center">
+            <div style="display:flex;gap:5px;justify-content:center">
+              <button class="act-btn act-btn-edit" onclick="editUser('${key}')">Sửa</button>
+              <button class="act-btn act-btn-del" onclick="deleteUser('${key}','${u.username||key}')">Xóa</button>
+            </div>
+          </td>
+        </tr>`).join('')
+    : `<tr><td colspan="6" style="padding:40px;text-align:center;color:var(--muted)">Không tìm thấy tài khoản</td></tr>`;
+
+  document.getElementById('usr-count').textContent = `${entries.length} tài khoản`;
+}
+
+/* ── USER MODAL ── */
+function openUserModal(key) {
+  document.getElementById('usr-edit-key').value = '';
+  document.getElementById('usr-modal-title').textContent = 'Thêm tài khoản mới';
+  document.getElementById('usr-name').value = '';
+  document.getElementById('usr-username').value = '';
+  document.getElementById('usr-password').value = '';
+  document.getElementById('usr-role').value = 'gara';
+  document.getElementById('usr-phone').value = '';
+  activeUserToggle = true;
+  selectedColor = '#2563eb';
+  updateToggleUI();
+  updateColorUI();
+  openModal('user-modal');
+}
+
+function editUser(key) {
+  const u = allUsers[key];
+  if (!u) return;
+  document.getElementById('usr-edit-key').value = key;
+  document.getElementById('usr-modal-title').textContent = 'Chỉnh sửa tài khoản';
+  document.getElementById('usr-name').value = u.garaName || u.name || '';
+  document.getElementById('usr-username').value = u.username || '';
+  document.getElementById('usr-password').value = u.password || '';
+  document.getElementById('usr-role').value = u.role || 'gara';
+  document.getElementById('usr-phone').value = u.garaPhone || u.phone || '';
+  activeUserToggle = u.active !== false;
+  selectedColor = u.color || '#2563eb';
+  updateToggleUI();
+  updateColorUI();
+  openModal('user-modal');
+}
+
+function toggleActive() {
+  activeUserToggle = !activeUserToggle;
+  updateToggleUI();
+}
+function updateToggleUI() {
+  const btn = document.getElementById('usr-active-toggle');
+  const lbl = document.getElementById('usr-active-label');
+  if (activeUserToggle) { btn.classList.add('on'); lbl.textContent = 'Đang hoạt động'; lbl.style.color = '#059669'; }
+  else { btn.classList.remove('on'); lbl.textContent = 'Bị khóa'; lbl.style.color = '#e11d48'; }
+}
+function selectColor(c) {
+  selectedColor = c;
+  document.getElementById('usr-color').value = c;
+  updateColorUI();
+}
+function updateColorUI() {
+  document.querySelectorAll('#color-picker [data-color]').forEach(el => {
+    el.style.border = el.dataset.color === selectedColor ? '2.5px solid #0f172a' : '2px solid transparent';
+    el.style.transform = el.dataset.color === selectedColor ? 'scale(1.2)' : '';
+  });
+}
+
+async function saveUser() {
+  const key = document.getElementById('usr-edit-key').value;
+  const name = document.getElementById('usr-name').value.trim();
+  const username = document.getElementById('usr-username').value.trim();
+  const password = document.getElementById('usr-password').value.trim();
+  const role = document.getElementById('usr-role').value;
+  const phone = document.getElementById('usr-phone').value.trim();
+  const color = document.getElementById('usr-color').value || '#2563eb';
+
+  if (!name || !username || !password) {
+    Toast.fire({ icon: 'warning', title: 'Vui lòng điền đầy đủ thông tin!' });
+    return;
+  }
+
+  const userData = {
+    username, password, role, active: activeUserToggle,
+    garaName: name, name, garaPhone: phone, phone, color
+  };
+
+  const saveKey = key || username;
+  try {
+    await db.ref('Users/' + saveKey).set(userData);
+    closeModal('user-modal');
+    Toast.fire({ icon: 'success', title: key ? 'Đã cập nhật tài khoản!' : 'Đã tạo tài khoản mới!' });
+    addLog(`${key ? 'Sửa' : 'Tạo'} tài khoản: ${username}`);
+  } catch(e) {
+    Toast.fire({ icon: 'error', title: 'Lỗi lưu dữ liệu: ' + e.message });
+  }
+}
+
+async function deleteUser(key, username) {
+  if (key === 'admin' || username === 'admin') {
+    Toast.fire({ icon: 'error', title: 'Không thể xóa tài khoản admin gốc!' }); return;
+  }
+  const r = await Swal.fire({
+    title: 'Xóa tài khoản?',
+    text: `Tài khoản "${username}" sẽ bị xóa vĩnh viễn!`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Xóa', cancelButtonText: 'Hủy',
+    confirmButtonColor: '#e11d48',
+    customClass: { popup: 'rnd' }
+  });
+  if (!r.isConfirmed) return;
+  await db.ref('Users/' + key).remove();
+  Toast.fire({ icon: 'success', title: 'Đã xóa tài khoản!' });
+  addLog(`Xóa tài khoản: ${username}`);
+}
+
+/* ── WORKSTATION TABLE ── */
+function populateGaraFilter() {
+  const garas = [...new Set(Object.values(allWorkstation).map(r => r.garaName || r.tenGara || r.gara || '').filter(Boolean))].sort();
+  const sel = document.getElementById('wk-gara-filter');
+  if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Tất cả gara</option>' + garas.map(g => `<option value="${g}" ${g===cur?'selected':''}>${g}</option>`).join('');
+}
+
+function renderWorkstationTable() {
+  const garaF = document.getElementById('wk-gara-filter')?.value || '';
+  const stepF = document.getElementById('wk-step-filter')?.value || '';
+
+  let entries = Object.entries(allWorkstation);
+  if (garaF) entries = entries.filter(([k,v]) => (v.garaName||v.tenGara||v.gara||'') === garaF);
+  if (stepF) entries = entries.filter(([k,v]) => String(v.step) === stepF);
+  entries.sort((a,b) => (b[1].step===8?1:0)-(a[1].step===8?1:0));
+
+  document.getElementById('wk-tbody').innerHTML = entries.length
+    ? entries.map(([id, r]) => `
+        <tr>
+          <td style="padding-left:18px">
+            <p style="font-weight:800;font-size:12px">${r.bsx||'—'}</p>
+            <p style="font-size:10px;color:var(--muted);font-family:monospace">${r.claimCode||''}</p>
+          </td>
+          <td>
+            <p style="font-size:12px;font-weight:600">${r.hangXe||''} ${r.loaiXe||''}</p>
+            <p style="font-size:11px;color:var(--muted)">${r.customer||'—'}</p>
+          </td>
+          <td style="font-size:11px;font-weight:700;max-width:120px">${r.garaName||r.tenGara||r.gara||'—'}</td>
+          <td><span class="chip ${chipClass(r.step||1)}">${stepLabel(r.step||1)}</span></td>
+          <td style="font-size:11px;color:var(--muted)">${r.notifyDate||'—'}</td>
+          <td style="font-size:12px;font-family:monospace;color:#059669;font-weight:700">${r.baoLanhAmount?fmt(parseFloat((r.baoLanhAmount+'').replace(/\D/g,''))):'—'}</td>
+          <td style="text-align:center">
+            <button class="act-btn act-btn-edit" onclick="openStepModal('${id}')">Cập nhật</button>
+          </td>
+        </tr>`).join('')
+    : `<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">Không có dữ liệu</td></tr>`;
+
+  document.getElementById('wk-count').textContent = `${entries.length} hồ sơ`;
+}
+
+/* ── STEP MODAL ── */
+function openStepModal(id) {
+  const r = allWorkstation[id];
+  if (!r) return;
+  document.getElementById('step-record-id').value = id;
+  document.getElementById('step-record-info').textContent = `${r.bsx||'—'} — ${r.claimCode||''}`;
+  document.getElementById('step-select').value = r.step || 1;
+  document.getElementById('missing-note-inp').value = r.missingDocsNote || '';
+  toggleMissingNote();
+  openModal('step-modal');
+}
+
+document.addEventListener('change', e => {
+  if (e.target.id === 'step-select') toggleMissingNote();
+});
+
+function toggleMissingNote() {
+  const v = document.getElementById('step-select')?.value;
+  const wrap = document.getElementById('missing-note-wrap');
+  if (wrap) wrap.style.display = v === '8' ? 'block' : 'none';
+}
+
+async function saveStepChange() {
+  const id = document.getElementById('step-record-id').value;
+  const step = parseInt(document.getElementById('step-select').value);
+  const note = document.getElementById('missing-note-inp').value.trim();
+
+  const updates = { step, stepUpdatedAt: new Date().toISOString() };
+  if (step === 8) updates.missingDocsNote = note;
+  else updates.missingDocsNote = '';
+
+  try {
+    await db.ref('Workstation/' + id).update(updates);
+    closeModal('step-modal');
+    Toast.fire({ icon: 'success', title: 'Đã cập nhật trạng thái!' });
+    addLog(`Cập nhật bước ${step} cho hồ sơ ${allWorkstation[id]?.bsx||id}`);
+  } catch(e) {
+    Toast.fire({ icon: 'error', title: 'Lỗi: ' + e.message });
+  }
+}
+
+/* ── FINANCE ALL ── */
+function renderFinanceAll() {
+  const cases = Object.values(allWorkstation);
+  const total = cases.reduce((acc,r) => acc+getAmount(r), 0);
+  const paid = cases.filter(r=>r.step===7).reduce((acc,r) => acc+getAmount(r), 0);
+  const debt = total - paid;
+
+  document.getElementById('fadm-total').textContent = total > 0 ? fmt(total) : '—';
+  document.getElementById('fadm-paid').textContent = paid > 0 ? fmt(paid) : '—';
+  document.getElementById('fadm-debt').textContent = debt > 0 ? fmt(debt) : '—';
+
+  // By gara
+  const garaMap = {};
+  cases.forEach(r => {
+    const g = r.garaName || r.tenGara || r.gara || 'Không rõ';
+    if (!garaMap[g]) garaMap[g] = { count:0, pending:0, done:0, rev:0, paid:0 };
+    garaMap[g].count++;
+    if (r.step===7) garaMap[g].done++; else garaMap[g].pending++;
+    garaMap[g].rev += getAmount(r);
+    if (r.step===7) garaMap[g].paid += getAmount(r);
+  });
+
+  document.getElementById('fadm-tbody').innerHTML = Object.entries(garaMap)
+    .sort((a,b) => b[1].rev - a[1].rev)
+    .map(([name, d]) => `
+      <tr>
+        <td style="padding-left:18px;font-size:12px;font-weight:700">${name}</td>
+        <td style="text-align:right;font-size:12px;font-weight:800;color:#2563eb">${d.count}</td>
+        <td style="text-align:right;font-size:12px;color:#d97706;font-weight:700">${d.pending}</td>
+        <td style="text-align:right;font-size:12px;color:#059669;font-weight:700">${d.done}</td>
+        <td style="text-align:right;font-size:12px;font-family:monospace;color:#059669">${d.rev>0?fmt(d.rev):'—'}</td>
+        <td style="text-align:right;font-size:12px;font-family:monospace;color:#0891b2">${d.paid>0?fmt(d.paid):'—'}</td>
+        <td style="text-align:right;font-size:12px;font-family:monospace;color:${(d.rev-d.paid)>0?'#e11d48':'#94a3b8'}">${(d.rev-d.paid)>0?fmt(d.rev-d.paid):'—'}</td>
+      </tr>`).join('') || `<tr><td colspan="7" style="padding:30px;text-align:center;color:var(--muted)">Không có dữ liệu</td></tr>`;
+}
+
+/* ── LOGS ── */
+function addLog(action) {
+  const log = {
+    time: new Date().toISOString(),
+    user: currentUser?.username || '?',
+    action
+  };
+  adminLogs.unshift(log);
+  if (adminLogs.length > 100) adminLogs.pop();
+  try { localStorage.setItem('tasco_logs', JSON.stringify(adminLogs)); } catch(e) {}
+}
+
+function renderLogs() {
+  try { adminLogs = JSON.parse(localStorage.getItem('tasco_logs') || '[]'); } catch(e) { adminLogs = []; }
+  const list = document.getElementById('log-list');
+  if (!adminLogs.length) {
+    list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted);font-size:12px">Chưa có nhật ký</div>';
+    return;
+  }
+  list.innerHTML = adminLogs.map(l => `
+    <div class="notif-item">
+      <div style="width:8px;height:8px;border-radius:50%;background:#2563eb;flex-shrink:0;margin-top:5px"></div>
+      <div style="flex:1">
+        <p style="font-size:12px;font-weight:700;color:#0f172a">${l.action}</p>
+        <p style="font-size:10px;color:var(--muted);margin-top:2px">
+          ${l.user} · ${moment(l.time).format('DD/MM/YYYY HH:mm:ss')}
+        </p>
+      </div>
+    </div>`).join('');
+}
+
+function saveSettings() {
+  Toast.fire({ icon: 'success', title: 'Đã lưu cấu hình!' });
+  addLog('Cập nhật cấu hình hệ thống');
+}
+
+/* Hook vào init */
+const _origApplyUI = GaraAuth._applyUI.bind(GaraAuth);
+GaraAuth._applyUI = function(user) {
+  _origApplyUI(user);
+  setTimeout(checkAdminRole, 500);
+};
 </script>
+
+<!-- ══ MODAL USER ══ -->
+<div class="modal-overlay" id="user-modal">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-header">
+      <div style="font-size:16px;font-weight:900;color:var(--text)" id="usr-modal-title">Thêm tài khoản</div>
+      <button onclick="closeModal('user-modal')" style="width:32px;height:32px;border-radius:9px;border:1.5px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#94a3b8">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <input type="hidden" id="usr-edit-key">
+      <div class="fgrp" style="grid-column:1/-1">
+        <label class="lbl">Tên hiển thị / Tên gara</label>
+        <input id="usr-name" class="inp" placeholder="VD: HONDA Đắk Lắk">
+      </div>
+      <div class="fgrp">
+        <label class="lbl">Tên đăng nhập</label>
+        <input id="usr-username" class="inp" placeholder="VD: honda_dlk">
+      </div>
+      <div class="fgrp">
+        <label class="lbl">Mật khẩu</label>
+        <input id="usr-password" class="inp" type="text" placeholder="Nhập mật khẩu">
+      </div>
+      <div class="fgrp">
+        <label class="lbl">Vai trò</label>
+        <select id="usr-role" class="inp">
+          <option value="gara">Gara đối tác</option>
+          <option value="nhanvien">Nhân viên</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="fgrp">
+        <label class="lbl">Số điện thoại</label>
+        <input id="usr-phone" class="inp" placeholder="0xxx xxx xxx">
+      </div>
+      <div class="fgrp" style="grid-column:1/-1">
+        <label class="lbl">Màu đại diện</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="color-picker">
+          ${['#2563eb','#7c3aed','#059669','#d97706','#e11d48','#0891b2','#0f172a','#6d28d9'].map(c=>`
+            <div onclick="selectColor('${c}')" data-color="${c}"
+              style="width:28px;height:28px;border-radius:8px;background:${c};cursor:pointer;border:2px solid transparent;transition:all .15s"
+              onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform=''"></div>`).join('')}
+        </div>
+        <input type="hidden" id="usr-color" value="#2563eb">
+      </div>
+      <div class="fgrp" style="grid-column:1/-1">
+        <label class="lbl">Trạng thái tài khoản</label>
+        <div class="toggle-wrap">
+          <button class="toggle on" id="usr-active-toggle" onclick="toggleActive()"></button>
+          <span id="usr-active-label" style="font-size:12px;font-weight:700;color:#059669">Đang hoạt động</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeModal('user-modal')" style="padding:10px 20px;background:#f1f5f9;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#475569">Hủy</button>
+      <button onclick="saveUser()" style="padding:10px 24px;background:#0f172a;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">Lưu tài khoản</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL SỬA BƯỚC WORKSTATION ══ -->
+<div class="modal-overlay" id="step-modal">
+  <div class="modal-box" style="max-width:360px">
+    <div class="modal-header">
+      <div style="font-size:15px;font-weight:900;color:var(--text)">Cập nhật trạng thái hồ sơ</div>
+      <button onclick="closeModal('step-modal')" style="width:32px;height:32px;border-radius:9px;border:1.5px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#94a3b8">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="step-record-id">
+      <p id="step-record-info" style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:14px"></p>
+      <div class="fgrp">
+        <label class="lbl">Trạng thái mới</label>
+        <select id="step-select" class="inp">
+          <option value="1">1 — Đã nhận xe</option>
+          <option value="2">2 — Đang giám định</option>
+          <option value="3">3 — Chờ báo giá</option>
+          <option value="4">4 — Đã có báo giá</option>
+          <option value="5">5 — Đang sửa chữa</option>
+          <option value="6">6 — Chờ hoá đơn</option>
+          <option value="7">7 — Đã thanh toán</option>
+          <option value="8">8 — Chờ bổ sung HS</option>
+        </select>
+      </div>
+      <div class="fgrp" id="missing-note-wrap" style="display:none">
+        <label class="lbl">Ghi chú hồ sơ thiếu</label>
+        <input id="missing-note-inp" class="inp" placeholder="Mô tả hồ sơ cần bổ sung...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeModal('step-modal')" style="padding:10px 20px;background:#f1f5f9;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#475569">Hủy</button>
+      <button onclick="saveStepChange()" style="padding:10px 24px;background:#2563eb;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">Cập nhật</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
