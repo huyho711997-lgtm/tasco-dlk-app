@@ -2050,6 +2050,17 @@ document.addEventListener('DOMContentLoaded', () => {
 let allUsers = {};
 let activeUserToggle = true;
 let selectedColor = '#2563eb';
+let garaList = []; // Danh sách gara từ Firebase Garages
+
+// Load danh sách gara từ Garages node
+function loadGaraList() {
+  db.ref('Garages').on('value', snap => {
+    const raw = snap.val() || {};
+    garaList = Object.values(raw).filter(g => g && g.name);
+    garaList.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    populateGaraSuggestions();
+  });
+}
 
 function checkAdminRole() {
   if (!currentUser) return;
@@ -2063,24 +2074,71 @@ function loadAdminData() {
   db.ref('Users').on('value', snap => {
     allUsers = snap.val() || {};
     renderUsersTable();
-    populateGaraSuggestions(); // Gọi hàm cập nhật danh sách xổ xuống mỗi khi có data mới
+    populateGaraSuggestions();
   });
+  loadGaraList(); // Load danh sách gara từ Garages
 }
 
-// Thêm hàm này ngay bên dưới hàm loadAdminData()
 function populateGaraSuggestions() {
-  // Quét toàn bộ user, lấy ra danh sách tên Gara, loại bỏ trùng lặp và giá trị rỗng, sau đó sắp xếp A-Z
-  const uniqueGaras = [...new Set(
-    Object.values(allUsers)
-      .map(u => u.garaName)
-      .filter(name => name && name.trim() !== '')
-  )].sort();
-
-  // Đổ dữ liệu vào thẻ <datalist>
   const datalist = document.getElementById('gara-suggestion-list');
-  if (datalist) {
-    datalist.innerHTML = uniqueGaras.map(g => `<option value="${g}">`).join('');
+  if (!datalist) return;
+
+  // Ưu tiên dùng garaList từ Garages node; fallback về Users nếu chưa load
+  let names;
+  if (garaList.length > 0) {
+    names = garaList.map(g => g.name);
+  } else {
+    names = [...new Set(
+      Object.values(allUsers).map(u => u.garaName).filter(n => n && n.trim() !== '')
+    )].sort();
   }
+  datalist.innerHTML = names.map(n => `<option value="${n}">`).join('');
+}
+
+function garaUserSearch(inp) {
+  const q = inp.value.trim().toLowerCase();
+  const drop = document.getElementById('gara-user-drop');
+  if (!q) { drop.classList.add('hidden'); return; }
+
+  const hits = garaList.filter(g => g.name && g.name.toLowerCase().includes(q)).slice(0, 6);
+  if (!hits.length) { drop.classList.add('hidden'); return; }
+
+  drop.innerHTML = hits.map(g =>
+    `<div class="gdrop-item" onclick="garaUserSelect(${JSON.stringify(g).replace(/"/g,'&quot;')})">
+      🔧 <div>
+        <p style="font-weight:800;font-size:13px;color:#0f172a">${g.name}</p>
+        ${g.address ? `<p style="font-size:10px;color:#94a3b8">${g.address}</p>` : ''}
+      </div>
+    </div>`
+  ).join('');
+  drop.classList.remove('hidden');
+}
+
+function garaUserSelect(g) {
+  document.getElementById('usr-gara-name').value     = g.name    || '';
+  document.getElementById('usr-gara-address').value  = g.address || '';
+  document.getElementById('usr-gara-tax').value      = g.tax     || '';
+  document.getElementById('usr-bank-owner').value    = g.bankOwner || '';
+  document.getElementById('usr-bank-no').value       = g.bankNo    || '';
+  document.getElementById('usr-bank-name').value     = g.bankName  || '';
+  document.getElementById('usr-bank-phone').value    = g.phone     || '';
+  document.getElementById('gara-user-drop').classList.add('hidden');
+
+  // Hiện preview
+  const preview = document.getElementById('gara-user-preview');
+  const body    = document.getElementById('gara-user-preview-body');
+  const row = (label, val) => val
+    ? `<div style="font-size:11px;color:#64748b">${label}</div><div style="font-size:12px;font-weight:700;color:#0f172a">${val}</div>`
+    : '';
+  body.innerHTML =
+    row('Địa chỉ', g.address) +
+    row('SĐT', g.phone) +
+    row('MST', g.tax) +
+    row('Số TK', g.bankNo) +
+    row('Ngân hàng', g.bankName) +
+    row('Chủ TK', g.bankOwner);
+  preview.classList.remove('hidden');
+  preview.style.display = 'flex';
 }
 /* ── USERS TABLE ── */
 /* ── USERS TABLE ── */
@@ -2153,6 +2211,11 @@ function openUserModal(key) {
   selectedColor = '#2563eb';
   updateToggleUI();
   updateColorUI();
+  // Reset hidden gara fields và ẩn preview
+  ['usr-gara-address','usr-gara-tax','usr-bank-owner','usr-bank-no','usr-bank-name','usr-bank-phone']
+    .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  const pv = document.getElementById('gara-user-preview');
+  if (pv) { pv.classList.add('hidden'); pv.style.display = 'none'; }
   openModal('user-modal');
 }
 
@@ -2167,6 +2230,33 @@ function editUser(key) {
   document.getElementById('usr-password').value = u.password || '';
   document.getElementById('usr-role').value = u.role || 'gara';
   document.getElementById('usr-phone').value = u.phone || u.garaPhone || '';
+  // Load thông tin gara đã lưu vào hidden fields và preview
+  document.getElementById('usr-gara-address').value = u.garaAddress   || '';
+  document.getElementById('usr-gara-tax').value      = u.garaTax       || '';
+  document.getElementById('usr-bank-owner').value    = u.garaBankOwner || '';
+  document.getElementById('usr-bank-no').value       = u.garaBankNo    || '';
+  document.getElementById('usr-bank-name').value     = u.garaBankName  || '';
+  document.getElementById('usr-bank-phone').value    = u.garaPhone     || '';
+
+  // Hiện preview nếu có thông tin
+  if (u.garaAddress || u.garaBankNo) {
+    const preview = document.getElementById('gara-user-preview');
+    const body    = document.getElementById('gara-user-preview-body');
+    const row = (label, val) => val
+      ? `<div style="font-size:11px;color:#64748b">${label}</div><div style="font-size:12px;font-weight:700;color:#0f172a">${val}</div>`
+      : '';
+    body.innerHTML =
+      row('Địa chỉ', u.garaAddress)   +
+      row('SĐT', u.garaPhone || u.phone) +
+      row('MST', u.garaTax)            +
+      row('Số TK', u.garaBankNo)       +
+      row('Ngân hàng', u.garaBankName) +
+      row('Chủ TK', u.garaBankOwner);
+    preview.classList.remove('hidden');
+    preview.style.display = 'flex';
+  } else {
+    document.getElementById('gara-user-preview').classList.add('hidden');
+  }
   document.getElementById('usr-gara-address').value = u.garaAddress || '';
   document.getElementById('usr-gara-tax').value = u.garaTax || '';
   document.getElementById('usr-gara-rep').value = u.garaRep || '';
@@ -2292,10 +2382,25 @@ GaraAuth._applyUI = function(user) {
         <label class="lbl">Tên người dùng</label>
         <input id="usr-name" class="inp" placeholder="VD: Nguyễn Văn A">
       </div>
-      <div class="fgrp">
-        <label class="lbl" style="color:#2563eb">Gán Gara quản lý</label>
-        <input id="usr-gara-name" list="gara-suggestion-list" class="inp" placeholder="Chọn hoặc gõ tên Gara mới..." style="border-color:#bfdbfe;background:#eff6ff" autocomplete="off" title="Tên này phải khớp với dữ liệu Gara trong hồ sơ xe">
+      <div class="fgrp" style="grid-column:1/-1; position:relative">
+        <label class="lbl" style="color:#2563eb">🏢 Gán Gara quản lý</label>
+        <input id="usr-gara-name" class="inp" placeholder="Gõ tên gara để tìm..." style="border-color:#bfdbfe;background:#eff6ff" autocomplete="off"
+          oninput="garaUserSearch(this)" onblur="setTimeout(()=>document.getElementById('gara-user-drop').classList.add('hidden'),200)">
         <datalist id="gara-suggestion-list"></datalist>
+        <div id="gara-user-drop" class="gdrop hidden"></div>
+        <!-- Thông tin gara được auto-fill (ẩn, dùng cho saveUser) -->
+        <input type="hidden" id="usr-gara-address">
+        <input type="hidden" id="usr-gara-tax">
+        <input type="hidden" id="usr-gara-rep">
+        <input type="hidden" id="usr-bank-owner">
+        <input type="hidden" id="usr-bank-no">
+        <input type="hidden" id="usr-bank-name">
+        <input type="hidden" id="usr-bank-phone">
+      </div>
+      <!-- Preview thông tin gara sau khi chọn -->
+      <div id="gara-user-preview" class="hidden" style="grid-column:1/-1; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; font-size:12px; display:flex; flex-direction:column; gap:4px">
+        <div style="font-size:10px;font-weight:800;color:#059669;text-transform:uppercase;margin-bottom:4px">✅ Thông tin gara đã được liên kết</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px" id="gara-user-preview-body"></div>
       </div>
       
       <div class="fgrp">
