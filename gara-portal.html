@@ -1958,6 +1958,7 @@ function loadAdminData() {
 }
 
 /* ── USERS TABLE ── */
+/* ── USERS TABLE ── */
 function renderUsersTable() {
   const search = (document.getElementById('usr-search')?.value||'').toLowerCase();
   const roleF = document.getElementById('usr-role-filter')?.value||'';
@@ -1976,16 +1977,19 @@ function renderUsersTable() {
         <tr>
           <td style="padding-left:20px">
             <div style="display:flex;align-items:center;gap:12px">
-              <div style="width:38px;height:38px;border-radius:12px;background:${u.color||'#2563eb'}18;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:${u.color||'#2563eb'};flex-shrink:0">${(u.garaName||u.name||'?').charAt(0).toUpperCase()}</div>
+              <div style="width:38px;height:38px;border-radius:12px;background:${u.color||'#2563eb'}18;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:${u.color||'#2563eb'};flex-shrink:0">${(u.name||u.garaName||'?').charAt(0).toUpperCase()}</div>
               <div>
                 <p style="font-size:13px;font-weight:800;color:var(--text)">${u.username||'—'}</p>
                 <p style="font-size:10px;color:var(--muted);font-family:monospace;margin-top:2px">ID: ${key}</p>
               </div>
             </div>
           </td>
-          <td style="font-size:13px;font-weight:700;color:#334155">${u.garaName||u.name||'—'}</td>
+          <td>
+            <div style="font-size:13px;font-weight:700;color:#334155">${u.name||'—'}</div>
+            <div style="font-size:10px;color:#2563eb;margin-top:2px;font-weight:800">🏢 ${u.garaName||'Chưa gán Gara'}</div>
+          </td>
           <td><span class="role-badge ${roleClass[u.role]||'role-gara'}" style="padding:4px 12px;font-size:11px">${roleLabel[u.role]||u.role}</span></td>
-          <td style="font-size:12px;color:var(--muted);font-weight:600">${u.garaPhone||u.phone||'—'}</td>
+          <td style="font-size:12px;color:var(--muted);font-weight:600">${u.phone||u.garaPhone||'—'}</td>
           <td>
             <span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:${u.active!==false?'#059669':'#e11d48'};background:${u.active!==false?'#ecfdf5':'#fff1f2'};padding:4px 10px;border-radius:20px;border:1px solid ${u.active!==false?'#a7f3d0':'#fecaca'}">
               <div style="width:6px;height:6px;border-radius:50%;background:${u.active!==false?'#059669':'#e11d48'}"></div>
@@ -2009,6 +2013,7 @@ function openUserModal(key) {
   document.getElementById('usr-edit-key').value = '';
   document.getElementById('usr-modal-title').textContent = 'Thêm tài khoản mới';
   document.getElementById('usr-name').value = '';
+  document.getElementById('usr-gara-name').value = ''; // Reset trường Gara
   document.getElementById('usr-username').value = '';
   document.getElementById('usr-password').value = '';
   document.getElementById('usr-role').value = 'gara';
@@ -2025,11 +2030,12 @@ function editUser(key) {
   if (!u) return;
   document.getElementById('usr-edit-key').value = key;
   document.getElementById('usr-modal-title').textContent = 'Chỉnh sửa tài khoản';
-  document.getElementById('usr-name').value = u.garaName || u.name || '';
+  document.getElementById('usr-name').value = u.name || '';
+  document.getElementById('usr-gara-name').value = u.garaName || ''; // Gán lại Gara
   document.getElementById('usr-username').value = u.username || '';
   document.getElementById('usr-password').value = u.password || '';
   document.getElementById('usr-role').value = u.role || 'gara';
-  document.getElementById('usr-phone').value = u.garaPhone || u.phone || '';
+  document.getElementById('usr-phone').value = u.phone || u.garaPhone || '';
   activeUserToggle = u.active !== false;
   selectedColor = u.color || '#2563eb';
   updateToggleUI();
@@ -2065,6 +2071,7 @@ function updateColorUI() {
 async function saveUser() {
   const key = document.getElementById('usr-edit-key').value;
   const name = document.getElementById('usr-name').value.trim();
+  const garaName = document.getElementById('usr-gara-name').value.trim(); // Lấy giá trị Gara
   const username = document.getElementById('usr-username').value.trim();
   const password = document.getElementById('usr-password').value.trim();
   const role = document.getElementById('usr-role').value;
@@ -2078,15 +2085,13 @@ async function saveUser() {
 
   const userData = {
     username, password, role, active: activeUserToggle,
-    garaName: name, name, garaPhone: phone, phone, color
+    garaName, name, phone, color // Lưu tách biệt name và garaName
   };
 
-  // Chuyển đổi các ký tự cấm của Firebase thành dấu gạch dưới "_"
   let safeKey = key || username;
   safeKey = safeKey.replace(/[.#$\[\]]/g, '_');
 
   try {
-    // Lưu vào database với safeKey
     await db.ref('Users/' + safeKey).set(userData);
     closeModal('user-modal');
     Toast.fire({ icon: 'success', title: key ? 'Đã cập nhật tài khoản!' : 'Đã tạo tài khoản mới!' });
@@ -2137,10 +2142,16 @@ GaraAuth._applyUI = function(user) {
     </div>
     <div class="modal-body" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
       <input type="hidden" id="usr-edit-key">
-      <div class="fgrp" style="grid-column:1/-1">
-        <label class="lbl">Tên hiển thị / Tên gara</label>
-        <input id="usr-name" class="inp" placeholder="VD: HONDA Đắk Lắk">
+      
+      <div class="fgrp">
+        <label class="lbl">Tên người dùng</label>
+        <input id="usr-name" class="inp" placeholder="VD: Nguyễn Văn A">
       </div>
+      <div class="fgrp">
+        <label class="lbl" style="color:#2563eb">Gán Gara quản lý</label>
+        <input id="usr-gara-name" class="inp" placeholder="VD: HONDA Đắk Lắk" style="border-color:#bfdbfe;background:#eff6ff" title="Tên này phải khớp với dữ liệu Gara trong hồ sơ xe">
+      </div>
+      
       <div class="fgrp">
         <label class="lbl">Tên đăng nhập</label>
         <input id="usr-username" class="inp" placeholder="VD: honda_dlk">
