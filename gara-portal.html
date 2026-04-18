@@ -2081,9 +2081,13 @@ async function saveUser() {
     garaName: name, name, garaPhone: phone, phone, color
   };
 
-  const saveKey = key || username;
+  // Chuyển đổi các ký tự cấm của Firebase thành dấu gạch dưới "_"
+  let safeKey = key || username;
+  safeKey = safeKey.replace(/[.#$\[\]]/g, '_');
+
   try {
-    await db.ref('Users/' + saveKey).set(userData);
+    // Lưu vào database với safeKey
+    await db.ref('Users/' + safeKey).set(userData);
     closeModal('user-modal');
     Toast.fire({ icon: 'success', title: key ? 'Đã cập nhật tài khoản!' : 'Đã tạo tài khoản mới!' });
   } catch(e) {
@@ -2160,10 +2164,14 @@ GaraAuth._applyUI = function(user) {
       <div class="fgrp" style="grid-column:1/-1">
         <label class="lbl">Màu đại diện</label>
         <div style="display:flex;gap:8px;flex-wrap:wrap" id="color-picker">
-          ${['#2563eb','#7c3aed','#059669','#d97706','#e11d48','#0891b2','#0f172a','#6d28d9'].map(c=>`
-            <div onclick="selectColor('${c}')" data-color="${c}"
-              style="width:28px;height:28px;border-radius:8px;background:${c};cursor:pointer;border:2px solid transparent;transition:all .15s"
-              onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform=''"></div>`).join('')}
+            <div onclick="selectColor('#2563eb')" data-color="#2563eb" style="width:28px;height:28px;border-radius:8px;background:#2563eb;cursor:pointer;border:2px solid transparent;transition:all .15s" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform=''"></div>
+            <div onclick="selectColor('#7c3aed')" data-color="#7c3aed" style="width:28px;height:28px;border-radius:8px;background:#7c3aed;cursor:pointer;border:2px solid transparent;transition:all .15s" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform=''"></div>
+            <div onclick="selectColor('#059669')" data-color="#059669" style="width:28px;height:28px;border-radius:8px;background:#059669;cursor:pointer;border:2px solid transparent;transition:all .15s" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform=''"></div>
+            <div onclick="selectColor('#d97706')" data-color="#d97706" style="width:28px;height:28px;border-radius:8px;background:#d97706;cursor:pointer;border:2px solid transparent;transition:all .15s" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform=''"></div>
+            <div onclick="selectColor('#e11d48')" data-color="#e11d48" style="width:28px;height:28px;border-radius:8px;background:#e11d48;cursor:pointer;border:2px solid transparent;transition:all .15s" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform=''"></div>
+            <div onclick="selectColor('#0891b2')" data-color="#0891b2" style="width:28px;height:28px;border-radius:8px;background:#0891b2;cursor:pointer;border:2px solid transparent;transition:all .15s" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform=''"></div>
+            <div onclick="selectColor('#0f172a')" data-color="#0f172a" style="width:28px;height:28px;border-radius:8px;background:#0f172a;cursor:pointer;border:2px solid transparent;transition:all .15s" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform=''"></div>
+            <div onclick="selectColor('#6d28d9')" data-color="#6d28d9" style="width:28px;height:28px;border-radius:8px;background:#6d28d9;cursor:pointer;border:2px solid transparent;transition:all .15s" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform=''"></div>
         </div>
         <input type="hidden" id="usr-color" value="#2563eb">
       </div>
