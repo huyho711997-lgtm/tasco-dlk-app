@@ -965,6 +965,16 @@ const GaraAuth = {
       const d = snap.val();
       if (d) this._usersList = Array.isArray(d) ? d : Object.values(d);
     });
+    this._usersList.push({
+      username: "admin",
+      password: "231014",
+      role: "gara",
+      active: true,
+      garaName: "Gara Tasco DLK",
+      garaPhone: "0909 999 999",
+      name: "Admin Team",
+      color: "#2563eb"
+    });
 
     const user = this.getCurrentUser();
     if (user) {
