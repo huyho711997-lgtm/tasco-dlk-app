@@ -992,32 +992,44 @@ const GaraAuth = {
 function startDataListener() {
   if (!currentUser) return;
 
-  // Hàm chuẩn hóa: Chuyển chữ thường, xóa dấu tiếng Việt và xóa khoảng trắng thừa
-  const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
+  // Hàm chuẩn hóa tiếng Việt triệt để (xử lý cả dấu và chữ Đ/đ)
+  const norm = (s) => {
+    if (!s) return "";
+    return String(s)
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // Bỏ dấu thanh (sắc, huyền, hỏi, ngã, nặng, mũ)
+      .replace(/đ/g, "d")             // FIX QUAN TRỌNG: Chữ đ/Đ phải được thay thế riêng
+      .replace(/[^a-z0-9]/g, "")      // Bỏ tất cả ký tự đặc biệt (dấu -, _, khoảng trắng...) để dính liền lại
+      .trim();
+  };
 
-  // Lấy tên Gara đăng nhập và đưa qua hàm chuẩn hóa (VD: "HONDA Đăk Lăk" -> "honda dak lak")
+  // Tên gara đang đăng nhập (VD: "HONDA Đăk Lăk" -> "hondadaklak")
   const loginGaraName = norm(currentUser.garaName || currentUser.name);
 
   db.ref('Workstation').on('value', snap => {
     const d = snap.val() || {};
     const all = Object.entries(d).map(([k, v]) => ({ id: k, ...v }));
     
-    // Lọc chỉ lấy hồ sơ thuộc gara này
     garaData = all.filter(r => {
       const recordGaraName = r.garaName || r.tenGara || r.gara || r.garaSuaChua || "";
       if (!recordGaraName) return false;
       
-      // Chuẩn hóa tên Gara trên hồ sơ Firebase
       const dbGaraName = norm(recordGaraName);
       
-      // Lọc dữ liệu chính xác bất chấp việc gõ sai dấu hay không dấu
-      return dbGaraName.includes(loginGaraName) || loginGaraName.includes(dbGaraName);
+      // Kiểm tra xem có chứa tên của nhau không
+      const isMatch = dbGaraName.includes(loginGaraName) || loginGaraName.includes(dbGaraName);
+      
+      // Fix phụ: Nếu hồ sơ không có trường step, mặc định là 1 (Tránh lỗi bị ẩn ở Dashboard)
+      if (isMatch && r.step === undefined) {
+         r.step = 1; 
+      }
+
+      return isMatch;
     });
 
-    // In log ra màn hình Console (F12) để bạn dễ kiểm tra dữ liệu
-    console.log("Tổng số hồ sơ trên Firebase:", all.length);
-    console.log(`Tên Gara đang đăng nhập: "${loginGaraName}"`);
-    console.log("Số hồ sơ lấy được sau khi lọc:", garaData.length);
+    console.log("🛠 [DEBUG] Chuỗi tìm kiếm Gara:", loginGaraName);
+    console.log("🛠 [DEBUG] Số hồ sơ khớp:", garaData.length);
 
     renderAll();
   });
