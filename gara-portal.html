@@ -1033,10 +1033,8 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
           <table class="data-table" style="font-size:12px">
             <thead>
               <tr>
-                <th style="padding-left:14px">Bộ phận / Chi tiết</th>
+                <th style="padding-left:14px; width:70%">Bộ phận / Chi tiết</th>
                 <th>Phương án</th>
-                <th style="text-align:right">Giá OEM</th>
-                <th style="text-align:right">Giá ngoài</th>
               </tr>
             </thead>
             <tbody id="md-damage-body"></tbody>
@@ -1588,8 +1586,6 @@ function openRecord(id) {
       return `<tr>
         <td style="padding-left:14px;font-size:12px;font-weight:700">${d.chiTiet || d.moTa || '—'}</td>
         <td><span class="chip ${d.suaChua ? 'chip-3' : 'chip-5'}" style="font-size:9px">${pa}</span></td>
-        <td style="text-align:right;font-size:12px;font-family:monospace;color:#7c3aed">${d.giaOem ? Number(d.giaOem).toLocaleString('vi-VN') + 'đ' : '—'}</td>
-        <td style="text-align:right;font-size:12px;font-family:monospace;color:#0891b2">${d.giaAm ? Number(d.giaAm).toLocaleString('vi-VN') + 'đ' : '—'}</td>
       </tr>`;
     }).join('');
   } else {
@@ -1954,9 +1950,25 @@ function loadAdminData() {
   db.ref('Users').on('value', snap => {
     allUsers = snap.val() || {};
     renderUsersTable();
+    populateGaraSuggestions(); // Gọi hàm cập nhật danh sách xổ xuống mỗi khi có data mới
   });
 }
 
+// Thêm hàm này ngay bên dưới hàm loadAdminData()
+function populateGaraSuggestions() {
+  // Quét toàn bộ user, lấy ra danh sách tên Gara, loại bỏ trùng lặp và giá trị rỗng, sau đó sắp xếp A-Z
+  const uniqueGaras = [...new Set(
+    Object.values(allUsers)
+      .map(u => u.garaName)
+      .filter(name => name && name.trim() !== '')
+  )].sort();
+
+  // Đổ dữ liệu vào thẻ <datalist>
+  const datalist = document.getElementById('gara-suggestion-list');
+  if (datalist) {
+    datalist.innerHTML = uniqueGaras.map(g => `<option value="${g}">`).join('');
+  }
+}
 /* ── USERS TABLE ── */
 /* ── USERS TABLE ── */
 function renderUsersTable() {
@@ -2149,7 +2161,8 @@ GaraAuth._applyUI = function(user) {
       </div>
       <div class="fgrp">
         <label class="lbl" style="color:#2563eb">Gán Gara quản lý</label>
-        <input id="usr-gara-name" class="inp" placeholder="VD: HONDA Đắk Lắk" style="border-color:#bfdbfe;background:#eff6ff" title="Tên này phải khớp với dữ liệu Gara trong hồ sơ xe">
+        <input id="usr-gara-name" list="gara-suggestion-list" class="inp" placeholder="Chọn hoặc gõ tên Gara mới..." style="border-color:#bfdbfe;background:#eff6ff" autocomplete="off" title="Tên này phải khớp với dữ liệu Gara trong hồ sơ xe">
+        <datalist id="gara-suggestion-list"></datalist>
       </div>
       
       <div class="fgrp">
