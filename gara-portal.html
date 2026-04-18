@@ -1000,21 +1000,14 @@ function startDataListener() {
     
     // Lọc chỉ lấy hồ sơ thuộc gara này
     garaData = all.filter(r => {
-      // Bắt dự phòng các key tên gara khác nhau trên Firebase
-      const recordGaraName = r.garaName || r.tenGara || r.gara || r.garaSuaChua || "";
-      if (!recordGaraName) return false;
+      if (!r.garaName) return false;
       
-      const dbGaraName = String(recordGaraName).toLowerCase().trim();
-      
-      // So sánh tương đối: Tên Gara đăng nhập có chứa tên Gara trên Firebase hoặc ngược lại
-      return dbGaraName.includes(loginGaraName) || loginGaraName.includes(dbGaraName);
+      // Chuyển dữ liệu trên Firebase về chữ thường và kiểm tra xem có chứa từ khóa không
+      const dbGaraName = String(r.garaName).toLowerCase();
+      return dbGaraName.includes("honda đăk lăk".toLowerCase());
     });
-
-    // In log ra màn hình Console (F12) để bạn dễ kiểm tra dữ liệu
-    console.log("Tổng số hồ sơ trên Firebase:", all.length);
-    console.log(`Tên Gara đang đăng nhập: "${loginGaraName}"`);
-    console.log("Số hồ sơ lấy được sau khi lọc:", garaData.length);
-
+    
+    console.log("Số hồ sơ HONDA Đăk Lăk tìm thấy:", garaData.length); // In ra F12 để kiểm tra
     renderAll();
   });
 }
