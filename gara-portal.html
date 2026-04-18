@@ -991,16 +991,30 @@ const GaraAuth = {
 ═══════════════════════════════════ */
 function startDataListener() {
   if (!currentUser) return;
-  const garaName = currentUser.garaName || currentUser.name;
+  // Lấy tên Gara đăng nhập để làm chuẩn lọc
+  const loginGaraName = String(currentUser.garaName || currentUser.name || "").toLowerCase().trim();
 
   db.ref('Workstation').on('value', snap => {
     const d = snap.val() || {};
     const all = Object.entries(d).map(([k, v]) => ({ id: k, ...v }));
+    
     // Lọc chỉ lấy hồ sơ thuộc gara này
     garaData = all.filter(r => {
-      if (!r.garaName) return false;
-      return r.garaName.toLowerCase().trim() === garaName.toLowerCase().trim();
+      // Bắt dự phòng các key tên gara khác nhau trên Firebase
+      const recordGaraName = r.garaName || r.tenGara || r.gara || r.garaSuaChua || "";
+      if (!recordGaraName) return false;
+      
+      const dbGaraName = String(recordGaraName).toLowerCase().trim();
+      
+      // So sánh tương đối: Tên Gara đăng nhập có chứa tên Gara trên Firebase hoặc ngược lại
+      return dbGaraName.includes(loginGaraName) || loginGaraName.includes(dbGaraName);
     });
+
+    // In log ra màn hình Console (F12) để bạn dễ kiểm tra dữ liệu
+    console.log("Tổng số hồ sơ trên Firebase:", all.length);
+    console.log(`Tên Gara đang đăng nhập: "${loginGaraName}"`);
+    console.log("Số hồ sơ lấy được sau khi lọc:", garaData.length);
+
     renderAll();
   });
 }
