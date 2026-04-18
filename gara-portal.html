@@ -29,54 +29,50 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-/* ── LOGIN ── */
+/* ── LOGIN REDESIGN ── */
 #login-screen {
   position: fixed; inset: 0; z-index: 9999;
-  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0f172a 100%);
+  background: #f8fafc;
   display: flex; align-items: center; justify-content: center;
-  transition: opacity .4s; overflow: hidden;
+  transition: opacity .4s;
 }
 #login-screen.hide { opacity: 0; pointer-events: none; }
-.login-orb {
-  position: absolute; border-radius: 50%;
-  background: radial-gradient(circle, rgba(59,130,246,.15) 0%, transparent 70%);
-  pointer-events: none;
-}
 .login-box {
-  position: relative; z-index: 1;
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.12);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 24px;
-  padding: 44px 40px;
-  width: 100%; max-width: 420px;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 32px 80px rgba(0,0,0,.4);
+  padding: 48px 40px;
+  width: 100%; max-width: 400px;
+  box-shadow: 0 20px 60px -15px rgba(0,0,0,.05);
 }
 .login-input {
   width: 100%;
-  background: rgba(255,255,255,.07);
-  border: 1.5px solid rgba(255,255,255,.15);
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
   border-radius: 12px;
   padding: 14px 16px 14px 44px;
-  font-size: 14px; font-weight: 500;
-  color: #f1f5f9; outline: none;
-  font-family: inherit; transition: all .2s;
-}
-.login-input:focus { background: rgba(255,255,255,.12); border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(96,165,250,.15); }
-.login-input::placeholder { color: rgba(255,255,255,.3); }
-.login-inp-wrap { position: relative; }
-.login-inp-wrap svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: rgba(255,255,255,.35); }
-.login-btn {
-  width: 100%; padding: 15px;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  border: none; border-radius: 14px;
-  color: #fff; font-size: 15px; font-weight: 800;
-  cursor: pointer; transition: all .2s;
-  box-shadow: 0 8px 24px rgba(37,99,235,.4);
+  font-size: 14px; font-weight: 600;
+  color: #0f172a; outline: none;
+  transition: all .2s;
   font-family: inherit;
 }
-.login-btn:hover { opacity: .92; transform: translateY(-1px); }
-.login-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+.login-input:focus { background: #fff; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+.login-input::placeholder { color: #94a3b8; font-weight: 500; }
+.login-inp-wrap { position: relative; margin-bottom: 16px; }
+.login-inp-wrap svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; }
+.pw-toggle { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; padding: 4px; transition: color .2s;}
+.pw-toggle:hover { color: #475569; }
+.login-btn {
+  width: 100%; padding: 15px; margin-top: 8px;
+  background: #2563eb;
+  border: none; border-radius: 12px;
+  color: #fff; font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+  box-shadow: 0 4px 12px rgba(37,99,235,.2);
+  font-family: inherit;
+}
+.login-btn:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37,99,235,.3); }
+.login-btn:disabled { opacity: .7; cursor: not-allowed; transform: none; box-shadow: none; }
 
 /* ── LAYOUT ── */
 #app { display: none; flex-direction: column; min-height: 100vh; }
@@ -342,42 +338,35 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
 
 <!-- ══ LOGIN ══ -->
 <div id="login-screen">
-  <div class="login-orb" style="width:500px;height:500px;top:-200px;right:-100px"></div>
-  <div class="login-orb" style="width:400px;height:400px;bottom:-150px;left:-100px"></div>
-
   <div class="login-box animate-in">
     <div style="text-align:center;margin-bottom:32px">
-      <div style="width:60px;height:60px;background:linear-gradient(135deg,#2563eb,#1d4ed8);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 10px 30px rgba(37,99,235,.4)">
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11v12H5z"/><path d="M14 17h1a3 3 0 0 0 3-3v-2h2.5"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+      <div style="width:64px;height:64px;background:#eff6ff;border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;border: 1px solid #bfdbfe">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11v12H5z"/><path d="M14 17h1a3 3 0 0 0 3-3v-2h2.5"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
       </div>
-      <h1 style="color:#f1f5f9;font-size:26px;font-weight:900;letter-spacing:-.5px">TASCO <span style="color:#60a5fa">DLK</span></h1>
-      <p style="color:rgba(255,255,255,.4);font-size:12px;font-weight:600;margin-top:4px;letter-spacing:.1em;text-transform:uppercase">Cổng Thông Tin Gara</p>
+      <h1 style="color:#0f172a;font-size:24px;font-weight:900;letter-spacing:-.5px">TASCO <span style="color:#2563eb">DLK</span></h1>
+      <p style="color:#64748b;font-size:12px;font-weight:700;margin-top:4px;letter-spacing:.05em;text-transform:uppercase">Cổng Thông Tin Đối Tác</p>
     </div>
 
-    <div style="display:flex;flex-direction:column;gap:14px">
+    <div>
       <div class="login-inp-wrap">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <input id="g-username" type="text" class="login-input" placeholder="Tên đăng nhập Gara"
-          autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false"
-          onkeydown="if(event.key==='Enter') document.getElementById('g-password').focus()">
+        <input id="g-username" type="text" class="login-input" placeholder="Tên đăng nhập" autocomplete="username" spellcheck="false" onkeydown="if(event.key==='Enter') document.getElementById('g-password').focus()">
       </div>
       <div class="login-inp-wrap">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        <input id="g-password" type="password" class="login-input" placeholder="Mật khẩu"
-          autocomplete="current-password"
-          onkeydown="if(event.key==='Enter') GaraAuth.login()">
+        <input id="g-password" type="password" class="login-input" placeholder="Mật khẩu" autocomplete="current-password" onkeydown="if(event.key==='Enter') GaraAuth.login()">
+        <span class="pw-toggle" onclick="GaraAuth.togglePw()" title="Hiện/Ẩn mật khẩu">
+            <svg id="g-pw-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </span>
       </div>
-      <button class="login-btn" id="g-login-btn" onclick="GaraAuth.login()">
-        Đăng nhập
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-left:6px"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-      </button>
-      <div id="g-login-err" class="hidden" style="background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.3);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:8px">
-        <svg class="w-4 h-4" style="color:#f87171;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <p id="g-login-err-text" style="color:#fca5a5;font-size:12px;font-weight:700"></p>
+      <button class="login-btn" id="g-login-btn" onclick="GaraAuth.login()">Đăng nhập</button>
+      
+      <div id="g-login-err" class="hidden" style="margin-top:16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:8px">
+        <svg class="w-4 h-4" style="color:#ef4444;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <p id="g-login-err-text" style="color:#b91c1c;font-size:12px;font-weight:700;margin:0"></p>
       </div>
     </div>
-
-    <p style="color:rgba(255,255,255,.2);font-size:11px;text-align:center;margin-top:24px">Liên hệ Tasco DLK để được cấp tài khoản</p>
+    <p style="color:#94a3b8;font-size:11px;text-align:center;margin-top:28px;font-weight:600">Vui lòng liên hệ giám định viên Tasco DLK<br>để được cấp tài khoản truy cập.</p>
   </div>
 </div>
 
@@ -876,65 +865,98 @@ const Toast = Swal.mixin({
   customClass: { popup: 'rnd' }
 });
 
+
 /* ═══════════════════════════════════
-   AUTH
+   AUTH - BẢO MẬT & TRUY VẤN TRỰC TIẾP
 ═══════════════════════════════════ */
 const GaraAuth = {
   _KEY: 'gara_portal_session',
-  _usersList: [],
 
   getCurrentUser() {
     const s = localStorage.getItem(this._KEY);
     return s ? JSON.parse(s) : null;
   },
 
+  togglePw() {
+    const inp = document.getElementById('g-password');
+    const eye = document.getElementById('g-pw-eye');
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      eye.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+    } else {
+      inp.type = 'password';
+      eye.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    }
+  },
+
   async login() {
     const username = document.getElementById('g-username').value.trim();
     const password = document.getElementById('g-password').value;
     const errEl = document.getElementById('g-login-err');
+    const errText = document.getElementById('g-login-err-text');
     const btn = document.getElementById('g-login-btn');
 
     if (!username || !password) {
-      document.getElementById('g-login-err-text').textContent = 'Vui lòng nhập đầy đủ thông tin';
+      errText.textContent = 'Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu';
       errEl.classList.remove('hidden');
       return;
     }
 
     btn.disabled = true;
-    btn.textContent = 'Đang xác thực...';
+    btn.innerHTML = 'Đang xác thực...';
+    errEl.classList.add('hidden');
 
-    if (this._usersList.length === 0) {
-      document.getElementById('g-login-err-text').textContent = 'Đang kết nối máy chủ, vui lòng thử lại!';
+    try {
+      // Query thẳng lên Firebase tìm username cụ thể (Không kéo cả bảng về nữa)
+      const snapshot = await db.ref('Users').orderByChild('username').equalTo(username).once('value');
+      const data = snapshot.val();
+
+      if (!data) {
+        throw new Error('Tài khoản không tồn tại!');
+      }
+
+      // Trích xuất user từ kết quả
+      const userId = Object.keys(data)[0];
+      const user = data[userId];
+
+      // Kiểm tra nhiều lớp bảo mật
+      if (user.password !== password) {
+        throw new Error('Mật khẩu không chính xác!');
+      }
+      if (user.role !== 'gara') {
+        throw new Error('Bạn không có quyền truy cập Cổng Đối Tác!');
+      }
+      if (user.active === false) {
+        throw new Error('Tài khoản này đã bị khóa!');
+      }
+
+      // Xóa password trước khi lưu vào LocalStorage
+      const session = { id: userId, ...user, loginAt: new Date().toISOString() };
+      delete session.password; 
+      localStorage.setItem(this._KEY, JSON.stringify(session));
+
+      document.getElementById('login-screen').classList.add('hide');
+      setTimeout(() => document.getElementById('login-screen').style.display = 'none', 400);
+
+      currentUser = session;
+      this._applyUI(session);
+      startDataListener();
+      
+      Toast.fire({ icon: 'success', title: `Chào mừng, ${session.garaName || session.name}!` });
+
+    } catch (error) {
+      errText.textContent = error.message || 'Lỗi kết nối máy chủ!';
       errEl.classList.remove('hidden');
+      
+      // Hiệu ứng rung lắc form khi sai
+      const box = document.querySelector('.login-box');
+      box.style.transform = 'translateX(-8px)';
+      setTimeout(() => box.style.transform = 'translateX(8px)', 100);
+      setTimeout(() => box.style.transform = '', 200);
+    } finally {
       btn.disabled = false;
-      btn.innerHTML = 'Đăng nhập <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-left:6px"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>';
-      return;
+      btn.innerHTML = 'Đăng nhập';
     }
-
-    // Tìm user role = 'gara'
-    const user = this._usersList.find(u =>
-      u.username === username && u.password === password && u.active && u.role === 'gara'
-    );
-
-    if (!user) {
-      document.getElementById('g-login-err-text').textContent = 'Tài khoản không đúng hoặc không có quyền truy cập!';
-      errEl.classList.remove('hidden');
-      btn.disabled = false;
-      btn.innerHTML = 'Đăng nhập <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-left:6px"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>';
-      return;
-    }
-
-    const session = { ...user, loginAt: new Date().toISOString() };
-    delete session.password;
-    localStorage.setItem(this._KEY, JSON.stringify(session));
-
-    document.getElementById('login-screen').classList.add('hide');
-    setTimeout(() => document.getElementById('login-screen').style.display = 'none', 400);
-
-    currentUser = session;
-    this._applyUI(session);
-    startDataListener();
-    Toast.fire({ icon: 'success', title: `Chào mừng, ${session.name}!` });
   },
 
   _applyUI(user) {
@@ -958,21 +980,7 @@ const GaraAuth = {
   },
 
   init() {
-    db.ref('Users').on('value', snap => {
-      const d = snap.val();
-      if (d) this._usersList = Array.isArray(d) ? d : Object.values(d);
-    });
-    this._usersList.push({
-      username: "admin",
-      password: "231014",
-      role: "gara",
-      active: true,
-      garaName: "HONDA Đăk Lăk",
-      garaPhone: "0909 999 999",
-      name: "Admin Team",
-      color: "#2563eb"
-    });
-
+    // Chỉ check phiên làm việc hiện tại, không cài Listener lên bảng Users nữa
     const user = this.getCurrentUser();
     if (user) {
       document.getElementById('login-screen').style.display = 'none';
