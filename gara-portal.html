@@ -1811,8 +1811,8 @@ document.addEventListener('DOMContentLoaded', () => {
    LỆNH TỰ ĐỘNG TẠO TÀI KHOẢN TRÊN FIREBASE
 ═══════════════════════════════════ */
 function autoCreateGaraAccount() {
-  // Đường dẫn đến node Users và tạo một key mới là 'gara_test_auto'
-  db.ref('Users/gara_test_auto').set({
+  // Ghi thẳng vào key 'admin' để đúng với username đang dùng
+  db.ref('Users/admin').set({
     username: "admin",
     password: "231014",
     role: "gara",
@@ -1820,20 +1820,17 @@ function autoCreateGaraAccount() {
     garaName: "HONDA Đăk Lăk",
     garaPhone: "0999 888 777",
     name: "HONDA Đăk Lăk",
-    color: "#e11d48" // Màu đỏ
+    color: "#e11d48"
   }).then(() => {
-    console.log("✅ Đã tự động tạo tài khoản thành công trên Firebase!");
-    // Bật thông báo Toast để bạn dễ nhận biết
-    Toast.fire({ icon: 'success', title: 'Đã tạo tài khoản test: admin123' });
+    console.log("✅ Đã cập nhật tài khoản admin thành công!");
   }).catch((error) => {
-    console.error("❌ Lỗi khi tạo tài khoản:", error);
+    console.error("❌ Lỗi:", error);
   });
 }
 
-// Gọi hàm này chạy ngay lập tức khi trang vừa load xong
 setTimeout(() => {
   autoCreateGaraAccount();
-}, 2000); // Đợi 2 giây để Firebase khởi tạo xong rồi mới đẩy dữ liệu
+}, 2000);
 </script>
 </body>
 </html>
