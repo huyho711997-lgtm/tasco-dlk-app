@@ -991,8 +991,12 @@ const GaraAuth = {
 ═══════════════════════════════════ */
 function startDataListener() {
   if (!currentUser) return;
-  // Lấy tên Gara đăng nhập để làm chuẩn lọc
-  const loginGaraName = String(currentUser.garaName || currentUser.name || "").toLowerCase().trim();
+
+  // Hàm chuẩn hóa: Chuyển chữ thường, xóa dấu tiếng Việt và xóa khoảng trắng thừa
+  const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
+
+  // Lấy tên Gara đăng nhập và đưa qua hàm chuẩn hóa (VD: "HONDA Đăk Lăk" -> "honda dak lak")
+  const loginGaraName = norm(currentUser.garaName || currentUser.name);
 
   db.ref('Workstation').on('value', snap => {
     const d = snap.val() || {};
@@ -1000,13 +1004,13 @@ function startDataListener() {
     
     // Lọc chỉ lấy hồ sơ thuộc gara này
     garaData = all.filter(r => {
-      // Bắt dự phòng các key tên gara khác nhau trên Firebase
       const recordGaraName = r.garaName || r.tenGara || r.gara || r.garaSuaChua || "";
       if (!recordGaraName) return false;
       
-      const dbGaraName = String(recordGaraName).toLowerCase().trim();
+      // Chuẩn hóa tên Gara trên hồ sơ Firebase
+      const dbGaraName = norm(recordGaraName);
       
-      // So sánh tương đối: Tên Gara đăng nhập có chứa tên Gara trên Firebase hoặc ngược lại
+      // Lọc dữ liệu chính xác bất chấp việc gõ sai dấu hay không dấu
       return dbGaraName.includes(loginGaraName) || loginGaraName.includes(dbGaraName);
     });
 
