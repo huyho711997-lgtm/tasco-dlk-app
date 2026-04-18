@@ -1577,16 +1577,24 @@ function openRecord(id) {
   }
 
   // Hạng mục
+  // Hạng mục
   const dmSec = document.getElementById('md-damage-section');
   const items = r.damageItems || [];
   if (items.length) {
     dmSec.classList.remove('hidden');
     document.getElementById('md-damage-body').innerHTML = items.map(d => {
       const pa = d.suaChua ? 'Sửa chữa' : 'Thay thế';
-      return `<tr>
-        <td style="padding-left:14px;font-size:12px;font-weight:700">${d.chiTiet || d.moTa || '—'}</td>
-        <td><span class="chip ${d.suaChua ? 'chip-3' : 'chip-5'}" style="font-size:9px">${pa}</span></td>
-      </tr>`;
+      const chipCls = d.suaChua ? 'chip-3' : 'chip-5';
+      const chiTiet = d.chiTiet || '—';
+      const moTaHtml = d.moTa ? '<div style="font-size:10px;color:var(--muted);margin-top:4px;font-weight:500">' + d.moTa + '</div>' : '';
+      
+      return '<tr>' +
+        '<td style="padding-left:14px;vertical-align:top">' +
+          '<div style="font-size:12px;font-weight:800;color:var(--text)">' + chiTiet + '</div>' +
+          moTaHtml +
+        '</td>' +
+        '<td style="vertical-align:top"><span class="chip ' + chipCls + '" style="font-size:9px">' + pa + '</span></td>' +
+      '</tr>';
     }).join('');
   } else {
     dmSec.classList.add('hidden');
@@ -1790,9 +1798,19 @@ function doPrint() {
 function printDocument(r, opts) {
   const garaName = currentUser.garaName || currentUser.name;
   const today = moment().format('DD/MM/YYYY');
-  const damages = (r.damageItems || []).map((d, i) =>
-    `<tr><td>${i+1}</td><td>${d.chiTiet || d.moTa || '—'}</td><td style="text-align:center">${d.suaChua ? 'Sửa chữa' : 'Thay thế'}</td><td style="text-align:right">${d.giaOem ? Number(d.giaOem).toLocaleString('vi-VN') : (d.giaAm ? Number(d.giaAm).toLocaleString('vi-VN') : '—')}</td></tr>`
-  ).join('');
+  const damages = (r.damageItems || []).map((d, i) => {
+    const tenBoPhan = d.chiTiet || '—';
+    const moTaChiTiet = d.moTa ? '<br><span style="font-size:10px;color:#64748b;font-weight:normal">' + d.moTa + '</span>' : '';
+    const pa = d.suaChua ? 'Sửa chữa' : 'Thay thế';
+    const gia = d.giaOem ? Number(d.giaOem).toLocaleString('vi-VN') : (d.giaAm ? Number(d.giaAm).toLocaleString('vi-VN') : '—');
+    
+    return '<tr>' +
+      '<td style="text-align:center">' + (i+1) + '</td>' +
+      '<td><b>' + tenBoPhan + '</b>' + moTaChiTiet + '</td>' +
+      '<td style="text-align:center">' + pa + '</td>' +
+      '<td style="text-align:right">' + gia + '</td>' +
+    '</tr>';
+  }).join('');
 
   const totalAmt = (r.damageItems || []).reduce((acc, d) => acc + (d.giaOem || d.giaAm || 0), 0);
   const w = window.open('', '_blank');
