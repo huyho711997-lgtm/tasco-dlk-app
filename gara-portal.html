@@ -1449,7 +1449,7 @@ const GaraAuth = {
       if (user.password !== password) {
         throw new Error('Mật khẩu không chính xác!');
       }
-      if (user.role !== 'gara') {
+      if (user.role !== 'gara' && user.role !== 'admin') {
         throw new Error('Bạn không có quyền truy cập Cổng Đối Tác!');
       }
       if (user.active === false) {
@@ -2157,32 +2157,6 @@ document.addEventListener('DOMContentLoaded', () => {
   moment.locale('vi');
   GaraAuth.init();
 });
-
-
-/* ═══════════════════════════════════
-   LỆNH TỰ ĐỘNG TẠO TÀI KHOẢN TRÊN FIREBASE
-═══════════════════════════════════ */
-function autoCreateGaraAccount() {
-  // Ghi thẳng vào key 'admin' để đúng với username đang dùng
-  db.ref('Users/admin').set({
-    username: "admin",
-    password: "231014",
-    role: "gara",
-    active: true,
-    garaName: "HONDA Đăk Lăk",
-    garaPhone: "0999 888 777",
-    name: "HONDA Đăk Lăk",
-    color: "#e11d48"
-  }).then(() => {
-    console.log("✅ Đã cập nhật tài khoản admin thành công!");
-  }).catch((error) => {
-    console.error("❌ Lỗi:", error);
-  });
-}
-
-setTimeout(() => {
-  autoCreateGaraAccount();
-}, 2000);
 
 
 /* ═══════════════════════════════════
