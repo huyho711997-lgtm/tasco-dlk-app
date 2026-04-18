@@ -996,6 +996,14 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
         </div>
       </div>
 
+      <!-- Chi phí sửa chữa -->
+      <div id="md-finance-section" class="hidden">
+        <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:14px">
+          <div style="font-size:10px;font-weight:800;color:#0284c7;text-transform:uppercase;margin-bottom:10px">💰 Chi phí sửa chữa</div>
+          <div id="md-finance-info" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+      </div>
+
       <!-- Thanh toán -->
       <div id="md-payment-section" class="hidden">
         <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px">
@@ -1549,6 +1557,21 @@ function openRecord(id) {
     errSec.classList.add('hidden');
   }
 
+  // Số tiền chi phí
+  const finSec = document.getElementById('md-finance-section');
+  const hasFinance = r.blChiPhiSuaChua || r.blBaoHiemBaoLanh || r.blKhachHangTuTra || r.blGiamGia;
+  if (hasFinance) {
+    finSec.classList.remove('hidden');
+    const fmtN = v => v ? fmt(parseFloat((v+'').replace(/\D/g,''))) + ' đ' : null;
+    document.getElementById('md-finance-info').innerHTML =
+      infoRow('Chi phí sửa chữa',    fmtN(r.blChiPhiSuaChua),    false) +
+      infoRow('BH Bảo lãnh',         fmtN(r.blBaoHiemBaoLanh),   true)  +
+      infoRow('Khách hàng tự trả',   fmtN(r.blKhachHangTuTra),   false) +
+      infoRow('Giảm giá',            fmtN(r.blGiamGia),           false);
+  } else {
+    finSec.classList.add('hidden');
+  }
+
   // Thanh toán
   const paySec = document.getElementById('md-payment-section');
   if (r.step >= 6) {
@@ -1963,11 +1986,19 @@ async function downloadHopDong(recordId) {
         diaChi:       r.diaChi       || '',
         phone:        r.phone        || '',
         garaName:     currentUser.garaName || currentUser.name || '',
-        garaAddress:  currentUser.garaAddress || '',
-        garaPhone:    currentUser.garaPhone   || '',
-        garaBankNo:   currentUser.garaBankNo  || '',
-        damageItems:  r.damageItems  || [],
-        claimCode:    r.claimCode    || '',
+        garaAddress:   currentUser.garaAddress  || '',
+        garaPhone:     currentUser.garaPhone     || '',
+        garaTax:       currentUser.garaTax       || '',
+        garaRep:       currentUser.garaRep       || '',
+        garaBankOwner: currentUser.garaBankOwner || '',
+        garaBankNo:    currentUser.garaBankNo    || '',
+        garaBankName:  currentUser.garaBankName  || '',
+        damageItems:   r.damageItems  || [],
+        claimCode:     r.claimCode    || '',
+        blChiPhiSuaChua:   r.blChiPhiSuaChua   || 0,
+        blBaoHiemBaoLanh:  r.blBaoHiemBaoLanh  || 0,
+        blKhachHangTuTra:  r.blKhachHangTuTra  || 0,
+        blGiamGia:         r.blGiamGia          || 0,
       }
     };
 
@@ -2107,11 +2138,17 @@ function openUserModal(key) {
   document.getElementById('usr-edit-key').value = '';
   document.getElementById('usr-modal-title').textContent = 'Thêm tài khoản mới';
   document.getElementById('usr-name').value = '';
-  document.getElementById('usr-gara-name').value = ''; // Reset trường Gara
+  document.getElementById('usr-gara-name').value = '';
   document.getElementById('usr-username').value = '';
   document.getElementById('usr-password').value = '';
   document.getElementById('usr-role').value = 'gara';
   document.getElementById('usr-phone').value = '';
+  document.getElementById('usr-gara-address').value = '';
+  document.getElementById('usr-gara-tax').value = '';
+  document.getElementById('usr-gara-rep').value = '';
+  document.getElementById('usr-bank-owner').value = '';
+  document.getElementById('usr-bank-no').value = '';
+  document.getElementById('usr-bank-name').value = '';
   activeUserToggle = true;
   selectedColor = '#2563eb';
   updateToggleUI();
@@ -2125,11 +2162,17 @@ function editUser(key) {
   document.getElementById('usr-edit-key').value = key;
   document.getElementById('usr-modal-title').textContent = 'Chỉnh sửa tài khoản';
   document.getElementById('usr-name').value = u.name || '';
-  document.getElementById('usr-gara-name').value = u.garaName || ''; // Gán lại Gara
+  document.getElementById('usr-gara-name').value = u.garaName || '';
   document.getElementById('usr-username').value = u.username || '';
   document.getElementById('usr-password').value = u.password || '';
   document.getElementById('usr-role').value = u.role || 'gara';
   document.getElementById('usr-phone').value = u.phone || u.garaPhone || '';
+  document.getElementById('usr-gara-address').value = u.garaAddress || '';
+  document.getElementById('usr-gara-tax').value = u.garaTax || '';
+  document.getElementById('usr-gara-rep').value = u.garaRep || '';
+  document.getElementById('usr-bank-owner').value = u.garaBankOwner || '';
+  document.getElementById('usr-bank-no').value = u.garaBankNo || '';
+  document.getElementById('usr-bank-name').value = u.garaBankName || '';
   activeUserToggle = u.active !== false;
   selectedColor = u.color || '#2563eb';
   updateToggleUI();
@@ -2169,8 +2212,14 @@ async function saveUser() {
   const username = document.getElementById('usr-username').value.trim();
   const password = document.getElementById('usr-password').value.trim();
   const role = document.getElementById('usr-role').value;
-  const phone = document.getElementById('usr-phone').value.trim();
-  const color = document.getElementById('usr-color').value || '#2563eb';
+  const phone        = document.getElementById('usr-phone').value.trim();
+  const color        = document.getElementById('usr-color').value || '#2563eb';
+  const garaAddress  = document.getElementById('usr-gara-address').value.trim();
+  const garaTax      = document.getElementById('usr-gara-tax').value.trim();
+  const garaRep      = document.getElementById('usr-gara-rep').value.trim();
+  const garaBankOwner = document.getElementById('usr-bank-owner').value.trim();
+  const garaBankNo   = document.getElementById('usr-bank-no').value.trim();
+  const garaBankName = document.getElementById('usr-bank-name').value.trim();
 
   if (!name || !username || !password) {
     Toast.fire({ icon: 'warning', title: 'Vui lòng điền đầy đủ thông tin!' });
@@ -2179,7 +2228,9 @@ async function saveUser() {
 
   const userData = {
     username, password, role, active: activeUserToggle,
-    garaName, name, phone, color // Lưu tách biệt name và garaName
+    garaName, name, phone, color,
+    garaAddress, garaTax, garaRep,
+    garaBankOwner, garaBankNo, garaBankName
   };
 
   let safeKey = key || username;
@@ -2266,6 +2317,33 @@ GaraAuth._applyUI = function(user) {
       <div class="fgrp">
         <label class="lbl">Số điện thoại</label>
         <input id="usr-phone" class="inp" placeholder="0xxx xxx xxx">
+      </div>
+      <div class="fgrp" style="grid-column:1/-1">
+        <label class="lbl">Địa chỉ gara</label>
+        <input id="usr-gara-address" class="inp" placeholder="VD: 123 Nguyễn Trãi, Buôn Ma Thuột">
+      </div>
+      <div class="fgrp">
+        <label class="lbl">MST / Mã số thuế</label>
+        <input id="usr-gara-tax" class="inp" placeholder="VD: 6001234567">
+      </div>
+      <div class="fgrp">
+        <label class="lbl">Tên đại diện gara</label>
+        <input id="usr-gara-rep" class="inp" placeholder="VD: Nguyễn Văn A">
+      </div>
+      <div class="fgrp" style="grid-column:1/-1; border-top:1px dashed #e2e8f0; padding-top:12px; margin-top:2px">
+        <label class="lbl" style="color:#059669">🏦 Thông tin ngân hàng (dùng cho hợp đồng & xác nhận bồi thường)</label>
+      </div>
+      <div class="fgrp">
+        <label class="lbl">Tên chủ tài khoản</label>
+        <input id="usr-bank-owner" class="inp" placeholder="VD: NGUYEN VAN A">
+      </div>
+      <div class="fgrp">
+        <label class="lbl">Số tài khoản</label>
+        <input id="usr-bank-no" class="inp" placeholder="VD: 0123456789">
+      </div>
+      <div class="fgrp" style="grid-column:1/-1">
+        <label class="lbl">Ngân hàng</label>
+        <input id="usr-bank-name" class="inp" placeholder="VD: Vietcombank – CN Đắk Lắk">
       </div>
       <div class="fgrp" style="grid-column:1/-1">
         <label class="lbl">Màu đại diện</label>
