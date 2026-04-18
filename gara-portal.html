@@ -2115,13 +2115,13 @@ function garaUserSearch(inp) {
 }
 
 function garaUserSelect(g) {
-  document.getElementById('usr-gara-name').value     = g.name    || '';
-  document.getElementById('usr-gara-address').value  = g.address || '';
-  document.getElementById('usr-gara-tax').value      = g.tax     || '';
-  document.getElementById('usr-bank-owner').value    = g.bankOwner || '';
-  document.getElementById('usr-bank-no').value       = g.bankNo    || '';
-  document.getElementById('usr-bank-name').value     = g.bankName  || '';
-  document.getElementById('usr-bank-phone').value    = g.phone     || '';
+  document.getElementById('usr-gara-name').value    = g.name      || '';
+  document.getElementById('usr-gara-address').value = g.address   || '';
+  document.getElementById('usr-gara-tax').value     = g.tax       || '';
+  document.getElementById('usr-gara-rep').value     = g.rep       || '';
+  document.getElementById('usr-bank-owner').value   = g.bankOwner || '';
+  document.getElementById('usr-bank-no').value      = g.bankNo    || '';
+  document.getElementById('usr-bank-name').value    = g.bankName  || '';
   document.getElementById('gara-user-drop').classList.add('hidden');
 
   // Hiện preview
@@ -2211,8 +2211,8 @@ function openUserModal(key) {
   selectedColor = '#2563eb';
   updateToggleUI();
   updateColorUI();
-  // Reset hidden gara fields và ẩn preview
-  ['usr-gara-address','usr-gara-tax','usr-bank-owner','usr-bank-no','usr-bank-name','usr-bank-phone']
+  // Reset các trường gara khi mở modal mới
+  ['usr-gara-address','usr-gara-tax','usr-gara-rep','usr-bank-owner','usr-bank-no','usr-bank-name']
     .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   const pv = document.getElementById('gara-user-preview');
   if (pv) { pv.classList.add('hidden'); pv.style.display = 'none'; }
@@ -2236,7 +2236,6 @@ function editUser(key) {
   document.getElementById('usr-bank-owner').value    = u.garaBankOwner || '';
   document.getElementById('usr-bank-no').value       = u.garaBankNo    || '';
   document.getElementById('usr-bank-name').value     = u.garaBankName  || '';
-  document.getElementById('usr-bank-phone').value    = u.garaPhone     || '';
 
   // Hiện preview nếu có thông tin
   if (u.garaAddress || u.garaBankNo) {
@@ -2368,7 +2367,7 @@ GaraAuth._applyUI = function(user) {
 
 <!-- ══ MODAL USER ══ -->
 <div class="modal-overlay" id="user-modal">
-  <div class="modal-box" style="max-width:480px">
+  <div class="modal-box" style="max-width:660px">
     <div class="modal-header">
       <div style="font-size:16px;font-weight:900;color:var(--text)" id="usr-modal-title">Thêm tài khoản</div>
       <button onclick="closeModal('user-modal')" style="width:32px;height:32px;border-radius:9px;border:1.5px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#94a3b8">
@@ -2388,14 +2387,6 @@ GaraAuth._applyUI = function(user) {
           oninput="garaUserSearch(this)" onblur="setTimeout(()=>document.getElementById('gara-user-drop').classList.add('hidden'),200)">
         <datalist id="gara-suggestion-list"></datalist>
         <div id="gara-user-drop" class="gdrop hidden"></div>
-        <!-- Thông tin gara được auto-fill (ẩn, dùng cho saveUser) -->
-        <input type="hidden" id="usr-gara-address">
-        <input type="hidden" id="usr-gara-tax">
-        <input type="hidden" id="usr-gara-rep">
-        <input type="hidden" id="usr-bank-owner">
-        <input type="hidden" id="usr-bank-no">
-        <input type="hidden" id="usr-bank-name">
-        <input type="hidden" id="usr-bank-phone">
       </div>
       <!-- Preview thông tin gara sau khi chọn -->
       <div id="gara-user-preview" class="hidden" style="grid-column:1/-1; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; font-size:12px; display:flex; flex-direction:column; gap:4px">
