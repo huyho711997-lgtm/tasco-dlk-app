@@ -1082,16 +1082,30 @@ const GaraAuth = {
 
     try {
       // Query thẳng lên Firebase tìm username cụ thể (Không kéo cả bảng về nữa)
-      const snapshot = await db.ref('Users').orderByChild('username').equalTo(username).once('value');
-      const data = snapshot.val();
+      // Thử lấy thẳng theo key trước (nhanh, chính xác)
+      let userId = null;
+      let user = null;
 
-      if (!data) {
-        throw new Error('Tài khoản không tồn tại!');
+      const directSnap = await db.ref('Users/' + username).once('value');
+      if (directSnap.exists()) {
+        userId = username;
+        user = directSnap.val();
+      } else {
+        // Fallback: quét toàn bộ Users tìm theo trường username
+        const allSnap = await db.ref('Users').once('value');
+        const allData = allSnap.val() || {};
+        for (const [k, v] of Object.entries(allData)) {
+          if (v && v.username === username) {
+            userId = k;
+            user = v;
+            break;
+          }
+        }
       }
 
-      // Trích xuất user từ kết quả
-      const userId = Object.keys(data)[0];
-      const user = data[userId];
+      if (!user) {
+        throw new Error('Tài khoản không tồn tại!');
+      }
 
       // Kiểm tra nhiều lớp bảo mật
       if (user.password !== password) {
