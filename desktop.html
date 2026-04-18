@@ -2364,9 +2364,12 @@ textarea.inp { resize:vertical; }
           </div>
           <div class="section-card" style="border-left:3px solid #3b82f6">
             <div class="section-header cursor-pointer hover:bg-slate-100 transition-colors select-none" onclick="const body = this.nextElementSibling; body.classList.toggle('hidden'); const icon = this.querySelector('.chevron-icon'); if(icon) icon.style.transform = body.classList.contains('hidden') ? 'rotate(180deg)' : 'rotate(0deg)';">
-              <div class="section-header-title text-blue-700">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                PASC & BẢO LÃNH
+              <div class="flex flex-col">
+                  <div class="section-header-title text-blue-700">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    PASC & BẢO LÃNH
+                  </div>
+                  <span id="summary-pasc-baolanh" class="text-[10px] text-slate-500 font-medium mt-0.5 ml-5">Chưa có thông tin</span>
               </div>
               <svg class="chevron-icon w-4 h-4 text-slate-400 transition-transform duration-200" style="transform: rotate(180deg);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
             </div>
@@ -2374,14 +2377,14 @@ textarea.inp { resize:vertical; }
               <div>
                 <label class="lbl">Link Phương án sửa chữa (PASC)</label>
                 <div class="flex gap-2">
-                  <input id="f-pascUrl" class="inp flex-1" placeholder="https://...">
+                  <input id="f-pascUrl" class="inp flex-1" placeholder="https://..." oninput="BaoLanh.updateSummary()">
                   <button type="button" onclick="BaoLanh.openUrl('f-pascUrl')" class="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-200 transition-colors">Mở</button>
                 </div>
               </div>
               <div>
                 <label class="lbl">Link Thông báo Bảo lãnh</label>
                 <div class="flex gap-2">
-                  <input id="f-baoLanhUrl" class="inp flex-1" placeholder="https://...">
+                  <input id="f-baoLanhUrl" class="inp flex-1" placeholder="https://..." oninput="BaoLanh.updateSummary()">
                   <button type="button" onclick="BaoLanh.openUrl('f-baoLanhUrl')" class="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-200 transition-colors">Mở</button>
                 </div>
               </div>
@@ -2393,15 +2396,15 @@ textarea.inp { resize:vertical; }
               <p id="bl-analyze-status" class="hidden text-[11px] font-bold text-center text-violet-600 animate-pulse"></p>
 
               <div class="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-100">
-                <div><label class="lbl">Chi phí sửa chữa</label><input id="f-blChiPhiSuaChua" class="inp font-mono text-right text-blue-700" oninput="BaoLanh.formatNumber(this)"></div>
+                <div><label class="lbl">Chi phí sửa chữa</label><input id="f-blChiPhiSuaChua" class="inp font-mono text-right text-blue-700" oninput="BaoLanh.formatNumber(this); BaoLanh.updateSummary()"></div>
                 <div><label class="lbl">Khách hàng tự trả</label><input id="f-blKhachHangTuTra" class="inp font-mono text-right text-rose-600" oninput="BaoLanh.formatNumber(this)"></div>
                 <div><label class="lbl">Giảm giá</label><input id="f-blGiamGia" class="inp font-mono text-right text-amber-600" oninput="BaoLanh.formatNumber(this)"></div>
-                <div><label class="lbl">BH Bảo lãnh</label><input id="f-blBaoHiemBaoLanh" class="inp font-mono text-right text-emerald-600" oninput="BaoLanh.formatNumber(this)"></div>
+                <div><label class="lbl">BH Bảo lãnh</label><input id="f-blBaoHiemBaoLanh" class="inp font-mono text-right text-emerald-600" oninput="BaoLanh.formatNumber(this); BaoLanh.updateSummary()"></div>
               </div>
 
               <button type="button" onclick="BaoLanh.sendMessage(curId)" class="w-full mt-2 py-2.5 bg-blue-600 text-white rounded-xl text-[13px] font-bold hover:bg-blue-700 flex items-center justify-center gap-2 shadow-md shadow-blue-200 transition-all active:scale-95">
                   <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> 
-                  Gửi PASC & BL qua Zalo Gara
+                  Gửi PASC & BL qua Zalo
               </button>
             </div>
           </div>
@@ -3779,6 +3782,7 @@ function openRecord(id) {
   // Cập nhật summary khi mở hồ sơ
   const summaryGara = document.getElementById('summary-garaname');
   if (summaryGara) summaryGara.textContent = rec.garaName || 'Chưa chọn Gara';
+  if (typeof BaoLanh.updateSummary === 'function') BaoLanh.updateSummary();
   
   // (Summary cho thụ hưởng đã được tự động xử lý bởi hàm switchRecvType bên trên)
   // --- GỌI HÀM RENDER SƠ ĐỒ Ở ĐÂY ---
@@ -11746,7 +11750,25 @@ const BaoLanh = {
         }
         try { input.setSelectionRange(newPos, newPos); } catch(e) {}
     },
-
+    updateSummary() {
+        const summaryEl = document.getElementById('summary-pasc-baolanh');
+        if (!summaryEl) return;
+        
+        const cp = document.getElementById('f-blChiPhiSuaChua')?.value;
+        const bl = document.getElementById('f-blBaoHiemBaoLanh')?.value;
+        const urlPasc = document.getElementById('f-pascUrl')?.value;
+        const urlBl = document.getElementById('f-baoLanhUrl')?.value;
+        
+        if (bl && bl !== '0') {
+            summaryEl.innerHTML = `<span class="text-emerald-600 font-bold">Bảo lãnh: ${bl}đ</span>`;
+        } else if (cp && cp !== '0') {
+            summaryEl.innerHTML = `<span class="text-blue-600 font-bold">Chi phí SC: ${cp}đ</span>`;
+        } else if (urlPasc || urlBl) {
+            summaryEl.textContent = 'Đã đính kèm Link';
+        } else {
+            summaryEl.textContent = 'Chưa có thông tin';
+        }
+    },
     async analyzeWithGemini() {
         const url = document.getElementById('f-baoLanhUrl')?.value.trim();
         if (!url) {
@@ -11833,6 +11855,7 @@ const BaoLanh = {
             setField('f-blKhachHangTuTra', parsed.khachHangTuTra);
             setField('f-blGiamGia',        parsed.giamGia);
             setField('f-blBaoHiemBaoLanh', parsed.baoHiemBaoLanh);
+            this.updateSummary();
 
             if (status) { 
                 status.textContent = '✅ Đã điền xong! Kiểm tra lại các số tiền nhé.'; 
