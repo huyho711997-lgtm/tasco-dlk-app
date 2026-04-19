@@ -2600,6 +2600,70 @@ GaraAuth._applyUI = function(user) {
   _origApplyUI(user);
   setTimeout(checkAdminRole, 500);
 };
+
+
+document.addEventListener('DOMContentLoaded', function() {
+ 
+  // ── 1. OVERRIDE toggleRecordPrintMenu ──
+  // Vấn đề cũ: preventDefault chặn click item; toggle gọi 2 lần khi click nút
+  window.toggleRecordPrintMenu = function(e) {
+    if (e) {
+      e.stopPropagation();
+      // KHÔNG gọi preventDefault - nó chặn action của button con
+    }
+    const menu = document.getElementById('md-print-menu');
+    if (!menu) return;
+    menu.classList.toggle('hidden');
+  };
+ 
+  // ── 2. ĐÓNG MENU KHI CLICK NGOÀI (listener mới, không trùng với cũ) ──
+  // Listener cũ trong code gốc vẫn chạy nhưng vô hại - listener mới này đủ mạnh
+  document.addEventListener('click', function(e) {
+    const wrap = document.getElementById('md-print-wrapper');
+    const menu = document.getElementById('md-print-menu');
+    if (!wrap || !menu) return;
+    if (!menu.classList.contains('hidden') && !wrap.contains(e.target)) {
+      menu.classList.add('hidden');
+    }
+  }, true); // useCapture=true để bắt trước listener cũ
+ 
+  // ── 3. PATCH openRecord: reset menu khi mở hồ sơ mới ──
+  const _origOpenRecord = window.openRecord;
+  window.openRecord = function(id) {
+    // Reset menu TRƯỚC khi render
+    const menu = document.getElementById('md-print-menu');
+    const wrap = document.getElementById('md-print-wrapper');
+    if (menu) menu.classList.add('hidden');
+    if (wrap) wrap.classList.add('hidden');
+ 
+    // Gọi hàm gốc
+    _origOpenRecord.call(this, id);
+ 
+    // Patch onclick các nút menu SAU khi render xong
+    setTimeout(function() {
+      // Đảm bảo menu đóng sau render
+      const menuAfter = document.getElementById('md-print-menu');
+      if (menuAfter) menuAfter.classList.add('hidden');
+ 
+      // Patch nút để đóng menu trước khi download
+      ['tbtn', 'bbgd', 'xnbt'].forEach(function(type) {
+        const btn = document.getElementById('btn-doc-' + type);
+        if (!btn) return;
+        // Clone để xoá tất cả listener cũ
+        const newBtn = btn.cloneNode(true);
+        newBtn.onclick = function(e) {
+          e.stopPropagation();
+          const m = document.getElementById('md-print-menu');
+          if (m) m.classList.add('hidden');
+          downloadSurveyorDoc(id, type);
+        };
+        btn.parentNode.replaceChild(newBtn, btn);
+      });
+    }, 30);
+  };
+ 
+  console.log('✅ [PATCH] Dropdown menu fixed');
+});
 </script>
 
 <!-- ══ MODAL USER ══ -->
