@@ -1729,8 +1729,9 @@ function openRecord(id) {
 
   // TÀI LIỆU GIÁM ĐỊNH TRÊN HEADER
   const printWrap = document.getElementById('md-print-wrapper');
-  const printMenu = document.getElementById('md-print-menu'); // Lấy element menu
-
+  const printMenu = document.getElementById('md-print-menu');
+  if (printMenu) printMenu.classList.add('hidden'); // ← THÊM DÒNG NÀY
+  
   if (r.step >= 1) { 
     printWrap.classList.remove('hidden');
     // BẮT BUỘC: Đóng menu nếu nó đang mở từ lần xem hồ sơ trước
@@ -1757,25 +1758,21 @@ function openRecord(id) {
 
 // ── XỬ LÝ MENU DROPDOWN IN TÀI LIỆU ──
 function toggleRecordPrintMenu(e) {
-    // Ngăn chặn sự kiện click lan ra ngoài document
-    if (e) { e.stopPropagation(); e.preventDefault(); }
-    
+    if (e) { e.stopPropagation(); }
     const menu = document.getElementById('md-print-menu');
-    if (menu) {
-        menu.classList.toggle('hidden');
-    }
+    if (!menu) return;
+    const isHidden = menu.classList.contains('hidden');
+    // Đóng tất cả trước, rồi mở nếu đang đóng
+    menu.classList.add('hidden');
+    if (isHidden) menu.classList.remove('hidden');
 }
 
-// Lắng nghe sự kiện click toàn màn hình để đóng menu
 document.addEventListener('click', function(e) {
     const wrap = document.getElementById('md-print-wrapper');
     const menu = document.getElementById('md-print-menu');
-    
-    // Nếu menu đang mở và vùng click chuột KHÔNG nằm trong menu/nút
-    if (wrap && menu && !menu.classList.contains('hidden')) {
-        if (!wrap.contains(e.target)) {
-            menu.classList.add('hidden');
-        }
+    if (!wrap || !menu) return;
+    if (!menu.classList.contains('hidden') && !wrap.contains(e.target)) {
+        menu.classList.add('hidden');
     }
 });
 
