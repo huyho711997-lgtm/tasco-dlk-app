@@ -2138,43 +2138,65 @@ async function downloadSurveyorDoc(recordId, templateType) {
   if (btn) { btn.disabled = true; btn.textContent = 'Đang tạo...'; }
 
   try {
+    // 1. Chuẩn bị dữ liệu chung
     const ownerType = r.ownerType || 'personal';
     const tenChuXe = ownerType === 'business' ? (r.ownerCompany || r.ownerRep || r.chuXe || '') : (r.ownerName || r.chuXe || '');
     const cccd = ownerType === 'business' ? (r.ownerMst || '') : (r.ownerCccd || '');
     const diaChiChuXe = ownerType === 'business' ? (r.ownerCompanyAddress || r.diaChi || '') : (r.ownerAddress || r.diaChi || '');
-    
     const now = moment();
 
-    // ĐỊNH TUYẾN ACTION ĐỂ KHỚP VỚI BACKEND CỦA BẠN
-    let actionName = 'export_word'; // Mặc định là Thông báo tai nạn (tbtn)
-    if (templateType === 'bbgd') actionName = 'export_bienbangd';
-    if (templateType === 'xnbt') actionName = 'export_xacnhanbt';
-
-    const payload = {
-      action: actionName, // Gửi đúng action để backend gọi đúng hàm
-      data: {
-        ...r, // Trải toàn bộ data của hồ sơ
-        tenChuXe: tenChuXe.toUpperCase(),
-        cccd: cccd,
-        diaChi: diaChiChuXe,
-        damageNguyenNhan: r.damageNguyenNhan || r.cause || '',
-        damageKienNghi: r.damageKienNghi || 'Giải quyết quyền lợi theo quy định',
-        garaName: r.garaName || currentUser.garaName || currentUser.name || '',
-        garaAddress: r.garaAddress || currentUser.garaAddress || '',
-        garaPhone: r.garaPhone || currentUser.garaPhone || '',
-        garaTax: r.garaTax || currentUser.garaTax || '',
-        garaBankOwner: r.garaBankOwner || currentUser.garaBankOwner || '',
-        garaBankNo: r.garaBankNo || currentUser.garaBankNo || '',
-        garaBankName: r.garaBankName || currentUser.garaBankName || '',
-        xnbtRecv: r.xnbtRecv || 'gara',
-        nguoiLienHe: currentUser.name || '',
-        ngay: now.format('DD'),
-        thang: now.format('MM'),
-        nam: now.format('YYYY'),
-        noiGiamDinh: r.location || r.garaName || currentUser.garaName || ''
-      }
+    // 2. Gộp chung vào một object hồ sơ chuẩn hóa
+    const normalizedRecord = {
+      ...r, // Trải toàn bộ dữ liệu gốc (GPLX, Đăng kiểm...)
+      tenChuXe: tenChuXe.toUpperCase(),
+      cccd: cccd,
+      diaChi: diaChiChuXe,
+      damageNguyenNhan: r.damageNguyenNhan || r.cause || '',
+      damageKienNghi: r.damageKienNghi || 'Giải quyết quyền lợi theo quy định',
+      garaName: r.garaName || currentUser.garaName || currentUser.name || '',
+      garaAddress: r.garaAddress || currentUser.garaAddress || '',
+      garaPhone: r.garaPhone || currentUser.garaPhone || '',
+      garaTax: r.garaTax || currentUser.garaTax || '',
+      garaBankOwner: r.garaBankOwner || currentUser.garaBankOwner || '',
+      garaBankNo: r.garaBankNo || currentUser.garaBankNo || '',
+      garaBankName: r.garaBankName || currentUser.garaBankName || '',
+      xnbtRecv: r.xnbtRecv || 'gara',
+      nguoiLienHe: currentUser.name || '',
+      noiGiamDinh: r.location || r.garaName || currentUser.garaName || ''
     };
 
+    let actionName = 'export_word';
+    let payloadData = {};
+
+    // 3. ĐÓNG GÓI DỮ LIỆU ĐÚNG CẤU TRÚC BACKEND YÊU CẦU CHO TỪNG LOẠI FORM
+    if (templateType === 'bbgd') {
+        actionName = 'export_bienbangd';
+        // Backend yêu cầu cấu trúc { item, hangMuc, nguyenNhan, kienNghi, ngay, thang, nam, noiGiamDinh }
+        payloadData = {
+            item: normalizedRecord,
+            hangMuc: r.damageItems || [],
+            nguyenNhan: normalizedRecord.damageNguyenNhan,
+            kienNghi: normalizedRecord.damageKienNghi,
+            ngay: now.format('DD'),
+            thang: now.format('MM'),
+            nam: now.format('YYYY'),
+            noiGiamDinh: normalizedRecord.noiGiamDinh
+        };
+    } else if (templateType === 'xnbt') {
+        actionName = 'export_xacnhanbt';
+        payloadData = normalizedRecord; // Backend dùng thẳng cục data
+    } else {
+        // TBTN (Thông báo tai nạn)
+        actionName = 'export_word';
+        payloadData = normalizedRecord; // Backend dùng thẳng cục data
+    }
+
+    const payload = {
+      action: actionName,
+      data: payloadData
+    };
+
+    // 4. Gọi API
     const res = await fetch(WORD_URL, {
       method: 'POST',
       body: JSON.stringify(payload),
@@ -2184,13 +2206,13 @@ async function downloadSurveyorDoc(recordId, templateType) {
     const json = await res.json();
     if (!json.success) throw new Error(json.error || 'Lỗi không xác định khi tạo file Word');
 
+    // 5. Tải file về
     const bytes = Uint8Array.from(atob(json.content), c => c.charCodeAt(0));
     const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     
-    // Tùy chỉnh tên file lưu về máy
     let prefix = 'TBTN';
     if (templateType === 'bbgd') prefix = 'BienBanGD';
     if (templateType === 'xnbt') prefix = 'XacNhanBT';
