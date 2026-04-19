@@ -2145,11 +2145,15 @@ async function downloadSurveyorDoc(recordId, templateType) {
     
     const now = moment();
 
+    // ĐỊNH TUYẾN ACTION ĐỂ KHỚP VỚI BACKEND CỦA BẠN
+    let actionName = 'export_word'; // Mặc định là Thông báo tai nạn (tbtn)
+    if (templateType === 'bbgd') actionName = 'export_bienbangd';
+    if (templateType === 'xnbt') actionName = 'export_xacnhanbt';
+
     const payload = {
-      action: 'export_word',
-      template: templateType, // tbtn, bbgd, xnbt
+      action: actionName, // Gửi đúng action để backend gọi đúng hàm
       data: {
-        ...r, // Lấy toàn bộ dữ liệu gốc của hồ sơ (gồm cả số GPLX, Đăng kiểm...)
+        ...r, // Trải toàn bộ data của hồ sơ
         tenChuXe: tenChuXe.toUpperCase(),
         cccd: cccd,
         diaChi: diaChiChuXe,
@@ -2185,7 +2189,13 @@ async function downloadSurveyorDoc(recordId, templateType) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = json.fileName || (`${templateType.toUpperCase()}_${r.bsx || 'xe'}.docx`);
+    
+    // Tùy chỉnh tên file lưu về máy
+    let prefix = 'TBTN';
+    if (templateType === 'bbgd') prefix = 'BienBanGD';
+    if (templateType === 'xnbt') prefix = 'XacNhanBT';
+    a.download = json.fileName || (`${prefix}_${r.bsx || 'xe'}.docx`);
+    
     a.click();
     URL.revokeObjectURL(url);
 
