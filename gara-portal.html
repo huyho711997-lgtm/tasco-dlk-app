@@ -130,41 +130,78 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
 
 /* ── TOPBAR ── */
 .topbar {
-  background: #0f172a;
-  padding: 0 24px;
-  height: 60px;
+  background: #0b1120;
+  padding: 0 20px;
+  height: 54px;
   display: flex; align-items: center; justify-content: space-between;
   flex-shrink: 0;
-  box-shadow: 0 2px 12px rgba(0,0,0,.25);
+  border-bottom: 1px solid rgba(255,255,255,.06);
 }
 .topbar-brand { display: flex; align-items: center; gap: 10px; }
 .topbar-brand-icon {
-  width: 36px; height: 36px;
+  width: 32px; height: 32px;
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 12px rgba(37,99,235,.4);
+  flex-shrink: 0;
 }
-.topbar-user { display: flex; align-items: center; gap: 10px; }
+.topbar-user { display: flex; align-items: center; gap: 8px; }
+.topbar-sep { width: 1px; height: 20px; background: rgba(255,255,255,.08); }
 .topbar-avatar {
-  width: 34px; height: 34px; border-radius: 10px;
+  width: 32px; height: 32px; border-radius: 9px;
   background: linear-gradient(135deg, #2563eb, #7c3aed);
   display: flex; align-items: center; justify-content: center;
-  font-weight: 800; color: #fff; font-size: 13px;
-  border: 1.5px solid rgba(255,255,255,.2);
+  font-weight: 900; color: #fff; font-size: 12px; flex-shrink: 0;
+  border: 1.5px solid rgba(255,255,255,.12);
 }
 .logout-btn {
-  padding: 7px 14px;
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.14);
-  border-radius: 9px;
-  color: rgba(255,255,255,.7);
-  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 11px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 8px;
+  color: rgba(255,255,255,.55);
+  font-size: 11px; font-weight: 700;
   cursor: pointer; transition: all .15s;
   font-family: inherit;
 }
-.logout-btn:hover { background: rgba(220,38,38,.2); border-color: rgba(220,38,38,.4); color: #fca5a5; }
+.logout-btn:hover { background: rgba(220,38,38,.15); border-color: rgba(220,38,38,.3); color: #fca5a5; }
 
+
+/* ── PROGRESS STEPS v2 ── */
+.step-dot-sm {
+  width: 18px; height: 18px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; font-weight: 900; flex-shrink: 0;
+}
+.sd-done  { background: #059669; color: #fff; }
+.sd-active{ background: #2563eb; color: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,.18); }
+.sd-pending{ background: #f1f5f9; color: #94a3b8; border: 1.5px solid #e2e8f0; }
+.sd-err   { background: #ef4444; color: #fff; }
+.step-line-sm { flex: 1; height: 2px; margin: 0 1px; }
+.sl-done  { background: #059669; }
+.sl-pending{ background: #e2e8f0; }
+
+.step-full { display: flex; align-items: flex-start; }
+.step-full-item { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 48px; }
+.step-full-row  { display: flex; align-items: center; width: 100%; }
+.step-full-dot  { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; }
+.sfd-done   { background: #059669; color: #fff; }
+.sfd-active { background: #2563eb; color: #fff; box-shadow: 0 0 0 4px rgba(37,99,235,.15); }
+.sfd-pending{ background: #f8fafc; color: #94a3b8; border: 2px solid #e2e8f0; }
+.sfd-err    { background: #fef2f2; border: 2px solid #fca5a5; color: #ef4444; }
+.step-full-line { flex: 1; height: 2px; }
+.sfl-done   { background: #059669; }
+.sfl-pending{ background: #e2e8f0; }
+.step-full-label { font-size: 9px; font-weight: 700; margin-top: 5px; text-align: center; white-space: nowrap; line-height: 1.3; }
+.sfl-done-lbl   { color: #059669; }
+.sfl-active-lbl { color: #2563eb; }
+.sfl-pending-lbl{ color: #94a3b8; }
+.sfl-err-lbl    { color: #ef4444; }
+.step-status-bar {
+  margin-top: 12px; padding: 10px 12px;
+  border-radius: 9px; display: flex; align-items: center; justify-content: space-between;
+}
 /* ── TABS ── */
 .tab-bar {
   background: #fff;
@@ -614,21 +651,22 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
   <div class="topbar">
     <div class="topbar-brand">
       <div class="topbar-brand-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
       </div>
       <div>
-        <p style="color:#f1f5f9;font-weight:900;font-size:15px;line-height:1">TASCO <span style="color:#60a5fa">DLK</span></p>
-        <p style="color:rgba(255,255,255,.35);font-size:10px;font-weight:600;margin-top:1px">Cổng Thông Tin Gara</p>
+        <p style="color:#f1f5f9;font-weight:900;font-size:14px;line-height:1;letter-spacing:-.3px">TASCO <span style="color:#60a5fa">DLK</span></p>
+        <p style="color:rgba(255,255,255,.28);font-size:9.5px;font-weight:600;margin-top:2px;text-transform:uppercase;letter-spacing:.08em">Cổng Thông Tin Gara</p>
       </div>
     </div>
     <div class="topbar-user">
-      <div>
-        <p id="app-gara-name" style="color:#f1f5f9;font-size:13px;font-weight:800;text-align:right"></p>
-        <p id="app-gara-sub" style="color:rgba(255,255,255,.4);font-size:10px;font-weight:600;text-align:right;margin-top:1px"></p>
+      <div style="text-align:right">
+        <p id="app-gara-name" style="color:#f1f5f9;font-size:12.5px;font-weight:800;line-height:1"></p>
+        <p id="app-gara-sub" style="color:rgba(255,255,255,.38);font-size:10px;font-weight:600;margin-top:2px"></p>
       </div>
+      <div class="topbar-sep"></div>
       <div id="app-avatar" class="topbar-avatar">G</div>
       <button class="logout-btn" onclick="GaraAuth.logout()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:4px"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Đăng xuất
       </button>
     </div>
@@ -1448,20 +1486,36 @@ function renderDashboard() {
 }
 
 function buildStepBar(currentStep) {
-  const mainSteps = [1,2,3,4,5,6,7];
-  const bars = mainSteps.map((s, i) => {
-    const done = currentStep >= s && currentStep !== 8;
-    const active = currentStep === s;
-    const dotClass = done ? 'done' : (active ? 'active' : 'pending');
-    const lineClass = (done && i < mainSteps.length - 1) ? 'done' : 'pending';
-    return `<div class="step-item">
-      <div style="display:flex;flex-direction:column;align-items:center">
-        <div class="step-dot ${dotClass}" style="width:22px;height:22px;font-size:9px">${done && !active ? '✓' : s}</div>
-      </div>
-      ${i < mainSteps.length - 1 ? `<div class="step-line ${lineClass}"></div>` : ''}
-    </div>`;
+  const labels = ['Nhận xe','Giám định','Báo giá','OK','Sửa chữa','Hoá đơn','TT'];
+  const isErr = currentStep === 8;
+  const dots = [1,2,3,4,5,6,7].map((s, i) => {
+    const done   = !isErr && currentStep > s;
+    const active = !isErr && currentStep === s;
+    const err    = isErr && currentStep <= s && s === Math.min(currentStep <= 3 ? 3 : currentStep, 8);
+    const dotCls = done ? 'sd-done' : (active ? 'sd-active' : (err ? 'sd-err' : 'sd-pending'));
+    const dot    = done ? '✓' : (err ? '!' : s);
+    const lineCls= done ? 'sl-done' : 'sl-pending';
+    return `<div class="step-dot-sm ${dotCls}" style="z-index:1">${dot}</div>`
+         + (i < 6 ? `<div class="step-line-sm ${lineCls}"></div>` : '');
   }).join('');
-  return `<div class="steps-bar">${bars}</div>`;
+  const badge = isErr
+    ? `<span style="font-size:10px;font-weight:800;color:#ef4444;white-space:nowrap">⚠ Cần bổ sung</span>`
+    : currentStep === 7
+    ? `<span style="font-size:10px;font-weight:800;color:#059669;white-space:nowrap">Hoàn tất ✓</span>`
+    : `<span style="font-size:10px;font-weight:700;color:#2563eb;white-space:nowrap">Bước ${currentStep}/7</span>`;
+  return `<div style="display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;align-items:center">${dots}</div>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;gap:0;flex:1">
+        ${labels.map((l,i) => {
+          const s=i+1, done=!isErr&&currentStep>s, active=!isErr&&currentStep===s;
+          const c = done?'#059669':active?'#2563eb':isErr&&s<=2?'#059669':'#cbd5e1';
+          return `<span style="flex:1;font-size:8.5px;font-weight:${done||active?700:500};color:${c};text-align:center;overflow:hidden">${l}</span>`;
+        }).join('')}
+      </div>
+      <div style="margin-left:8px">${badge}</div>
+    </div>
+  </div>`;
 }
 
 /* ═══════════════════════════════════
@@ -1524,22 +1578,45 @@ function openRecord(id) {
   document.getElementById('md-chip').innerHTML = `<span class="chip ${chipClass(r.step)}">${stepLabel(r.step)}</span>`;
 
   // Steps
-  const mainSteps = [1,2,3,4,5,6,7];
+  // Steps
+  const isErr = r.step === 8;
+  const stepLabels = ['Nhận xe','Giám định','Chờ báo giá','OK báo giá','Sửa chữa','Chờ hoá đơn','Thanh toán'];
+  const stepDots = [1,2,3,4,5,6,7].map((s, i) => {
+    const done   = !isErr && r.step > s;
+    const active = !isErr && r.step === s;
+    const err    = isErr && s <= 2 ? false : isErr && s === 3;
+    const dotCls = done ? 'sfd-done' : (active ? 'sfd-active' : (err ? 'sfd-err' : 'sfd-pending'));
+    const dot    = done ? '✓' : (err ? '!' : s);
+    const lineCls= done ? 'sfl-done' : 'sfl-pending';
+    const lblCls = done ? 'sfl-done-lbl' : (active ? 'sfl-active-lbl' : (err ? 'sfl-err-lbl' : 'sfl-pending-lbl'));
+    return `<div class="step-full-item">
+      <div class="step-full-row">
+        <div class="step-full-dot ${dotCls}">${dot}</div>
+        ${i < 6 ? `<div class="step-full-line ${lineCls}"></div>` : ''}
+      </div>
+      <div class="step-full-label ${lblCls}">${stepLabels[i]}</div>
+    </div>`;
+  }).join('');
+
+  const statusColor = isErr ? '#fef2f2' : r.step === 7 ? '#f0fdf4' : '#f0f9ff';
+  const statusBorder = isErr ? '#fecaca' : r.step === 7 ? '#bbf7d0' : '#bae6fd';
+  const statusTxtC = isErr ? '#0284c7' : r.step === 7 ? '#059669' : '#0284c7';
+  const statusLabel = isErr ? 'Cần bổ sung hồ sơ' : r.step === 7 ? 'Đã hoàn tất' : 'Đang xử lý';
+  const statusDesc  = isErr ? (r.missingDocsNote || 'Hồ sơ cần bổ sung') : stepLabels[r.step - 1] || '—';
+  const badgeColor  = isErr ? '#ef4444' : r.step === 7 ? '#059669' : '#2563eb';
+
   document.getElementById('md-steps').innerHTML = `
-    <div class="steps-bar" style="margin-bottom:6px">
-      ${mainSteps.map((s, i) => {
-        const done = r.step >= s && r.step !== 8;
-        const active = r.step === s;
-        const dotClass = done ? 'done' : (active ? 'active' : 'pending');
-        const lineClass = (done && i < mainSteps.length - 1) ? 'done' : 'pending';
-        return `<div class="step-item">
-          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
-            <div class="step-dot ${dotClass}">${done && !active ? '✓' : s}</div>
-            <div class="step-label" style="color:${dotClass==='done'?'#059669':dotClass==='active'?'#2563eb':'#94a3b8'}">${STEPS[i].label}</div>
-          </div>
-          ${i < mainSteps.length - 1 ? `<div class="step-line ${lineClass}" style="margin-bottom:16px"></div>` : ''}
-        </div>`;
-      }).join('')}
+    <div class="step-full" style="margin-bottom:12px">${stepDots}</div>
+    <div class="step-status-bar" style="background:${statusColor};border:1px solid ${statusBorder}">
+      <div>
+        <div style="font-size:10px;font-weight:800;color:${statusTxtC};text-transform:uppercase;letter-spacing:.04em">${statusLabel}</div>
+        <div style="font-size:13px;font-weight:700;color:#0f172a;margin-top:2px">
+          ${isErr ? (r.missingDocsNote || 'Hồ sơ cần bổ sung tài liệu') : 'Bước ' + r.step + ' — ' + statusDesc}
+        </div>
+      </div>
+      <div style="background:${badgeColor};color:#fff;font-size:${isErr?'14':'18'}px;font-weight:900;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        ${isErr ? '⚠' : r.step}
+      </div>
     </div>`;
 
   // Thông tin xe
