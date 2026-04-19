@@ -1064,6 +1064,14 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
             </div>
           </div>
           <div style="margin-top:16px;display:flex;gap:10px;position:relative;z-index:1" id="md-dl-buttons">
+          </div>
+        </div>
+      </div>
+
+      <div id="md-surveyor-section" class="hidden">
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:14px">
+          <div style="font-size:10px;font-weight:800;color:#1e40af;text-transform:uppercase;margin-bottom:10px">Tài liệu từ Giám định viên</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap" id="md-surveyor-buttons">
             </div>
         </div>
       </div>
@@ -1693,7 +1701,6 @@ function openRecord(id) {
   }
 
   // Hạng mục
-  // Hạng mục
   const dmSec = document.getElementById('md-damage-section');
   const items = r.damageItems || [];
   if (items.length) {
@@ -1714,6 +1721,19 @@ function openRecord(id) {
     }).join('');
   } else {
     dmSec.classList.add('hidden');
+  }
+
+  // TÀI LIỆU GIÁM ĐỊNH
+  const surveyorSec = document.getElementById('md-surveyor-section');
+  if (r.step >= 1) { 
+    surveyorSec.classList.remove('hidden');
+    document.getElementById('md-surveyor-buttons').innerHTML = `
+      <button id="btn-doc-tbtn" onclick="downloadSurveyorDoc('${r.id}', 'tbtn')" style="flex:1;padding:8px;background:#fff;border:1.5px solid #bfdbfe;border-radius:8px;color:#1d4ed8;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#fff'">📄 Thông báo tai nạn</button>
+      <button id="btn-doc-bbgd" onclick="downloadSurveyorDoc('${r.id}', 'bbgd')" style="flex:1;padding:8px;background:#fff;border:1.5px solid #bfdbfe;border-radius:8px;color:#1d4ed8;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#fff'">📄 Biên bản giám định</button>
+      <button id="btn-doc-xnbt" onclick="downloadSurveyorDoc('${r.id}', 'xnbt')" style="flex:1;padding:8px;background:#fff;border:1.5px solid #bfdbfe;border-radius:8px;color:#1d4ed8;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#fff'">📄 Xác nhận bồi thường</button>
+    `;
+  } else {
+    surveyorSec.classList.add('hidden');
   }
 
   openModal('record-modal');
@@ -2102,7 +2122,85 @@ async function downloadHopDong(recordId) {
   } catch(err) {
     Toast.fire({ icon: 'error', title: 'Lỗi: ' + err.message });
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '📄 Tải Hợp đồng SC'; }
+    if (btn) { btn.disabled = false; btn.textContent = '📄 Tải Hợp đồng SC';
+    }
+  }
+}
+
+async function downloadSurveyorDoc(recordId, templateType) {
+  const id = recordId || curRecordId;
+  if (!id) return;
+  const r = garaData.find(x => x.id === id);
+  if (!r) return;
+
+  const btn = document.getElementById('btn-doc-' + templateType);
+  const originalText = btn ? btn.textContent : 'Tải tài liệu';
+  if (btn) { btn.disabled = true; btn.textContent = 'Đang tạo...'; }
+
+  try {
+    // Chạy qua endpoint chung đã sử dụng cho app GĐV & Hợp đồng
+    const payload = {
+      action: 'export_word',
+      template: templateType, // tbtn, bbgd, xnbt
+      data: {
+        bsx: r.bsx || '',
+        hangXe: r.hangXe || '',
+        loaiXe: r.loaiXe || '',
+        namSanXuat: r.namSanXuat || '',
+        soKhung: r.soKhung || '',
+        soMay: r.soMay || '',
+        customer: r.customer || r.ownerName || '',
+        phone: r.phone || '',
+        notifyDate: r.notifyDate || '',
+        accidentDate: r.accidentDate || '',
+        location: r.location || '',
+        cause: r.cause || '',
+        description: r.description || '',
+        garaName: r.garaName || currentUser.garaName || currentUser.name || '',
+        garaAddress: r.garaAddress || currentUser.garaAddress || '',
+        garaPhone: r.garaPhone || currentUser.garaPhone || '',
+        garaTax: r.garaTax || currentUser.garaTax || '',
+        damageItems: (r.damageItems || []).map(d => ({
+            chiTiet: d.chiTiet || '',
+            moTa: d.moTa || '',
+            mucDo: d.mucDo || '',
+            thayThe: d.thayThe ? true : false,
+            suaChua: d.suaChua ? true : false,
+            giaOem: d.giaOem || 0,
+            giaAm: d.giaAm || 0
+        })),
+        chiPhiSuaChua: r.blChiPhiSuaChua || 0,
+        khachHangTuTra: r.blKhachHangTuTra || 0,
+        giamGia: r.blGiamGia || 0,
+        baoHiemBaoLanh: r.blBaoHiemBaoLanh || 0,
+        nguoiLienHe: currentUser.name || ''
+      }
+    };
+
+    const res = await fetch(WORD_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+    });
+    
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'Lỗi không xác định khi tạo file Word');
+
+    // Chuyển base64 về file và tự động tải xuống
+    const bytes = Uint8Array.from(atob(json.content), c => c.charCodeAt(0));
+    const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = json.fileName || (`${templateType.toUpperCase()}_${r.bsx || 'xe'}.docx`);
+    a.click();
+    URL.revokeObjectURL(url);
+
+    Toast.fire({ icon: 'success', title: 'Tải tài liệu thành công!' });
+  } catch(err) {
+    Toast.fire({ icon: 'error', title: 'Lỗi: ' + err.message });
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = originalText; }
   }
 }
 
