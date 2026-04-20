@@ -482,11 +482,13 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
 .notif-item:hover { background: #f8fafc; }
 .notif-item.unread { background: #f0f7ff; }
 .notif-dot { width: 8px; height: 8px; border-radius: 50%; background: #2563eb; flex-shrink: 0; margin-top: 5px; }
+
+.md-tab-btn { transition: color .15s, border-color .15s; }
+.md-tab-btn:hover:not(.active) { color: #334155 !important; background: #f8fafc; }
 </style>
 </head>
 <body>
 
-<!-- ══ LOGIN ══ -->
 <!-- ══ LOGIN ══ -->
 <div id="login-screen">
 
@@ -683,10 +685,6 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
       Tài chính
     </button>
-    <button class="tab-btn" id="tab-guarantee" onclick="goTab('guarantee')">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      Bảo lãnh & In ấn
-    </button>
     <button class="tab-btn" id="tab-admin" onclick="goTab('admin')" style="display:none">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       Quản trị
@@ -851,38 +849,6 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
       </div>
     </div>
 
-    <!-- ══ BẢO LÃNH & IN ẤN ══ -->
-    <div id="view-guarantee" class="view animate-in">
-      <div class="grid grid-cols-2 gap-5">
-
-        <!-- Thư bảo lãnh -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-              Thư Bảo Lãnh Đã Duyệt
-            </div>
-          </div>
-          <div style="padding:12px">
-            <div id="guarantee-list" style="display:flex;flex-direction:column;gap:10px"></div>
-          </div>
-        </div>
-
-        <!-- Kho biểu mẫu -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              Kho Biểu Mẫu Tự Động
-            </div>
-          </div>
-          <div style="padding:14px;display:flex;flex-direction:column;gap:10px" id="template-list">
-            <!-- Rendered by JS -->
-          </div>
-        </div>
-
-      </div>
-    </div>
     <!-- ══ ADMIN PANEL ══ -->
     <div id="view-admin" class="view animate-in">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
@@ -935,7 +901,7 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
 
 <!-- ══ MODAL CHI TIẾT HỒ SƠ ══ -->
 <div class="modal-overlay" id="record-modal">
-  <div class="modal-box" style="max-width:720px">
+  <div class="modal-box" style="max-width:760px">
     <div class="modal-header">
       <div>
         <div style="font-size:18px;font-weight:900;color:var(--text)" id="md-bsx">—</div>
@@ -943,106 +909,137 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
       </div>
       <div style="display:flex;align-items:center;gap:10px">
         <span id="md-chip"></span>
+        <!-- NÚT IN HỒ SƠ -->
+        <button onclick="openSurveyorPrintModal()" style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:#1e40af;color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#1e40af'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          In hồ sơ
+        </button>
         <button onclick="closeModal('record-modal')" style="width:32px;height:32px;border-radius:9px;border:1.5px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#94a3b8;transition:all .15s" onmouseover="this.style.background='#fff1f2';this.style.color='#ef4444'" onmouseout="this.style.background='#fff';this.style.color='#94a3b8'">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
       </div>
     </div>
-    <div class="modal-body" style="display:flex;flex-direction:column;gap:16px">
 
-      <!-- Tiến độ -->
-      <div>
-        <div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;margin-bottom:12px">Tiến độ xử lý</div>
-        <div id="md-steps"></div>
-      </div>
+    <!-- THANH TIẾN ĐỘ -->
+    <div style="padding:16px 24px;background:#f8fafc;border-bottom:1px solid #f1f5f9">
+      <div id="md-steps"></div>
+    </div>
 
-      <!-- Thông tin xe & chủ xe -->
-      <div class="grid grid-cols-2 gap-4">
-        <div style="background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:14px">
-          <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;margin-bottom:10px">Thông tin xe</div>
-          <div id="md-car-info" style="display:flex;flex-direction:column;gap:6px"></div>
-        </div>
-        <div style="background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:14px">
-          <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;margin-bottom:10px">Chủ xe & Liên hệ</div>
-          <div id="md-owner-info" style="display:flex;flex-direction:column;gap:6px"></div>
-        </div>
-      </div>
+    <!-- TABS BÊN TRONG MODAL -->
+    <div style="display:flex;gap:0;padding:0 24px;background:#fff;border-bottom:1.5px solid var(--border)">
+      <button class="md-tab-btn active" onclick="switchMdTab('info')" id="md-tab-info" style="padding:11px 16px;font-size:12px;font-weight:700;color:#2563eb;border-bottom:2.5px solid #2563eb;cursor:pointer;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;display:flex;align-items:center;gap:5px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Thông tin
+      </button>
+      <button class="md-tab-btn" onclick="switchMdTab('damage')" id="md-tab-damage" style="padding:11px 16px;font-size:12px;font-weight:700;color:#94a3b8;border-bottom:2.5px solid transparent;cursor:pointer;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;display:flex;align-items:center;gap:5px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m14.5 4-5 16"/><path d="M5 8h8"/><path d="M4 12h8"/><path d="M7 16h4"/></svg>
+        Hạng mục giám định
+      </button>
+      <button class="md-tab-btn" onclick="switchMdTab('finance')" id="md-tab-finance" style="padding:11px 16px;font-size:12px;font-weight:700;color:#94a3b8;border-bottom:2.5px solid transparent;cursor:pointer;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;display:flex;align-items:center;gap:5px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Tài chính
+      </button>
+    </div>
 
-      <!-- Lỗi hồ sơ -->
-      <div id="md-error-section" class="hidden">
-        <div style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:12px;padding:14px">
-          <div style="font-size:11px;font-weight:800;color:#e11d48;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Hồ sơ cần bổ sung
-          </div>
-          <p id="md-error-text" style="font-size:13px;color:#7f1d1d;font-weight:600;line-height:1.6"></p>
-          <div style="margin-top:10px">
-            <label class="upload-zone" style="display:block">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" style="margin:0 auto 6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              <p style="font-size:12px;font-weight:700;color:#2563eb">Nhấn để upload bổ sung</p>
-              <p style="font-size:11px;color:var(--muted);margin-top:2px">Ảnh chứng từ, hoá đơn, giấy tờ...</p>
-              <input type="file" accept="image/*,.pdf" multiple class="hidden" onchange="handleUploadSuplement(event)">
-            </label>
-          </div>
-        </div>
-      </div>
+    <div class="modal-body">
 
-      <!-- Chi phí sửa chữa -->
-      <div id="md-finance-section" class="hidden">
-        <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:14px">
-          <div style="font-size:10px;font-weight:800;color:#0284c7;text-transform:uppercase;margin-bottom:10px">💰 Chi phí sửa chữa</div>
-          <div id="md-finance-info" style="display:flex;flex-direction:column;gap:8px"></div>
-        </div>
-      </div>
-
-      <!-- Thanh toán -->
-      <div id="md-payment-section" class="hidden">
-        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px">
-          <div style="font-size:10px;font-weight:800;color:#059669;text-transform:uppercase;margin-bottom:10px">Thông tin thanh toán</div>
-          <div id="md-payment-info" style="display:flex;flex-direction:column;gap:8px"></div>
-        </div>
-      </div>
-
-      <!-- Bảo lãnh -->
-      <div id="md-guarantee-section" class="hidden">
-        <div class="guarantee-card">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;position:relative;z-index:1">
-            <div>
-              <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,.5);text-transform:uppercase;margin-bottom:6px">Thư bảo lãnh & PASC</div>
-              <div style="font-size:20px;font-weight:900;color:#fff;letter-spacing:-.5px" id="md-guarantee-amount">—</div>
-              <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px" id="md-guarantee-date"></div>
+      <!-- TAB: THÔNG TIN -->
+      <div id="md-panel-info">
+        <!-- Lỗi hồ sơ -->
+        <div id="md-error-section" class="hidden" style="margin-bottom:14px">
+          <div style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:12px;padding:14px">
+            <div style="font-size:11px;font-weight:800;color:#e11d48;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Hồ sơ cần bổ sung
             </div>
-            <div class="qr-box">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="5" height="5"/><rect x="16" y="3" width="5" height="5"/><rect x="3" y="16" width="5" height="5"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
-            </div>
+            <p id="md-error-text" style="font-size:13px;color:#7f1d1d;font-weight:600;line-height:1.6"></p>
           </div>
-          <div style="margin-top:16px;display:flex;gap:10px;position:relative;z-index:1" id="md-dl-buttons">
+        </div>
+
+        <!-- Thông tin xe & chủ xe -->
+        <div class="grid grid-cols-2 gap-4">
+          <div style="background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:14px">
+            <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11v12H5z"/><path d="M14 17h1a3 3 0 0 0 3-3v-2h2.5"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+              Thông tin xe
+            </div>
+            <div id="md-car-info" style="display:flex;flex-direction:column;gap:7px"></div>
+          </div>
+          <div style="background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:14px">
+            <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Chủ xe & Liên hệ
+            </div>
+            <div id="md-owner-info" style="display:flex;flex-direction:column;gap:7px"></div>
+          </div>
+        </div>
+
+        <!-- Bảo lãnh -->
+        <div id="md-guarantee-section" class="hidden" style="margin-top:14px">
+          <div class="guarantee-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;position:relative;z-index:1">
+              <div>
+                <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,.5);text-transform:uppercase;margin-bottom:6px">Thư bảo lãnh & PASC</div>
+                <div style="font-size:20px;font-weight:900;color:#fff;letter-spacing:-.5px" id="md-guarantee-amount">—</div>
+                <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px" id="md-guarantee-date"></div>
+              </div>
+              <div class="qr-box">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="5" height="5"/><rect x="16" y="3" width="5" height="5"/><rect x="3" y="16" width="5" height="5"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
+              </div>
+            </div>
+            <div style="margin-top:16px;display:flex;gap:10px;position:relative;z-index:1" id="md-dl-buttons"></div>
           </div>
         </div>
       </div>
 
-      <div id="md-surveyor-section" class="hidden">
-        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:14px">
-          <div style="font-size:10px;font-weight:800;color:#1e40af;text-transform:uppercase;margin-bottom:10px">Tài liệu từ Giám định viên</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap" id="md-surveyor-buttons">
-            </div>
+      <!-- TAB: HẠNG MỤC GIÁM ĐỊNH -->
+      <div id="md-panel-damage" style="display:none">
+        <div id="md-damage-empty" style="padding:48px 20px;text-align:center;color:var(--muted)">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 10px;opacity:.4"><path d="m14.5 4-5 16"/><path d="M5 8h8"/><path d="M4 12h8"/><path d="M7 16h4"/></svg>
+          <p style="font-size:13px;font-weight:600">Chưa có hạng mục giám định</p>
         </div>
-      </div>
-
-      <!-- Hạng mục sửa chữa -->
-      <div id="md-damage-section" class="hidden">
-        <div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Hạng mục sửa chữa</div>
-        <div class="card" style="overflow:hidden">
+        <div id="md-damage-wrap" style="display:none">
           <table class="data-table" style="font-size:12px">
             <thead>
               <tr>
-                <th style="padding-left:14px; width:70%">Bộ phận / Chi tiết</th>
-                <th>Phương án</th>
+                <th style="padding-left:16px;width:40px">#</th>
+                <th>Bộ phận / Chi tiết</th>
+                <th style="width:120px;text-align:center">Phương án</th>
+                <th style="width:140px;text-align:right;padding-right:16px">Đơn giá</th>
               </tr>
             </thead>
             <tbody id="md-damage-body"></tbody>
           </table>
+          <div style="padding:12px 16px;background:#f8fafc;border-top:1.5px solid var(--border);display:flex;justify-content:flex-end;align-items:center;gap:8px">
+            <span style="font-size:12px;font-weight:700;color:var(--muted)">Tổng cộng:</span>
+            <span id="md-damage-total" style="font-size:15px;font-weight:900;color:#0f172a"></span>
+          </div>
         </div>
+      </div>
+
+      <!-- TAB: TÀI CHÍNH -->
+      <div id="md-panel-finance" style="display:none;display:flex;flex-direction:column;gap:12px">
+
+        <!-- Chi phí -->
+        <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:16px">
+          <div style="font-size:10px;font-weight:800;color:#0284c7;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:5px">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Chi phí sửa chữa
+          </div>
+          <div id="md-finance-info" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+
+        <!-- Thanh toán -->
+        <div id="md-payment-section" class="hidden">
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:16px">
+            <div style="font-size:10px;font-weight:800;color:#059669;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:5px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              Thanh toán
+            </div>
+            <div id="md-payment-info" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -1367,6 +1364,82 @@ function closeModal(id) {
   document.getElementById(id).classList.remove('open');
 }
 
+function switchMdTab(tab) {
+  ['info','damage','finance'].forEach(t => {
+    const btn = document.getElementById('md-tab-' + t);
+    const panel = document.getElementById('md-panel-' + t);
+    const isActive = t === tab;
+    btn.style.color = isActive ? '#2563eb' : '#94a3b8';
+    btn.style.borderBottomColor = isActive ? '#2563eb' : 'transparent';
+    panel.style.display = isActive ? (t === 'finance' ? 'flex' : 'block') : 'none';
+  });
+}
+
+function openSurveyorPrintModal() {
+  if (!curRecordId) return;
+  const r = garaData.find(x => x.id === curRecordId);
+  if (!r) return;
+
+  Swal.fire({
+    title: '<span style="font-size:16px;font-weight:900">Chọn tài liệu cần in</span>',
+    html: `
+      <div style="display:flex;flex-direction:column;gap:10px;text-align:left;margin-top:8px">
+        <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer">
+          <input type="checkbox" id="chk-tbtn" checked style="width:16px;height:16px;accent-color:#1d4ed8">
+          <div>
+            <p style="font-size:13px;font-weight:700;color:#0f172a">Thông báo tai nạn</p>
+            <p style="font-size:11px;color:#94a3b8">Khai báo tai nạn ban đầu</p>
+          </div>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer">
+          <input type="checkbox" id="chk-bbgd" checked style="width:16px;height:16px;accent-color:#1d4ed8">
+          <div>
+            <p style="font-size:13px;font-weight:700;color:#0f172a">Biên bản giám định</p>
+            <p style="font-size:11px;color:#94a3b8">Mô tả chi tiết tổn thất xe</p>
+          </div>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer">
+          <input type="checkbox" id="chk-xnbt" style="width:16px;height:16px;accent-color:#1d4ed8">
+          <div>
+            <p style="font-size:13px;font-weight:700;color:#0f172a">Xác nhận bồi thường</p>
+            <p style="font-size:11px;color:#94a3b8">Xác nhận chi trả bồi thường</p>
+          </div>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer">
+          <input type="checkbox" id="chk-hopdong" style="width:16px;height:16px;accent-color:#1d4ed8">
+          <div>
+            <p style="font-size:13px;font-weight:700;color:#0f172a">Hợp đồng sửa chữa</p>
+            <p style="font-size:11px;color:#94a3b8">Hợp đồng giữa gara & khách hàng</p>
+          </div>
+        </label>
+      </div>`,
+    showCancelButton: true,
+    confirmButtonText: 'Tải xuống',
+    cancelButtonText: 'Hủy',
+    confirmButtonColor: '#1e40af',
+    customClass: { popup: 'rnd' },
+    preConfirm: () => {
+      const selected = {
+        tbtn:    document.getElementById('chk-tbtn')?.checked,
+        bbgd:    document.getElementById('chk-bbgd')?.checked,
+        xnbt:    document.getElementById('chk-xnbt')?.checked,
+        hopdong: document.getElementById('chk-hopdong')?.checked
+      };
+      if (!Object.values(selected).some(Boolean)) {
+        Swal.showValidationMessage('Chọn ít nhất 1 tài liệu!');
+        return false;
+      }
+      return selected;
+    }
+  }).then(result => {
+    if (!result.isConfirmed) return;
+    const sel = result.value;
+    if (sel.tbtn)    downloadSurveyorDoc(curRecordId, 'tbtn');
+    if (sel.bbgd)    downloadSurveyorDoc(curRecordId, 'bbgd');
+    if (sel.xnbt)    downloadSurveyorDoc(curRecordId, 'xnbt');
+    if (sel.hopdong) downloadHopDong(curRecordId);
+  });
+}
 /* ═══════════════════════════════════
    DASHBOARD
 ═══════════════════════════════════ */
@@ -1600,42 +1673,33 @@ function openRecord(id) {
     gtSec.classList.add('hidden');
   }
 
-  // Hạng mục
-  const dmSec = document.getElementById('md-damage-section');
+  // Hạng mục giám định (tab riêng)
   const items = r.damageItems || [];
+  const dmWrap  = document.getElementById('md-damage-wrap');
+  const dmEmpty = document.getElementById('md-damage-empty');
   if (items.length) {
-    dmSec.classList.remove('hidden');
-    document.getElementById('md-damage-body').innerHTML = items.map(d => {
+    dmWrap.style.display = 'block';
+    dmEmpty.style.display = 'none';
+    const total = items.reduce((acc, d) => acc + (d.giaOem || d.giaAm || 0), 0);
+    document.getElementById('md-damage-body').innerHTML = items.map((d, i) => {
       const pa = d.suaChua ? 'Sửa chữa' : 'Thay thế';
       const chipCls = d.suaChua ? 'chip-3' : 'chip-5';
-      const chiTiet = d.chiTiet || '—';
-      const moTaHtml = d.moTa ? '<div style="font-size:10px;color:var(--muted);margin-top:4px;font-weight:500">' + d.moTa + '</div>' : '';
-      
-      return '<tr>' +
-        '<td style="padding-left:14px;vertical-align:top">' +
-          '<div style="font-size:12px;font-weight:800;color:var(--text)">' + chiTiet + '</div>' +
-          moTaHtml +
-        '</td>' +
-        '<td style="vertical-align:top"><span class="chip ' + chipCls + '" style="font-size:9px">' + pa + '</span></td>' +
-      '</tr>';
+      const gia = (d.giaOem || d.giaAm) ? Number(d.giaOem || d.giaAm).toLocaleString('vi-VN') + 'đ' : '—';
+      const moTaHtml = d.moTa ? `<div style="font-size:10px;color:var(--muted);margin-top:3px">${d.moTa}</div>` : '';
+      return `<tr>
+        <td style="padding-left:16px;text-align:center;color:var(--muted);font-size:11px">${i+1}</td>
+        <td><div style="font-size:12px;font-weight:800">${d.chiTiet || '—'}</div>${moTaHtml}</td>
+        <td style="text-align:center"><span class="chip ${chipCls}" style="font-size:9px">${pa}</span></td>
+        <td style="text-align:right;padding-right:16px;font-size:12px;font-weight:700;font-family:monospace">${gia}</td>
+      </tr>`;
     }).join('');
+    document.getElementById('md-damage-total').textContent = total > 0 ? total.toLocaleString('vi-VN') + 'đ' : '—';
   } else {
-    dmSec.classList.add('hidden');
+    dmWrap.style.display = 'none';
+    dmEmpty.style.display = 'block';
   }
 
-  // TÀI LIỆU GIÁM ĐỊNH
-  const surveyorSec = document.getElementById('md-surveyor-section');
-  if (r.step >= 1) { 
-    surveyorSec.classList.remove('hidden');
-    document.getElementById('md-surveyor-buttons').innerHTML = `
-      <button id="btn-doc-tbtn" onclick="downloadSurveyorDoc('${r.id}', 'tbtn')" style="flex:1;padding:8px;background:#fff;border:1.5px solid #bfdbfe;border-radius:8px;color:#1d4ed8;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#fff'">📄 Thông báo tai nạn</button>
-      <button id="btn-doc-bbgd" onclick="downloadSurveyorDoc('${r.id}', 'bbgd')" style="flex:1;padding:8px;background:#fff;border:1.5px solid #bfdbfe;border-radius:8px;color:#1d4ed8;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#fff'">📄 Biên bản giám định</button>
-      <button id="btn-doc-xnbt" onclick="downloadSurveyorDoc('${r.id}', 'xnbt')" style="flex:1;padding:8px;background:#fff;border:1.5px solid #bfdbfe;border-radius:8px;color:#1d4ed8;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#fff'">📄 Xác nhận bồi thường</button>
-    `;
-  } else {
-    surveyorSec.classList.add('hidden');
-  }
-
+  switchMdTab('info');
   openModal('record-modal');
 }
 
@@ -1733,7 +1797,7 @@ function renderFinance() {
 
 function getAmount(r) {
   if (r.baoLanhAmount) return parseFloat((r.baoLanhAmount + '').replace(/\D/g,'')) || 0;
-  if (r.blChiPhiSuaChua) return parseFloat((r.blChiPhiSuaChua + '').replace(/\D/g,'')) || 0;
+  if (r.blBaoHiemBaoLanh) return parseFloat((r.blBaoHiemBaoLanh + '').replace(/\D/g,'')) || 0;
   return 0;
 }
 
