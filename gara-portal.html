@@ -2555,8 +2555,20 @@ function renderUsersTable() {
     (v.garaName||v.name||'').toLowerCase().includes(search));
   if (roleF) entries = entries.filter(([k,v]) => v.role === roleF);
 
-  const roleClass = { admin:'role-admin', gara:'role-gara', nhanvien:'role-nv' };
-  const roleLabel = { admin:'Admin', gara:'Gara', nhanvien:'Nhân viên' };
+  // Cập nhật thêm adminbt vào 2 đối tượng này:
+  const roleClass = { 
+    admin: 'role-admin', 
+    gara: 'role-gara', 
+    nhanvien: 'role-nv',
+    adminbt: 'role-admin' // Sử dụng chung màu vàng của admin hoặc bạn có thể tạo class riêng
+  };
+
+  const roleLabel = { 
+    admin: 'Hệ thống', 
+    gara: 'Gara', 
+    nhanvien: 'Nhân viên',
+    adminbt: 'Bồi thường' // Nhãn hiển thị trên bảng
+  };
 
   document.getElementById('usr-tbody').innerHTML = entries.length
     ? entries.map(([key, u]) => `
@@ -2936,10 +2948,12 @@ async function saveAdminBtAction() {
       </div>
       <div class="fgrp">
         <label class="lbl">Vai trò</label>
-        <select id="usr-role" class="inp">
-          <option value="gara">Gara đối tác</option>
-          <option value="nhanvien">Nhân viên</option>
-          <option value="admin">Admin</option>
+        <select id="usr-role-filter" class="inp" style="width:180px;background:#fff;border-radius:24px;border:1.5px solid #cbd5e1;padding:10px 14px" onchange="renderUsersTable()">
+            <option value="">Tất cả vai trò</option>
+            <option value="admin">Quản trị (Admin)</option>
+            <option value="gara">Gara đối tác</option>
+            <option value="nhanvien">Nhân viên Tasco</option>
+            <option value="adminbt">Admin bồi thường</option> </select>
         </select>
       </div>
       <div class="fgrp">
