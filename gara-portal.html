@@ -783,7 +783,7 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
       </div>
     </div>
 
-    
+
     <div id="view-adminbt" class="view animate-in">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
         <div>
@@ -1314,6 +1314,18 @@ const GaraAuth = {
     const av = document.getElementById('app-avatar');
     av.textContent = (user.garaName || user.name).charAt(0).toUpperCase();
     if (user.color) av.style.background = `linear-gradient(135deg,${user.color},${user.color}99)`;
+
+    // Xử lý ẩn/hiện tab dựa trên quyền adminbt
+    if (user.role === 'adminbt') {
+      document.getElementById('tab-dashboard').style.display = 'none';
+      document.getElementById('tab-finance').style.display = 'none';
+      document.getElementById('tab-admin').style.display = 'none';
+      // Mặc định nhảy vào tab bồi thường
+      goTab('adminbt');
+    } else {
+      document.getElementById('tab-dashboard').style.display = 'flex';
+      document.getElementById('tab-finance').style.display = 'flex';
+    }
   },
 
   async logout() {
@@ -2443,14 +2455,21 @@ function loadGaraList() {
 
 function checkAdminRole() {
   if (!currentUser) return;
+
+  // Quyền Admin hệ thống (Full quyền)
   if (currentUser.role === 'admin') {
     document.getElementById('tab-admin').style.display = 'flex';
-    loadAdminData();
-  }
-  // Cấp quyền Tab Bồi thường cho Admin hoặc Nhân viên bồi thường
-  if (currentUser.role === 'admin' || currentUser.role === 'nhanvien' || currentUser.role === 'adminbt') {
     document.getElementById('tab-adminbt').style.display = 'flex';
-    if(allWorkstationData.length > 0) renderAdminBtRecords();
+    loadAdminData();
+  } 
+  // Quyền Admin Bồi thường hoặc Nhân viên bồi thường
+  else if (currentUser.role === 'adminbt' || currentUser.role === 'nhanvien') {
+    document.getElementById('tab-adminbt').style.display = 'flex';
+    document.getElementById('tab-admin').style.display = 'none';
+  }
+
+  if ((currentUser.role === 'admin' || currentUser.role === 'nhanvien' || currentUser.role === 'adminbt') && allWorkstationData.length > 0) {
+    renderAdminBtRecords();
   }
 }
 
