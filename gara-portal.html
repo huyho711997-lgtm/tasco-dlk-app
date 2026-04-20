@@ -394,6 +394,28 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
 .swal2-popup.rnd { border-radius: 1.5rem !important; padding: 1.5rem !important; }
 .swal2-html-container { margin: 0 !important; }
 
+/* ── CUSTOM TOAST MINIMAL ── */
+.toast-minimal {
+  border-radius: 12px !important;
+  padding: 8px 20px 8px 12px !important;
+  width: auto !important;
+  box-shadow: 0 8px 24px rgba(15,23,42,0.1) !important;
+  border: 1px solid #e2e8f0 !important;
+  background: #ffffff !important;
+  margin-top: 16px !important;
+}
+.toast-minimal .swal2-title {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  margin: 0 !important;
+}
+.toast-minimal .swal2-icon {
+  transform: scale(0.6) !important;
+  margin: 0 8px 0 0 !important;
+  border: none !important;
+}
+
 /* ── GUARANTEE CARD ── */
 .guarantee-card {
   background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
@@ -487,6 +509,23 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
 .md-tab-btn { transition: color .15s, border-color .15s; }
 .md-tab-btn:hover:not(.active) { color: #334155 !important; background: #f8fafc; }
 .role-adminbt { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+
+/* ── PAGINATION ── */
+.page-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all .15s;
+  font-family: inherit;
+}
+.page-btn:hover:not(:disabled) { background: #f1f5f9; color: var(--text); }
+.page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -745,43 +784,49 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
 
       <!-- BẢNG HỒ SƠ ĐẦY ĐỦ -->
       <div class="card">
-        <div style="padding:14px 16px;background:#f8fafc;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
-          <div style="position:relative;flex:1">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input id="rec-search" type="text" class="inp" style="padding-left:36px;background:#fff" placeholder="Tìm biển số, mã vụ..." oninput="renderRecords()">
+        <div style="padding:16px 20px;background:#f8fafc;border-bottom:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+          <div style="position:relative;flex:1;min-width:240px">
+            <svg width="14" height="14" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94a3b8;pointer-events:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input id="abt-search" type="text" class="inp" style="padding:10px 14px 10px 38px;background:#fff;border-radius:24px;border:1.5px solid #cbd5e1" placeholder="Tìm biển số, mã vụ, tên gara..." oninput="abtCurrentPage=1; renderAdminBtRecords()">
           </div>
-          <select id="rec-filter" class="inp" style="width:200px;background:#fff" onchange="renderRecords()">
+          
+          <select id="abt-limit" class="inp" style="width:120px;background:#fff;border-radius:24px;border:1.5px solid #cbd5e1;padding:10px 14px" onchange="changeAbtLimit()">
+            <option value="10">10 dòng</option>
+            <option value="20" selected>20 dòng</option>
+            <option value="50">50 dòng</option>
+            <option value="100">100 dòng</option>
+          </select>
+
+          <select id="abt-filter" class="inp" style="width:180px;background:#fff;border-radius:24px;border:1.5px solid #cbd5e1;padding:10px 14px" onchange="abtCurrentPage=1; renderAdminBtRecords()">
             <option value="">Tất cả trạng thái</option>
-            <option value="1">Đã nhận xe</option>
-            <option value="2">Đang giám định</option>
-            <option value="3">Chờ báo giá</option>
-            <option value="4">Đã có báo giá</option>
-            <option value="5">Đang sửa chữa</option>
-            <option value="6">Chờ hoá đơn</option>
-            <option value="7">Đã thanh toán</option>
-            <option value="8">Chờ bổ sung HS</option>
+            <option value="8">⚠ Đang bị lỗi (Cần BS)</option>
+            <option value="7">✓ Đã thanh toán</option>
+            <option value="received">📁 Đã nhận HS gốc</option>
           </select>
         </div>
-        <div style="overflow-x:auto">
+        
+        <div style="overflow-x:auto; min-height: 400px">
           <table class="data-table">
             <thead>
               <tr>
-                <th style="padding-left:18px">Mã vụ / Biển số</th>
-                <th>Xe / Chủ xe</th>
+                <th style="padding-left:20px">BSX / Mã Vụ</th>
+                <th>Gara / Chủ xe</th>
                 <th>Trạng thái</th>
-                <th>Tiến độ</th>
-                <th>Ngày tiếp nhận</th>
-                <th>Hạng mục lỗi</th>
-                <th style="width:90px;text-align:center">Chi tiết</th>
+                <th style="text-align:center">HS Gốc</th>
+                <th>Ghi chú lỗi</th>
+                <th style="text-align:center;width:100px">Thao tác</th>
               </tr>
             </thead>
-            <tbody id="rec-tbody"></tbody>
+            <tbody id="abt-tbody"></tbody>
           </table>
         </div>
-        <div style="padding:10px 16px;background:#f8fafc;border-top:1px solid var(--border)">
-          <span id="rec-count" style="font-size:12px;color:var(--muted);font-weight:700"></span>
+        
+        <div style="padding:12px 20px;background:#f8fafc;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <span id="abt-count" style="font-size:12px;color:var(--muted);font-weight:700"></span>
+          <div id="abt-pagination" style="display:flex;gap:4px"></div>
         </div>
       </div>
+    </div>
     </div>
 
 
@@ -1195,9 +1240,12 @@ function fmt(n) {
 }
 
 const Toast = Swal.mixin({
-  toast: true, position: 'top-end',
-  showConfirmButton: false, timer: 2800, timerProgressBar: true,
-  customClass: { popup: 'rnd' }
+  toast: true, 
+  position: 'top-end',
+  showConfirmButton: false, 
+  timer: 2500, 
+  timerProgressBar: false, /* Tắt thanh chạy cho gọn gàng */
+  customClass: { popup: 'toast-minimal' }
 });
 
 
@@ -2785,12 +2833,20 @@ GaraAuth._applyUI = function(user) {
 /* ═══════════════════════════════════
    LOGIC CHO QUYỀN ADMIN BỒI THƯỜNG
 ═══════════════════════════════════ */
+/* ═══════════════════════════════════
+   LOGIC CHO QUYỀN ADMIN BỒI THƯỜNG
+═══════════════════════════════════ */
+// Biến trạng thái phân trang
+let abtCurrentPage = 1;
+let abtRowsPerPage = 20;
+
 function renderAdminBtRecords() {
   const search = (document.getElementById('abt-search')?.value || '').toLowerCase();
   const filter = document.getElementById('abt-filter')?.value || '';
 
   let list = allWorkstationData;
   
+  // 1. Lọc dữ liệu
   if (search) {
     list = list.filter(r => 
       (r.bsx || '').toLowerCase().includes(search) || 
@@ -2807,12 +2863,23 @@ function renderAdminBtRecords() {
     }
   }
 
-  // Sắp xếp ưu tiên: Lỗi (8) -> Chưa nhận HS gốc -> Mới nhất
+  // 2. Sắp xếp ưu tiên: Lỗi (8) -> Chưa nhận HS gốc -> Mới nhất
   list.sort((a, b) => (b.step === 8 ? 1 : 0) - (a.step === 8 ? 1 : 0) || (a.daNhanHoSoGoc ? 1 : 0) - (b.daNhanHoSoGoc ? 1 : 0) || new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
+  // 3. Xử lý phân trang (Cắt mảng)
+  const totalItems = list.length;
+  const totalPages = Math.ceil(totalItems / abtRowsPerPage) || 1;
+  
+  if (abtCurrentPage > totalPages) abtCurrentPage = totalPages;
+  if (abtCurrentPage < 1) abtCurrentPage = 1;
+
+  const startIndex = (abtCurrentPage - 1) * abtRowsPerPage;
+  const paginatedList = list.slice(startIndex, startIndex + abtRowsPerPage);
+
+  // 4. Render HTML ra bảng
   const tbody = document.getElementById('abt-tbody');
-  tbody.innerHTML = list.length
-    ? list.map(r => {
+  tbody.innerHTML = paginatedList.length
+    ? paginatedList.map(r => {
         const isErr = r.step === 8;
         const hardcopyBadge = r.daNhanHoSoGoc 
           ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:6px;background:#ecfdf5;color:#059669;font-size:10px;font-weight:800;border:1px solid #a7f3d0"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Đã nhận</span>` 
@@ -2841,7 +2908,61 @@ function renderAdminBtRecords() {
       }).join('')
     : `<tr><td colspan="6" style="padding:48px;text-align:center;color:var(--muted);font-size:13px">Không tìm thấy hồ sơ nào</td></tr>`;
 
-  document.getElementById('abt-count').textContent = `Tổng cộng: ${list.length} hồ sơ`;
+  // 5. Cập nhật Text thống kê
+  const endCount = Math.min(startIndex + abtRowsPerPage, totalItems);
+  document.getElementById('abt-count').textContent = totalItems > 0 
+    ? `Hiển thị dòng ${startIndex + 1} đến ${endCount} (Tổng số: ${totalItems} hồ sơ)` 
+    : 'Tổng cộng: 0 hồ sơ';
+
+  // 6. Vẽ thanh phân trang
+  renderAbtPagination(totalPages);
+}
+
+// Các hàm hỗ trợ Phân trang
+function changeAbtLimit() {
+  abtRowsPerPage = parseInt(document.getElementById('abt-limit').value) || 20;
+  abtCurrentPage = 1; // Đổi số dòng thì reset về trang 1
+  renderAdminBtRecords();
+}
+
+function goToAbtPage(page) {
+  abtCurrentPage = page;
+  renderAdminBtRecords();
+}
+
+function renderAbtPagination(totalPages) {
+  const container = document.getElementById('abt-pagination');
+  if (totalPages <= 1) { container.innerHTML = ''; return; }
+
+  let html = `<button class="page-btn" ${abtCurrentPage === 1 ? 'disabled' : ''} onclick="goToAbtPage(${abtCurrentPage - 1})">«</button>`;
+
+  // Logic hiển thị cửa sổ trang (Chỉ hiện tối đa 5 trang xung quanh trang hiện tại để ko bị dài quá)
+  let startPage = Math.max(1, abtCurrentPage - 2);
+  let endPage = Math.min(totalPages, startPage + 4);
+  if (endPage - startPage < 4) {
+    startPage = Math.max(1, endPage - 4);
+  }
+
+  // Trang đầu
+  if (startPage > 1) {
+    html += `<button class="page-btn" onclick="goToAbtPage(1)">1</button>`;
+    if (startPage > 2) html += `<span style="padding:4px 8px;font-size:12px;color:var(--muted)">...</span>`;
+  }
+
+  // Các trang ở giữa
+  for (let i = startPage; i <= endPage; i++) {
+    html += `<button class="page-btn ${i === abtCurrentPage ? 'active' : ''}" onclick="goToAbtPage(${i})">${i}</button>`;
+  }
+
+  // Trang cuối
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) html += `<span style="padding:4px 8px;font-size:12px;color:var(--muted)">...</span>`;
+    html += `<button class="page-btn" onclick="goToAbtPage(${totalPages})">${totalPages}</button>`;
+  }
+
+  html += `<button class="page-btn" ${abtCurrentPage === totalPages ? 'disabled' : ''} onclick="goToAbtPage(${abtCurrentPage + 1})">»</button>`;
+  
+  container.innerHTML = html;
 }
 
 function openAdminBtAction(id) {
