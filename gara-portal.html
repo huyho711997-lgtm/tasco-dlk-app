@@ -1272,7 +1272,8 @@ const GaraAuth = {
       if (user.password !== password) {
         throw new Error('Mật khẩu không chính xác!');
       }
-      if (user.role !== 'gara' && user.role !== 'admin') {
+      // Đã cấp phép thêm cho adminbt và nhanvien đăng nhập
+      if (user.role !== 'gara' && user.role !== 'admin' && user.role !== 'adminbt' && user.role !== 'nhanvien') {
         throw new Error('Bạn không có quyền truy cập Cổng Đối Tác!');
       }
       if (user.active === false) {
