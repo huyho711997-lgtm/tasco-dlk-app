@@ -1286,6 +1286,10 @@ textarea.inp { resize:vertical; }
       <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="4" height="15" rx="1"/></svg>
       <span class="sidebar-text whitespace-nowrap">Kanban Hồ sơ</span>
     </button>   
+    <button title="Phiếu bàn giao HS" onclick="goView('handover')" id="nav-handover" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      <span class="sidebar-text whitespace-nowrap">Bàn giao hồ sơ</span>
+    </button>    
     <button title="Quản lý hồ sơ" onclick="goView('manage')" id="nav-manage" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
       <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v1"/><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v5z"/></svg> 
       <span class="sidebar-text whitespace-nowrap">Quản lý hồ sơ</span>
@@ -1423,6 +1427,69 @@ textarea.inp { resize:vertical; }
 
     </div>
 
+    <!-- KPI strip -->
+    <div class="grid grid-cols-4 gap-4 shrink-0">
+      <div class="card p-4 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tổng phiếu</p><p class="text-2xl font-extrabold text-slate-800" id="ho-kpi-total">0</p></div>
+      </div>
+      <div class="card p-4 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Chờ xác nhận</p><p class="text-2xl font-extrabold text-amber-500" id="ho-kpi-pending">0</p></div>
+      </div>
+      <div class="card p-4 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Đã xác nhận</p><p class="text-2xl font-extrabold text-emerald-500" id="ho-kpi-confirmed">0</p></div>
+      </div>
+      <div class="card p-4 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        </div>
+        <div><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">HS đã bàn giao</p><p class="text-2xl font-extrabold text-blue-600" id="ho-kpi-records">0</p></div>
+      </div>
+    </div>
+
+    <!-- Toolbar tạo phiếu mới -->
+    <div class="card px-5 py-4 flex items-center gap-4 shrink-0">
+      <button onclick="HandOver.openCreateModal()" class="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-blue-600 transition-all shadow-md">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Tạo phiếu bàn giao mới
+      </button>
+      <div class="relative flex-1 max-w-sm">
+        <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="ho-search" oninput="HandOver.render()" placeholder="Tìm số phiếu, người tạo..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-400 focus:bg-white">
+      </div>
+      <select id="ho-filter-status" onchange="HandOver.render()" class="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 outline-none cursor-pointer focus:border-blue-400">
+        <option value="">Tất cả trạng thái</option>
+        <option value="pending">Chờ xác nhận</option>
+        <option value="confirmed">Đã xác nhận</option>
+      </select>
+      <span class="ml-auto text-xs text-slate-400 font-semibold" id="ho-count"></span>
+    </div>
+
+    <!-- Bảng danh sách phiếu -->
+    <div class="card overflow-hidden shrink-0">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-slate-50 border-b border-slate-100">
+            <th class="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Số phiếu / Ngày tạo</th>
+            <th class="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Người bàn giao</th>
+            <th class="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wide text-center">Số hồ sơ</th>
+            <th class="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Ghi chú</th>
+            <th class="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Trạng thái</th>
+            <th class="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wide text-center">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="ho-tbody" class="divide-y divide-slate-50"></tbody>
+      </table>
+    </div>
+  </div>
     <!-- CLOUD CỦA TÔI -->
     <div id="view-cloud" class="view hidden h-full flex flex-col" style="gap:0;overflow-y:hidden">
       <div class="mn-sticky-header shrink-0">
@@ -2941,6 +3008,105 @@ textarea.inp { resize:vertical; }
   </div>
 </div>
 
+
+<!-- ══ MODAL TẠO PHIẾU BÀN GIAO ══ -->
+<div id="ho-create-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity duration-300">
+<div class="bg-white w-[96vw] max-w-5xl max-h-[92vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-300">
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#0f172a,#1e293b)" class="px-7 py-5 flex items-center justify-between shrink-0">
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
+        <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
+      </div>
+      <div>
+        <p class="text-white text-base font-extrabold leading-none" id="ho-modal-title">Tạo phiếu bàn giao hồ sơ</p>
+        <p class="text-slate-400 text-xs mt-1">Chọn hồ sơ cần bàn giao cho bộ phận Bồi thường</p>
+      </div>
+    </div>
+    <button onclick="HandOver.closeCreateModal()" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white transition-all">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="flex flex-1 min-h-0 overflow-hidden">
+
+    <!-- Cột trái: Chọn hồ sơ -->
+    <div class="flex-1 flex flex-col border-r border-slate-100 min-h-0">
+      <div class="px-5 py-3 bg-slate-50 border-b border-slate-100 flex items-center gap-3 shrink-0">
+        <p class="text-xs font-black text-slate-700 uppercase tracking-wide flex-1">Chọn hồ sơ bàn giao</p>
+        <div class="relative">
+          <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="ho-rec-search" oninput="HandOver.filterRecords()" placeholder="Tìm biển số..." class="pl-8 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg outline-none focus:border-blue-400 w-44">
+        </div>
+        <span id="ho-rec-count" class="text-xs text-slate-400 font-semibold shrink-0"></span>
+      </div>
+      <div class="flex-1 overflow-y-auto" id="ho-rec-list"></div>
+    </div>
+
+    <!-- Cột phải: Hồ sơ đã chọn + Thông tin phiếu -->
+    <div class="w-72 flex flex-col border-l border-slate-100 min-h-0 shrink-0">
+      <div class="px-4 py-3 bg-slate-50 border-b border-slate-100 shrink-0">
+        <p class="text-xs font-black text-slate-700 uppercase tracking-wide">Đã chọn <span id="ho-sel-count" class="text-blue-600">0</span> hồ sơ</p>
+      </div>
+      <!-- Danh sách đã chọn -->
+      <div id="ho-sel-list" class="flex-1 overflow-y-auto min-h-0 max-h-52 border-b border-slate-100 px-1 py-2"></div>
+      <!-- Thông tin phiếu -->
+      <div class="p-4 flex flex-col gap-3 shrink-0">
+        <div>
+          <label class="lbl">Người nhận (Admin BT)</label>
+          <input id="ho-receiver" class="inp" placeholder="Tên người nhận...">
+        </div>
+        <div>
+          <label class="lbl">Ghi chú</label>
+          <textarea id="ho-note" rows="2" class="inp resize-none" placeholder="Ghi chú bàn giao..."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
+    <span class="text-xs text-slate-400">Sau khi tạo, phiếu sẽ gửi đến Admin Bồi thường để xác nhận</span>
+    <div class="flex gap-3">
+      <button onclick="HandOver.closeCreateModal()" class="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all">Hủy</button>
+      <button onclick="HandOver.submitCreate()" class="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-extrabold hover:bg-blue-600 transition-all shadow-md flex items-center gap-2">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        Tạo & Gửi phiếu
+      </button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ MODAL XEM CHI TIẾT / XÁC NHẬN PHIẾU ══ -->
+<div id="ho-view-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity duration-300">
+<div class="bg-white w-[96vw] max-w-4xl max-h-[92vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-300">
+
+  <!-- Header modal xem -->
+  <div style="background:linear-gradient(135deg,#0f172a,#1e293b)" class="px-7 py-5 flex items-center justify-between shrink-0">
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center">
+        <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div>
+        <p class="text-white text-base font-extrabold leading-none" id="hov-title">Chi tiết phiếu bàn giao</p>
+        <p class="text-slate-400 text-xs mt-1" id="hov-subtitle">—</p>
+      </div>
+    </div>
+    <button onclick="HandOver.closeViewModal()" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white transition-all">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <!-- Body modal xem -->
+  <div class="flex-1 overflow-y-auto p-6" id="hov-body"></div>
+
+  <!-- Footer modal xem -->
+  <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between shrink-0" id="hov-footer"></div>
+</div>
+</div>
 <script>
 /* ═══════════════════════════════════════
    CONFIG & GLOBALS
@@ -3087,7 +3253,7 @@ function toggleSidebar() {
   }, 300);
 }
 
-var viewTitles={dashboard:'Bảng điều khiển',manage:'Quản lý Hồ sơ',calendar:'Lịch giám định',overdue:'Hồ sơ trễ hẹn',import:'Tiếp nhận AI',stats:'Thống kê & Báo cáo',kanban:'Kanban Hồ sơ',cloud:'Cloud của tôi'};
+var viewTitles={handover: 'Phiếu bàn giao hồ sơ',dashboard:'Bảng điều khiển',manage:'Quản lý Hồ sơ',calendar:'Lịch giám định',overdue:'Hồ sơ trễ hẹn',import:'Tiếp nhận AI',stats:'Thống kê & Báo cáo',kanban:'Kanban Hồ sơ',cloud:'Cloud của tôi'};
 
 function goView(v) {
   document.querySelectorAll('.view').forEach(function(el){ 
@@ -11928,6 +12094,485 @@ const BaoLanh = {
                 setTimeout(() => { window.open(`https://zalo.me/${cleanPhone}`, '_blank'); }, 300);
             }
         });
+    }
+};
+
+/* ═══════════════════════════════════════
+   HANDOVER — PHIẾU BÀN GIAO HỒ SƠ
+═══════════════════════════════════════ */
+const HandOver = {
+    _allVouchers: [],
+    _selectedIds: new Set(),
+    _editingId: null,
+    _printTimeout: null,
+
+    /* ── Firebase listener ── */
+    init() {
+        db.ref('HandoverVouchers').on('value', snap => {
+            const raw = snap.val() || {};
+            this._allVouchers = Object.keys(raw).map(k => Object.assign({ _key: k }, raw[k]))
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            this.render();
+            this._updateKPIs();
+        });
+    },
+
+    /* ── KPIs ── */
+    _updateKPIs() {
+        const v = this._allVouchers;
+        const totalRecords = v.reduce((s, x) => s + (x.records ? x.records.length : 0), 0);
+        document.getElementById('ho-kpi-total').textContent    = v.length;
+        document.getElementById('ho-kpi-pending').textContent  = v.filter(x => x.status === 'pending').length;
+        document.getElementById('ho-kpi-confirmed').textContent= v.filter(x => x.status === 'confirmed').length;
+        document.getElementById('ho-kpi-records').textContent  = totalRecords;
+    },
+
+    /* ── Render table ── */
+    render() {
+        const q   = (document.getElementById('ho-search')?.value || '').toLowerCase();
+        const stt = document.getElementById('ho-filter-status')?.value || '';
+        let list = this._allVouchers.filter(v => {
+            const text = [v.voucherNo, v.createdByName, v.receiver, v.note].join(' ').toLowerCase();
+            return text.includes(q) && (!stt || v.status === stt);
+        });
+        document.getElementById('ho-count').textContent = list.length + ' phiếu';
+
+        const statusBadge = s => s === 'confirmed'
+            ? '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black uppercase"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>Đã xác nhận</span>'
+            : '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-black uppercase"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Chờ xác nhận</span>';
+
+        const tbody = document.getElementById('ho-tbody');
+        tbody.innerHTML = list.length ? list.map(v => `
+            <tr class="hover:bg-blue-50/40 cursor-pointer border-b border-slate-50 transition-colors" onclick="HandOver.openViewModal('${v._key}')">
+              <td class="px-5 py-4">
+                <p class="font-black text-slate-800 text-sm">${v.voucherNo || '—'}</p>
+                <p class="text-xs text-slate-400 mt-0.5">${v.createdAt ? moment(v.createdAt).format('HH:mm · DD/MM/YYYY') : '—'}</p>
+              </td>
+              <td class="px-5 py-4">
+                <p class="text-sm font-bold text-slate-700">${v.createdByName || '—'}</p>
+              </td>
+              <td class="px-5 py-4 text-center">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-black text-sm">${v.records ? v.records.length : 0}</span>
+              </td>
+              <td class="px-5 py-4">
+                <p class="text-xs text-slate-500 max-w-[180px] truncate">${v.note || '—'}</p>
+              </td>
+              <td class="px-5 py-4">${statusBadge(v.status)}</td>
+              <td class="px-5 py-4 text-center">
+                <div class="flex items-center justify-center gap-2">
+                  <button onclick="event.stopPropagation();HandOver.printVoucher('${v._key}')" class="p-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 hover:text-blue-600 text-slate-500 transition-all" title="In phiếu">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                  </button>
+                  ${v.status === 'pending' ? `
+                  <button onclick="event.stopPropagation();HandOver.deleteVoucher('${v._key}')" class="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-100 hover:text-rose-600 text-slate-500 transition-all" title="Xóa phiếu">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                  </button>` : ''}
+                </div>
+              </td>
+            </tr>`) .join('')
+            : '<tr><td colspan="6" class="px-5 py-16 text-center text-slate-400 text-sm font-bold">Chưa có phiếu bàn giao nào</td></tr>';
+    },
+
+    /* ── Mở modal tạo ── */
+    openCreateModal() {
+        this._selectedIds.clear();
+        this._editingId = null;
+        document.getElementById('ho-modal-title').textContent = 'Tạo phiếu bàn giao hồ sơ';
+        document.getElementById('ho-receiver').value = '';
+        document.getElementById('ho-note').value = '';
+        document.getElementById('ho-rec-search').value = '';
+        this._renderRecordList();
+        this._renderSelectedList();
+        const w = document.getElementById('ho-create-modal');
+        const b = w.querySelector('div');
+        w.classList.remove('hidden');
+        setTimeout(() => { w.classList.remove('opacity-0'); b.classList.remove('scale-95'); }, 10);
+    },
+    closeCreateModal() {
+        const w = document.getElementById('ho-create-modal');
+        const b = w.querySelector('div');
+        w.classList.add('opacity-0'); b.classList.add('scale-95');
+        setTimeout(() => w.classList.add('hidden'), 280);
+    },
+
+    /* ── Render danh sách hồ sơ để chọn ── */
+    _renderRecordList() {
+        const q = (document.getElementById('ho-rec-search')?.value || '').toLowerCase();
+        // Lọc hồ sơ chưa thanh toán (step < 7)
+        let list = allData.filter(r => r.step < 7);
+        if (q) list = list.filter(r => [r.bsx, r.claimCode, r.customer, r.garaName].join(' ').toLowerCase().includes(q));
+        // Sắp xếp mới nhất lên đầu theo notifyDate
+        list.sort((a, b) => moment(b.notifyDate, ['DD/MM/YYYY HH:mm', 'DD/MM/YYYY']).valueOf() - moment(a.notifyDate, ['DD/MM/YYYY HH:mm', 'DD/MM/YYYY']).valueOf());
+
+        const el = document.getElementById('ho-rec-list');
+        document.getElementById('ho-rec-count').textContent = list.length + ' hồ sơ';
+
+        el.innerHTML = list.length ? list.map(r => {
+            const sel = this._selectedIds.has(r.id);
+            const stepColors = { 1:'#4f46e5',2:'#d97706',3:'#0891b2',4:'#16a34a',5:'#8b5cf6',6:'#10b981',8:'#e11d48' };
+            return `<label class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-blue-50/60 border-b border-slate-50 transition-colors ${sel ? 'bg-blue-50' : ''}" onclick="HandOver._toggleRecord('${r.id}')">
+              <div class="w-5 h-5 rounded flex items-center justify-center border-2 transition-all flex-shrink-0 ${sel ? 'bg-blue-600 border-blue-600' : 'border-slate-300 bg-white'}">
+                ${sel ? '<svg class="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>' : ''}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-black text-slate-800 text-sm flex items-center gap-2">
+                  <span>${r.bsx || '—'}</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" style="background:${stepColors[r.step] || '#475569'}18;color:${stepColors[r.step] || '#475569'}">${stepLabel(r.step)}</span>
+                </p>
+                <p class="text-xs text-slate-400 mt-0.5 truncate">${r.claimCode || ''} ${r.customer ? '· ' + r.customer : ''}</p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-xs font-bold text-teal-600">${r.garaName || '—'}</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">${r.notifyDate || '—'}</p>
+              </div>
+            </label>`;
+        }).join('') : '<p class="px-5 py-10 text-center text-slate-400 text-sm">Không có hồ sơ phù hợp</p>';
+    },
+
+    filterRecords() { this._renderRecordList(); },
+
+    _toggleRecord(id) {
+        if (this._selectedIds.has(id)) this._selectedIds.delete(id);
+        else this._selectedIds.add(id);
+        this._renderRecordList();
+        this._renderSelectedList();
+    },
+
+    _renderSelectedList() {
+        const el = document.getElementById('ho-sel-list');
+        document.getElementById('ho-sel-count').textContent = this._selectedIds.size;
+        if (!this._selectedIds.size) {
+            el.innerHTML = '<p class="px-3 py-4 text-center text-xs text-slate-400">Chưa chọn hồ sơ nào</p>';
+            return;
+        }
+        el.innerHTML = Array.from(this._selectedIds).map(id => {
+            const r = allData.find(x => x.id === id);
+            if (!r) return '';
+            return `<div class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 border-b border-slate-50">
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-black text-slate-700 truncate">${r.bsx || '—'}</p>
+                <p class="text-[10px] text-slate-400 truncate">${r.garaName || '—'}</p>
+              </div>
+              <button onclick="HandOver._toggleRecord('${id}')" class="p-1 rounded hover:bg-rose-100 text-slate-300 hover:text-rose-500 transition-all flex-shrink-0">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              </button>
+            </div>`;
+        }).join('');
+    },
+
+    /* ── Tạo phiếu ── */
+    async submitCreate() {
+        if (!this._selectedIds.size) {
+            Toast.fire({ icon: 'warning', title: 'Vui lòng chọn ít nhất 1 hồ sơ!' });
+            return;
+        }
+        const receiver = document.getElementById('ho-receiver').value.trim();
+        const note     = document.getElementById('ho-note').value.trim();
+
+        const currentUser = Auth.getCurrentUser();
+        const voucherNo = 'BG-' + moment().format('YYYYMMDD') + '-' + String(this._allVouchers.length + 1).padStart(3, '0');
+
+        const records = Array.from(this._selectedIds).map(id => {
+            const r = allData.find(x => x.id === id);
+            return r ? { id, bsx: r.bsx, claimCode: r.claimCode, customer: r.customer, garaName: r.garaName, step: r.step, notifyDate: r.notifyDate } : null;
+        }).filter(Boolean);
+
+        const payload = {
+            voucherNo,
+            status: 'pending',
+            createdAt: new Date().toISOString(),
+            createdById: currentUser?.id || currentUser?.username || 'unknown',
+            createdByName: currentUser?.name || 'Giám định viên',
+            receiver: receiver || 'Bộ phận Bồi thường',
+            note,
+            records,
+            confirmedAt: null,
+            confirmedBy: null
+        };
+
+        try {
+            await db.ref('HandoverVouchers/' + Date.now()).set(payload);
+            this.closeCreateModal();
+            Toast.fire({ icon: 'success', title: `Đã tạo phiếu ${voucherNo}!` });
+        } catch (e) {
+            Toast.fire({ icon: 'error', title: 'Lỗi: ' + e.message });
+        }
+    },
+
+    /* ── Modal xem / xác nhận ── */
+    openViewModal(key) {
+        const v = this._allVouchers.find(x => x._key === key);
+        if (!v) return;
+
+        const statusBadge = v.status === 'confirmed'
+            ? '<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-black"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>Đã xác nhận</span>'
+            : '<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs font-black"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Chờ xác nhận</span>';
+
+        document.getElementById('hov-title').textContent = v.voucherNo || 'Chi tiết phiếu';
+        document.getElementById('hov-subtitle').textContent = `Tạo lúc ${v.createdAt ? moment(v.createdAt).format('HH:mm · DD/MM/YYYY') : '—'} bởi ${v.createdByName}`;
+
+        const confirmedBlock = v.status === 'confirmed' ? `
+          <div class="mt-5 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <div>
+              <p class="text-sm font-black text-emerald-800">Đã xác nhận nhận hồ sơ</p>
+              <p class="text-xs text-emerald-600 mt-0.5">Bởi <b>${v.confirmedBy || '—'}</b> · ${v.confirmedAt ? moment(v.confirmedAt).format('HH:mm · DD/MM/YYYY') : '—'}</p>
+            </div>
+          </div>` : '';
+
+        document.getElementById('hov-body').innerHTML = `
+          <!-- Thông tin phiếu -->
+          <div class="grid grid-cols-2 gap-5 mb-5">
+            <div class="space-y-3">
+              <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                <span class="text-xs text-slate-500 font-semibold">Số phiếu</span>
+                <span class="text-sm font-black text-slate-800 font-mono">${v.voucherNo}</span>
+              </div>
+              <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                <span class="text-xs text-slate-500 font-semibold">Người bàn giao</span>
+                <span class="text-sm font-bold text-slate-800">${v.createdByName}</span>
+              </div>
+              <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                <span class="text-xs text-slate-500 font-semibold">Người nhận</span>
+                <span class="text-sm font-bold text-slate-800">${v.receiver || '—'}</span>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                <span class="text-xs text-slate-500 font-semibold">Ngày tạo</span>
+                <span class="text-sm font-bold text-slate-800">${v.createdAt ? moment(v.createdAt).format('HH:mm · DD/MM/YYYY') : '—'}</span>
+              </div>
+              <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                <span class="text-xs text-slate-500 font-semibold">Số hồ sơ</span>
+                <span class="text-sm font-black text-blue-600">${v.records ? v.records.length : 0} hồ sơ</span>
+              </div>
+              <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                <span class="text-xs text-slate-500 font-semibold">Trạng thái</span>
+                ${statusBadge}
+              </div>
+            </div>
+          </div>
+          ${v.note ? `<div class="mb-5 p-4 bg-blue-50 border border-blue-100 rounded-xl"><p class="text-xs text-blue-600 font-bold uppercase mb-1">Ghi chú</p><p class="text-sm text-blue-900">${v.note}</p></div>` : ''}
+
+          <!-- Danh sách hồ sơ -->
+          <div class="border border-slate-200 rounded-xl overflow-hidden">
+            <div class="px-4 py-3 bg-slate-50 border-b border-slate-200">
+              <p class="text-xs font-black text-slate-600 uppercase tracking-wide">Danh sách hồ sơ bàn giao</p>
+            </div>
+            <table class="w-full border-collapse text-sm">
+              <thead><tr class="border-b border-slate-100 bg-slate-50/60">
+                <th class="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase">#</th>
+                <th class="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase">Biển số / Mã vụ</th>
+                <th class="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase">Khách hàng</th>
+                <th class="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase">Gara</th>
+                <th class="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase">Ngày báo</th>
+                <th class="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase">Trạng thái</th>
+              </tr></thead>
+              <tbody class="divide-y divide-slate-50">
+                ${(v.records || []).map((r, i) => `
+                  <tr class="hover:bg-blue-50/30 transition-colors">
+                    <td class="px-4 py-3 text-slate-400 text-xs">${i + 1}</td>
+                    <td class="px-4 py-3"><p class="font-black text-slate-800">${r.bsx || '—'}</p><p class="text-[10px] text-slate-400 font-mono">${r.claimCode || ''}</p></td>
+                    <td class="px-4 py-3 text-slate-600 text-xs">${r.customer || '—'}</td>
+                    <td class="px-4 py-3 text-teal-600 text-xs font-bold">${r.garaName || '—'}</td>
+                    <td class="px-4 py-3 text-slate-500 text-xs">${r.notifyDate || '—'}</td>
+                    <td class="px-4 py-3"><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">${stepLabel(r.step || 1)}</span></td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+          ${confirmedBlock}`;
+
+        // Footer buttons
+        const cu = Auth.getCurrentUser();
+        const isAdminBT = cu && (cu.role === 'admin' || cu.role === 'adminbt' || cu.role === 'nhanvien');
+        document.getElementById('hov-footer').innerHTML = `
+          <div class="flex items-center gap-3 ml-auto">
+            <button onclick="HandOver.printVoucher('${key}')" class="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-700 rounded-xl text-sm font-bold transition-all">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              In phiếu
+            </button>
+            ${isAdminBT && v.status === 'pending' ? `
+            <button onclick="HandOver.confirmVoucher('${key}')" class="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-extrabold transition-all shadow-md">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+              Xác nhận đã nhận hồ sơ
+            </button>` : ''}
+            <button onclick="HandOver.closeViewModal()" class="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all">Đóng</button>
+          </div>`;
+
+        const w = document.getElementById('ho-view-modal');
+        const b = w.querySelector('div');
+        w.classList.remove('hidden');
+        setTimeout(() => { w.classList.remove('opacity-0'); b.classList.remove('scale-95'); }, 10);
+    },
+    closeViewModal() {
+        const w = document.getElementById('ho-view-modal');
+        const b = w.querySelector('div');
+        w.classList.add('opacity-0'); b.classList.add('scale-95');
+        setTimeout(() => w.classList.add('hidden'), 280);
+    },
+
+    /* ── Xác nhận nhận hồ sơ ── */
+    async confirmVoucher(key) {
+        const cu = Auth.getCurrentUser();
+        const result = await Swal.fire({
+            title: '<span class="font-extrabold text-base text-slate-900">Xác nhận đã nhận hồ sơ?</span>',
+            html: '<p class="text-sm text-slate-500 mt-2">Bạn xác nhận đã nhận đủ toàn bộ hồ sơ trong phiếu bàn giao này.</p>',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Xác nhận nhận hồ sơ',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#059669',
+            customClass: { popup: 'rnd' }
+        });
+        if (!result.isConfirmed) return;
+        try {
+            await db.ref('HandoverVouchers/' + key).update({
+                status: 'confirmed',
+                confirmedAt: new Date().toISOString(),
+                confirmedBy: cu?.name || cu?.username || 'Admin BT'
+            });
+            this.closeViewModal();
+            Toast.fire({ icon: 'success', title: 'Đã xác nhận nhận hồ sơ!' });
+        } catch (e) {
+            Toast.fire({ icon: 'error', title: 'Lỗi: ' + e.message });
+        }
+    },
+
+    /* ── Xóa phiếu ── */
+    async deleteVoucher(key) {
+        const r = await Swal.fire({
+            title: 'Xóa phiếu bàn giao?', icon: 'warning',
+            showCancelButton: true, confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Xóa', cancelButtonText: 'Hủy',
+            customClass: { popup: 'rnd' }
+        });
+        if (!r.isConfirmed) return;
+        await db.ref('HandoverVouchers/' + key).remove();
+        Toast.fire({ icon: 'success', title: 'Đã xóa phiếu!' });
+    },
+
+    /* ── In phiếu bàn giao ── */
+    printVoucher(key) {
+        const v = this._allVouchers.find(x => x._key === key);
+        if (!v) return;
+        const w = window.open('', '_blank');
+        if (!w) { Toast.fire({ icon: 'error', title: 'Trình duyệt chặn popup!' }); return; }
+
+        const statusText = v.status === 'confirmed'
+            ? `<div style="margin-top:12px;padding:10px 14px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;display:flex;align-items:center;gap:10px">
+                <div style="width:20px;height:20px;background:#22c55e;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+                <div><p style="font-size:13px;font-weight:800;color:#15803d;margin:0">Đã xác nhận nhận hồ sơ</p><p style="font-size:11px;color:#16a34a;margin:2px 0 0">Bởi: ${v.confirmedBy || '—'} · ${v.confirmedAt ? moment(v.confirmedAt).format('HH:mm · DD/MM/YYYY') : '—'}</p></div>
+               </div>`
+            : '<div style="margin-top:12px;padding:10px 14px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px"><p style="font-size:13px;font-weight:700;color:#92400e;margin:0">Chờ xác nhận</p></div>';
+
+        const tableRows = (v.records || []).map((r, i) => `
+          <tr>
+            <td style="padding:9px 12px;text-align:center;color:#94a3b8;font-size:12px">${i + 1}</td>
+            <td style="padding:9px 12px"><b style="font-size:13px">${r.bsx || '—'}</b><br><span style="font-size:10px;color:#94a3b8;font-family:monospace">${r.claimCode || ''}</span></td>
+            <td style="padding:9px 12px;font-size:12px">${r.customer || '—'}</td>
+            <td style="padding:9px 12px;font-size:12px;color:#0d9488">${r.garaName || '—'}</td>
+            <td style="padding:9px 12px;font-size:12px">${r.notifyDate || '—'}</td>
+            <td style="padding:9px 12px;font-size:10px;font-weight:700;color:#4f46e5">${stepLabel(r.step || 1)}</td>
+          </tr>`).join('');
+
+        const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Phiếu ${v.voucherNo}</title>
+        <style>
+          * { box-sizing:border-box; margin:0; padding:0; }
+          @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap');
+          body { font-family:'Be Vietnam Pro',Arial,sans-serif; font-size:13px; color:#0f172a; background:#f8fafc; padding:32px; }
+          .page { background:#fff; max-width:820px; margin:0 auto; padding:36px 40px; box-shadow:0 2px 12px rgba(0,0,0,.1); border-radius:12px; }
+          .header { display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:20px; border-bottom:2.5px solid #0f172a; margin-bottom:20px; }
+          .logo-text { font-size:22px; font-weight:900; color:#0f172a; letter-spacing:-.5px; }
+          .logo-text span { color:#2563eb; }
+          .voucher-title { text-align:right; }
+          .voucher-title h1 { font-size:20px; font-weight:900; color:#0f172a; }
+          .voucher-title p { font-size:12px; color:#64748b; margin-top:4px; font-family:monospace; }
+          .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:20px; }
+          .info-row { display:flex; justify-content:space-between; padding:8px 12px; background:#f8fafc; border-radius:7px; border:1px solid #e2e8f0; }
+          .info-row span:first-child { color:#64748b; font-size:11px; }
+          .info-row span:last-child { font-weight:800; font-size:12px; }
+          table { width:100%; border-collapse:collapse; margin-bottom:24px; }
+          thead tr { background:#f1f5f9; border-bottom:2px solid #e2e8f0; }
+          th { padding:10px 12px; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:#64748b; text-align:left; }
+          tbody tr { border-bottom:1px solid #f1f5f9; }
+          tbody tr:last-child { border-bottom:none; }
+          .sig-row { display:grid; grid-template-columns:1fr 1fr; gap:40px; margin-top:36px; padding-top:24px; border-top:1px solid #e2e8f0; }
+          .sig-box { text-align:center; }
+          .sig-box p.title { font-size:13px; font-weight:800; }
+          .sig-box p.sub { font-size:11px; color:#94a3b8; margin-top:3px; font-style:italic; }
+          .sig-box .line { height:1px; background:#cbd5e1; margin:44px 16px 6px; }
+          .sig-box .name { font-size:12px; font-weight:700; }
+          @media print { body { background:#fff; padding:0; } .page { box-shadow:none; border-radius:0; padding:28px 32px; } }
+        </style></head><body>
+        <div class="page">
+          <div class="header">
+            <div>
+              <p class="logo-text">TASCO <span>DLK</span></p>
+              <p style="font-size:11px;color:#64748b;margin-top:3px">Bảo hiểm phi nhân thọ</p>
+            </div>
+            <div class="voucher-title">
+              <h1>PHIẾU BÀN GIAO HỒ SƠ BỒI THƯỜNG</h1>
+              <p>${v.voucherNo}</p>
+            </div>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-row"><span>Số phiếu</span><span style="font-family:monospace">${v.voucherNo}</span></div>
+            <div class="info-row"><span>Ngày tạo</span><span>${v.createdAt ? moment(v.createdAt).format('DD/MM/YYYY HH:mm') : '—'}</span></div>
+            <div class="info-row"><span>Người bàn giao</span><span>${v.createdByName}</span></div>
+            <div class="info-row"><span>Người nhận</span><span>${v.receiver || 'Bộ phận Bồi thường'}</span></div>
+            <div class="info-row" style="grid-column:1/-1"><span>Ghi chú</span><span>${v.note || '—'}</span></div>
+          </div>
+
+          <table>
+            <thead><tr>
+              <th style="width:32px">#</th>
+              <th>Biển số / Mã vụ</th>
+              <th>Khách hàng</th>
+              <th>Gara</th>
+              <th>Ngày báo</th>
+              <th>Trạng thái</th>
+            </tr></thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+
+          ${statusText}
+
+          <div class="sig-row">
+            <div class="sig-box">
+              <p class="title">Người bàn giao</p>
+              <p class="sub">Ký, ghi rõ họ tên</p>
+              <div class="line"></div>
+              <p class="name">${v.createdByName}</p>
+            </div>
+            <div class="sig-box">
+              <p class="title">Người nhận hồ sơ (Admin BT)</p>
+              <p class="sub">Ký, ghi rõ họ tên</p>
+              <div class="line"></div>
+              <p class="name">${v.confirmedBy || v.receiver || '...................................'}</p>
+            </div>
+          </div>
+
+          <p style="text-align:center;font-size:10px;color:#cbd5e1;margin-top:28px">In lúc ${moment().format('HH:mm · DD/MM/YYYY')} · Tasco Đắk Lắk</p>
+        </div>
+        <script>setTimeout(()=>window.print(),400)<\/script>
+        </body></html>`;
+
+        w.document.write(html);
+        w.document.close();
+    }
+};
+
+/* ── Hook vào goView để load dữ liệu ── */
+const _origGoView = goView;
+goView = function(v) {
+    _origGoView(v);
+    if (v === 'handover' && !HandOver._isInited) {
+        HandOver.init();
+        HandOver._isInited = true;
     }
 };
 </script>
