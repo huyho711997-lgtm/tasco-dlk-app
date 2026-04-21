@@ -12793,95 +12793,111 @@ const HandOver = {
 
         const tableRows = (v.records || []).map((r, i) => `
           <tr>
-            <td style="padding:9px 12px;text-align:center;color:#94a3b8;font-size:12px">${i + 1}</td>
-            <td style="padding:9px 12px"><b style="font-size:13px">${r.bsx || '—'}</b><br><span style="font-size:10px;color:#94a3b8;font-family:monospace">${r.claimCode || ''}</span></td>
-            <td style="padding:9px 12px;font-size:12px">${r.customer || '—'}</td>
-            <td style="padding:9px 12px;font-size:12px;color:#0d9488">${r.garaName || '—'}</td>
-            <td style="padding:9px 12px;font-size:12px">${r.notifyDate || '—'}</td>
-            <td style="padding:9px 12px;font-size:10px;font-weight:700;color:#4f46e5">${stepLabel(r.step || 1)}</td>
+            <td class="center">${i + 1}</td>
+            <td><b>${r.bsx || '—'}</b><br><span style="font-size:13px;">${r.claimCode || ''}</span></td>
+            <td>${r.customer || '—'}</td>
+            <td>${r.garaName || '—'}</td>
+            <td class="center">${r.notifyDate || '—'}</td>
+            <td class="center">${stepLabel(r.step || 1)}</td>
           </tr>`).join('');
 
-        const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Phiếu ${v.voucherNo}</title>
+        const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Phiếu bàn giao ${v.voucherNo}</title>
         <style>
-          * { box-sizing:border-box; margin:0; padding:0; }
-          @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap');
-          body { font-family:'Be Vietnam Pro',Arial,sans-serif; font-size:13px; color:#0f172a; background:#f8fafc; padding:32px; }
-          .page { background:#fff; max-width:820px; margin:0 auto; padding:36px 40px; box-shadow:0 2px 12px rgba(0,0,0,.1); border-radius:12px; }
-          .header { display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:20px; border-bottom:2.5px solid #0f172a; margin-bottom:20px; }
-          .logo-text { font-size:22px; font-weight:900; color:#0f172a; letter-spacing:-.5px; }
-          .logo-text span { color:#2563eb; }
-          .voucher-title { text-align:right; }
-          .voucher-title h1 { font-size:20px; font-weight:900; color:#0f172a; }
-          .voucher-title p { font-size:12px; color:#64748b; margin-top:4px; font-family:monospace; }
-          .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:20px; }
-          .info-row { display:flex; justify-content:space-between; padding:8px 12px; background:#f8fafc; border-radius:7px; border:1px solid #e2e8f0; }
-          .info-row span:first-child { color:#64748b; font-size:11px; }
-          .info-row span:last-child { font-weight:800; font-size:12px; }
-          table { width:100%; border-collapse:collapse; margin-bottom:24px; }
-          thead tr { background:#f1f5f9; border-bottom:2px solid #e2e8f0; }
-          th { padding:10px 12px; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:#64748b; text-align:left; }
-          tbody tr { border-bottom:1px solid #f1f5f9; }
-          tbody tr:last-child { border-bottom:none; }
-          .sig-row { display:grid; grid-template-columns:1fr 1fr; gap:40px; margin-top:36px; padding-top:24px; border-top:1px solid #e2e8f0; }
-          .sig-box { text-align:center; }
-          .sig-box p.title { font-size:13px; font-weight:800; }
-          .sig-box p.sub { font-size:11px; color:#94a3b8; margin-top:3px; font-style:italic; }
-          .sig-box .line { height:1px; background:#cbd5e1; margin:44px 16px 6px; }
-          .sig-box .name { font-size:12px; font-weight:700; }
-          @media print { body { background:#fff; padding:0; } .page { box-shadow:none; border-radius:0; padding:28px 32px; } }
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body { font-family: "Times New Roman", Times, serif; font-size: 15px; color: #000; background: #fff; line-height: 1.4; padding: 20px; }
+          .page { max-width: 210mm; margin: 0 auto; padding: 20px; }
+          
+          /* Header */
+          .header { display: flex; justify-content: space-between; margin-bottom: 30px; }
+          .header-left { text-align: center; }
+          .header-right { text-align: center; }
+          .company-name { font-size: 15px; font-weight: bold; text-transform: uppercase; }
+          .branch-name { font-size: 15px; font-weight: bold; text-decoration: underline; margin-top: 3px; }
+          .quoc-hieu { font-size: 15px; font-weight: bold; text-transform: uppercase; }
+          .tieu-ngu { font-size: 16px; font-weight: bold; text-decoration: underline; margin-top: 3px; }
+          
+          /* Title */
+          .title-area { text-align: center; margin-bottom: 30px; }
+          .voucher-title { font-size: 22px; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; }
+          .voucher-no { font-size: 15px; font-style: italic; }
+          
+          /* Info */
+          .info-row { display: flex; margin-bottom: 8px; font-size: 16px; }
+          .info-label { width: 180px; font-weight: bold; }
+          .info-val { flex: 1; }
+          
+          /* Table */
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 20px; font-size: 15px; }
+          th, td { border: 1px solid #000; padding: 8px 10px; text-align: left; vertical-align: middle; }
+          th { font-weight: bold; text-align: center; }
+          td.center { text-align: center; }
+          
+          /* Signatures */
+          .print-date { text-align: right; font-size: 16px; font-style: italic; margin-bottom: 10px; padding-right: 30px; }
+          .sig-row { display: flex; justify-content: space-between; margin-top: 10px; text-align: center; padding: 0 30px; }
+          .sig-box { width: 40%; }
+          .sig-title { font-size: 16px; font-weight: bold; }
+          .sig-sub { font-size: 14px; font-style: italic; margin-bottom: 90px; }
+          .sig-name { font-size: 16px; font-weight: bold; text-transform: uppercase; }
+          
+          @media print {
+            body { padding: 0; }
+            .page { padding: 0; width: 100%; }
+          }
         </style></head><body>
         <div class="page">
           <div class="header">
-            <div>
-              <p class="logo-text">TASCO <span>DLK</span></p>
-              <p style="font-size:11px;color:#64748b;margin-top:3px">Bảo hiểm phi nhân thọ</p>
+            <div class="header-left">
+              <div class="company-name">CÔNG TY BẢO HIỂM TASCO</div>
+              <div class="branch-name">ĐƠN VỊ: TASCO ĐẮK LẮK</div>
             </div>
-            <div class="voucher-title">
-              <h1>PHIẾU BÀN GIAO HỒ SƠ BỒI THƯỜNG</h1>
-              <p>${v.voucherNo}</p>
+            <div class="header-right">
+              <div class="quoc-hieu">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+              <div class="tieu-ngu">Độc lập - Tự do - Hạnh phúc</div>
             </div>
           </div>
 
-          <div class="info-grid">
-            <div class="info-row"><span>Số phiếu</span><span style="font-family:monospace">${v.voucherNo}</span></div>
-            <div class="info-row"><span>Ngày tạo</span><span>${v.createdAt ? moment(v.createdAt).format('DD/MM/YYYY HH:mm') : '—'}</span></div>
-            <div class="info-row"><span>Người bàn giao</span><span>${v.createdByName}</span></div>
-            <div class="info-row"><span>Người nhận</span><span>${v.receiver || 'Bộ phận Bồi thường'}</span></div>
-            <div class="info-row" style="grid-column:1/-1"><span>Ghi chú</span><span>${v.note || '—'}</span></div>
+          <div class="title-area">
+            <div class="voucher-title">PHIẾU BÀN GIAO HỒ SƠ BỒI THƯỜNG</div>
+            <div class="voucher-no">Số: ${v.voucherNo}</div>
           </div>
 
+          <div style="margin-bottom: 25px;">
+            <div class="info-row"><div class="info-label">- Người bàn giao:</div><div class="info-val">${v.createdByName}</div></div>
+            <div class="info-row"><div class="info-label">- Người nhận:</div><div class="info-val">${v.receiver || 'Bộ phận Bồi thường'}</div></div>
+            <div class="info-row"><div class="info-label">- Thời gian tạo phiếu:</div><div class="info-val">${v.createdAt ? moment(v.createdAt).format('HH:mm - DD/MM/YYYY') : '—'}</div></div>
+            ${v.note ? `<div class="info-row"><div class="info-label">- Ghi chú:</div><div class="info-val">${v.note}</div></div>` : ''}
+          </div>
+
+          <div style="font-weight:bold; font-size:16px;">Danh sách hồ sơ bàn giao (${v.records ? v.records.length : 0} bộ):</div>
           <table>
             <thead><tr>
-              <th style="width:32px">#</th>
-              <th>Biển số / Mã vụ</th>
-              <th>Khách hàng</th>
-              <th>Gara</th>
-              <th>Ngày báo</th>
-              <th>Trạng thái</th>
+              <th style="width:5%">STT</th>
+              <th style="width:20%">Biển số / Mã vụ</th>
+              <th style="width:25%">Khách hàng</th>
+              <th style="width:25%">Gara sửa chữa</th>
+              <th style="width:15%">Ngày báo</th>
+              <th style="width:10%">Tiến độ</th>
             </tr></thead>
             <tbody>${tableRows}</tbody>
           </table>
 
-          ${statusText}
+          <div class="print-date">Đắk Lắk, ngày ${moment().format('DD')} tháng ${moment().format('MM')} năm ${moment().format('YYYY')}</div>
 
           <div class="sig-row">
             <div class="sig-box">
-              <p class="title">Người bàn giao</p>
-              <p class="sub">Ký, ghi rõ họ tên</p>
-              <div class="line"></div>
-              <p class="name">${v.createdByName}</p>
+              <div class="sig-title">NGƯỜI BÀN GIAO</div>
+              <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
+              <div class="sig-name">${v.createdByName}</div>
             </div>
             <div class="sig-box">
-              <p class="title">Người nhận hồ sơ (Admin BT)</p>
-              <p class="sub">Ký, ghi rõ họ tên</p>
-              <div class="line"></div>
-              <p class="name">${v.confirmedBy || v.receiver || '...................................'}</p>
+              <div class="sig-title">NGƯỜI NHẬN</div>
+              <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
+              <div class="sig-name">${v.confirmedBy || v.receiver || '...........................................'}</div>
             </div>
           </div>
-
-          <p style="text-align:center;font-size:10px;color:#cbd5e1;margin-top:28px">In lúc ${moment().format('HH:mm · DD/MM/YYYY')} · Tasco Đắk Lắk</p>
         </div>
-        <script>setTimeout(()=>window.print(),400)<\/script>
+        <script>setTimeout(()=>window.print(),500)<\/script>
         </body></html>`;
 
         w.document.write(html);
