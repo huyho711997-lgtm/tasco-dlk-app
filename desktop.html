@@ -12430,20 +12430,13 @@ const HandOver = {
           </div>
           ${confirmedBlock}`;
 
-        // Footer buttons
-        const cu = Auth.getCurrentUser();
-        const isAdminBT = cu && (cu.role === 'admin' || cu.role === 'adminbt' || cu.role === 'nhanvien');
+        // Footer buttons (Dành cho Giám định viên: Chỉ có In phiếu và Đóng)
         document.getElementById('hov-footer').innerHTML = `
           <div class="flex items-center gap-3 ml-auto">
             <button onclick="HandOver.printVoucher('${key}')" class="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-700 rounded-xl text-sm font-bold transition-all">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
               In phiếu
             </button>
-            ${isAdminBT && v.status === 'pending' ? `
-            <button onclick="HandOver.confirmVoucher('${key}')" class="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-extrabold transition-all shadow-md">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
-              Xác nhận đã nhận hồ sơ
-            </button>` : ''}
             <button onclick="HandOver.closeViewModal()" class="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all">Đóng</button>
           </div>`;
 
@@ -12457,33 +12450,6 @@ const HandOver = {
         const b = w.querySelector('div');
         w.classList.add('opacity-0'); b.classList.add('scale-95');
         setTimeout(() => w.classList.add('hidden'), 280);
-    },
-
-    /* ── Xác nhận nhận hồ sơ ── */
-    async confirmVoucher(key) {
-        const cu = Auth.getCurrentUser();
-        const result = await Swal.fire({
-            title: '<span class="font-extrabold text-base text-slate-900">Xác nhận đã nhận hồ sơ?</span>',
-            html: '<p class="text-sm text-slate-500 mt-2">Bạn xác nhận đã nhận đủ toàn bộ hồ sơ trong phiếu bàn giao này.</p>',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Xác nhận nhận hồ sơ',
-            cancelButtonText: 'Hủy',
-            confirmButtonColor: '#059669',
-            customClass: { popup: 'rnd' }
-        });
-        if (!result.isConfirmed) return;
-        try {
-            await db.ref('HandoverVouchers/' + key).update({
-                status: 'confirmed',
-                confirmedAt: new Date().toISOString(),
-                confirmedBy: cu?.name || cu?.username || 'Admin BT'
-            });
-            this.closeViewModal();
-            Toast.fire({ icon: 'success', title: 'Đã xác nhận nhận hồ sơ!' });
-        } catch (e) {
-            Toast.fire({ icon: 'error', title: 'Lỗi: ' + e.message });
-        }
     },
 
     /* ── Xóa phiếu ── */
