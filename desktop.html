@@ -9494,18 +9494,54 @@ function _cmpStatCard(val, label, bg, color, border) {
     function(){
       var curImg = S.imgs[S.cur];
       if(!curImg) return;
+
+      // 1. Xác định ảnh tiếp theo sẽ hiển thị (nếu còn ảnh)
+      var gi = groupImgs(S.cur);
+      var ci = gi.indexOf(S.cur);
+      var nextImgTarget = null;
       
-      // Nếu là ảnh nằm trong tab Cloud
-      if (curImg.group === 'mycloud') {
-          if (curImg.key) { // Bỏ window.MyCloud đi, gọi trực tiếp MyCloud
-              MyCloud.deleteSingle(curImg.key, function(){ close(); });
+      if (gi.length > 1) {
+          // Ưu tiên lấy ảnh kế tiếp, nếu đang ở cuối cùng thì lấy ảnh sát trước
+          var targetIdx = (ci < gi.length - 1) ? gi[ci + 1] : gi[ci - 1];
+          nextImgTarget = S.imgs[targetIdx];
+      }
+
+      // 2. Hàm xử lý chuyển ảnh sau khi xóa thành công
+      var handleAfterDelete = function() {
+          if (nextImgTarget) {
+              // Hiển thị vòng quay loading chờ Cloud cập nhật giao diện
+              img.classList.remove('vis');
+              spin.style.display = 'block';
+              
+              setTimeout(function() {
+                  register(); // Quét lại danh sách ảnh mới nhất trên màn hình
+                  
+                  // Tìm lại vị trí của bức ảnh tiếp theo
+                  var newIdx = S.imgs.findIndex(function(item) {
+                      return item.src === nextImgTarget.src;
+                  });
+                  
+                  if (newIdx !== -1) {
+                      load(newIdx); // Mở ảnh tiếp theo
+                  } else {
+                      close(); // Đóng nếu có lỗi xảy ra
+                  }
+              }, 400); // Chờ 400ms để giao diện nền (HTML) xóa file cũ xong
+          } else {
+              close(); // Nếu đã xóa tấm ảnh cuối cùng -> Đóng cửa sổ
           }
-      // Nếu là ảnh nằm trong Hồ sơ (Chứng từ / Hiện trường / Hư hỏng)
+      };
+
+      // 3. Thực thi lệnh xóa
+      if (curImg.group === 'mycloud') {
+          if (curImg.key) { 
+              MyCloud.deleteSingle(curImg.key, handleAfterDelete);
+          }
       } else if (curImg.group.startsWith('gallery-') || curImg.group.startsWith('docs-') || curImg.group.startsWith('modal-docs-')) {
           var recId = curImg.group.replace('gallery-', '').replace('docs-', '').replace('modal-docs-', '');
           if (typeof removeImg === 'function') {
-              close(); // Đóng viewer
-              removeImg(recId, curImg.src, null); // Gọi hàm xóa ảnh hồ sơ gốc
+              close(); // Vẫn đóng viewer khi xóa ảnh ở mục Hồ sơ Bồi thường do cấu trúc riêng
+              removeImg(recId, curImg.src, null); 
           }
       } else {
           Toast.fire({icon: 'warning', title: 'Không hỗ trợ xóa ảnh ở mục này!'});
