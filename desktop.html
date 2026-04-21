@@ -12174,18 +12174,41 @@ const HandOver = {
 
     /* ── Mở modal tạo ── */
     openCreateModal() {
-        this._selectedIds.clear();
+        const w = document.getElementById('ho-create-modal');
+        if (!w) {
+            Swal.fire({
+                icon: 'error', 
+                title: 'Lỗi giao diện', 
+                text: 'Không tìm thấy khung giao diện tạo phiếu (ho-create-modal). Có thể đoạn mã HTML này đã bị xóa nhầm ở cuối file.',
+                customClass: { popup: 'rnd' }
+            });
+            return;
+        }
+
+        if (this._selectedIds) this._selectedIds.clear();
         this._editingId = null;
-        document.getElementById('ho-modal-title').textContent = 'Tạo phiếu bàn giao hồ sơ';
-        document.getElementById('ho-receiver').value = '';
-        document.getElementById('ho-note').value = '';
-        document.getElementById('ho-rec-search').value = '';
+
+        const titleEl = document.getElementById('ho-modal-title');
+        if (titleEl) titleEl.textContent = 'Tạo phiếu bàn giao hồ sơ';
+
+        const recvEl = document.getElementById('ho-receiver');
+        if (recvEl) recvEl.value = '';
+
+        const noteEl = document.getElementById('ho-note');
+        if (noteEl) noteEl.value = '';
+
+        const searchEl = document.getElementById('ho-rec-search');
+        if (searchEl) searchEl.value = '';
+
         this._renderRecordList();
         this._renderSelectedList();
-        const w = document.getElementById('ho-create-modal');
+
         const b = w.querySelector('div');
         w.classList.remove('hidden');
-        setTimeout(() => { w.classList.remove('opacity-0'); b.classList.remove('scale-95'); }, 10);
+        setTimeout(() => { 
+            w.classList.remove('opacity-0'); 
+            if (b) b.classList.remove('scale-95'); 
+        }, 10);
     },
     closeCreateModal() {
         const w = document.getElementById('ho-create-modal');
@@ -12196,36 +12219,53 @@ const HandOver = {
 
     /* ── Render danh sách hồ sơ để chọn ── */
     _renderRecordList() {
-        const q = (document.getElementById('ho-rec-search')?.value || '').toLowerCase();
-        // Lọc hồ sơ chưa thanh toán (step < 7)
-        let list = allData.filter(r => r.step < 7);
-        if (q) list = list.filter(r => [r.bsx, r.claimCode, r.customer, r.garaName].join(' ').toLowerCase().includes(q));
-        // Sắp xếp mới nhất lên đầu theo notifyDate
-        list.sort((a, b) => moment(b.notifyDate, ['DD/MM/YYYY HH:mm', 'DD/MM/YYYY']).valueOf() - moment(a.notifyDate, ['DD/MM/YYYY HH:mm', 'DD/MM/YYYY']).valueOf());
+        const searchEl = document.getElementById('ho-rec-search');
+        const q = (searchEl ? searchEl.value : '').toLowerCase();
+        
+        let list = allData.filter(r => r && r.step < 7);
+        if (q) {
+            list = list.filter(r => [r.bsx, r.claimCode, r.customer, r.garaName].join(' ').toLowerCase().includes(q));
+        }
+        
+        // Sắp xếp an toàn, tránh lỗi NaN khi ngày bị rỗng
+        list.sort((a, b) => {
+            let tA = moment(a.notifyDate, ['DD/MM/YYYY HH:mm', 'DD/MM/YYYY']).valueOf();
+            let tB = moment(b.notifyDate, ['DD/MM/YYYY HH:mm', 'DD/MM/YYYY']).valueOf();
+            if (isNaN(tA)) tA = 0;
+            if (isNaN(tB)) tB = 0;
+            return tB - tA;
+        });
 
         const el = document.getElementById('ho-rec-list');
-        document.getElementById('ho-rec-count').textContent = list.length + ' hồ sơ';
-
-        el.innerHTML = list.length ? list.map(r => {
-            const sel = this._selectedIds.has(r.id);
-            const stepColors = { 1:'#4f46e5',2:'#d97706',3:'#0891b2',4:'#16a34a',5:'#8b5cf6',6:'#10b981',8:'#e11d48' };
-            return `<label class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-blue-50/60 border-b border-slate-50 transition-colors ${sel ? 'bg-blue-50' : ''}" onclick="HandOver._toggleRecord('${r.id}')">
-              <div class="w-5 h-5 rounded flex items-center justify-center border-2 transition-all flex-shrink-0 ${sel ? 'bg-blue-600 border-blue-600' : 'border-slate-300 bg-white'}">
-                ${sel ? '<svg class="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>' : ''}
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="font-black text-slate-800 text-sm flex items-center gap-2">
-                  <span>${r.bsx || '—'}</span>
-                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" style="background:${stepColors[r.step] || '#475569'}18;color:${stepColors[r.step] || '#475569'}">${stepLabel(r.step)}</span>
-                </p>
-                <p class="text-xs text-slate-400 mt-0.5 truncate">${r.claimCode || ''} ${r.customer ? '· ' + r.customer : ''}</p>
-              </div>
-              <div class="text-right shrink-0">
-                <p class="text-xs font-bold text-teal-600">${r.garaName || '—'}</p>
-                <p class="text-[10px] text-slate-400 mt-0.5">${r.notifyDate || '—'}</p>
-              </div>
-            </label>`;
-        }).join('') : '<p class="px-5 py-10 text-center text-slate-400 text-sm">Không có hồ sơ phù hợp</p>';
+        const countEl = document.getElementById('ho-rec-count');
+        
+        if (countEl) countEl.textContent = list.length + ' hồ sơ';
+        
+        if (el) {
+            el.innerHTML = list.length ? list.map(r => {
+                const sel = this._selectedIds && this._selectedIds.has(r.id);
+                const stepColors = { 1:'#4f46e5',2:'#d97706',3:'#0891b2',4:'#16a34a',5:'#8b5cf6',6:'#10b981',8:'#e11d48' };
+                const sc = stepColors[r.step] || '#475569';
+                const sl = typeof stepLabel === 'function' ? stepLabel(r.step || 1) : ('B' + (r.step || 1));
+                
+                return `<label class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-blue-50/60 border-b border-slate-50 transition-colors ${sel ? 'bg-blue-50' : ''}" onclick="HandOver._toggleRecord('${r.id}')">
+                  <div class="w-5 h-5 rounded flex items-center justify-center border-2 transition-all flex-shrink-0 ${sel ? 'bg-blue-600 border-blue-600' : 'border-slate-300 bg-white'}">
+                    ${sel ? '<svg class="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>' : ''}
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="font-black text-slate-800 text-sm flex items-center gap-2">
+                      <span>${r.bsx || '—'}</span>
+                      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full" style="background:${sc}18;color:${sc}">${sl}</span>
+                    </p>
+                    <p class="text-xs text-slate-400 mt-0.5 truncate">${r.claimCode || ''} ${r.customer ? '· ' + r.customer : ''}</p>
+                  </div>
+                  <div class="text-right shrink-0">
+                    <p class="text-xs font-bold text-teal-600">${r.garaName || '—'}</p>
+                    <p class="text-[10px] text-slate-400 mt-0.5">${r.notifyDate || '—'}</p>
+                  </div>
+                </label>`;
+            }).join('') : '<p class="px-5 py-10 text-center text-slate-400 text-sm">Không có hồ sơ phù hợp</p>';
+        }
     },
 
     filterRecords() { this._renderRecordList(); },
@@ -12239,24 +12279,31 @@ const HandOver = {
 
     _renderSelectedList() {
         const el = document.getElementById('ho-sel-list');
-        document.getElementById('ho-sel-count').textContent = this._selectedIds.size;
-        if (!this._selectedIds.size) {
-            el.innerHTML = '<p class="px-3 py-4 text-center text-xs text-slate-400">Chưa chọn hồ sơ nào</p>';
-            return;
+        const countEl = document.getElementById('ho-sel-count');
+        
+        if (countEl && this._selectedIds) {
+            countEl.textContent = this._selectedIds.size;
         }
-        el.innerHTML = Array.from(this._selectedIds).map(id => {
-            const r = allData.find(x => x.id === id);
-            if (!r) return '';
-            return `<div class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 border-b border-slate-50">
-              <div class="flex-1 min-w-0">
-                <p class="text-xs font-black text-slate-700 truncate">${r.bsx || '—'}</p>
-                <p class="text-[10px] text-slate-400 truncate">${r.garaName || '—'}</p>
-              </div>
-              <button onclick="HandOver._toggleRecord('${id}')" class="p-1 rounded hover:bg-rose-100 text-slate-300 hover:text-rose-500 transition-all flex-shrink-0">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-              </button>
-            </div>`;
-        }).join('');
+        
+        if (el) {
+            if (!this._selectedIds || !this._selectedIds.size) {
+                el.innerHTML = '<p class="px-3 py-4 text-center text-xs text-slate-400">Chưa chọn hồ sơ nào</p>';
+                return;
+            }
+            el.innerHTML = Array.from(this._selectedIds).map(id => {
+                const r = allData.find(x => x && x.id === id);
+                if (!r) return '';
+                return `<div class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 border-b border-slate-50">
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs font-black text-slate-700 truncate">${r.bsx || '—'}</p>
+                    <p class="text-[10px] text-slate-400 truncate">${r.garaName || '—'}</p>
+                  </div>
+                  <button onclick="HandOver._toggleRecord('${id}')" class="p-1 rounded hover:bg-rose-100 text-slate-300 hover:text-rose-500 transition-all flex-shrink-0">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                  </button>
+                </div>`;
+            }).join('');
+        }
     },
 
     /* ── Tạo phiếu ── */
