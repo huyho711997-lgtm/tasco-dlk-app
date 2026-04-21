@@ -1387,55 +1387,108 @@ const GaraAuth = {
 };
 
 /* ═══════════════════════════════════
-   DATA LISTENER
+   LOGIC CHO QUYỀN ADMIN BỒI THƯỜNG
 ═══════════════════════════════════ */
-function startDataListener() {
-  if (!currentUser) return;
+function renderAdminBtRecords(resetPage = false) {
+  const search = (document.getElementById('abt-search')?.value || '').toLowerCase();
+  const filter = document.getElementById('abt-filter')?.value || '';
 
-  // Hàm chuẩn hóa tiếng Việt triệt để (xử lý cả dấu và chữ Đ/đ)
-  const norm = (s) => {
-    if (!s) return "";
-    return String(s)
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "") // Bỏ dấu thanh (sắc, huyền, hỏi, ngã, nặng, mũ)
-      .replace(/đ/g, "d")             // FIX QUAN TRỌNG: Chữ đ/Đ phải được thay thế riêng
-      .replace(/[^a-z0-9]/g, "")      // Bỏ tất cả ký tự đặc biệt (dấu -, _, khoảng trắng...) để dính liền lại
-      .trim();
-  };
+  if (resetPage) abtCurrentPage = 1;
 
-  // Tên gara đang đăng nhập (VD: "HONDA Đăk Lăk" -> "hondadaklak")
-  const loginGaraName = norm(currentUser.garaName || currentUser.name);
+  let list = allWorkstationData;
 
-  db.ref('Workstation').on('value', snap => {
-    const d = snap.val() || {};
-    const all = Object.entries(d).map(([k, v]) => ({ id: k, ...v }));
-    
-    // Lưu lại toàn bộ dữ liệu (kèm mặc định step=1) để Admin Bồi thường xem
-    allWorkstationData = all.map(r => ({ ...r, step: r.step || 1 }));
-    
-    garaData = all.filter(r => {
-      const recordGaraName = r.garaName || r.tenGara || r.gara || r.garaSuaChua || "";
-      if (!recordGaraName) return false;
-      
-      const dbGaraName = norm(recordGaraName);
-      
-      // Kiểm tra xem có chứa tên của nhau không
-      const isMatch = dbGaraName.includes(loginGaraName) || loginGaraName.includes(dbGaraName);
-      
-      // Fix phụ: Nếu hồ sơ không có trường step, mặc định là 1 (Tránh lỗi bị ẩn ở Dashboard)
-      if (isMatch && r.step === undefined) {
-         r.step = 1; 
-      }
+  if (search) {
+    list = list.filter(r =>
+      (r.bsx || '').toLowerCase().includes(search) ||
+      (r.claimCode || '').toLowerCase().includes(search) ||
+      (r.garaName || r.gara || '').toLowerCase().includes(search)
+    );
+  }
 
-      return isMatch;
-    });
+  if (filter) {
+    if (filter === 'received') {
+      list = list.filter(r => r.daNhanHoSoGoc === true);
+    } else {
+      list = list.filter(r => String(r.step) === filter);
+    }
+  }
 
-    console.log("🛠 [DEBUG] Chuỗi tìm kiếm Gara:", loginGaraName);
-    console.log("🛠 [DEBUG] Số hồ sơ khớp:", garaData.length);
+  list.sort((a, b) =>
+    (b.step === 8 ? 1 : 0) - (a.step === 8 ? 1 : 0) ||
+    (a.daNhanHoSoGoc ? 1 : 0) - (b.daNhanHoSoGoc ? 1 : 0) ||
+    new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+  );
 
-    renderAll();
-  });
+  const total = list.length;
+  const totalPages = Math.max(1, Math.ceil(total / abtPageSize));
+  if (abtCurrentPage > totalPages) abtCurrentPage = totalPages;
+
+  const start = (abtCurrentPage - 1) * abtPageSize;
+  const pageList = list.slice(start, start + abtPageSize);
+
+  const tbody = document.getElementById('abt-tbody');
+  tbody.innerHTML = pageList.length
+    ? pageList.map(r => {
+        const isErr = r.step === 8;
+        const hardcopyBadge = r.daNhanHoSoGoc
+          ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:6px;background:#ecfdf5;color:#059669;font-size:10px;font-weight:800;border:1px solid #a7f3d0"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Đã nhận</span>`
+          : `<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:6px;background:#f1f5f9;color:#64748b;font-size:10px;font-weight:700;border:1px solid #e2e8f0">Chưa nhận</span>`;
+        const noteStr = isErr
+          ? `<span style="color:#e11d48;font-size:11px;font-weight:600">${r.missingDocsNote || 'Không có ghi chú'}</span>`
+          : `<span style="color:#94a3b8;font-size:11px">—</span>`;
+        
+        // FIX: Bổ sung onclick mở chi tiết, và stopPropagation cho nút Cập nhật
+        return `<tr style="cursor:pointer" onclick="openRecord('${r.id}')">
+          <td style="padding-left:20px">
+            <p style="font-weight:900;font-size:13px;color:#0f172a">${r.bsx || '—'}</p>
+            <p style="font-size:10px;color:var(--muted);font-family:monospace;margin-top:2px">${r.claimCode || '—'}</p>
+          </td>
+          <td>
+            <p style="font-size:12px;font-weight:800;color:#2563eb">${r.garaName || r.gara || '—'}</p>
+            <p style="font-size:11px;color:var(--muted);margin-top:2px">${r.customer || r.ownerName || '—'}</p>
+          </td>
+          <td><span class="chip ${chipClass(r.step)}">${stepLabel(r.step)}</span></td>
+          <td style="text-align:center">${hardcopyBadge}</td>
+          <td>${noteStr}</td>
+          <td style="text-align:center">
+            <button onclick="event.stopPropagation(); openAdminBtAction('${r.id}')" style="padding:6px 14px;background:#eff6ff;color:#2563eb;border:none;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">Cập nhật</button>
+          </td>
+        </tr>`;
+      }).join('')
+    : `<tr><td colspan="6" style="padding:48px;text-align:center;color:var(--muted);font-size:13px">Không tìm thấy hồ sơ nào</td></tr>`;
+
+  // Render Footer Phân trang
+  const countEl = document.getElementById('abt-count');
+  const from = total === 0 ? 0 : start + 1;
+  const to   = Math.min(start + abtPageSize, total);
+
+  let pageButtons = '';
+  const maxBtn = 5;
+  let startP = Math.max(1, abtCurrentPage - Math.floor(maxBtn / 2));
+  let endP   = Math.min(totalPages, startP + maxBtn - 1);
+  if (endP - startP < maxBtn - 1) startP = Math.max(1, endP - maxBtn + 1);
+
+  if (startP > 1) pageButtons += `<button onclick="abtGoPage(1)" ${pBtnStyle()}>1</button>` + (startP > 2 ? `<span style="padding:0 4px;color:#94a3b8">…</span>` : '');
+  for (let p = startP; p <= endP; p++) {
+    const active = p === abtCurrentPage;
+    pageButtons += `<button onclick="abtGoPage(${p})" style="min-width:32px;height:32px;border-radius:8px;border:${active ? 'none' : '1.5px solid #e2e8f0'};background:${active ? '#2563eb' : '#fff'};color:${active ? '#fff' : '#475569'};font-size:12px;font-weight:${active ? 800 : 600};cursor:pointer;font-family:inherit;transition:all .15s">${p}</button>`;
+  }
+  if (endP < totalPages) pageButtons += (endP < totalPages - 1 ? `<span style="padding:0 4px;color:#94a3b8">…</span>` : '') + `<button onclick="abtGoPage(${totalPages})" ${pBtnStyle()}>${totalPages}</button>`;
+
+  countEl.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:12px;color:var(--muted);font-weight:700">Hiển thị ${from}–${to} / ${total} hồ sơ</span>
+        <select onchange="abtSetPageSize(this.value)" style="padding:4px 8px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12px;font-weight:700;color:#475569;background:#fff;cursor:pointer;font-family:inherit">
+          ${[10,20,50,100].map(n => `<option value="${n}" ${n === abtPageSize ? 'selected' : ''}>${n} dòng</option>`).join('')}
+        </select>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <button onclick="abtGoPage(${abtCurrentPage - 1})" ${abtCurrentPage <= 1 ? 'disabled' : ''} ${pBtnStyle(abtCurrentPage <= 1)}>‹</button>
+        ${pageButtons}
+        <button onclick="abtGoPage(${abtCurrentPage + 1})" ${abtCurrentPage >= totalPages ? 'disabled' : ''} ${pBtnStyle(abtCurrentPage >= totalPages)}>›</button>
+      </div>
+    </div>`;
 }
 
 function renderAll() {
