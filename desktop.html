@@ -1327,7 +1327,11 @@ textarea.inp { resize:vertical; }
     <button title="Kho giá phụ tùng" onclick="goView('partsprices')" id="nav-partsprices" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
       <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
       <span class="sidebar-text whitespace-nowrap">Kho giá phụ tùng</span>
-    </button>      
+    </button> 
+    <button title="Bồi thường con người" onclick="goView('human_claims')" id="nav-human_claims" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span class="sidebar-text whitespace-nowrap">BT Con Người</span>
+    </button>     
   </nav>
 </aside>
 
@@ -1687,7 +1691,293 @@ textarea.inp { resize:vertical; }
       </div>
 
     </div>
+    <div id="view-human_claims" class="view hidden h-full flex flex-col" style="gap:0;overflow-y:auto">
+      
+      <div class="mn-sticky-header">
+        <div class="mn-header">
+          <div class="mn-header-top">
+            <div class="mn-brand">
+              <div class="mn-icon-wrap" style="background: linear-gradient(135deg,#db2777,#be123c); box-shadow: 0 4px 14px rgba(219,39,119,.4);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div>
+                <p style="color:#f1f5f9;font-size:14px;font-weight:800;margin:0;letter-spacing:-.2px">Bồi thường Con người</p>
+                <p style="color:rgba(255,255,255,.4);font-size:11px;margin:1px 0 0;font-weight:400">Học sinh, Sinh viên, Giáo viên...</p>
+              </div>
+            </div>
+            <div class="mn-actions">
+              <button class="mn-btn mn-btn-primary" style="background: linear-gradient(135deg,#db2777,#be123c); border:none; box-shadow: 0 4px 14px rgba(219,39,119,.4);" onclick="HumanClaims.openModal()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Thêm hồ sơ
+              </button>
+            </div>
+          </div>
 
+          <div class="mn-toolbar">
+            <div class="mn-search-wrap">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input id="hc-search-inp" oninput="HumanClaims.renderTable()" type="text" placeholder="Tìm tên, GCN, bệnh viện..." class="mn-search-inp focus:!border-pink-400 focus:!ring-pink-500/20">
+            </div>
+            <div class="mn-divider"></div>
+            <select id="hc-filter-status" onchange="HumanClaims.renderTable()" class="pp-filter-sel" style="min-width:140px">
+              <option value="">Tất cả trạng thái</option>
+              <option value="new">Mới thêm</option>
+              <option value="req_no">Xin số HSBT</option>
+              <option value="has_no">Đã có số HSBT</option>
+              <option value="req_fund">Xin nguồn</option>
+              <option value="funding">Đang xin nguồn</option>
+              <option value="paid">Đã thanh toán</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="mn-table-card">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead class="sticky top-0 bg-slate-50/95 backdrop-blur z-10 border-b border-slate-100">
+              <tr>
+                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Trạng thái</th>
+                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Số HSBT</th>
+                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Người được BH</th>
+                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Ngày TT</th>
+                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Loại TT</th>
+                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide text-right">Số tiền BT</th>
+                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Người tạo</th>
+                <th class="px-6 py-4 w-12"></th>
+              </tr>
+            </thead>
+            <tbody id="hc-tbl-body" class="divide-y divide-slate-50"></tbody>
+          </table>
+        </div>
+        
+        <div class="shrink-0 border-t border-slate-100 bg-slate-50/80 px-6 py-3 flex items-center justify-between gap-4 rounded-b-xl">
+          <div class="flex items-center gap-3">
+            <span id="hc-pg-info" class="text-xs text-slate-400 font-semibold"></span>
+            <select id="hc-pg-size" onchange="HumanClaims.changePageSize()" class="text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-lg px-2 py-1.5 outline-none cursor-pointer">
+              <option value="10">10</option>
+              <option value="25" selected>25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-1" id="hc-pg-btns"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="hc-modal-wrap" class="fixed inset-0 z-[60] hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity duration-300">
+      <div id="hc-modal-box" class="bg-slate-50 w-[96vw] max-w-6xl h-[94vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-300">
+        
+        <div class="bg-white px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0 relative z-20">
+          <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center">
+              <svg class="w-5 h-5 text-pink-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div>
+              <p class="text-slate-800 text-lg font-black leading-none flex items-center gap-3">
+                <span id="hc-m-title">Thêm hồ sơ mới</span>
+                <span id="hc-m-status-badge" class="px-2.5 py-1 rounded-md text-[10px] font-bold text-white bg-slate-400">Mới thêm</span>
+              </p>
+              <p class="text-slate-500 text-[11px] font-semibold mt-1" id="hc-m-subtitle">Điền thông tin chi tiết bên dưới</p>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-3">
+            <div id="hc-m-ai-warning" class="hidden cursor-pointer px-3 py-1.5 bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-[11px] font-bold flex items-center gap-1.5 animate-pulse">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Cảnh báo Hợp đồng!
+            </div>
+            <button onclick="HumanClaims.generateEmail()" class="px-4 py-2 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-xl text-xs font-bold hover:bg-indigo-100 flex items-center gap-2 transition-colors hidden" id="btn-hc-email">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email xin số
+            </button>
+            <button onclick="HumanClaims.printDossier()" class="px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-xs font-bold hover:bg-blue-100 flex items-center gap-2 transition-colors hidden" id="btn-hc-print">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> In HSBT
+            </button>
+            <div class="w-px h-6 bg-slate-200 mx-1"></div>
+            <button onclick="HumanClaims.closeModal()" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-rose-100 hover:text-rose-600 transition-colors">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6" id="hc-m-body">
+          <div class="grid grid-cols-12 gap-6">
+            
+            <div class="col-span-7 flex flex-col gap-5">
+              
+              <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+                  <svg class="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                  <span class="text-xs font-black text-slate-700 uppercase tracking-wide">Thông tin Hợp đồng</span>
+                </div>
+                <div class="p-4 space-y-3">
+                  <div class="grid grid-cols-2 gap-3">
+                    <div class="relative">
+                      <label class="lbl">Số HĐ gốc (Gõ để tìm kiếm)</label>
+                      <input id="hc-contractNo" class="inp font-mono" placeholder="Tìm hợp đồng..." oninput="HumanClaims.searchContract(this.value)">
+                      <div id="hc-contract-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl hidden max-h-48 overflow-y-auto"></div>
+                    </div>
+                    <div><label class="lbl">Tên đơn vị tham gia BH</label><input id="hc-companyName" class="inp font-bold text-blue-800"></div>
+                  </div>
+                  <div class="grid grid-cols-3 gap-3">
+                    <div><label class="lbl">Số GCN</label><input id="hc-gcn" class="inp font-mono"></div>
+                    <div><label class="lbl">Loại hình BH</label>
+                      <select id="hc-insType" class="inp">
+                        <option value="Học sinh">Học sinh / Sinh viên</option>
+                        <option value="Giáo viên">Giáo viên</option>
+                        <option value="Khác">Khác</option>
+                      </select>
+                    </div>
+                    <div><label class="lbl">Tình trạng phí</label>
+                      <select id="hc-feeStatus" class="inp font-bold">
+                        <option value="Đã nộp" class="text-emerald-600">Đã nộp</option>
+                        <option value="Chưa nộp" class="text-rose-600">Chưa nộp</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-4 gap-3">
+                    <div><label class="lbl">Hiệu lực từ</label><input id="hc-effFrom" type="datetime-local" class="inp text-[11px]" onchange="HumanClaims.checkWarnings()"></div>
+                    <div><label class="lbl">Đến</label><input id="hc-effTo" type="datetime-local" class="inp text-[11px]" onchange="HumanClaims.checkWarnings()"></div>
+                    <div><label class="lbl">Mức trách nhiệm B</label><input id="hc-limitB" class="inp font-mono text-right text-emerald-600" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
+                    <div><label class="lbl">Mức trách nhiệm D</label><input id="hc-limitD" class="inp font-mono text-right text-blue-600" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+                  <svg class="w-4 h-4 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                  <span class="text-xs font-black text-slate-700 uppercase tracking-wide">Người được bảo hiểm & Tai nạn</span>
+                </div>
+                <div class="p-4 space-y-3">
+                  <div class="grid grid-cols-12 gap-3">
+                    <div class="col-span-7"><label class="lbl">Người được Bảo hiểm</label><input id="hc-victimName" class="inp font-bold text-rose-700 uppercase"></div>
+                    <div class="col-span-5"><label class="lbl">Loại tổn thất</label>
+                      <select id="hc-lossType" class="inp">
+                        <option value="Thương tật">Thương tật</option>
+                        <option value="Phẫu thuật">Phẫu thuật</option>
+                        <option value="Tử vong">Tử vong</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-4 gap-3">
+                    <div><label class="lbl">Ngày bị tai nạn</label><input id="hc-accDate" type="date" class="inp" onchange="HumanClaims.checkWarnings()"></div>
+                    <div><label class="lbl">Ngày nhập viện</label><input id="hc-inDate" type="date" class="inp" onchange="HumanClaims.calculateDays()"></div>
+                    <div><label class="lbl">Ngày ra viện</label><input id="hc-outDate" type="date" class="inp" onchange="HumanClaims.calculateDays()"></div>
+                    <div><label class="lbl">Số ngày nằm viện</label><input id="hc-days" type="number" class="inp text-center font-bold" oninput="HumanClaims.calculateTotal()"></div>
+                  </div>
+                  <div><label class="lbl">Nguyên nhân tai nạn</label><textarea id="hc-accCause" rows="2" class="inp resize-none"></textarea></div>
+                  
+                  <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <div class="flex items-center justify-between mb-2">
+                      <label class="lbl !mb-0">Hậu quả / Thương tật</label>
+                      <button onclick="HumanClaims.suggestInjury()" class="px-2 py-1 bg-violet-100 text-violet-700 rounded text-[10px] font-bold hover:bg-violet-200 transition-colors flex items-center gap-1">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/></svg> AI Gợi ý TLTT
+                      </button>
+                    </div>
+                    <textarea id="hc-injuryDesc" rows="2" class="inp resize-none mb-2" placeholder="Gãy 1/3 dưới xương quay trái..."></textarea>
+                    
+                    <div class="flex items-center gap-3">
+                      <div class="flex-1"><label class="text-[10px] font-semibold text-slate-500">Mục theo Bảng TLTT</label><input id="hc-injuryCode" class="inp text-xs text-violet-700 bg-white" readonly placeholder="AI tự điền..."></div>
+                      <div class="w-24"><label class="text-[10px] font-semibold text-slate-500">Tỷ lệ quy định</label><input id="hc-injuryRange" class="inp text-xs text-center bg-white font-mono" readonly placeholder="-- %"></div>
+                      <div class="w-28">
+                        <label class="text-[10px] font-semibold text-slate-500">Tỷ lệ thực tế</label>
+                        <div class="flex items-center">
+                          <button onclick="HumanClaims.adjPct(-1)" class="w-8 h-8 flex items-center justify-center bg-slate-200 rounded-l-lg hover:bg-slate-300 font-bold">-</button>
+                          <input id="hc-injuryRealPct" class="w-12 h-8 text-center text-sm font-black text-rose-600 bg-white border-y border-slate-200 outline-none" value="0" oninput="HumanClaims.calculateTotal()">
+                          <button onclick="HumanClaims.adjPct(1)" class="w-8 h-8 flex items-center justify-center bg-slate-200 rounded-r-lg hover:bg-slate-300 font-bold">+</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+
+            <div class="col-span-5 flex flex-col gap-5">
+
+              <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-200 shadow-sm p-5 relative overflow-hidden">
+                <svg class="absolute -right-6 -bottom-6 w-32 h-32 text-emerald-500/10 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                <p class="text-xs font-black text-emerald-800 uppercase tracking-widest mb-4">Giá trị chi trả</p>
+                <div class="space-y-2 mb-4 relative z-10">
+                  <div class="flex justify-between items-center"><span class="text-xs font-semibold text-emerald-700">Tiền Thương tật (Mức B x Tỷ lệ)</span><span class="text-sm font-mono font-bold text-emerald-900" id="hc-calc-injury">0 đ</span></div>
+                  <div class="flex justify-between items-center"><span class="text-xs font-semibold text-emerald-700">Trợ cấp nằm viện (Mức D x Số ngày)</span><span class="text-sm font-mono font-bold text-emerald-900" id="hc-calc-hospital">0 đ</span></div>
+                </div>
+                <div class="pt-3 border-t border-emerald-200/60 flex justify-between items-end relative z-10">
+                  <span class="text-sm font-black text-emerald-800">TỔNG BỒI THƯỜNG</span>
+                  <span class="text-3xl font-black text-emerald-600 tracking-tight" id="hc-calc-total">0<span class="text-lg text-emerald-400">đ</span></span>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex-1 flex flex-col">
+                <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                    <span class="text-xs font-black text-slate-700 uppercase tracking-wide">Người thụ hưởng</span>
+                  </div>
+                  <label class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-[10px] font-bold cursor-pointer hover:bg-purple-200 transition-colors flex items-center gap-1">
+                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/><polyline points="16 21 16 19 8 19 8 21"/><path d="M12 9v4"/><path d="M8 11h8"/></svg> Quét CCCD
+                    <input type="file" accept="image/*" class="hidden" onchange="HumanClaims.ocrCccd(event)">
+                  </label>
+                </div>
+                <div class="p-4 space-y-3 flex-1">
+                  <div class="grid grid-cols-2 gap-3">
+                    <div><label class="lbl">Họ tên người nhận</label><input id="hc-payeeName" class="inp font-bold uppercase"></div>
+                    <div><label class="lbl">Quan hệ với NĐBH</label>
+                      <select id="hc-payeeRelation" class="inp">
+                        <option value="Bản thân">Bản thân</option>
+                        <option value="Bố">Bố</option>
+                        <option value="Mẹ">Mẹ</option>
+                        <option value="Ông/Bà">Ông / Bà</option>
+                        <option value="Người giám hộ hợp pháp">Khác (Giám hộ)</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-3 gap-3">
+                    <div><label class="lbl">Số CCCD</label><input id="hc-payeeCccd" class="inp font-mono"></div>
+                    <div><label class="lbl">Ngày cấp</label><input id="hc-payeeIssueDate" class="inp" placeholder="DD/MM/YYYY"></div>
+                    <div><label class="lbl">Nơi cấp</label><input id="hc-payeeIssuePlace" class="inp text-xs"></div>
+                  </div>
+                  <div class="grid grid-cols-5 gap-3 pt-2 border-t border-slate-100">
+                    <div class="col-span-2"><label class="lbl">Số tài khoản</label><input id="hc-payeeBankNo" class="inp font-mono text-purple-700"></div>
+                    <div class="col-span-3"><label class="lbl">Ngân hàng</label><input id="hc-payeeBankName" class="inp"></div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-100 border-t border-slate-200 px-6 py-4 flex items-center justify-between shrink-0">
+          
+          <div class="flex items-center gap-2" id="hc-m-workflow">
+            <div class="relative group">
+              <button class="px-3 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 font-bold text-xs flex items-center gap-1 shadow-sm">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Trả về
+              </button>
+              <div class="absolute bottom-full left-0 mb-1 w-40 bg-white border border-slate-200 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all flex flex-col overflow-hidden" id="hc-m-back-menu">
+                </div>
+            </div>
+            
+            <button onclick="HumanClaims.nextStatus()" id="hc-m-next-btn" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-bold text-sm hover:bg-blue-700 transition-colors shadow-md shadow-blue-200 flex items-center gap-2">
+              Chuyển trạng thái <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <span class="text-[11px] text-slate-400 font-semibold" id="hc-m-save-status"></span>
+            <button onclick="HumanClaims.saveData()" class="px-8 py-2.5 bg-slate-800 text-white rounded-xl text-sm font-extrabold hover:bg-slate-700 transition-colors shadow-lg flex items-center gap-2">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Lưu hồ sơ
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
     <!-- CALENDAR -->
     <div id="view-calendar" class="view hidden h-full flex-col gap-4">
       <div class="grid grid-cols-3 gap-4">
@@ -3265,6 +3555,7 @@ function toggleSidebar() {
 }
 
 var viewTitles={handover: 'Phiếu bàn giao hồ sơ',dashboard:'Bảng điều khiển',manage:'Quản lý Hồ sơ',calendar:'Lịch giám định',overdue:'Hồ sơ trễ hẹn',import:'Tiếp nhận AI',stats:'Thống kê & Báo cáo',kanban:'Kanban Hồ sơ',cloud:'Cloud của tôi'};
+viewTitles['human_claims'] = 'Hồ sơ Bồi thường Con người';
 
 function goView(v) {
   document.querySelectorAll('.view').forEach(function(el){ 
@@ -12955,6 +13246,423 @@ HandOver.openCreateModal = function() {
         if (b) b.classList.remove('scale-95'); 
     }, 10);
 };
+
+
+/* ═══════════════════════════════════════
+   MODULE: HỒ SƠ BỒI THƯỜNG CON NGƯỜI
+═══════════════════════════════════════ */
+const HumanClaims = {
+    _data: [],
+    _pageSize: 25,
+    _curPage: 1,
+    _currentId: null,
+    
+    // Cấu hình quy trình trạng thái
+    STATUS_FLOW: ['new', 'req_no', 'has_no', 'req_fund', 'funding', 'paid'],
+    STATUS_LABELS: {
+        'new': { text: 'Mới thêm', color: '#c026d3', bg: '#fdf2f8', border: '#fbcfe8' },
+        'req_no': { text: 'Xin số HSBT', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe' },
+        'has_no': { text: 'Đã có số HSBT', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0' },
+        'req_fund': { text: 'Xin nguồn', color: '#d97706', bg: '#fffbeb', border: '#fde68a' },
+        'funding': { text: 'Đang xin nguồn', color: '#0891b2', bg: '#ecfeff', border: '#a5f3fc' },
+        'paid': { text: 'Đã thanh toán', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4' }
+    },
+
+    init() {
+        // Lắng nghe dữ liệu từ Firebase
+        db.ref('HumanClaims').on('value', snap => {
+            const raw = snap.val() || {};
+            this._data = Object.keys(raw).map(k => Object.assign({ id: k }, raw[k]))
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            if (document.getElementById('view-human_claims') && !document.getElementById('view-human_claims').classList.contains('hidden')) {
+                this.renderTable();
+            }
+        });
+    },
+
+    /* ── Render Bảng Danh sách ── */
+    renderTable() {
+        const q = (document.getElementById('hc-search-inp')?.value || '').toLowerCase();
+        const stt = document.getElementById('hc-filter-status')?.value || '';
+        
+        let filtered = this._data.filter(r => {
+            const text = [r.claimNo, r.victimName, r.hospitalName, r.gcn].join(' ').toLowerCase();
+            return text.includes(q) && (!stt || r.status === stt);
+        });
+
+        const total = filtered.length;
+        const maxPage = Math.ceil(total / this._pageSize) || 1;
+        if (this._curPage > maxPage) this._curPage = maxPage;
+        
+        const start = (this._curPage - 1) * this._pageSize;
+        const pageData = filtered.slice(start, start + this._pageSize);
+
+        const tbody = document.getElementById('hc-tbl-body');
+        if (!pageData.length) {
+            tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-16 text-center text-slate-400 font-bold">Chưa có hồ sơ bồi thường con người nào.</td></tr>';
+            document.getElementById('hc-pg-info').textContent = '';
+            document.getElementById('hc-pg-btns').innerHTML = '';
+            return;
+        }
+
+        tbody.innerHTML = pageData.map(r => {
+            const stObj = this.STATUS_LABELS[r.status || 'new'];
+            const stBadge = `<span class="px-2.5 py-1 rounded-md text-[10px] font-black border" style="color:${stObj.color}; background:${stObj.bg}; border-color:${stObj.border}">${stObj.text}</span>`;
+            
+            return `
+            <tr class="hover:bg-blue-50/40 cursor-pointer transition-colors" onclick="HumanClaims.openModal('${r.id}')">
+                <td class="px-6 py-3">${stBadge}</td>
+                <td class="px-6 py-3 font-mono font-bold text-slate-700">${r.claimNo || '—'}</td>
+                <td class="px-6 py-3 font-bold text-rose-700 uppercase text-xs">${r.victimName || '—'}</td>
+                <td class="px-6 py-3 text-xs text-slate-500">${r.accDate ? moment(r.accDate).format('DD/MM/YYYY') : '—'}</td>
+                <td class="px-6 py-3 text-xs font-semibold text-slate-600">${r.lossType || '—'}</td>
+                <td class="px-6 py-3 text-right font-black text-emerald-600">${r.totalAmount ? Number(r.totalAmount).toLocaleString('vi-VN') + 'đ' : '—'}</td>
+                <td class="px-6 py-3 text-[11px] text-slate-400 font-medium">${r.createdBy || '—'}</td>
+                <td class="px-6 py-3 text-center">
+                    <button onclick="event.stopPropagation(); HumanClaims.deleteRecord('${r.id}')" class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>
+                </td>
+            </tr>`;
+        }).join('');
+
+        document.getElementById('hc-pg-info').textContent = `Hiển thị ${start + 1} - ${Math.min(start + this._pageSize, total)} / ${total}`;
+        this._renderPagination(maxPage);
+    },
+
+    changePageSize() {
+        this._pageSize = parseInt(document.getElementById('hc-pg-size').value) || 25;
+        this._curPage = 1;
+        this.renderTable();
+    },
+
+    _renderPagination(maxPage) {
+        const btns = document.getElementById('hc-pg-btns');
+        if (maxPage <= 1) { btns.innerHTML = ''; return; }
+        
+        let html = `<button onclick="HumanClaims._curPage = Math.max(1, HumanClaims._curPage - 1); HumanClaims.renderTable()" class="px-2 py-1 bg-white border border-slate-200 rounded text-xs font-bold text-slate-500 hover:bg-slate-50">Prev</button>`;
+        html += `<span class="px-3 text-xs font-bold text-slate-700">${this._curPage} / ${maxPage}</span>`;
+        html += `<button onclick="HumanClaims._curPage = Math.min(${maxPage}, HumanClaims._curPage + 1); HumanClaims.renderTable()" class="px-2 py-1 bg-white border border-slate-200 rounded text-xs font-bold text-slate-500 hover:bg-slate-50">Next</button>`;
+        btns.innerHTML = html;
+    },
+
+    /* ── Quản lý Modal ── */
+    openModal(id = null) {
+        this._currentId = id;
+        const w = document.getElementById('hc-modal-wrap');
+        const b = document.getElementById('hc-modal-box');
+        
+        this._resetForm();
+        
+        if (id) {
+            const rec = this._data.find(r => r.id === id);
+            if (rec) this._fillForm(rec);
+            document.getElementById('hc-m-title').textContent = rec.claimNo || 'Chi tiết hồ sơ';
+        } else {
+            document.getElementById('hc-m-title').textContent = 'Thêm hồ sơ mới';
+            this._updateUIStatus('new');
+        }
+
+        w.classList.remove('hidden');
+        setTimeout(() => { w.classList.remove('opacity-0'); b.classList.remove('scale-95'); }, 10);
+    },
+
+    closeModal() {
+        const w = document.getElementById('hc-modal-wrap');
+        const b = document.getElementById('hc-modal-box');
+        w.classList.add('opacity-0'); b.classList.add('scale-95');
+        setTimeout(() => { w.classList.add('hidden'); }, 300);
+    },
+
+    _resetForm() {
+        const inputs = document.querySelectorAll('#hc-modal-box input, #hc-modal-box textarea, #hc-modal-box select');
+        inputs.forEach(el => {
+            if (el.id === 'hc-lossType' || el.id === 'hc-insType' || el.id === 'hc-payeeRelation' || el.id === 'hc-feeStatus') return; // Giữ giá trị mặc định của select
+            el.value = '';
+        });
+        document.getElementById('hc-calc-injury').textContent = '0 đ';
+        document.getElementById('hc-calc-hospital').textContent = '0 đ';
+        document.getElementById('hc-calc-total').innerHTML = '0<span class="text-lg text-emerald-400">đ</span>';
+        document.getElementById('hc-injuryRealPct').value = '0';
+        document.getElementById('hc-m-ai-warning').classList.add('hidden');
+        document.getElementById('btn-hc-email').classList.add('hidden');
+        document.getElementById('btn-hc-print').classList.add('hidden');
+        
+        const inputsToLock = document.querySelectorAll('#hc-m-body input, #hc-m-body select, #hc-m-body textarea');
+        inputsToLock.forEach(el => el.disabled = false);
+    },
+
+    _fillForm(r) {
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+        
+        setVal('hc-contractNo', r.contractNo); setVal('hc-companyName', r.companyName);
+        setVal('hc-gcn', r.gcn); setVal('hc-insType', r.insType); setVal('hc-feeStatus', r.feeStatus);
+        setVal('hc-effFrom', r.effFrom); setVal('hc-effTo', r.effTo);
+        setVal('hc-limitB', r.limitB ? Number(r.limitB).toLocaleString('vi-VN') : '');
+        setVal('hc-limitD', r.limitD ? Number(r.limitD).toLocaleString('vi-VN') : '');
+        
+        setVal('hc-victimName', r.victimName); setVal('hc-lossType', r.lossType);
+        setVal('hc-accDate', r.accDate); setVal('hc-inDate', r.inDate);
+        setVal('hc-outDate', r.outDate); setVal('hc-days', r.days);
+        setVal('hc-accCause', r.accCause); setVal('hc-injuryDesc', r.injuryDesc);
+        setVal('hc-injuryCode', r.injuryCode); setVal('hc-injuryRange', r.injuryRange);
+        setVal('hc-injuryRealPct', r.injuryRealPct || 0);
+
+        setVal('hc-payeeName', r.payeeName); setVal('hc-payeeRelation', r.payeeRelation);
+        setVal('hc-payeeCccd', r.payeeCccd); setVal('hc-payeeIssueDate', r.payeeIssueDate); setVal('hc-payeeIssuePlace', r.payeeIssuePlace);
+        setVal('hc-payeeBankNo', r.payeeBankNo); setVal('hc-payeeBankName', r.payeeBankName);
+
+        this.calculateTotal();
+        this.checkWarnings();
+        this._updateUIStatus(r.status || 'new');
+    },
+
+    /* ── Xử lý Trạng thái (Workflow) ── */
+    _updateUIStatus(status) {
+        const stObj = this.STATUS_LABELS[status];
+        const badge = document.getElementById('hc-m-status-badge');
+        badge.textContent = stObj.text;
+        badge.style.backgroundColor = stObj.color;
+
+        const currIdx = this.STATUS_FLOW.indexOf(status);
+        const nextBtn = document.getElementById('hc-m-next-btn');
+        const backMenu = document.getElementById('hc-m-back-menu');
+        
+        // Render nút Chuyển tiếp
+        if (currIdx < this.STATUS_FLOW.length - 1) {
+            const nextSt = this.STATUS_FLOW[currIdx + 1];
+            const nextObj = this.STATUS_LABELS[nextSt];
+            nextBtn.innerHTML = `Chuyển: ${nextObj.text} <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
+            nextBtn.style.display = 'flex';
+        } else {
+            nextBtn.style.display = 'none';
+        }
+
+        // Render Menu Trả về
+        if (currIdx > 0) {
+            let backHtml = '';
+            for (let i = currIdx - 1; i >= 0; i--) {
+                const bSt = this.STATUS_FLOW[i];
+                backHtml += `<button onclick="HumanClaims.changeStatus('${bSt}')" class="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 border-b border-slate-100">${this.STATUS_LABELS[bSt].text}</button>`;
+            }
+            backMenu.innerHTML = backHtml;
+            backMenu.parentElement.style.display = 'block';
+        } else {
+            backMenu.parentElement.style.display = 'none';
+        }
+
+        // Khóa form nếu status >= req_fund (Xin nguồn)
+        const inputsToLock = document.querySelectorAll('#hc-m-body input, #hc-m-body select, #hc-m-body textarea');
+        if (currIdx >= this.STATUS_FLOW.indexOf('req_fund')) {
+            inputsToLock.forEach(el => el.disabled = true);
+        } else {
+            inputsToLock.forEach(el => el.disabled = false);
+        }
+
+        // Hiện nút Email khi ở trạng thái Mới thêm hoặc Xin số
+        if (currIdx <= 1) document.getElementById('btn-hc-email').classList.remove('hidden');
+        else document.getElementById('btn-hc-email').classList.add('hidden');
+
+        // Hiện nút In khi đã có số HSBT
+        if (currIdx >= 2) document.getElementById('btn-hc-print').classList.remove('hidden');
+        else document.getElementById('btn-hc-print').classList.add('hidden');
+    },
+
+    nextStatus() {
+        if (!this._currentId) { Toast.fire({icon:'warning', title:'Hãy lưu hồ sơ trước!'}); return; }
+        const rec = this._data.find(r => r.id === this._currentId);
+        const currIdx = this.STATUS_FLOW.indexOf(rec.status || 'new');
+        if (currIdx < this.STATUS_FLOW.length - 1) {
+            this.changeStatus(this.STATUS_FLOW[currIdx + 1]);
+        }
+    },
+
+    changeStatus(newStatus) {
+        if (!this._currentId) return;
+        const stObj = this.STATUS_LABELS[newStatus];
+        Swal.fire({
+            title: 'Chuyển trạng thái?',
+            html: `Xác nhận chuyển hồ sơ sang: <b style="color:${stObj.color}">${stObj.text}</b>`,
+            showCancelButton: true, confirmButtonText: 'Xác nhận', cancelButtonText: 'Hủy', customClass: {popup: 'rnd'}
+        }).then(r => {
+            if (r.isConfirmed) {
+                db.ref('HumanClaims/' + this._currentId).update({ status: newStatus, updatedAt: new Date().toISOString() }).then(() => {
+                    Toast.fire({icon:'success', title:'Đã chuyển trạng thái!'});
+                    this._updateUIStatus(newStatus);
+                });
+            }
+        });
+    },
+
+    /* ── Lưu Dữ liệu ── */
+    async saveData() {
+        const getVal = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+        const getNum = id => { const val = getVal(id); return val ? parseInt(val.replace(/[^\d]/g, '')) || 0 : 0; };
+        
+        const victimName = getVal('hc-victimName');
+        if (!victimName) { Toast.fire({icon:'warning', title:'Vui lòng nhập Tên người được bảo hiểm!'}); return; }
+
+        const payload = {
+            contractNo: getVal('hc-contractNo'), companyName: getVal('hc-companyName'),
+            gcn: getVal('hc-gcn'), insType: getVal('hc-insType'), feeStatus: getVal('hc-feeStatus'),
+            effFrom: getVal('hc-effFrom'), effTo: getVal('hc-effTo'),
+            limitB: getNum('hc-limitB'), limitD: getNum('hc-limitD'),
+            victimName: victimName, lossType: getVal('hc-lossType'),
+            accDate: getVal('hc-accDate'), inDate: getVal('hc-inDate'), outDate: getVal('hc-outDate'), days: getNum('hc-days'),
+            accCause: getVal('hc-accCause'), injuryDesc: getVal('hc-injuryDesc'),
+            injuryCode: getVal('hc-injuryCode'), injuryRange: getVal('hc-injuryRange'), injuryRealPct: getNum('hc-injuryRealPct'),
+            payeeName: getVal('hc-payeeName'), payeeRelation: getVal('hc-payeeRelation'), payeeCccd: getVal('hc-payeeCccd'),
+            payeeIssueDate: getVal('hc-payeeIssueDate'), payeeIssuePlace: getVal('hc-payeeIssuePlace'),
+            payeeBankNo: getVal('hc-payeeBankNo'), payeeBankName: getVal('hc-payeeBankName'),
+            totalAmount: parseInt(document.getElementById('hc-calc-total').textContent.replace(/[^\d]/g, '')) || 0,
+            updatedAt: new Date().toISOString()
+        };
+
+        const user = Auth.getCurrentUser();
+        const saveStatus = document.getElementById('hc-m-save-status');
+        saveStatus.textContent = 'Đang lưu...';
+
+        try {
+            if (this._currentId) {
+                await db.ref('HumanClaims/' + this._currentId).update(payload);
+            } else {
+                payload.status = 'new';
+                payload.createdAt = new Date().toISOString();
+                payload.createdBy = user ? user.name : 'Unknown';
+                const newRef = await db.ref('HumanClaims/' + Date.now()).set(payload);
+                this._currentId = newRef.key; // Lưu lại key mới
+                this._updateUIStatus('new');
+            }
+            saveStatus.textContent = 'Đã lưu lúc ' + moment().format('HH:mm:ss');
+            Toast.fire({icon:'success', title:'Lưu hồ sơ thành công!'});
+        } catch (e) {
+            saveStatus.textContent = 'Lỗi lưu dữ liệu!';
+            Toast.fire({icon:'error', title:'Lỗi: ' + e.message});
+        }
+    },
+
+    deleteRecord(id) {
+        const rec = this._data.find(r => r.id === id);
+        if(!rec) return;
+        Swal.fire({
+            title: 'Xóa hồ sơ bồi thường?',
+            html: `Xóa hồ sơ của: <b class="text-rose-600">${rec.victimName}</b><br>Số tiền: ${Number(rec.totalAmount||0).toLocaleString('vi-VN')}đ`,
+            icon: 'warning', showCancelButton: true, confirmButtonColor: '#e11d48', confirmButtonText: 'Xóa vĩnh viễn', cancelButtonText: 'Hủy', customClass: {popup:'rnd'}
+        }).then(r => {
+            if(r.isConfirmed) {
+                db.ref('HumanClaims/' + id).remove().then(() => Toast.fire({icon:'success', title:'Đã xóa!'}));
+            }
+        });
+    },
+
+    /* ── Logic Tiện ích & Tính toán ── */
+    calculateDays() {
+        const inDate = document.getElementById('hc-inDate').value;
+        const outDate = document.getElementById('hc-outDate').value;
+        if (inDate && outDate) {
+            const days = moment(outDate).diff(moment(inDate), 'days');
+            document.getElementById('hc-days').value = Math.max(0, days);
+            this.calculateTotal();
+        }
+    },
+
+    adjPct(val) {
+        const inp = document.getElementById('hc-injuryRealPct');
+        let cur = parseInt(inp.value) || 0;
+        cur = Math.max(0, cur + val);
+        // Có thể thêm logic kiểm tra MAX dựa vào hc-injuryRange ở đây
+        inp.value = cur;
+        this.calculateTotal();
+    },
+
+    calculateTotal() {
+        const limitB = parseInt(document.getElementById('hc-limitB').value.replace(/[^\d]/g, '')) || 0;
+        const limitD = parseInt(document.getElementById('hc-limitD').value.replace(/[^\d]/g, '')) || 0;
+        const pct = parseInt(document.getElementById('hc-injuryRealPct').value) || 0;
+        const days = parseInt(document.getElementById('hc-days').value) || 0;
+
+        const valInjury = Math.round(limitB * (pct / 100));
+        // Giả sử trợ cấp nằm viện là 0.5% Mức D / ngày
+        const valHospital = Math.round(limitD * 0.005 * days); 
+        const total = valInjury + valHospital;
+
+        document.getElementById('hc-calc-injury').textContent = valInjury.toLocaleString('vi-VN') + ' đ';
+        document.getElementById('hc-calc-hospital').textContent = valHospital.toLocaleString('vi-VN') + ' đ';
+        document.getElementById('hc-calc-total').innerHTML = total.toLocaleString('vi-VN') + '<span class="text-lg text-emerald-400">đ</span>';
+    },
+
+    checkWarnings() {
+        const effFrom = document.getElementById('hc-effFrom').value;
+        const effTo = document.getElementById('hc-effTo').value;
+        const accDate = document.getElementById('hc-accDate').value;
+        
+        const warnEl = document.getElementById('hc-m-ai-warning');
+        warnEl.classList.add('hidden');
+
+        if (accDate && effFrom) {
+            if (moment(accDate).isBefore(moment(effFrom), 'day')) {
+                warnEl.innerHTML = `<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Tai nạn TRƯỚC ngày hiệu lực!`;
+                warnEl.classList.remove('hidden');
+                return;
+            }
+        }
+        if (accDate && effTo) {
+            if (moment(accDate).isAfter(moment(effTo), 'day')) {
+                warnEl.innerHTML = `<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Tai nạn SAU ngày hết hiệu lực!`;
+                warnEl.classList.remove('hidden');
+            }
+        }
+    },
+
+    /* ── STUB: Các hàm API tích hợp AI/Apps Script ── */
+    searchContract(val) {
+        // Todo: Gọi API Apps Script để tìm số hợp đồng
+        console.log("Searching contract:", val);
+    },
+
+    suggestInjury() {
+        const desc = document.getElementById('hc-injuryDesc').value.trim();
+        if(!desc) { Toast.fire({icon:'warning', title:'Hãy nhập mô tả hậu quả trước!'}); return; }
+        // Todo: Gọi API AI (Gemini) để phân tích desc -> trả về mã TLTT và Range %
+        // Mock:
+        document.getElementById('hc-injuryCode').value = "Mục 41.2a (Gãy Xương)";
+        document.getElementById('hc-injuryRange').value = "10 - 15%";
+        document.getElementById('hc-injuryRealPct').value = "10";
+        this.calculateTotal();
+        Toast.fire({icon:'success', title:'AI đã gợi ý xong!'});
+    },
+
+    ocrCccd(event) {
+        const file = event.target.files[0];
+        if(!file) return;
+        event.target.value = '';
+        // Todo: Gọi hàm OCR CCCD (có thể dùng lại hàm ocrCccd đã có ở hồ sơ xe)
+        Toast.fire({icon:'info', title:'Đang quét CCCD (Tính năng đang phát triển)...'});
+    },
+
+    generateEmail() {
+        const victim = document.getElementById('hc-victimName').value || '___';
+        const hdog = document.getElementById('hc-contractNo').value || '___';
+        const msg = `Kính gửi Ban XCG & Con Người,\n\nĐơn vị Tasco Đắk Lắk xin cấp số HSBT cho trường hợp:\n- NĐBH: ${victim}\n- Thuộc HĐ: ${hdog}\n- Ước tính BT: ${document.getElementById('hc-calc-total').textContent}\n\nTrân trọng.`;
+        
+        Swal.fire({
+            title: 'Nội dung Email',
+            html: `<textarea rows="6" class="inp w-full text-sm font-mono p-3 bg-slate-50">${msg}</textarea>`,
+            confirmButtonText: 'Copy', customClass: {popup:'rnd'}
+        }).then(r => {
+            if(r.isConfirmed) { navigator.clipboard.writeText(msg); Toast.fire({icon:'success', title:'Đã copy!'}); }
+        });
+    },
+
+    printDossier() {
+        // Todo: Gọi API Apps Script export Word
+        Toast.fire({icon:'info', title:'Đang gọi API in Hồ sơ...'});
+    }
+};
+
+// Khởi tạo khi load script
+document.addEventListener('DOMContentLoaded', () => {
+    HumanClaims.init();
+});
 </script>
 
 
