@@ -1449,6 +1449,11 @@ function startDataListener() {
     console.log("🛠 [DEBUG] Số hồ sơ khớp:", garaData.length);
 
     renderAll();
+
+    // Luôn render bảng adminbt sau khi có data (không phụ thuộc checkAdminRole)
+    if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'adminbt' || currentUser.role === 'nhanvien')) {
+      if (typeof renderAdminBtRecords === 'function') renderAdminBtRecords();
+    }
   });
 }
 
@@ -2517,9 +2522,6 @@ function checkAdminRole() {
     document.getElementById('tab-admin').style.display = 'none';
   }
 
-  if ((currentUser.role === 'admin' || currentUser.role === 'nhanvien' || currentUser.role === 'adminbt') && allWorkstationData.length > 0) {
-    renderAdminBtRecords();
-  }
 }
 
 function loadAdminData() {
