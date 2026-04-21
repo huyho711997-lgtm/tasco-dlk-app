@@ -1413,6 +1413,13 @@ function startDataListener() {
     
     // Lưu lại toàn bộ dữ liệu (kèm mặc định step=1) để Admin Bồi thường xem
     allWorkstationData = all.map(r => ({ ...r, step: r.step || 1 }));
+
+    // Admin và adminbt xem toàn bộ, không lọc theo gara
+    if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'adminbt' || currentUser.role === 'nhanvien')) {
+      garaData = allWorkstationData;
+      renderAll();
+      return;
+    }
     
     garaData = all.filter(r => {
       const recordGaraName = r.garaName || r.tenGara || r.gara || r.garaSuaChua || "";
