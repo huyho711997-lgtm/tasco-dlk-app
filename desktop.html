@@ -3998,6 +3998,13 @@ function saveModal() {
     blBaoHiemBaoLanh: parseInt(gv('f-blBaoHiemBaoLanh').replace(/[^\d]/g, '')) || 0
   };
   if(iso&&rec.step===1)upd.step=2;
+
+  // Tự động chuyển sang B6 (Chờ hoá đơn) nếu có link bảo lãnh và hồ sơ đang ở bước < 6
+  if (upd.baoLanhUrl && upd.baoLanhUrl.trim() !== '' && rec.step < 6) {
+      upd.step = 6;
+      upd.invoiceWaitAt = new Date().toISOString();
+  }
+
   if(gv('f-garaname'))garaSaveNew({name:gv('f-garaname'),phone:gv('f-garaphone'),tax:gv('f-garatax'),address:gv('f-garaaddr')});
 
   var fmap={bsx:'Biển số',customer:'Người báo',driverName:'Lái xe',phone:'SĐT',accidentDate:'Ngày VTT',notifyDate:'Ngày báo',location:'Địa điểm',cause:'Nguyên nhân',garaName:'Gara',appointmentTime:'Lịch hẹn',note:'Ghi chú',ownerName:'Chủ xe',ownerCccd:'CCCD',ownerCompany:'Công ty'};
