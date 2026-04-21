@@ -795,6 +795,7 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
             <option value="20" selected>20 dòng</option>
             <option value="50">50 dòng</option>
             <option value="100">100 dòng</option>
+            <option value="all">Tất cả</option> </select>
           </select>
 
           <select id="abt-filter" class="inp" style="width:180px;background:#fff;border-radius:24px;border:1.5px solid #cbd5e1;padding:10px 14px" onchange="abtCurrentPage=1; renderAdminBtRecords()">
@@ -2831,10 +2832,6 @@ GaraAuth._applyUI = function(user) {
 /* ═══════════════════════════════════
    LOGIC CHO QUYỀN ADMIN BỒI THƯỜNG
 ═══════════════════════════════════ */
-/* ═══════════════════════════════════
-   LOGIC CHO QUYỀN ADMIN BỒI THƯỜNG
-═══════════════════════════════════ */
-// Biến trạng thái phân trang
 let abtCurrentPage = 1;
 let abtRowsPerPage = 20;
 
@@ -2842,9 +2839,9 @@ function renderAdminBtRecords() {
   const search = (document.getElementById('abt-search')?.value || '').toLowerCase();
   const filter = document.getElementById('abt-filter')?.value || '';
 
-  let list = allWorkstationData;
+  // 1. TẠO BẢN SAO DỮ LIỆU ĐỂ KHÔNG LÀM MẤT GỐC
+  let list = [...allWorkstationData];
   
-  // 1. Lọc dữ liệu
   if (search) {
     list = list.filter(r => 
       (r.bsx || '').toLowerCase().includes(search) || 
@@ -2861,21 +2858,36 @@ function renderAdminBtRecords() {
     }
   }
 
-  // 2. Sắp xếp ưu tiên: Lỗi (8) -> Chưa nhận HS gốc -> Mới nhất
-  list.sort((a, b) => (b.step === 8 ? 1 : 0) - (a.step === 8 ? 1 : 0) || (a.daNhanHoSoGoc ? 1 : 0) - (b.daNhanHoSoGoc ? 1 : 0) || new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  // 2. Sắp xếp an toàn (Lỗi -> Chưa nhận HS gốc -> Mới nhất)
+  list.sort((a, b) => {
+    const stepDiff = (b.step === 8 ? 1 : 0) - (a.step === 8 ? 1 : 0);
+    if (stepDiff !== 0) return stepDiff;
+    const docDiff = (a.daNhanHoSoGoc ? 1 : 0) - (b.daNhanHoSoGoc ? 1 : 0);
+    if (docDiff !== 0) return docDiff;
+    const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    return (timeB || 0) - (timeA || 0);
+  });
 
-  // 3. Xử lý phân trang (Cắt mảng)
   const totalItems = list.length;
-  const totalPages = Math.ceil(totalItems / abtRowsPerPage) || 1;
-  
-  if (abtCurrentPage > totalPages) abtCurrentPage = totalPages;
-  if (abtCurrentPage < 1) abtCurrentPage = 1;
+  let paginatedList = list;
+  let totalPages = 1;
+  let startIndex = 0;
 
-  const startIndex = (abtCurrentPage - 1) * abtRowsPerPage;
-  const paginatedList = list.slice(startIndex, startIndex + abtRowsPerPage);
+  // 3. Xử lý cắt mảng nếu KHÔNG chọn "Tất cả"
+  if (abtRowsPerPage !== 'all') {
+    totalPages = Math.ceil(totalItems / abtRowsPerPage) || 1;
+    if (abtCurrentPage > totalPages) abtCurrentPage = totalPages;
+    if (abtCurrentPage < 1) abtCurrentPage = 1;
+    
+    startIndex = (abtCurrentPage - 1) * abtRowsPerPage;
+    paginatedList = list.slice(startIndex, startIndex + abtRowsPerPage);
+  }
 
   // 4. Render HTML ra bảng
   const tbody = document.getElementById('abt-tbody');
+  if (!tbody) return; // Bẫy lỗi an toàn
+
   tbody.innerHTML = paginatedList.length
     ? paginatedList.map(r => {
         const isErr = r.step === 8;
@@ -2906,20 +2918,28 @@ function renderAdminBtRecords() {
       }).join('')
     : `<tr><td colspan="6" style="padding:48px;text-align:center;color:var(--muted);font-size:13px">Không tìm thấy hồ sơ nào</td></tr>`;
 
-  // 5. Cập nhật Text thống kê
-  const endCount = Math.min(startIndex + abtRowsPerPage, totalItems);
-  document.getElementById('abt-count').textContent = totalItems > 0 
-    ? `Hiển thị dòng ${startIndex + 1} đến ${endCount} (Tổng số: ${totalItems} hồ sơ)` 
-    : 'Tổng cộng: 0 hồ sơ';
+  // 5. Cập nhật Text Thống kê
+  const countEl = document.getElementById('abt-count');
+  if (countEl) {
+    if (abtRowsPerPage === 'all') {
+      countEl.textContent = `Hiển thị toàn bộ ${totalItems} hồ sơ`;
+    } else {
+      const endCount = Math.min(startIndex + abtRowsPerPage, totalItems);
+      countEl.textContent = totalItems > 0 
+        ? `Hiển thị dòng ${startIndex + 1} đến ${endCount} (Tổng số: ${totalItems} hồ sơ)` 
+        : 'Tổng cộng: 0 hồ sơ';
+    }
+  }
 
   // 6. Vẽ thanh phân trang
   renderAbtPagination(totalPages);
 }
 
-// Các hàm hỗ trợ Phân trang
+// CÁC HÀM HỖ TRỢ
 function changeAbtLimit() {
-  abtRowsPerPage = parseInt(document.getElementById('abt-limit').value) || 20;
-  abtCurrentPage = 1; // Đổi số dòng thì reset về trang 1
+  const val = document.getElementById('abt-limit').value;
+  abtRowsPerPage = val === 'all' ? 'all' : (parseInt(val) || 20);
+  abtCurrentPage = 1;
   renderAdminBtRecords();
 }
 
@@ -2930,29 +2950,30 @@ function goToAbtPage(page) {
 
 function renderAbtPagination(totalPages) {
   const container = document.getElementById('abt-pagination');
-  if (totalPages <= 1) { container.innerHTML = ''; return; }
+  if (!container) return; // Bẫy lỗi an toàn
+
+  if (totalPages <= 1 || abtRowsPerPage === 'all') { 
+    container.innerHTML = ''; 
+    return; 
+  }
 
   let html = `<button class="page-btn" ${abtCurrentPage === 1 ? 'disabled' : ''} onclick="goToAbtPage(${abtCurrentPage - 1})">«</button>`;
 
-  // Logic hiển thị cửa sổ trang (Chỉ hiện tối đa 5 trang xung quanh trang hiện tại để ko bị dài quá)
   let startPage = Math.max(1, abtCurrentPage - 2);
   let endPage = Math.min(totalPages, startPage + 4);
   if (endPage - startPage < 4) {
     startPage = Math.max(1, endPage - 4);
   }
 
-  // Trang đầu
   if (startPage > 1) {
     html += `<button class="page-btn" onclick="goToAbtPage(1)">1</button>`;
     if (startPage > 2) html += `<span style="padding:4px 8px;font-size:12px;color:var(--muted)">...</span>`;
   }
 
-  // Các trang ở giữa
   for (let i = startPage; i <= endPage; i++) {
     html += `<button class="page-btn ${i === abtCurrentPage ? 'active' : ''}" onclick="goToAbtPage(${i})">${i}</button>`;
   }
 
-  // Trang cuối
   if (endPage < totalPages) {
     if (endPage < totalPages - 1) html += `<span style="padding:4px 8px;font-size:12px;color:var(--muted)">...</span>`;
     html += `<button class="page-btn" onclick="goToAbtPage(${totalPages})">${totalPages}</button>`;
@@ -2961,72 +2982,6 @@ function renderAbtPagination(totalPages) {
   html += `<button class="page-btn" ${abtCurrentPage === totalPages ? 'disabled' : ''} onclick="goToAbtPage(${abtCurrentPage + 1})">»</button>`;
   
   container.innerHTML = html;
-}
-
-function openAdminBtAction(id) {
-  const r = allWorkstationData.find(x => x.id === id);
-  if (!r) return;
-
-  document.getElementById('abt-record-id').value = id;
-  document.getElementById('abt-modal-bsx').textContent = `${r.bsx || '—'} · ${r.garaName || '—'}`;
-  document.getElementById('abt-step').value = r.step || 1;
-  document.getElementById('abt-received-docs').checked = r.daNhanHoSoGoc === true;
-  document.getElementById('abt-missing-note').value = r.missingDocsNote || '';
-  
-  toggleAbtErrorNote();
-  openModal('adminbt-modal');
-}
-
-function toggleAbtErrorNote() {
-  const step = document.getElementById('abt-step').value;
-  const wrap = document.getElementById('abt-error-note-wrap');
-  // Hiện khung ghi chú nếu chọn bước 8 (Báo lỗi), mờ đi nếu chọn bước khác
-  if (step === '8') {
-    wrap.style.opacity = '1';
-    wrap.style.pointerEvents = 'all';
-  } else {
-    wrap.style.opacity = '0.5';
-    wrap.style.pointerEvents = 'none';
-    document.getElementById('abt-missing-note').value = ''; // Xóa ghi chú nếu ko phải lỗi
-  }
-}
-
-async function saveAdminBtAction() {
-  const id = document.getElementById('abt-record-id').value;
-  const step = parseInt(document.getElementById('abt-step').value);
-  const daNhanHoSoGoc = document.getElementById('abt-received-docs').checked;
-  const missingDocsNote = document.getElementById('abt-missing-note').value.trim();
-
-  if (step === 8 && !missingDocsNote) {
-    Toast.fire({ icon: 'warning', title: 'Vui lòng nhập ghi chú khi báo lỗi hồ sơ!' });
-    return;
-  }
-
-  const payload = {
-    step: step,
-    daNhanHoSoGoc: daNhanHoSoGoc,
-    stepUpdatedAt: new Date().toISOString()
-  };
-
-  if (step === 8) {
-    payload.missingDocsNote = missingDocsNote;
-  } else {
-    payload.missingDocsNote = null; // Xóa lỗi nếu đổi sang trạng thái bình thường
-  }
-
-  // Nếu chuyển sang Đã thanh toán, tự động đánh dấu thời gian kế toán (nếu chưa có)
-  if (step === 7) {
-    const r = allWorkstationData.find(x => x.id === id);
-    if (r && !r.accountingAt) payload.accountingAt = new Date().toISOString();
-  }
-
-  try {
-    await db.ref('Workstation/' + id).update(payload);
-    closeModal('adminbt-modal');
-    Toast.fire({ icon: 'success', title: 'Đã cập nhật trạng thái hồ sơ!' });
-  } catch (error) {
-    Toast.fire({ icon: 'error', title: 'Lỗi máy chủ: ' + error.message });
-  }
 }
 </script>
 
