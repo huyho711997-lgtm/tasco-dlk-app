@@ -11695,6 +11695,10 @@ const MyCloud = {
     },
 
     deleteSingle(key, callback) {
+        // Tạm thời hạ z-index của Lightbox xuống để bảng xác nhận hiện lên trên
+        const lightbox = document.getElementById('_clb');
+        if (lightbox) lightbox.style.zIndex = '99999';
+
         Swal.fire({
             title: 'Xóa ảnh này?',
             text: "Dữ liệu sẽ bị xóa vĩnh viễn khỏi Cloud.",
@@ -11704,21 +11708,18 @@ const MyCloud = {
             cancelButtonColor: '#64748b',
             confirmButtonText: 'Xóa vĩnh viễn',
             cancelButtonText: 'Hủy',
-            customClass: { popup: 'rnd' },
-            didOpen: () => {
-                // Ép z-index để popup hiện đè lên trên trình xem ảnh (Lightbox)
-                const container = document.querySelector('.swal2-container');
-                if(container) container.style.zIndex = '2147483647';
-            }
+            customClass: { popup: 'rnd' }
         }).then(async (result) => {
             if (result.isConfirmed) {
                 const user = Auth.getCurrentUser();
                 const userId = user ? (user.id || user.username) : null; 
-                if(!userId) return;
+                if(!userId) {
+                    if (lightbox) lightbox.style.zIndex = '2147483647';
+                    return;
+                }
 
+                // Hiện popup đang xóa (vẫn giữ z-index thấp cho Lightbox)
                 Swal.fire({ title: 'Đang xóa...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass: { popup: 'rnd' } });
-                const container2 = document.querySelector('.swal2-container');
-                if(container2) container2.style.zIndex = '2147483647';
                 
                 const item = this.items.find(i => i.key === key);
                 if (item && item.url) {
@@ -11737,10 +11738,14 @@ const MyCloud = {
 
                 db.ref('Users/' + userId + '/myCloud/' + key).remove().then(() => {
                     Swal.close();
+                    if (lightbox) lightbox.style.zIndex = '2147483647'; // Khôi phục lại khi xóa xong
                     Toast.fire({ icon: 'success', title: 'Đã xóa file!' });
                     if (callback) callback(); // Đóng Lightbox sau khi xóa
                     this.updateQuota();
                 });
+            } else {
+                // Người dùng bấm "Hủy" -> Khôi phục lại z-index cho trình xem ảnh
+                if (lightbox) lightbox.style.zIndex = '2147483647';
             }
         });
     },
