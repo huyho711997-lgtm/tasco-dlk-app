@@ -4032,6 +4032,16 @@ function saveModal() {
   db.ref('Workstation/'+curId).update(upd).then(function(){
     Toast.fire({icon:'success',title:'Đã lưu thay đổi!'});
     if(upd.auditLog)renderAuditLog(upd.auditLog);
+    
+    // CẬP NHẬT GIAO DIỆN NÚT TRẠNG THÁI NGAY LẬP TỨC
+    if (upd.step) {
+      rec.step = upd.step; // Cập nhật lại biến tạm thời
+      var sb = document.getElementById('m-status-btn');
+      if (sb) {
+        sb.className = 'px-3 py-1.5 rounded-lg text-[11px] font-black uppercase border flex items-center gap-1.5 hover:shadow-md transition-all ' + chipClass(upd.step);
+        sb.innerHTML = stepLabel(upd.step) + ' <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
+      }
+    }
   }).catch(function(e){Toast.fire({icon:'error',title:'Lỗi: '+e.message});});
 }
 
