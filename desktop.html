@@ -11813,20 +11813,24 @@ const MyCloud = {
                     return item ? item.url : null;
                 }).filter(Boolean);
 
-                for (let i = 0; i < urlsToDelete.length; i++) {
-                    const url = urlsToDelete[i];
+                // --- BẮT ĐẦU XÓA SONG SONG ---
+                const deletePromises = urlsToDelete.map(url => {
                     const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[a-zA-Z0-9]+)?(?:\?.*)?$/);
                     const pubId = match ? match[1] : null;
                     if (pubId) {
-                        try {
-                            await fetch(WORD_URL, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                                body: JSON.stringify({ action: 'delete_cloudinary', publicId: pubId })
-                            });
-                        } catch (err) {}
+                        // Trả về một Promise fetch (không dùng await ở đây để nó không chờ)
+                        return fetch(WORD_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: JSON.stringify({ action: 'delete_cloudinary', publicId: pubId })
+                        }).catch(err => console.error("Lỗi xóa Cloudinary:", err)); // Bắt lỗi âm thầm để không làm sập luồng
                     }
-                }
+                    return Promise.resolve();
+                });
+
+                // Đợi tất cả các lệnh xóa chạy CÙNG LÚC hoàn tất
+                await Promise.allSettled(deletePromises);
+                // --- KẾT THÚC XÓA SONG SONG ---
 
                 const updates = {};
                 keysToDelete.forEach(key => updates[key] = null);
