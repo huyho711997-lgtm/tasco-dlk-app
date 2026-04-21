@@ -1311,8 +1311,8 @@ textarea.inp { resize:vertical; }
       <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg> 
       <span class="sidebar-text whitespace-nowrap">Thống kê</span>
     </button>
-    <button title="Cloud của tôi" onclick="goView('cloud')" id="nav-cloud" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all mt-1 border border-transparent hover:border-cyan-100">
-      <svg class="w-5 h-5 shrink-0 text-cyan-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/><path d="M12 12v6"/><path d="M9 15l3 3 3-3"/></svg>
+    <button title="Cloud của tôi" onclick="goView('cloud')" id="nav-cloud" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all mt-1">
+      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
       <span class="sidebar-text whitespace-nowrap">Cloud của tôi</span>
     </button>
     <div class="section-title pt-6 pb-2 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Nghiệp vụ</div>
@@ -11456,11 +11456,28 @@ const MyCloud = {
     },
 
     _getFilteredItems() {
+        // Lấy từ khóa từ ô tìm kiếm (nếu có)
+        const searchEl = document.getElementById('mycloud-search-inp');
+        const query = searchEl ? searchEl.value.trim().toLowerCase() : '';
+
         return this.items.filter(i => {
+            // 1. Điều kiện Lọc theo Tab (Ảnh / Tài liệu)
             const isImg = i.url.match(/\.(jpeg|jpg|gif|png|webp)/i) != null || i.url.includes('image');
-            if (this._activeTab === 'image') return isImg;
-            if (this._activeTab === 'document') return !isImg;
-            return true;
+            let tabMatch = true;
+            if (this._activeTab === 'image') tabMatch = isImg;
+            if (this._activeTab === 'document') tabMatch = !isImg;
+
+            // 2. Điều kiện Lọc theo Từ khóa tìm kiếm (Ghi chú hoặc Tên file)
+            let textMatch = true;
+            if (query) {
+                const fileName = (i.fileName || '').toLowerCase();
+                const note = (i.note || '').toLowerCase();
+                // Sẽ hiển thị nếu từ khóa nằm trong Tên file HOẶC nằm trong Ghi chú
+                textMatch = fileName.includes(query) || note.includes(query);
+            }
+
+            // Phải thỏa mãn cả 2 điều kiện
+            return tabMatch && textMatch;
         });
     },
 
