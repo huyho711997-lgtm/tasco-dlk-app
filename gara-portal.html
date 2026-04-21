@@ -1783,7 +1783,7 @@ function renderRecords() {
   );
   if (filterStep) list = list.filter(r => String(r.step) === filterStep);
 
-  list.sort((a, b) => (b.step === 8 ? 1 : 0) - (a.step === 8 ? 1 : 0) || new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
   const body = document.getElementById('rec-tbody');
   body.innerHTML = list.length
@@ -2846,11 +2846,7 @@ function renderAdminBtRecords(resetPage = false) {
     }
   }
 
-  list.sort((a, b) =>
-    (b.step === 8 ? 1 : 0) - (a.step === 8 ? 1 : 0) ||
-    (a.daNhanHoSoGoc ? 1 : 0) - (b.daNhanHoSoGoc ? 1 : 0) ||
-    new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-  );
+  list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
   const total = list.length;
   const totalPages = Math.max(1, Math.ceil(total / abtPageSize));
