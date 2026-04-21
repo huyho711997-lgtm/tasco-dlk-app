@@ -9497,8 +9497,8 @@ function _cmpStatCard(val, label, bg, color, border) {
       
       // Nếu là ảnh nằm trong tab Cloud
       if (curImg.group === 'mycloud') {
-          if (window.MyCloud && curImg.key) {
-              window.MyCloud.deleteSingle(curImg.key, function(){ close(); });
+          if (curImg.key) { // Bỏ window.MyCloud đi, gọi trực tiếp MyCloud
+              MyCloud.deleteSingle(curImg.key, function(){ close(); });
           }
       // Nếu là ảnh nằm trong Hồ sơ (Chứng từ / Hiện trường / Hư hỏng)
       } else if (curImg.group.startsWith('gallery-') || curImg.group.startsWith('docs-') || curImg.group.startsWith('modal-docs-')) {
