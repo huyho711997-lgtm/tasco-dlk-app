@@ -484,198 +484,8 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
 .notif-item.unread { background: #f0f7ff; }
 .notif-dot { width: 8px; height: 8px; border-radius: 50%; background: #2563eb; flex-shrink: 0; margin-top: 5px; }
 
-/* ══ ADMIN REDESIGN ══ */
-.gdrop { position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:100;overflow:hidden;max-height:240px;overflow-y:auto }
-.gdrop-item { display:flex;align-items:flex-start;gap:10px;padding:10px 14px;cursor:pointer;font-size:12px;transition:background .1s }
-.gdrop-item:hover { background:#f8fafc }
-
-/* Sidebar mới */
-.adm-sidebar {
-  width:240px;flex-shrink:0;background:#0c1220;
-  display:flex;flex-direction:column;
-  border-right:1px solid rgba(255,255,255,.05);
-}
-.adm-sb-brand {
-  padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.06);
-  display:flex;align-items:center;gap:10px;
-}
-.adm-sb-logo {
-  width:34px;height:34px;background:#2563eb;border-radius:10px;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
-.adm-sb-section {
-  font-size:9px;font-weight:800;color:rgba(255,255,255,.2);
-  text-transform:uppercase;letter-spacing:.1em;padding:16px 20px 6px;
-}
-.adm-sb-item {
-  display:flex;align-items:center;gap:10px;
-  padding:9px 12px;margin:1px 8px;border-radius:9px;
-  cursor:pointer;font-size:12px;font-weight:700;
-  color:rgba(255,255,255,.38);border:none;background:none;
-  font-family:inherit;width:calc(100% - 16px);text-align:left;
-  transition:all .15s;
-}
-.adm-sb-item svg { width:15px;height:15px;flex-shrink:0 }
-.adm-sb-item:hover { background:rgba(255,255,255,.06);color:rgba(255,255,255,.72) }
-.adm-sb-item.adm-active { background:rgba(37,99,235,.2);color:#93c5fd }
-.adm-sb-item .adm-badge {
-  margin-left:auto;background:#ef4444;color:#fff;
-  font-size:9px;font-weight:800;padding:1px 6px;border-radius:10px;
-}
-.adm-sb-footer {
-  margin-top:auto;padding:12px;
-  border-top:1px solid rgba(255,255,255,.06);
-}
-.adm-sb-user {
-  display:flex;align-items:center;gap:9px;
-  padding:9px 10px;border-radius:9px;cursor:pointer;
-}
-.adm-sb-user:hover { background:rgba(255,255,255,.05) }
-.adm-sb-avatar {
-  width:30px;height:30px;border-radius:9px;
-  background:linear-gradient(135deg,#2563eb,#7c3aed);
-  display:flex;align-items:center;justify-content:center;
-  font-size:12px;font-weight:900;color:#fff;flex-shrink:0;
-}
-/* Topbar admin */
-.adm-topbar {
-  height:52px;background:#fff;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;padding:0 24px;gap:14px;flex-shrink:0;
-}
-.adm-topbar-title { font-size:15px;font-weight:900;color:#0f172a }
-.adm-topbar-sep { width:1px;height:18px;background:var(--border) }
-.adm-topbar-sub { font-size:12px;color:var(--muted);font-weight:600 }
-.adm-topbar-right { margin-left:auto;display:flex;align-items:center;gap:8px }
-.adm-tb-btn {
-  display:flex;align-items:center;gap:5px;height:34px;padding:0 14px;
-  border:1px solid var(--border);border-radius:9px;background:#fff;
-  font-size:12px;font-weight:700;color:#475569;cursor:pointer;
-  font-family:inherit;transition:all .15s;
-}
-.adm-tb-btn:hover { background:#f8fafc }
-.adm-tb-btn svg { width:12px;height:12px }
-.adm-tb-btn-primary {
-  background:#0f172a;color:#fff;border-color:#0f172a;
-  box-shadow:0 2px 8px rgba(15,23,42,.2);
-}
-.adm-tb-btn-primary:hover { background:#1e293b }
-/* KPI mini */
-.adm-kpi-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px }
-.adm-kpi {
-  background:#fff;border:1px solid var(--border);border-radius:12px;
-  padding:16px 18px;display:flex;flex-direction:column;gap:12px;
-}
-.adm-kpi-row { display:flex;align-items:center;justify-content:space-between }
-.adm-kpi-icon { width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center }
-.adm-kpi-icon svg { width:15px;height:15px }
-.adm-kpi-badge {
-  font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;
-}
-.adm-kpi-val { font-size:24px;font-weight:900;line-height:1;letter-spacing:-.8px }
-.adm-kpi-label { font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:2px }
-/* Table card mới */
-.adm-tcard {
-  background:#fff;border:1px solid var(--border);
-  border-radius:14px;overflow:hidden;
-}
-.adm-tcard-hd {
-  padding:14px 20px;border-bottom:1px solid #f1f5f9;
-  display:flex;align-items:center;gap:10px;
-}
-.adm-tcard-title { font-size:14px;font-weight:900;color:#0f172a }
-.adm-tcard-count {
-  font-size:11px;font-weight:700;color:var(--muted);
-  background:#f1f5f9;padding:3px 9px;border-radius:10px;
-}
-/* Toolbar tìm kiếm */
-.adm-toolbar {
-  display:flex;align-items:center;gap:10px;padding:12px 20px;
-  background:#f8fafc;border-bottom:1px solid var(--border);flex-wrap:wrap;
-}
-.adm-search-wrap { position:relative;flex:1;min-width:220px }
-.adm-search-wrap svg {
-  position:absolute;left:12px;top:50%;transform:translateY(-50%);
-  width:13px;height:13px;color:#94a3b8;pointer-events:none;
-}
-.adm-search-inp {
-  width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:22px;
-  padding:8px 14px 8px 34px;font-size:12px;font-weight:600;
-  color:#0f172a;outline:none;font-family:inherit;
-  transition:border-color .15s;
-}
-.adm-search-inp:focus { border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1) }
-.adm-filter-sel {
-  background:#fff;border:1px solid #e2e8f0;border-radius:22px;
-  padding:8px 14px;font-size:12px;font-weight:600;color:#475569;
-  font-family:inherit;outline:none;cursor:pointer;
-}
-/* Table rows */
-.adm-table { width:100%;border-collapse:collapse }
-.adm-table thead th {
-  padding:9px 16px;font-size:10px;font-weight:800;
-  color:var(--muted);text-transform:uppercase;letter-spacing:.06em;
-  text-align:left;background:#f8fafc;
-  border-bottom:1px solid var(--border);white-space:nowrap;
-}
-.adm-table tbody td { padding:12px 16px;border-bottom:1px solid #f8fafc;vertical-align:middle }
-.adm-table tbody tr { transition:background .08s;cursor:default }
-.adm-table tbody tr:hover td { background:#f8fafc }
-.adm-table tbody tr:last-child td { border-bottom:none }
-/* Avatar */
-.adm-uavatar {
-  width:36px;height:36px;border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:13px;font-weight:900;flex-shrink:0;
-}
-/* Role badge mới */
-.adm-role {
-  display:inline-flex;align-items:center;gap:4px;
-  padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;
-}
-.adm-role-admin { background:#fef3c7;color:#92400e;border:1px solid #fde68a }
-.adm-role-gara  { background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe }
-.adm-role-nv    { background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0 }
-.adm-role-bt    { background:#fdf4ff;color:#7e22ce;border:1px solid #e9d5ff }
-/* Status pill */
-.adm-status {
-  display:inline-flex;align-items:center;gap:5px;
-  font-size:10px;font-weight:800;
-}
-.adm-status-dot { width:6px;height:6px;border-radius:50% }
-/* Action buttons */
-.adm-act-btn {
-  padding:5px 12px;border-radius:7px;font-size:11px;font-weight:700;
-  cursor:pointer;border:none;font-family:inherit;transition:all .15s;
-}
-.adm-act-edit { background:#eff6ff;color:#2563eb }
-.adm-act-edit:hover { background:#dbeafe }
-.adm-act-del { background:#fff1f2;color:#e11d48 }
-.adm-act-del:hover { background:#ffe4e6 }
-/* Pagination mới */
-.adm-pagination {
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 20px;border-top:1px solid var(--border);flex-wrap:wrap;gap:10px;
-}
-.adm-pg-info { font-size:12px;color:var(--muted);font-weight:700 }
-.adm-pg-sel {
-  background:#fff;border:1px solid var(--border);border-radius:8px;
-  padding:5px 10px;font-size:12px;font-weight:700;color:#475569;
-  font-family:inherit;cursor:pointer;outline:none;
-}
-.adm-pg-btn {
-  min-width:32px;height:32px;border-radius:8px;
-  border:1px solid var(--border);background:#fff;
-  font-size:12px;font-weight:700;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  color:#475569;font-family:inherit;transition:all .15s;padding:0 6px;
-}
-.adm-pg-btn:hover:not(:disabled) { background:#f1f5f9 }
-.adm-pg-btn:disabled { opacity:.35;cursor:not-allowed }
-.adm-pg-btn.adm-pg-active {
-  background:#0f172a;color:#fff;border-color:#0f172a;
-}
-/* Checkbox column */
-.adm-chk { width:16px;height:16px;accent-color:#2563eb;cursor:pointer }
+.md-tab-btn { transition: color .15s, border-color .15s; }
+.md-tab-btn:hover:not(.active) { color: #334155 !important; background: #f8fafc; }
 </style>
 </head>
 <body>
@@ -1088,185 +898,49 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
     </div>
 
     <!-- ══ ADMIN PANEL ══ -->
-    <div id="view-admin" class="view animate-in" style="padding:0;display:flex;height:calc(100vh - 54px - 48px)">
-
-      <!-- SIDEBAR ADMIN -->
-      <div class="adm-sidebar">
-        <div class="adm-sb-brand">
-          <div class="adm-sb-logo">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-          </div>
-          <div>
-            <p style="color:#f1f5f9;font-weight:900;font-size:14px;line-height:1">Quản trị</p>
-            <p style="color:rgba(255,255,255,.3);font-size:9px;font-weight:700;margin-top:2px;text-transform:uppercase;letter-spacing:.08em">Admin Panel</p>
-          </div>
+    <div id="view-admin" class="view animate-in">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <h2 style="font-size:20px;font-weight:900;color:#0f172a;letter-spacing:-.4px">Quản lý tài khoản</h2>
+          <p style="font-size:12px;color:var(--muted);margin-top:3px;font-weight:600">Thêm, sửa, xoá tài khoản truy cập hệ thống</p>
         </div>
-
-        <div style="flex:1;overflow-y:auto;padding-top:6px">
-          <div class="adm-sb-section">Tổng quan</div>
-          <button class="adm-sb-item" onclick="adminNavTo('users')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            Tài khoản hệ thống
-          </button>
-
-          <div class="adm-sb-section">Cấu hình</div>
-          <button class="adm-sb-item" onclick="adminNavTo('garages')" id="adm-nav-garages">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            Gara đối tác
-          </button>
-          <button class="adm-sb-item" onclick="adminNavTo('steps')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            Quy trình xử lý
-          </button>
-          <button class="adm-sb-item" onclick="adminNavTo('logs')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            Nhật ký hoạt động
-          </button>
-        </div>
-
-        <div class="adm-sb-footer">
-          <div class="adm-sb-user">
-            <div class="adm-sb-avatar" id="adm-sb-av">A</div>
-            <div style="flex:1;min-width:0">
-              <p style="color:#f1f5f9;font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="adm-sb-name">Admin</p>
-              <p style="color:rgba(255,255,255,.3);font-size:10px;font-weight:600">Quản trị viên</p>
-            </div>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          </div>
-        </div>
+        <button onclick="openUserModal()" style="padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px;box-shadow:0 4px 12px rgba(37,99,235,.25);transition:all .2s" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 16px rgba(37,99,235,.35)'" onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 12px rgba(37,99,235,.25)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Thêm tài khoản
+        </button>
       </div>
 
-      <!-- NỘI DUNG CHÍNH -->
-      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f0f4ff">
-
-        <!-- TOPBAR -->
-        <div class="adm-topbar">
-          <div>
-            <div class="adm-topbar-title">Quản lý tài khoản</div>
+      <div class="card">
+        <div style="padding:16px 20px;background:#f8fafc;border-bottom:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+          <div style="position:relative;flex:1;min-width:240px">
+            <svg width="14" height="14" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94a3b8;pointer-events:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input id="usr-search" type="text" class="inp" style="padding:10px 14px 10px 38px;background:#fff;border-radius:24px;border:1.5px solid #cbd5e1" placeholder="Tìm kiếm tên, username..." oninput="renderUsersTable()">
           </div>
-          <div class="adm-topbar-sep"></div>
-          <div class="adm-topbar-sub" id="adm-usr-subtitle">Đang tải...</div>
-          <div class="adm-topbar-right">
-            <button class="adm-tb-btn" onclick="exportUsersCSV()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Xuất CSV
-            </button>
-            <button class="adm-tb-btn adm-tb-btn-primary" onclick="openUserModal()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Thêm tài khoản
-            </button>
-          </div>
+          <select id="usr-role-filter" class="inp" style="width:180px;background:#fff;border-radius:24px;border:1.5px solid #cbd5e1;padding:10px 14px" onchange="renderUsersTable()">
+            <option value="">Tất cả vai trò</option>
+            <option value="admin">Quản trị (Admin)</option>
+            <option value="gara">Gara đối tác</option>
+            <option value="nhanvien">Nhân viên Tasco</option>
+          </select>
         </div>
-
-        <!-- SCROLL CONTENT -->
-        <div style="flex:1;overflow-y:auto;padding:20px 24px">
-
-          <!-- KPI ROW -->
-          <div class="adm-kpi-grid">
-            <div class="adm-kpi">
-              <div class="adm-kpi-row">
-                <div class="adm-kpi-icon" style="background:#eff6ff">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                </div>
-                <span id="adm-kpi-total-badge" class="adm-kpi-badge" style="background:#eff6ff;color:#1d4ed8">—</span>
-              </div>
-              <div class="adm-kpi-val" id="adm-kpi-total" style="color:#2563eb">—</div>
-              <div class="adm-kpi-label">Tổng tài khoản</div>
-            </div>
-            <div class="adm-kpi">
-              <div class="adm-kpi-row">
-                <div class="adm-kpi-icon" style="background:#f0fdf4">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                </div>
-                <span id="adm-kpi-active-badge" class="adm-kpi-badge" style="background:#dcfce7;color:#15803d">—</span>
-              </div>
-              <div class="adm-kpi-val" id="adm-kpi-active" style="color:#15803d">—</div>
-              <div class="adm-kpi-label">Đang hoạt động</div>
-            </div>
-            <div class="adm-kpi">
-              <div class="adm-kpi-row">
-                <div class="adm-kpi-icon" style="background:#fffbeb">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                </div>
-              </div>
-              <div class="adm-kpi-val" id="adm-kpi-gara" style="color:#b45309">—</div>
-              <div class="adm-kpi-label">Gara đối tác</div>
-            </div>
-            <div class="adm-kpi">
-              <div class="adm-kpi-row">
-                <div class="adm-kpi-icon" style="background:#fff1f2">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-                </div>
-                <span id="adm-kpi-locked-badge" class="adm-kpi-badge" style="background:#fee2e2;color:#b91c1c">—</span>
-              </div>
-              <div class="adm-kpi-val" id="adm-kpi-locked" style="color:#b91c1c">—</div>
-              <div class="adm-kpi-label">Bị khóa</div>
-            </div>
-          </div>
-
-          <!-- TABLE CARD -->
-          <div class="adm-tcard">
-            <div class="adm-tcard-hd">
-              <div class="adm-tcard-title">Danh sách tài khoản</div>
-              <div class="adm-tcard-count" id="usr-count">—</div>
-              <div style="margin-left:auto;display:flex;gap:6px">
-                <div style="display:flex;gap:4px" id="adm-role-tabs">
-                  <button onclick="setUsrRoleQuick('')" class="adm-pg-btn adm-pg-active" id="adm-rtab-all">Tất cả</button>
-                  <button onclick="setUsrRoleQuick('gara')" class="adm-pg-btn" id="adm-rtab-gara">Gara</button>
-                  <button onclick="setUsrRoleQuick('nhanvien')" class="adm-pg-btn" id="adm-rtab-nv">Nhân viên</button>
-                  <button onclick="setUsrRoleQuick('admin')" class="adm-pg-btn" id="adm-rtab-admin">Admin</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="adm-toolbar">
-              <div class="adm-search-wrap">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input id="usr-search" type="text" class="adm-search-inp" placeholder="Tìm tên, username, tên gara..." oninput="renderUsersTable()">
-              </div>
-              <select id="usr-role-filter" class="adm-filter-sel" onchange="renderUsersTable()">
-                <option value="">Tất cả vai trò</option>
-                <option value="admin">Quản trị (Admin)</option>
-                <option value="gara">Gara đối tác</option>
-                <option value="nhanvien">Nhân viên Tasco</option>
-                <option value="adminbt">Admin Bồi thường</option>
-              </select>
-              <select id="usr-status-filter" class="adm-filter-sel" onchange="renderUsersTable()">
-                <option value="">Tất cả trạng thái</option>
-                <option value="active">Hoạt động</option>
-                <option value="locked">Bị khóa</option>
-              </select>
-            </div>
-
-            <div style="overflow-x:auto">
-              <table class="adm-table">
-                <thead>
-                  <tr>
-                    <th style="padding-left:20px;width:40px"><input type="checkbox" class="adm-chk" id="chk-all" onchange="toggleAllChk(this)"></th>
-                    <th>Tài khoản</th>
-                    <th>Đơn vị / Gara</th>
-                    <th>Vai trò</th>
-                    <th>Liên hệ</th>
-                    <th>Trạng thái</th>
-                    <th style="text-align:center;width:130px">Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody id="usr-tbody"></tbody>
-              </table>
-            </div>
-
-            <div class="adm-pagination">
-              <div style="display:flex;align-items:center;gap:10px">
-                <span class="adm-pg-info" id="adm-usr-pg-info">—</span>
-                <select class="adm-pg-sel" onchange="usrSetPageSize(this.value)">
-                  <option value="10">10 dòng</option>
-                  <option value="20" selected>20 dòng</option>
-                  <option value="50">50 dòng</option>
-                </select>
-              </div>
-              <div style="display:flex;gap:4px;align-items:center" id="adm-usr-pg-btns"></div>
-            </div>
-          </div>
+        
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="padding-left:20px">Tài khoản</th>
+                <th>Tên hiển thị / Tên đơn vị</th>
+                <th>Vai trò</th>
+                <th>Liên hệ</th>
+                <th>Trạng thái</th>
+                <th style="text-align:center;width:120px">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="usr-tbody"></tbody>
+          </table>
+        </div>
+        <div style="padding:12px 20px;background:#f8fafc;border-top:1px solid var(--border)">
+          <span id="usr-count" style="font-size:12px;color:var(--muted);font-weight:700"></span>
         </div>
       </div>
     </div>
@@ -2879,91 +2553,54 @@ function garaUserSelect(g) {
   preview.style.display = 'flex';
 }
 /* ── USERS TABLE ── */
+/* ── USERS TABLE ── */
 function renderUsersTable() {
-  updateAdminKPIs();
-  const search  = (document.getElementById('usr-search')?.value||'').toLowerCase();
-  const roleF   = document.getElementById('usr-role-filter')?.value||'';
-  const statusF = document.getElementById('usr-status-filter')?.value||'';
+  const search = (document.getElementById('usr-search')?.value||'').toLowerCase();
+  const roleF = document.getElementById('usr-role-filter')?.value||'';
 
   let entries = Object.entries(allUsers);
   if (search) entries = entries.filter(([k,v]) =>
     (v.username||'').toLowerCase().includes(search) ||
     (v.garaName||v.name||'').toLowerCase().includes(search));
   if (roleF) entries = entries.filter(([k,v]) => v.role === roleF);
-  if (statusF === 'active') entries = entries.filter(([k,v]) => v.active !== false);
-  if (statusF === 'locked') entries = entries.filter(([k,v]) => v.active === false);
 
-  const total = entries.length;
-  const totalPages = Math.max(1, Math.ceil(total / usrPageSize));
-  if (usrCurrentPage > totalPages) usrCurrentPage = totalPages;
-  const start = (usrCurrentPage - 1) * usrPageSize;
-  const page  = entries.slice(start, start + usrPageSize);
+  const roleClass = { admin:'role-admin', gara:'role-gara', nhanvien:'role-nv' };
+  const roleLabel = { admin:'Admin', gara:'Gara', nhanvien:'Nhân viên' };
 
-  const roleClass = { admin:'adm-role-admin', gara:'adm-role-gara', nhanvien:'adm-role-nv', adminbt:'adm-role-bt' };
-  const roleLabel = { admin:'Admin', gara:'Gara', nhanvien:'Nhân viên', adminbt:'Admin BT' };
-  const colors = ['#2563eb','#7c3aed','#059669','#d97706','#e11d48','#0891b2','#0f172a'];
-
-  document.getElementById('usr-tbody').innerHTML = page.length
-    ? page.map(([key, u]) => {
-        const clr = u.color || colors[Math.abs(key.split('').reduce((a,c)=>a+c.charCodeAt(0),0)) % colors.length];
-        const isActive = u.active !== false;
-        return `<tr>
-          <td style="padding-left:20px"><input type="checkbox" class="adm-row-chk adm-chk"></td>
-          <td>
-            <div style="display:flex;align-items:center;gap:10px">
-              <div class="adm-uavatar" style="background:${clr}18;color:${clr}">${(u.name||u.garaName||'?').charAt(0).toUpperCase()}</div>
+  document.getElementById('usr-tbody').innerHTML = entries.length
+    ? entries.map(([key, u]) => `
+        <tr>
+          <td style="padding-left:20px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:38px;height:38px;border-radius:12px;background:${u.color||'#2563eb'}18;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:${u.color||'#2563eb'};flex-shrink:0">${(u.name||u.garaName||'?').charAt(0).toUpperCase()}</div>
               <div>
-                <p style="font-size:13px;font-weight:800;color:#0f172a">${u.username||'—'}</p>
-                <p style="font-size:10px;color:var(--muted);margin-top:1px">${u.name||'—'}</p>
+                <p style="font-size:13px;font-weight:800;color:var(--text)">${u.username||'—'}</p>
+                <p style="font-size:10px;color:var(--muted);font-family:monospace;margin-top:2px">ID: ${key}</p>
               </div>
             </div>
           </td>
           <td>
-            <div style="font-size:12px;font-weight:700;color:#334155">${u.garaName||'<span style="color:#cbd5e1;font-style:italic">Chưa gán</span>'}</div>
-            ${u.garaPhone||u.phone ? `<div style="font-size:10px;color:var(--muted);margin-top:2px">${u.garaPhone||u.phone}</div>` : ''}
+            <div style="font-size:13px;font-weight:700;color:#334155">${u.name||'—'}</div>
+            <div style="font-size:10px;color:#2563eb;margin-top:2px;font-weight:800">🏢 ${u.garaName||'Chưa gán Gara'}</div>
           </td>
-          <td><span class="adm-role ${roleClass[u.role]||'adm-role-gara'}">${roleLabel[u.role]||u.role}</span></td>
-          <td style="font-size:12px;color:var(--muted);font-weight:600">${u.garaPhone||u.phone||'—'}</td>
+          <td><span class="role-badge ${roleClass[u.role]||'role-gara'}" style="padding:4px 12px;font-size:11px">${roleLabel[u.role]||u.role}</span></td>
+          <td style="font-size:12px;color:var(--muted);font-weight:600">${u.phone||u.garaPhone||'—'}</td>
           <td>
-            <div class="adm-status">
-              <div class="adm-status-dot" style="background:${isActive?'#16a34a':'#e11d48'}"></div>
-              <span style="font-size:11px;font-weight:700;color:${isActive?'#15803d':'#b91c1c'}">${isActive?'Hoạt động':'Bị khóa'}</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:${u.active!==false?'#059669':'#e11d48'};background:${u.active!==false?'#ecfdf5':'#fff1f2'};padding:4px 10px;border-radius:20px;border:1px solid ${u.active!==false?'#a7f3d0':'#fecaca'}">
+              <div style="width:6px;height:6px;border-radius:50%;background:${u.active!==false?'#059669':'#e11d48'}"></div>
+              ${u.active!==false?'Hoạt động':'Bị khóa'}
+            </span>
+          </td>
+          <td style="text-align:center">
+            <div style="display:flex;gap:8px;justify-content:center">
+              <button class="act-btn act-btn-edit" style="padding:6px 14px;border-radius:10px;font-size:11px" onclick="editUser('${key}')">Sửa</button>
+              <button class="act-btn act-btn-del" style="padding:6px 14px;border-radius:10px;font-size:11px" onclick="deleteUser('${key}','${u.username||key}')">Xóa</button>
             </div>
           </td>
-          <td>
-            <div style="display:flex;gap:6px;justify-content:center">
-              <button class="adm-act-btn adm-act-edit" onclick="editUser('${key}')">Sửa</button>
-              <button class="adm-act-btn adm-act-del" onclick="deleteUser('${key}','${u.username||key}')">Xóa</button>
-            </div>
-          </td>
-        </tr>`;
-      }).join('')
-    : `<tr><td colspan="7" style="padding:60px 20px;text-align:center;color:var(--muted)">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 10px;opacity:.3;display:block"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-        <p style="font-size:13px;font-weight:700">Không tìm thấy tài khoản nào</p>
-      </td></tr>`;
+        </tr>`).join('')
+    : `<tr><td colspan="6" style="padding:60px 20px;text-align:center;color:var(--muted)"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 12px;opacity:0.4"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><p style="font-size:13px;font-weight:600">Không tìm thấy tài khoản nào</p></td></tr>`;
 
-  const countEl = document.getElementById('usr-count');
-  const infoEl  = document.getElementById('adm-usr-pg-info');
-  const from = total === 0 ? 0 : start + 1;
-  const to   = Math.min(start + usrPageSize, total);
-  if (countEl) countEl.textContent = total + ' tài khoản';
-  if (infoEl)  infoEl.textContent  = `Hiển thị ${from}–${to} / ${total} tài khoản`;
-
-  const pgWrap = document.getElementById('adm-usr-pg-btns');
-  if (!pgWrap) return;
-  let html = `<button class="adm-pg-btn" onclick="usrGoPage(${usrCurrentPage-1})" ${usrCurrentPage<=1?'disabled':''}>‹</button>`;
-  const maxBtn = 5;
-  let sp = Math.max(1, usrCurrentPage - Math.floor(maxBtn/2));
-  let ep = Math.min(totalPages, sp + maxBtn - 1);
-  if (ep - sp < maxBtn - 1) sp = Math.max(1, ep - maxBtn + 1);
-  if (sp > 1) html += `<button class="adm-pg-btn" onclick="usrGoPage(1)">1</button>${sp>2?'<span style="padding:0 4px;font-size:12px;color:var(--muted)">…</span>':''}`;
-  for (let p = sp; p <= ep; p++) {
-    html += `<button class="adm-pg-btn${p===usrCurrentPage?' adm-pg-active':''}" onclick="usrGoPage(${p})">${p}</button>`;
-  }
-  if (ep < totalPages) html += `${ep<totalPages-1?'<span style="padding:0 4px;font-size:12px;color:var(--muted)">…</span>':''}<button class="adm-pg-btn" onclick="usrGoPage(${totalPages})">${totalPages}</button>`;
-  html += `<button class="adm-pg-btn" onclick="usrGoPage(${usrCurrentPage+1})" ${usrCurrentPage>=totalPages?'disabled':''}>›</button>`;
-  pgWrap.innerHTML = html;
+  document.getElementById('usr-count').textContent = `Tổng số lượng: ${entries.length} tài khoản`;
 }
 
 /* ── MODAL LÔGIC ── */
@@ -3324,87 +2961,6 @@ async function saveAdminBtAction() {
     Toast.fire({ icon: 'success', title: 'Đã cập nhật trạng thái hồ sơ!' });
   } catch (error) {
     Toast.fire({ icon: 'error', title: 'Lỗi máy chủ: ' + error.message });
-  }
-}
-
-/* ══ ADMIN PANEL — LOGIC MỚI ══ */
-let usrCurrentPage = 1;
-let usrPageSize = 20;
-let usrQuickRole = '';
-
-function adminNavTo(section) {
-  document.querySelectorAll('.adm-sb-item').forEach(el => el.classList.remove('adm-active'));
-  event.currentTarget.classList.add('adm-active');
-}
-
-function setUsrRoleQuick(role) {
-  usrQuickRole = role;
-  usrCurrentPage = 1;
-  document.getElementById('usr-role-filter').value = role;
-  ['all','gara','nv','admin'].forEach(k => {
-    const el = document.getElementById('adm-rtab-' + k);
-    if (el) el.classList.remove('adm-pg-active');
-  });
-  const keyMap = {'':'all','gara':'gara','nhanvien':'nv','admin':'admin'};
-  const activeEl = document.getElementById('adm-rtab-' + (keyMap[role] || 'all'));
-  if (activeEl) activeEl.classList.add('adm-pg-active');
-  renderUsersTable();
-}
-
-function usrSetPageSize(val) {
-  usrPageSize = parseInt(val);
-  usrCurrentPage = 1;
-  renderUsersTable();
-}
-
-function usrGoPage(page) {
-  const entries = Object.entries(allUsers);
-  const total = entries.length;
-  const totalPages = Math.max(1, Math.ceil(total / usrPageSize));
-  if (page < 1 || page > totalPages) return;
-  usrCurrentPage = page;
-  renderUsersTable();
-}
-
-function toggleAllChk(master) {
-  document.querySelectorAll('.adm-row-chk').forEach(c => c.checked = master.checked);
-}
-
-function exportUsersCSV() {
-  const rows = [['Username','Tên','Gara','Vai trò','SĐT','Trạng thái']];
-  Object.values(allUsers).forEach(u => {
-    rows.push([u.username||'',u.name||'',u.garaName||'',u.role||'',u.phone||u.garaPhone||'',u.active!==false?'Hoạt động':'Bị khóa']);
-  });
-  const csv = rows.map(r => r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
-  const blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'TaiKhoan_' + moment().format('YYYYMMDD') + '.csv';
-  a.click();
-  Toast.fire({icon:'success',title:'Đã xuất CSV!'});
-}
-
-function updateAdminKPIs() {
-  const vals = Object.values(allUsers);
-  const total  = vals.length;
-  const active = vals.filter(u => u.active !== false).length;
-  const gara   = vals.filter(u => u.role === 'gara').length;
-  const locked = vals.filter(u => u.active === false).length;
-  const setText = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
-  setText('adm-kpi-total',  total);
-  setText('adm-kpi-active', active);
-  setText('adm-kpi-gara',   gara);
-  setText('adm-kpi-locked', locked);
-  setText('adm-kpi-total-badge',  total + ' TK');
-  setText('adm-kpi-active-badge', active + ' đang online');
-  setText('adm-kpi-locked-badge', locked > 0 ? locked + ' bị khóa' : 'Không có');
-  const subEl = document.getElementById('adm-usr-subtitle');
-  if (subEl) subEl.textContent = total + ' tài khoản · ' + active + ' đang hoạt động';
-  if (currentUser) {
-    const avEl = document.getElementById('adm-sb-av');
-    const nmEl = document.getElementById('adm-sb-name');
-    if (avEl) avEl.textContent = (currentUser.garaName || currentUser.name || 'A').charAt(0).toUpperCase();
-    if (nmEl) nmEl.textContent = currentUser.garaName || currentUser.name || 'Admin';
   }
 }
 </script>
