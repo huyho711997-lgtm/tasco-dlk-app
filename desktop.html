@@ -12778,18 +12778,12 @@ const HandOver = {
     },
 
     /* ── In phiếu bàn giao ── */
+    /* ── In phiếu bàn giao ── */
     printVoucher(key) {
         const v = this._allVouchers.find(x => x._key === key);
         if (!v) return;
         const w = window.open('', '_blank');
         if (!w) { Toast.fire({ icon: 'error', title: 'Trình duyệt chặn popup!' }); return; }
-
-        const statusText = v.status === 'confirmed'
-            ? `<div style="margin-top:12px;padding:10px 14px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;display:flex;align-items:center;gap:10px">
-                <div style="width:20px;height:20px;background:#22c55e;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></div>
-                <div><p style="font-size:13px;font-weight:800;color:#15803d;margin:0">Đã xác nhận nhận hồ sơ</p><p style="font-size:11px;color:#16a34a;margin:2px 0 0">Bởi: ${v.confirmedBy || '—'} · ${v.confirmedAt ? moment(v.confirmedAt).format('HH:mm · DD/MM/YYYY') : '—'}</p></div>
-               </div>`
-            : '<div style="margin-top:12px;padding:10px 14px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px"><p style="font-size:13px;font-weight:700;color:#92400e;margin:0">Chờ xác nhận</p></div>';
 
         const tableRows = (v.records || []).map((r, i) => `
           <tr>
@@ -12804,8 +12798,17 @@ const HandOver = {
         const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Phiếu bàn giao ${v.voucherNo}</title>
         <style>
           * { box-sizing: border-box; margin: 0; padding: 0; }
-          body { font-family: "Times New Roman", Times, serif; font-size: 15px; color: #000; background: #fff; line-height: 1.4; padding: 20px; }
-          .page { max-width: 210mm; margin: 0 auto; padding: 20px; }
+          
+          /* Nền xám bao quanh giả lập phần mềm xem PDF */
+          body { font-family: "Times New Roman", Times, serif; font-size: 15px; color: #000; background: #525659; line-height: 1.4; padding: 40px 20px; display: flex; justify-content: center; }
+          
+          /* Khung giấy A4 */
+          .page { background: #fff; width: 210mm; min-height: 297mm; padding: 20mm; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; }
+          
+          /* Nút In ghim nổi ở góc */
+          .btn-print { position: fixed; top: 30px; right: 40px; background: #2563eb; color: #fff; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.4); font-family: Arial, sans-serif; display: flex; align-items: center; gap: 8px; transition: all 0.2s; z-index: 1000; }
+          .btn-print:hover { background: #1d4ed8; transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,0.5); }
+          .btn-print:active { transform: translateY(0); box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
           
           /* Header */
           .header { display: flex; justify-content: space-between; margin-bottom: 30px; }
@@ -12840,11 +12843,19 @@ const HandOver = {
           .sig-sub { font-size: 14px; font-style: italic; margin-bottom: 90px; }
           .sig-name { font-size: 16px; font-weight: bold; text-transform: uppercase; }
           
+          /* Chế độ in: Xóa nền xám, căn chỉnh lại lề, ẩn nút In */
           @media print {
-            body { padding: 0; }
-            .page { padding: 0; width: 100%; }
+            body { background: #fff; padding: 0; display: block; }
+            .page { padding: 0; width: 100%; box-shadow: none; min-height: auto; }
+            .btn-print { display: none !important; }
           }
         </style></head><body>
+        
+        <button class="btn-print" onclick="window.print()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          In Phiếu Này
+        </button>
+
         <div class="page">
           <div class="header">
             <div class="header-left">
@@ -12897,7 +12908,6 @@ const HandOver = {
             </div>
           </div>
         </div>
-        <script>setTimeout(()=>window.print(),500)<\/script>
         </body></html>`;
 
         w.document.write(html);
