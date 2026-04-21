@@ -1417,7 +1417,9 @@ function startDataListener() {
     // Admin và adminbt xem toàn bộ, không lọc theo gara
     if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'adminbt' || currentUser.role === 'nhanvien')) {
       garaData = allWorkstationData;
-      renderAll();
+      renderDashboard();
+      renderFinance();
+      renderAdminBtRecords();
       return;
     }
     
