@@ -3216,7 +3216,7 @@ function openHandoverViewModal(key) {
 
 // Xử lý khi Admin xác nhận Phiếu
 async function confirmHandoverVoucher(key) {
-  const cu = Auth.getCurrentUser();
+  const cu = GaraAuth.getCurrentUser();
   const v = allHandoverVouchers.find(x => x._key === key);
   
   const result = await Swal.fire({

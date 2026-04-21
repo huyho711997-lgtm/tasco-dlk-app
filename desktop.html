@@ -12314,7 +12314,8 @@ const HandOver = {
         const receiver = document.getElementById('ho-receiver').value.trim();
         const note     = document.getElementById('ho-note').value.trim();
 
-        const currentUser = Auth.getCurrentUser();
+        // SỬA THÀNH GaraAuth:
+        const currentUser = GaraAuth.getCurrentUser();
         const voucherNo = 'BG-' + moment().format('YYYYMMDD') + '-' + String(this._allVouchers.length + 1).padStart(3, '0');
 
         const records = Array.from(this._selectedIds).map(id => {
