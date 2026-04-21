@@ -12778,7 +12778,6 @@ const HandOver = {
     },
 
     /* ── In phiếu bàn giao ── */
-    /* ── In phiếu bàn giao ── */
     printVoucher(key) {
         const v = this._allVouchers.find(x => x._key === key);
         if (!v) return;
@@ -12802,8 +12801,8 @@ const HandOver = {
           /* Nền xám bao quanh giả lập phần mềm xem PDF */
           body { font-family: "Times New Roman", Times, serif; font-size: 15px; color: #000; background: #525659; line-height: 1.4; padding: 40px 20px; display: flex; justify-content: center; }
           
-          /* Khung giấy A4 */
-          .page { background: #fff; width: 210mm; min-height: 297mm; padding: 20mm; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; }
+          /* Khung giấy A4 - Đã fix box-sizing để không tràn viền */
+          .page { background: #fff; width: 210mm; max-width: 100%; min-height: 297mm; padding: 20mm; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; margin: 0 auto; box-sizing: border-box; }
           
           /* Nút In ghim nổi ở góc */
           .btn-print { position: fixed; top: 30px; right: 40px; background: #2563eb; color: #fff; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.4); font-family: Arial, sans-serif; display: flex; align-items: center; gap: 8px; transition: all 0.2s; z-index: 1000; }
@@ -12834,8 +12833,8 @@ const HandOver = {
           .info-label { width: 180px; font-weight: bold; }
           .info-val { flex: 1; }
           
-          /* Table */
-          table { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 20px; font-size: 15px; }
+          /* Table - Đã fix viền outer */
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 20px; font-size: 15px; border: 1px solid #000; box-sizing: border-box; }
           th, td { border: 1px solid #000; padding: 8px 10px; text-align: left; vertical-align: middle; }
           th { font-weight: bold; text-align: center; }
           td.center { text-align: center; }
@@ -12848,12 +12847,13 @@ const HandOver = {
           .sig-sub { font-size: 14px; font-style: italic; margin-bottom: 90px; }
           .sig-name { font-size: 16px; font-weight: bold; text-transform: uppercase; }
           
-          /* Chế độ in: Xóa nền xám, căn chỉnh lại lề, ẩn nút In và ẩn màu vùng sửa */
+          /* Chế độ in: Căn lề chuẩn A4, xóa nền xám, ẩn màu vùng sửa */
           @media print {
-            body { background: #fff; padding: 0; display: block; }
-            .page { padding: 0; width: 100%; box-shadow: none; min-height: auto; }
+            @page { size: A4; margin: 15mm; }
+            body { background: #fff; padding: 0; display: block; margin: 0; }
+            .page { padding: 0; width: 100%; max-width: 100%; box-shadow: none; min-height: auto; margin: 0; border: none; }
             .btn-print { display: none !important; }
-            .editable { background-color: transparent !important; border-bottom: none !important; }
+            .editable { background-color: transparent !important; border-bottom: none !important; outline: none !important; }
           }
         </style></head><body>
         
