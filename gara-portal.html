@@ -1783,7 +1783,7 @@ function renderRecords() {
   );
   if (filterStep) list = list.filter(r => String(r.step) === filterStep);
 
-  list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  list.sort((a, b) => moment(b.notifyDate, 'DD/MM/YYYY').valueOf() - moment(a.notifyDate, 'DD/MM/YYYY').valueOf());
 
   const body = document.getElementById('rec-tbody');
   body.innerHTML = list.length
@@ -2846,7 +2846,7 @@ function renderAdminBtRecords(resetPage = false) {
     }
   }
 
-  list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  list.sort((a, b) => moment(b.notifyDate, 'DD/MM/YYYY').valueOf() - moment(a.notifyDate, 'DD/MM/YYYY').valueOf());
 
   const total = list.length;
   const totalPages = Math.max(1, Math.ceil(total / abtPageSize));
