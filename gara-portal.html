@@ -3421,7 +3421,8 @@ const _originalGoTab = window.goTab;
 window.goTab = function(tab) {
   _originalGoTab(tab);
   if (tab === 'handover') {
-    renderHandoverTable();
+    // SỬA LẠI THÀNH GỌI HÀM NÀY ĐỂ TRÁNH LỖI SCOPE
+    HandOver.render();
   }
 };
 </script>

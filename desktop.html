@@ -12128,32 +12128,40 @@ const HandOver = {
     /* ── Render table ── */
     render() {
         const q   = (document.getElementById('ho-search')?.value || '').toLowerCase();
-        const stt = document.getElementById('ho-filter-status')?.value || '';
+        const stt = document.getElementById('ho-filter')?.value || '';
+        
         let list = this._allVouchers.filter(v => {
             const text = [v.voucherNo, v.createdByName, v.receiver, v.note].join(' ').toLowerCase();
-            return text.includes(q) && (!stt || v.status === stt);
+            if (!stt) {
+                // Mặc định "Tất cả" sẽ ẩn các phiếu đã hủy
+                return text.includes(q) && v.status !== 'deleted';
+            }
+            return text.includes(q) && v.status === stt;
         });
-        document.getElementById('ho-count').textContent = list.length + ' phiếu';
+        
+        document.getElementById('ho-count').textContent = `Hiển thị ${list.length} phiếu`;
 
-        const statusBadge = s => s === 'confirmed'
-            ? '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black uppercase"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>Đã xác nhận</span>'
-            : '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-black uppercase"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Chờ xác nhận</span>';
+        const statusBadge = s => {
+            if (s === 'confirmed') return '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black uppercase"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>Đã xác nhận</span>';
+            if (s === 'deleted') return '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-black uppercase"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Đã hủy</span>';
+            return '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-black uppercase"><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Chờ xác nhận</span>';
+        };
 
         const tbody = document.getElementById('ho-tbody');
         tbody.innerHTML = list.length ? list.map(v => `
             <tr class="hover:bg-blue-50/40 cursor-pointer border-b border-slate-50 transition-colors" onclick="HandOver.openViewModal('${v._key}')">
               <td class="px-5 py-4">
-                <p class="font-black text-slate-800 text-sm">${v.voucherNo || '—'}</p>
-                <p class="text-xs text-slate-400 mt-0.5">${v.createdAt ? moment(v.createdAt).format('HH:mm · DD/MM/YYYY') : '—'}</p>
+                <p class="font-black text-sm" style="color:${v.status === 'deleted' ? '#94a3b8' : '#0f172a'}">${v.voucherNo || '—'}</p>
+                <p class="text-xs mt-0.5" style="color:${v.status === 'deleted' ? '#cbd5e1' : '#94a3b8'}">${v.createdAt ? moment(v.createdAt).format('HH:mm · DD/MM/YYYY') : '—'}</p>
               </td>
               <td class="px-5 py-4">
-                <p class="text-sm font-bold text-slate-700">${v.createdByName || '—'}</p>
+                <p class="text-sm font-bold" style="color:${v.status === 'deleted' ? '#94a3b8' : '#334155'}">${v.createdByName || '—'}</p>
               </td>
               <td class="px-5 py-4 text-center">
-                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-black text-sm">${v.records ? v.records.length : 0}</span>
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full font-black text-sm" style="background:${v.status === 'deleted' ? '#f1f5f9' : '#eff6ff'};color:${v.status === 'deleted' ? '#94a3b8' : '#2563eb'}">${v.records ? v.records.length : 0}</span>
               </td>
               <td class="px-5 py-4">
-                <p class="text-xs text-slate-500 max-w-[180px] truncate">${v.note || '—'}</p>
+                <p class="text-xs max-w-[180px] truncate" style="color:${v.status === 'deleted' ? '#cbd5e1' : '#64748b'}">${v.note || '—'}</p>
               </td>
               <td class="px-5 py-4">${statusBadge(v.status)}</td>
               <td class="px-5 py-4 text-center">
@@ -12162,13 +12170,13 @@ const HandOver = {
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
                   </button>
                   ${v.status === 'pending' ? `
-                  <button onclick="event.stopPropagation();HandOver.deleteVoucher('${v._key}')" class="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-100 hover:text-rose-600 text-slate-500 transition-all" title="Xóa phiếu">
+                  <button onclick="event.stopPropagation();HandOver.deleteVoucher('${v._key}')" class="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-100 hover:text-rose-600 text-slate-500 transition-all" title="Hủy phiếu">
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                   </button>` : ''}
                 </div>
               </td>
-            </tr>`) .join('')
-            : '<tr><td colspan="6" class="px-5 py-16 text-center text-slate-400 text-sm font-bold">Chưa có phiếu bàn giao nào</td></tr>';
+            </tr>`).join('')
+        : '<tr><td colspan="6" class="px-5 py-16 text-center text-slate-400 text-sm font-bold">Chưa có phiếu bàn giao nào</td></tr>';
     },
 
     /* ── Mở modal tạo ── */
@@ -12453,17 +12461,53 @@ const HandOver = {
         setTimeout(() => w.classList.add('hidden'), 280);
     },
 
-    /* ── Xóa phiếu ── */
+    /* ── Xóa (Hủy) phiếu ── */
     async deleteVoucher(key) {
+        const v = this._allVouchers.find(x => x._key === key);
+        if (!v) return;
+
+        // Chặn bảo mật: Không cho phép thao tác trên phiếu đã xác nhận/hủy
+        if (v.status !== 'pending') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Không hợp lệ',
+                text: 'Chỉ có thể hủy phiếu đang ở trạng thái Chờ xác nhận!',
+                customClass: { popup: 'rnd' }
+            });
+            return;
+        }
+
         const r = await Swal.fire({
-            title: 'Xóa phiếu bàn giao?', icon: 'warning',
-            showCancelButton: true, confirmButtonColor: '#ef4444',
-            confirmButtonText: 'Xóa', cancelButtonText: 'Hủy',
+            title: 'Hủy phiếu bàn giao này?',
+            text: 'Phiếu này sẽ được đánh dấu là "Đã hủy" và lưu trữ vào lịch sử hệ thống chứ không mất đi hoàn toàn.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e11d48',
+            confirmButtonText: 'Đồng ý Hủy',
+            cancelButtonText: 'Đóng',
             customClass: { popup: 'rnd' }
         });
+
         if (!r.isConfirmed) return;
-        await db.ref('HandoverVouchers/' + key).remove();
-        Toast.fire({ icon: 'success', title: 'Đã xóa phiếu!' });
+
+        const cu = GaraAuth.getCurrentUser();
+
+        try {
+            Swal.fire({ title: 'Đang xử lý...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            
+            // LƯU LỊCH SỬ: Dùng .update thay vì .remove
+            await db.ref('HandoverVouchers/' + key).update({
+                status: 'deleted',
+                deletedAt: new Date().toISOString(),
+                deletedBy: cu?.name || cu?.username || 'Admin BT'
+            });
+
+            Swal.close();
+            Toast.fire({ icon: 'success', title: 'Đã hủy phiếu thành công!' });
+        } catch (error) {
+            Swal.close();
+            Toast.fire({ icon: 'error', title: 'Lỗi: ' + error.message });
+        }
     },
 
     /* ── In phiếu bàn giao ── */
