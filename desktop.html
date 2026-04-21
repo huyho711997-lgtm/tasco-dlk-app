@@ -9442,6 +9442,66 @@ function _cmpStatCard(val, label, bg, color, border) {
   toolbar.appendChild(tbBtn('Đặt lại (0)',
     '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><circle cx="12" cy="12" r="2" fill="currentColor"/>',
     function(){ reset(); appl(); }));
+  toolbar.appendChild(sep());
+  
+  // Nút Tải xuống
+  toolbar.appendChild(tbBtn('Tải xuống',
+    '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+    function(){
+      var curImg = S.imgs[S.cur];
+      if(!curImg || !curImg.src) return;
+      Toast.fire({icon: 'info', title: 'Đang tải ảnh xuống...'});
+      fetch(curImg.src).then(res => res.blob()).then(blob => {
+          var url = window.URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = url;
+          a.download = curImg.filename || 'Anh_Tai_Ve.jpg';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+      }).catch(e => {
+          // Dự phòng nếu lỗi CORS (mở tab mới để tải)
+          var a = document.createElement('a');
+          a.target = '_blank';
+          a.href = curImg.src;
+          a.download = curImg.filename || 'Anh_Tai_Ve.jpg';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+      });
+    }));
+
+  // Nút Xóa ảnh
+  var delBtn = tbBtn('Xóa ảnh này',
+    '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+    function(){
+      var curImg = S.imgs[S.cur];
+      if(!curImg) return;
+      
+      // Nếu là ảnh nằm trong tab Cloud
+      if (curImg.group === 'mycloud') {
+          if (window.MyCloud && curImg.key) {
+              window.MyCloud.deleteSingle(curImg.key, function(){ close(); });
+          }
+      // Nếu là ảnh nằm trong Hồ sơ (Chứng từ / Hiện trường / Hư hỏng)
+      } else if (curImg.group.startsWith('gallery-') || curImg.group.startsWith('docs-') || curImg.group.startsWith('modal-docs-')) {
+          var recId = curImg.group.replace('gallery-', '').replace('docs-', '').replace('modal-docs-', '');
+          if (typeof removeImg === 'function') {
+              close(); // Đóng viewer
+              removeImg(recId, curImg.src, null); // Gọi hàm xóa ảnh hồ sơ gốc
+          }
+      } else {
+          Toast.fire({icon: 'warning', title: 'Không hỗ trợ xóa ảnh ở mục này!'});
+      }
+    });
+    
+  // Định dạng lại màu đỏ cho Nút xóa để nổi bật
+  delBtn.style.color = '#fca5a5';
+  delBtn.onmouseover = function(){ this.style.background='rgba(239,68,68,.2)'; this.style.color='#ef4444'; this.style.transform='scale(1.1)'; };
+  delBtn.onmouseout = function(){ this.style.background='rgba(255,255,255,.09)'; this.style.color='#fca5a5'; this.style.transform='scale(1)'; };
+  toolbar.appendChild(delBtn);
 
   stage.appendChild(spin);
   stage.appendChild(img);
@@ -9643,10 +9703,13 @@ function _cmpStatCard(val, label, bg, color, border) {
     S.imgs=[]; S.groups={};
     document.querySelectorAll('a[data-fslightbox]').forEach(function(a){
       var src = a.getAttribute('href') || '';
-      var thumb = a.getAttribute('data-thumb') || src; // Lấy link ảnh nhỏ, nếu không có thì dùng link gốc
+      var thumb = a.getAttribute('data-thumb') || src;
       var grp = a.getAttribute('data-fslightbox') || 'default';
+      var key = a.getAttribute('data-key') || '';
+      var filename = a.getAttribute('data-filename') || '';
       var idx = S.imgs.length;
-      S.imgs.push({src:src, thumb:thumb, group:grp}); // Lưu thêm thumb
+      
+      S.imgs.push({src:src, thumb:thumb, group:grp, key:key, filename:filename});
       if(!S.groups[grp]) S.groups[grp]=[];
       S.groups[grp].push(idx);
       // Store index on element to avoid re-traversal
@@ -11478,8 +11541,8 @@ const MyCloud = {
                     ? `<div class="absolute top-2 left-2 right-2 z-10"><div class="bg-black/70 backdrop-blur-sm text-white px-2 py-1.5 rounded-lg text-[10px] font-bold truncate border border-white/20" title="${item.note}">${item.note}</div></div>` 
                     : '';
 
-                // Bổ sung thêm data-thumb="${thumbUrl}" để Lightbox biết đường dẫn ảnh nhỏ
-                const lightBoxLink = isImg ? `<a id="lb-mc-${item.key}" href="${item.url}" data-thumb="${thumbUrl}" data-fslightbox="mycloud" class="hidden"></a>` : '';
+                // Thêm data-key và data-filename để trình xem ảnh xử lý Tải về / Xóa
+                const lightBoxLink = isImg ? `<a id="lb-mc-${item.key}" href="${item.url}" data-thumb="${thumbUrl}" data-key="${item.key}" data-filename="${item.fileName || 'Anh_Cloud.jpg'}" data-fslightbox="mycloud" class="hidden"></a>` : '';
 
                 const bodyHTML = isImg
                     ? `<img src="${thumbUrl}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">${lightBoxLink}`
@@ -11597,6 +11660,57 @@ const MyCloud = {
         } else {
             Toast.fire({ icon: 'error', title: 'Tải lên thất bại!' });
         }
+    },
+
+    deleteSingle(key, callback) {
+        Swal.fire({
+            title: 'Xóa ảnh này?',
+            text: "Dữ liệu sẽ bị xóa vĩnh viễn khỏi Cloud.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Xóa vĩnh viễn',
+            cancelButtonText: 'Hủy',
+            customClass: { popup: 'rnd' },
+            didOpen: () => {
+                // Ép z-index để popup hiện đè lên trên trình xem ảnh (Lightbox)
+                const container = document.querySelector('.swal2-container');
+                if(container) container.style.zIndex = '2147483647';
+            }
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const user = Auth.getCurrentUser();
+                const userId = user ? (user.id || user.username) : null; 
+                if(!userId) return;
+
+                Swal.fire({ title: 'Đang xóa...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass: { popup: 'rnd' } });
+                const container2 = document.querySelector('.swal2-container');
+                if(container2) container2.style.zIndex = '2147483647';
+                
+                const item = this.items.find(i => i.key === key);
+                if (item && item.url) {
+                    const match = item.url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[a-zA-Z0-9]+)?(?:\?.*)?$/);
+                    const pubId = match ? match[1] : null;
+                    if (pubId) {
+                        try {
+                            await fetch(WORD_URL, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                                body: JSON.stringify({ action: 'delete_cloudinary', publicId: pubId })
+                            });
+                        } catch (err) {}
+                    }
+                }
+
+                db.ref('Users/' + userId + '/myCloud/' + key).remove().then(() => {
+                    Swal.close();
+                    Toast.fire({ icon: 'success', title: 'Đã xóa file!' });
+                    if (callback) callback(); // Đóng Lightbox sau khi xóa
+                    this.updateQuota();
+                });
+            }
+        });
     },
 
     deleteSelected() {
