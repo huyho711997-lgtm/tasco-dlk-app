@@ -8328,7 +8328,9 @@ async function confirmAndSaveParts(parts) {
   result.value.forEach(function(p){
     var existing = partsList.filter(function(x){
       return normName(x.partName) === normName(p.partName)
-        && (!x.carBrand || !p.carBrand || normName(x.carBrand) === normName(p.carBrand))
+        && normName(x.carBrand) === normName(p.carBrand)
+        && normName(x.carModel) === normName(p.carModel)
+        && normName(x.namSX) === normName(p.namSX)
         && (x.partType || 'oem') === (p.partType || 'oem');
     });
 
