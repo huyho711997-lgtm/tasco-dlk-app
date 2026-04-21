@@ -11248,6 +11248,7 @@ const MyCloud = {
     _activeTab: 'all',
     _selectMode: false,
     _selectedKeys: new Set(),
+    _lastClickedIdx: null, // Thêm biến lưu vị trí click cuối cùng cho chức năng Shift
 
     init() {
         if (this._isInit) return;
@@ -11262,7 +11263,6 @@ const MyCloud = {
 
         const viewCloud = document.getElementById('view-cloud');
         if (viewCloud) {
-            // Chỉ giữ lại tính toán chiều cao để cuộn mượt
             viewCloud.style.height = 'calc(100vh - 132px)';
             viewCloud.style.overflow = 'hidden'; 
         }
@@ -11289,6 +11289,7 @@ const MyCloud = {
         this._activeTab = tab;
         this._selectMode = false;
         this._selectedKeys.clear();
+        this._lastClickedIdx = null; // Reset khi đổi tab
         
         const buttons = btn.parentElement.querySelectorAll('.mn-fp');
         buttons.forEach(b => b.classList.remove('active'));
@@ -11300,18 +11301,51 @@ const MyCloud = {
     toggleSelectMode() {
         this._selectMode = !this._selectMode;
         this._selectedKeys.clear();
+        this._lastClickedIdx = null; // Reset khi bật/tắt chế độ chọn
         this.render();
     },
 
-    toggleSelect(key) {
+    toggleSelect(e, key, index) {
         if (!this._selectMode) return;
-        if (this._selectedKeys.has(key)) this._selectedKeys.delete(key);
-        else this._selectedKeys.add(key);
-        
+
+        // Ngăn bôi đen text trình duyệt khi giữ Shift click
+        if (e && e.shiftKey) {
+            e.preventDefault();
+        }
+
+        if (e && e.shiftKey && this._lastClickedIdx !== null) {
+            const filtered = this._getFilteredItems();
+            const start = Math.min(this._lastClickedIdx, index);
+            const end = Math.max(this._lastClickedIdx, index);
+
+            // Chọn tất cả các mục từ điểm đầu đến điểm cuối
+            for (let i = start; i <= end; i++) {
+                const item = filtered[i];
+                if (item) {
+                    this._selectedKeys.add(item.key);
+                    this._updateItemUI(item.key, true);
+                }
+            }
+        } else {
+            // Click bình thường (không giữ Shift hoặc là click đầu tiên)
+            if (this._selectedKeys.has(key)) {
+                this._selectedKeys.delete(key);
+                this._updateItemUI(key, false);
+            } else {
+                this._selectedKeys.add(key);
+                this._updateItemUI(key, true);
+            }
+            // Lưu lại vị trí để làm mốc cho thao tác Shift-click tiếp theo
+            this._lastClickedIdx = index;
+        }
+
+        this._updateDeleteBar();
+    },
+
+    _updateItemUI(key, isSelected) {
         const wrap = document.getElementById('mc-wrap-' + key);
         const chk = document.getElementById('mc-chk-' + key);
         if (wrap && chk) {
-            const isSelected = this._selectedKeys.has(key);
             wrap.classList.toggle('border-rose-500', isSelected);
             wrap.classList.toggle('border-slate-200', !isSelected);
             wrap.classList.toggle('scale-[0.96]', isSelected);
@@ -11319,7 +11353,6 @@ const MyCloud = {
             wrap.classList.toggle('ring-rose-100', isSelected);
             chk.classList.toggle('hidden', !isSelected);
         }
-        this._updateDeleteBar();
     },
 
     selectAll() {
@@ -11415,8 +11448,11 @@ const MyCloud = {
                 const wrapClasses = isSelected ? 'border-rose-500 scale-[0.96] ring-4 ring-rose-100' : 'border-slate-200 hover:border-blue-400 hover:shadow-lg';
                 const checkClasses = isSelected ? '' : 'hidden';
 
+                // Lấy ra index thực tế của file này trong mảng đang hiển thị để xử lý Shift
+                const globalIdx = filteredItems.findIndex(x => x.key === item.key);
+
                 const clickAction = this._selectMode 
-                    ? `MyCloud.toggleSelect('${item.key}')` 
+                    ? `MyCloud.toggleSelect(event, '${item.key}', ${globalIdx})` 
                     : (isImg ? `document.getElementById('lb-mc-${item.key}').click()` : `window.open('${item.url}', '_blank')`);
 
                 const noteTag = item.note 
