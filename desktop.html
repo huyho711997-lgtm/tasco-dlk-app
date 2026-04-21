@@ -12789,10 +12789,10 @@ const HandOver = {
           <tr>
             <td class="center">${i + 1}</td>
             <td><b>${r.bsx || '—'}</b><br><span style="font-size:13px;">${r.claimCode || ''}</span></td>
-            <td>${r.customer || '—'}</td>
-            <td>${r.garaName || '—'}</td>
-            <td class="center">${r.notifyDate || '—'}</td>
-            <td class="center">${stepLabel(r.step || 1)}</td>
+            <td class="editable" contenteditable="true" spellcheck="false">${r.customer || '—'}</td>
+            <td class="editable" contenteditable="true" spellcheck="false">${r.garaName || '—'}</td>
+            <td class="center editable" contenteditable="true" spellcheck="false">${r.notifyDate || '—'}</td>
+            <td class="center editable" contenteditable="true" spellcheck="false">${stepLabel(r.step || 1)}</td>
           </tr>`).join('');
 
         const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Phiếu bàn giao ${v.voucherNo}</title>
@@ -12809,6 +12809,11 @@ const HandOver = {
           .btn-print { position: fixed; top: 30px; right: 40px; background: #2563eb; color: #fff; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.4); font-family: Arial, sans-serif; display: flex; align-items: center; gap: 8px; transition: all 0.2s; z-index: 1000; }
           .btn-print:hover { background: #1d4ed8; transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,0.5); }
           .btn-print:active { transform: translateY(0); box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+          
+          /* Hiệu ứng cho vùng có thể chỉnh sửa trực tiếp */
+          .editable { outline: none; border-bottom: 1px dashed transparent; transition: background 0.2s, border 0.2s; border-radius: 2px; }
+          .editable:hover { background-color: #fef08a; border-bottom: 1px dashed #ca8a04; cursor: text; }
+          .editable:focus { background-color: #fef08a; border-bottom: 1px solid #ca8a04; }
           
           /* Header */
           .header { display: flex; justify-content: space-between; margin-bottom: 30px; }
@@ -12843,11 +12848,12 @@ const HandOver = {
           .sig-sub { font-size: 14px; font-style: italic; margin-bottom: 90px; }
           .sig-name { font-size: 16px; font-weight: bold; text-transform: uppercase; }
           
-          /* Chế độ in: Xóa nền xám, căn chỉnh lại lề, ẩn nút In */
+          /* Chế độ in: Xóa nền xám, căn chỉnh lại lề, ẩn nút In và ẩn màu vùng sửa */
           @media print {
             body { background: #fff; padding: 0; display: block; }
             .page { padding: 0; width: 100%; box-shadow: none; min-height: auto; }
             .btn-print { display: none !important; }
+            .editable { background-color: transparent !important; border-bottom: none !important; }
           }
         </style></head><body>
         
@@ -12859,25 +12865,25 @@ const HandOver = {
         <div class="page">
           <div class="header">
             <div class="header-left">
-              <div class="company-name">CÔNG TY BẢO HIỂM TASCO</div>
-              <div class="branch-name">ĐƠN VỊ: TASCO ĐẮK LẮK</div>
+              <div class="company-name editable" contenteditable="true" spellcheck="false">CÔNG TY BẢO HIỂM TASCO</div>
+              <div class="branch-name editable" contenteditable="true" spellcheck="false">ĐƠN VỊ: TASCO ĐẮK LẮK</div>
             </div>
             <div class="header-right">
-              <div class="quoc-hieu">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
-              <div class="tieu-ngu">Độc lập - Tự do - Hạnh phúc</div>
+              <div class="quoc-hieu editable" contenteditable="true" spellcheck="false">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+              <div class="tieu-ngu editable" contenteditable="true" spellcheck="false">Độc lập - Tự do - Hạnh phúc</div>
             </div>
           </div>
 
           <div class="title-area">
-            <div class="voucher-title">PHIẾU BÀN GIAO HỒ SƠ BỒI THƯỜNG</div>
-            <div class="voucher-no">Số: ${v.voucherNo}</div>
+            <div class="voucher-title editable" contenteditable="true" spellcheck="false">PHIẾU BÀN GIAO HỒ SƠ BỒI THƯỜNG</div>
+            <div class="voucher-no editable" contenteditable="true" spellcheck="false">Số: ${v.voucherNo}</div>
           </div>
 
           <div style="margin-bottom: 25px;">
-            <div class="info-row"><div class="info-label">- Người bàn giao:</div><div class="info-val">${v.createdByName}</div></div>
-            <div class="info-row"><div class="info-label">- Người nhận:</div><div class="info-val">${v.receiver || 'Bộ phận Bồi thường'}</div></div>
-            <div class="info-row"><div class="info-label">- Thời gian tạo phiếu:</div><div class="info-val">${v.createdAt ? moment(v.createdAt).format('HH:mm - DD/MM/YYYY') : '—'}</div></div>
-            ${v.note ? `<div class="info-row"><div class="info-label">- Ghi chú:</div><div class="info-val">${v.note}</div></div>` : ''}
+            <div class="info-row"><div class="info-label">- Người bàn giao:</div><div class="info-val editable" contenteditable="true" spellcheck="false">${v.createdByName}</div></div>
+            <div class="info-row"><div class="info-label">- Người nhận:</div><div class="info-val editable" contenteditable="true" spellcheck="false">${v.receiver || 'Bộ phận Bồi thường'}</div></div>
+            <div class="info-row"><div class="info-label">- Thời gian tạo phiếu:</div><div class="info-val editable" contenteditable="true" spellcheck="false">${v.createdAt ? moment(v.createdAt).format('HH:mm - DD/MM/YYYY') : '—'}</div></div>
+            <div class="info-row"><div class="info-label">- Ghi chú:</div><div class="info-val editable" contenteditable="true" spellcheck="false">${v.note || '...................................................'}</div></div>
           </div>
 
           <div style="font-weight:bold; font-size:16px;">Danh sách hồ sơ bàn giao (${v.records ? v.records.length : 0} bộ):</div>
@@ -12893,18 +12899,18 @@ const HandOver = {
             <tbody>${tableRows}</tbody>
           </table>
 
-          <div class="print-date">Đắk Lắk, ngày ${moment().format('DD')} tháng ${moment().format('MM')} năm ${moment().format('YYYY')}</div>
+          <div class="print-date editable" contenteditable="true" spellcheck="false">Đắk Lắk, ngày ${moment().format('DD')} tháng ${moment().format('MM')} năm ${moment().format('YYYY')}</div>
 
           <div class="sig-row">
             <div class="sig-box">
-              <div class="sig-title">NGƯỜI BÀN GIAO</div>
-              <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
-              <div class="sig-name">${v.createdByName}</div>
+              <div class="sig-title editable" contenteditable="true" spellcheck="false">NGƯỜI BÀN GIAO</div>
+              <div class="sig-sub editable" contenteditable="true" spellcheck="false">(Ký, ghi rõ họ tên)</div>
+              <div class="sig-name editable" contenteditable="true" spellcheck="false">${v.createdByName}</div>
             </div>
             <div class="sig-box">
-              <div class="sig-title">NGƯỜI NHẬN</div>
-              <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
-              <div class="sig-name">${v.confirmedBy || v.receiver || '...........................................'}</div>
+              <div class="sig-title editable" contenteditable="true" spellcheck="false">NGƯỜI NHẬN</div>
+              <div class="sig-sub editable" contenteditable="true" spellcheck="false">(Ký, ghi rõ họ tên)</div>
+              <div class="sig-name editable" contenteditable="true" spellcheck="false">${v.confirmedBy || v.receiver || '...........................................'}</div>
             </div>
           </div>
         </div>
