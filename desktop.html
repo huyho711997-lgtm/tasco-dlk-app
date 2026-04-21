@@ -12622,6 +12622,31 @@ goView = function(v) {
         HandOver._isInited = true;
     }
 };
+
+
+// Patch: đảm bảo openCreateModal hoạt động
+HandOver.openCreateModal = function() {
+    const w = document.getElementById('ho-create-modal');
+    if (!w) { console.error('ho-create-modal not found'); return; }
+    
+    this._selectedIds = new Set();
+    this._editingId = null;
+    
+    ['ho-modal-title','ho-receiver','ho-note','ho-rec-search'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { if(id === 'ho-modal-title') el.textContent = 'Tạo phiếu bàn giao hồ sơ'; else el.value = ''; }
+    });
+    
+    this._renderRecordList();
+    this._renderSelectedList();
+    
+    const b = w.querySelector('div');
+    w.classList.remove('hidden');
+    setTimeout(() => { 
+        w.classList.remove('opacity-0'); 
+        if (b) b.classList.remove('scale-95'); 
+    }, 10);
+};
 </script>
 
 
