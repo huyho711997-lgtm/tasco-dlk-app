@@ -841,16 +841,23 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
         <div style="padding:16px 20px;background:#f8fafc;border-bottom:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap;align-items:center">
           <div style="position:relative;flex:1;min-width:240px">
             <svg width="14" height="14" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94a3b8;pointer-events:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input id="abt-search" type="text" class="inp" style="padding:10px 14px 10px 38px;background:#fff;border-radius:24px;border:1.5px solid #cbd5e1" placeholder="Tìm biển số, mã vụ, tên gara..." oninput="renderAdminBtRecords()">
+            <input id="abt-search2" type="text" class="inp" style="padding:10px 14px 10px 38px;background:#fff;border-radius:24px;border:1.5px solid #cbd5e1" placeholder="Tìm biển số, mã vụ, tên gara..." oninput="abtCurrentPage=1; renderAdminBtRecords()">
           </div>
-          <select id="abt-filter" class="inp" style="width:180px;background:#fff;border-radius:24px;border:1.5px solid #cbd5e1;padding:10px 14px" onchange="renderAdminBtRecords()">
+          <select id="abt-limit2" class="inp" style="width:120px;background:#fff;border-radius:24px;border:1.5px solid #cbd5e1;padding:10px 14px" onchange="changeAbtLimit2()">
+            <option value="10">10 dòng</option>
+            <option value="20" selected>20 dòng</option>
+            <option value="50">50 dòng</option>
+            <option value="100">100 dòng</option>
+            <option value="all">Tất cả</option>
+          </select>
+          <select id="abt-filter2" class="inp" style="width:180px;background:#fff;border-radius:24px;border:1.5px solid #cbd5e1;padding:10px 14px" onchange="abtCurrentPage=1; renderAdminBtRecords()">
             <option value="">Tất cả trạng thái</option>
             <option value="8">⚠ Đang bị lỗi (Cần BS)</option>
             <option value="7">✓ Đã thanh toán</option>
             <option value="received">📁 Đã nhận HS gốc</option>
           </select>
         </div>
-        
+
         <div style="overflow-x:auto">
           <table class="data-table">
             <thead>
@@ -863,11 +870,13 @@ body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: 
                 <th style="text-align:center;width:100px">Thao tác</th>
               </tr>
             </thead>
-            <tbody id="abt-tbody"></tbody>
+            <tbody id="abt-tbody2"></tbody>
           </table>
         </div>
-        <div style="padding:12px 20px;background:#f8fafc;border-top:1px solid var(--border)">
-          <span id="abt-count" style="font-size:12px;color:var(--muted);font-weight:700"></span>
+
+        <div style="padding:12px 20px;background:#f8fafc;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <span id="abt-count2" style="font-size:12px;color:var(--muted);font-weight:700"></span>
+          <div id="abt-pagination2" style="display:flex;gap:4px"></div>
         </div>
       </div>
     </div>
@@ -1364,12 +1373,13 @@ const GaraAuth = {
     av.textContent = (user.garaName || user.name).charAt(0).toUpperCase();
     if (user.color) av.style.background = `linear-gradient(135deg,${user.color},${user.color}99)`;
 
-    // Xử lý ẩn/hiện tab dựa trên quyền adminbt
-    if (user.role === 'adminbt') {
+    if (user.role === 'adminbt' || user.role === 'nhanvien') {
+      // Ẩn các tab không cần thiết
       document.getElementById('tab-dashboard').style.display = 'none';
       document.getElementById('tab-finance').style.display = 'none';
       document.getElementById('tab-admin').style.display = 'none';
-      // Mặc định nhảy vào tab bồi thường
+      // Hiện tab adminbt và nhảy vào luôn
+      document.getElementById('tab-adminbt').style.display = 'flex';
       goTab('adminbt');
     } else {
       document.getElementById('tab-dashboard').style.display = 'flex';
@@ -2838,8 +2848,12 @@ let abtCurrentPage = 1;
 let abtRowsPerPage = 20;
 
 function renderAdminBtRecords() {
-  const search = (document.getElementById('abt-search')?.value || '').toLowerCase();
-  const filter = document.getElementById('abt-filter')?.value || '';
+  // Xác định đang ở tab nào để lấy đúng element
+  const inAdminbt = document.getElementById('view-adminbt')?.classList.contains('active');
+  const sfx = inAdminbt ? '2' : '';
+
+  const search = (document.getElementById('abt-search' + sfx)?.value || '').toLowerCase();
+  const filter = document.getElementById('abt-filter' + sfx)?.value || '';
 
   // 1. TẠO BẢN SAO DỮ LIỆU ĐỂ KHÔNG LÀM MẤT GỐC
   let list = [...allWorkstationData];
@@ -2887,8 +2901,8 @@ function renderAdminBtRecords() {
   }
 
   // 4. Render HTML ra bảng
-  const tbody = document.getElementById('abt-tbody');
-  if (!tbody) return; // Bẫy lỗi an toàn
+  const tbody = document.getElementById('abt-tbody' + sfx);
+  if (!tbody) return;
 
   tbody.innerHTML = paginatedList.length
     ? paginatedList.map(r => {
@@ -2921,7 +2935,7 @@ function renderAdminBtRecords() {
     : `<tr><td colspan="6" style="padding:48px;text-align:center;color:var(--muted);font-size:13px">Không tìm thấy hồ sơ nào</td></tr>`;
 
   // 5. Cập nhật Text Thống kê
-  const countEl = document.getElementById('abt-count');
+  const countEl = document.getElementById('abt-count' + sfx);
   if (countEl) {
     if (abtRowsPerPage === 'all') {
       countEl.textContent = `Hiển thị toàn bộ ${totalItems} hồ sơ`;
@@ -2934,7 +2948,7 @@ function renderAdminBtRecords() {
   }
 
   // 6. Vẽ thanh phân trang
-  renderAbtPagination(totalPages);
+  renderAbtPagination(totalPages, sfx);
 }
 
 // CÁC HÀM HỖ TRỢ
@@ -2945,13 +2959,20 @@ function changeAbtLimit() {
   renderAdminBtRecords();
 }
 
+function changeAbtLimit2() {
+  const val = document.getElementById('abt-limit2').value;
+  abtRowsPerPage = val === 'all' ? 'all' : (parseInt(val) || 20);
+  abtCurrentPage = 1;
+  renderAdminBtRecords();
+}
+
 function goToAbtPage(page) {
   abtCurrentPage = page;
   renderAdminBtRecords();
 }
 
-function renderAbtPagination(totalPages) {
-  const container = document.getElementById('abt-pagination');
+function renderAbtPagination(totalPages, sfx = '') {
+  const container = document.getElementById('abt-pagination' + sfx);
   if (!container) return; // Bẫy lỗi an toàn
 
   if (totalPages <= 1 || abtRowsPerPage === 'all') { 
