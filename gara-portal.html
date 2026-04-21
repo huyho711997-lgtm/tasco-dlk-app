@@ -1336,22 +1336,30 @@ const GaraAuth = {
     av.textContent = (user.garaName || user.name).charAt(0).toUpperCase();
     if (user.color) av.style.background = `linear-gradient(135deg,${user.color},${user.color}99)`;
 
-    // Xử lý ẩn/hiện tab dựa trên role
-    if (user.role === 'adminbt') {
+    // XỬ LÝ ẨN/HIỆN TAB DỰA TRÊN ROLE
+    if (user.role === 'admin') {
+      // Admin: Ẩn Dashboard & Finance, Hiện Admin & Bồi thường
+      document.getElementById('tab-dashboard').style.display = 'none';
+      document.getElementById('tab-finance').style.display = 'none';
+      document.getElementById('tab-admin').style.display = 'flex';
+      document.getElementById('tab-adminbt').style.display = 'flex';
+      setTimeout(() => goTab('admin'), 0); // Mặc định vào tab Admin
+
+    } else if (user.role === 'adminbt' || user.role === 'nhanvien') {
+      // Nhân viên / Admin Bồi thường: Chỉ hiện Bồi thường
       document.getElementById('tab-dashboard').style.display = 'none';
       document.getElementById('tab-finance').style.display = 'none';
       document.getElementById('tab-admin').style.display = 'none';
       document.getElementById('tab-adminbt').style.display = 'flex';
       setTimeout(() => goTab('adminbt'), 0);
-    } else if (user.role === 'nhanvien') {
-      document.getElementById('tab-dashboard').style.display = 'none';
-      document.getElementById('tab-finance').style.display = 'none';
-      document.getElementById('tab-admin').style.display = 'none';
-      document.getElementById('tab-adminbt').style.display = 'flex';
-      setTimeout(() => goTab('adminbt'), 0);
+
     } else {
+      // Gara: Hiện Dashboard & Finance
       document.getElementById('tab-dashboard').style.display = 'flex';
       document.getElementById('tab-finance').style.display = 'flex';
+      document.getElementById('tab-admin').style.display = 'none';
+      document.getElementById('tab-adminbt').style.display = 'none';
+      setTimeout(() => goTab('dashboard'), 0);
     }
   },
 
@@ -2483,18 +2491,12 @@ function loadGaraList() {
 function checkAdminRole() {
   if (!currentUser) return;
 
-  // Quyền Admin hệ thống (Full quyền)
+  // Nếu là admin thì tải thêm dữ liệu danh sách tài khoản
   if (currentUser.role === 'admin') {
-    document.getElementById('tab-admin').style.display = 'flex';
-    document.getElementById('tab-adminbt').style.display = 'flex';
     loadAdminData();
   } 
-  // Quyền Admin Bồi thường hoặc Nhân viên bồi thường
-  else if (currentUser.role === 'adminbt' || currentUser.role === 'nhanvien') {
-    document.getElementById('tab-adminbt').style.display = 'flex';
-    document.getElementById('tab-admin').style.display = 'none';
-  }
 
+  // Nếu là nội bộ Tasco thì render bảng bồi thường
   if ((currentUser.role === 'admin' || currentUser.role === 'nhanvien' || currentUser.role === 'adminbt') && allWorkstationData.length > 0) {
     renderAdminBtRecords();
   }
