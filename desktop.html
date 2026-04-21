@@ -9516,7 +9516,8 @@ function _cmpStatCard(val, label, bg, color, border) {
       gi.forEach(function(i){
         var t = document.createElement('img');
         t.className = '_clb_th';
-        t.src = S.imgs[i].src;
+        t.loading = 'lazy'; // Thêm thuộc tính lazy load
+        t.src = S.imgs[i].thumb; // Đổi từ src sang thumb
         t.addEventListener('click', function(e){ e.stopPropagation(); load(i); });
         strip.appendChild(t);
       });
@@ -9642,9 +9643,10 @@ function _cmpStatCard(val, label, bg, color, border) {
     S.imgs=[]; S.groups={};
     document.querySelectorAll('a[data-fslightbox]').forEach(function(a){
       var src = a.getAttribute('href') || '';
+      var thumb = a.getAttribute('data-thumb') || src; // Lấy link ảnh nhỏ, nếu không có thì dùng link gốc
       var grp = a.getAttribute('data-fslightbox') || 'default';
       var idx = S.imgs.length;
-      S.imgs.push({src:src, group:grp});
+      S.imgs.push({src:src, thumb:thumb, group:grp}); // Lưu thêm thumb
       if(!S.groups[grp]) S.groups[grp]=[];
       S.groups[grp].push(idx);
       // Store index on element to avoid re-traversal
@@ -11476,9 +11478,10 @@ const MyCloud = {
                     ? `<div class="absolute top-2 left-2 right-2 z-10"><div class="bg-black/70 backdrop-blur-sm text-white px-2 py-1.5 rounded-lg text-[10px] font-bold truncate border border-white/20" title="${item.note}">${item.note}</div></div>` 
                     : '';
 
-                const lightBoxLink = isImg ? `<a id="lb-mc-${item.key}" href="${item.url}" data-fslightbox="mycloud" class="hidden"></a>` : '';
+                // Bổ sung thêm data-thumb="${thumbUrl}" để Lightbox biết đường dẫn ảnh nhỏ
+                const lightBoxLink = isImg ? `<a id="lb-mc-${item.key}" href="${item.url}" data-thumb="${thumbUrl}" data-fslightbox="mycloud" class="hidden"></a>` : '';
 
-                const bodyHTML = isImg 
+                const bodyHTML = isImg
                     ? `<img src="${thumbUrl}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">${lightBoxLink}`
                     : `<div class="w-full h-full flex flex-col items-center justify-center ${isPdf ? 'bg-rose-50' : 'bg-slate-50'} p-4 text-center group-hover:bg-blue-50 transition-colors">
                          <svg class="w-10 h-10 ${isPdf ? 'text-rose-500' : 'text-blue-400'} mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
