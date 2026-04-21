@@ -3260,16 +3260,13 @@ async function confirmHandoverVoucher(key) {
   }
 }
 
-// Hàm in phiếu bàn giao
 function printHandoverVoucher(key) {
   const v = allHandoverVouchers.find(x => x._key === key);
   if (!v) return;
   const w = window.open('', '_blank');
   if (!w) { Toast.fire({ icon: 'error', title: 'Trình duyệt chặn popup!' }); return; }
 
-  const statusText = v.status === 'confirmed'
-    ? `<div style="margin-top:16px;padding:12px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;display:flex;align-items:center;gap:10px"><div style="width:20px;height:20px;background:#22c55e;border-radius:50%;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></div><div><p style="font-size:13px;font-weight:800;color:#15803d;margin:0">Đã xác nhận nhận hồ sơ cứng</p><p style="font-size:11px;color:#16a34a;margin:2px 0 0">Bởi: ${v.confirmedBy || '—'} · ${v.confirmedAt ? moment(v.confirmedAt).format('HH:mm · DD/MM/YYYY') : '—'}</p></div></div>`
-    : `<div style="margin-top:16px;padding:12px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px"><p style="font-size:13px;font-weight:700;color:#92400e;margin:0">Trạng thái: Chờ Admin Bồi thường xác nhận</p></div>`;
+  // Đã xóa phần khai báo biến statusText ở đây
 
   const tableRows = (v.records || []).map((r, i) => `
     <tr>
@@ -3319,7 +3316,7 @@ function printHandoverVoucher(key) {
     .info-val { flex: 1; }
     
     /* Table */
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 20px; font-size: 15px; border: 1px solid #000; box-sizing: border-box; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 25px; font-size: 15px; border: 1px solid #000; box-sizing: border-box; }
     th, td { border: 1px solid #000; padding: 8px 10px; text-align: left; vertical-align: middle; }
     th { font-weight: bold; text-align: center; }
     td.center { text-align: center; }
@@ -3381,8 +3378,6 @@ function printHandoverVoucher(key) {
       </tr></thead>
       <tbody>${tableRows}</tbody>
     </table>
-
-    ${statusText}
 
     <div class="print-date editable" contenteditable="true" spellcheck="false">Đắk Lắk, ngày ${moment().format('DD')} tháng ${moment().format('MM')} năm ${moment().format('YYYY')}</div>
 
