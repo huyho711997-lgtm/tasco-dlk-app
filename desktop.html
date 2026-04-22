@@ -14509,7 +14509,7 @@ const InjuryRates = {
     switchTab(tabName) {
         this._currentTab = tabName;
         this._curPage = 1;
-        this.clearSelection(); // Đổi bảng thì hủy thao tác Chọn nhiều
+        this.clearSelection(); 
 
         const btnTt = document.getElementById('ir-tab-thuong_tat');
         const btnPt = document.getElementById('ir-tab-phau_thuat');
@@ -14530,7 +14530,6 @@ const InjuryRates = {
     _getFilteredData() {
         const q = (document.getElementById('ir-search-inp')?.value || '').toLowerCase();
         return this._data.filter(r => {
-            // LỌC THEO TAB ĐANG CHỌN (Thương tật hoặc Phẫu thuật)
             const type = r.type || 'thuong_tat';
             if (type !== this._currentTab) return false;
 
@@ -14595,7 +14594,8 @@ const InjuryRates = {
         if (chkAll) chkAll.checked = pageData.length > 0 && pageData.every(r => this._selectedIds.has(r.id));
 
         if (!pageData.length) {
-            tbody.innerHTML = `<tr><td colspan="${this._selectMode ? 5 : 4}" class="px-6 py-16 text-center text-slate-400 font-bold">Không tìm thấy dữ liệu.</td></tr>`;
+            const emptyText = this._currentTab === 'thuong_tat' ? 'Không tìm thấy dữ liệu Thương tật.' : 'Không tìm thấy dữ liệu Phẫu thuật.';
+            tbody.innerHTML = `<tr><td colspan="${this._selectMode ? 5 : 4}" class="px-6 py-16 text-center text-slate-400 font-bold">${emptyText}</td></tr>`;
             document.getElementById('ir-pg-info').textContent = '';
             document.getElementById('ir-pg-btns').innerHTML = '';
             return;
@@ -14611,7 +14611,6 @@ const InjuryRates = {
                     <input type="checkbox" ${isSelected ? 'checked' : ''} onclick="InjuryRates.toggleSelect(event, '${r.id}', ${globalIdx})" class="w-4 h-4 cursor-pointer accent-fuchsia-600 rounded">
                 </td>` : '';
 
-            // Đã xóa cột Badge Phân Loại vì Tab đã thể hiện rõ
             return `
             <tr class="cursor-pointer transition-colors border-b border-slate-50 ${rowBg}" onclick="InjuryRates.rowClick(event, '${r.id}', ${globalIdx})">
                 ${chkCol}
@@ -14721,7 +14720,6 @@ const InjuryRates = {
             }
         } else {
             document.getElementById('ir-m-title').textContent = 'Thêm mục mới';
-            // Tự động set Type trong Form dựa vào Tab đang xem
             setVal('ir-f-stt', ''); setVal('ir-f-type', this._currentTab); setVal('ir-f-name', ''); setVal('ir-f-min', ''); setVal('ir-f-max', '');
             if(delBtn) delBtn.classList.replace('flex', 'hidden');
         }
@@ -14765,7 +14763,6 @@ const InjuryRates = {
         db.ref('InjuryRates/' + refKey).update(payload).then(() => {
             Toast.fire({icon: 'success', title: this._currentId ? 'Đã cập nhật!' : 'Đã thêm mới!'});
             this.closeModal();
-            // Nếu lưu mà khác Tab hiện tại thì tự nhảy qua tab đó
             if (this._currentTab !== type) {
                 this.switchTab(type);
             }
@@ -14774,6 +14771,7 @@ const InjuryRates = {
         });
     },
 
+    // ── XỬ LÝ IMPORT: NẠP VÀO ĐÚNG TAB ĐANG MỞ ──
     async importExcel(e) {
         if (typeof XLSX === 'undefined') {
             Swal.fire({icon: 'error', title: 'Thiếu thư viện Excel', text: 'Trình duyệt chưa tải xong thư viện. Vui lòng kiểm tra lại mạng.', customClass: {popup:'rnd'}});
@@ -14800,19 +14798,20 @@ const InjuryRates = {
                 let currentParentName = "";
                 let lastParsedStt = "";
                 let inheritedStt = "";
-                let inheritedType = "thuong_tat";
+                
+                // MẶC ĐỊNH SẼ NẠP VÀO TAB ĐANG CHỌN
+                let defaultType = this._currentTab; 
 
                 const norm = str => String(str||'').toLowerCase().replace(/\s+/g,'').trim();
 
                 rows.forEach((row) => {
-                    let stt, type, name, min, max;
+                    let stt, name, min, max;
                     
                     Object.keys(row).forEach(key => {
                         const nk = norm(key);
                         const val = row[key];
                         
                         if (nk === 'stt' || nk.includes('thứtự')) stt = val;
-                        else if (nk.includes('loại') || nk.includes('loai')) type = val;
                         else if (nk.includes('tên') || nk.includes('thươngtật') || nk.includes('phẫuthuật')) name = val;
                         else if (nk.includes('thấp') || nk.includes('min')) min = val;
                         else if (nk.includes('cao') || nk.includes('max')) max = val;
@@ -14820,12 +14819,6 @@ const InjuryRates = {
 
                     if (stt !== undefined && stt !== "") inheritedStt = stt;
                     else stt = inheritedStt;
-
-                    if (type !== undefined && type !== "") {
-                        const tStr = norm(type);
-                        if (tStr.includes('phẫu') || tStr === 'pt') inheritedType = 'phau_thuat';
-                        else if (tStr.includes('thương') || tStr === 'tt') inheritedType = 'thuong_tat';
-                    }
 
                     if (stt && name && norm(stt) !== 'stt') {
                         let sttStr = String(stt).trim();
@@ -14856,7 +14849,7 @@ const InjuryRates = {
 
                         validData.push({
                             stt: sttStr,
-                            type: inheritedType,
+                            type: defaultType, // Gán thẳng loại của tab hiện tại
                             name: finalName,
                             minPct: isNaN(minVal) ? null : minVal,
                             maxPct: isNaN(maxVal) ? null : maxVal
@@ -14867,13 +14860,15 @@ const InjuryRates = {
                 });
 
                 if (!validData.length) {
-                    Swal.fire({icon: 'error', title: 'File trống hoặc sai cấu trúc', text: 'Không nhận diện được nội dung. Đảm bảo file có các cột chứa chữ: STT, LOẠI, TÊN, THẤP NHẤT, CAO NHẤT.', customClass: {popup:'rnd'}});
+                    Swal.fire({icon: 'error', title: 'File trống hoặc sai cấu trúc', text: 'Không nhận diện được nội dung. Đảm bảo file có các cột chứa chữ: STT, TÊN, THẤP NHẤT, CAO NHẤT.', customClass: {popup:'rnd'}});
                     return;
                 }
 
+                const typeLabel = this._currentTab === 'thuong_tat' ? 'Thương tật' : 'Phẫu thuật';
+
                 const confirmRes = await Swal.fire({
                     title: `Đã quét được ${validData.length} dòng`,
-                    text: "Bạn muốn XÓA SẠCH DỮ LIỆU CŨ để nạp mới toàn bộ, hay chỉ GHI NỐI THÊM vào dữ liệu đang có?",
+                    html: `Dữ liệu sẽ được nạp vào bảng <b>${typeLabel}</b>.<br><br>Bạn muốn XÓA SẠCH dữ liệu cũ của bảng này để nạp mới, hay chỉ GHI NỐI THÊM?`,
                     showDenyButton: true, showCancelButton: true, confirmButtonText: 'Xóa cũ & Nạp mới', denyButtonText: 'Ghi nối thêm', cancelButtonText: 'Hủy', confirmButtonColor: '#e11d48', denyButtonColor: '#2563eb', customClass: {popup:'rnd'}
                 });
 
@@ -14885,12 +14880,18 @@ const InjuryRates = {
                 const now = Date.now();
                 
                 if (confirmRes.isConfirmed) {
+                    // Nếu chọn Xoá Cũ & Nạp Mới: Cần xoá hết các mục thuộc Tab hiện tại trước
+                    const itemsToDelete = this._data.filter(r => r.type === this._currentTab);
+                    itemsToDelete.forEach(item => { updates[item.id] = null; });
+                    
+                    // Sau đó nạp mới
                     validData.forEach((item, i) => { 
                         let padIdx = String(i).padStart(4, '0');
                         updates[`ir_${item.type}_${now}_${padIdx}`] = item; 
                     });
-                    await db.ref('InjuryRates').set(updates);
+                    await db.ref('InjuryRates').update(updates);
                 } else if (confirmRes.isDenied) {
+                    // Ghi thêm
                     validData.forEach((item, i) => { 
                         let padIdx = String(i).padStart(4, '0');
                         updates[`InjuryRates/ir_${item.type}_${now}_${padIdx}`] = item; 
@@ -14898,7 +14899,7 @@ const InjuryRates = {
                     await db.ref().update(updates);
                 }
 
-                Swal.fire({icon: 'success', title: 'Hoàn tất!', text: `Đã lưu ${validData.length} mục.`, customClass: {popup:'rnd'}});
+                Swal.fire({icon: 'success', title: 'Hoàn tất!', text: `Đã lưu ${validData.length} mục vào bảng ${typeLabel}.`, customClass: {popup:'rnd'}});
                 this.clearSelection();
 
             } catch (err) {
@@ -14908,26 +14909,42 @@ const InjuryRates = {
         reader.readAsArrayBuffer(file);
     },
 
+    // ── XUẤT FILE MẪU THEO TAB ĐANG MỞ ──
     downloadTemplate() {
         if (typeof XLSX === 'undefined') {
             Swal.fire({icon: 'error', title: 'Thiếu thư viện Excel', text: 'Hệ thống chưa tải xong công cụ xuất Excel. Vui lòng chờ vài giây hoặc tải lại trang.', customClass: {popup:'rnd'}});
             return;
         }
 
-        const data = [
-            ["STT", "LOẠI (Thương tật / Phẫu thuật)", "TÊN THƯƠNG TẬT / PHẪU THUẬT", "THẤP NHẤT (%)", "CAO NHẤT (%)"],
-            ["8", "Thương tật", "Mất một cánh tay từ vai xuống (tháo khớp vai)", 75, 85],
-            ["9", "Thương tật", "Cắt cụt cánh tay từ dưới vai xuống", 70, 80],
-            ["1", "Phẫu thuật", "Phẫu thuật mở hộp sọ", 15, 30],
-            ["1", "Thương tật", "Vỡ xương sọ rạn nứt sọ cứng", 0, 5]
-        ];
+        let data = [];
+        let fileName = "";
+
+        if (this._currentTab === 'thuong_tat') {
+            data = [
+                ["STT", "TÊN THƯƠNG TẬT", "THẤP NHẤT (%)", "CAO NHẤT (%)"],
+                ["8", "Mất một cánh tay từ vai xuống (tháo khớp vai)", 75, 85],
+                ["9", "Cắt cụt cánh tay từ dưới vai xuống", 70, 80],
+                ["10", "Cắt cụt một cánh tay từ khuỷu xuống (tháo khớp khuỷu)", 65, 75],
+                ["11", "Mất trọn một bàn tay hay năm ngón của một bàn", 60, 70]
+            ];
+            fileName = "Mau_Nhap_TyLeThuongTat.xlsx";
+        } else {
+            data = [
+                ["STT", "TÊN PHẪU THUẬT", "THẤP NHẤT (%)", "CAO NHẤT (%)"],
+                ["1", "Phẫu thuật sọ não", "", ""],
+                ["1.1", "Mổ sọ giải áp", 20, 30],
+                ["1.2", "Khâu màng cứng", 15, 25],
+                ["2", "Phẫu thuật ngực", 10, 20]
+            ];
+            fileName = "Mau_Nhap_TyLePhauThuat.xlsx";
+        }
 
         const ws = XLSX.utils.aoa_to_sheet(data);
-        ws['!cols'] = [{wch: 8}, {wch: 30}, {wch: 60}, {wch: 15}, {wch: 15}];
+        ws['!cols'] = [{wch: 8}, {wch: 65}, {wch: 15}, {wch: 15}];
         
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "BangTyLeThuongTat_PhauThuat");
-        XLSX.writeFile(wb, "Mau_Nhap_TyLeThuongTat_PhauThuat.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "BangTyLe");
+        XLSX.writeFile(wb, fileName);
     }
 };
 
