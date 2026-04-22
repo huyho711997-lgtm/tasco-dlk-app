@@ -13642,12 +13642,74 @@ const HumanClaims = {
         Toast.fire({icon:'success', title:'AI đã gợi ý xong!'});
     },
 
-    ocrCccd(event) {
+    async ocrCccd(event) {
         const file = event.target.files[0];
-        if(!file) return;
+        if (!file) return;
         event.target.value = '';
-        // Todo: Gọi hàm OCR CCCD (có thể dùng lại hàm ocrCccd đã có ở hồ sơ xe)
-        Toast.fire({icon:'info', title:'Đang quét CCCD (Tính năng đang phát triển)...'});
+
+        // Hiển thị thông báo trạng thái
+        const statusHtml = `<div class="text-[12px] font-bold text-purple-600 mt-2 animate-pulse">🔍 AI đang đọc thẻ Căn cước công dân...</div>`;
+        Swal.fire({
+            title: 'Quét CCCD',
+            html: statusHtml,
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            customClass: { popup: 'rnd' },
+            didOpen: () => Swal.showLoading()
+        });
+
+        try {
+            // Chuyển ảnh sang Base64
+            const b64 = await new Promise((res, rej) => {
+                const r = new FileReader();
+                r.onloadend = () => res(r.result.replace(/^data:[^;]+;base64,/, ''));
+                r.onerror = rej;
+                r.readAsDataURL(file);
+            });
+
+            // Gọi AI Gemini với Prompt tương tự phần Xe
+            const PROMPT = 'Đây là ảnh mặt trước CCCD/CMND Việt Nam. Trích xuất và trả về JSON (CHỈ JSON): {"soId":"...","hoTen":"...","ngaySinh":"DD/MM/YYYY","gioiTinh":"...","queQuan":"...","thuongTru":"..."}';
+            
+            const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent?key=' + nextGemKey(), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: file.type, data: b64 } }] }],
+                    generationConfig: { temperature: 0.1 }
+                })
+            });
+
+            const data = await res.json();
+            if (data.error) throw new Error(data.error.message);
+
+            const raw = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0].text) || '';
+            
+            // Xử lý chuỗi JSON trả về
+            let parsed = null;
+            try { 
+                parsed = JSON.parse(raw.replace(/```json|```/gi, '').trim()); 
+            } catch (_) { 
+                const m = raw.match(/\{[\s\S]*\}/); 
+                if (m) try { parsed = JSON.parse(m[0]); } catch (_) {} 
+            }
+
+            if (!parsed) throw new Error('Không nhận dạng được thông tin từ ảnh');
+
+            // Đổ dữ liệu vào các ô Input của Form Con Người
+            const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+            
+            setVal('hc-payeeName', parsed.hoTen);
+            setVal('hc-payeeCccd', parsed.soId);
+            // Có thể tạm dùng quê quán/thường trú gán vào Nơi cấp nếu cần (hoặc để trống tùy quy trình)
+            setVal('hc-payeeIssuePlace', parsed.thuongTru || parsed.queQuan);
+
+            Swal.close();
+            Toast.fire({ icon: 'success', title: 'Đã nhận dạng CCCD thành công!' });
+
+        } catch (e) {
+            Swal.close();
+            Toast.fire({ icon: 'error', title: 'Lỗi đọc CCCD: ' + (e.message || 'Lỗi hệ thống') });
+        }
     },
 
     generateEmail() {
