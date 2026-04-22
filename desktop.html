@@ -3521,26 +3521,24 @@ textarea.inp { resize:vertical; }
   <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between shrink-0" id="hov-footer"></div>
 </div>
 
-<div id="ir-modal-wrap" class="fixed inset-0 z-[60] hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity duration-200">
-  <div id="ir-modal-box" class="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-200 w-[500px]">
-    
+<div id="ir-modal-wrap" class="fixed inset-0 z-[99999] hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity duration-200">
+  <div id="ir-modal-box" class="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-200 w-[500px] max-w-[95vw]">
     <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
       <div>
         <p class="text-sm font-extrabold text-slate-800" id="ir-m-title">Thêm mục tỷ lệ thương tật</p>
       </div>
       <button onclick="InjuryRates.closeModal()" class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
     </div>
-
     <div class="p-6 space-y-4">
       <div>
         <label class="lbl">Số thứ tự (STT)</label>
-        <input id="ir-f-stt" type="text" class="inp font-mono font-bold" placeholder="VD: 8, 8.1, 8a...">
+        <input id="ir-f-stt" type="text" class="inp font-mono font-bold text-slate-800" placeholder="VD: 8, 8.1, 8a...">
       </div>
       <div>
         <label class="lbl">Tên thương tật</label>
-        <textarea id="ir-f-name" class="inp resize-none font-semibold text-sm" rows="3" placeholder="Nhập mô tả thương tật..."></textarea>
+        <textarea id="ir-f-name" class="inp resize-none font-semibold text-sm text-slate-800" rows="3" placeholder="Nhập mô tả thương tật..."></textarea>
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
@@ -3553,15 +3551,14 @@ textarea.inp { resize:vertical; }
         </div>
       </div>
     </div>
-
     <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
       <button onclick="InjuryRates.deleteRecord()" id="ir-m-del-btn" class="hidden items-center gap-2 px-4 py-2.5 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl text-sm font-bold hover:bg-rose-100 transition-colors">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg> Xóa
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg> Xóa
       </button>
       <div class="flex items-center gap-2 ml-auto">
-        <button onclick="InjuryRates.closeModal()" class="px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors border border-slate-200">Hủy</button>
+        <button onclick="InjuryRates.closeModal()" class="px-5 py-2.5 bg-white text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-50 transition-colors border border-slate-200">Hủy</button>
         <button onclick="InjuryRates.saveData()" class="px-6 py-2.5 bg-fuchsia-600 text-white rounded-xl text-sm font-bold hover:bg-fuchsia-700 transition-colors shadow-md shadow-fuchsia-200 flex items-center gap-2">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Lưu
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Lưu
         </button>
       </div>
     </div>
@@ -14433,15 +14430,13 @@ Nếu không có thông tin, để chuỗi rỗng "".`;
 
 // Khởi tạo khi load script
 document.addEventListener('DOMContentLoaded', () => {
-    InjuryRates.init();
     HumanClaims.init();
 });
 
 
-v/* ═══════════════════════════════════════
+/* ═══════════════════════════════════════
    MODULE: QUẢN LÝ BẢNG TỶ LỆ THƯƠNG TẬT
 ═══════════════════════════════════════ */
-// Thêm viewTitles
 viewTitles['injury_rates'] = 'Bảng tỷ lệ thương tật';
 
 const InjuryRates = {
@@ -14453,9 +14448,9 @@ const InjuryRates = {
     init() {
         db.ref('InjuryRates').on('value', snap => {
             const raw = snap.val() || {};
-            // Sắp xếp tự nhiên theo STT (ví dụ: 1, 2, 8, 10, 11) thay vì chữ cái (1, 10, 11, 2, 8)
             this._data = Object.keys(raw).map(k => Object.assign({ id: k }, raw[k]))
                 .sort((a, b) => {
+                    // Cố gắng parse STT sang số để sắp xếp chuẩn (8.1, 8.2, 9, 10)
                     const numA = parseFloat(a.stt) || 0;
                     const numB = parseFloat(b.stt) || 0;
                     return numA - numB;
@@ -14472,7 +14467,8 @@ const InjuryRates = {
             return text.includes(q);
         });
 
-        document.getElementById('ir-count-text').textContent = `Tổng: ${filtered.length} mục`;
+        const countEl = document.getElementById('ir-count-text');
+        if (countEl) countEl.textContent = `Tổng: ${filtered.length} mục`;
 
         const total = filtered.length;
         const maxPage = Math.ceil(total / this._pageSize) || 1;
@@ -14482,6 +14478,8 @@ const InjuryRates = {
         const pageData = filtered.slice(start, start + this._pageSize);
 
         const tbody = document.getElementById('ir-tbl-body');
+        if (!tbody) return;
+
         if (!pageData.length) {
             tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-16 text-center text-slate-400 font-bold">Không tìm thấy tỷ lệ thương tật nào.</td></tr>';
             document.getElementById('ir-pg-info').textContent = '';
@@ -14491,17 +14489,18 @@ const InjuryRates = {
 
         tbody.innerHTML = pageData.map(r => `
             <tr class="hover:bg-fuchsia-50/40 cursor-pointer transition-colors border-b border-slate-50" onclick="InjuryRates.openModal('${r.id}')">
-                <td class="px-6 py-4 text-center font-black text-slate-800 text-sm">${r.stt || '—'}</td>
-                <td class="px-6 py-4 font-semibold text-slate-700 text-sm">${r.name || '—'}</td>
-                <td class="px-6 py-4 text-center font-bold text-blue-600 text-sm">${r.minPct != null ? r.minPct + '%' : '—'}</td>
-                <td class="px-6 py-4 text-center font-bold text-rose-600 text-sm">${r.maxPct != null ? r.maxPct + '%' : '—'}</td>
-                <td class="px-6 py-4 text-center">
+                <td class="px-6 py-3 text-center font-black text-slate-800 text-sm">${r.stt || '—'}</td>
+                <td class="px-6 py-3 font-semibold text-slate-700 text-[13px] leading-snug">${r.name || '—'}</td>
+                <td class="px-6 py-3 text-center font-black text-blue-600 text-sm">${r.minPct != null && r.minPct !== '' ? r.minPct + '%' : '—'}</td>
+                <td class="px-6 py-3 text-center font-black text-rose-600 text-sm">${r.maxPct != null && r.maxPct !== '' ? r.maxPct + '%' : '—'}</td>
+                <td class="px-6 py-3 text-center">
                     <button onclick="event.stopPropagation(); InjuryRates.deleteRecord('${r.id}')" class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>
                 </td>
             </tr>
         `).join('');
 
-        document.getElementById('ir-pg-info').textContent = `Hiển thị ${start + 1} - ${Math.min(start + this._pageSize, total)} / ${total}`;
+        const infoEl = document.getElementById('ir-pg-info');
+        if(infoEl) infoEl.textContent = `Hiển thị ${start + 1} - ${Math.min(start + this._pageSize, total)} / ${total}`;
         this._renderPagination(maxPage);
     },
 
@@ -14513,33 +14512,43 @@ const InjuryRates = {
 
     _renderPagination(maxPage) {
         const btns = document.getElementById('ir-pg-btns');
+        if (!btns) return;
         if (maxPage <= 1) { btns.innerHTML = ''; return; }
         
-        let html = `<button onclick="InjuryRates._curPage = Math.max(1, InjuryRates._curPage - 1); InjuryRates.renderTable()" class="px-2 py-1 bg-white border border-slate-200 rounded text-xs font-bold text-slate-500 hover:bg-slate-50">‹</button>`;
+        let html = `<button onclick="InjuryRates._curPage = Math.max(1, InjuryRates._curPage - 1); InjuryRates.renderTable()" class="px-2 py-1 bg-white border border-slate-200 rounded text-xs font-bold text-slate-500 hover:bg-slate-50 transition-colors">‹</button>`;
         html += `<span class="px-3 text-xs font-bold text-slate-700">${this._curPage} / ${maxPage}</span>`;
-        html += `<button onclick="InjuryRates._curPage = Math.min(${maxPage}, InjuryRates._curPage + 1); InjuryRates.renderTable()" class="px-2 py-1 bg-white border border-slate-200 rounded text-xs font-bold text-slate-500 hover:bg-slate-50">›</button>`;
+        html += `<button onclick="InjuryRates._curPage = Math.min(${maxPage}, InjuryRates._curPage + 1); InjuryRates.renderTable()" class="px-2 py-1 bg-white border border-slate-200 rounded text-xs font-bold text-slate-500 hover:bg-slate-50 transition-colors">›</button>`;
         btns.innerHTML = html;
     },
 
     openModal(id = null) {
-        this._currentId = id;
         const w = document.getElementById('ir-modal-wrap');
         const b = document.getElementById('ir-modal-box');
         
-        const setVal = (id, val) => { document.getElementById(id).value = val || ''; };
+        // Bắt lỗi nếu thiếu HTML của Modal
+        if (!w || !b) {
+            Swal.fire({icon: 'error', title: 'Thiếu HTML Modal', text: 'Không tìm thấy khung Popup thêm mới. Vui lòng dán đoạn HTML Modal vào cuối file.', customClass: {popup:'rnd'}});
+            return;
+        }
+
+        this._currentId = id;
+        const setVal = (fid, val) => { const el = document.getElementById(fid); if(el) el.value = val || ''; };
+        const delBtn = document.getElementById('ir-m-del-btn');
         
         if (id) {
             const r = this._data.find(x => x.id === id);
-            document.getElementById('ir-m-title').textContent = 'Chỉnh sửa tỷ lệ';
-            setVal('ir-f-stt', r.stt);
-            setVal('ir-f-name', r.name);
-            setVal('ir-f-min', r.minPct);
-            setVal('ir-f-max', r.maxPct);
-            document.getElementById('ir-m-del-btn').classList.replace('hidden', 'flex');
+            if(r) {
+                document.getElementById('ir-m-title').textContent = 'Chỉnh sửa tỷ lệ';
+                setVal('ir-f-stt', r.stt);
+                setVal('ir-f-name', r.name);
+                setVal('ir-f-min', r.minPct);
+                setVal('ir-f-max', r.maxPct);
+                if(delBtn) delBtn.classList.replace('hidden', 'flex');
+            }
         } else {
             document.getElementById('ir-m-title').textContent = 'Thêm mục mới';
             setVal('ir-f-stt', ''); setVal('ir-f-name', ''); setVal('ir-f-min', ''); setVal('ir-f-max', '');
-            document.getElementById('ir-m-del-btn').classList.replace('flex', 'hidden');
+            if(delBtn) delBtn.classList.replace('flex', 'hidden');
         }
 
         w.classList.remove('hidden');
@@ -14549,6 +14558,7 @@ const InjuryRates = {
     closeModal() {
         const w = document.getElementById('ir-modal-wrap');
         const b = document.getElementById('ir-modal-box');
+        if(!w) return;
         w.classList.add('opacity-0'); b.classList.add('scale-95');
         setTimeout(() => { w.classList.add('hidden'); }, 200);
     },
@@ -14567,18 +14577,18 @@ const InjuryRates = {
         const payload = {
             stt: stt,
             name: name,
-            minPct: minPct ? parseFloat(minPct) : null,
-            maxPct: maxPct ? parseFloat(maxPct) : null,
+            minPct: minPct !== '' ? parseFloat(minPct) : null,
+            maxPct: maxPct !== '' ? parseFloat(maxPct) : null,
             updatedAt: new Date().toISOString()
         };
 
-        const refKey = this._currentId || Date.now().toString();
+        const refKey = this._currentId || ('ir_' + Date.now().toString());
         
         db.ref('InjuryRates/' + refKey).update(payload).then(() => {
             Toast.fire({icon: 'success', title: this._currentId ? 'Đã cập nhật!' : 'Đã thêm mới!'});
             this.closeModal();
         }).catch(e => {
-            Toast.fire({icon: 'error', title: 'Lỗi: ' + e.message});
+            Toast.fire({icon: 'error', title: 'Lỗi Firebase: ' + e.message});
         });
     },
 
@@ -14588,7 +14598,8 @@ const InjuryRates = {
         
         Swal.fire({
             title: 'Xóa mục này?',
-            icon: 'warning', showCancelButton: true, confirmButtonColor: '#e11d48', confirmButtonText: 'Xóa', customClass: {popup:'rnd'}
+            text: 'Mục này sẽ bị xóa khỏi bảng tỷ lệ.',
+            icon: 'warning', showCancelButton: true, confirmButtonColor: '#e11d48', confirmButtonText: 'Xóa', cancelButtonText:'Hủy', customClass: {popup:'rnd'}
         }).then(r => {
             if(r.isConfirmed) {
                 db.ref('InjuryRates/' + key).remove().then(() => {
@@ -14601,8 +14612,15 @@ const InjuryRates = {
 
     // ── Xử lý Import Excel ──
     async importExcel(e) {
+        // Bắt lỗi nếu trình duyệt chưa tải được thư viện XLSX
+        if (typeof XLSX === 'undefined') {
+            Swal.fire({icon: 'error', title: 'Thiếu thư viện Excel', text: 'Trình duyệt chưa tải xong thư viện XLSX. Vui lòng kiểm tra lại kết nối mạng hoặc thử tải lại trang.', customClass: {popup:'rnd'}});
+            e.target.value = '';
+            return;
+        }
+
         const file = e.target.files[0];
-        e.target.value = ''; // reset
+        e.target.value = ''; // reset input
         if (!file) return;
 
         Swal.fire({ title: 'Đang đọc file...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass: {popup:'rnd'} });
@@ -14612,60 +14630,53 @@ const InjuryRates = {
             try {
                 const data = new Uint8Array(evt.target.result);
                 const workbook = XLSX.read(data, {type: 'array'});
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const firstSheetName = workbook.SheetNames[0];
+                const firstSheet = workbook.Sheets[firstSheetName];
                 
-                // Chuyển sheet sang dạng mảng JSON. 
-                // Ở đây ta giả sử dòng 1 là Header.
-                let rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                // Đọc file thành mảng Array (mỗi dòng là 1 mảng nhỏ) thay vì Object để dễ lấy dữ liệu theo thứ tự cột
+                let rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: "" });
                 
-                // Chuẩn hoá key map để đọc được file dù header có sai khác đôi chút
-                const norm = (str) => String(str||'').toLowerCase().replace(/\s+/g,'').trim();
-
                 let validData = [];
-                rows.forEach(row => {
-                    let stt, name, min, max;
-                    
-                    // Tìm map dựa vào key
-                    Object.keys(row).forEach(k => {
-                        const nk = norm(k);
-                        if (nk === 'stt' || nk.includes('sốthứtự')) stt = row[k];
-                        else if (nk.includes('tên') || nk.includes('thươngtật') || nk.includes('nộidung')) name = row[k];
-                        else if (nk.includes('thấp') || nk.includes('tốithiểu') || nk.includes('min')) min = row[k];
-                        else if (nk.includes('cao') || nk.includes('tốiđa') || nk.includes('max')) max = row[k];
-                    });
+                let isHeaderFound = false;
 
-                    // Hoặc mảng array nếu không có header (fallback)
-                    if (!name && Object.values(row).length >= 2) {
-                        const vals = Object.values(row);
-                        stt = vals[0]; name = vals[1]; min = vals[2]; max = vals[3];
+                rows.forEach((row, rowIndex) => {
+                    // Cố gắng xác định dòng Header (có chứa chữ "STT" hoặc "TÊN")
+                    const rowString = row.join(' ').toLowerCase();
+                    if (!isHeaderFound && (rowString.includes('stt') || rowString.includes('tên') || rowString.includes('thương tật'))) {
+                        isHeaderFound = true;
+                        return; // Bỏ qua dòng Header
                     }
 
-                    if (stt && name) {
-                        // Bỏ qua dòng header nếu bị lẫn vào
-                        if (String(stt).toLowerCase().includes('stt')) return;
+                    // Nếu đã qua Header hoặc không có header rõ ràng, đọc dữ liệu (Giả định Cột 0: STT, Cột 1: Tên, Cột 2: Min, Cột 3: Max)
+                    if (row.length >= 2) {
+                        let stt = String(row[0]).trim();
+                        let name = String(row[1]).trim();
+                        let min = row[2] !== undefined && row[2] !== "" ? parseFloat(String(row[2]).replace(/[^\d.-]/g, '')) : null;
+                        let max = row[3] !== undefined && row[3] !== "" ? parseFloat(String(row[3]).replace(/[^\d.-]/g, '')) : null;
 
-                        validData.push({
-                            stt: String(stt).trim(),
-                            name: String(name).trim(),
-                            minPct: min != null && String(min).trim() !== '' ? parseFloat(String(min).replace(/[^\d.-]/g, '')) : null,
-                            maxPct: max != null && String(max).trim() !== '' ? parseFloat(String(max).replace(/[^\d.-]/g, '')) : null,
-                        });
+                        if (stt && name && stt.toLowerCase() !== 'stt') {
+                            validData.push({
+                                stt: stt,
+                                name: name,
+                                minPct: isNaN(min) ? null : min,
+                                maxPct: isNaN(max) ? null : max
+                            });
+                        }
                     }
                 });
 
                 if (!validData.length) {
-                    Swal.fire({icon: 'error', title: 'Lỗi định dạng', text: 'Không tìm thấy dữ liệu hợp lệ (Cột STT, TÊN THƯƠNG TẬT, THẤP NHẤT, CAO NHẤT).', customClass: {popup:'rnd'}});
+                    Swal.fire({icon: 'error', title: 'File trống hoặc sai định dạng', text: 'Không tìm thấy dữ liệu ở cấu trúc: Cột 1 (STT), Cột 2 (Tên), Cột 3 (Min), Cột 4 (Max).', customClass: {popup:'rnd'}});
                     return;
                 }
 
-                // Xác nhận trước khi ghi đè/thêm
                 const confirmRes = await Swal.fire({
-                    title: `Tìm thấy ${validData.length} dòng`,
-                    text: "Bạn muốn XÓA DỮ LIỆU CŨ và nạp mới, hay GHI THÊM vào dữ liệu hiện tại?",
+                    title: `Đã quét được ${validData.length} dòng`,
+                    text: "Bạn muốn XÓA SẠCH DỮ LIỆU CŨ để nạp mới toàn bộ, hay chỉ GHI THÊM vào dữ liệu đang có?",
                     showDenyButton: true,
                     showCancelButton: true,
                     confirmButtonText: 'Xóa cũ & Nạp mới',
-                    denyButtonText: 'Ghi thêm',
+                    denyButtonText: 'Ghi nối thêm',
                     cancelButtonText: 'Hủy',
                     confirmButtonColor: '#e11d48',
                     denyButtonColor: '#2563eb',
@@ -14674,33 +14685,40 @@ const InjuryRates = {
 
                 if (confirmRes.isDismissed) return;
 
-                Swal.fire({ title: 'Đang lưu vào hệ thống...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass: {popup:'rnd'} });
+                Swal.fire({ title: 'Đang lưu vào cơ sở dữ liệu...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass: {popup:'rnd'} });
 
                 let updates = {};
+                const now = Date.now();
+                
                 if (confirmRes.isConfirmed) {
-                    // Xóa cũ -> update set thẳng Object mới
+                    // Xóa cũ -> nạp đè
                     validData.forEach((item, i) => {
-                        updates[`ir_${Date.now()}_${i}`] = item;
+                        updates[`ir_${now}_${i}`] = item;
                     });
                     await db.ref('InjuryRates').set(updates);
                 } else if (confirmRes.isDenied) {
                     // Ghi thêm
                     validData.forEach((item, i) => {
-                        updates[`InjuryRates/ir_${Date.now()}_${i}`] = item;
+                        updates[`InjuryRates/ir_${now}_${i}`] = item;
                     });
                     await db.ref().update(updates);
                 }
 
-                Swal.fire({icon: 'success', title: 'Nhập thành công!', text: `Đã nạp ${validData.length} tỷ lệ thương tật.`, customClass: {popup:'rnd'}});
+                Swal.fire({icon: 'success', title: 'Nhập thành công!', text: `Đã lưu ${validData.length} tỷ lệ thương tật vào hệ thống.`, customClass: {popup:'rnd'}});
 
             } catch (err) {
-                Swal.fire({icon: 'error', title: 'Lỗi xử lý file', text: err.message, customClass: {popup:'rnd'}});
+                Swal.fire({icon: 'error', title: 'Lỗi đọc Excel', text: err.message, customClass: {popup:'rnd'}});
             }
         };
         reader.readAsArrayBuffer(file);
     },
 
     downloadTemplate() {
+        if (typeof XLSX === 'undefined') {
+            Swal.fire({icon: 'error', title: 'Thiếu thư viện Excel', text: 'Trình duyệt chưa tải xong thư viện XLSX. Vui lòng F5 tải lại trang.', customClass: {popup:'rnd'}});
+            return;
+        }
+
         const data = [
             ["STT", "TÊN THƯƠNG TẬT", "THẤP NHẤT (%)", "CAO NHẤT (%)"],
             ["8", "Mất một cánh tay từ vai xuống (tháo khớp vai)", 75, 85],
@@ -14710,14 +14728,22 @@ const InjuryRates = {
         ];
 
         const ws = XLSX.utils.aoa_to_sheet(data);
-        // Chỉnh độ rộng cột cho đẹp
-        ws['!cols'] = [{wch: 10}, {wch: 60}, {wch: 15}, {wch: 15}];
+        // Thiết lập độ rộng cột
+        ws['!cols'] = [{wch: 8}, {wch: 65}, {wch: 15}, {wch: 15}];
         
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "TyLeThuongTat");
+        XLSX.utils.book_append_sheet(wb, ws, "BangTyLeThuongTat");
         XLSX.writeFile(wb, "Mau_Nhap_TyLeThuongTat.xlsx");
     }
 };
+
+// Đảm bảo object này thành global để HTML đọc được
+window.InjuryRates = InjuryRates;
+
+// Khởi tạo dữ liệu
+document.addEventListener('DOMContentLoaded', () => {
+    InjuryRates.init();
+});
 
 
 </script>
