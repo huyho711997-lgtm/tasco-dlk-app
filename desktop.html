@@ -1935,7 +1935,23 @@ textarea.inp { resize:vertical; }
                   </div>
                 </div>
               </div>
-
+              <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col shrink-0">
+                <div class="px-4 py-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                    <span class="text-[11px] font-black text-slate-700 uppercase tracking-wide">Tài liệu đính kèm</span>
+                  </div>
+                  <label class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] font-bold cursor-pointer hover:bg-blue-200 transition-colors flex items-center gap-1">
+                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Tải lên
+                    <input type="file" accept="image/*,application/pdf" multiple class="hidden" onchange="HumanClaims.uploadDocuments(event)">
+                  </label>
+                </div>
+                <div class="p-3">
+                  <div id="hc-docs-grid" class="flex flex-wrap gap-2.5">
+                    </div>
+                  <p id="hc-docs-empty" class="text-[11px] text-slate-400 text-center py-3 font-semibold">Chưa có tài liệu nào</p>
+                </div>
+              </div>
               <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-200 shadow-sm p-4 relative overflow-hidden shrink-0">
                 <svg class="absolute -right-6 -bottom-6 w-24 h-24 text-emerald-500/10 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                 <p class="text-[10px] font-black text-emerald-800 uppercase tracking-widest mb-3">Giá trị chi trả</p>
@@ -13258,6 +13274,7 @@ const HumanClaims = {
     _pageSize: 25,
     _curPage: 1,
     _currentId: null,
+    _currentImages: [],
     
     // Cấu hình quy trình trạng thái
     STATUS_FLOW: ['new', 'req_no', 'has_no', 'req_fund', 'funding', 'paid'],
@@ -13389,6 +13406,8 @@ const HumanClaims = {
         
         const inputsToLock = document.querySelectorAll('#hc-m-body input, #hc-m-body select, #hc-m-body textarea');
         inputsToLock.forEach(el => el.disabled = false);
+        this._currentImages = [];
+        this.renderImages();
     },
 
     _fillForm(r) {
@@ -13417,6 +13436,8 @@ const HumanClaims = {
         this.calculateTotal();
         this.checkWarnings();
         this._updateUIStatus(r.status || 'new');
+        this._currentImages = r.documentImages || [];
+        this.renderImages();
     },
 
     /* ── Xử lý Trạng thái (Workflow) ── */
@@ -13520,6 +13541,7 @@ const HumanClaims = {
             payeeIssueDate: getVal('hc-payeeIssueDate'), payeeIssuePlace: getVal('hc-payeeIssuePlace'),
             payeeBankNo: getVal('hc-payeeBankNo'), payeeBankName: getVal('hc-payeeBankName'),
             totalAmount: parseInt(document.getElementById('hc-calc-total').textContent.replace(/[^\d]/g, '')) || 0,
+            documentImages: this._currentImages,
             updatedAt: new Date().toISOString()
         };
 
@@ -13820,13 +13842,24 @@ const HumanClaims = {
             const frontB64 = await toB64(frontFile);
             const frontPrompt = 'Đây là ảnh mặt trước CCCD/CMND Việt Nam. Trích xuất và trả về JSON (CHỈ JSON): {"soId":"...","hoTen":"...","ngaySinh":"DD/MM/YYYY","queQuan":"...","thuongTru":"..."}';
             
-            // Xử lý song song nếu có cả 2 mặt ảnh
-            const tasks = [callGemini(frontB64, frontPrompt, 'Mặt trước')];
+            // Hàm upload ngầm lên Cloudinary
+            const uploadToCloud = async (f, cat) => {
+                const fd = new FormData(); fd.append('file', f); fd.append('upload_preset', CL_PRESET);
+                try {
+                    const r = await fetch(CL_URL, { method: 'POST', body: fd });
+                    const d = await r.json();
+                    if (d.secure_url) this._currentImages.push({ url: d.secure_url, cat: cat, name: f.name });
+                } catch(e) {}
+            };
+
+            // Xử lý AI và Upload song song cùng lúc!
+            const tasks = [callGemini(frontB64, frontPrompt, 'Mặt trước'), uploadToCloud(frontFile, 'cccd')];
 
             if (backFile) {
                 const backB64 = await toB64(backFile);
                 const backPrompt = 'Đây là ảnh mặt sau CCCD/CMND Việt Nam. Trích xuất và trả về JSON (CHỈ JSON): {"ngayCap":"DD/MM/YYYY","noiCap":"..."}. Nếu là thẻ CCCD gắn chip cấp bởi Cục Cảnh sát QLHC về TTXH thì noiCap ghi là "Cục Cảnh sát QLHC về TTXH".';
                 tasks.push(callGemini(backB64, backPrompt, 'Mặt sau'));
+                tasks.push(uploadToCloud(backFile, 'cccd'));
             }
 
             const results = await Promise.all(tasks);
@@ -13868,6 +13901,92 @@ const HumanClaims = {
     printDossier() {
         // Todo: Gọi API Apps Script export Word
         Toast.fire({icon:'info', title:'Đang gọi API in Hồ sơ...'});
+    }
+
+    /* ── TÀI LIỆU ĐÍNH KÈM ── */
+    async uploadDocuments(event) {
+        const files = Array.from(event.target.files);
+        event.target.value = '';
+        if (!files.length) return;
+
+        Swal.fire({ title: 'Đang tải tài liệu...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass: {popup:'rnd'} });
+        
+        try {
+            const uploadTasks = files.map(async file => {
+                const fd = new FormData();
+                fd.append('file', file);
+                fd.append('upload_preset', CL_PRESET);
+                const res = await fetch(CL_URL, { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.secure_url) {
+                    this._currentImages.push({ 
+                        url: data.secure_url, 
+                        cat: 'doc', 
+                        name: file.name,
+                        isPdf: file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+                    });
+                }
+            });
+            await Promise.all(uploadTasks);
+            this.renderImages();
+            Swal.close();
+            Toast.fire({ icon: 'success', title: 'Tải tài liệu thành công!' });
+        } catch(e) {
+            Swal.close();
+            Toast.fire({ icon: 'error', title: 'Lỗi tải lên: ' + e.message });
+        }
+    },
+
+    renderImages() {
+        const grid = document.getElementById('hc-docs-grid');
+        const empty = document.getElementById('hc-docs-empty');
+        if (!grid || !empty) return;
+
+        if (!this._currentImages || !this._currentImages.length) {
+            grid.innerHTML = '';
+            empty.classList.remove('hidden');
+            return;
+        }
+        empty.classList.add('hidden');
+        
+        grid.innerHTML = this._currentImages.map((img, i) => {
+            const isPdf = img.isPdf || img.url.toLowerCase().endsWith('.pdf');
+            const bg = isPdf ? '#fff1f2' : '#f8fafc';
+            const border = isPdf ? '#fecdd3' : '#e2e8f0';
+            const icon = isPdf 
+                ? `<svg class="w-7 h-7 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`
+                : `<img src="${img.url}" class="w-full h-full object-cover">`;
+            const badgeTxt = img.cat === 'cccd' ? 'CCCD' : (isPdf ? 'PDF' : 'Ảnh');
+                
+            return `
+            <div class="relative w-[72px] h-[72px] rounded-lg border flex items-center justify-center overflow-hidden group cursor-pointer" style="background:${bg}; border-color:${border}">
+                ${!isPdf ? `<a data-fslightbox="hc-docs-${this._currentId || 'new'}" href="${img.url}" class="absolute inset-0 z-10"></a>` : `<a href="${img.url}" target="_blank" class="absolute inset-0 z-10"></a>`}
+                ${icon}
+                <div class="absolute bottom-0 left-0 right-0 bg-black/50 p-1 text-[8px] text-white font-bold text-center truncate z-0 pointer-events-none">${badgeTxt}</div>
+                <button type="button" onclick="event.stopPropagation(); HumanClaims.removeImage(${i})" class="absolute top-1 right-1 w-5 h-5 bg-rose-500 text-white rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20 hover:bg-rose-600">
+                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>`;
+        }).join('');
+        
+        if (typeof refreshFsLightbox === 'function') refreshFsLightbox();
+    },
+
+    removeImage(idx) {
+        Swal.fire({
+            title: 'Xóa tài liệu này?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e11d48',
+            confirmButtonText: 'Xóa',
+            cancelButtonText: 'Hủy',
+            customClass: { popup: 'rnd z-[100000]' }
+        }).then(r => {
+            if (r.isConfirmed) {
+                this._currentImages.splice(idx, 1);
+                this.renderImages();
+            }
+        });
     }
 };
 
