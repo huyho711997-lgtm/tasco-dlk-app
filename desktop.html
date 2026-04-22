@@ -2060,29 +2060,48 @@ textarea.inp { resize:vertical; }
         </div>
       </div>
 
-      <div class="mn-table-card flex-1">
-        <div class="overflow-x-auto h-full">
+      <div id="ir-action-bar" class="hidden items-center justify-between px-6 py-2.5 bg-fuchsia-50 border-b border-fuchsia-100 shrink-0 shadow-sm z-20 relative">
+        <div class="flex items-center gap-3">
+          <div class="w-6 h-6 rounded bg-fuchsia-200 flex items-center justify-center text-fuchsia-700">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="text-sm font-black text-fuchsia-800" id="ir-sel-count">Đã chọn 0 mục</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="InjuryRates.clearSelection()" class="px-4 py-2 bg-white text-slate-600 text-xs font-bold rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">Bỏ chọn</button>
+          <button onclick="InjuryRates.deleteSelected()" class="px-4 py-2 bg-rose-500 text-white text-xs font-bold rounded-lg hover:bg-rose-600 shadow-md shadow-rose-200 transition-colors flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            Xóa đã chọn
+          </button>
+        </div>
+      </div>
+
+      <div class="mn-table-card flex-1 flex flex-col min-h-0 rounded-none border-x-0 border-b-0">
+        <div class="overflow-x-auto overflow-y-auto flex-1 custom-scrollbar">
           <table class="w-full text-left border-collapse">
-            <thead class="sticky top-0 bg-slate-50/95 backdrop-blur z-10 border-b border-slate-100">
+            <thead class="sticky top-0 bg-slate-50/95 backdrop-blur z-10 border-b border-slate-100 shadow-sm">
               <tr>
-                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide w-24 text-center">STT</th>
+                <th class="px-4 py-4 w-12 text-center">
+                  <input type="checkbox" id="ir-chk-all" onchange="InjuryRates.toggleSelectAll(this.checked)" class="w-4 h-4 cursor-pointer accent-fuchsia-600 rounded">
+                </th>
+                <th class="px-2 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide w-20 text-center">STT</th>
                 <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Tên thương tật</th>
-                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide w-32 text-center">Thấp nhất (%)</th>
-                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide w-32 text-center">Cao nhất (%)</th>
-                <th class="px-6 py-4 w-24 text-center">Thao tác</th>
+                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide w-32 text-center">Thấp nhất</th>
+                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide w-32 text-center">Cao nhất</th>
               </tr>
             </thead>
             <tbody id="ir-tbl-body" class="divide-y divide-slate-50"></tbody>
           </table>
         </div>
         
-        <div class="shrink-0 border-t border-slate-100 bg-slate-50/80 px-6 py-3 flex items-center justify-between gap-4 rounded-b-xl">
+        <div class="shrink-0 border-t border-slate-200 bg-slate-50/80 px-6 py-3 flex items-center justify-between gap-4">
           <div class="flex items-center gap-3">
             <span id="ir-pg-info" class="text-xs text-slate-400 font-semibold"></span>
             <select id="ir-pg-size" onchange="InjuryRates.changePageSize()" class="text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-lg px-2 py-1.5 outline-none cursor-pointer">
               <option value="50" selected>50</option>
               <option value="100">100</option>
               <option value="200">200</option>
+              <option value="500">500</option>
             </select>
           </div>
           <div class="flex items-center gap-1" id="ir-pg-btns"></div>
@@ -14444,13 +14463,16 @@ const InjuryRates = {
     _pageSize: 50,
     _curPage: 1,
     _currentId: null,
+    
+    // State cho tính năng chọn nhiều dòng
+    _selectedIds: new Set(),
+    _lastClickedIdx: null,
 
     init() {
         db.ref('InjuryRates').on('value', snap => {
             const raw = snap.val() || {};
             this._data = Object.keys(raw).map(k => Object.assign({ id: k }, raw[k]))
                 .sort((a, b) => {
-                    // Cố gắng parse STT sang số để sắp xếp chuẩn (8.1, 8.2, 9, 10)
                     const numA = parseFloat(a.stt) || 0;
                     const numB = parseFloat(b.stt) || 0;
                     return numA - numB;
@@ -14459,14 +14481,16 @@ const InjuryRates = {
         });
     },
 
-    renderTable() {
+    _getFilteredData() {
         const q = (document.getElementById('ir-search-inp')?.value || '').toLowerCase();
-        
-        let filtered = this._data.filter(r => {
+        return this._data.filter(r => {
             const text = [r.stt, r.name].join(' ').toLowerCase();
             return text.includes(q);
         });
+    },
 
+    renderTable() {
+        const filtered = this._getFilteredData();
         const countEl = document.getElementById('ir-count-text');
         if (countEl) countEl.textContent = `Tổng: ${filtered.length} mục`;
 
@@ -14480,33 +14504,130 @@ const InjuryRates = {
         const tbody = document.getElementById('ir-tbl-body');
         if (!tbody) return;
 
+        // Cập nhật giao diện thanh Action Bar và Checkbox All
+        const actionBar = document.getElementById('ir-action-bar');
+        const selCountEl = document.getElementById('ir-sel-count');
+        if (this._selectedIds.size > 0) {
+            if (actionBar) actionBar.classList.replace('hidden', 'flex');
+            if (selCountEl) selCountEl.textContent = `Đã chọn ${this._selectedIds.size} mục`;
+        } else {
+            if (actionBar) actionBar.classList.replace('flex', 'hidden');
+        }
+
+        const chkAll = document.getElementById('ir-chk-all');
+        if (chkAll) {
+            // Check tất cả nếu data trên trang hiện tại đều nằm trong danh sách đã chọn
+            chkAll.checked = pageData.length > 0 && pageData.every(r => this._selectedIds.has(r.id));
+        }
+
         if (!pageData.length) {
-            tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-16 text-center text-slate-400 font-bold">Không tìm thấy tỷ lệ thương tật nào.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-16 text-center text-slate-400 font-bold">Không tìm thấy dữ liệu.</td></tr>';
             document.getElementById('ir-pg-info').textContent = '';
             document.getElementById('ir-pg-btns').innerHTML = '';
             return;
         }
 
-        tbody.innerHTML = pageData.map(r => `
-            <tr class="hover:bg-fuchsia-50/40 cursor-pointer transition-colors border-b border-slate-50" onclick="InjuryRates.openModal('${r.id}')">
-                <td class="px-6 py-3 text-center font-black text-slate-800 text-sm">${r.stt || '—'}</td>
+        tbody.innerHTML = pageData.map((r, i) => {
+            const globalIdx = start + i; // Index thật trong mảng filtered để xử lý Shift
+            const isSelected = this._selectedIds.has(r.id);
+            const rowBg = isSelected ? 'bg-fuchsia-50/60' : 'hover:bg-slate-50';
+
+            return `
+            <tr class="cursor-pointer transition-colors border-b border-slate-50 ${rowBg}" onclick="InjuryRates.openModal('${r.id}')">
+                <td class="px-4 py-3 text-center" onclick="event.stopPropagation()">
+                    <input type="checkbox" ${isSelected ? 'checked' : ''} onclick="InjuryRates.toggleSelect(event, '${r.id}', ${globalIdx})" class="w-4 h-4 cursor-pointer accent-fuchsia-600 rounded">
+                </td>
+                <td class="px-2 py-3 text-center font-black text-slate-800 text-sm">${r.stt || '—'}</td>
                 <td class="px-6 py-3 font-semibold text-slate-700 text-[13px] leading-snug">${r.name || '—'}</td>
                 <td class="px-6 py-3 text-center font-black text-blue-600 text-sm">${r.minPct != null && r.minPct !== '' ? r.minPct + '%' : '—'}</td>
                 <td class="px-6 py-3 text-center font-black text-rose-600 text-sm">${r.maxPct != null && r.maxPct !== '' ? r.maxPct + '%' : '—'}</td>
-                <td class="px-6 py-3 text-center">
-                    <button onclick="event.stopPropagation(); InjuryRates.deleteRecord('${r.id}')" class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>
-                </td>
-            </tr>
-        `).join('');
+            </tr>`;
+        }).join('');
 
         const infoEl = document.getElementById('ir-pg-info');
         if(infoEl) infoEl.textContent = `Hiển thị ${start + 1} - ${Math.min(start + this._pageSize, total)} / ${total}`;
         this._renderPagination(maxPage);
     },
 
+    // ── Xử lý tính năng chọn / đè Shift ──
+    toggleSelect(e, id, index) {
+        e.stopPropagation();
+        
+        if (e.shiftKey && this._lastClickedIdx !== null) {
+            // Lấy danh sách đang hiển thị
+            const filtered = this._getFilteredData();
+            
+            // Tìm điểm đầu và cuối
+            const startIdx = Math.min(this._lastClickedIdx, index);
+            const endIdx = Math.max(this._lastClickedIdx, index);
+            
+            // Loop và quét chọn tất cả khoảng giữa
+            for (let i = startIdx; i <= endIdx; i++) {
+                if (filtered[i]) {
+                    this._selectedIds.add(filtered[i].id);
+                }
+            }
+        } else {
+            // Click bình thường (từng cái một)
+            if (this._selectedIds.has(id)) {
+                this._selectedIds.delete(id);
+            } else {
+                this._selectedIds.add(id);
+            }
+            this._lastClickedIdx = index; // Ghi nhớ vị trí click gần nhất
+        }
+        
+        this.renderTable(); // Vẽ lại bảng để hiện màu nền & thanh action
+    },
+
+    toggleSelectAll(checked) {
+        const filtered = this._getFilteredData();
+        const start = (this._curPage - 1) * this._pageSize;
+        const pageData = filtered.slice(start, start + this._pageSize);
+
+        // Chỉ chọn/bỏ chọn các item đang hiển thị trên trang hiện tại
+        pageData.forEach(r => {
+            if (checked) this._selectedIds.add(r.id);
+            else this._selectedIds.delete(r.id);
+        });
+        
+        this.renderTable();
+    },
+
+    clearSelection() {
+        this._selectedIds.clear();
+        this._lastClickedIdx = null;
+        this.renderTable();
+    },
+
+    deleteSelected() {
+        const n = this._selectedIds.size;
+        if (!n) return;
+        
+        Swal.fire({
+            title: `Xóa ${n} mục đã chọn?`,
+            text: 'Dữ liệu sẽ bị xóa vĩnh viễn khỏi hệ thống.',
+            icon: 'warning', showCancelButton: true, confirmButtonColor: '#e11d48', cancelButtonText: 'Hủy', confirmButtonText: 'Xóa vĩnh viễn', customClass: {popup:'rnd'}
+        }).then(r => {
+            if (r.isConfirmed) {
+                let updates = {};
+                this._selectedIds.forEach(id => {
+                    updates[id] = null; // Đặt null để Firebase xóa node đó
+                });
+                
+                db.ref('InjuryRates').update(updates).then(() => {
+                    Toast.fire({icon: 'success', title: `Đã xóa ${n} mục!`});
+                    this.clearSelection(); // Xóa xong thì reset trạng thái chọn
+                });
+            }
+        });
+    },
+
+    // ── Pagination ──
     changePageSize() {
         this._pageSize = parseInt(document.getElementById('ir-pg-size').value) || 50;
         this._curPage = 1;
+        this.clearSelection(); // Đổi số trang thì hủy chọn cho an toàn
         this.renderTable();
     },
 
@@ -14521,15 +14642,11 @@ const InjuryRates = {
         btns.innerHTML = html;
     },
 
+    // ── Thêm / Sửa thủ công ──
     openModal(id = null) {
         const w = document.getElementById('ir-modal-wrap');
         const b = document.getElementById('ir-modal-box');
-        
-        // Bắt lỗi nếu thiếu HTML của Modal
-        if (!w || !b) {
-            Swal.fire({icon: 'error', title: 'Thiếu HTML Modal', text: 'Không tìm thấy khung Popup thêm mới. Vui lòng dán đoạn HTML Modal vào cuối file.', customClass: {popup:'rnd'}});
-            return;
-        }
+        if (!w || !b) return;
 
         this._currentId = id;
         const setVal = (fid, val) => { const el = document.getElementById(fid); if(el) el.value = val || ''; };
@@ -14582,14 +14699,21 @@ const InjuryRates = {
             updatedAt: new Date().toISOString()
         };
 
-        const refKey = this._currentId || ('ir_' + Date.now().toString());
-        
-        db.ref('InjuryRates/' + refKey).update(payload).then(() => {
-            Toast.fire({icon: 'success', title: this._currentId ? 'Đã cập nhật!' : 'Đã thêm mới!'});
-            this.closeModal();
-        }).catch(e => {
-            Toast.fire({icon: 'error', title: 'Lỗi Firebase: ' + e.message});
-        });
+        if (this._currentId) {
+            // CẬP NHẬT CŨ
+            db.ref('InjuryRates/' + this._currentId).update(payload).then(() => {
+                Toast.fire({icon: 'success', title: 'Đã cập nhật!'});
+                this.closeModal();
+            }).catch(e => Toast.fire({icon: 'error', title: 'Lỗi: ' + e.message}));
+        } else {
+            // THÊM MỚI (FIXED)
+            payload.createdAt = new Date().toISOString();
+            const newId = 'ir_' + Date.now().toString();
+            db.ref('InjuryRates/' + newId).set(payload).then(() => {
+                Toast.fire({icon: 'success', title: 'Đã thêm mới thành công!'});
+                this.closeModal();
+            }).catch(e => Toast.fire({icon: 'error', title: 'Lỗi: ' + e.message}));
+        }
     },
 
     deleteRecord(id = null) {
@@ -14598,7 +14722,6 @@ const InjuryRates = {
         
         Swal.fire({
             title: 'Xóa mục này?',
-            text: 'Mục này sẽ bị xóa khỏi bảng tỷ lệ.',
             icon: 'warning', showCancelButton: true, confirmButtonColor: '#e11d48', confirmButtonText: 'Xóa', cancelButtonText:'Hủy', customClass: {popup:'rnd'}
         }).then(r => {
             if(r.isConfirmed) {
@@ -14610,11 +14733,10 @@ const InjuryRates = {
         });
     },
 
-    // ── Xử lý Import Excel ──
+    // ── Xử lý Import / Export Excel ──
     async importExcel(e) {
-        // Bắt lỗi nếu trình duyệt chưa tải được thư viện XLSX
         if (typeof XLSX === 'undefined') {
-            Swal.fire({icon: 'error', title: 'Thiếu thư viện Excel', text: 'Trình duyệt chưa tải xong thư viện XLSX. Vui lòng kiểm tra lại kết nối mạng hoặc thử tải lại trang.', customClass: {popup:'rnd'}});
+            Swal.fire({icon: 'error', title: 'Thiếu thư viện Excel', text: 'Trình duyệt chưa tải xong thư viện XLSX. Vui lòng kiểm tra mạng.', customClass: {popup:'rnd'}});
             e.target.value = '';
             return;
         }
@@ -14633,21 +14755,17 @@ const InjuryRates = {
                 const firstSheetName = workbook.SheetNames[0];
                 const firstSheet = workbook.Sheets[firstSheetName];
                 
-                // Đọc file thành mảng Array (mỗi dòng là 1 mảng nhỏ) thay vì Object để dễ lấy dữ liệu theo thứ tự cột
                 let rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: "" });
-                
                 let validData = [];
                 let isHeaderFound = false;
 
-                rows.forEach((row, rowIndex) => {
-                    // Cố gắng xác định dòng Header (có chứa chữ "STT" hoặc "TÊN")
+                rows.forEach((row) => {
                     const rowString = row.join(' ').toLowerCase();
                     if (!isHeaderFound && (rowString.includes('stt') || rowString.includes('tên') || rowString.includes('thương tật'))) {
                         isHeaderFound = true;
-                        return; // Bỏ qua dòng Header
+                        return; // Skip header
                     }
 
-                    // Nếu đã qua Header hoặc không có header rõ ràng, đọc dữ liệu (Giả định Cột 0: STT, Cột 1: Tên, Cột 2: Min, Cột 3: Max)
                     if (row.length >= 2) {
                         let stt = String(row[0]).trim();
                         let name = String(row[1]).trim();
@@ -14666,13 +14784,13 @@ const InjuryRates = {
                 });
 
                 if (!validData.length) {
-                    Swal.fire({icon: 'error', title: 'File trống hoặc sai định dạng', text: 'Không tìm thấy dữ liệu ở cấu trúc: Cột 1 (STT), Cột 2 (Tên), Cột 3 (Min), Cột 4 (Max).', customClass: {popup:'rnd'}});
+                    Swal.fire({icon: 'error', title: 'File trống hoặc sai cấu trúc', text: 'Vui lòng kiểm tra lại 4 cột đầu tiên: STT, TÊN, THẤP NHẤT, CAO NHẤT', customClass: {popup:'rnd'}});
                     return;
                 }
 
                 const confirmRes = await Swal.fire({
                     title: `Đã quét được ${validData.length} dòng`,
-                    text: "Bạn muốn XÓA SẠCH DỮ LIỆU CŨ để nạp mới toàn bộ, hay chỉ GHI THÊM vào dữ liệu đang có?",
+                    text: "Bạn muốn XÓA SẠCH DỮ LIỆU CŨ để nạp mới toàn bộ, hay chỉ GHI NỐI THÊM vào dữ liệu đang có?",
                     showDenyButton: true,
                     showCancelButton: true,
                     confirmButtonText: 'Xóa cũ & Nạp mới',
@@ -14685,29 +14803,24 @@ const InjuryRates = {
 
                 if (confirmRes.isDismissed) return;
 
-                Swal.fire({ title: 'Đang lưu vào cơ sở dữ liệu...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass: {popup:'rnd'} });
+                Swal.fire({ title: 'Đang đẩy lên máy chủ...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass: {popup:'rnd'} });
 
                 let updates = {};
                 const now = Date.now();
                 
                 if (confirmRes.isConfirmed) {
-                    // Xóa cũ -> nạp đè
-                    validData.forEach((item, i) => {
-                        updates[`ir_${now}_${i}`] = item;
-                    });
-                    await db.ref('InjuryRates').set(updates);
+                    validData.forEach((item, i) => { updates[`ir_${now}_${i}`] = item; });
+                    await db.ref('InjuryRates').set(updates); // Xoá sạch set mới
                 } else if (confirmRes.isDenied) {
-                    // Ghi thêm
-                    validData.forEach((item, i) => {
-                        updates[`InjuryRates/ir_${now}_${i}`] = item;
-                    });
-                    await db.ref().update(updates);
+                    validData.forEach((item, i) => { updates[`InjuryRates/ir_${now}_${i}`] = item; });
+                    await db.ref().update(updates); // Ghi thêm
                 }
 
-                Swal.fire({icon: 'success', title: 'Nhập thành công!', text: `Đã lưu ${validData.length} tỷ lệ thương tật vào hệ thống.`, customClass: {popup:'rnd'}});
+                Swal.fire({icon: 'success', title: 'Hoàn tất!', text: `Đã lưu ${validData.length} tỷ lệ thương tật.`, customClass: {popup:'rnd'}});
+                this.clearSelection();
 
             } catch (err) {
-                Swal.fire({icon: 'error', title: 'Lỗi đọc Excel', text: err.message, customClass: {popup:'rnd'}});
+                Swal.fire({icon: 'error', title: 'Lỗi xử lý file', text: err.message, customClass: {popup:'rnd'}});
             }
         };
         reader.readAsArrayBuffer(file);
@@ -14715,7 +14828,7 @@ const InjuryRates = {
 
     downloadTemplate() {
         if (typeof XLSX === 'undefined') {
-            Swal.fire({icon: 'error', title: 'Thiếu thư viện Excel', text: 'Trình duyệt chưa tải xong thư viện XLSX. Vui lòng F5 tải lại trang.', customClass: {popup:'rnd'}});
+            Swal.fire({icon: 'error', title: 'Thiếu thư viện Excel', text: 'Hệ thống chưa tải xong công cụ xuất Excel. Vui lòng chờ vài giây hoặc tải lại trang.', customClass: {popup:'rnd'}});
             return;
         }
 
@@ -14728,7 +14841,6 @@ const InjuryRates = {
         ];
 
         const ws = XLSX.utils.aoa_to_sheet(data);
-        // Thiết lập độ rộng cột
         ws['!cols'] = [{wch: 8}, {wch: 65}, {wch: 15}, {wch: 15}];
         
         const wb = XLSX.utils.book_new();
@@ -14737,7 +14849,6 @@ const InjuryRates = {
     }
 };
 
-// Đảm bảo object này thành global để HTML đọc được
 window.InjuryRates = InjuryRates;
 
 // Khởi tạo dữ liệu
