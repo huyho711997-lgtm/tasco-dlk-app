@@ -1835,11 +1835,15 @@ textarea.inp { resize:vertical; }
                       </select>
                     </div>
                   </div>
-                  <div class="grid grid-cols-4 gap-3">
+                  <div class="grid grid-cols-2 gap-3">
                     <div><label class="lbl">Hiệu lực từ</label><input id="hc-effFrom" type="datetime-local" class="inp text-[11px]" onchange="HumanClaims.checkWarnings()"></div>
                     <div><label class="lbl">Đến</label><input id="hc-effTo" type="datetime-local" class="inp text-[11px]" onchange="HumanClaims.checkWarnings()"></div>
-                    <div><label class="lbl">Mức trách nhiệm B</label><input id="hc-limitB" class="inp font-mono text-right text-emerald-600" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
-                    <div><label class="lbl">Mức trách nhiệm D</label><input id="hc-limitD" class="inp font-mono text-right text-blue-600" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
+                  </div>
+                  <div class="grid grid-cols-4 gap-3 pt-2 border-t border-slate-100">
+                    <div><label class="lbl !text-[10px]">Mức trách nhiệm A</label><input id="hc-limitA" class="inp font-mono text-right text-rose-600" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
+                    <div><label class="lbl !text-[10px]">Mức trách nhiệm B</label><input id="hc-limitB" class="inp font-mono text-right text-emerald-600" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
+                    <div><label class="lbl !text-[10px]">Mức trách nhiệm C</label><input id="hc-limitC" class="inp font-mono text-right text-amber-600" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
+                    <div><label class="lbl !text-[10px]">Mức trách nhiệm D</label><input id="hc-limitD" class="inp font-mono text-right text-blue-600" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
                   </div>
                 </div>
               </div>
@@ -13394,7 +13398,10 @@ const HumanClaims = {
         setVal('hc-contractNo', r.contractNo); setVal('hc-companyName', r.companyName);
         setVal('hc-gcn', r.gcn); setVal('hc-insType', r.insType); setVal('hc-feeStatus', r.feeStatus);
         setVal('hc-effFrom', r.effFrom); setVal('hc-effTo', r.effTo);
+        setVal('hc-effFrom', r.effFrom); setVal('hc-effTo', r.effTo);
+        setVal('hc-limitA', r.limitA ? Number(r.limitA).toLocaleString('vi-VN') : '');
         setVal('hc-limitB', r.limitB ? Number(r.limitB).toLocaleString('vi-VN') : '');
+        setVal('hc-limitC', r.limitC ? Number(r.limitC).toLocaleString('vi-VN') : '');
         setVal('hc-limitD', r.limitD ? Number(r.limitD).toLocaleString('vi-VN') : '');
         
         setVal('hc-victimName', r.victimName); setVal('hc-lossType', r.lossType);
@@ -13502,7 +13509,10 @@ const HumanClaims = {
             contractNo: getVal('hc-contractNo'), companyName: getVal('hc-companyName'),
             gcn: getVal('hc-gcn'), insType: getVal('hc-insType'), feeStatus: getVal('hc-feeStatus'),
             effFrom: getVal('hc-effFrom'), effTo: getVal('hc-effTo'),
-            limitB: getNum('hc-limitB'), limitD: getNum('hc-limitD'),
+            effFrom: getVal('hc-effFrom'), effTo: getVal('hc-effTo'),
+            limitA: getNum('hc-limitA'), limitB: getNum('hc-limitB'),
+            limitC: getNum('hc-limitC'), limitD: getNum('hc-limitD'),
+            victimName: victimName, lossType: getVal('hc-lossType'),
             victimName: victimName, lossType: getVal('hc-lossType'),
             accDate: getVal('hc-accDate'), inDate: getVal('hc-inDate'), outDate: getVal('hc-outDate'), days: getNum('hc-days'),
             accCause: getVal('hc-accCause'), injuryDesc: getVal('hc-injuryDesc'),
