@@ -2050,12 +2050,19 @@ textarea.inp { resize:vertical; }
             </div>
           </div>
           
-          <div class="mn-toolbar flex items-center justify-between w-full">
-            <div class="flex items-center gap-3 flex-1">
-              <div class="mn-search-wrap">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input id="ir-search-inp" oninput="InjuryRates.renderTable()" type="text" placeholder="Tìm theo STT hoặc Tên thương tật..." class="mn-search-inp focus:!border-fuchsia-400 focus:!ring-fuchsia-500/20">
+          <div class="mn-toolbar flex items-center justify-between w-full flex-wrap gap-3">
+            <div class="flex items-center gap-3 flex-1 min-w-[300px]">
+              
+              <div class="flex bg-slate-900/50 p-1 rounded-lg border border-white/10 shrink-0">
+                <button id="ir-tab-thuong_tat" onclick="InjuryRates.switchTab('thuong_tat')" class="px-4 py-1.5 text-xs font-bold rounded-md transition-all bg-fuchsia-600 text-white shadow-sm">Thương tật</button>
+                <button id="ir-tab-phau_thuat" onclick="InjuryRates.switchTab('phau_thuat')" class="px-4 py-1.5 text-xs font-bold rounded-md transition-all text-white/60 hover:text-white hover:bg-white/10 bg-transparent">Phẫu thuật</button>
               </div>
+
+              <div class="mn-search-wrap flex-1 max-w-sm">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input id="ir-search-inp" oninput="InjuryRates.renderTable()" type="text" placeholder="Tìm theo STT hoặc Tên..." class="mn-search-inp focus:!border-fuchsia-400 focus:!ring-fuchsia-500/20">
+              </div>
+
               <button id="ir-select-mode-btn" onclick="InjuryRates.toggleSelectMode()" class="px-3 py-1.5 rounded-lg border border-white/20 text-white/80 font-bold text-[11px] hover:bg-white/10 transition-colors flex items-center gap-1.5">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                 Chọn nhiều
@@ -2091,7 +2098,6 @@ textarea.inp { resize:vertical; }
                   <input type="checkbox" id="ir-chk-all" onchange="InjuryRates.toggleSelectAll(this.checked)" class="w-4 h-4 cursor-pointer accent-fuchsia-600 rounded">
                 </th>
                 <th class="px-2 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide w-20 text-center">STT</th>
-                <th class="px-4 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide w-28 text-center">Phân loại</th>
                 <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Tên thương tật / Phẫu thuật</th>
                 <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide w-32 text-center">Thấp nhất</th>
                 <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide w-32 text-center">Cao nhất</th>
@@ -14482,6 +14488,8 @@ const InjuryRates = {
     _selectMode: false,
     _selectedIds: new Set(),
     _lastClickedIdx: null,
+    
+    _currentTab: 'thuong_tat', // Mặc định mở tab Thương Tật
 
     init() {
         db.ref('InjuryRates').on('value', snap => {
@@ -14490,22 +14498,43 @@ const InjuryRates = {
                 .sort((a, b) => {
                     const numA = parseFloat(a.stt) || 0;
                     const numB = parseFloat(b.stt) || 0;
-                    
-                    // FIX: Nếu STT trùng nhau, sắp xếp theo ID (ID giờ đã chứa Type nên sẽ phân tách rõ ràng)
-                    if (numA === numB) {
-                        return a.id.localeCompare(b.id);
-                    }
+                    if (numA === numB) return a.id.localeCompare(b.id);
                     return numA - numB;
                 });
             this.renderTable();
         });
     },
 
+    // ── XỬ LÝ CHUYỂN BẢNG (TAB) ──
+    switchTab(tabName) {
+        this._currentTab = tabName;
+        this._curPage = 1;
+        this.clearSelection(); // Đổi bảng thì hủy thao tác Chọn nhiều
+
+        const btnTt = document.getElementById('ir-tab-thuong_tat');
+        const btnPt = document.getElementById('ir-tab-phau_thuat');
+        const activeCls = ['bg-fuchsia-600', 'text-white', 'shadow-sm'];
+        const inactiveCls = ['text-white/60', 'bg-transparent', 'hover:text-white', 'hover:bg-white/10'];
+
+        if (tabName === 'thuong_tat') {
+            if (btnTt) { btnTt.classList.remove(...inactiveCls); btnTt.classList.add(...activeCls); }
+            if (btnPt) { btnPt.classList.remove(...activeCls); btnPt.classList.add(...inactiveCls); }
+        } else {
+            if (btnPt) { btnPt.classList.remove(...inactiveCls); btnPt.classList.add(...activeCls); }
+            if (btnTt) { btnTt.classList.remove(...activeCls); btnTt.classList.add(...inactiveCls); }
+        }
+
+        this.renderTable();
+    },
+
     _getFilteredData() {
         const q = (document.getElementById('ir-search-inp')?.value || '').toLowerCase();
         return this._data.filter(r => {
-            const typeLabel = r.type === 'phau_thuat' ? 'phẫu thuật' : 'thương tật';
-            const text = [r.stt, r.name, typeLabel].join(' ').toLowerCase();
+            // LỌC THEO TAB ĐANG CHỌN (Thương tật hoặc Phẫu thuật)
+            const type = r.type || 'thuong_tat';
+            if (type !== this._currentTab) return false;
+
+            const text = [r.stt, r.name].join(' ').toLowerCase();
             return text.includes(q);
         });
     },
@@ -14566,7 +14595,7 @@ const InjuryRates = {
         if (chkAll) chkAll.checked = pageData.length > 0 && pageData.every(r => this._selectedIds.has(r.id));
 
         if (!pageData.length) {
-            tbody.innerHTML = `<tr><td colspan="${this._selectMode ? 6 : 5}" class="px-6 py-16 text-center text-slate-400 font-bold">Không tìm thấy dữ liệu.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="${this._selectMode ? 5 : 4}" class="px-6 py-16 text-center text-slate-400 font-bold">Không tìm thấy dữ liệu.</td></tr>`;
             document.getElementById('ir-pg-info').textContent = '';
             document.getElementById('ir-pg-btns').innerHTML = '';
             return;
@@ -14582,15 +14611,11 @@ const InjuryRates = {
                     <input type="checkbox" ${isSelected ? 'checked' : ''} onclick="InjuryRates.toggleSelect(event, '${r.id}', ${globalIdx})" class="w-4 h-4 cursor-pointer accent-fuchsia-600 rounded">
                 </td>` : '';
 
-            const typeBadge = r.type === 'phau_thuat' 
-                ? '<span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-[10px] font-bold border border-amber-200">Phẫu thuật</span>'
-                : '<span class="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-[10px] font-bold border border-indigo-200">Thương tật</span>';
-
+            // Đã xóa cột Badge Phân Loại vì Tab đã thể hiện rõ
             return `
             <tr class="cursor-pointer transition-colors border-b border-slate-50 ${rowBg}" onclick="InjuryRates.rowClick(event, '${r.id}', ${globalIdx})">
                 ${chkCol}
                 <td class="px-2 py-3 text-center font-black text-slate-800 text-sm">${r.stt || '—'}</td>
-                <td class="px-4 py-3 text-center">${typeBadge}</td>
                 <td class="px-6 py-3 font-semibold text-slate-700 text-[13px] leading-snug">${r.name || '—'}</td>
                 <td class="px-6 py-3 text-center font-black text-blue-600 text-sm">${r.minPct != null && r.minPct !== '' ? r.minPct + '%' : '—'}</td>
                 <td class="px-6 py-3 text-center font-black text-rose-600 text-sm">${r.maxPct != null && r.maxPct !== '' ? r.maxPct + '%' : '—'}</td>
@@ -14696,7 +14721,8 @@ const InjuryRates = {
             }
         } else {
             document.getElementById('ir-m-title').textContent = 'Thêm mục mới';
-            setVal('ir-f-stt', ''); setVal('ir-f-type', 'thuong_tat'); setVal('ir-f-name', ''); setVal('ir-f-min', ''); setVal('ir-f-max', '');
+            // Tự động set Type trong Form dựa vào Tab đang xem
+            setVal('ir-f-stt', ''); setVal('ir-f-type', this._currentTab); setVal('ir-f-name', ''); setVal('ir-f-min', ''); setVal('ir-f-max', '');
             if(delBtn) delBtn.classList.replace('flex', 'hidden');
         }
 
@@ -14733,13 +14759,16 @@ const InjuryRates = {
             updatedAt: new Date().toISOString()
         };
 
-        // KHI THÊM THỦ CÔNG: CŨNG DÙNG TYPE LÀM KHÓA CHÍNH ĐỂ TRÁNH TRÙNG
         const newId = `ir_${type}_${Date.now()}_${Math.floor(Math.random()*1000)}`;
         const refKey = this._currentId || newId;
         
         db.ref('InjuryRates/' + refKey).update(payload).then(() => {
             Toast.fire({icon: 'success', title: this._currentId ? 'Đã cập nhật!' : 'Đã thêm mới!'});
             this.closeModal();
+            // Nếu lưu mà khác Tab hiện tại thì tự nhảy qua tab đó
+            if (this._currentTab !== type) {
+                this.switchTab(type);
+            }
         }).catch(e => {
             Toast.fire({icon: 'error', title: 'Lỗi Firebase: ' + e.message});
         });
@@ -14761,16 +14790,13 @@ const InjuryRates = {
         reader.onload = async (evt) => {
             try {
                 const data = new Uint8Array(evt.target.result);
-                // XLSX tự động xử lý tốt cả file .xlsx và .csv (dù phân cách bằng dấu , hay ;)
                 const workbook = XLSX.read(data, {type: 'array'});
                 const firstSheetName = workbook.SheetNames[0];
                 const firstSheet = workbook.Sheets[firstSheetName];
                 
-                // Lấy dữ liệu theo dạng mảng Object (AI tự map key theo dòng Header đầu tiên)
                 let rows = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
                 let validData = [];
                 
-                // Bộ nhớ để ghép tên Cha - Con và xử lý gộp ô (Merge cells)
                 let currentParentName = "";
                 let lastParsedStt = "";
                 let inheritedStt = "";
@@ -14781,7 +14807,6 @@ const InjuryRates = {
                 rows.forEach((row) => {
                     let stt, type, name, min, max;
                     
-                    // Quét linh hoạt tìm cột dựa vào tên Header (không sợ lệch cột)
                     Object.keys(row).forEach(key => {
                         const nk = norm(key);
                         const val = row[key];
@@ -14793,7 +14818,6 @@ const InjuryRates = {
                         else if (nk.includes('cao') || nk.includes('max')) max = val;
                     });
 
-                    // Xử lý kế thừa nếu ô bị bỏ trống (do Merge Cell trên Excel)
                     if (stt !== undefined && stt !== "") inheritedStt = stt;
                     else stt = inheritedStt;
 
@@ -14803,7 +14827,6 @@ const InjuryRates = {
                         else if (tStr.includes('thương') || tStr === 'tt') inheritedType = 'thuong_tat';
                     }
 
-                    // Bắt đầu phân tích logic ghép chuỗi
                     if (stt && name && norm(stt) !== 'stt') {
                         let sttStr = String(stt).trim();
                         let nameStr = String(name).trim();
@@ -14816,7 +14839,6 @@ const InjuryRates = {
                         let hasDash = /^[-–—+]\s*/.test(nameStr);
                         let isSubItem = hasDash || sttStr.includes('.');
                         
-                        // Nếu STT lặp lại y hệt dòng trước thì chắc chắn là mục Con
                         if (sttStr === lastParsedStt) isSubItem = true;
 
                         let cleanName = nameStr.replace(/^[-–—+]\s*/, '').trim();
@@ -14827,7 +14849,6 @@ const InjuryRates = {
 
                         let finalName = cleanName;
                         if (isSubItem && currentParentName) {
-                            // Tránh việc ghép lặp chữ (VD: Răng - Răng cửa)
                             if (!cleanName.toLowerCase().includes(currentParentName.toLowerCase())) {
                                 finalName = currentParentName + ' - ' + cleanName;
                             }
@@ -14877,7 +14898,7 @@ const InjuryRates = {
                     await db.ref().update(updates);
                 }
 
-                Swal.fire({icon: 'success', title: 'Hoàn tất!', text: `Đã lưu ${validData.length} tỷ lệ thương tật.`, customClass: {popup:'rnd'}});
+                Swal.fire({icon: 'success', title: 'Hoàn tất!', text: `Đã lưu ${validData.length} mục.`, customClass: {popup:'rnd'}});
                 this.clearSelection();
 
             } catch (err) {
