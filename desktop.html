@@ -16,6 +16,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 * { box-sizing: border-box; }
@@ -1331,7 +1332,11 @@ textarea.inp { resize:vertical; }
     <button title="Bồi thường con người" onclick="goView('human_claims')" id="nav-human_claims" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
       <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span class="sidebar-text whitespace-nowrap">BT Con Người</span>
-    </button>     
+    </button>  
+    <button title="Bảng tỷ lệ thương tật" onclick="goView('injury_rates')" id="nav-injury_rates" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      <span class="sidebar-text whitespace-nowrap">Bảng tỷ lệ thương tật</span>
+    </button>   
   </nav>
 </aside>
 
@@ -2013,6 +2018,78 @@ textarea.inp { resize:vertical; }
 
       </div>
     </div>
+
+    <div id="view-injury_rates" class="view hidden h-full flex flex-col" style="gap:0;overflow-y:auto">
+      
+      <div class="mn-sticky-header">
+        <div class="mn-header">
+          <div class="mn-header-top">
+            <div class="mn-brand">
+              <div class="mn-icon-wrap" style="background: linear-gradient(135deg,#c026d3,#9333ea); box-shadow: 0 4px 14px rgba(192,38,211,.4);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              </div>
+              <div>
+                <p style="color:#f1f5f9;font-size:16px;font-weight:800;margin:0;letter-spacing:-.2px">Bảng Tỷ Lệ Thương Tật</p>
+                <p style="color:rgba(255,255,255,.4);font-size:11px;margin:2px 0 0;font-weight:500">Quản lý tỷ lệ quy định cho bồi thường con người</p>
+              </div>
+            </div>
+            <div class="mn-actions">
+              <button class="mn-btn mn-btn-ghost" onclick="InjuryRates.downloadTemplate()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Tải file mẫu Excel
+              </button>
+              <label class="mn-btn mn-btn-primary cursor-pointer" style="background: linear-gradient(135deg,#c026d3,#9333ea); border:none; box-shadow: 0 4px 14px rgba(192,38,211,.4);">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Nhập từ Excel (Import)
+                <input type="file" id="ir-excel-file" class="hidden" accept=".xlsx, .xls, .csv" onchange="InjuryRates.importExcel(event)">
+              </label>
+              <button class="mn-btn" onclick="InjuryRates.openModal()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Thêm mục mới
+              </button>
+            </div>
+          </div>
+          
+          <div class="mn-toolbar">
+            <div class="mn-search-wrap">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input id="ir-search-inp" oninput="InjuryRates.renderTable()" type="text" placeholder="Tìm theo STT hoặc Tên thương tật..." class="mn-search-inp focus:!border-fuchsia-400 focus:!ring-fuchsia-500/20">
+            </div>
+            <div class="ml-auto text-xs font-bold text-white/50" id="ir-count-text">Tổng: 0 mục</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mn-table-card flex-1">
+        <div class="overflow-x-auto h-full">
+          <table class="w-full text-left border-collapse">
+            <thead class="sticky top-0 bg-slate-50/95 backdrop-blur z-10 border-b border-slate-100">
+              <tr>
+                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide w-24 text-center">STT</th>
+                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Tên thương tật</th>
+                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide w-32 text-center">Thấp nhất (%)</th>
+                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide w-32 text-center">Cao nhất (%)</th>
+                <th class="px-6 py-4 w-24 text-center">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="ir-tbl-body" class="divide-y divide-slate-50"></tbody>
+          </table>
+        </div>
+        
+        <div class="shrink-0 border-t border-slate-100 bg-slate-50/80 px-6 py-3 flex items-center justify-between gap-4 rounded-b-xl">
+          <div class="flex items-center gap-3">
+            <span id="ir-pg-info" class="text-xs text-slate-400 font-semibold"></span>
+            <select id="ir-pg-size" onchange="InjuryRates.changePageSize()" class="text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-lg px-2 py-1.5 outline-none cursor-pointer">
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+              <option value="200">200</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-1" id="ir-pg-btns"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- CALENDAR -->
     <div id="view-calendar" class="view hidden h-full flex-col gap-4">
       <div class="grid grid-cols-3 gap-4">
@@ -3442,6 +3519,53 @@ textarea.inp { resize:vertical; }
 
   <!-- Footer modal xem -->
   <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between shrink-0" id="hov-footer"></div>
+</div>
+
+<div id="ir-modal-wrap" class="fixed inset-0 z-[60] hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity duration-200">
+  <div id="ir-modal-box" class="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-200 w-[500px]">
+    
+    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
+      <div>
+        <p class="text-sm font-extrabold text-slate-800" id="ir-m-title">Thêm mục tỷ lệ thương tật</p>
+      </div>
+      <button onclick="InjuryRates.closeModal()" class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="p-6 space-y-4">
+      <div>
+        <label class="lbl">Số thứ tự (STT)</label>
+        <input id="ir-f-stt" type="text" class="inp font-mono font-bold" placeholder="VD: 8, 8.1, 8a...">
+      </div>
+      <div>
+        <label class="lbl">Tên thương tật</label>
+        <textarea id="ir-f-name" class="inp resize-none font-semibold text-sm" rows="3" placeholder="Nhập mô tả thương tật..."></textarea>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="lbl">Thấp nhất (%)</label>
+          <input id="ir-f-min" type="number" class="inp text-center font-bold text-blue-600" placeholder="VD: 75" min="0" max="100">
+        </div>
+        <div>
+          <label class="lbl">Cao nhất (%)</label>
+          <input id="ir-f-max" type="number" class="inp text-center font-bold text-rose-600" placeholder="VD: 85" min="0" max="100">
+        </div>
+      </div>
+    </div>
+
+    <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
+      <button onclick="InjuryRates.deleteRecord()" id="ir-m-del-btn" class="hidden items-center gap-2 px-4 py-2.5 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl text-sm font-bold hover:bg-rose-100 transition-colors">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg> Xóa
+      </button>
+      <div class="flex items-center gap-2 ml-auto">
+        <button onclick="InjuryRates.closeModal()" class="px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors border border-slate-200">Hủy</button>
+        <button onclick="InjuryRates.saveData()" class="px-6 py-2.5 bg-fuchsia-600 text-white rounded-xl text-sm font-bold hover:bg-fuchsia-700 transition-colors shadow-md shadow-fuchsia-200 flex items-center gap-2">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Lưu
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 <script>
 /* ═══════════════════════════════════════
@@ -14309,8 +14433,293 @@ Nếu không có thông tin, để chuỗi rỗng "".`;
 
 // Khởi tạo khi load script
 document.addEventListener('DOMContentLoaded', () => {
+    InjuryRates.init();
     HumanClaims.init();
 });
+
+
+v/* ═══════════════════════════════════════
+   MODULE: QUẢN LÝ BẢNG TỶ LỆ THƯƠNG TẬT
+═══════════════════════════════════════ */
+// Thêm viewTitles
+viewTitles['injury_rates'] = 'Bảng tỷ lệ thương tật';
+
+const InjuryRates = {
+    _data: [],
+    _pageSize: 50,
+    _curPage: 1,
+    _currentId: null,
+
+    init() {
+        db.ref('InjuryRates').on('value', snap => {
+            const raw = snap.val() || {};
+            // Sắp xếp tự nhiên theo STT (ví dụ: 1, 2, 8, 10, 11) thay vì chữ cái (1, 10, 11, 2, 8)
+            this._data = Object.keys(raw).map(k => Object.assign({ id: k }, raw[k]))
+                .sort((a, b) => {
+                    const numA = parseFloat(a.stt) || 0;
+                    const numB = parseFloat(b.stt) || 0;
+                    return numA - numB;
+                });
+            this.renderTable();
+        });
+    },
+
+    renderTable() {
+        const q = (document.getElementById('ir-search-inp')?.value || '').toLowerCase();
+        
+        let filtered = this._data.filter(r => {
+            const text = [r.stt, r.name].join(' ').toLowerCase();
+            return text.includes(q);
+        });
+
+        document.getElementById('ir-count-text').textContent = `Tổng: ${filtered.length} mục`;
+
+        const total = filtered.length;
+        const maxPage = Math.ceil(total / this._pageSize) || 1;
+        if (this._curPage > maxPage) this._curPage = maxPage;
+        
+        const start = (this._curPage - 1) * this._pageSize;
+        const pageData = filtered.slice(start, start + this._pageSize);
+
+        const tbody = document.getElementById('ir-tbl-body');
+        if (!pageData.length) {
+            tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-16 text-center text-slate-400 font-bold">Không tìm thấy tỷ lệ thương tật nào.</td></tr>';
+            document.getElementById('ir-pg-info').textContent = '';
+            document.getElementById('ir-pg-btns').innerHTML = '';
+            return;
+        }
+
+        tbody.innerHTML = pageData.map(r => `
+            <tr class="hover:bg-fuchsia-50/40 cursor-pointer transition-colors border-b border-slate-50" onclick="InjuryRates.openModal('${r.id}')">
+                <td class="px-6 py-4 text-center font-black text-slate-800 text-sm">${r.stt || '—'}</td>
+                <td class="px-6 py-4 font-semibold text-slate-700 text-sm">${r.name || '—'}</td>
+                <td class="px-6 py-4 text-center font-bold text-blue-600 text-sm">${r.minPct != null ? r.minPct + '%' : '—'}</td>
+                <td class="px-6 py-4 text-center font-bold text-rose-600 text-sm">${r.maxPct != null ? r.maxPct + '%' : '—'}</td>
+                <td class="px-6 py-4 text-center">
+                    <button onclick="event.stopPropagation(); InjuryRates.deleteRecord('${r.id}')" class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>
+                </td>
+            </tr>
+        `).join('');
+
+        document.getElementById('ir-pg-info').textContent = `Hiển thị ${start + 1} - ${Math.min(start + this._pageSize, total)} / ${total}`;
+        this._renderPagination(maxPage);
+    },
+
+    changePageSize() {
+        this._pageSize = parseInt(document.getElementById('ir-pg-size').value) || 50;
+        this._curPage = 1;
+        this.renderTable();
+    },
+
+    _renderPagination(maxPage) {
+        const btns = document.getElementById('ir-pg-btns');
+        if (maxPage <= 1) { btns.innerHTML = ''; return; }
+        
+        let html = `<button onclick="InjuryRates._curPage = Math.max(1, InjuryRates._curPage - 1); InjuryRates.renderTable()" class="px-2 py-1 bg-white border border-slate-200 rounded text-xs font-bold text-slate-500 hover:bg-slate-50">‹</button>`;
+        html += `<span class="px-3 text-xs font-bold text-slate-700">${this._curPage} / ${maxPage}</span>`;
+        html += `<button onclick="InjuryRates._curPage = Math.min(${maxPage}, InjuryRates._curPage + 1); InjuryRates.renderTable()" class="px-2 py-1 bg-white border border-slate-200 rounded text-xs font-bold text-slate-500 hover:bg-slate-50">›</button>`;
+        btns.innerHTML = html;
+    },
+
+    openModal(id = null) {
+        this._currentId = id;
+        const w = document.getElementById('ir-modal-wrap');
+        const b = document.getElementById('ir-modal-box');
+        
+        const setVal = (id, val) => { document.getElementById(id).value = val || ''; };
+        
+        if (id) {
+            const r = this._data.find(x => x.id === id);
+            document.getElementById('ir-m-title').textContent = 'Chỉnh sửa tỷ lệ';
+            setVal('ir-f-stt', r.stt);
+            setVal('ir-f-name', r.name);
+            setVal('ir-f-min', r.minPct);
+            setVal('ir-f-max', r.maxPct);
+            document.getElementById('ir-m-del-btn').classList.replace('hidden', 'flex');
+        } else {
+            document.getElementById('ir-m-title').textContent = 'Thêm mục mới';
+            setVal('ir-f-stt', ''); setVal('ir-f-name', ''); setVal('ir-f-min', ''); setVal('ir-f-max', '');
+            document.getElementById('ir-m-del-btn').classList.replace('flex', 'hidden');
+        }
+
+        w.classList.remove('hidden');
+        setTimeout(() => { w.classList.remove('opacity-0'); b.classList.remove('scale-95'); }, 10);
+    },
+
+    closeModal() {
+        const w = document.getElementById('ir-modal-wrap');
+        const b = document.getElementById('ir-modal-box');
+        w.classList.add('opacity-0'); b.classList.add('scale-95');
+        setTimeout(() => { w.classList.add('hidden'); }, 200);
+    },
+
+    saveData() {
+        const stt = document.getElementById('ir-f-stt').value.trim();
+        const name = document.getElementById('ir-f-name').value.trim();
+        const minPct = document.getElementById('ir-f-min').value.trim();
+        const maxPct = document.getElementById('ir-f-max').value.trim();
+
+        if (!stt || !name) {
+            Toast.fire({icon:'warning', title:'Vui lòng nhập STT và Tên thương tật!'});
+            return;
+        }
+
+        const payload = {
+            stt: stt,
+            name: name,
+            minPct: minPct ? parseFloat(minPct) : null,
+            maxPct: maxPct ? parseFloat(maxPct) : null,
+            updatedAt: new Date().toISOString()
+        };
+
+        const refKey = this._currentId || Date.now().toString();
+        
+        db.ref('InjuryRates/' + refKey).update(payload).then(() => {
+            Toast.fire({icon: 'success', title: this._currentId ? 'Đã cập nhật!' : 'Đã thêm mới!'});
+            this.closeModal();
+        }).catch(e => {
+            Toast.fire({icon: 'error', title: 'Lỗi: ' + e.message});
+        });
+    },
+
+    deleteRecord(id = null) {
+        const key = id || this._currentId;
+        if(!key) return;
+        
+        Swal.fire({
+            title: 'Xóa mục này?',
+            icon: 'warning', showCancelButton: true, confirmButtonColor: '#e11d48', confirmButtonText: 'Xóa', customClass: {popup:'rnd'}
+        }).then(r => {
+            if(r.isConfirmed) {
+                db.ref('InjuryRates/' + key).remove().then(() => {
+                    Toast.fire({icon:'success', title:'Đã xóa!'});
+                    if(!id) this.closeModal();
+                });
+            }
+        });
+    },
+
+    // ── Xử lý Import Excel ──
+    async importExcel(e) {
+        const file = e.target.files[0];
+        e.target.value = ''; // reset
+        if (!file) return;
+
+        Swal.fire({ title: 'Đang đọc file...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass: {popup:'rnd'} });
+
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+            try {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                
+                // Chuyển sheet sang dạng mảng JSON. 
+                // Ở đây ta giả sử dòng 1 là Header.
+                let rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                
+                // Chuẩn hoá key map để đọc được file dù header có sai khác đôi chút
+                const norm = (str) => String(str||'').toLowerCase().replace(/\s+/g,'').trim();
+
+                let validData = [];
+                rows.forEach(row => {
+                    let stt, name, min, max;
+                    
+                    // Tìm map dựa vào key
+                    Object.keys(row).forEach(k => {
+                        const nk = norm(k);
+                        if (nk === 'stt' || nk.includes('sốthứtự')) stt = row[k];
+                        else if (nk.includes('tên') || nk.includes('thươngtật') || nk.includes('nộidung')) name = row[k];
+                        else if (nk.includes('thấp') || nk.includes('tốithiểu') || nk.includes('min')) min = row[k];
+                        else if (nk.includes('cao') || nk.includes('tốiđa') || nk.includes('max')) max = row[k];
+                    });
+
+                    // Hoặc mảng array nếu không có header (fallback)
+                    if (!name && Object.values(row).length >= 2) {
+                        const vals = Object.values(row);
+                        stt = vals[0]; name = vals[1]; min = vals[2]; max = vals[3];
+                    }
+
+                    if (stt && name) {
+                        // Bỏ qua dòng header nếu bị lẫn vào
+                        if (String(stt).toLowerCase().includes('stt')) return;
+
+                        validData.push({
+                            stt: String(stt).trim(),
+                            name: String(name).trim(),
+                            minPct: min != null && String(min).trim() !== '' ? parseFloat(String(min).replace(/[^\d.-]/g, '')) : null,
+                            maxPct: max != null && String(max).trim() !== '' ? parseFloat(String(max).replace(/[^\d.-]/g, '')) : null,
+                        });
+                    }
+                });
+
+                if (!validData.length) {
+                    Swal.fire({icon: 'error', title: 'Lỗi định dạng', text: 'Không tìm thấy dữ liệu hợp lệ (Cột STT, TÊN THƯƠNG TẬT, THẤP NHẤT, CAO NHẤT).', customClass: {popup:'rnd'}});
+                    return;
+                }
+
+                // Xác nhận trước khi ghi đè/thêm
+                const confirmRes = await Swal.fire({
+                    title: `Tìm thấy ${validData.length} dòng`,
+                    text: "Bạn muốn XÓA DỮ LIỆU CŨ và nạp mới, hay GHI THÊM vào dữ liệu hiện tại?",
+                    showDenyButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Xóa cũ & Nạp mới',
+                    denyButtonText: 'Ghi thêm',
+                    cancelButtonText: 'Hủy',
+                    confirmButtonColor: '#e11d48',
+                    denyButtonColor: '#2563eb',
+                    customClass: {popup:'rnd'}
+                });
+
+                if (confirmRes.isDismissed) return;
+
+                Swal.fire({ title: 'Đang lưu vào hệ thống...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass: {popup:'rnd'} });
+
+                let updates = {};
+                if (confirmRes.isConfirmed) {
+                    // Xóa cũ -> update set thẳng Object mới
+                    validData.forEach((item, i) => {
+                        updates[`ir_${Date.now()}_${i}`] = item;
+                    });
+                    await db.ref('InjuryRates').set(updates);
+                } else if (confirmRes.isDenied) {
+                    // Ghi thêm
+                    validData.forEach((item, i) => {
+                        updates[`InjuryRates/ir_${Date.now()}_${i}`] = item;
+                    });
+                    await db.ref().update(updates);
+                }
+
+                Swal.fire({icon: 'success', title: 'Nhập thành công!', text: `Đã nạp ${validData.length} tỷ lệ thương tật.`, customClass: {popup:'rnd'}});
+
+            } catch (err) {
+                Swal.fire({icon: 'error', title: 'Lỗi xử lý file', text: err.message, customClass: {popup:'rnd'}});
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    },
+
+    downloadTemplate() {
+        const data = [
+            ["STT", "TÊN THƯƠNG TẬT", "THẤP NHẤT (%)", "CAO NHẤT (%)"],
+            ["8", "Mất một cánh tay từ vai xuống (tháo khớp vai)", 75, 85],
+            ["9", "Cắt cụt cánh tay từ dưới vai xuống", 70, 80],
+            ["10", "Cắt cụt một cánh tay từ khuỷu xuống (tháo khớp khuỷu)", 65, 75],
+            ["11", "Mất trọn một bàn tay hay năm ngón của một bàn", 60, 70]
+        ];
+
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        // Chỉnh độ rộng cột cho đẹp
+        ws['!cols'] = [{wch: 10}, {wch: 60}, {wch: 15}, {wch: 15}];
+        
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "TyLeThuongTat");
+        XLSX.writeFile(wb, "Mau_Nhap_TyLeThuongTat.xlsx");
+    }
+};
+
+
 </script>
 
 
