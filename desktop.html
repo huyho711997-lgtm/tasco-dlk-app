@@ -2091,7 +2091,8 @@ textarea.inp { resize:vertical; }
                   <input type="checkbox" id="ir-chk-all" onchange="InjuryRates.toggleSelectAll(this.checked)" class="w-4 h-4 cursor-pointer accent-fuchsia-600 rounded">
                 </th>
                 <th class="px-2 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide w-20 text-center">STT</th>
-                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Tên thương tật</th>
+                <th class="px-4 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide w-28 text-center">Phân loại</th>
+                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Tên thương tật / Phẫu thuật</th>
                 <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide w-32 text-center">Thấp nhất</th>
                 <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide w-32 text-center">Cao nhất</th>
               </tr>
@@ -3550,20 +3551,29 @@ textarea.inp { resize:vertical; }
   <div id="ir-modal-box" class="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-200 w-[500px] max-w-[95vw]">
     <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
       <div>
-        <p class="text-sm font-extrabold text-slate-800" id="ir-m-title">Thêm mục tỷ lệ thương tật</p>
+        <p class="text-sm font-extrabold text-slate-800" id="ir-m-title">Thêm mục tỷ lệ</p>
       </div>
       <button onclick="InjuryRates.closeModal()" class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
     </div>
     <div class="p-6 space-y-4">
-      <div>
-        <label class="lbl">Số thứ tự (STT)</label>
-        <input id="ir-f-stt" type="text" class="inp font-mono font-bold text-slate-800" placeholder="VD: 8, 8.1, 8a...">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="lbl">Số thứ tự (STT)</label>
+          <input id="ir-f-stt" type="text" class="inp font-mono font-bold text-slate-800" placeholder="VD: 8, 8.1, 8a...">
+        </div>
+        <div>
+          <label class="lbl">Phân loại</label>
+          <select id="ir-f-type" class="inp font-bold text-slate-700">
+            <option value="thuong_tat">Thương tật</option>
+            <option value="phau_thuat">Phẫu thuật</option>
+          </select>
+        </div>
       </div>
       <div>
-        <label class="lbl">Tên thương tật</label>
-        <textarea id="ir-f-name" class="inp resize-none font-semibold text-sm text-slate-800" rows="3" placeholder="Nhập mô tả thương tật..."></textarea>
+        <label class="lbl">Tên thương tật / Phẫu thuật</label>
+        <textarea id="ir-f-name" class="inp resize-none font-semibold text-sm text-slate-800" rows="3" placeholder="Nhập mô tả chi tiết..."></textarea>
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
@@ -14470,7 +14480,6 @@ const InjuryRates = {
     _curPage: 1,
     _currentId: null,
     
-    // State cho tính năng chọn nhiều dòng
     _selectMode: false,
     _selectedIds: new Set(),
     _lastClickedIdx: null,
@@ -14491,12 +14500,13 @@ const InjuryRates = {
     _getFilteredData() {
         const q = (document.getElementById('ir-search-inp')?.value || '').toLowerCase();
         return this._data.filter(r => {
-            const text = [r.stt, r.name].join(' ').toLowerCase();
+            // Lọc theo STT, Tên hoặc Loại
+            const typeLabel = r.type === 'phau_thuat' ? 'phẫu thuật' : 'thương tật';
+            const text = [r.stt, r.name, typeLabel].join(' ').toLowerCase();
             return text.includes(q);
         });
     },
 
-    // ── Bật / Tắt chế độ Chọn nhiều ──
     toggleSelectMode() {
         this._selectMode = !this._selectMode;
         if (!this._selectMode) {
@@ -14517,15 +14527,9 @@ const InjuryRates = {
         this.renderTable();
     },
 
-    // ── Điều hướng Click chuột trên Dòng ──
     rowClick(e, id, index) {
-        if (this._selectMode) {
-            // Nếu đang bật "Chọn nhiều" -> Click vào dòng sẽ Check/Uncheck
-            this.toggleSelect(e, id, index);
-        } else {
-            // Nếu đang bình thường -> Click vào dòng sẽ Mở Form Sửa
-            this.openModal(id);
-        }
+        if (this._selectMode) this.toggleSelect(e, id, index);
+        else this.openModal(id);
     },
 
     renderTable() {
@@ -14543,11 +14547,9 @@ const InjuryRates = {
         const tbody = document.getElementById('ir-tbl-body');
         if (!tbody) return;
 
-        // Ẩn/Hiện cột tiêu đề Checkbox
         const thChk = document.getElementById('th-ir-chk');
         if (thChk) thChk.style.display = this._selectMode ? '' : 'none';
 
-        // Cập nhật giao diện thanh Action Bar
         const actionBar = document.getElementById('ir-action-bar');
         const selCountEl = document.getElementById('ir-sel-count');
         if (this._selectMode && this._selectedIds.size > 0) {
@@ -14558,12 +14560,10 @@ const InjuryRates = {
         }
 
         const chkAll = document.getElementById('ir-chk-all');
-        if (chkAll) {
-            chkAll.checked = pageData.length > 0 && pageData.every(r => this._selectedIds.has(r.id));
-        }
+        if (chkAll) chkAll.checked = pageData.length > 0 && pageData.every(r => this._selectedIds.has(r.id));
 
         if (!pageData.length) {
-            tbody.innerHTML = `<tr><td colspan="${this._selectMode ? 5 : 4}" class="px-6 py-16 text-center text-slate-400 font-bold">Không tìm thấy dữ liệu.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="${this._selectMode ? 6 : 5}" class="px-6 py-16 text-center text-slate-400 font-bold">Không tìm thấy dữ liệu.</td></tr>`;
             document.getElementById('ir-pg-info').textContent = '';
             document.getElementById('ir-pg-btns').innerHTML = '';
             return;
@@ -14574,16 +14574,21 @@ const InjuryRates = {
             const isSelected = this._selectedIds.has(r.id);
             const rowBg = isSelected ? 'bg-fuchsia-50/60' : 'hover:bg-slate-50';
             
-            // Xây dựng cột Checkbox
             const chkCol = this._selectMode ? `
                 <td class="px-4 py-3 text-center" onclick="event.stopPropagation()">
                     <input type="checkbox" ${isSelected ? 'checked' : ''} onclick="InjuryRates.toggleSelect(event, '${r.id}', ${globalIdx})" class="w-4 h-4 cursor-pointer accent-fuchsia-600 rounded">
                 </td>` : '';
 
+            // Badge Hiển thị Loại
+            const typeBadge = r.type === 'phau_thuat' 
+                ? '<span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-[10px] font-bold border border-amber-200">Phẫu thuật</span>'
+                : '<span class="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-[10px] font-bold border border-indigo-200">Thương tật</span>';
+
             return `
             <tr class="cursor-pointer transition-colors border-b border-slate-50 ${rowBg}" onclick="InjuryRates.rowClick(event, '${r.id}', ${globalIdx})">
                 ${chkCol}
                 <td class="px-2 py-3 text-center font-black text-slate-800 text-sm">${r.stt || '—'}</td>
+                <td class="px-4 py-3 text-center">${typeBadge}</td>
                 <td class="px-6 py-3 font-semibold text-slate-700 text-[13px] leading-snug">${r.name || '—'}</td>
                 <td class="px-6 py-3 text-center font-black text-blue-600 text-sm">${r.minPct != null && r.minPct !== '' ? r.minPct + '%' : '—'}</td>
                 <td class="px-6 py-3 text-center font-black text-rose-600 text-sm">${r.maxPct != null && r.maxPct !== '' ? r.maxPct + '%' : '—'}</td>
@@ -14595,30 +14600,22 @@ const InjuryRates = {
         this._renderPagination(maxPage);
     },
 
-    // ── Xử lý tính năng chọn / đè Shift ──
     toggleSelect(e, id, index) {
         if (!this._selectMode) return;
-        
-        // Ngăn bôi đen văn bản khi giữ Shift click
         if (e && e.shiftKey) e.preventDefault();
         
         if (e && e.shiftKey && this._lastClickedIdx !== null) {
             const filtered = this._getFilteredData();
             const startIdx = Math.min(this._lastClickedIdx, index);
             const endIdx = Math.max(this._lastClickedIdx, index);
-            
             for (let i = startIdx; i <= endIdx; i++) {
                 if (filtered[i]) this._selectedIds.add(filtered[i].id);
             }
         } else {
-            if (this._selectedIds.has(id)) {
-                this._selectedIds.delete(id);
-            } else {
-                this._selectedIds.add(id);
-            }
+            if (this._selectedIds.has(id)) this._selectedIds.delete(id);
+            else this._selectedIds.add(id);
             this._lastClickedIdx = index;
         }
-        
         this.renderTable();
     },
 
@@ -14626,12 +14623,10 @@ const InjuryRates = {
         const filtered = this._getFilteredData();
         const start = (this._curPage - 1) * this._pageSize;
         const pageData = filtered.slice(start, start + this._pageSize);
-
         pageData.forEach(r => {
             if (checked) this._selectedIds.add(r.id);
             else this._selectedIds.delete(r.id);
         });
-        
         this.renderTable();
     },
 
@@ -14644,28 +14639,22 @@ const InjuryRates = {
     deleteSelected() {
         const n = this._selectedIds.size;
         if (!n) return;
-        
         Swal.fire({
             title: `Xóa ${n} mục đã chọn?`,
-            text: 'Dữ liệu sẽ bị xóa vĩnh viễn khỏi hệ thống.',
             icon: 'warning', showCancelButton: true, confirmButtonColor: '#e11d48', cancelButtonText: 'Hủy', confirmButtonText: 'Xóa vĩnh viễn', customClass: {popup:'rnd'}
         }).then(r => {
             if (r.isConfirmed) {
                 let updates = {};
-                this._selectedIds.forEach(id => {
-                    updates[id] = null;
-                });
-                
+                this._selectedIds.forEach(id => { updates[id] = null; });
                 db.ref('InjuryRates').update(updates).then(() => {
                     Toast.fire({icon: 'success', title: `Đã xóa ${n} mục!`});
                     this.clearSelection();
-                    this.toggleSelectMode(); // Xóa xong tự động tắt chế độ chọn
+                    this.toggleSelectMode();
                 });
             }
         });
     },
 
-    // ── Pagination ──
     changePageSize() {
         this._pageSize = parseInt(document.getElementById('ir-pg-size').value) || 50;
         this._curPage = 1;
@@ -14677,14 +14666,12 @@ const InjuryRates = {
         const btns = document.getElementById('ir-pg-btns');
         if (!btns) return;
         if (maxPage <= 1) { btns.innerHTML = ''; return; }
-        
         let html = `<button onclick="InjuryRates._curPage = Math.max(1, InjuryRates._curPage - 1); InjuryRates.renderTable()" class="px-2 py-1 bg-white border border-slate-200 rounded text-xs font-bold text-slate-500 hover:bg-slate-50 transition-colors">‹</button>`;
         html += `<span class="px-3 text-xs font-bold text-slate-700">${this._curPage} / ${maxPage}</span>`;
         html += `<button onclick="InjuryRates._curPage = Math.min(${maxPage}, InjuryRates._curPage + 1); InjuryRates.renderTable()" class="px-2 py-1 bg-white border border-slate-200 rounded text-xs font-bold text-slate-500 hover:bg-slate-50 transition-colors">›</button>`;
         btns.innerHTML = html;
     },
 
-    // ── Thêm / Sửa thủ công ──
     openModal(id = null) {
         const w = document.getElementById('ir-modal-wrap');
         const b = document.getElementById('ir-modal-box');
@@ -14699,6 +14686,7 @@ const InjuryRates = {
             if(r) {
                 document.getElementById('ir-m-title').textContent = 'Chỉnh sửa tỷ lệ';
                 setVal('ir-f-stt', r.stt);
+                setVal('ir-f-type', r.type || 'thuong_tat');
                 setVal('ir-f-name', r.name);
                 setVal('ir-f-min', r.minPct);
                 setVal('ir-f-max', r.maxPct);
@@ -14706,7 +14694,7 @@ const InjuryRates = {
             }
         } else {
             document.getElementById('ir-m-title').textContent = 'Thêm mục mới';
-            setVal('ir-f-stt', ''); setVal('ir-f-name', ''); setVal('ir-f-min', ''); setVal('ir-f-max', '');
+            setVal('ir-f-stt', ''); setVal('ir-f-type', 'thuong_tat'); setVal('ir-f-name', ''); setVal('ir-f-min', ''); setVal('ir-f-max', '');
             if(delBtn) delBtn.classList.replace('flex', 'hidden');
         }
 
@@ -14724,17 +14712,19 @@ const InjuryRates = {
 
     saveData() {
         const stt = document.getElementById('ir-f-stt').value.trim();
+        const type = document.getElementById('ir-f-type').value;
         const name = document.getElementById('ir-f-name').value.trim();
         const minPct = document.getElementById('ir-f-min').value.trim();
         const maxPct = document.getElementById('ir-f-max').value.trim();
 
         if (!stt || !name) {
-            Toast.fire({icon:'warning', title:'Vui lòng nhập STT và Tên thương tật!'});
+            Toast.fire({icon:'warning', title:'Vui lòng nhập STT và Tên!'});
             return;
         }
 
         const payload = {
             stt: stt,
+            type: type,
             name: name,
             minPct: minPct !== '' ? parseFloat(minPct) : null,
             maxPct: maxPct !== '' ? parseFloat(maxPct) : null,
@@ -14751,34 +14741,14 @@ const InjuryRates = {
         });
     },
 
-    deleteRecord(id = null) {
-        const key = id || this._currentId;
-        if(!key) return;
-        
-        Swal.fire({
-            title: 'Xóa mục này?',
-            text: 'Mục này sẽ bị xóa khỏi bảng tỷ lệ.',
-            icon: 'warning', showCancelButton: true, confirmButtonColor: '#e11d48', confirmButtonText: 'Xóa', cancelButtonText:'Hủy', customClass: {popup:'rnd'}
-        }).then(r => {
-            if(r.isConfirmed) {
-                db.ref('InjuryRates/' + key).remove().then(() => {
-                    Toast.fire({icon:'success', title:'Đã xóa!'});
-                    if(!id) this.closeModal();
-                });
-            }
-        });
-    },
-
-    // ── Xử lý Import / Export Excel ──
     async importExcel(e) {
         if (typeof XLSX === 'undefined') {
             Swal.fire({icon: 'error', title: 'Thiếu thư viện Excel', text: 'Trình duyệt chưa tải xong thư viện XLSX. Vui lòng kiểm tra mạng.', customClass: {popup:'rnd'}});
-            e.target.value = '';
-            return;
+            e.target.value = ''; return;
         }
 
         const file = e.target.files[0];
-        e.target.value = '';
+        e.target.value = ''; 
         if (!file) return;
 
         Swal.fire({ title: 'Đang đọc file...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass: {popup:'rnd'} });
@@ -14795,46 +14765,58 @@ const InjuryRates = {
                 let validData = [];
                 let isHeaderFound = false;
 
+                const norm = str => String(str||'').toLowerCase().replace(/\s+/g,'').trim();
+
                 rows.forEach((row) => {
                     const rowString = row.join(' ').toLowerCase();
                     if (!isHeaderFound && (rowString.includes('stt') || rowString.includes('tên') || rowString.includes('thương tật'))) {
                         isHeaderFound = true;
-                        return;
+                        return; // Skip header
                     }
 
+                    // Mapping Cột linh hoạt (Hỗ trợ 5 cột nếu user xài chuẩn mẫu)
                     if (row.length >= 2) {
-                        let stt = String(row[0]).trim();
-                        let name = String(row[1]).trim();
-                        let min = row[2] !== undefined && row[2] !== "" ? parseFloat(String(row[2]).replace(/[^\d.-]/g, '')) : null;
-                        let max = row[3] !== undefined && row[3] !== "" ? parseFloat(String(row[3]).replace(/[^\d.-]/g, '')) : null;
+                        let stt, type, name, min, max;
+                        
+                        // Quét lấy index của dòng tiêu đề nếu user để sai thứ tự cột (Fallback an toàn)
+                        let hasLoaiCol = row.some(cell => norm(cell).includes('phẫu') || norm(cell) === 'pt' || norm(cell) === 'tt' || norm(cell).includes('thương'));
+                        
+                        // Trích xuất: Nếu dòng này đọc giống cấu trúc mặc định [STT, LOAI, TEN, MIN, MAX]
+                        if (row.length >= 5 && (norm(row[1]).includes('thương') || norm(row[1]).includes('phẫu') || norm(row[1])==='tt' || norm(row[1])==='pt')) {
+                            stt = row[0]; type = row[1]; name = row[2]; min = row[3]; max = row[4];
+                        } else {
+                            // Giữ cấu trúc 4 cột cũ, mặc định là thương tật
+                            stt = row[0]; name = row[1]; min = row[2]; max = row[3];
+                        }
 
-                        if (stt && name && stt.toLowerCase() !== 'stt') {
+                        // Xử lý phân loại
+                        let parsedType = 'thuong_tat';
+                        if (type) {
+                            const tStr = norm(type);
+                            if (tStr.includes('phẫu') || tStr.includes('phau') || tStr === 'pt') parsedType = 'phau_thuat';
+                        }
+
+                        if (stt && name && norm(stt) !== 'stt') {
                             validData.push({
-                                stt: stt,
-                                name: name,
-                                minPct: isNaN(min) ? null : min,
-                                maxPct: isNaN(max) ? null : max
+                                stt: String(stt).trim(),
+                                type: parsedType,
+                                name: String(name).trim(),
+                                minPct: min != null && String(min).trim() !== '' ? parseFloat(String(min).replace(/[^\d.-]/g, '')) : null,
+                                maxPct: max != null && String(max).trim() !== '' ? parseFloat(String(max).replace(/[^\d.-]/g, '')) : null
                             });
                         }
                     }
                 });
 
                 if (!validData.length) {
-                    Swal.fire({icon: 'error', title: 'File trống hoặc sai cấu trúc', text: 'Vui lòng kiểm tra lại 4 cột đầu tiên: STT, TÊN, THẤP NHẤT, CAO NHẤT', customClass: {popup:'rnd'}});
+                    Swal.fire({icon: 'error', title: 'File trống hoặc sai cấu trúc', text: 'Vui lòng tải File mẫu để xem đúng định dạng (STT, LOẠI, TÊN, THẤP NHẤT, CAO NHẤT).', customClass: {popup:'rnd'}});
                     return;
                 }
 
                 const confirmRes = await Swal.fire({
                     title: `Đã quét được ${validData.length} dòng`,
                     text: "Bạn muốn XÓA SẠCH DỮ LIỆU CŨ để nạp mới toàn bộ, hay chỉ GHI NỐI THÊM vào dữ liệu đang có?",
-                    showDenyButton: true,
-                    showCancelButton: true,
-                    confirmButtonText: 'Xóa cũ & Nạp mới',
-                    denyButtonText: 'Ghi nối thêm',
-                    cancelButtonText: 'Hủy',
-                    confirmButtonColor: '#e11d48',
-                    denyButtonColor: '#2563eb',
-                    customClass: {popup:'rnd'}
+                    showDenyButton: true, showCancelButton: true, confirmButtonText: 'Xóa cũ & Nạp mới', denyButtonText: 'Ghi nối thêm', cancelButtonText: 'Hủy', confirmButtonColor: '#e11d48', denyButtonColor: '#2563eb', customClass: {popup:'rnd'}
                 });
 
                 if (confirmRes.isDismissed) return;
@@ -14852,7 +14834,7 @@ const InjuryRates = {
                     await db.ref().update(updates);
                 }
 
-                Swal.fire({icon: 'success', title: 'Hoàn tất!', text: `Đã lưu ${validData.length} tỷ lệ thương tật.`, customClass: {popup:'rnd'}});
+                Swal.fire({icon: 'success', title: 'Hoàn tất!', text: `Đã lưu ${validData.length} mục vào hệ thống.`, customClass: {popup:'rnd'}});
                 this.clearSelection();
 
             } catch (err) {
@@ -14864,24 +14846,24 @@ const InjuryRates = {
 
     downloadTemplate() {
         if (typeof XLSX === 'undefined') {
-            Swal.fire({icon: 'error', title: 'Thiếu thư viện Excel', text: 'Hệ thống chưa tải xong công cụ xuất Excel. Vui lòng chờ vài giây hoặc tải lại trang.', customClass: {popup:'rnd'}});
+            Swal.fire({icon: 'error', title: 'Thiếu thư viện Excel', text: 'Trình duyệt chưa tải xong thư viện. Vui lòng thử lại.', customClass: {popup:'rnd'}});
             return;
         }
 
         const data = [
-            ["STT", "TÊN THƯƠNG TẬT", "THẤP NHẤT (%)", "CAO NHẤT (%)"],
-            ["8", "Mất một cánh tay từ vai xuống (tháo khớp vai)", 75, 85],
-            ["9", "Cắt cụt cánh tay từ dưới vai xuống", 70, 80],
-            ["10", "Cắt cụt một cánh tay từ khuỷu xuống (tháo khớp khuỷu)", 65, 75],
-            ["11", "Mất trọn một bàn tay hay năm ngón của một bàn", 60, 70]
+            ["STT", "LOẠI (Thương tật / Phẫu thuật)", "TÊN THƯƠNG TẬT / PHẪU THUẬT", "THẤP NHẤT (%)", "CAO NHẤT (%)"],
+            ["8", "Thương tật", "Mất một cánh tay từ vai xuống (tháo khớp vai)", 75, 85],
+            ["9", "Thương tật", "Cắt cụt cánh tay từ dưới vai xuống", 70, 80],
+            ["A1", "Phẫu thuật", "Phẫu thuật mở hộp sọ", 15, 30],
+            ["B2", "Phẫu thuật", "Khâu vết thương phần mềm ngoài da", 0, 5]
         ];
 
         const ws = XLSX.utils.aoa_to_sheet(data);
-        ws['!cols'] = [{wch: 8}, {wch: 65}, {wch: 15}, {wch: 15}];
+        ws['!cols'] = [{wch: 8}, {wch: 30}, {wch: 60}, {wch: 15}, {wch: 15}];
         
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "BangTyLeThuongTat");
-        XLSX.writeFile(wb, "Mau_Nhap_TyLeThuongTat.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "BangTyLeThuongTat_PhauThuat");
+        XLSX.writeFile(wb, "Mau_Nhap_TyLeThuongTat_PhauThuat.xlsx");
     }
 };
 
