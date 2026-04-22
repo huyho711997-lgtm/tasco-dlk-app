@@ -14743,7 +14743,7 @@ const InjuryRates = {
 
     async importExcel(e) {
         if (typeof XLSX === 'undefined') {
-            Swal.fire({icon: 'error', title: 'Thiếu thư viện Excel', text: 'Trình duyệt chưa tải xong thư viện XLSX. Vui lòng kiểm tra mạng.', customClass: {popup:'rnd'}});
+            Swal.fire({icon: 'error', title: 'Thiếu thư viện Excel', text: 'Trình duyệt chưa tải xong thư viện. Vui lòng kiểm tra mạng.', customClass: {popup:'rnd'}});
             e.target.value = ''; return;
         }
 
@@ -14764,6 +14764,9 @@ const InjuryRates = {
                 let rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: "" });
                 let validData = [];
                 let isHeaderFound = false;
+                
+                // BIẾN LƯU TRỮ TÊN MỤC CHA
+                let currentParentName = ""; 
 
                 const norm = str => String(str||'').toLowerCase().replace(/\s+/g,'').trim();
 
@@ -14771,25 +14774,20 @@ const InjuryRates = {
                     const rowString = row.join(' ').toLowerCase();
                     if (!isHeaderFound && (rowString.includes('stt') || rowString.includes('tên') || rowString.includes('thương tật'))) {
                         isHeaderFound = true;
-                        return; // Skip header
+                        return; // Skip dòng header
                     }
 
-                    // Mapping Cột linh hoạt (Hỗ trợ 5 cột nếu user xài chuẩn mẫu)
                     if (row.length >= 2) {
                         let stt, type, name, min, max;
                         
-                        // Quét lấy index của dòng tiêu đề nếu user để sai thứ tự cột (Fallback an toàn)
                         let hasLoaiCol = row.some(cell => norm(cell).includes('phẫu') || norm(cell) === 'pt' || norm(cell) === 'tt' || norm(cell).includes('thương'));
                         
-                        // Trích xuất: Nếu dòng này đọc giống cấu trúc mặc định [STT, LOAI, TEN, MIN, MAX]
                         if (row.length >= 5 && (norm(row[1]).includes('thương') || norm(row[1]).includes('phẫu') || norm(row[1])==='tt' || norm(row[1])==='pt')) {
                             stt = row[0]; type = row[1]; name = row[2]; min = row[3]; max = row[4];
                         } else {
-                            // Giữ cấu trúc 4 cột cũ, mặc định là thương tật
                             stt = row[0]; name = row[1]; min = row[2]; max = row[3];
                         }
 
-                        // Xử lý phân loại
                         let parsedType = 'thuong_tat';
                         if (type) {
                             const tStr = norm(type);
@@ -14797,19 +14795,43 @@ const InjuryRates = {
                         }
 
                         if (stt && name && norm(stt) !== 'stt') {
+                            let sttStr = String(stt).trim();
+                            let nameStr = String(name).trim();
+                            
+                            // Lọc Min/Max (bỏ qua các ký tự gạch ngang như -, —, – mà Excel hay xuất)
+                            let minStr = String(min || '').trim();
+                            let maxStr = String(max || '').trim();
+                            let minVal = (minStr !== '' && !/^[-–—]+$/.test(minStr)) ? parseFloat(minStr.replace(/[^\d.-]/g, '')) : null;
+                            let maxVal = (maxStr !== '' && !/^[-–—]+$/.test(maxStr)) ? parseFloat(maxStr.replace(/[^\d.-]/g, '')) : null;
+
+                            // LOGIC GHÉP TÊN CHA - CON
+                            let isSubItem = /^[-–—+]\s*/.test(nameStr) || sttStr.includes('.');
+                            let cleanName = nameStr.replace(/^[-–—+]\s*/, '').trim(); // Gọt bỏ dấu gạch ngang ở đầu chữ
+
+                            // Nhận diện dòng Cha: STT không có dấu chấm và tên không bắt đầu bằng gạch ngang
+                            if (!sttStr.includes('.') && !/^[-–—+]/.test(nameStr)) {
+                                currentParentName = cleanName;
+                            }
+
+                            // Nếu là dòng Con, tiến hành ghép tên Cha vào phía trước
+                            let finalName = cleanName;
+                            if (isSubItem && currentParentName) {
+                                finalName = currentParentName + ' - ' + cleanName;
+                            }
+
                             validData.push({
-                                stt: String(stt).trim(),
+                                stt: sttStr,
                                 type: parsedType,
-                                name: String(name).trim(),
-                                minPct: min != null && String(min).trim() !== '' ? parseFloat(String(min).replace(/[^\d.-]/g, '')) : null,
-                                maxPct: max != null && String(max).trim() !== '' ? parseFloat(String(max).replace(/[^\d.-]/g, '')) : null
+                                name: finalName,
+                                minPct: isNaN(minVal) ? null : minVal,
+                                maxPct: isNaN(maxVal) ? null : maxVal
                             });
                         }
                     }
                 });
 
                 if (!validData.length) {
-                    Swal.fire({icon: 'error', title: 'File trống hoặc sai cấu trúc', text: 'Vui lòng tải File mẫu để xem đúng định dạng (STT, LOẠI, TÊN, THẤP NHẤT, CAO NHẤT).', customClass: {popup:'rnd'}});
+                    Swal.fire({icon: 'error', title: 'File trống hoặc sai cấu trúc', text: 'Vui lòng tải File mẫu để xem đúng định dạng.', customClass: {popup:'rnd'}});
                     return;
                 }
 
@@ -14828,10 +14850,10 @@ const InjuryRates = {
                 
                 if (confirmRes.isConfirmed) {
                     validData.forEach((item, i) => { updates[`ir_${now}_${i}`] = item; });
-                    await db.ref('InjuryRates').set(updates);
+                    await db.ref('InjuryRates').set(updates); // Ghi đè
                 } else if (confirmRes.isDenied) {
                     validData.forEach((item, i) => { updates[`InjuryRates/ir_${now}_${i}`] = item; });
-                    await db.ref().update(updates);
+                    await db.ref().update(updates); // Ghi nối
                 }
 
                 Swal.fire({icon: 'success', title: 'Hoàn tất!', text: `Đã lưu ${validData.length} mục vào hệ thống.`, customClass: {popup:'rnd'}});
