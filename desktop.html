@@ -14468,7 +14468,6 @@ document.addEventListener('DOMContentLoaded', () => {
     HumanClaims.init();
 });
 
-
 /* ═══════════════════════════════════════
    MODULE: QUẢN LÝ BẢNG TỶ LỆ THƯƠNG TẬT
 ═══════════════════════════════════════ */
@@ -14491,8 +14490,8 @@ const InjuryRates = {
                 .sort((a, b) => {
                     const numA = parseFloat(a.stt) || 0;
                     const numB = parseFloat(b.stt) || 0;
-                    // FIX: Nếu STT giống hệt nhau (VD: 29 và 29), ưu tiên sắp xếp theo ID 
-                    // (ID đã được đệm số 0 ở hàm import để đảm bảo không bị lỗi 1, 10, 2)
+                    
+                    // FIX: Nếu STT trùng nhau, sắp xếp theo ID (ID giờ đã chứa Type nên sẽ phân tách rõ ràng)
                     if (numA === numB) {
                         return a.id.localeCompare(b.id);
                     }
@@ -14678,10 +14677,7 @@ const InjuryRates = {
     openModal(id = null) {
         const w = document.getElementById('ir-modal-wrap');
         const b = document.getElementById('ir-modal-box');
-        if (!w || !b) {
-            Toast.fire({icon:'error', title:'Lỗi: Không tìm thấy giao diện Modal HTML.'});
-            return;
-        }
+        if (!w || !b) return;
 
         this._currentId = id;
         const setVal = (fid, val) => { const el = document.getElementById(fid); if(el) el.value = val || ''; };
@@ -14737,7 +14733,9 @@ const InjuryRates = {
             updatedAt: new Date().toISOString()
         };
 
-        const refKey = this._currentId || ('ir_' + Date.now().toString() + '_9999');
+        // KHI THÊM THỦ CÔNG: CŨNG DÙNG TYPE LÀM KHÓA CHÍNH ĐỂ TRÁNH TRÙNG
+        const newId = `ir_${type}_${Date.now()}_${Math.floor(Math.random()*1000)}`;
+        const refKey = this._currentId || newId;
         
         db.ref('InjuryRates/' + refKey).update(payload).then(() => {
             Toast.fire({icon: 'success', title: this._currentId ? 'Đã cập nhật!' : 'Đã thêm mới!'});
@@ -14771,7 +14769,6 @@ const InjuryRates = {
                 let validData = [];
                 let isHeaderFound = false;
                 
-                // CÁC BIẾN "NHỚ" ĐỂ FIX LỖI MERGE CELL VÀ GHÉP TÊN CHA-CON
                 let currentParentName = "";
                 let lastParsedStt = "";
                 let inheritedStt = "";
@@ -14788,21 +14785,18 @@ const InjuryRates = {
                     if (row.length >= 2) {
                         let stt, type, name, min, max;
                         
-                        // Lấy dữ liệu linh hoạt theo số cột
                         if (row.length >= 5 && (norm(row[1]).includes('thương') || norm(row[1]).includes('phẫu') || norm(row[1])==='tt' || norm(row[1])==='pt')) {
                             stt = row[0]; type = row[1]; name = row[2]; min = row[3]; max = row[4];
                         } else {
                             stt = row[0]; name = row[1]; min = row[2]; max = row[3];
                         }
 
-                        // FIX LỖI 1: Bị trống STT do Excel trộn ô (Merge Cells)
                         if (stt !== undefined && stt !== "") {
                             inheritedStt = stt;
                         } else {
                             stt = inheritedStt;
                         }
 
-                        // Xử lý Phân loại (Thương tật/Phẫu thuật)
                         let parsedType = 'thuong_tat';
                         if (type) {
                             const tStr = norm(type);
@@ -14813,31 +14807,26 @@ const InjuryRates = {
                             let sttStr = String(stt).trim();
                             let nameStr = String(name).trim();
                             
-                            // Gọt bỏ các ký tự rác khi parse Min/Max
                             let minStr = String(min || '').trim();
                             let maxStr = String(max || '').trim();
                             let minVal = (minStr !== '' && !/^[-–—]+$/.test(minStr)) ? parseFloat(minStr.replace(/[^\d.-]/g, '')) : null;
                             let maxVal = (maxStr !== '' && !/^[-–—]+$/.test(maxStr)) ? parseFloat(maxStr.replace(/[^\d.-]/g, '')) : null;
 
-                            // Bắt đầu xử lý logic Cha - Con
                             let hasDash = /^[-–—+]\s*/.test(nameStr);
                             let isSubItem = hasDash || sttStr.includes('.');
                             
-                            // FIX LỖI 2: STT Trùng nhau nhưng người dùng quên gõ dấu gạch (-) ở tên
                             if (sttStr === lastParsedStt) {
                                 isSubItem = true;
                             }
 
                             let cleanName = nameStr.replace(/^[-–—+]\s*/, '').trim();
 
-                            // Nếu là dòng Cha mới (STT mới, không gạch đầu dòng, không có chấm)
                             if (!isSubItem && sttStr !== lastParsedStt && !hasDash) {
                                 currentParentName = cleanName;
                             }
 
                             let finalName = cleanName;
                             if (isSubItem && currentParentName) {
-                                // Ghép tên Cha + Tên con (Nếu tên con chưa chứa tên cha để tránh lặp chữ)
                                 if (!cleanName.toLowerCase().includes(currentParentName.toLowerCase())) {
                                     finalName = currentParentName + ' - ' + cleanName;
                                 }
@@ -14851,14 +14840,13 @@ const InjuryRates = {
                                 maxPct: isNaN(maxVal) ? null : maxVal
                             });
 
-                            // Ghi nhớ lại STT vừa parse
                             lastParsedStt = sttStr;
                         }
                     }
                 });
 
                 if (!validData.length) {
-                    Swal.fire({icon: 'error', title: 'File trống hoặc sai cấu trúc', text: 'Vui lòng kiểm tra lại 4 cột đầu tiên: STT, TÊN, THẤP NHẤT, CAO NHẤT', customClass: {popup:'rnd'}});
+                    Swal.fire({icon: 'error', title: 'File trống hoặc sai cấu trúc', text: 'Vui lòng tải File mẫu để xem đúng định dạng.', customClass: {popup:'rnd'}});
                     return;
                 }
 
@@ -14875,17 +14863,17 @@ const InjuryRates = {
                 let updates = {};
                 const now = Date.now();
                 
-                // FIX LỖI 3: Đệm thêm số "0001, 0002..." vào ID Firebase để giữ nguyên thứ tự sắp xếp của Excel
                 if (confirmRes.isConfirmed) {
                     validData.forEach((item, i) => { 
                         let padIdx = String(i).padStart(4, '0');
-                        updates[`ir_${now}_${padIdx}`] = item; 
+                        // FIX: ĐƯA LOẠI VÀO TRONG KHOÁ CHÍNH (ID) ĐỂ TRÁNH GHI ĐÈ KHI TRÙNG STT NHƯNG KHÁC LOẠI
+                        updates[`ir_${item.type}_${now}_${padIdx}`] = item; 
                     });
                     await db.ref('InjuryRates').set(updates);
                 } else if (confirmRes.isDenied) {
                     validData.forEach((item, i) => { 
                         let padIdx = String(i).padStart(4, '0');
-                        updates[`InjuryRates/ir_${now}_${padIdx}`] = item; 
+                        updates[`InjuryRates/ir_${item.type}_${now}_${padIdx}`] = item; 
                     });
                     await db.ref().update(updates);
                 }
@@ -14910,8 +14898,8 @@ const InjuryRates = {
             ["STT", "LOẠI (Thương tật / Phẫu thuật)", "TÊN THƯƠNG TẬT / PHẪU THUẬT", "THẤP NHẤT (%)", "CAO NHẤT (%)"],
             ["8", "Thương tật", "Mất một cánh tay từ vai xuống (tháo khớp vai)", 75, 85],
             ["9", "Thương tật", "Cắt cụt cánh tay từ dưới vai xuống", 70, 80],
-            ["A1", "Phẫu thuật", "Phẫu thuật mở hộp sọ", 15, 30],
-            ["B2", "Phẫu thuật", "Khâu vết thương phần mềm ngoài da", 0, 5]
+            ["1", "Phẫu thuật", "Phẫu thuật mở hộp sọ", 15, 30],
+            ["1", "Thương tật", "Vỡ xương sọ rạn nứt sọ cứng", 0, 5]
         ];
 
         const ws = XLSX.utils.aoa_to_sheet(data);
