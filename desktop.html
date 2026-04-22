@@ -1859,6 +1859,8 @@ textarea.inp { resize:vertical; }
                 </div>
                 <div class="p-4 space-y-3">
                   <div class="grid grid-cols-12 gap-3">
+                    <div class="p-4 space-y-3">
+                  <div class="grid grid-cols-12 gap-3">
                     <div class="col-span-7"><label class="lbl">Người được Bảo hiểm</label><input id="hc-victimName" class="inp font-bold text-rose-700 uppercase"></div>
                     <div class="col-span-5"><label class="lbl">Loại tổn thất</label>
                       <select id="hc-lossType" class="inp">
@@ -1868,6 +1870,8 @@ textarea.inp { resize:vertical; }
                       </select>
                     </div>
                   </div>
+                  
+                  <div><label class="lbl">Địa chỉ</label><input id="hc-victimAddress" class="inp" placeholder="Số nhà, đường, phường/xã, quận/huyện..."></div>
                   <div class="grid grid-cols-4 gap-3">
                     <div><label class="lbl">Ngày bị tai nạn</label><input id="hc-accDate" type="date" class="inp" onchange="HumanClaims.checkWarnings()"></div>
                     <div><label class="lbl">Ngày nhập viện</label><input id="hc-inDate" type="date" class="inp" onchange="HumanClaims.calculateDays()"></div>
@@ -13407,7 +13411,7 @@ const HumanClaims = {
         setVal('hc-limitC', r.limitC ? Number(r.limitC).toLocaleString('vi-VN') : '');
         setVal('hc-limitD', r.limitD ? Number(r.limitD).toLocaleString('vi-VN') : '');
         
-        setVal('hc-victimName', r.victimName); setVal('hc-lossType', r.lossType);
+        setVal('hc-victimName', r.victimName); setVal('hc-victimAddress', r.victimAddress); setVal('hc-lossType', r.lossType);
         setVal('hc-accDate', r.accDate); setVal('hc-inDate', r.inDate);
         setVal('hc-outDate', r.outDate); setVal('hc-days', r.days);
         setVal('hc-accCause', r.accCause); setVal('hc-injuryDesc', r.injuryDesc);
@@ -13516,7 +13520,7 @@ const HumanClaims = {
             limitA: getNum('hc-limitA'), limitB: getNum('hc-limitB'),
             limitC: getNum('hc-limitC'), limitD: getNum('hc-limitD'),
             victimName: victimName, lossType: getVal('hc-lossType'),
-            victimName: victimName, lossType: getVal('hc-lossType'),
+            victimAddress: getVal('hc-victimAddress'),
             accDate: getVal('hc-accDate'), inDate: getVal('hc-inDate'), outDate: getVal('hc-outDate'), days: getNum('hc-days'),
             accCause: getVal('hc-accCause'), injuryDesc: getVal('hc-injuryDesc'),
             injuryCode: getVal('hc-injuryCode'), injuryRange: getVal('hc-injuryRange'), injuryRealPct: getNum('hc-injuryRealPct'),
@@ -13892,7 +13896,7 @@ const HumanClaims = {
     async processMedicalOcr(file) {
         Swal.fire({
             title: 'AI đang phân tích...',
-            html: '<p class="text-sm text-slate-500 mt-2">Đang đọc thông tin từ bệnh viện, chẩn đoán, ngày nhập/xuất viện...</p>',
+            html: '<p class="text-sm text-slate-500 mt-2">Đang đọc thông tin bệnh nhân, địa chỉ, chẩn đoán, ngày giờ...</p>',
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading(),
             customClass: { popup: 'rnd' }
@@ -13908,14 +13912,16 @@ const HumanClaims = {
         try {
             const b64 = await toB64(file);
             const PROMPT = `Đây là chứng từ y tế (Giấy ra viện, tóm tắt bệnh án, hoặc bảng kê) tại Việt Nam.
-Hãy trích xuất các thông tin sau và trả về ĐÚNG định dạng JSON (không markdown, không giải thích):
-{
-    "ngayNhapVien": "YYYY-MM-DD",
-    "ngayXuatVien": "YYYY-MM-DD",
-    "chanDoan": "Ghi vắn tắt các chẩn đoán chính, tình trạng thương tật",
-    "tongTien": "số nguyên (nếu có ghi tổng viện phí, không có thì để rỗng)"
-}
-Nếu không đọc được trường nào, hãy để chuỗi rỗng "".`;
+              Hãy trích xuất các thông tin sau và trả về ĐÚNG định dạng JSON (không markdown, không giải thích):
+              {
+                  "tenNguoiBenh": "Tên bệnh nhân/người bị tai nạn",
+                  "diaChiNguoiBenh": "Địa chỉ của bệnh nhân ghi trên giấy",
+                  "ngayNhapVien": "YYYY-MM-DD",
+                  "ngayXuatVien": "YYYY-MM-DD",
+                  "chanDoan": "Ghi vắn tắt các chẩn đoán chính, tình trạng thương tật",
+                  "tongTien": "số nguyên (nếu có ghi tổng viện phí, không có thì để rỗng)"
+              }
+              Nếu không đọc được trường nào, hãy để chuỗi rỗng "".`;
 
             const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent?key=' + nextGemKey(), {
                 method: 'POST',
@@ -13948,26 +13954,39 @@ Nếu không đọc được trường nào, hãy để chuỗi rỗng "".`;
 
     showMedicalOcrResult(aiData) {
         // Lấy dữ liệu đang có trên form
+        const curName = document.getElementById('hc-victimName').value;
+        const curAddress = document.getElementById('hc-victimAddress').value;
         const curInDate = document.getElementById('hc-inDate').value;
         const curOutDate = document.getElementById('hc-outDate').value;
         const curDesc = document.getElementById('hc-injuryDesc').value;
 
-        // Hàm format ngày từ YYYY-MM-DD sang DD/MM/YYYY để hiển thị đẹp
         const fmtDate = (d) => d ? moment(d, 'YYYY-MM-DD').format('DD/MM/YYYY') : '';
 
         const html = `
             <div class="text-left font-sans mt-2">
                 <p class="text-xs text-slate-500 mb-4">Kiểm tra và điều chỉnh lại các thông tin do AI bóc tách trước khi áp dụng vào hồ sơ.</p>
                 
-                <div class="border border-slate-200 rounded-xl overflow-hidden">
+                <div class="border border-slate-200 rounded-xl overflow-hidden max-h-[50vh] overflow-y-auto">
                     <table class="w-full text-sm text-left">
-                        <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500">
+                        <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 sticky top-0">
                             <tr>
                                 <th class="px-3 py-2 w-1/3">Trường thông tin</th>
                                 <th class="px-3 py-2 w-2/3">Kết quả AI trích xuất (Có thể sửa)</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
+                            <tr>
+                                <td class="px-3 py-2 font-semibold text-slate-700">Tên người bệnh<br><span class="text-[10px] font-normal text-slate-400">Đang có: ${curName || 'Trống'}</span></td>
+                                <td class="px-3 py-2">
+                                    <input type="text" id="ai-med-victimName" class="w-full bg-white border border-slate-200 rounded p-1.5 outline-none focus:border-teal-500 font-bold text-rose-700 uppercase" value="${aiData.tenNguoiBenh || ''}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2 font-semibold text-slate-700">Địa chỉ<br><span class="text-[10px] font-normal text-slate-400">Đang có: ${curAddress || 'Trống'}</span></td>
+                                <td class="px-3 py-2">
+                                    <textarea id="ai-med-victimAddress" rows="2" class="w-full bg-white border border-slate-200 rounded p-1.5 outline-none focus:border-teal-500 resize-none">${aiData.diaChiNguoiBenh || ''}</textarea>
+                                </td>
+                            </tr>
                             <tr>
                                 <td class="px-3 py-2 font-semibold text-slate-700">Ngày nhập viện<br><span class="text-[10px] font-normal text-slate-400">Đang có: ${fmtDate(curInDate) || 'Trống'}</span></td>
                                 <td class="px-3 py-2">
@@ -14009,9 +14028,11 @@ Nếu không đọc được trường nào, hãy để chuỗi rỗng "".`;
             customClass: { popup: 'rnd' },
             preConfirm: () => {
                 return {
+                    victimName: document.getElementById('ai-med-victimName').value.trim(),
+                    victimAddress: document.getElementById('ai-med-victimAddress').value.trim(),
                     inDate: document.getElementById('ai-med-inDate').value,
                     outDate: document.getElementById('ai-med-outDate').value,
-                    desc: document.getElementById('ai-med-desc').value
+                    desc: document.getElementById('ai-med-desc').value.trim()
                 };
             }
         }).then((res) => {
@@ -14022,18 +14043,17 @@ Nếu không đọc được trường nào, hãy để chuỗi rỗng "".`;
     },
 
     applyMedicalOcr(data) {
+        if (data.victimName) document.getElementById('hc-victimName').value = data.victimName.toUpperCase();
+        if (data.victimAddress) document.getElementById('hc-victimAddress').value = data.victimAddress;
         if (data.inDate) document.getElementById('hc-inDate').value = data.inDate;
         if (data.outDate) document.getElementById('hc-outDate').value = data.outDate;
         
         const descEl = document.getElementById('hc-injuryDesc');
         if (data.desc) {
-            // Nối thêm vào nếu đã có sẵn, hoặc ghi đè nếu đang trống
             descEl.value = descEl.value ? (descEl.value + '\n' + data.desc) : data.desc;
         }
 
-        // Tự động tính lại số ngày nằm viện và tiền viện phí
         this.calculateDays();
-        
         Toast.fire({ icon: 'success', title: 'Đã điền thông tin y tế vào form!' });
     },
     generateEmail() {
