@@ -2050,12 +2050,18 @@ textarea.inp { resize:vertical; }
             </div>
           </div>
           
-          <div class="mn-toolbar">
-            <div class="mn-search-wrap">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <input id="ir-search-inp" oninput="InjuryRates.renderTable()" type="text" placeholder="Tìm theo STT hoặc Tên thương tật..." class="mn-search-inp focus:!border-fuchsia-400 focus:!ring-fuchsia-500/20">
+          <div class="mn-toolbar flex items-center justify-between w-full">
+            <div class="flex items-center gap-3 flex-1">
+              <div class="mn-search-wrap">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input id="ir-search-inp" oninput="InjuryRates.renderTable()" type="text" placeholder="Tìm theo STT hoặc Tên thương tật..." class="mn-search-inp focus:!border-fuchsia-400 focus:!ring-fuchsia-500/20">
+              </div>
+              <button id="ir-select-mode-btn" onclick="InjuryRates.toggleSelectMode()" class="px-3 py-1.5 rounded-lg border border-white/20 text-white/80 font-bold text-[11px] hover:bg-white/10 transition-colors flex items-center gap-1.5">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                Chọn nhiều
+              </button>
             </div>
-            <div class="ml-auto text-xs font-bold text-white/50" id="ir-count-text">Tổng: 0 mục</div>
+            <div class="text-xs font-bold text-white/50 shrink-0" id="ir-count-text">Tổng: 0 mục</div>
           </div>
         </div>
       </div>
@@ -2081,7 +2087,7 @@ textarea.inp { resize:vertical; }
           <table class="w-full text-left border-collapse">
             <thead class="sticky top-0 bg-slate-50/95 backdrop-blur z-10 border-b border-slate-100 shadow-sm">
               <tr>
-                <th class="px-4 py-4 w-12 text-center">
+                <th id="th-ir-chk" class="px-4 py-4 w-12 text-center" style="display:none">
                   <input type="checkbox" id="ir-chk-all" onchange="InjuryRates.toggleSelectAll(this.checked)" class="w-4 h-4 cursor-pointer accent-fuchsia-600 rounded">
                 </th>
                 <th class="px-2 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide w-20 text-center">STT</th>
@@ -14465,6 +14471,7 @@ const InjuryRates = {
     _currentId: null,
     
     // State cho tính năng chọn nhiều dòng
+    _selectMode: false,
     _selectedIds: new Set(),
     _lastClickedIdx: null,
 
@@ -14489,6 +14496,38 @@ const InjuryRates = {
         });
     },
 
+    // ── Bật / Tắt chế độ Chọn nhiều ──
+    toggleSelectMode() {
+        this._selectMode = !this._selectMode;
+        if (!this._selectMode) {
+            this._selectedIds.clear();
+            this._lastClickedIdx = null;
+        }
+
+        const btn = document.getElementById('ir-select-mode-btn');
+        if (btn) {
+            if (this._selectMode) {
+                btn.classList.add('bg-white', 'text-fuchsia-700');
+                btn.classList.remove('text-white/80', 'bg-transparent', 'hover:bg-white/10');
+            } else {
+                btn.classList.remove('bg-white', 'text-fuchsia-700');
+                btn.classList.add('text-white/80', 'bg-transparent', 'hover:bg-white/10');
+            }
+        }
+        this.renderTable();
+    },
+
+    // ── Điều hướng Click chuột trên Dòng ──
+    rowClick(e, id, index) {
+        if (this._selectMode) {
+            // Nếu đang bật "Chọn nhiều" -> Click vào dòng sẽ Check/Uncheck
+            this.toggleSelect(e, id, index);
+        } else {
+            // Nếu đang bình thường -> Click vào dòng sẽ Mở Form Sửa
+            this.openModal(id);
+        }
+    },
+
     renderTable() {
         const filtered = this._getFilteredData();
         const countEl = document.getElementById('ir-count-text');
@@ -14504,10 +14543,14 @@ const InjuryRates = {
         const tbody = document.getElementById('ir-tbl-body');
         if (!tbody) return;
 
-        // Cập nhật giao diện thanh Action Bar và Checkbox All
+        // Ẩn/Hiện cột tiêu đề Checkbox
+        const thChk = document.getElementById('th-ir-chk');
+        if (thChk) thChk.style.display = this._selectMode ? '' : 'none';
+
+        // Cập nhật giao diện thanh Action Bar
         const actionBar = document.getElementById('ir-action-bar');
         const selCountEl = document.getElementById('ir-sel-count');
-        if (this._selectedIds.size > 0) {
+        if (this._selectMode && this._selectedIds.size > 0) {
             if (actionBar) actionBar.classList.replace('hidden', 'flex');
             if (selCountEl) selCountEl.textContent = `Đã chọn ${this._selectedIds.size} mục`;
         } else {
@@ -14516,27 +14559,30 @@ const InjuryRates = {
 
         const chkAll = document.getElementById('ir-chk-all');
         if (chkAll) {
-            // Check tất cả nếu data trên trang hiện tại đều nằm trong danh sách đã chọn
             chkAll.checked = pageData.length > 0 && pageData.every(r => this._selectedIds.has(r.id));
         }
 
         if (!pageData.length) {
-            tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-16 text-center text-slate-400 font-bold">Không tìm thấy dữ liệu.</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="${this._selectMode ? 5 : 4}" class="px-6 py-16 text-center text-slate-400 font-bold">Không tìm thấy dữ liệu.</td></tr>`;
             document.getElementById('ir-pg-info').textContent = '';
             document.getElementById('ir-pg-btns').innerHTML = '';
             return;
         }
 
         tbody.innerHTML = pageData.map((r, i) => {
-            const globalIdx = start + i; // Index thật trong mảng filtered để xử lý Shift
+            const globalIdx = start + i;
             const isSelected = this._selectedIds.has(r.id);
             const rowBg = isSelected ? 'bg-fuchsia-50/60' : 'hover:bg-slate-50';
-
-            return `
-            <tr class="cursor-pointer transition-colors border-b border-slate-50 ${rowBg}" onclick="InjuryRates.openModal('${r.id}')">
+            
+            // Xây dựng cột Checkbox
+            const chkCol = this._selectMode ? `
                 <td class="px-4 py-3 text-center" onclick="event.stopPropagation()">
                     <input type="checkbox" ${isSelected ? 'checked' : ''} onclick="InjuryRates.toggleSelect(event, '${r.id}', ${globalIdx})" class="w-4 h-4 cursor-pointer accent-fuchsia-600 rounded">
-                </td>
+                </td>` : '';
+
+            return `
+            <tr class="cursor-pointer transition-colors border-b border-slate-50 ${rowBg}" onclick="InjuryRates.rowClick(event, '${r.id}', ${globalIdx})">
+                ${chkCol}
                 <td class="px-2 py-3 text-center font-black text-slate-800 text-sm">${r.stt || '—'}</td>
                 <td class="px-6 py-3 font-semibold text-slate-700 text-[13px] leading-snug">${r.name || '—'}</td>
                 <td class="px-6 py-3 text-center font-black text-blue-600 text-sm">${r.minPct != null && r.minPct !== '' ? r.minPct + '%' : '—'}</td>
@@ -14551,33 +14597,29 @@ const InjuryRates = {
 
     // ── Xử lý tính năng chọn / đè Shift ──
     toggleSelect(e, id, index) {
-        e.stopPropagation();
+        if (!this._selectMode) return;
         
-        if (e.shiftKey && this._lastClickedIdx !== null) {
-            // Lấy danh sách đang hiển thị
+        // Ngăn bôi đen văn bản khi giữ Shift click
+        if (e && e.shiftKey) e.preventDefault();
+        
+        if (e && e.shiftKey && this._lastClickedIdx !== null) {
             const filtered = this._getFilteredData();
-            
-            // Tìm điểm đầu và cuối
             const startIdx = Math.min(this._lastClickedIdx, index);
             const endIdx = Math.max(this._lastClickedIdx, index);
             
-            // Loop và quét chọn tất cả khoảng giữa
             for (let i = startIdx; i <= endIdx; i++) {
-                if (filtered[i]) {
-                    this._selectedIds.add(filtered[i].id);
-                }
+                if (filtered[i]) this._selectedIds.add(filtered[i].id);
             }
         } else {
-            // Click bình thường (từng cái một)
             if (this._selectedIds.has(id)) {
                 this._selectedIds.delete(id);
             } else {
                 this._selectedIds.add(id);
             }
-            this._lastClickedIdx = index; // Ghi nhớ vị trí click gần nhất
+            this._lastClickedIdx = index;
         }
         
-        this.renderTable(); // Vẽ lại bảng để hiện màu nền & thanh action
+        this.renderTable();
     },
 
     toggleSelectAll(checked) {
@@ -14585,7 +14627,6 @@ const InjuryRates = {
         const start = (this._curPage - 1) * this._pageSize;
         const pageData = filtered.slice(start, start + this._pageSize);
 
-        // Chỉ chọn/bỏ chọn các item đang hiển thị trên trang hiện tại
         pageData.forEach(r => {
             if (checked) this._selectedIds.add(r.id);
             else this._selectedIds.delete(r.id);
@@ -14612,12 +14653,13 @@ const InjuryRates = {
             if (r.isConfirmed) {
                 let updates = {};
                 this._selectedIds.forEach(id => {
-                    updates[id] = null; // Đặt null để Firebase xóa node đó
+                    updates[id] = null;
                 });
                 
                 db.ref('InjuryRates').update(updates).then(() => {
                     Toast.fire({icon: 'success', title: `Đã xóa ${n} mục!`});
-                    this.clearSelection(); // Xóa xong thì reset trạng thái chọn
+                    this.clearSelection();
+                    this.toggleSelectMode(); // Xóa xong tự động tắt chế độ chọn
                 });
             }
         });
@@ -14627,7 +14669,7 @@ const InjuryRates = {
     changePageSize() {
         this._pageSize = parseInt(document.getElementById('ir-pg-size').value) || 50;
         this._curPage = 1;
-        this.clearSelection(); // Đổi số trang thì hủy chọn cho an toàn
+        this.clearSelection();
         this.renderTable();
     },
 
@@ -14699,21 +14741,14 @@ const InjuryRates = {
             updatedAt: new Date().toISOString()
         };
 
-        if (this._currentId) {
-            // CẬP NHẬT CŨ
-            db.ref('InjuryRates/' + this._currentId).update(payload).then(() => {
-                Toast.fire({icon: 'success', title: 'Đã cập nhật!'});
-                this.closeModal();
-            }).catch(e => Toast.fire({icon: 'error', title: 'Lỗi: ' + e.message}));
-        } else {
-            // THÊM MỚI (FIXED)
-            payload.createdAt = new Date().toISOString();
-            const newId = 'ir_' + Date.now().toString();
-            db.ref('InjuryRates/' + newId).set(payload).then(() => {
-                Toast.fire({icon: 'success', title: 'Đã thêm mới thành công!'});
-                this.closeModal();
-            }).catch(e => Toast.fire({icon: 'error', title: 'Lỗi: ' + e.message}));
-        }
+        const refKey = this._currentId || ('ir_' + Date.now().toString());
+        
+        db.ref('InjuryRates/' + refKey).update(payload).then(() => {
+            Toast.fire({icon: 'success', title: this._currentId ? 'Đã cập nhật!' : 'Đã thêm mới!'});
+            this.closeModal();
+        }).catch(e => {
+            Toast.fire({icon: 'error', title: 'Lỗi Firebase: ' + e.message});
+        });
     },
 
     deleteRecord(id = null) {
@@ -14722,6 +14757,7 @@ const InjuryRates = {
         
         Swal.fire({
             title: 'Xóa mục này?',
+            text: 'Mục này sẽ bị xóa khỏi bảng tỷ lệ.',
             icon: 'warning', showCancelButton: true, confirmButtonColor: '#e11d48', confirmButtonText: 'Xóa', cancelButtonText:'Hủy', customClass: {popup:'rnd'}
         }).then(r => {
             if(r.isConfirmed) {
@@ -14742,7 +14778,7 @@ const InjuryRates = {
         }
 
         const file = e.target.files[0];
-        e.target.value = ''; // reset input
+        e.target.value = '';
         if (!file) return;
 
         Swal.fire({ title: 'Đang đọc file...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass: {popup:'rnd'} });
@@ -14763,7 +14799,7 @@ const InjuryRates = {
                     const rowString = row.join(' ').toLowerCase();
                     if (!isHeaderFound && (rowString.includes('stt') || rowString.includes('tên') || rowString.includes('thương tật'))) {
                         isHeaderFound = true;
-                        return; // Skip header
+                        return;
                     }
 
                     if (row.length >= 2) {
@@ -14810,10 +14846,10 @@ const InjuryRates = {
                 
                 if (confirmRes.isConfirmed) {
                     validData.forEach((item, i) => { updates[`ir_${now}_${i}`] = item; });
-                    await db.ref('InjuryRates').set(updates); // Xoá sạch set mới
+                    await db.ref('InjuryRates').set(updates);
                 } else if (confirmRes.isDenied) {
                     validData.forEach((item, i) => { updates[`InjuryRates/ir_${now}_${i}`] = item; });
-                    await db.ref().update(updates); // Ghi thêm
+                    await db.ref().update(updates);
                 }
 
                 Swal.fire({icon: 'success', title: 'Hoàn tất!', text: `Đã lưu ${validData.length} tỷ lệ thương tật.`, customClass: {popup:'rnd'}});
