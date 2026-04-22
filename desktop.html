@@ -13643,31 +13643,56 @@ const HumanClaims = {
 
     openOcrModal() {
         const html = `
-        <div class="text-left font-sans mt-2">
-            <p class="text-xs text-slate-500 mb-4">Tải lên ảnh mặt trước (bắt buộc) và mặt sau (không bắt buộc) để AI tự động trích xuất đầy đủ thông tin.</p>
-            <div class="flex gap-4">
-                <label class="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl p-5 cursor-pointer hover:bg-purple-50 hover:border-purple-400 transition-all group" id="hc-ocr-front-zone">
-                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+        <div class="text-left font-sans mt-2 mb-2">
+            <p class="text-[13px] text-slate-500 mb-5 text-center px-4">Tải lên ảnh rõ nét, không bị chói sáng hay mất góc để AI bóc tách chính xác nhất.</p>
+            <div class="flex gap-5 px-2">
+                <div class="flex-1 flex flex-col gap-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-black text-slate-700 uppercase tracking-wide">Mặt trước <span class="text-rose-500">*</span></span>
                     </div>
-                    <span class="text-xs font-extrabold text-slate-700 text-center" id="hc-ocr-front-label">Mặt trước (*)</span>
-                    <input type="file" id="hc-ocr-front" accept="image/*" class="hidden" onchange="HumanClaims.previewOcrFile(this, 'hc-ocr-front-zone', 'hc-ocr-front-label')">
-                </label>
-                <label class="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl p-5 cursor-pointer hover:bg-purple-50 hover:border-purple-400 transition-all group" id="hc-ocr-back-zone">
-                    <div class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 group-hover:bg-purple-100 transition-all">
-                        <svg class="w-5 h-5 text-slate-400 group-hover:text-purple-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    <label id="hc-ocr-front-zone" style="aspect-ratio: 1.58;" class="relative w-full border-2 border-dashed border-slate-300 rounded-xl overflow-hidden cursor-pointer hover:bg-purple-50 hover:border-purple-400 transition-all group flex items-center justify-center bg-slate-50/50 shadow-sm">
+                        <div id="hc-ocr-front-placeholder" class="flex flex-col items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mb-2 shadow-sm">
+                                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-400">Chạm để chụp / tải ảnh</span>
+                        </div>
+                        <img id="hc-ocr-front-img" class="absolute inset-0 w-full h-full object-cover hidden z-10" />
+                        <div id="hc-ocr-front-overlay" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hidden z-20">
+                            <span class="px-3 py-1.5 bg-white/20 backdrop-blur text-white text-[10px] font-bold rounded-lg border border-white/30">Đổi ảnh khác</span>
+                        </div>
+                        <input type="file" id="hc-ocr-front" accept="image/*" class="hidden" onchange="HumanClaims.previewOcrFile(this, 'hc-ocr-front-zone', 'hc-ocr-front-img', 'hc-ocr-front-placeholder', 'hc-ocr-front-overlay')">
+                    </label>
+                </div>
+                
+                <div class="flex-1 flex flex-col gap-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-black text-slate-500 uppercase tracking-wide">Mặt sau</span>
+                        <span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">Tùy chọn</span>
                     </div>
-                    <span class="text-xs font-extrabold text-slate-500 group-hover:text-slate-700 text-center" id="hc-ocr-back-label">Mặt sau</span>
-                    <input type="file" id="hc-ocr-back" accept="image/*" class="hidden" onchange="HumanClaims.previewOcrFile(this, 'hc-ocr-back-zone', 'hc-ocr-back-label')">
-                </label>
+                    <label id="hc-ocr-back-zone" style="aspect-ratio: 1.58;" class="relative w-full border-2 border-dashed border-slate-300 rounded-xl overflow-hidden cursor-pointer hover:bg-slate-100 hover:border-slate-400 transition-all group flex items-center justify-center bg-slate-50/50 shadow-sm">
+                        <div id="hc-ocr-back-placeholder" class="flex flex-col items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                            <div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center mb-2 shadow-sm group-hover:bg-slate-300 transition-colors">
+                                <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-400">Chạm để chụp / tải ảnh</span>
+                        </div>
+                        <img id="hc-ocr-back-img" class="absolute inset-0 w-full h-full object-cover hidden z-10" />
+                        <div id="hc-ocr-back-overlay" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hidden z-20">
+                            <span class="px-3 py-1.5 bg-white/20 backdrop-blur text-white text-[10px] font-bold rounded-lg border border-white/30">Đổi ảnh khác</span>
+                        </div>
+                        <input type="file" id="hc-ocr-back" accept="image/*" class="hidden" onchange="HumanClaims.previewOcrFile(this, 'hc-ocr-back-zone', 'hc-ocr-back-img', 'hc-ocr-back-placeholder', 'hc-ocr-back-overlay')">
+                    </label>
+                </div>
             </div>
         </div>`;
 
         Swal.fire({
-            title: '<span class="text-lg font-black text-slate-800 flex items-center gap-2"><svg class="w-5 h-5 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="7" y1="15" x2="7.01" y2="15"/><line x1="11" y1="15" x2="13" y2="15"/></svg> Quét thẻ Căn cước</span>',
+            title: '<span class="text-lg font-black text-slate-800 flex items-center gap-2 mt-1"><svg class="w-5 h-5 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="7" y1="15" x2="7.01" y2="15"/><line x1="11" y1="15" x2="13" y2="15"/></svg> Quét thẻ Căn cước</span>',
             html: html,
+            width: 640, // Mở rộng Modal để 2 ảnh nằm ngang đẹp hơn
             showCancelButton: true,
-            confirmButtonText: 'Bắt đầu quét',
+            confirmButtonText: 'Bắt đầu quét AI',
             cancelButtonText: 'Hủy',
             confirmButtonColor: '#9333ea',
             customClass: { popup: 'rnd' },
@@ -13687,20 +13712,37 @@ const HumanClaims = {
         });
     },
 
-    previewOcrFile(input, zoneId, labelId) {
+    previewOcrFile(input, zoneId, imgId, placeholderId, overlayId) {
         const file = input.files[0];
         const zone = document.getElementById(zoneId);
-        const label = document.getElementById(labelId);
+        const imgEl = document.getElementById(imgId);
+        const placeholder = document.getElementById(placeholderId);
+        const overlay = document.getElementById(overlayId);
+
         if (file) {
-            zone.classList.add('border-purple-500', 'bg-purple-50');
-            zone.classList.remove('border-slate-300');
-            label.textContent = file.name.length > 12 ? file.name.substring(0, 10) + '...' : file.name;
-            label.classList.add('text-purple-700');
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imgEl.src = e.target.result;
+                imgEl.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                overlay.classList.remove('hidden');
+                
+                // Đổi viền sang nét liền màu tím khi có ảnh
+                zone.classList.add('border-purple-500', 'border-solid', 'shadow-md');
+                zone.classList.remove('border-dashed', 'border-slate-300', 'hover:bg-purple-50', 'hover:bg-slate-100');
+            }
+            reader.readAsDataURL(file);
         } else {
-            zone.classList.remove('border-purple-500', 'bg-purple-50');
-            zone.classList.add('border-slate-300');
-            label.textContent = labelId.includes('front') ? 'Mặt trước (*)' : 'Mặt sau';
-            label.classList.remove('text-purple-700');
+            imgEl.src = '';
+            imgEl.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+            overlay.classList.add('hidden');
+            
+            // Trả lại viền đứt nét nếu user Hủy chọn ảnh
+            zone.classList.remove('border-purple-500', 'border-solid', 'shadow-md');
+            zone.classList.add('border-dashed', 'border-slate-300');
+            if (zoneId.includes('front')) zone.classList.add('hover:bg-purple-50');
+            else zone.classList.add('hover:bg-slate-100');
         }
     },
 
