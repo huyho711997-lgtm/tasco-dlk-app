@@ -13834,16 +13834,145 @@ const HumanClaims = {
         console.log("Searching contract:", val);
     },
 
-    suggestInjury() {
+    async suggestInjury() {
         const desc = document.getElementById('hc-injuryDesc').value.trim();
-        if(!desc) { Toast.fire({icon:'warning', title:'Hãy nhập mô tả hậu quả trước!'}); return; }
-        // Todo: Gọi API AI (Gemini) để phân tích desc -> trả về mã TLTT và Range %
-        // Mock:
-        document.getElementById('hc-injuryCode').value = "Mục 41.2a (Gãy Xương)";
-        document.getElementById('hc-injuryRange').value = "10 - 15%";
-        document.getElementById('hc-injuryRealPct').value = "10";
-        this.calculateTotal();
-        Toast.fire({icon:'success', title:'AI đã gợi ý xong!'});
+        const lossType = document.getElementById('hc-lossType').value;
+        
+        if (!desc) { 
+            Toast.fire({icon:'warning', title:'Hãy nhập mô tả hậu quả / chẩn đoán trước!'}); 
+            return; 
+        }
+
+        // Lấy nút để làm hiệu ứng loading
+        const btnSuggest = document.querySelector('button[onclick="HumanClaims.suggestInjury()"]');
+        const origBtnText = btnSuggest ? btnSuggest.innerHTML : '';
+        
+        if (btnSuggest) {
+            btnSuggest.innerHTML = '<svg class="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Đang tra cứu AI...';
+            btnSuggest.disabled = true;
+        }
+
+        try {
+            // 1. Tải Bảng tỷ lệ từ Firebase (chỉ tải loại tương ứng)
+            const typeToFetch = lossType === 'Phẫu thuật' ? 'phau_thuat' : 'thuong_tat';
+            const snap = await db.ref('InjuryRates').once('value');
+            const rawRates = snap.val() || {};
+            
+            // Lọc và format bảng tỷ lệ để gửi cho AI (giảm dung lượng token)
+            const ratesData = Object.keys(rawRates)
+                .map(k => rawRates[k])
+                .filter(r => r.type === typeToFetch)
+                .map(r => ({
+                    stt: r.stt,
+                    name: r.name,
+                    min: r.minPct,
+                    max: r.maxPct
+                }));
+
+            if (!ratesData.length) {
+                throw new Error(`Bảng tỷ lệ ${lossType} trên hệ thống đang trống!`);
+            }
+
+            // 2. Viết Prompt cho AI
+            const PROMPT = `Bạn là chuyên gia giám định bồi thường y tế.
+            Nhiệm vụ của bạn là đối chiếu "Chẩn đoán y khoa" với "Bảng tỷ lệ quy định" để tìm ra Mục thương tật/phẫu thuật phù hợp nhất.
+
+            CHẨN ĐOÁN CỦA BỆNH NHÂN:
+            "${desc}"
+
+            BẢNG TỶ LỆ QUY ĐỊNH (Loại: ${lossType}):
+            ${JSON.stringify(ratesData)}
+
+            Hãy tìm ra MỘT mục duy nhất trong bảng quy định khớp nhất với chẩn đoán trên.
+            - Trả về CHỈ JSON theo định dạng sau (không markdown, không giải thích thêm):
+            {
+                "matched": true/false,
+                "stt": "số thứ tự mục tìm được",
+                "name": "tên mục tìm được",
+                "min": "tỷ lệ thấp nhất (số nguyên)",
+                "max": "tỷ lệ cao nhất (số nguyên)"
+            }
+            Nếu không tìm thấy mục nào phù hợp, hãy trả về {"matched": false}`;
+
+            // 3. Gọi Gemini API (Sử dụng cơ chế Retry tương tự các phần khác)
+            let parsed = null;
+            const maxRetries = GEM_KEYS.length;
+
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                const key = nextGemKey();
+                try {
+                    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent?key=' + key, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: PROMPT }] }],
+                            generationConfig: { temperature: 0.1 }
+                        })
+                    });
+                    
+                    const data = await res.json();
+                    if (data.error) throw new Error(data.error.message);
+
+                    const raw = (data.candidates && data.candidates[0].content.parts[0].text) || '';
+                    
+                    try { parsed = JSON.parse(raw.replace(/```json|```/gi, '').trim()); } 
+                    catch (_) {
+                        const m = raw.match(/\{[\s\S]*\}/);
+                        if (m) try { parsed = JSON.parse(m[0]); } catch (_) {}
+                    }
+                    if (parsed) break; // Thoát nếu parse thành công
+                } catch (err) {
+                    console.warn(`[Gợi ý thương tật - Lần ${attempt + 1}] Lỗi:`, err);
+                    if (attempt === maxRetries - 1) throw err;
+                }
+            }
+
+            if (!parsed) throw new Error('AI không thể trả lời lúc này.');
+
+            // 4. Xử lý kết quả trả về
+            if (!parsed.matched) {
+                Toast.fire({icon: 'info', title: `AI không tìm thấy mục ${lossType} nào phù hợp với mô tả này trong hệ thống.`});
+            } else {
+                const codeInp = document.getElementById('hc-injuryCode');
+                const rangeInp = document.getElementById('hc-injuryRange');
+                const pctInp = document.getElementById('hc-injuryRealPct');
+
+                // Format lại cách hiển thị
+                if (codeInp) codeInp.value = `Mục ${parsed.stt}: ${parsed.name}`;
+                
+                let rangeText = '';
+                let defaultVal = 0;
+
+                if (parsed.min != null && parsed.max != null) {
+                    rangeText = `${parsed.min} - ${parsed.max}%`;
+                    defaultVal = parsed.min; // Lấy mức min làm gợi ý ban đầu
+                } else if (parsed.min != null) {
+                    rangeText = `${parsed.min}%`;
+                    defaultVal = parsed.min;
+                } else if (parsed.max != null) {
+                    rangeText = `${parsed.max}%`;
+                    defaultVal = parsed.max;
+                } else {
+                    rangeText = '-- %';
+                }
+
+                if (rangeInp) rangeInp.value = rangeText;
+                if (pctInp) pctInp.value = defaultVal; // Điền số % thực tế gợi ý
+
+                this.calculateTotal(); // Tính lại tiền
+                Toast.fire({icon: 'success', title: 'AI đã điền thành công tỷ lệ!'});
+            }
+
+        } catch (error) {
+            console.error(error);
+            Toast.fire({icon: 'error', title: 'Lỗi: ' + error.message});
+        } finally {
+            // Trả lại trạng thái cho nút bấm
+            if (btnSuggest) {
+                btnSuggest.innerHTML = origBtnText;
+                btnSuggest.disabled = false;
+            }
+        }
     },
 
     openOcrModal() {
