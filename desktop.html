@@ -13893,101 +13893,108 @@ const HumanClaims = {
 
     async processMedicalOcr(file) {
         Swal.fire({
-            title: 'AI đang phân tích...',
-            html: '<p class="text-sm text-slate-500 mt-2">Đang đọc thông tin bệnh nhân, địa chỉ, chẩn đoán, ngày giờ...</p><p id="med-ocr-status" class="text-xs text-blue-600 mt-2 font-bold animate-pulse">Đang tối ưu hóa hình ảnh...</p>',
+            title: 'AI 2.5 đang phân tích...',
+            html: '<p class="text-sm text-slate-500 mt-2">Đang đọc thông tin bệnh nhân, địa chỉ, chẩn đoán, ngày giờ...</p><p id="med-ocr-status" class="text-xs text-blue-600 mt-2 font-bold animate-pulse">Đang tối ưu hóa hình ảnh ở mức tối đa...</p>',
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading(),
             customClass: { popup: 'rnd' }
         });
 
-        // 1. HÀM NÉN ẢNH (GIẢM TẢI CHO API)
-        const compressImg = (f, maxW = 1200) => new Promise((resolve, reject) => {
+        // 1. ÉP XUNG NÉN ẢNH: Giảm Max Width xuống 1000px, giảm chất lượng xuống 70%
+        // Để dung lượng ảnh siêu nhẹ, model 2.5-flash sẽ không bị nghẹn token
+        const compressImg = (f, maxW = 1000) => new Promise((resolve, reject) => {
+            if (f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')) {
+                reject(new Error('Hệ thống hiện tại chỉ hỗ trợ AI quét định dạng ảnh (JPG/PNG), chưa hỗ trợ PDF cho phần y tế.'));
+                return;
+            }
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
                     let w = img.width, h = img.height;
-                    // Thu nhỏ ảnh nếu chiều rộng vượt quá maxW
                     if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
                     canvas.width = w; canvas.height = h;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, w, h);
-                    // Nén sang JPEG với chất lượng 80%
-                    resolve(canvas.toDataURL('image/jpeg', 0.8).split(',')[1]);
+                    // Nén chất lượng 0.7 (70%) thay vì 0.8 để tối ưu tuyệt đối
+                    resolve(canvas.toDataURL('image/jpeg', 0.7).split(',')[1]);
                 };
-                img.onerror = reject;
+                img.onerror = () => reject(new Error('Không thể đọc file ảnh này.'));
                 img.src = e.target.result;
             };
-            reader.onerror = reject;
+            reader.onerror = () => reject(new Error('Lỗi FileReader.'));
             reader.readAsDataURL(f);
         });
 
         try {
-            // Nén ảnh thay vì chuyển Base64 trực tiếp file gốc
             const b64 = await compressImg(file);
             const statusText = document.getElementById('med-ocr-status');
 
-            const PROMPT = `Đây là chứng từ y tế (Giấy ra viện, tóm tắt bệnh án, hoặc bảng kê) tại Việt Nam.
-            Hãy trích xuất các thông tin sau và trả về ĐÚNG định dạng JSON (không markdown, không giải thích):
+            // Giữ Prompt ngắn gọn, súc tích nhất có thể cho 2.5-flash
+            const PROMPT = `Đây là chứng từ y tế tại Việt Nam.
+            Trích xuất thông tin và trả về CHỈ JSON (không markdown):
             {
-                "tenNguoiBenh": "Tên bệnh nhân/người bị tai nạn",
-                "diaChiNguoiBenh": "Địa chỉ của bệnh nhân ghi trên giấy",
+                "tenNguoiBenh": "Tên bệnh nhân",
+                "diaChiNguoiBenh": "Địa chỉ",
                 "ngayNhapVien": "YYYY-MM-DD",
                 "ngayXuatVien": "YYYY-MM-DD",
-                "chanDoan": "Ghi vắn tắt các chẩn đoán chính, tình trạng thương tật",
-                "tongTien": "số nguyên (nếu có ghi tổng viện phí, không có thì để rỗng)"
+                "chanDoan": "Chẩn đoán ngắn gọn",
+                "tongTien": "Tổng viện phí (số nguyên)"
             }
-            Nếu không đọc được trường nào, hãy để chuỗi rỗng "".`;
+            Nếu không có thông tin, để chuỗi rỗng "".`;
 
             let dataResponse = null;
-            // Cho phép lặp qua mảng Key 2 vòng (nếu anh có 4 keys -> thử tối đa 8 lần)
             const maxRetries = GEM_KEYS.length * 2; 
+            let baseDelay = 2000; // Khởi tạo độ trễ 2 giây
 
-            // 2. VÒNG LẶP RETRY TỰ ĐỘNG
+            // 2. VÒNG LẶP RETRY VỚI EXPONENTIAL BACKOFF (Chờ tăng dần)
             for (let attempt = 0; attempt < maxRetries; attempt++) {
-                const key = nextGemKey(); // Lấy Key mới
-                if (statusText) statusText.textContent = `Đang phân tích dữ liệu (Thử lần ${attempt + 1}/${maxRetries})...`;
+                const key = nextGemKey();
+                if (statusText) statusText.textContent = `Đang xử lý dữ liệu (Thử lần ${attempt + 1}/${maxRetries})...`;
                 
                 try {
                     const controller = new AbortController();
-                    // Giới hạn timeout 35 giây để không bị treo vĩnh viễn
-                    const timeoutId = setTimeout(() => controller.abort(), 35000);
+                    const timeoutId = setTimeout(() => controller.abort(), 60000);
 
+                    // SỬ DỤNG TRỞ LẠI GEM_MODEL 2.5 CỦA ANH
                     const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent?key=' + key, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         signal: controller.signal,
                         body: JSON.stringify({
                             contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: 'image/jpeg', data: b64 } }] }],
-                            generationConfig: { temperature: 0.1 } // Hạ nhiệt độ để AI bám sát văn bản
+                            generationConfig: { temperature: 0.1, maxOutputTokens: 2048 }
                         })
                     });
                     
                     clearTimeout(timeoutId);
                     dataResponse = await res.json();
                     
-                    // Nếu thành công và không bị lỗi high demand -> Thoát vòng lặp
+                    // Nếu gọi API thành công -> Thoát vòng lặp ngay
                     if (res.ok && !dataResponse.error) break;
 
-                    // Nếu gặp lỗi từ Google, báo trên UI và chờ delay trước khi chạy lại loop
-                    if (statusText) statusText.textContent = `Máy chủ bận, đang chuyển đổi luồng kết nối...`;
-                    // Delay tăng dần: 1.5s, 3s, 4.5s...
-                    await new Promise(r => setTimeout(r, 1500 * (attempt + 1)));
+                    console.warn(`[Lần ${attempt + 1}] Máy chủ báo bận:`, dataResponse.error);
+                    
+                    // Nếu lỗi 503 High Demand -> Giãn thời gian chờ ra xa hơn để chắc chắn lọt qua
+                    if (statusText) statusText.textContent = `Server Google đang kẹt, chờ ${baseDelay/1000}s để thử lại luồng khác...`;
+                    await new Promise(r => setTimeout(r, baseDelay));
+                    baseDelay = Math.min(baseDelay * 1.5, 8000); // Tăng thời gian chờ lên gấp rưỡi (tối đa 8s)
 
                 } catch (err) {
-                    if (attempt === maxRetries - 1) throw err; // Hết số lần thử thì văng lỗi ra ngoài
-                    if (statusText) statusText.textContent = `Mạng chập chờn, đang kết nối lại...`;
-                    await new Promise(r => setTimeout(r, 2000));
+                    console.error(`[Lần ${attempt + 1}] Lỗi mạng/Timeout:`, err);
+                    if (attempt === maxRetries - 1) throw err;
+                    
+                    if (statusText) statusText.textContent = `Kết nối chập chờn, đang khôi phục...`;
+                    await new Promise(r => setTimeout(r, baseDelay));
+                    baseDelay = Math.min(baseDelay * 1.5, 8000);
                 }
             }
 
-            // Nếu sau vòng lặp vẫn null hoặc lỗi
             if (!dataResponse || dataResponse.error) {
-                throw new Error(dataResponse?.error?.message || 'Google AI đang quá tải, vui lòng thử lại sau vài phút.');
+                throw new Error(dataResponse?.error?.message || 'Google AI 2.5 đang bị quá tải toàn cầu, vui lòng thử lại sau ít phút.');
             }
 
-            // Xử lý dữ liệu JSON trả về
             const raw = (dataResponse.candidates && dataResponse.candidates[0].content.parts[0].text) || '';
             let parsed = null;
             try { parsed = JSON.parse(raw.replace(/```json|```/gi, '').trim()); } 
@@ -13996,13 +14003,13 @@ const HumanClaims = {
                 if (m) try { parsed = JSON.parse(m[0]); } catch (_) {}
             }
 
-            if (!parsed) throw new Error('Không bóc tách được dữ liệu từ ảnh này, vui lòng chụp rõ hơn.');
+            if (!parsed) throw new Error('Không bóc tách được dữ liệu. Vui lòng chụp rõ chứng từ hơn.');
 
             Swal.close();
             this.showMedicalOcrResult(parsed);
 
         } catch (e) {
-            Swal.fire({ icon: 'error', title: 'Lỗi OCR Y tế', text: e.message, customClass: { popup: 'rnd' } });
+            Swal.fire({ icon: 'error', title: 'Lỗi kết nối AI', text: e.message, customClass: { popup: 'rnd' } });
         }
     },
 
