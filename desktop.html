@@ -1787,6 +1787,10 @@ textarea.inp { resize:vertical; }
             <div id="hc-m-ai-warning" class="hidden cursor-pointer px-3 py-1.5 bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-[11px] font-bold flex items-center gap-1.5 animate-pulse">
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Cảnh báo Hợp đồng!
             </div>
+
+            <button onclick="HumanClaims.openMedicalOcrModal()" class="px-4 py-2 bg-teal-50 text-teal-700 border border-teal-200 rounded-xl text-xs font-bold hover:bg-teal-100 flex items-center gap-2 transition-colors" id="btn-hc-ocr-medical">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> AI Quét Y Tế
+            </button>
             <button onclick="HumanClaims.generateEmail()" class="px-4 py-2 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-xl text-xs font-bold hover:bg-indigo-100 flex items-center gap-2 transition-colors hidden" id="btn-hc-email">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email xin số
             </button>
@@ -13850,7 +13854,188 @@ const HumanClaims = {
             Toast.fire({ icon: 'error', title: 'Lỗi xử lý OCR: ' + (e.message || 'Hệ thống bận') });
         }
     },
+    openMedicalOcrModal() {
+        Swal.fire({
+            title: '<span class="text-lg font-black text-teal-800 flex items-center gap-2"><svg class="w-5 h-5 text-teal-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Quét chứng từ Y tế</span>',
+            html: `
+                <div class="text-left font-sans mt-2 mb-2">
+                    <p class="text-[13px] text-slate-500 mb-4 text-center">Tải lên Giấy ra viện, Tóm tắt bệnh án hoặc Bảng kê viện phí để AI tự động trích xuất ngày nằm viện và chẩn đoán.</p>
+                    <label id="hc-med-zone" class="relative w-full h-32 border-2 border-dashed border-teal-300 rounded-xl flex flex-col items-center justify-center cursor-pointer bg-teal-50/30 hover:bg-teal-50 transition-colors">
+                        <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center mb-2">
+                            <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        </div>
+                        <span id="hc-med-label" class="text-xs font-bold text-slate-500">Nhấn để chọn ảnh (JPG/PNG)</span>
+                        <input type="file" id="hc-med-file" accept="image/*" class="hidden" onchange="document.getElementById('hc-med-label').textContent = this.files[0] ? this.files[0].name : 'Nhấn để chọn ảnh'">
+                    </label>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Bắt đầu quét',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#0d9488',
+            customClass: { popup: 'rnd' },
+            preConfirm: () => {
+                const file = document.getElementById('hc-med-file').files[0];
+                if (!file) {
+                    Swal.showValidationMessage('Vui lòng chọn ảnh chứng từ y tế!');
+                    return false;
+                }
+                return file;
+            }
+        }).then((res) => {
+            if (res.isConfirmed) {
+                this.processMedicalOcr(res.value);
+            }
+        });
+    },
 
+    async processMedicalOcr(file) {
+        Swal.fire({
+            title: 'AI đang phân tích...',
+            html: '<p class="text-sm text-slate-500 mt-2">Đang đọc thông tin từ bệnh viện, chẩn đoán, ngày nhập/xuất viện...</p>',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading(),
+            customClass: { popup: 'rnd' }
+        });
+
+        const toB64 = (f) => new Promise((res, rej) => {
+            const r = new FileReader();
+            r.onloadend = () => res(r.result.replace(/^data:[^;]+;base64,/, ''));
+            r.onerror = rej;
+            r.readAsDataURL(f);
+        });
+
+        try {
+            const b64 = await toB64(file);
+            const PROMPT = `Đây là chứng từ y tế (Giấy ra viện, tóm tắt bệnh án, hoặc bảng kê) tại Việt Nam.
+Hãy trích xuất các thông tin sau và trả về ĐÚNG định dạng JSON (không markdown, không giải thích):
+{
+    "ngayNhapVien": "YYYY-MM-DD",
+    "ngayXuatVien": "YYYY-MM-DD",
+    "chanDoan": "Ghi vắn tắt các chẩn đoán chính, tình trạng thương tật",
+    "tongTien": "số nguyên (nếu có ghi tổng viện phí, không có thì để rỗng)"
+}
+Nếu không đọc được trường nào, hãy để chuỗi rỗng "".`;
+
+            const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent?key=' + nextGemKey(), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: file.type, data: b64 } }] }],
+                    generationConfig: { temperature: 0.1 }
+                })
+            });
+
+            const data = await res.json();
+            if (data.error) throw new Error(data.error.message);
+
+            const raw = (data.candidates && data.candidates[0].content.parts[0].text) || '';
+            let parsed = null;
+            try { parsed = JSON.parse(raw.replace(/```json|```/gi, '').trim()); } 
+            catch (_) {
+                const m = raw.match(/\{[\s\S]*\}/);
+                if (m) try { parsed = JSON.parse(m[0]); } catch (_) {}
+            }
+
+            if (!parsed) throw new Error('Không phân tích được JSON từ AI');
+
+            this.showMedicalOcrResult(parsed);
+
+        } catch (e) {
+            Swal.fire({ icon: 'error', title: 'Lỗi OCR Y tế', text: e.message, customClass: { popup: 'rnd' } });
+        }
+    },
+
+    showMedicalOcrResult(aiData) {
+        // Lấy dữ liệu đang có trên form
+        const curInDate = document.getElementById('hc-inDate').value;
+        const curOutDate = document.getElementById('hc-outDate').value;
+        const curDesc = document.getElementById('hc-injuryDesc').value;
+
+        // Hàm format ngày từ YYYY-MM-DD sang DD/MM/YYYY để hiển thị đẹp
+        const fmtDate = (d) => d ? moment(d, 'YYYY-MM-DD').format('DD/MM/YYYY') : '';
+
+        const html = `
+            <div class="text-left font-sans mt-2">
+                <p class="text-xs text-slate-500 mb-4">Kiểm tra và điều chỉnh lại các thông tin do AI bóc tách trước khi áp dụng vào hồ sơ.</p>
+                
+                <div class="border border-slate-200 rounded-xl overflow-hidden">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500">
+                            <tr>
+                                <th class="px-3 py-2 w-1/3">Trường thông tin</th>
+                                <th class="px-3 py-2 w-2/3">Kết quả AI trích xuất (Có thể sửa)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr>
+                                <td class="px-3 py-2 font-semibold text-slate-700">Ngày nhập viện<br><span class="text-[10px] font-normal text-slate-400">Đang có: ${fmtDate(curInDate) || 'Trống'}</span></td>
+                                <td class="px-3 py-2">
+                                    <input type="date" id="ai-med-inDate" class="w-full bg-white border border-slate-200 rounded p-1.5 outline-none focus:border-teal-500" value="${aiData.ngayNhapVien || ''}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2 font-semibold text-slate-700">Ngày xuất viện<br><span class="text-[10px] font-normal text-slate-400">Đang có: ${fmtDate(curOutDate) || 'Trống'}</span></td>
+                                <td class="px-3 py-2">
+                                    <input type="date" id="ai-med-outDate" class="w-full bg-white border border-slate-200 rounded p-1.5 outline-none focus:border-teal-500" value="${aiData.ngayXuatVien || ''}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2 font-semibold text-slate-700">Chẩn đoán / Thương tật<br><span class="text-[10px] font-normal text-slate-400">Đang có: ${curDesc ? 'Đã nhập' : 'Trống'}</span></td>
+                                <td class="px-3 py-2">
+                                    <textarea id="ai-med-desc" rows="3" class="w-full bg-white border border-slate-200 rounded p-1.5 outline-none focus:border-teal-500 resize-none">${aiData.chanDoan || ''}</textarea>
+                                </td>
+                            </tr>
+                            ${aiData.tongTien ? `
+                            <tr class="bg-amber-50/50">
+                                <td class="px-3 py-2 font-semibold text-amber-700" colspan="2">
+                                    <span class="text-xs">💡 AI tìm thấy Tổng viện phí: <b>${Number(aiData.tongTien).toLocaleString('vi-VN')} đ</b> (Anh có thể note lại nếu cần)</span>
+                                </td>
+                            </tr>` : ''}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        Swal.fire({
+            title: '<span class="text-base font-black text-teal-800">Kiểm tra kết quả Y tế</span>',
+            html: html,
+            width: 600,
+            showCancelButton: true,
+            confirmButtonText: 'Áp dụng vào Form',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#0d9488',
+            customClass: { popup: 'rnd' },
+            preConfirm: () => {
+                return {
+                    inDate: document.getElementById('ai-med-inDate').value,
+                    outDate: document.getElementById('ai-med-outDate').value,
+                    desc: document.getElementById('ai-med-desc').value
+                };
+            }
+        }).then((res) => {
+            if (res.isConfirmed) {
+                this.applyMedicalOcr(res.value);
+            }
+        });
+    },
+
+    applyMedicalOcr(data) {
+        if (data.inDate) document.getElementById('hc-inDate').value = data.inDate;
+        if (data.outDate) document.getElementById('hc-outDate').value = data.outDate;
+        
+        const descEl = document.getElementById('hc-injuryDesc');
+        if (data.desc) {
+            // Nối thêm vào nếu đã có sẵn, hoặc ghi đè nếu đang trống
+            descEl.value = descEl.value ? (descEl.value + '\n' + data.desc) : data.desc;
+        }
+
+        // Tự động tính lại số ngày nằm viện và tiền viện phí
+        this.calculateDays();
+        
+        Toast.fire({ icon: 'success', title: 'Đã điền thông tin y tế vào form!' });
+    },
     generateEmail() {
         const victim = document.getElementById('hc-victimName').value || '___';
         const hdog = document.getElementById('hc-contractNo').value || '___';
