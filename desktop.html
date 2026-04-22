@@ -14491,6 +14491,11 @@ const InjuryRates = {
                 .sort((a, b) => {
                     const numA = parseFloat(a.stt) || 0;
                     const numB = parseFloat(b.stt) || 0;
+                    // FIX: Nếu STT giống hệt nhau (VD: 29 và 29), ưu tiên sắp xếp theo ID 
+                    // (ID đã được đệm số 0 ở hàm import để đảm bảo không bị lỗi 1, 10, 2)
+                    if (numA === numB) {
+                        return a.id.localeCompare(b.id);
+                    }
                     return numA - numB;
                 });
             this.renderTable();
@@ -14500,7 +14505,6 @@ const InjuryRates = {
     _getFilteredData() {
         const q = (document.getElementById('ir-search-inp')?.value || '').toLowerCase();
         return this._data.filter(r => {
-            // Lọc theo STT, Tên hoặc Loại
             const typeLabel = r.type === 'phau_thuat' ? 'phẫu thuật' : 'thương tật';
             const text = [r.stt, r.name, typeLabel].join(' ').toLowerCase();
             return text.includes(q);
@@ -14579,7 +14583,6 @@ const InjuryRates = {
                     <input type="checkbox" ${isSelected ? 'checked' : ''} onclick="InjuryRates.toggleSelect(event, '${r.id}', ${globalIdx})" class="w-4 h-4 cursor-pointer accent-fuchsia-600 rounded">
                 </td>` : '';
 
-            // Badge Hiển thị Loại
             const typeBadge = r.type === 'phau_thuat' 
                 ? '<span class="px-2 py-1 bg-amber-100 text-amber-700 rounded text-[10px] font-bold border border-amber-200">Phẫu thuật</span>'
                 : '<span class="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-[10px] font-bold border border-indigo-200">Thương tật</span>';
@@ -14675,7 +14678,10 @@ const InjuryRates = {
     openModal(id = null) {
         const w = document.getElementById('ir-modal-wrap');
         const b = document.getElementById('ir-modal-box');
-        if (!w || !b) return;
+        if (!w || !b) {
+            Toast.fire({icon:'error', title:'Lỗi: Không tìm thấy giao diện Modal HTML.'});
+            return;
+        }
 
         this._currentId = id;
         const setVal = (fid, val) => { const el = document.getElementById(fid); if(el) el.value = val || ''; };
@@ -14731,7 +14737,7 @@ const InjuryRates = {
             updatedAt: new Date().toISOString()
         };
 
-        const refKey = this._currentId || ('ir_' + Date.now().toString());
+        const refKey = this._currentId || ('ir_' + Date.now().toString() + '_9999');
         
         db.ref('InjuryRates/' + refKey).update(payload).then(() => {
             Toast.fire({icon: 'success', title: this._currentId ? 'Đã cập nhật!' : 'Đã thêm mới!'});
@@ -14743,7 +14749,7 @@ const InjuryRates = {
 
     async importExcel(e) {
         if (typeof XLSX === 'undefined') {
-            Swal.fire({icon: 'error', title: 'Thiếu thư viện Excel', text: 'Trình duyệt chưa tải xong thư viện. Vui lòng kiểm tra mạng.', customClass: {popup:'rnd'}});
+            Swal.fire({icon: 'error', title: 'Thiếu thư viện Excel', text: 'Trình duyệt chưa tải xong thư viện. Vui lòng kiểm tra lại mạng.', customClass: {popup:'rnd'}});
             e.target.value = ''; return;
         }
 
@@ -14765,8 +14771,10 @@ const InjuryRates = {
                 let validData = [];
                 let isHeaderFound = false;
                 
-                // BIẾN LƯU TRỮ TÊN MỤC CHA
-                let currentParentName = ""; 
+                // CÁC BIẾN "NHỚ" ĐỂ FIX LỖI MERGE CELL VÀ GHÉP TÊN CHA-CON
+                let currentParentName = "";
+                let lastParsedStt = "";
+                let inheritedStt = "";
 
                 const norm = str => String(str||'').toLowerCase().replace(/\s+/g,'').trim();
 
@@ -14774,20 +14782,27 @@ const InjuryRates = {
                     const rowString = row.join(' ').toLowerCase();
                     if (!isHeaderFound && (rowString.includes('stt') || rowString.includes('tên') || rowString.includes('thương tật'))) {
                         isHeaderFound = true;
-                        return; // Skip dòng header
+                        return; // Bỏ qua dòng Header
                     }
 
                     if (row.length >= 2) {
                         let stt, type, name, min, max;
                         
-                        let hasLoaiCol = row.some(cell => norm(cell).includes('phẫu') || norm(cell) === 'pt' || norm(cell) === 'tt' || norm(cell).includes('thương'));
-                        
+                        // Lấy dữ liệu linh hoạt theo số cột
                         if (row.length >= 5 && (norm(row[1]).includes('thương') || norm(row[1]).includes('phẫu') || norm(row[1])==='tt' || norm(row[1])==='pt')) {
                             stt = row[0]; type = row[1]; name = row[2]; min = row[3]; max = row[4];
                         } else {
                             stt = row[0]; name = row[1]; min = row[2]; max = row[3];
                         }
 
+                        // FIX LỖI 1: Bị trống STT do Excel trộn ô (Merge Cells)
+                        if (stt !== undefined && stt !== "") {
+                            inheritedStt = stt;
+                        } else {
+                            stt = inheritedStt;
+                        }
+
+                        // Xử lý Phân loại (Thương tật/Phẫu thuật)
                         let parsedType = 'thuong_tat';
                         if (type) {
                             const tStr = norm(type);
@@ -14798,25 +14813,34 @@ const InjuryRates = {
                             let sttStr = String(stt).trim();
                             let nameStr = String(name).trim();
                             
-                            // Lọc Min/Max (bỏ qua các ký tự gạch ngang như -, —, – mà Excel hay xuất)
+                            // Gọt bỏ các ký tự rác khi parse Min/Max
                             let minStr = String(min || '').trim();
                             let maxStr = String(max || '').trim();
                             let minVal = (minStr !== '' && !/^[-–—]+$/.test(minStr)) ? parseFloat(minStr.replace(/[^\d.-]/g, '')) : null;
                             let maxVal = (maxStr !== '' && !/^[-–—]+$/.test(maxStr)) ? parseFloat(maxStr.replace(/[^\d.-]/g, '')) : null;
 
-                            // LOGIC GHÉP TÊN CHA - CON
-                            let isSubItem = /^[-–—+]\s*/.test(nameStr) || sttStr.includes('.');
-                            let cleanName = nameStr.replace(/^[-–—+]\s*/, '').trim(); // Gọt bỏ dấu gạch ngang ở đầu chữ
+                            // Bắt đầu xử lý logic Cha - Con
+                            let hasDash = /^[-–—+]\s*/.test(nameStr);
+                            let isSubItem = hasDash || sttStr.includes('.');
+                            
+                            // FIX LỖI 2: STT Trùng nhau nhưng người dùng quên gõ dấu gạch (-) ở tên
+                            if (sttStr === lastParsedStt) {
+                                isSubItem = true;
+                            }
 
-                            // Nhận diện dòng Cha: STT không có dấu chấm và tên không bắt đầu bằng gạch ngang
-                            if (!sttStr.includes('.') && !/^[-–—+]/.test(nameStr)) {
+                            let cleanName = nameStr.replace(/^[-–—+]\s*/, '').trim();
+
+                            // Nếu là dòng Cha mới (STT mới, không gạch đầu dòng, không có chấm)
+                            if (!isSubItem && sttStr !== lastParsedStt && !hasDash) {
                                 currentParentName = cleanName;
                             }
 
-                            // Nếu là dòng Con, tiến hành ghép tên Cha vào phía trước
                             let finalName = cleanName;
                             if (isSubItem && currentParentName) {
-                                finalName = currentParentName + ' - ' + cleanName;
+                                // Ghép tên Cha + Tên con (Nếu tên con chưa chứa tên cha để tránh lặp chữ)
+                                if (!cleanName.toLowerCase().includes(currentParentName.toLowerCase())) {
+                                    finalName = currentParentName + ' - ' + cleanName;
+                                }
                             }
 
                             validData.push({
@@ -14826,12 +14850,15 @@ const InjuryRates = {
                                 minPct: isNaN(minVal) ? null : minVal,
                                 maxPct: isNaN(maxVal) ? null : maxVal
                             });
+
+                            // Ghi nhớ lại STT vừa parse
+                            lastParsedStt = sttStr;
                         }
                     }
                 });
 
                 if (!validData.length) {
-                    Swal.fire({icon: 'error', title: 'File trống hoặc sai cấu trúc', text: 'Vui lòng tải File mẫu để xem đúng định dạng.', customClass: {popup:'rnd'}});
+                    Swal.fire({icon: 'error', title: 'File trống hoặc sai cấu trúc', text: 'Vui lòng kiểm tra lại 4 cột đầu tiên: STT, TÊN, THẤP NHẤT, CAO NHẤT', customClass: {popup:'rnd'}});
                     return;
                 }
 
@@ -14848,15 +14875,22 @@ const InjuryRates = {
                 let updates = {};
                 const now = Date.now();
                 
+                // FIX LỖI 3: Đệm thêm số "0001, 0002..." vào ID Firebase để giữ nguyên thứ tự sắp xếp của Excel
                 if (confirmRes.isConfirmed) {
-                    validData.forEach((item, i) => { updates[`ir_${now}_${i}`] = item; });
-                    await db.ref('InjuryRates').set(updates); // Ghi đè
+                    validData.forEach((item, i) => { 
+                        let padIdx = String(i).padStart(4, '0');
+                        updates[`ir_${now}_${padIdx}`] = item; 
+                    });
+                    await db.ref('InjuryRates').set(updates);
                 } else if (confirmRes.isDenied) {
-                    validData.forEach((item, i) => { updates[`InjuryRates/ir_${now}_${i}`] = item; });
-                    await db.ref().update(updates); // Ghi nối
+                    validData.forEach((item, i) => { 
+                        let padIdx = String(i).padStart(4, '0');
+                        updates[`InjuryRates/ir_${now}_${padIdx}`] = item; 
+                    });
+                    await db.ref().update(updates);
                 }
 
-                Swal.fire({icon: 'success', title: 'Hoàn tất!', text: `Đã lưu ${validData.length} mục vào hệ thống.`, customClass: {popup:'rnd'}});
+                Swal.fire({icon: 'success', title: 'Hoàn tất!', text: `Đã lưu ${validData.length} tỷ lệ thương tật.`, customClass: {popup:'rnd'}});
                 this.clearSelection();
 
             } catch (err) {
@@ -14868,7 +14902,7 @@ const InjuryRates = {
 
     downloadTemplate() {
         if (typeof XLSX === 'undefined') {
-            Swal.fire({icon: 'error', title: 'Thiếu thư viện Excel', text: 'Trình duyệt chưa tải xong thư viện. Vui lòng thử lại.', customClass: {popup:'rnd'}});
+            Swal.fire({icon: 'error', title: 'Thiếu thư viện Excel', text: 'Hệ thống chưa tải xong công cụ xuất Excel. Vui lòng chờ vài giây hoặc tải lại trang.', customClass: {popup:'rnd'}});
             return;
         }
 
