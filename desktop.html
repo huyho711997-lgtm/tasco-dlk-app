@@ -14761,92 +14761,92 @@ const InjuryRates = {
         reader.onload = async (evt) => {
             try {
                 const data = new Uint8Array(evt.target.result);
+                // XLSX tự động xử lý tốt cả file .xlsx và .csv (dù phân cách bằng dấu , hay ;)
                 const workbook = XLSX.read(data, {type: 'array'});
                 const firstSheetName = workbook.SheetNames[0];
                 const firstSheet = workbook.Sheets[firstSheetName];
                 
-                let rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: "" });
+                // Lấy dữ liệu theo dạng mảng Object (AI tự map key theo dòng Header đầu tiên)
+                let rows = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
                 let validData = [];
-                let isHeaderFound = false;
                 
+                // Bộ nhớ để ghép tên Cha - Con và xử lý gộp ô (Merge cells)
                 let currentParentName = "";
                 let lastParsedStt = "";
                 let inheritedStt = "";
+                let inheritedType = "thuong_tat";
 
                 const norm = str => String(str||'').toLowerCase().replace(/\s+/g,'').trim();
 
                 rows.forEach((row) => {
-                    const rowString = row.join(' ').toLowerCase();
-                    if (!isHeaderFound && (rowString.includes('stt') || rowString.includes('tên') || rowString.includes('thương tật'))) {
-                        isHeaderFound = true;
-                        return; // Bỏ qua dòng Header
+                    let stt, type, name, min, max;
+                    
+                    // Quét linh hoạt tìm cột dựa vào tên Header (không sợ lệch cột)
+                    Object.keys(row).forEach(key => {
+                        const nk = norm(key);
+                        const val = row[key];
+                        
+                        if (nk === 'stt' || nk.includes('thứtự')) stt = val;
+                        else if (nk.includes('loại') || nk.includes('loai')) type = val;
+                        else if (nk.includes('tên') || nk.includes('thươngtật') || nk.includes('phẫuthuật')) name = val;
+                        else if (nk.includes('thấp') || nk.includes('min')) min = val;
+                        else if (nk.includes('cao') || nk.includes('max')) max = val;
+                    });
+
+                    // Xử lý kế thừa nếu ô bị bỏ trống (do Merge Cell trên Excel)
+                    if (stt !== undefined && stt !== "") inheritedStt = stt;
+                    else stt = inheritedStt;
+
+                    if (type !== undefined && type !== "") {
+                        const tStr = norm(type);
+                        if (tStr.includes('phẫu') || tStr === 'pt') inheritedType = 'phau_thuat';
+                        else if (tStr.includes('thương') || tStr === 'tt') inheritedType = 'thuong_tat';
                     }
 
-                    if (row.length >= 2) {
-                        let stt, type, name, min, max;
+                    // Bắt đầu phân tích logic ghép chuỗi
+                    if (stt && name && norm(stt) !== 'stt') {
+                        let sttStr = String(stt).trim();
+                        let nameStr = String(name).trim();
                         
-                        if (row.length >= 5 && (norm(row[1]).includes('thương') || norm(row[1]).includes('phẫu') || norm(row[1])==='tt' || norm(row[1])==='pt')) {
-                            stt = row[0]; type = row[1]; name = row[2]; min = row[3]; max = row[4];
-                        } else {
-                            stt = row[0]; name = row[1]; min = row[2]; max = row[3];
+                        let minStr = String(min || '').trim();
+                        let maxStr = String(max || '').trim();
+                        let minVal = (minStr !== '' && !/^[-–—]+$/.test(minStr)) ? parseFloat(minStr.replace(/[^\d.-]/g, '')) : null;
+                        let maxVal = (maxStr !== '' && !/^[-–—]+$/.test(maxStr)) ? parseFloat(maxStr.replace(/[^\d.-]/g, '')) : null;
+
+                        let hasDash = /^[-–—+]\s*/.test(nameStr);
+                        let isSubItem = hasDash || sttStr.includes('.');
+                        
+                        // Nếu STT lặp lại y hệt dòng trước thì chắc chắn là mục Con
+                        if (sttStr === lastParsedStt) isSubItem = true;
+
+                        let cleanName = nameStr.replace(/^[-–—+]\s*/, '').trim();
+
+                        if (!isSubItem && sttStr !== lastParsedStt && !hasDash) {
+                            currentParentName = cleanName;
                         }
 
-                        if (stt !== undefined && stt !== "") {
-                            inheritedStt = stt;
-                        } else {
-                            stt = inheritedStt;
-                        }
-
-                        let parsedType = 'thuong_tat';
-                        if (type) {
-                            const tStr = norm(type);
-                            if (tStr.includes('phẫu') || tStr.includes('phau') || tStr === 'pt') parsedType = 'phau_thuat';
-                        }
-
-                        if (stt && name && norm(stt) !== 'stt') {
-                            let sttStr = String(stt).trim();
-                            let nameStr = String(name).trim();
-                            
-                            let minStr = String(min || '').trim();
-                            let maxStr = String(max || '').trim();
-                            let minVal = (minStr !== '' && !/^[-–—]+$/.test(minStr)) ? parseFloat(minStr.replace(/[^\d.-]/g, '')) : null;
-                            let maxVal = (maxStr !== '' && !/^[-–—]+$/.test(maxStr)) ? parseFloat(maxStr.replace(/[^\d.-]/g, '')) : null;
-
-                            let hasDash = /^[-–—+]\s*/.test(nameStr);
-                            let isSubItem = hasDash || sttStr.includes('.');
-                            
-                            if (sttStr === lastParsedStt) {
-                                isSubItem = true;
+                        let finalName = cleanName;
+                        if (isSubItem && currentParentName) {
+                            // Tránh việc ghép lặp chữ (VD: Răng - Răng cửa)
+                            if (!cleanName.toLowerCase().includes(currentParentName.toLowerCase())) {
+                                finalName = currentParentName + ' - ' + cleanName;
                             }
-
-                            let cleanName = nameStr.replace(/^[-–—+]\s*/, '').trim();
-
-                            if (!isSubItem && sttStr !== lastParsedStt && !hasDash) {
-                                currentParentName = cleanName;
-                            }
-
-                            let finalName = cleanName;
-                            if (isSubItem && currentParentName) {
-                                if (!cleanName.toLowerCase().includes(currentParentName.toLowerCase())) {
-                                    finalName = currentParentName + ' - ' + cleanName;
-                                }
-                            }
-
-                            validData.push({
-                                stt: sttStr,
-                                type: parsedType,
-                                name: finalName,
-                                minPct: isNaN(minVal) ? null : minVal,
-                                maxPct: isNaN(maxVal) ? null : maxVal
-                            });
-
-                            lastParsedStt = sttStr;
                         }
+
+                        validData.push({
+                            stt: sttStr,
+                            type: inheritedType,
+                            name: finalName,
+                            minPct: isNaN(minVal) ? null : minVal,
+                            maxPct: isNaN(maxVal) ? null : maxVal
+                        });
+
+                        lastParsedStt = sttStr;
                     }
                 });
 
                 if (!validData.length) {
-                    Swal.fire({icon: 'error', title: 'File trống hoặc sai cấu trúc', text: 'Vui lòng tải File mẫu để xem đúng định dạng.', customClass: {popup:'rnd'}});
+                    Swal.fire({icon: 'error', title: 'File trống hoặc sai cấu trúc', text: 'Không nhận diện được nội dung. Đảm bảo file có các cột chứa chữ: STT, LOẠI, TÊN, THẤP NHẤT, CAO NHẤT.', customClass: {popup:'rnd'}});
                     return;
                 }
 
@@ -14866,7 +14866,6 @@ const InjuryRates = {
                 if (confirmRes.isConfirmed) {
                     validData.forEach((item, i) => { 
                         let padIdx = String(i).padStart(4, '0');
-                        // FIX: ĐƯA LOẠI VÀO TRONG KHOÁ CHÍNH (ID) ĐỂ TRÁNH GHI ĐÈ KHI TRÙNG STT NHƯNG KHÁC LOẠI
                         updates[`ir_${item.type}_${now}_${padIdx}`] = item; 
                     });
                     await db.ref('InjuryRates').set(updates);
