@@ -1876,6 +1876,11 @@ textarea.inp { resize:vertical; }
                     <div><label class="lbl">Ngày ra viện</label><input id="hc-outDate" type="date" class="inp" onchange="HumanClaims.calculateDays()"></div>
                     <div><label class="lbl">Số ngày nằm viện</label><input id="hc-days" type="number" class="inp text-center font-bold" oninput="HumanClaims.calculateTotal()"></div>
                   </div>
+                  
+                  <div class="grid grid-cols-2 gap-3">
+                    <div><label class="lbl">Địa điểm bị tai nạn</label><input id="hc-accLocation" class="inp" placeholder="Nơi xảy ra tai nạn..."></div>
+                    <div><label class="lbl">Nơi điều trị</label><input id="hc-hospitalName" class="inp font-bold text-teal-700" placeholder="Tên bệnh viện / Phòng khám..."></div>
+                  </div>
                   <div><label class="lbl">Nguyên nhân tai nạn</label><textarea id="hc-accCause" rows="2" class="inp resize-none"></textarea></div>
                   
                   <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
@@ -13434,6 +13439,8 @@ const HumanClaims = {
         setVal('hc-limitB', r.limitB ? Number(r.limitB).toLocaleString('vi-VN') : '');
         setVal('hc-limitC', r.limitC ? Number(r.limitC).toLocaleString('vi-VN') : '');
         setVal('hc-limitD', r.limitD ? Number(r.limitD).toLocaleString('vi-VN') : '');
+        setVal('hc-accLocation', r.accLocation);   
+        setVal('hc-hospitalName', r.hospitalName); 
         
         setVal('hc-victimName', r.victimName); setVal('hc-victimAddress', r.victimAddress); setVal('hc-lossType', r.lossType);
         setVal('hc-accDate', r.accDate); setVal('hc-inDate', r.inDate);
@@ -13546,6 +13553,8 @@ const HumanClaims = {
             limitC: getNum('hc-limitC'), limitD: getNum('hc-limitD'),
             victimName: victimName, lossType: getVal('hc-lossType'),
             victimAddress: getVal('hc-victimAddress'),
+            accLocation: getVal('hc-accLocation'),     
+            hospitalName: getVal('hc-hospitalName'),   
             accDate: getVal('hc-accDate'), inDate: getVal('hc-inDate'), outDate: getVal('hc-outDate'), days: getNum('hc-days'),
             accCause: getVal('hc-accCause'), injuryDesc: getVal('hc-injuryDesc'),
             injuryCode: getVal('hc-injuryCode'), injuryRange: getVal('hc-injuryRange'), injuryRealPct: getNum('hc-injuryRealPct'),
@@ -13956,24 +13965,14 @@ const HumanClaims = {
 
     async processMedicalOcr(file) {
         Swal.fire({
-            title: '<span class="text-base font-black text-slate-800">Hệ thống đang xử lý...</span>',
-            html: `
-                <div class="flex flex-col items-center py-4">
-                    <div class="relative w-48 h-28 bg-slate-100 border-2 border-slate-200 rounded-xl overflow-hidden mb-5 flex items-center justify-center">
-                        <svg class="w-16 h-16 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
-                        <div class="absolute top-0 left-0 w-full h-[3px] bg-teal-500 shadow-[0_0_15px_4px_rgba(20,184,166,0.7)] animate-[scan_1.5s_ease-in-out_infinite]"></div>
-                    </div>
-                    <p class="text-[13px] text-slate-500 font-bold animate-pulse" id="hc-ocr-status-text">Đang đọc thông tin y khoa và tính toán viện phí...</p>
-                </div>
-            `,
+            title: 'AI đang phân tích...',
+            html: '<p class="text-sm text-slate-500 mt-2">Đang đọc thông tin bệnh viện, chẩn đoán, ngày nhập/xuất viện...</p><p id="med-ocr-status" class="text-xs text-blue-600 mt-2 font-bold animate-pulse">Đang tối ưu hóa hình ảnh...</p>',
             allowOutsideClick: false,
-            showConfirmButton: false,
+            didOpen: () => Swal.showLoading(),
             customClass: { popup: 'rnd' }
         });
 
-        // 1. ÉP XUNG NÉN ẢNH: Giảm Max Width xuống 1000px, giảm chất lượng xuống 70%
-        // Để dung lượng ảnh siêu nhẹ, model 2.5-flash sẽ không bị nghẹn token
-        const compressImg = (f, maxW = 1000) => new Promise((resolve, reject) => {
+        const compressImg = (f, maxW = 1200) => new Promise((resolve, reject) => {
             if (f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')) {
                 reject(new Error('Hệ thống hiện tại chỉ hỗ trợ AI quét định dạng ảnh (JPG/PNG), chưa hỗ trợ PDF cho phần y tế.'));
                 return;
@@ -13988,8 +13987,7 @@ const HumanClaims = {
                     canvas.width = w; canvas.height = h;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, w, h);
-                    // Nén chất lượng 0.7 (70%) thay vì 0.8 để tối ưu tuyệt đối
-                    resolve(canvas.toDataURL('image/jpeg', 0.7).split(',')[1]);
+                    resolve(canvas.toDataURL('image/jpeg', 0.8).split(',')[1]);
                 };
                 img.onerror = () => reject(new Error('Không thể đọc file ảnh này.'));
                 img.src = e.target.result;
@@ -14002,33 +14000,31 @@ const HumanClaims = {
             const b64 = await compressImg(file);
             const statusText = document.getElementById('med-ocr-status');
 
-            // Giữ Prompt ngắn gọn, súc tích nhất có thể cho 2.5-flash
+            // CẬP NHẬT PROMPT: Bổ sung noiDieuTri
             const PROMPT = `Đây là chứng từ y tế tại Việt Nam.
-            Trích xuất thông tin và trả về CHỈ JSON (không markdown):
-            {
-                "tenNguoiBenh": "Tên bệnh nhân",
-                "diaChiNguoiBenh": "Địa chỉ",
-                "ngayNhapVien": "YYYY-MM-DD",
-                "ngayXuatVien": "YYYY-MM-DD",
-                "chanDoan": "Chẩn đoán ngắn gọn",
-                "tongTien": "Tổng viện phí (số nguyên)"
-            }
-            Nếu không có thông tin, để chuỗi rỗng "".`;
+Trích xuất thông tin và trả về CHỈ JSON (không markdown):
+{
+    "noiDieuTri": "Tên bệnh viện hoặc cơ sở y tế ban hành giấy này",
+    "tenNguoiBenh": "Tên bệnh nhân",
+    "diaChiNguoiBenh": "Địa chỉ",
+    "ngayNhapVien": "YYYY-MM-DD",
+    "ngayXuatVien": "YYYY-MM-DD",
+    "chanDoan": "Chẩn đoán ngắn gọn",
+    "tongTien": "Tổng viện phí (số nguyên)"
+}
+Nếu không có thông tin, để chuỗi rỗng "".`;
 
             let dataResponse = null;
             const maxRetries = GEM_KEYS.length * 2; 
-            let baseDelay = 2000; // Khởi tạo độ trễ 2 giây
 
-            // 2. VÒNG LẶP RETRY VỚI EXPONENTIAL BACKOFF (Chờ tăng dần)
             for (let attempt = 0; attempt < maxRetries; attempt++) {
                 const key = nextGemKey();
-                if (statusText) statusText.textContent = `Đang xử lý dữ liệu (Thử lần ${attempt + 1}/${maxRetries})...`;
+                if (statusText) statusText.textContent = `Đang đọc tài liệu (Thử lần ${attempt + 1}/${maxRetries})...`;
                 
                 try {
                     const controller = new AbortController();
                     const timeoutId = setTimeout(() => controller.abort(), 60000);
 
-                    // SỬ DỤNG TRỞ LẠI GEM_MODEL 2.5 CỦA ANH
                     const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent?key=' + key, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -14042,28 +14038,23 @@ const HumanClaims = {
                     clearTimeout(timeoutId);
                     dataResponse = await res.json();
                     
-                    // Nếu gọi API thành công -> Thoát vòng lặp ngay
                     if (res.ok && !dataResponse.error) break;
 
-                    console.warn(`[Lần ${attempt + 1}] Máy chủ báo bận:`, dataResponse.error);
+                    console.warn(`[Lần ${attempt + 1}] Lỗi từ Google API:`, dataResponse.error);
                     
-                    // Nếu lỗi 503 High Demand -> Giãn thời gian chờ ra xa hơn để chắc chắn lọt qua
-                    if (statusText) statusText.textContent = `Server Google đang kẹt, chờ ${baseDelay/1000}s để thử lại luồng khác...`;
-                    await new Promise(r => setTimeout(r, baseDelay));
-                    baseDelay = Math.min(baseDelay * 1.5, 8000); // Tăng thời gian chờ lên gấp rưỡi (tối đa 8s)
+                    if (statusText) statusText.textContent = `Máy chủ bận, đang chuyển đổi luồng...`;
+                    await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
 
                 } catch (err) {
-                    console.error(`[Lần ${attempt + 1}] Lỗi mạng/Timeout:`, err);
+                    console.error(`[Lần ${attempt + 1}] Lỗi Mạng/Timeout:`, err);
                     if (attempt === maxRetries - 1) throw err;
-                    
-                    if (statusText) statusText.textContent = `Kết nối chập chờn, đang khôi phục...`;
-                    await new Promise(r => setTimeout(r, baseDelay));
-                    baseDelay = Math.min(baseDelay * 1.5, 8000);
+                    if (statusText) statusText.textContent = `Đang kết nối lại...`;
+                    await new Promise(r => setTimeout(r, 2000));
                 }
             }
 
             if (!dataResponse || dataResponse.error) {
-                throw new Error(dataResponse?.error?.message || 'Google AI 2.5 đang bị quá tải toàn cầu, vui lòng thử lại sau ít phút.');
+                throw new Error(dataResponse?.error?.message || 'Google AI đang quá tải, vui lòng thử lại sau vài phút.');
             }
 
             const raw = (dataResponse.candidates && dataResponse.candidates[0].content.parts[0].text) || '';
@@ -14074,20 +14065,20 @@ const HumanClaims = {
                 if (m) try { parsed = JSON.parse(m[0]); } catch (_) {}
             }
 
-            if (!parsed) throw new Error('Không bóc tách được dữ liệu. Vui lòng chụp rõ chứng từ hơn.');
+            if (!parsed) throw new Error('Không bóc tách được dữ liệu từ ảnh này.');
 
             Swal.close();
             this.showMedicalOcrResult(parsed);
 
         } catch (e) {
-            Swal.fire({ icon: 'error', title: 'Lỗi kết nối AI', text: e.message, customClass: { popup: 'rnd' } });
+            Swal.fire({ icon: 'error', title: 'Lỗi OCR Y tế', text: e.message, customClass: { popup: 'rnd' } });
         }
     },
 
     showMedicalOcrResult(aiData) {
-        // Lấy dữ liệu đang có trên form
         const curName = document.getElementById('hc-victimName').value;
         const curAddress = document.getElementById('hc-victimAddress').value;
+        const curHospital = document.getElementById('hc-hospitalName').value; // <-- Lấy BV hiện tại
         const curInDate = document.getElementById('hc-inDate').value;
         const curOutDate = document.getElementById('hc-outDate').value;
         const curDesc = document.getElementById('hc-injuryDesc').value;
@@ -14107,6 +14098,12 @@ const HumanClaims = {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
+                            <tr>
+                                <td class="px-3 py-2 font-semibold text-slate-700">Nơi điều trị<br><span class="text-[10px] font-normal text-slate-400">Đang có: ${curHospital || 'Trống'}</span></td>
+                                <td class="px-3 py-2">
+                                    <input type="text" id="ai-med-hospitalName" class="w-full bg-white border border-slate-200 rounded p-1.5 outline-none focus:border-teal-500 font-bold text-teal-700" value="${aiData.noiDieuTri || ''}">
+                                </td>
+                            </tr>
                             <tr>
                                 <td class="px-3 py-2 font-semibold text-slate-700">Tên người bệnh<br><span class="text-[10px] font-normal text-slate-400">Đang có: ${curName || 'Trống'}</span></td>
                                 <td class="px-3 py-2">
@@ -14160,6 +14157,7 @@ const HumanClaims = {
             customClass: { popup: 'rnd' },
             preConfirm: () => {
                 return {
+                    hospitalName: document.getElementById('ai-med-hospitalName').value.trim(),
                     victimName: document.getElementById('ai-med-victimName').value.trim(),
                     victimAddress: document.getElementById('ai-med-victimAddress').value.trim(),
                     inDate: document.getElementById('ai-med-inDate').value,
@@ -14175,6 +14173,7 @@ const HumanClaims = {
     },
 
     applyMedicalOcr(data) {
+        if (data.hospitalName) document.getElementById('hc-hospitalName').value = data.hospitalName;
         if (data.victimName) document.getElementById('hc-victimName').value = data.victimName.toUpperCase();
         if (data.victimAddress) document.getElementById('hc-victimAddress').value = data.victimAddress;
         if (data.inDate) document.getElementById('hc-inDate').value = data.inDate;
