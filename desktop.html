@@ -13752,6 +13752,29 @@ const HumanClaims = {
         }
     },
 
+    previewMedicalFile(input) {
+        const file = input.files[0];
+        const zone = document.getElementById('hc-med-zone');
+        const imgEl = document.getElementById('hc-med-preview');
+        const placeholder = document.getElementById('hc-med-placeholder');
+        const overlay = document.getElementById('hc-med-overlay');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imgEl.src = e.target.result;
+                imgEl.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                overlay.classList.remove('hidden');
+                
+                // Đổi kiểu viền sang nét liền khi đã có ảnh
+                zone.classList.add('border-solid', 'border-teal-500', 'bg-white');
+                zone.classList.remove('border-dashed', 'bg-teal-50/30');
+            }
+            reader.readAsDataURL(file);
+        }
+    },
+
     async processOcrCccd(frontFile, backFile) {
         // Hiệu ứng Scanning chuyên nghiệp
         const animHtml = `
@@ -13859,20 +13882,32 @@ const HumanClaims = {
     openMedicalOcrModal() {
         Swal.fire({
             title: '<span class="text-lg font-black text-teal-800 flex items-center gap-2"><svg class="w-5 h-5 text-teal-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Quét chứng từ Y tế</span>',
+            width: 800, // Nới rộng form lên 800px
             html: `
                 <div class="text-left font-sans mt-2 mb-2">
-                    <p class="text-[13px] text-slate-500 mb-4 text-center">Tải lên Giấy ra viện, Tóm tắt bệnh án hoặc Bảng kê viện phí để AI tự động trích xuất ngày nằm viện và chẩn đoán.</p>
-                    <label id="hc-med-zone" class="relative w-full h-32 border-2 border-dashed border-teal-300 rounded-xl flex flex-col items-center justify-center cursor-pointer bg-teal-50/30 hover:bg-teal-50 transition-colors">
-                        <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center mb-2">
-                            <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    <p class="text-[13px] text-slate-500 mb-4 text-center px-4">Tải lên Giấy ra viện, Tóm tắt bệnh án hoặc Bảng kê viện phí để AI tự động trích xuất dữ liệu.</p>
+                    
+                    <label id="hc-med-zone" class="relative w-full border-2 border-dashed border-teal-300 rounded-xl flex flex-col items-center justify-center cursor-pointer bg-teal-50/30 hover:bg-teal-50 transition-all min-h-[200px] overflow-hidden shadow-sm">
+                        <div id="hc-med-placeholder" class="flex flex-col items-center justify-center py-10 transition-transform duration-300 group-hover:scale-110">
+                            <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-3 shadow-sm">
+                                <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            </div>
+                            <span class="text-[13px] font-bold text-slate-500">Nhấn để chọn ảnh hoặc kéo thả vào đây</span>
+                            <span class="text-[11px] text-slate-400 mt-1">(Hỗ trợ JPG, PNG, WEBP)</span>
                         </div>
-                        <span id="hc-med-label" class="text-xs font-bold text-slate-500">Nhấn để chọn ảnh (JPG/PNG)</span>
-                        <input type="file" id="hc-med-file" accept="image/*" class="hidden" onchange="document.getElementById('hc-med-label').textContent = this.files[0] ? this.files[0].name : 'Nhấn để chọn ảnh'">
+
+                        <img id="hc-med-preview" class="hidden w-full max-h-[600px] object-contain p-2 z-10" />
+
+                        <div id="hc-med-overlay" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity hidden z-20">
+                            <span class="px-4 py-2 bg-white/20 backdrop-blur text-white text-xs font-bold rounded-lg border border-white/30 shadow-lg">Chọn ảnh khác</span>
+                        </div>
+
+                        <input type="file" id="hc-med-file" accept="image/*" class="hidden" onchange="HumanClaims.previewMedicalFile(this)">
                     </label>
                 </div>
             `,
             showCancelButton: true,
-            confirmButtonText: 'Bắt đầu quét',
+            confirmButtonText: 'Bắt đầu quét AI',
             cancelButtonText: 'Hủy',
             confirmButtonColor: '#0d9488',
             customClass: { popup: 'rnd' },
@@ -13893,10 +13928,18 @@ const HumanClaims = {
 
     async processMedicalOcr(file) {
         Swal.fire({
-            title: 'AI 2.5 đang phân tích...',
-            html: '<p class="text-sm text-slate-500 mt-2">Đang đọc thông tin bệnh nhân, địa chỉ, chẩn đoán, ngày giờ...</p><p id="med-ocr-status" class="text-xs text-blue-600 mt-2 font-bold animate-pulse">Đang tối ưu hóa hình ảnh ở mức tối đa...</p>',
+            title: '<span class="text-base font-black text-slate-800">Hệ thống đang xử lý...</span>',
+            html: `
+                <div class="flex flex-col items-center py-4">
+                    <div class="relative w-48 h-28 bg-slate-100 border-2 border-slate-200 rounded-xl overflow-hidden mb-5 flex items-center justify-center">
+                        <svg class="w-16 h-16 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                        <div class="absolute top-0 left-0 w-full h-[3px] bg-teal-500 shadow-[0_0_15px_4px_rgba(20,184,166,0.7)] animate-[scan_1.5s_ease-in-out_infinite]"></div>
+                    </div>
+                    <p class="text-[13px] text-slate-500 font-bold animate-pulse" id="hc-ocr-status-text">Đang đọc thông tin y khoa và tính toán viện phí...</p>
+                </div>
+            `,
             allowOutsideClick: false,
-            didOpen: () => Swal.showLoading(),
+            showConfirmButton: false,
             customClass: { popup: 'rnd' }
         });
 
