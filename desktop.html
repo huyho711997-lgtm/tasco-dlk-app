@@ -13892,12 +13892,12 @@ const HumanClaims = {
 
             for (let attempt = 0; attempt < maxRetries; attempt++) {
                 const key = nextGemKey();
-                if (statusEl && attempt > 0) statusEl.textContent = `Máy chủ bận, đang chuyển đổi API Key (Lần thử ${attempt + 1}/${maxRetries})...`;
+                if (statusEl && attempt > 0) statusEl.textContent = `Máy chủ bận, đang thử lại (Lần ${attempt + 1}/${maxRetries})...`;
 
                 try {
-                    // Thêm AbortController để tự ngắt nếu AI treo quá 15 giây
+                    // Tăng thời gian chờ lên 45 giây cho tác vụ đọc dữ liệu dài
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 15000);
+                    const timeoutId = setTimeout(() => controller.abort(), 45000);
 
                     const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent?key=' + key, {
                         method: 'POST',
@@ -13941,8 +13941,10 @@ const HumanClaims = {
                         throw new Error('Máy chủ Google AI hiện đang quá tải. Vui lòng thử lại sau ít phút.');
                     }
                     
-                    // Nghỉ 1-2 giây trước khi gọi lại để tránh spam
-                    await new Promise(r => setTimeout(r, 1500)); 
+                    // Thời gian nghỉ tăng dần để tránh bị Google block IP (2s, 4s, 6s...)
+                    const delay = Math.min(2000 * (attempt + 1), 8000);
+                    if (statusEl) statusEl.textContent = `Đang đợi ${delay/1000}s để tránh nghẽn mạng...`;
+                    await new Promise(r => setTimeout(r, delay)); 
                 }
             }
 
