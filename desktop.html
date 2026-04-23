@@ -13838,213 +13838,222 @@ const HumanClaims = {
         console.log("Searching contract:", val);
     },
 
+    // Cache bảng tỷ lệ — đặt ngoài object/class, dùng chung
+    const _ratesCache = {};
+
     async suggestInjury() {
         const desc = document.getElementById('hc-injuryDesc').value.trim();
         const lossType = document.getElementById('hc-lossType').value;
-        
-        if (!desc) { 
-            Toast.fire({icon:'warning', title:'Hãy nhập mô tả hậu quả / chẩn đoán trước!'}); 
-            return; 
+
+        if (!desc) {
+            Toast.fire({ icon: 'warning', title: 'Hãy nhập mô tả hậu quả / chẩn đoán trước!' });
+            return;
         }
 
         Swal.fire({
             title: 'AI đang tra cứu...',
-            html: '<p class="text-sm text-slate-500 mt-2">Đang đối chiếu chẩn đoán với bảng tỷ lệ quy định...</p><p id="ai-retry-status" class="text-[10px] text-violet-600 font-bold mt-1"></p>',
+            html: `<p class="text-sm text-slate-500 mt-2">Đang đối chiếu chẩn đoán với bảng tỷ lệ quy định...</p>
+                  <p id="ai-retry-status" class="text-[10px] text-violet-600 font-bold mt-1"></p>`,
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading(),
             customClass: { popup: 'rnd' }
         });
 
         try {
-            // 1. Tải Bảng tỷ lệ từ Firebase
+            // ─── 1. Firebase: Query trực tiếp theo type, có cache ──────────────────
             const typeToFetch = lossType === 'Phẫu thuật' ? 'phau_thuat' : 'thuong_tat';
-            const snap = await db.ref('InjuryRates').once('value');
-            const rawRates = snap.val() || {};
-            
-            const ratesData = Object.keys(rawRates)
-                .map(k => rawRates[k])
-                .filter(r => r.type === typeToFetch)
-                .map(r => ({ stt: r.stt, name: r.name, min: r.minPct, max: r.maxPct }));
+
+            if (!_ratesCache[typeToFetch]) {
+                // orderByChild + equalTo → Firebase chỉ trả đúng records cần thiết
+                const snap = await db.ref('InjuryRates')
+                    .orderByChild('type')
+                    .equalTo(typeToFetch)
+                    .once('value');
+
+                const raw = snap.val() || {};
+                _ratesCache[typeToFetch] = Object.values(raw)
+                    .map(r => ({ stt: r.stt, name: r.name, min: r.minPct, max: r.maxPct }));
+            }
+
+            const ratesData = _ratesCache[typeToFetch];
 
             if (!ratesData.length) {
                 throw new Error(`Bảng tỷ lệ ${lossType} trên hệ thống đang trống!`);
             }
 
-            // 2. Prompt yêu cầu trả về Mảng danh sách
-            const PROMPT = `Bạn là chuyên gia y tế và bảo hiểm.
-            CHẨN ĐOÁN CỦA BỆNH NHÂN: "${desc}"
-            BẢNG TỶ LỆ (${lossType}): ${JSON.stringify(ratesData)}
+            // ─── 2. Prompt gọn hơn: chỉ gửi trường name + stt để giảm token ───────
+            // min/max sẽ được lookup lại sau khi AI trả về stt
+            const ratesForPrompt = ratesData.map(r => ({ stt: r.stt, name: r.name }));
 
-            Hãy tìm TỐI ĐA 10 mục trong bảng khớp nhất hoặc có liên quan nhất đến chẩn đoán trên.
-            - Sắp xếp theo mức độ phù hợp giảm dần (Mục khớp nhất đứng đầu).
-            - Trả về CHỈ MẢNG JSON (không markdown, không giải thích ngoài JSON):
-            [
-              {
-                "stt": "số thứ tự",
-                "name": "tên mục",
-                "min": "số tỷ lệ min (hoặc null)",
-                "max": "số tỷ lệ max (hoặc null)",
-                "reason": "Lý do ngắn gọn (1 câu) vì sao chọn mục này"
-              }
-            ]
-            Nếu không có mục nào liên quan, trả về mảng rỗng [].`;
+            const PROMPT = `Bạn là chuyên gia y tế và bảo hiểm. Trả về CHỈ JSON array, không markdown, không giải thích.
+    CHẨN ĐOÁN: "${desc}"
+    BẢNG TỶ LỆ (${lossType}): ${JSON.stringify(ratesForPrompt)}
+    Tìm tối đa 10 mục khớp nhất, sắp xếp giảm dần theo độ phù hợp.
+    Format: [{"stt":"...","name":"...","reason":"1 câu ngắn"}]
+    Nếu không có mục phù hợp, trả về [].`;
 
-            // 3. Gọi Gemini API (CÓ CƠ CHẾ RETRY THÔNG MINH)
-            let parsedArray = null;
-            const maxRetries = GEM_KEYS.length * 2; // Thử gấp đôi số lượng key hiện có
-            const statusEl = document.getElementById('ai-retry-status');
+            // ─── 3. Gọi Gemini với exponential backoff thực sự ────────────────────
+            const parsedArray = await this._callGeminiWithRetry(PROMPT);
 
-            for (let attempt = 0; attempt < maxRetries; attempt++) {
-                const key = nextGemKey();
-                if (statusEl && attempt > 0) statusEl.textContent = `Máy chủ bận, đang thử lại (Lần ${attempt + 1}/${maxRetries})...`;
-
-                try {
-                    // Tăng thời gian chờ lên 45 giây cho tác vụ đọc dữ liệu dài
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 45000);
-
-                    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent?key=' + key, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        signal: controller.signal,
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: PROMPT }] }],
-                            generationConfig: { temperature: 0.1 }
-                        })
-                    });
-                    
-                    clearTimeout(timeoutId);
-
-                    const data = await res.json();
-
-                    // Xử lý lỗi 429 (Quá tải) hoặc 503 (Server bận)
-                    if (!res.ok) {
-                        if (res.status === 429 || res.status === 503 || (data.error && data.error.message.includes('high demand'))) {
-                            throw new Error('Overloaded'); // Bắn lỗi ra để bắt catch bên dưới và Retry
-                        }
-                        throw new Error(data.error?.message || 'Lỗi API không xác định');
-                    }
-
-                    const raw = (data.candidates && data.candidates[0].content.parts[0].text) || '';
-                    
-                    // Parse JSON Array
-                    try { 
-                        parsedArray = JSON.parse(raw.replace(/```json|```/gi, '').trim()); 
-                    } 
-                    catch (_) {
-                        const m = raw.match(/\[[\s\S]*\]/);
-                        if (m) try { parsedArray = JSON.parse(m[0]); } catch (_) {}
-                    }
-                    
-                    if (Array.isArray(parsedArray)) break; // Nếu parse thành công -> Thoát vòng lặp
-
-                } catch (err) {
-                    console.warn(`[OCR Thương Tật - Lần ${attempt + 1}] Lỗi:`, err.message);
-                    
-                    if (attempt === maxRetries - 1) {
-                        throw new Error('Máy chủ Google AI hiện đang quá tải. Vui lòng thử lại sau ít phút.');
-                    }
-                    
-                    // Thời gian nghỉ tăng dần để tránh bị Google block IP (2s, 4s, 6s...)
-                    const delay = Math.min(2000 * (attempt + 1), 8000);
-                    if (statusEl) statusEl.textContent = `Đang đợi ${delay/1000}s để tránh nghẽn mạng...`;
-                    await new Promise(r => setTimeout(r, delay)); 
-                }
-            }
-
-            if (!parsedArray) throw new Error('AI không thể trả lời định dạng JSON lúc này.');
+            // ─── 4. Enrich kết quả: gắn lại min/max từ cache local (không gọi thêm API) ──
+            const sttMap = Object.fromEntries(ratesData.map(r => [String(r.stt), r]));
+            const enriched = parsedArray.map(item => ({
+                ...item,
+                ...(sttMap[String(item.stt)] || {})
+            }));
 
             Swal.close();
 
-            // 4. Xử lý hiển thị Form nếu mảng rỗng
-            if (parsedArray.length === 0) {
+            if (enriched.length === 0) {
                 Swal.fire({
-                    icon: 'info', 
-                    title: 'Không tìm thấy!', 
-                    text: `AI không tìm thấy mục ${lossType} nào phù hợp với chẩn đoán trên. Anh hãy thử ghi rõ ràng hơn nhé.`,
+                    icon: 'info',
+                    title: 'Không tìm thấy!',
+                    text: `AI không tìm thấy mục ${lossType} nào phù hợp. Hãy thử mô tả rõ hơn.`,
                     customClass: { popup: 'rnd' }
                 });
                 return;
             }
 
-            // 5. Tạo HTML cho danh sách lựa chọn
-            let listHtml = '<div class="space-y-3 mt-4 text-left max-h-[50vh] overflow-y-auto px-1 custom-scrollbar">';
-            
-            parsedArray.forEach((item, index) => {
-                let rangeStr = '';
-                if (item.min != null && item.max != null) rangeStr = `${item.min}% - ${item.max}%`;
-                else if (item.min != null) rangeStr = `${item.min}%`;
-                else if (item.max != null) rangeStr = `${item.max}%`;
-                else rangeStr = '--%';
-
-                const isFirst = index === 0;
-                listHtml += `
-                    <label class="flex items-start gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all hover:bg-slate-50 ${isFirst ? 'border-violet-500 bg-violet-50/30' : 'border-slate-200 bg-white'}" onclick="document.querySelectorAll('label').forEach(l=>l.classList.remove('border-violet-500','bg-violet-50/30')); this.classList.add('border-violet-500','bg-violet-50/30');">
-                        <input type="radio" name="ai_suggest_radio" value="${index}" ${isFirst ? 'checked' : ''} class="mt-1.5 w-4 h-4 accent-violet-600 cursor-pointer">
-                        <div class="flex-1">
-                            <p class="font-bold text-slate-800 text-[13px] leading-snug">Mục ${item.stt}: ${item.name}</p>
-                            <div class="flex items-center gap-2 mt-1.5">
-                                <span class="px-2 py-0.5 bg-rose-100 text-rose-700 text-[11px] font-black rounded-md border border-rose-200">Tỷ lệ: ${rangeStr}</span>
-                            </div>
-                            <p class="text-[11px] text-slate-500 mt-2 bg-slate-100 p-2 rounded-lg border border-slate-200 leading-relaxed"><span class="font-bold text-slate-600">💡 Lý do:</span> ${item.reason || 'Khớp với mô tả'}</p>
-                        </div>
-                    </label>
-                `;
-            });
-            listHtml += '</div>';
-
-            // 6. Hiển thị Popup cho người dùng chọn
-            Swal.fire({
-                title: '<span class="text-base font-black text-violet-800 flex items-center justify-center gap-2"><svg class="w-5 h-5 text-violet-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> AI Gợi ý Thương tật</span>',
-                html: '<p class="text-[12px] text-slate-500 mt-1">Vui lòng chọn một mục chính xác nhất để áp dụng vào hồ sơ:</p>' + listHtml,
-                width: 600,
-                showCancelButton: true,
-                confirmButtonText: 'Áp dụng',
-                cancelButtonText: 'Hủy',
-                confirmButtonColor: '#7c3aed',
-                customClass: { popup: 'rnd' },
-                preConfirm: () => {
-                    const selectedIndex = document.querySelector('input[name="ai_suggest_radio"]:checked').value;
-                    return parsedArray[selectedIndex];
-                }
-            }).then((res) => {
-                if (res.isConfirmed) {
-                    const selectedItem = res.value;
-                    
-                    const codeInp = document.getElementById('hc-injuryCode');
-                    const rangeInp = document.getElementById('hc-injuryRange');
-                    const pctInp = document.getElementById('hc-injuryRealPct');
-
-                    if (codeInp) codeInp.value = `Mục ${selectedItem.stt}: ${selectedItem.name}`;
-                    
-                    let rangeText = '';
-                    let defaultVal = 0;
-
-                    if (selectedItem.min != null && selectedItem.max != null) {
-                        rangeText = `${selectedItem.min} - ${selectedItem.max}%`;
-                        defaultVal = selectedItem.min; 
-                    } else if (selectedItem.min != null) {
-                        rangeText = `${selectedItem.min}%`;
-                        defaultVal = selectedItem.min;
-                    } else if (selectedItem.max != null) {
-                        rangeText = `${selectedItem.max}%`;
-                        defaultVal = selectedItem.max;
-                    } else {
-                        rangeText = '-- %';
-                    }
-
-                    if (rangeInp) rangeInp.value = rangeText;
-                    if (pctInp) pctInp.value = defaultVal;
-
-                    this.calculateTotal(); 
-                    Toast.fire({icon: 'success', title: 'Đã điền thành công!'});
-                }
-            });
+            this._showSuggestPopup(enriched, lossType);
 
         } catch (error) {
             console.error(error);
-            Swal.fire({icon: 'error', title: 'Hệ thống bận', text: error.message, customClass: { popup: 'rnd' }});
+            Swal.fire({ icon: 'error', title: 'Hệ thống bận', text: error.message, customClass: { popup: 'rnd' } });
         }
+    },
+
+    // ─── Helper: Gemini retry với exponential backoff ─────────────────────────────
+    async _callGeminiWithRetry(prompt) {
+        const maxRetries = GEM_KEYS.length * 2;
+        const statusEl = () => document.getElementById('ai-retry-status');
+
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
+            const key = nextGemKey();
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 45000);
+
+                const res = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/${GEM_MODEL}:generateContent?key=${key}`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        signal: controller.signal,
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }] }],
+                            generationConfig: { temperature: 0.1 }
+                        })
+                    }
+                );
+                clearTimeout(timeoutId);
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    // 429 / 503 / high demand → retry
+                    if ([429, 503].includes(res.status) || data.error?.message?.includes('high demand')) {
+                        throw new Error('Overloaded');
+                    }
+                    throw new Error(data.error?.message || 'Lỗi API không xác định');
+                }
+
+                const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                const parsed = this._parseJsonArray(raw);
+                if (Array.isArray(parsed)) return parsed;
+
+                // JSON không parse được → thử lại
+                throw new Error('InvalidJSON');
+
+            } catch (err) {
+                console.warn(`[Gemini attempt ${attempt + 1}/${maxRetries}]`, err.message);
+
+                if (attempt === maxRetries - 1) {
+                    throw new Error('Máy chủ Google AI hiện đang quá tải. Vui lòng thử lại sau ít phút.');
+                }
+
+                // Exponential backoff: 1s, 2s, 4s, 8s (tối đa 8s)
+                const delay = Math.min(1000 * Math.pow(2, attempt), 8000);
+                const el = statusEl();
+                if (el) el.textContent = `Thử lại lần ${attempt + 2}/${maxRetries} sau ${delay / 1000}s...`;
+                await new Promise(r => setTimeout(r, delay));
+            }
+        }
+    },
+
+    // ─── Helper: Parse JSON an toàn ───────────────────────────────────────────────
+    _parseJsonArray(raw) {
+        const cleaned = raw.replace(/```json|```/gi, '').trim();
+        try {
+            return JSON.parse(cleaned);
+        } catch (_) {
+            const match = cleaned.match(/\[[\s\S]*]/);
+            if (match) {
+                try { return JSON.parse(match[0]); } catch (_) {}
+            }
+            return null;
+        }
+    },
+
+    // ─── Helper: Render popup chọn kết quả ───────────────────────────────────────
+    _showSuggestPopup(items, lossType) {
+        const listHtml = `
+            <div class="space-y-3 mt-4 text-left max-h-[50vh] overflow-y-auto px-1 custom-scrollbar">
+                ${items.map((item, index) => {
+                    const rangeStr = item.min != null && item.max != null ? `${item.min}% - ${item.max}%`
+                        : item.min != null ? `${item.min}%`
+                        : item.max != null ? `${item.max}%`
+                        : '--%';
+                    return `
+                        <label class="flex items-start gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all hover:bg-slate-50 ${index === 0 ? 'border-violet-500 bg-violet-50/30' : 'border-slate-200 bg-white'}"
+                              onclick="this.closest('.space-y-3').querySelectorAll('label').forEach(l=>l.classList.remove('border-violet-500','bg-violet-50/30')); this.classList.add('border-violet-500','bg-violet-50/30');">
+                            <input type="radio" name="ai_suggest_radio" value="${index}" ${index === 0 ? 'checked' : ''} class="mt-1.5 w-4 h-4 accent-violet-600 cursor-pointer">
+                            <div class="flex-1">
+                                <p class="font-bold text-slate-800 text-[13px] leading-snug">Mục ${item.stt}: ${item.name}</p>
+                                <div class="flex items-center gap-2 mt-1.5">
+                                    <span class="px-2 py-0.5 bg-rose-100 text-rose-700 text-[11px] font-black rounded-md border border-rose-200">Tỷ lệ: ${rangeStr}</span>
+                                </div>
+                                <p class="text-[11px] text-slate-500 mt-2 bg-slate-100 p-2 rounded-lg border border-slate-200 leading-relaxed">
+                                    <span class="font-bold text-slate-600">💡 Lý do:</span> ${item.reason || 'Khớp với mô tả'}
+                                </p>
+                            </div>
+                        </label>`;
+                }).join('')}
+            </div>`;
+
+        Swal.fire({
+            title: `<span class="text-base font-black text-violet-800 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5 text-violet-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                        </svg> AI Gợi ý Thương tật
+                    </span>`,
+            html: `<p class="text-[12px] text-slate-500 mt-1">Chọn mục chính xác nhất để áp dụng vào hồ sơ:</p>${listHtml}`,
+            width: 600,
+            showCancelButton: true,
+            confirmButtonText: 'Áp dụng',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#7c3aed',
+            customClass: { popup: 'rnd' },
+            preConfirm: () => {
+                return items[document.querySelector('input[name="ai_suggest_radio"]:checked').value];
+            }
+        }).then(res => {
+            if (!res.isConfirmed) return;
+            const s = res.value;
+
+            const rangeText = s.min != null && s.max != null ? `${s.min} - ${s.max}%`
+                : s.min != null ? `${s.min}%`
+                : s.max != null ? `${s.max}%`
+                : '-- %';
+
+            const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+            set('hc-injuryCode', `Mục ${s.stt}: ${s.name}`);
+            set('hc-injuryRange', rangeText);
+            set('hc-injuryRealPct', s.min ?? s.max ?? 0);
+
+            this.calculateTotal();
+            Toast.fire({ icon: 'success', title: 'Đã điền thành công!' });
+        });
     },
 
     openOcrModal() {
