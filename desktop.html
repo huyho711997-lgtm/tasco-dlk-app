@@ -1792,9 +1792,10 @@ textarea.inp { resize:vertical; }
             <div id="hc-m-ai-warning" class="hidden cursor-pointer px-3 py-1.5 bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-[11px] font-bold flex items-center gap-1.5 animate-pulse">
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Cảnh báo Hợp đồng!
             </div>
-
-            <button onclick="HumanClaims.openMedicalOcrModal()" class="px-4 py-2 bg-teal-50 text-teal-700 border border-teal-200 rounded-xl text-xs font-bold hover:bg-teal-100 flex items-center gap-2 transition-colors" id="btn-hc-ocr-medical">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> AI Quét Y Tế
+            
+            <button type="button" onclick="HumanClaims.openSuperOcrModal()" class="px-4 py-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl text-xs font-bold cursor-pointer hover:shadow-lg hover:shadow-purple-500/30 transition-all flex items-center gap-2">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/></svg> 
+              AI Quét Toàn Bộ
             </button>
             <button onclick="HumanClaims.generateEmail()" class="px-4 py-2 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-xl text-xs font-bold hover:bg-indigo-100 flex items-center gap-2 transition-colors hidden" id="btn-hc-email">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email xin số
@@ -14636,7 +14637,349 @@ Nếu không có thông tin, để chuỗi rỗng "".`;
             this.renderImages(currentImgs);
             Toast.fire({icon: 'success', title: 'Đã xóa ảnh!'});
         });
+    },
+    // ==========================================
+    // CHỨC NĂNG MỚI: SUPER OCR QUÉT TOÀN BỘ HỒ SƠ
+    // ==========================================
+    openSuperOcrModal() {
+        Swal.fire({
+            title: '<span class="text-lg font-black text-purple-800 flex items-center gap-2"><svg class="w-5 h-5 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg> AI Quét Toàn Bộ Hồ Sơ</span>',
+            width: 700,
+            html: `
+                <div class="text-left font-sans mt-2 mb-2">
+                    <p class="text-[13px] text-slate-500 mb-4 text-center px-4">Tải lên <b>CÙNG LÚC</b> tất cả giấy tờ (CCCD, Giấy ra viện, Bảng kê...). AI sẽ đọc tổng hợp và tự động gợi ý Tỷ lệ thương tật.</p>
+                    
+                    <label id="hc-super-zone" class="relative w-full border-2 border-dashed border-purple-300 rounded-xl flex flex-col items-center justify-center cursor-pointer bg-purple-50/30 hover:bg-purple-50 transition-all min-h-[160px] overflow-hidden shadow-sm">
+                        <div id="hc-super-placeholder" class="flex flex-col items-center justify-center py-8 transition-transform duration-300 group-hover:scale-105">
+                            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-3 shadow-sm">
+                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M14.5 4h-5L7 7H4a2 2 0 00-2 2v9a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                            </div>
+                            <span class="text-[13px] font-bold text-slate-600" id="hc-super-lbl">Nhấn để chọn nhiều ảnh hoặc kéo thả vào đây</span>
+                            <div class="flex gap-2 mt-3">
+                                <span class="px-2 py-0.5 bg-slate-200 text-slate-600 text-[10px] font-bold rounded border border-slate-300">CCCD</span>
+                                <span class="px-2 py-0.5 bg-slate-200 text-slate-600 text-[10px] font-bold rounded border border-slate-300">Giấy ra viện</span>
+                                <span class="px-2 py-0.5 bg-slate-200 text-slate-600 text-[10px] font-bold rounded border border-slate-300">Bảng kê</span>
+                            </div>
+                        </div>
+                        <input type="file" id="hc-super-files" accept="image/*" multiple class="hidden" onchange="
+                            const n = this.files.length;
+                            const lbl = document.getElementById('hc-super-lbl');
+                            const zone = document.getElementById('hc-super-zone');
+                            if(n > 0) {
+                                lbl.innerHTML = '<span class=\\'text-purple-700 font-black text-lg\\'>Đã tải lên ' + n + ' ảnh</span>';
+                                zone.classList.add('border-solid', 'border-purple-500', 'bg-purple-100');
+                                zone.classList.remove('border-dashed', 'bg-purple-50/30');
+                            }
+                        ">
+                    </label>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Quét toàn bộ',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#9333ea',
+            customClass: { popup: 'rnd' },
+            preConfirm: () => {
+                const files = document.getElementById('hc-super-files').files;
+                if (!files || files.length === 0) {
+                    Swal.showValidationMessage('Vui lòng chọn ít nhất 1 ảnh!');
+                    return false;
+                }
+                return Array.from(files);
+            }
+        }).then((res) => {
+            if (res.isConfirmed) {
+                this.processSuperOcr(res.value);
+            }
+        });
+    },
+
+    async processSuperOcr(files) {
+        Swal.fire({
+            title: 'Hệ thống đang xử lý...',
+            html: `
+                <div class="flex flex-col items-center py-4">
+                    <div class="relative w-48 h-28 bg-slate-100 border-2 border-slate-200 rounded-xl overflow-hidden mb-5 flex items-center justify-center">
+                        <svg class="w-16 h-16 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                        <div class="absolute top-0 left-0 w-full h-[3px] bg-purple-500 shadow-[0_0_15px_4px_rgba(168,85,247,0.7)] animate-[scan_1.5s_ease-in-out_infinite]"></div>
+                    </div>
+                    <p class="text-[13px] text-slate-500 font-bold animate-pulse" id="hc-ocr-status-text">Đang nén ${files.length} ảnh để gửi cho AI...</p>
+                </div>
+            `,
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            customClass: { popup: 'rnd' }
+        });
+
+        // 1. Tải Bảng tỷ lệ thương tật / phẫu thuật để nhúng vào Prompt
+        const lossType = document.getElementById('hc-lossType').value || 'Thương tật';
+        const typeToFetch = lossType === 'Phẫu thuật' ? 'phau_thuat' : 'thuong_tat';
+        let ratesData = [];
+        try {
+            const snap = await db.ref('InjuryRates').once('value');
+            const rawRates = snap.val() || {};
+            ratesData = Object.keys(rawRates).map(k => rawRates[k])
+                .filter(r => r.type === typeToFetch)
+                .map(r => ({ stt: r.stt, name: r.name, min: r.minPct, max: r.maxPct }));
+        } catch(e) { console.warn("Lỗi tải bảng tỷ lệ:", e); }
+
+        // 2. Nén toàn bộ ảnh (Scale max width 1000px, quality 0.7 cho nhẹ)
+        const compressImg = (f, maxW = 1000) => new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    resolve({ mime_type: 'image/jpeg', data: canvas.toDataURL('image/jpeg', 0.7).split(',')[1] });
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(f);
+        });
+
+        let base64Images = [];
+        try {
+            base64Images = await Promise.all(files.map(f => compressImg(f)));
+        } catch(e) {
+            Swal.fire({icon:'error', title:'Lỗi đọc ảnh', text: 'Có lỗi khi nén ảnh.', customClass:{popup:'rnd'}});
+            return;
+        }
+
+        document.getElementById('hc-ocr-status-text').textContent = 'AI đang tổng hợp dữ liệu Hành chính, Y tế và tra cứu Tỷ lệ...';
+
+        // 3. Xây dựng Prompt
+        const PROMPT = `Đây là tập hợp các hình ảnh chứng từ của 1 hồ sơ bồi thường con người.
+Nhiệm vụ của bạn:
+1. Đọc CCCD để lấy thông tin Người bệnh. (Nơi cấp ưu tiên lấy từ mặt sau, nếu không có lấy Quê quán).
+2. Đọc Giấy ra viện/Bệnh án để lấy thông tin Y tế.
+3. So sánh "Chẩn đoán" với "Bảng tỷ lệ quy định" dưới đây để tìm ra 1 mục khớp nhất.
+
+BẢNG TỶ LỆ QUY ĐỊNH (${lossType}):
+${JSON.stringify(ratesData.slice(0, 150))} // Cắt bớt nếu quá dài
+
+Trả về CHỈ ĐÚNG 1 OBJECT JSON duy nhất (không markdown):
+{
+  "nguoiBenh": {
+    "hoTen": "",
+    "soCccd": "",
+    "ngaySinh": "YYYY-MM-DD",
+    "diaChi": "",
+    "noiCap": ""
+  },
+  "yTe": {
+    "noiDieuTri": "Tên bệnh viện",
+    "ngayNhapVien": "YYYY-MM-DD",
+    "ngayXuatVien": "YYYY-MM-DD",
+    "chanDoan": "Ghi vắn tắt chẩn đoán",
+    "tongTien": 0
+  },
+  "thuongTatGoiY": {
+    "stt": "Số thứ tự mục tìm được (hoặc null)",
+    "name": "Tên mục tìm được",
+    "min": 0,
+    "max": 0
+  }
+}`;
+
+        const parts = [{ text: PROMPT }];
+        base64Images.forEach(img => { parts.push({ inline_data: img }); });
+
+        try {
+            let parsed = null;
+            let baseDelay = 2000;
+            const maxRetries = GEM_KEYS.length * 2;
+
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                const key = nextGemKey();
+                const el = document.getElementById('hc-ocr-status-text');
+                if (el) el.textContent = `Đang phân tích siêu tốc (Thử lần ${attempt + 1}/${maxRetries})...`;
+                
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+                    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent?key=' + key, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        signal: controller.signal,
+                        body: JSON.stringify({
+                            contents: [{ parts: parts }],
+                            generationConfig: { temperature: 0.1, maxOutputTokens: 2048 }
+                        })
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    const dataResponse = await res.json();
+                    
+                    if (res.ok && !dataResponse.error) {
+                        const raw = (dataResponse.candidates && dataResponse.candidates[0].content.parts[0].text) || '';
+                        try { parsed = JSON.parse(raw.replace(/```json|```/gi, '').trim()); } 
+                        catch (_) {
+                            const m = raw.match(/\{[\s\S]*\}/);
+                            if (m) parsed = JSON.parse(m[0]);
+                        }
+                        if (parsed) break;
+                    }
+                    await new Promise(r => setTimeout(r, baseDelay));
+                    baseDelay = Math.min(baseDelay * 1.5, 8000);
+                } catch (err) {
+                    await new Promise(r => setTimeout(r, baseDelay));
+                    baseDelay = Math.min(baseDelay * 1.5, 8000);
+                }
+            }
+
+            if (!parsed) throw new Error('Máy chủ AI đang quá tải, không thể bóc tách toàn bộ tài liệu lúc này.');
+
+            Swal.close();
+            this.showSuperOcrResult(parsed);
+
+            // BỔ SUNG: Upload ngầm các file này lên Cloudinary và đưa vào phần "Ảnh đính kèm"
+            this.uploadFilesSilently(files);
+
+        } catch (e) {
+            Swal.fire({ icon: 'error', title: 'Lỗi OCR Toàn bộ', text: e.message, customClass: { popup: 'rnd' } });
+        }
+    },
+
+    showSuperOcrResult(aiData) {
+        const u = aiData.nguoiBenh || {};
+        const y = aiData.yTe || {};
+        const t = aiData.thuongTatGoiY || {};
+        
+        let rangeStr = '-- %';
+        let defaultVal = 0;
+        if (t.min != null && t.max != null) { rangeStr = `${t.min} - ${t.max}%`; defaultVal = t.min; }
+        else if (t.min != null) { rangeStr = `${t.min}%`; defaultVal = t.min; }
+
+        const html = `
+            <div class="text-left font-sans mt-2 max-h-[60vh] overflow-y-auto px-1 custom-scrollbar">
+                <p class="text-[12px] text-slate-500 mb-3">Vui lòng kiểm tra lại thông tin AI đã tổng hợp trước khi áp dụng vào form.</p>
+                
+                <div class="mb-4 bg-purple-50/50 p-3 rounded-xl border border-purple-100">
+                    <p class="text-[11px] font-black text-purple-700 uppercase mb-2 flex items-center gap-1.5"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> 1. Thông tin Hành chính</p>
+                    <div class="space-y-2 text-sm">
+                        <div><span class="text-slate-500 w-24 inline-block font-semibold">Họ tên:</span> <input id="ai-sup-name" class="font-bold text-rose-700 bg-white border border-slate-200 px-2 py-1 rounded outline-none w-2/3 uppercase focus:border-purple-400" value="${u.hoTen || ''}"></div>
+                        <div><span class="text-slate-500 w-24 inline-block font-semibold">Số CCCD:</span> <input id="ai-sup-cccd" class="font-mono bg-white border border-slate-200 px-2 py-1 rounded outline-none w-2/3 focus:border-purple-400" value="${u.soCccd || ''}"></div>
+                        <div><span class="text-slate-500 w-24 inline-block font-semibold">Địa chỉ:</span> <input id="ai-sup-addr" class="bg-white border border-slate-200 px-2 py-1 rounded outline-none w-2/3 focus:border-purple-400" value="${u.diaChi || ''}"></div>
+                        <div><span class="text-slate-500 w-24 inline-block font-semibold">Nơi cấp:</span> <input id="ai-sup-place" class="bg-white border border-slate-200 px-2 py-1 rounded outline-none w-2/3 focus:border-purple-400" value="${u.noiCap || ''}"></div>
+                    </div>
+                </div>
+
+                <div class="mb-4 bg-teal-50/50 p-3 rounded-xl border border-teal-100">
+                    <p class="text-[11px] font-black text-teal-700 uppercase mb-2 flex items-center gap-1.5"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> 2. Thông tin Y tế</p>
+                    <div class="space-y-2 text-sm">
+                        <div><span class="text-slate-500 w-24 inline-block font-semibold">Nơi điều trị:</span> <input id="ai-sup-hospital" class="font-bold text-teal-700 bg-white border border-slate-200 px-2 py-1 rounded outline-none w-2/3 focus:border-teal-400" value="${y.noiDieuTri || ''}"></div>
+                        <div><span class="text-slate-500 w-24 inline-block font-semibold">Nhập viện:</span> <input type="date" id="ai-sup-in" class="bg-white border border-slate-200 px-2 py-1 rounded outline-none w-2/3 focus:border-teal-400" value="${y.ngayNhapVien || ''}"></div>
+                        <div><span class="text-slate-500 w-24 inline-block font-semibold">Xuất viện:</span> <input type="date" id="ai-sup-out" class="bg-white border border-slate-200 px-2 py-1 rounded outline-none w-2/3 focus:border-teal-400" value="${y.ngayXuatVien || ''}"></div>
+                        <div>
+                            <span class="text-slate-500 block mb-1 font-semibold">Chẩn đoán:</span> 
+                            <textarea id="ai-sup-desc" rows="2" class="w-full bg-white border border-slate-200 px-2 py-1.5 rounded outline-none resize-none focus:border-teal-400">${y.chanDoan || ''}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50/50 p-3 rounded-xl border border-amber-100">
+                    <p class="text-[11px] font-black text-amber-700 uppercase mb-2 flex items-center gap-1.5"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> 3. AI Đối chiếu Tỷ lệ</p>
+                    ${t.stt ? `
+                        <div class="bg-white p-2.5 border border-amber-200 rounded-lg">
+                            <p class="font-bold text-slate-800 text-sm">Mục ${t.stt}: ${t.name}</p>
+                            <p class="text-xs text-rose-600 font-bold mt-1">Tỷ lệ quy định: <span class="bg-rose-100 px-1.5 py-0.5 rounded">${rangeStr}</span></p>
+                            <input type="hidden" id="ai-sup-t-code" value="Mục ${t.stt}: ${t.name}">
+                            <input type="hidden" id="ai-sup-t-range" value="${rangeStr}">
+                            <input type="hidden" id="ai-sup-t-pct" value="${defaultVal}">
+                        </div>
+                    ` : '<div class="bg-white p-2.5 border border-amber-200 rounded-lg"><p class="text-xs text-slate-500 italic">Không tìm thấy mục nào khớp trong bảng tỷ lệ.</p></div>'}
+                </div>
+            </div>
+        `;
+
+        Swal.fire({
+            title: '<span class="text-base font-black text-purple-800">Kết quả tổng hợp</span>',
+            html: html,
+            width: 650,
+            showCancelButton: true,
+            confirmButtonText: 'Áp dụng',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#9333ea',
+            customClass: { popup: 'rnd' },
+            preConfirm: () => {
+                return {
+                    name: document.getElementById('ai-sup-name').value,
+                    cccd: document.getElementById('ai-sup-cccd').value,
+                    addr: document.getElementById('ai-sup-addr').value,
+                    place: document.getElementById('ai-sup-place').value,
+                    hospital: document.getElementById('ai-sup-hospital').value,
+                    inDate: document.getElementById('ai-sup-in').value,
+                    outDate: document.getElementById('ai-sup-out').value,
+                    desc: document.getElementById('ai-sup-desc').value,
+                    tCode: document.getElementById('ai-sup-t-code')?.value || '',
+                    tRange: document.getElementById('ai-sup-t-range')?.value || '',
+                    tPct: document.getElementById('ai-sup-t-pct')?.value || 0
+                };
+            }
+        }).then((res) => {
+            if (res.isConfirmed) {
+                this.applySuperOcr(res.value);
+            }
+        });
+    },
+
+    applySuperOcr(data) {
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+        
+        setVal('hc-payeeName', data.name.toUpperCase());
+        setVal('hc-victimName', data.name.toUpperCase());
+        setVal('hc-payeeCccd', data.cccd);
+        setVal('hc-victimAddress', data.addr);
+        setVal('hc-payeeIssuePlace', data.place);
+        
+        setVal('hc-hospitalName', data.hospital);
+        setVal('hc-inDate', data.inDate);
+        setVal('hc-outDate', data.outDate);
+        setVal('hc-injuryDesc', data.desc);
+        
+        if (data.tCode) {
+            setVal('hc-injuryCode', data.tCode);
+            setVal('hc-injuryRange', data.tRange);
+            setVal('hc-injuryRealPct', data.tPct);
+        }
+
+        this.calculateDays();
+        Toast.fire({ icon: 'success', title: 'Đã điền tự động toàn bộ form!' });
+    },
+
+    // Hàm phụ tải ảnh ngầm lên Firebase sau khi AI bóc xong
+    async uploadFilesSilently(files) {
+        const newImages = [];
+        for(let f of files) {
+            const fd = new FormData();
+            fd.append('file', f);
+            fd.append('upload_preset', CL_PRESET); 
+            try {
+                const res = await fetch(CL_URL, { method: 'POST', body: fd });
+                const data = await res.json();
+                if(data.secure_url) newImages.push(data.secure_url);
+            } catch(err) {}
+        }
+        
+        let currentImgs = [];
+        if (this._currentId) {
+            const rec = this._data.find(r => r.id === this._currentId) || {};
+            currentImgs = rec.images || [];
+            currentImgs = [...currentImgs, ...newImages];
+            await db.ref('HumanClaims/' + this._currentId + '/images').set(currentImgs);
+        } else {
+            this._tempImages = [...(this._tempImages || []), ...newImages];
+            currentImgs = this._tempImages;
+        }
+        this.renderImages(currentImgs);
     }
+
 };
 
 // Khởi tạo khi load script
@@ -15124,6 +15467,7 @@ window.InjuryRates = InjuryRates;
 document.addEventListener('DOMContentLoaded', () => {
     InjuryRates.init();
 });
+
 
 
 </script>
