@@ -14763,8 +14763,8 @@ Nếu không có thông tin, để chuỗi rỗng "".`;
 
         document.getElementById('hc-ocr-status-text').textContent = 'Đang phân tích đa luồng (Hành chính & Y tế)...';
 
-        // 3. HÀM GỌI API CHUNG TỐI ƯU
-        const callGeminiAPI = async (prompt, images, maxTokens = 1024) => {
+        // 3. HÀM GỌI API CHUNG TỐI ƯU (Đã thêm tham số targetModel)
+        const callGeminiAPI = async (prompt, images, targetModel, maxTokens = 1024) => {
             const parts = [{ text: prompt }];
             if (images && images.length) {
                 images.forEach(img => parts.push({ inline_data: img }));
@@ -14772,21 +14772,22 @@ Nếu không có thông tin, để chuỗi rỗng "".`;
             
             let parsed = {};
             let baseDelay = 1500;
-            const maxRetries = GEM_KEYS.length * 2; // Cho phép quay vòng key
+            const maxRetries = GEM_KEYS.length * 2; 
 
             for (let attempt = 0; attempt < maxRetries; attempt++) {
-                const key = nextGemKey(); // Lấy ngẫu nhiên Key
+                const key = nextGemKey(); 
                 try {
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 35000); // Rút ngắn Timeout xuống 35s
+                    const timeoutId = setTimeout(() => controller.abort(), 35000); 
 
-                    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent?key=' + key, {
+                    // Gọi đích danh Model được chỉ định cho từng luồng
+                    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + targetModel + ':generateContent?key=' + key, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         signal: controller.signal,
                         body: JSON.stringify({
                             contents: [{ parts: parts }],
-                            generationConfig: { temperature: 0.05, maxOutputTokens: maxTokens } // Temperature cực thấp để ra JSON chuẩn
+                            generationConfig: { temperature: 0.05, maxOutputTokens: maxTokens } 
                         })
                     });
                     
@@ -14815,65 +14816,49 @@ Nếu không có thông tin, để chuỗi rỗng "".`;
                     baseDelay = Math.min(baseDelay * 1.5, 5000);
                 }
             }
-            return {}; // Trả về rỗng nếu thất bại hoàn toàn
+            return {}; 
         };
 
         try {
             // PROMPT 1: CHỈ TÌM VÀ ĐỌC CCCD
-            const promptAdmin = `Đây là tập hợp hình ảnh. Hãy TÌM thẻ Căn cước công dân (CCCD) hoặc CMND.
-Bỏ qua các giấy tờ khác.
+            const promptAdmin = `Đây là tập hợp hình ảnh. Hãy TÌM thẻ Căn cước công dân (CCCD) hoặc CMND. Bỏ qua các giấy tờ khác.
 Trích xuất thông tin trên thẻ CCCD/CMND và trả về CHỈ JSON:
-{
-  "hoTen": "Họ tên",
-  "soCccd": "Số CCCD",
-  "diaChi": "Nơi thường trú",
-  "noiCap": "Nơi cấp (ưu tiên mặt sau, nếu không có lấy Quê quán)"
-}
+{"hoTen": "Họ tên", "soCccd": "Số CCCD", "diaChi": "Nơi thường trú", "noiCap": "Nơi cấp"}
 Nếu không có CCCD, trả về JSON rỗng {"hoTen":""}`;
 
             // PROMPT 2: CHỈ TÌM VÀ ĐỌC CHỨNG TỪ Y TẾ
-            const promptMedical = `Đây là tập hợp hình ảnh. Hãy TÌM Giấy ra viện, Tóm tắt bệnh án, Bảng kê viện phí.
-Bỏ qua các giấy tờ khác (như CCCD).
+            const promptMedical = `Đây là tập hợp hình ảnh. Hãy TÌM Giấy ra viện, Tóm tắt bệnh án, Bảng kê. Bỏ qua các giấy tờ khác.
 Trích xuất thông tin y tế và trả về CHỈ JSON:
-{
-  "tenNguoiBenh": "Tên bệnh nhân",
-  "diaChiNguoiBenh": "Địa chỉ",
-  "noiDieuTri": "Tên bệnh viện",
-  "ngayNhapVien": "YYYY-MM-DD",
-  "ngayXuatVien": "YYYY-MM-DD",
-  "chanDoan": "Chẩn đoán bệnh/thương tật",
-  "tongTien": 0
-}
+{"tenNguoiBenh": "Tên bệnh nhân", "diaChiNguoiBenh": "Địa chỉ", "noiDieuTri": "Tên bệnh viện", "ngayNhapVien": "YYYY-MM-DD", "ngayXuatVien": "YYYY-MM-DD", "chanDoan": "Chẩn đoán bệnh/thương tật", "tongTien": 0}
 Nếu không có giấy tờ y tế, trả về JSON rỗng {"tenNguoiBenh":""}`;
 
-            // 4. CHẠY SONG SONG 2 LUỒNG (ADMIN & MEDICAL)
+            // KHAI BÁO MODEL CỤ THỂ CHO TỪNG TÁC VỤ
+            // Cập nhật model 2.5 Flash mới nhất để quét ảnh với tốc độ và độ chính xác cao
+            const MODEL_LITE = 'gemini-2.5-flash'; 
+            // Giữ model mặc định (GEM_MODEL) cho phần suy luận logic
+            const MODEL_PRO = GEM_MODEL;
+
+            // 4. CHẠY SONG SONG 2 LUỒNG BẰNG MODEL LITE
             const [adminData, medicalData] = await Promise.all([
-                callGeminiAPI(promptAdmin, base64Images, 512),
-                callGeminiAPI(promptMedical, base64Images, 512)
+                callGeminiAPI(promptAdmin, base64Images, MODEL_LITE, 512),
+                callGeminiAPI(promptMedical, base64Images, MODEL_LITE, 512)
             ]);
 
-            // 5. LUỒNG 3: Tra cứu Tỷ lệ (Chạy RẤT NHANH vì chỉ xử lý Text)
+            // 5. LUỒNG 3: Tra cứu Tỷ lệ (Sử dụng Model Pro vì cần phân tích ngôn ngữ sâu)
             let rateData = {};
             if (medicalData.chanDoan && medicalData.chanDoan.length > 5) {
                 document.getElementById('hc-ocr-status-text').textContent = 'Đang đối chiếu Bảng tỷ lệ thương tật...';
                 
-                // Lọc bớt bảng tỷ lệ, chỉ lấy 100 mục đầu tiên để tránh lỗi token
                 const limitedRates = ratesData.slice(0, 100);
-                
-                const promptRate = `Bạn là chuyên gia giám định y khoa. So sánh "Chẩn đoán" với "Bảng tỷ lệ" để tìm 1 mục khớp nhất.
+                const promptRate = `Bạn là chuyên gia giám định. So sánh "Chẩn đoán" với "Bảng tỷ lệ" để tìm 1 mục khớp nhất.
 CHẨN ĐOÁN: "${medicalData.chanDoan}"
 BẢNG TỶ LỆ (${lossType}): ${JSON.stringify(limitedRates)}
 
 Trả về CHỈ JSON:
-{
-  "stt": "Số thứ tự (nếu có)",
-  "name": "Tên mục tìm được",
-  "min": 0,
-  "max": 0
-}
+{"stt": "Số thứ tự", "name": "Tên mục tìm được", "min": 0, "max": 0}
 Nếu không tìm thấy, trả về {"stt": null}`;
 
-                rateData = await callGeminiAPI(promptRate, [], 256);
+                rateData = await callGeminiAPI(promptRate, [], MODEL_PRO, 256);
             }
 
             Swal.close();
