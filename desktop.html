@@ -13843,59 +13843,50 @@ const HumanClaims = {
             return; 
         }
 
-        // Lấy nút để làm hiệu ứng loading
-        const btnSuggest = document.querySelector('button[onclick="HumanClaims.suggestInjury()"]');
-        const origBtnText = btnSuggest ? btnSuggest.innerHTML : '';
-        
-        if (btnSuggest) {
-            btnSuggest.innerHTML = '<svg class="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Đang tra cứu AI...';
-            btnSuggest.disabled = true;
-        }
+        Swal.fire({
+            title: 'AI đang tra cứu...',
+            html: '<p class="text-sm text-slate-500 mt-2">Đang đối chiếu chẩn đoán với bảng tỷ lệ quy định...</p>',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading(),
+            customClass: { popup: 'rnd' }
+        });
 
         try {
-            // 1. Tải Bảng tỷ lệ từ Firebase (chỉ tải loại tương ứng)
+            // 1. Tải Bảng tỷ lệ từ Firebase
             const typeToFetch = lossType === 'Phẫu thuật' ? 'phau_thuat' : 'thuong_tat';
             const snap = await db.ref('InjuryRates').once('value');
             const rawRates = snap.val() || {};
             
-            // Lọc và format bảng tỷ lệ để gửi cho AI (giảm dung lượng token)
             const ratesData = Object.keys(rawRates)
                 .map(k => rawRates[k])
                 .filter(r => r.type === typeToFetch)
-                .map(r => ({
-                    stt: r.stt,
-                    name: r.name,
-                    min: r.minPct,
-                    max: r.maxPct
-                }));
+                .map(r => ({ stt: r.stt, name: r.name, min: r.minPct, max: r.maxPct }));
 
             if (!ratesData.length) {
                 throw new Error(`Bảng tỷ lệ ${lossType} trên hệ thống đang trống!`);
             }
 
-            // 2. Viết Prompt cho AI
-            const PROMPT = `Bạn là chuyên gia giám định bồi thường y tế.
-            Nhiệm vụ của bạn là đối chiếu "Chẩn đoán y khoa" với "Bảng tỷ lệ quy định" để tìm ra Mục thương tật/phẫu thuật phù hợp nhất.
+            // 2. Prompt yêu cầu trả về Mảng danh sách
+            const PROMPT = `Bạn là chuyên gia y tế và bảo hiểm.
+            CHẨN ĐOÁN CỦA BỆNH NHÂN: "${desc}"
+            BẢNG TỶ LỆ (${lossType}): ${JSON.stringify(ratesData)}
 
-            CHẨN ĐOÁN CỦA BỆNH NHÂN:
-            "${desc}"
+            Hãy tìm TỐI ĐA 5 mục trong bảng khớp nhất hoặc có liên quan nhất đến chẩn đoán trên.
+            - Sắp xếp theo mức độ phù hợp giảm dần (Mục khớp nhất đứng đầu).
+            - Trả về CHỈ MẢNG JSON (không markdown, không giải thích ngoài JSON):
+            [
+              {
+                "stt": "số thứ tự",
+                "name": "tên mục",
+                "min": "số tỷ lệ min (hoặc null)",
+                "max": "số tỷ lệ max (hoặc null)",
+                "reason": "Lý do ngắn gọn (1 câu) vì sao chọn mục này"
+              }
+            ]
+            Nếu không có mục nào liên quan, trả về mảng rỗng [].`;
 
-            BẢNG TỶ LỆ QUY ĐỊNH (Loại: ${lossType}):
-            ${JSON.stringify(ratesData)}
-
-            Hãy tìm ra MỘT mục duy nhất trong bảng quy định khớp nhất với chẩn đoán trên.
-            - Trả về CHỈ JSON theo định dạng sau (không markdown, không giải thích thêm):
-            {
-                "matched": true/false,
-                "stt": "số thứ tự mục tìm được",
-                "name": "tên mục tìm được",
-                "min": "tỷ lệ thấp nhất (số nguyên)",
-                "max": "tỷ lệ cao nhất (số nguyên)"
-            }
-            Nếu không tìm thấy mục nào phù hợp, hãy trả về {"matched": false}`;
-
-            // 3. Gọi Gemini API (Sử dụng cơ chế Retry tương tự các phần khác)
-            let parsed = null;
+            // 3. Gọi Gemini API
+            let parsedArray = null;
             const maxRetries = GEM_KEYS.length;
 
             for (let attempt = 0; attempt < maxRetries; attempt++) {
@@ -13915,63 +13906,113 @@ const HumanClaims = {
 
                     const raw = (data.candidates && data.candidates[0].content.parts[0].text) || '';
                     
-                    try { parsed = JSON.parse(raw.replace(/```json|```/gi, '').trim()); } 
+                    // Parse JSON Array
+                    try { parsedArray = JSON.parse(raw.replace(/```json|```/gi, '').trim()); } 
                     catch (_) {
-                        const m = raw.match(/\{[\s\S]*\}/);
-                        if (m) try { parsed = JSON.parse(m[0]); } catch (_) {}
+                        const m = raw.match(/\[[\s\S]*\]/);
+                        if (m) try { parsedArray = JSON.parse(m[0]); } catch (_) {}
                     }
-                    if (parsed) break; // Thoát nếu parse thành công
+                    if (Array.isArray(parsedArray)) break;
                 } catch (err) {
-                    console.warn(`[Gợi ý thương tật - Lần ${attempt + 1}] Lỗi:`, err);
+                    console.warn(`[Lần ${attempt + 1}] Lỗi:`, err);
                     if (attempt === maxRetries - 1) throw err;
                 }
             }
 
-            if (!parsed) throw new Error('AI không thể trả lời lúc này.');
+            if (!parsedArray) throw new Error('AI không thể trả lời lúc này.');
 
-            // 4. Xử lý kết quả trả về
-            if (!parsed.matched) {
-                Toast.fire({icon: 'info', title: `AI không tìm thấy mục ${lossType} nào phù hợp với mô tả này trong hệ thống.`});
-            } else {
-                const codeInp = document.getElementById('hc-injuryCode');
-                const rangeInp = document.getElementById('hc-injuryRange');
-                const pctInp = document.getElementById('hc-injuryRealPct');
+            Swal.close();
 
-                // Format lại cách hiển thị
-                if (codeInp) codeInp.value = `Mục ${parsed.stt}: ${parsed.name}`;
-                
-                let rangeText = '';
-                let defaultVal = 0;
-
-                if (parsed.min != null && parsed.max != null) {
-                    rangeText = `${parsed.min} - ${parsed.max}%`;
-                    defaultVal = parsed.min; // Lấy mức min làm gợi ý ban đầu
-                } else if (parsed.min != null) {
-                    rangeText = `${parsed.min}%`;
-                    defaultVal = parsed.min;
-                } else if (parsed.max != null) {
-                    rangeText = `${parsed.max}%`;
-                    defaultVal = parsed.max;
-                } else {
-                    rangeText = '-- %';
-                }
-
-                if (rangeInp) rangeInp.value = rangeText;
-                if (pctInp) pctInp.value = defaultVal; // Điền số % thực tế gợi ý
-
-                this.calculateTotal(); // Tính lại tiền
-                Toast.fire({icon: 'success', title: 'AI đã điền thành công tỷ lệ!'});
+            // 4. Xử lý hiển thị Form nếu mảng rỗng
+            if (parsedArray.length === 0) {
+                Swal.fire({
+                    icon: 'info', 
+                    title: 'Không tìm thấy!', 
+                    text: `AI không tìm thấy mục ${lossType} nào phù hợp với mô tả trên. Vui lòng kiểm tra lại chẩn đoán.`,
+                    customClass: { popup: 'rnd' }
+                });
+                return;
             }
+
+            // 5. Tạo HTML cho danh sách lựa chọn
+            let listHtml = '<div class="space-y-3 mt-4 text-left max-h-[50vh] overflow-y-auto px-1 custom-scrollbar">';
+            
+            parsedArray.forEach((item, index) => {
+                // Tạo chuỗi hiển thị tỷ lệ
+                let rangeStr = '';
+                if (item.min != null && item.max != null) rangeStr = `${item.min}% - ${item.max}%`;
+                else if (item.min != null) rangeStr = `${item.min}%`;
+                else if (item.max != null) rangeStr = `${item.max}%`;
+                else rangeStr = '--%';
+
+                // Giao diện Radio Card (Item đầu tiên mặc định được check và có màu viền nổi bật)
+                const isFirst = index === 0;
+                listHtml += `
+                    <label class="flex items-start gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all hover:bg-slate-50 ${isFirst ? 'border-violet-500 bg-violet-50/30' : 'border-slate-200 bg-white'}" onclick="document.querySelectorAll('label').forEach(l=>l.classList.remove('border-violet-500','bg-violet-50/30')); this.classList.add('border-violet-500','bg-violet-50/30');">
+                        <input type="radio" name="ai_suggest_radio" value="${index}" ${isFirst ? 'checked' : ''} class="mt-1.5 w-4 h-4 accent-violet-600 cursor-pointer">
+                        <div class="flex-1">
+                            <p class="font-bold text-slate-800 text-[13px] leading-snug">Mục ${item.stt}: ${item.name}</p>
+                            <div class="flex items-center gap-2 mt-1.5">
+                                <span class="px-2 py-0.5 bg-rose-100 text-rose-700 text-[11px] font-black rounded-md border border-rose-200">Tỷ lệ: ${rangeStr}</span>
+                            </div>
+                            <p class="text-[11px] text-slate-500 mt-2 bg-slate-100 p-2 rounded-lg border border-slate-200 leading-relaxed"><span class="font-bold text-slate-600">💡 Lý do:</span> ${item.reason || 'Khớp với mô tả'}</p>
+                        </div>
+                    </label>
+                `;
+            });
+            listHtml += '</div>';
+
+            // 6. Hiển thị Popup cho người dùng chọn
+            Swal.fire({
+                title: '<span class="text-base font-black text-violet-800 flex items-center justify-center gap-2"><svg class="w-5 h-5 text-violet-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> AI Gợi ý Thương tật</span>',
+                html: '<p class="text-[12px] text-slate-500 mt-1">Vui lòng chọn một mục chính xác nhất để áp dụng vào hồ sơ:</p>' + listHtml,
+                width: 600,
+                showCancelButton: true,
+                confirmButtonText: 'Áp dụng',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#7c3aed',
+                customClass: { popup: 'rnd' },
+                preConfirm: () => {
+                    const selectedIndex = document.querySelector('input[name="ai_suggest_radio"]:checked').value;
+                    return parsedArray[selectedIndex];
+                }
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    const selectedItem = res.value;
+                    
+                    const codeInp = document.getElementById('hc-injuryCode');
+                    const rangeInp = document.getElementById('hc-injuryRange');
+                    const pctInp = document.getElementById('hc-injuryRealPct');
+
+                    if (codeInp) codeInp.value = `Mục ${selectedItem.stt}: ${selectedItem.name}`;
+                    
+                    let rangeText = '';
+                    let defaultVal = 0;
+
+                    if (selectedItem.min != null && selectedItem.max != null) {
+                        rangeText = `${selectedItem.min} - ${selectedItem.max}%`;
+                        defaultVal = selectedItem.min; // Lấy mức min làm gợi ý ban đầu
+                    } else if (selectedItem.min != null) {
+                        rangeText = `${selectedItem.min}%`;
+                        defaultVal = selectedItem.min;
+                    } else if (selectedItem.max != null) {
+                        rangeText = `${selectedItem.max}%`;
+                        defaultVal = selectedItem.max;
+                    } else {
+                        rangeText = '-- %';
+                    }
+
+                    if (rangeInp) rangeInp.value = rangeText;
+                    if (pctInp) pctInp.value = defaultVal;
+
+                    this.calculateTotal(); 
+                    Toast.fire({icon: 'success', title: 'Đã điền thành công!'});
+                }
+            });
 
         } catch (error) {
             console.error(error);
-            Toast.fire({icon: 'error', title: 'Lỗi: ' + error.message});
-        } finally {
-            // Trả lại trạng thái cho nút bấm
-            if (btnSuggest) {
-                btnSuggest.innerHTML = origBtnText;
-                btnSuggest.disabled = false;
-            }
+            Swal.fire({icon: 'error', title: 'Lỗi', text: error.message, customClass: { popup: 'rnd' }});
         }
     },
 
