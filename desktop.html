@@ -14655,18 +14655,17 @@ Nếu không có thông tin, để chuỗi rỗng "".`;
         if (empty) empty.classList.add('hidden');
         if (grid) {
             grid.innerHTML = imgs.map(url => {
-                // Tạo URL Thumbnail từ Cloudinary (nếu là link cloudinary)
-                // c_thumb: cắt thông minh, w_150: rộng 150px, q_auto: tự tối ưu chất lượng
+                // Đổi c_thumb thành c_fit để không cắt ảnh, chỉ thu nhỏ lại cho vừa khung 150x150
                 let thumbUrl = url;
                 if (url.includes('cloudinary.com')) {
-                    thumbUrl = url.replace('/upload/', '/upload/c_thumb,w_150,h_150,g_auto,f_auto,q_auto/');
+                    thumbUrl = url.replace('/upload/', '/upload/c_fit,w_150,h_150,f_auto,q_auto/');
                 }
 
                 return `
-                    <div class="relative aspect-square rounded-lg border border-slate-200 overflow-hidden group shadow-sm bg-slate-100">
-                        <a href="${url}" data-fslightbox="hc-gallery">
+                    <div class="relative aspect-square rounded-lg border border-slate-200 overflow-hidden group shadow-sm bg-slate-50 flex items-center justify-center p-1">
+                        <a href="${url}" data-fslightbox="hc-gallery" class="w-full h-full flex items-center justify-center">
                             <img src="${thumbUrl}" 
-                                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" 
+                                 class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105" 
                                  loading="lazy"
                                  title="Nhấn để xem ảnh lớn">
                         </a>
