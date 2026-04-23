@@ -13845,7 +13845,7 @@ const HumanClaims = {
 
         Swal.fire({
             title: 'AI đang tra cứu...',
-            html: '<p class="text-sm text-slate-500 mt-2">Đang đối chiếu chẩn đoán với bảng tỷ lệ quy định...</p>',
+            html: '<p class="text-sm text-slate-500 mt-2">Đang đối chiếu chẩn đoán với bảng tỷ lệ quy định...</p><p id="ai-retry-status" class="text-[10px] text-violet-600 font-bold mt-1"></p>',
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading(),
             customClass: { popup: 'rnd' }
@@ -13885,41 +13885,68 @@ const HumanClaims = {
             ]
             Nếu không có mục nào liên quan, trả về mảng rỗng [].`;
 
-            // 3. Gọi Gemini API
+            // 3. Gọi Gemini API (CÓ CƠ CHẾ RETRY THÔNG MINH)
             let parsedArray = null;
-            const maxRetries = GEM_KEYS.length;
+            const maxRetries = GEM_KEYS.length * 2; // Thử gấp đôi số lượng key hiện có
+            const statusEl = document.getElementById('ai-retry-status');
 
             for (let attempt = 0; attempt < maxRetries; attempt++) {
                 const key = nextGemKey();
+                if (statusEl && attempt > 0) statusEl.textContent = `Máy chủ bận, đang chuyển đổi API Key (Lần thử ${attempt + 1}/${maxRetries})...`;
+
                 try {
+                    // Thêm AbortController để tự ngắt nếu AI treo quá 15 giây
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
                     const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent?key=' + key, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
+                        signal: controller.signal,
                         body: JSON.stringify({
                             contents: [{ parts: [{ text: PROMPT }] }],
                             generationConfig: { temperature: 0.1 }
                         })
                     });
                     
+                    clearTimeout(timeoutId);
+
                     const data = await res.json();
-                    if (data.error) throw new Error(data.error.message);
+
+                    // Xử lý lỗi 429 (Quá tải) hoặc 503 (Server bận)
+                    if (!res.ok) {
+                        if (res.status === 429 || res.status === 503 || (data.error && data.error.message.includes('high demand'))) {
+                            throw new Error('Overloaded'); // Bắn lỗi ra để bắt catch bên dưới và Retry
+                        }
+                        throw new Error(data.error?.message || 'Lỗi API không xác định');
+                    }
 
                     const raw = (data.candidates && data.candidates[0].content.parts[0].text) || '';
                     
                     // Parse JSON Array
-                    try { parsedArray = JSON.parse(raw.replace(/```json|```/gi, '').trim()); } 
+                    try { 
+                        parsedArray = JSON.parse(raw.replace(/```json|```/gi, '').trim()); 
+                    } 
                     catch (_) {
                         const m = raw.match(/\[[\s\S]*\]/);
                         if (m) try { parsedArray = JSON.parse(m[0]); } catch (_) {}
                     }
-                    if (Array.isArray(parsedArray)) break;
+                    
+                    if (Array.isArray(parsedArray)) break; // Nếu parse thành công -> Thoát vòng lặp
+
                 } catch (err) {
-                    console.warn(`[Lần ${attempt + 1}] Lỗi:`, err);
-                    if (attempt === maxRetries - 1) throw err;
+                    console.warn(`[OCR Thương Tật - Lần ${attempt + 1}] Lỗi:`, err.message);
+                    
+                    if (attempt === maxRetries - 1) {
+                        throw new Error('Máy chủ Google AI hiện đang quá tải. Vui lòng thử lại sau ít phút.');
+                    }
+                    
+                    // Nghỉ 1-2 giây trước khi gọi lại để tránh spam
+                    await new Promise(r => setTimeout(r, 1500)); 
                 }
             }
 
-            if (!parsedArray) throw new Error('AI không thể trả lời lúc này.');
+            if (!parsedArray) throw new Error('AI không thể trả lời định dạng JSON lúc này.');
 
             Swal.close();
 
@@ -13928,7 +13955,7 @@ const HumanClaims = {
                 Swal.fire({
                     icon: 'info', 
                     title: 'Không tìm thấy!', 
-                    text: `AI không tìm thấy mục ${lossType} nào phù hợp với mô tả trên. Vui lòng kiểm tra lại chẩn đoán.`,
+                    text: `AI không tìm thấy mục ${lossType} nào phù hợp với chẩn đoán trên. Anh hãy thử ghi rõ ràng hơn nhé.`,
                     customClass: { popup: 'rnd' }
                 });
                 return;
@@ -13938,14 +13965,12 @@ const HumanClaims = {
             let listHtml = '<div class="space-y-3 mt-4 text-left max-h-[50vh] overflow-y-auto px-1 custom-scrollbar">';
             
             parsedArray.forEach((item, index) => {
-                // Tạo chuỗi hiển thị tỷ lệ
                 let rangeStr = '';
                 if (item.min != null && item.max != null) rangeStr = `${item.min}% - ${item.max}%`;
                 else if (item.min != null) rangeStr = `${item.min}%`;
                 else if (item.max != null) rangeStr = `${item.max}%`;
                 else rangeStr = '--%';
 
-                // Giao diện Radio Card (Item đầu tiên mặc định được check và có màu viền nổi bật)
                 const isFirst = index === 0;
                 listHtml += `
                     <label class="flex items-start gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all hover:bg-slate-50 ${isFirst ? 'border-violet-500 bg-violet-50/30' : 'border-slate-200 bg-white'}" onclick="document.querySelectorAll('label').forEach(l=>l.classList.remove('border-violet-500','bg-violet-50/30')); this.classList.add('border-violet-500','bg-violet-50/30');">
@@ -13991,7 +14016,7 @@ const HumanClaims = {
 
                     if (selectedItem.min != null && selectedItem.max != null) {
                         rangeText = `${selectedItem.min} - ${selectedItem.max}%`;
-                        defaultVal = selectedItem.min; // Lấy mức min làm gợi ý ban đầu
+                        defaultVal = selectedItem.min; 
                     } else if (selectedItem.min != null) {
                         rangeText = `${selectedItem.min}%`;
                         defaultVal = selectedItem.min;
@@ -14012,7 +14037,7 @@ const HumanClaims = {
 
         } catch (error) {
             console.error(error);
-            Swal.fire({icon: 'error', title: 'Lỗi', text: error.message, customClass: { popup: 'rnd' }});
+            Swal.fire({icon: 'error', title: 'Hệ thống bận', text: error.message, customClass: { popup: 'rnd' }});
         }
     },
 
