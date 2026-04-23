@@ -14767,70 +14767,88 @@ Nếu không có thông tin, để chuỗi rỗng "".`;
         const callGeminiAPI = async (prompt, images, targetModel, maxTokens = 1024) => {
             const parts = [{ text: prompt }];
             if (images && images.length) {
-                images.forEach(img => parts.push({ inline_data: img }));
+                // Giới hạn 4 ảnh/call tránh token overflow gây timeout thầm lặng
+                images.slice(0, 4).forEach(img => parts.push({ inline_data: img }));
             }
-            
-            let parsed = {};
-            let baseDelay = 1500;
-            const maxRetries = GEM_KEYS.length * 2; 
+
+            const maxRetries = Math.max(GEM_KEYS.length, 3);
 
             for (let attempt = 0; attempt < maxRetries; attempt++) {
-                const key = nextGemKey(); 
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 35000); 
+                const key = nextGemKey();
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 40000);
 
-                    // Gọi đích danh Model được chỉ định cho từng luồng
-                    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + targetModel + ':generateContent?key=' + key, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        signal: controller.signal,
-                        body: JSON.stringify({
-                            contents: [{ parts: parts }],
-                            generationConfig: { temperature: 0.05, maxOutputTokens: maxTokens } 
-                        })
-                    });
-                    
-                    clearTimeout(timeoutId);
-                    
-                    if (res.ok) {
-                        const dataResponse = await res.json();
-                        if (!dataResponse.error) {
-                            const raw = (dataResponse.candidates && dataResponse.candidates[0].content.parts[0].text) || '';
-                            try { parsed = JSON.parse(raw.replace(/```json|```/gi, '').trim()); } 
-                            catch (_) {
-                                const m = raw.match(/\{[\s\S]*\}/);
-                                if (m) parsed = JSON.parse(m[0]);
-                            }
-                            if (Object.keys(parsed).length > 0) return parsed;
+                try {
+                    const res = await fetch(
+                        'https://generativelanguage.googleapis.com/v1beta/models/' + targetModel + ':generateContent?key=' + key,
+                        {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            signal: controller.signal,
+                            body: JSON.stringify({
+                                contents: [{ parts }],
+                                generationConfig: { temperature: 0.05, maxOutputTokens: maxTokens }
+                            })
                         }
-                    } else {
-                        console.warn(`[Lần ${attempt + 1}] Lỗi từ server:`, res.status);
+                    );
+                    clearTimeout(timeoutId);
+
+                    if (!res.ok) {
+                        console.warn(`[${targetModel}][Lần ${attempt + 1}] HTTP ${res.status}`);
+                        await new Promise(r => setTimeout(r, 1500));
+                        continue;
                     }
-                    
-                    await new Promise(r => setTimeout(r, baseDelay));
-                    baseDelay = Math.min(baseDelay * 1.5, 5000);
+
+                    const dataResponse = await res.json();
+                    if (dataResponse.error) {
+                        console.warn(`[${targetModel}][Lần ${attempt + 1}] API Error:`, dataResponse.error.message);
+                        await new Promise(r => setTimeout(r, 1500));
+                        continue;
+                    }
+
+                    const raw = dataResponse?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                    if (!raw) {
+                        console.warn(`[${targetModel}][Lần ${attempt + 1}] Trả về rỗng`);
+                        await new Promise(r => setTimeout(r, 1000));
+                        continue;
+                    }
+
+                    let parsed = null;
+                    const cleaned = raw.replace(/```json|```/gi, '').trim();
+                    try { parsed = JSON.parse(cleaned); } catch (_) {
+                        const mObj = cleaned.match(/\{[\s\S]*\}/);
+                        if (mObj) try { parsed = JSON.parse(mObj[0]); } catch (_) {}
+                    }
+
+                    if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+                        return parsed;
+                    }
+
+                    console.warn(`[${targetModel}][Lần ${attempt + 1}] Parse thất bại, raw:`, raw.substring(0, 150));
+                    await new Promise(r => setTimeout(r, 1000));
+
                 } catch (err) {
-                    console.warn(`[Lần ${attempt + 1}] Lỗi mạng/Timeout:`, err.message);
-                    await new Promise(r => setTimeout(r, baseDelay));
-                    baseDelay = Math.min(baseDelay * 1.5, 5000);
+                    clearTimeout(timeoutId);
+                    console.warn(`[${targetModel}][Lần ${attempt + 1}] Lỗi:`, err.message);
+                    await new Promise(r => setTimeout(r, 1500));
                 }
             }
-            return {}; 
+            return {};
         };
 
         try {
             // PROMPT 1: CHỈ TÌM VÀ ĐỌC CCCD
-            const promptAdmin = `Đây là tập hợp hình ảnh. Hãy TÌM thẻ Căn cước công dân (CCCD) hoặc CMND. Bỏ qua các giấy tờ khác.
-Trích xuất thông tin trên thẻ CCCD/CMND và trả về CHỈ JSON:
-{"hoTen": "Họ tên", "soCccd": "Số CCCD", "diaChi": "Nơi thường trú", "noiCap": "Nơi cấp"}
-Nếu không có CCCD, trả về JSON rỗng {"hoTen":""}`;
+            const promptAdmin = `Bạn là chuyên gia nhận dạng giấy tờ tùy thân Việt Nam.
+            NHIỆM VỤ: Trong các ảnh, TÌM và ĐỌC thẻ Căn cước công dân (CCCD) hoặc CMND. Bỏ hoàn toàn giấy tờ y tế.
+            Trả về CHỈ JSON thuần túy (không markdown, không giải thích):
+            {"hoTen":"Họ tên in hoa","soCccd":"12 chữ số","diaChi":"Nơi thường trú đầy đủ","noiCap":"Nơi cấp"}
+            Nếu không tìm thấy CCCD/CMND: {"hoTen":"","soCccd":"","diaChi":"","noiCap":""}`;
 
-            // PROMPT 2: CHỈ TÌM VÀ ĐỌC CHỨNG TỪ Y TẾ
-            const promptMedical = `Đây là tập hợp hình ảnh. Hãy TÌM Giấy ra viện, Tóm tắt bệnh án, Bảng kê. Bỏ qua các giấy tờ khác.
-Trích xuất thông tin y tế và trả về CHỈ JSON:
-{"tenNguoiBenh": "Tên bệnh nhân", "diaChiNguoiBenh": "Địa chỉ", "noiDieuTri": "Tên bệnh viện", "ngayNhapVien": "YYYY-MM-DD", "ngayXuatVien": "YYYY-MM-DD", "chanDoan": "Chẩn đoán bệnh/thương tật", "tongTien": 0}
-Nếu không có giấy tờ y tế, trả về JSON rỗng {"tenNguoiBenh":""}`;
+            const promptMedical = `Bạn là chuyên gia đọc hồ sơ y tế Việt Nam.
+            NHIỆM VỤ: Trong các ảnh, TÌM và ĐỌC Giấy ra viện / Tóm tắt bệnh án / Bảng kê viện phí. Bỏ hoàn toàn CCCD, CMND.
+            Trả về CHỈ JSON thuần túy (không markdown, không giải thích):
+            {"tenNguoiBenh":"Họ tên","diaChiNguoiBenh":"Địa chỉ","noiDieuTri":"Tên bệnh viện","ngayNhapVien":"YYYY-MM-DD","ngayXuatVien":"YYYY-MM-DD","chanDoan":"Chẩn đoán đầy đủ","tongTien":0}
+            Nếu không tìm thấy giấy tờ y tế: {"tenNguoiBenh":"","noiDieuTri":"","ngayNhapVien":"","ngayXuatVien":"","chanDoan":"","tongTien":0}`;
 
             // KHAI BÁO MODEL CỤ THỂ CHO TỪNG TÁC VỤ
             // Cập nhật model 2.5 Flash mới nhất để quét ảnh với tốc độ và độ chính xác cao
@@ -14882,86 +14900,126 @@ Nếu không tìm thấy, trả về {"stt": null}`;
         const a = aiData.admin || {};
         const m = aiData.medical || {};
         const r = aiData.rate || {};
-        
-        let rangeStr = '-- %';
+
+        const hasCccd = !!(a.hoTen || a.soCccd);
+        const hasMedical = !!(m.tenNguoiBenh || m.noiDieuTri || m.chanDoan);
+
+        let rangeStr = '';
         let defaultVal = 0;
-        if (r.min != null && r.max != null) { rangeStr = `${r.min} - ${r.max}%`; defaultVal = r.min; }
-        else if (r.min != null) { rangeStr = `${r.min}%`; defaultVal = r.min; }
+        if (r.stt) {
+            if (r.min != null && r.max != null) { rangeStr = `${r.min} - ${r.max}%`; defaultVal = r.min; }
+            else if (r.min != null) { rangeStr = `${r.min}%`; defaultVal = r.min; }
+            else if (r.max != null) { rangeStr = `${r.max}%`; defaultVal = r.max; }
+        }
+
+        const fieldRow = (label, id, value, type = 'text', extraClass = '') => `
+            <div class="flex flex-col gap-1">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider">${label}</label>
+                <input type="${type}" id="${id}" value="${value || ''}"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-violet-400 focus:bg-white transition-all ${extraClass}">
+            </div>`;
+
+        const emptyBadge = (icon, text) => `
+            <div class="flex items-center gap-2 py-2 px-3 mb-3 bg-orange-50 border border-orange-200 rounded-lg">
+                <span class="text-base">${icon}</span>
+                <p class="text-[11px] text-orange-700 font-bold">${text}</p>
+            </div>`;
 
         const html = `
-            <div class="text-left font-sans mt-2 max-h-[60vh] overflow-y-auto px-1 custom-scrollbar">
-                <p class="text-[12px] text-slate-500 mb-3">Thông tin Người thụ hưởng (CCCD) và Nạn nhân (Y Tế) được bóc tách riêng biệt.</p>
-                
-                <div class="mb-4 bg-purple-50/50 p-3 rounded-xl border border-purple-100">
-                    <p class="text-[11px] font-black text-purple-700 uppercase mb-2 flex items-center gap-1.5"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> 1. Thông tin Người thụ hưởng (Từ CCCD)</p>
-                    <div class="space-y-2 text-sm">
-                        <div><span class="text-slate-500 w-24 inline-block font-semibold">Họ tên:</span> <input id="ai-sup-payee-name" class="font-bold text-purple-700 bg-white border border-slate-200 px-2 py-1 rounded outline-none w-2/3 uppercase focus:border-purple-400" value="${a.hoTen || ''}"></div>
-                        <div><span class="text-slate-500 w-24 inline-block font-semibold">Số CCCD:</span> <input id="ai-sup-payee-cccd" class="font-mono bg-white border border-slate-200 px-2 py-1 rounded outline-none w-2/3 focus:border-purple-400" value="${a.soCccd || ''}"></div>
-                        <div><span class="text-slate-500 w-24 inline-block font-semibold">Địa chỉ:</span> <input id="ai-sup-payee-addr" class="bg-white border border-slate-200 px-2 py-1 rounded outline-none w-2/3 focus:border-purple-400" value="${a.diaChi || ''}"></div>
-                        <div><span class="text-slate-500 w-24 inline-block font-semibold">Nơi cấp:</span> <input id="ai-sup-payee-place" class="bg-white border border-slate-200 px-2 py-1 rounded outline-none w-2/3 focus:border-purple-400" value="${a.noiCap || ''}"></div>
+            <div class="text-left font-sans mt-1 max-h-[62vh] overflow-y-auto px-0.5 space-y-2.5 custom-scrollbar">
+
+                <!-- CCCD -->
+                <div class="rounded-xl p-3.5 bg-violet-50/60 border border-violet-100">
+                    <div class="flex items-center gap-2 mb-3 pb-2.5 border-b border-violet-200">
+                        <svg class="w-3.5 h-3.5 text-violet-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="7" y1="15" x2="7.01" y2="15"/><line x1="11" y1="15" x2="13" y2="15"/></svg>
+                        <span class="text-[10px] font-black text-violet-700 uppercase tracking-wider">Người thụ hưởng — CCCD / CMND</span>
+                        <span class="ml-auto px-2 py-0.5 rounded-md text-[9px] font-black ${hasCccd ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-600'}">${hasCccd ? '✓ Đã nhận dạng' : '⚠ Không tìm thấy'}</span>
+                    </div>
+                    ${!hasCccd ? emptyBadge('🪪', 'Không tìm thấy ảnh CCCD/CMND — vui lòng nhập tay hoặc bổ sung ảnh') : ''}
+                    <div class="grid grid-cols-2 gap-x-3 gap-y-2.5">
+                        ${fieldRow('Họ và tên', 'ai-sup-payee-name', a.hoTen, 'text', 'font-black text-violet-700 uppercase')}
+                        ${fieldRow('Số CCCD / CMND', 'ai-sup-payee-cccd', a.soCccd, 'text', 'font-mono font-bold tracking-widest')}
+                        ${fieldRow('Nơi thường trú', 'ai-sup-payee-addr', a.diaChi)}
+                        ${fieldRow('Nơi cấp', 'ai-sup-payee-place', a.noiCap)}
                     </div>
                 </div>
 
-                <div class="mb-4 bg-teal-50/50 p-3 rounded-xl border border-teal-100">
-                    <p class="text-[11px] font-black text-teal-700 uppercase mb-2 flex items-center gap-1.5"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> 2. Nạn nhân & Y tế (Từ Giấy ra viện)</p>
-                    <div class="space-y-2 text-sm">
-                        <div><span class="text-slate-500 w-24 inline-block font-semibold">Tên nạn nhân:</span> <input id="ai-sup-victim-name" class="font-bold text-rose-700 bg-white border border-slate-200 px-2 py-1 rounded outline-none w-2/3 uppercase focus:border-teal-400" value="${m.tenNguoiBenh || ''}"></div>
-                        <div><span class="text-slate-500 w-24 inline-block font-semibold">Địa chỉ (Y tế):</span> <input id="ai-sup-victim-addr" class="bg-white border border-slate-200 px-2 py-1 rounded outline-none w-2/3 focus:border-teal-400" value="${m.diaChiNguoiBenh || ''}"></div>
-                        <div><span class="text-slate-500 w-24 inline-block font-semibold">Nơi điều trị:</span> <input id="ai-sup-hospital" class="font-bold text-teal-700 bg-white border border-slate-200 px-2 py-1 rounded outline-none w-2/3 focus:border-teal-400" value="${m.noiDieuTri || ''}"></div>
-                        <div><span class="text-slate-500 w-24 inline-block font-semibold">Nhập viện:</span> <input type="date" id="ai-sup-in" class="bg-white border border-slate-200 px-2 py-1 rounded outline-none w-2/3 focus:border-teal-400" value="${m.ngayNhapVien || ''}"></div>
-                        <div><span class="text-slate-500 w-24 inline-block font-semibold">Xuất viện:</span> <input type="date" id="ai-sup-out" class="bg-white border border-slate-200 px-2 py-1 rounded outline-none w-2/3 focus:border-teal-400" value="${m.ngayXuatVien || ''}"></div>
-                        <div>
-                            <span class="text-slate-500 block mb-1 font-semibold">Chẩn đoán:</span> 
-                            <textarea id="ai-sup-desc" rows="2" class="w-full bg-white border border-slate-200 px-2 py-1.5 rounded outline-none resize-none focus:border-teal-400">${m.chanDoan || ''}</textarea>
+                <!-- Y TẾ -->
+                <div class="rounded-xl p-3.5 bg-teal-50/60 border border-teal-100">
+                    <div class="flex items-center gap-2 mb-3 pb-2.5 border-b border-teal-200">
+                        <svg class="w-3.5 h-3.5 text-teal-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        <span class="text-[10px] font-black text-teal-700 uppercase tracking-wider">Nạn nhân &amp; Y tế — Giấy ra viện / Bệnh án</span>
+                        <span class="ml-auto px-2 py-0.5 rounded-md text-[9px] font-black ${hasMedical ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-600'}">${hasMedical ? '✓ Đã nhận dạng' : '⚠ Không tìm thấy'}</span>
+                    </div>
+                    ${!hasMedical ? emptyBadge('🏥', 'Không tìm thấy giấy tờ y tế — vui lòng nhập tay hoặc bổ sung ảnh') : ''}
+                    <div class="grid grid-cols-2 gap-x-3 gap-y-2.5">
+                        ${fieldRow('Tên nạn nhân', 'ai-sup-victim-name', m.tenNguoiBenh, 'text', 'font-black text-rose-700 uppercase')}
+                        ${fieldRow('Nơi điều trị', 'ai-sup-hospital', m.noiDieuTri, 'text', 'font-bold text-teal-700')}
+                        ${fieldRow('Địa chỉ nạn nhân', 'ai-sup-victim-addr', m.diaChiNguoiBenh)}
+                        <div class="grid grid-cols-2 gap-2">
+                            ${fieldRow('Ngày nhập viện', 'ai-sup-in', m.ngayNhapVien, 'date')}
+                            ${fieldRow('Ngày xuất viện', 'ai-sup-out', m.ngayXuatVien, 'date')}
+                        </div>
+                        <div class="col-span-2 flex flex-col gap-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Chẩn đoán / Thương tật</label>
+                            <textarea id="ai-sup-desc" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-teal-400 focus:bg-white transition-all resize-none">${m.chanDoan || ''}</textarea>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-amber-50/50 p-3 rounded-xl border border-amber-100">
-                    <p class="text-[11px] font-black text-amber-700 uppercase mb-2 flex items-center gap-1.5"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> 3. AI Đối chiếu Tỷ lệ</p>
+                <!-- TỶ LỆ -->
+                <div class="rounded-xl p-3.5 bg-amber-50/60 border border-amber-100">
+                    <div class="flex items-center gap-2 mb-3 pb-2.5 border-b border-amber-200">
+                        <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        <span class="text-[10px] font-black text-amber-700 uppercase tracking-wider">AI Đối chiếu Tỷ lệ Thương tật</span>
+                        <span class="ml-auto px-2 py-0.5 rounded-md text-[9px] font-black ${r.stt ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}">${r.stt ? '✓ Tìm thấy' : '— Chưa xác định'}</span>
+                    </div>
                     ${r.stt ? `
-                        <div class="bg-white p-2.5 border border-amber-200 rounded-lg">
-                            <p class="font-bold text-slate-800 text-sm">Mục ${r.stt}: ${r.name}</p>
-                            <p class="text-xs text-rose-600 font-bold mt-1">Tỷ lệ quy định: <span class="bg-rose-100 px-1.5 py-0.5 rounded">${rangeStr}</span></p>
-                            <input type="hidden" id="ai-sup-t-code" value="Mục ${r.stt}: ${r.name}">
-                            <input type="hidden" id="ai-sup-t-range" value="${rangeStr}">
-                            <input type="hidden" id="ai-sup-t-pct" value="${defaultVal}">
+                    <div class="bg-white rounded-xl border border-amber-200 p-3 flex items-start gap-3">
+                        <div class="w-9 h-9 shrink-0 bg-amber-100 rounded-lg flex items-center justify-center font-black text-amber-700 text-xs">${r.stt}</div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold text-slate-800 text-[13px] leading-snug">${r.name}</p>
+                            <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                                <span class="px-2.5 py-1 bg-rose-100 border border-rose-200 text-rose-700 text-[11px] font-black rounded-lg">Tỷ lệ: ${rangeStr || '--'}</span>
+                                <span class="text-[10px] text-slate-400">→ Gợi ý mặc định: <b class="text-slate-600">${defaultVal}%</b></span>
+                            </div>
                         </div>
-                    ` : '<div class="bg-white p-2.5 border border-amber-200 rounded-lg"><p class="text-xs text-slate-500 italic">Không tìm thấy mục nào khớp trong bảng tỷ lệ.</p></div>'}
+                    </div>` : `
+                    <p class="text-xs text-slate-400 italic text-center py-2">
+                        ${!hasMedical ? 'Cần có Chẩn đoán từ giấy tờ y tế để đối chiếu.' : 'Không tìm thấy mục phù hợp trong bảng tỷ lệ.'}
+                    </p>`}
+                    <input type="hidden" id="ai-sup-t-code" value="${r.stt ? 'Mục ' + r.stt + ': ' + r.name : ''}">
+                    <input type="hidden" id="ai-sup-t-range" value="${rangeStr}">
+                    <input type="hidden" id="ai-sup-t-pct" value="${defaultVal}">
                 </div>
-            </div>
-        `;
+            </div>`;
 
         Swal.fire({
-            title: '<span class="text-base font-black text-purple-800">Kết quả tổng hợp (Đa luồng)</span>',
+            title: '<span class="text-[15px] font-black text-slate-800 flex items-center gap-2"><svg class="w-4 h-4 text-violet-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg> Kết quả bóc tách đa luồng</span>',
             html: html,
-            width: 680,
+            width: 700,
             showCancelButton: true,
-            confirmButtonText: 'Áp dụng vào Form',
+            confirmButtonText: '✓ Áp dụng vào Form',
             cancelButtonText: 'Hủy',
-            confirmButtonColor: '#9333ea',
+            confirmButtonColor: '#7c3aed',
             customClass: { popup: 'rnd' },
-            preConfirm: () => {
-                return {
-                    payeeName: document.getElementById('ai-sup-payee-name').value,
-                    payeeCccd: document.getElementById('ai-sup-payee-cccd').value,
-                    payeeAddr: document.getElementById('ai-sup-payee-addr').value,
-                    payeePlace: document.getElementById('ai-sup-payee-place').value,
-                    victimName: document.getElementById('ai-sup-victim-name').value,
-                    victimAddr: document.getElementById('ai-sup-victim-addr').value,
-                    hospital: document.getElementById('ai-sup-hospital').value,
-                    inDate: document.getElementById('ai-sup-in').value,
-                    outDate: document.getElementById('ai-sup-out').value,
-                    desc: document.getElementById('ai-sup-desc').value,
-                    tCode: document.getElementById('ai-sup-t-code')?.value || '',
-                    tRange: document.getElementById('ai-sup-t-range')?.value || '',
-                    tPct: document.getElementById('ai-sup-t-pct')?.value || 0
-                };
-            }
+            preConfirm: () => ({
+                payeeName: document.getElementById('ai-sup-payee-name').value,
+                payeeCccd: document.getElementById('ai-sup-payee-cccd').value,
+                payeeAddr: document.getElementById('ai-sup-payee-addr').value,
+                payeePlace: document.getElementById('ai-sup-payee-place').value,
+                victimName: document.getElementById('ai-sup-victim-name').value,
+                victimAddr: document.getElementById('ai-sup-victim-addr').value,
+                hospital: document.getElementById('ai-sup-hospital').value,
+                inDate: document.getElementById('ai-sup-in').value,
+                outDate: document.getElementById('ai-sup-out').value,
+                desc: document.getElementById('ai-sup-desc').value,
+                tCode: document.getElementById('ai-sup-t-code')?.value || '',
+                tRange: document.getElementById('ai-sup-t-range')?.value || '',
+                tPct: document.getElementById('ai-sup-t-pct')?.value || 0
+            })
         }).then((res) => {
-            if (res.isConfirmed) {
-                this.applySuperOcr(res.value);
-            }
+            if (res.isConfirmed) this.applySuperOcr(res.value);
         });
     },
 
