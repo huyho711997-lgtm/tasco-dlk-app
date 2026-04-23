@@ -1864,8 +1864,9 @@ textarea.inp { resize:vertical; }
                 </div>
                 <div class="p-4 space-y-3">
                   <div class="grid grid-cols-12 gap-3">
-                    <div class="col-span-7"><label class="lbl">Người được Bảo hiểm</label><input id="hc-victimName" class="inp font-bold text-rose-700 uppercase"></div>
-                    <div class="col-span-5"><label class="lbl">Loại tổn thất</label>
+                    <div class="col-span-6"><label class="lbl">Người được Bảo hiểm</label><input id="hc-victimName" class="inp font-bold text-rose-700 uppercase"></div>
+                    <div class="col-span-2"><label class="lbl">Tuổi</label><input id="hc-victimAge" type="number" class="inp text-center font-bold text-rose-700" placeholder="VD: 35"></div>
+                    <div class="col-span-4"><label class="lbl">Loại tổn thất</label>
                       <select id="hc-lossType" class="inp">
                         <option value="Thương tật">Thương tật</option>
                         <option value="Phẫu thuật">Phẫu thuật</option>
@@ -13604,7 +13605,7 @@ const HumanClaims = {
         setVal('hc-accLocation', r.accLocation);   
         setVal('hc-hospitalName', r.hospitalName); 
         
-        setVal('hc-victimName', r.victimName); setVal('hc-victimAddress', r.victimAddress); setVal('hc-lossType', r.lossType);
+        setVal('hc-victimName', r.victimName); setVal('hc-victimAge', r.victimAge); setVal('hc-victimAddress', r.victimAddress); setVal('hc-lossType', r.lossType);
         setVal('hc-accDate', r.accDate); setVal('hc-inDate', r.inDate);
         setVal('hc-outDate', r.outDate); setVal('hc-days', r.days);
         setVal('hc-accCause', r.accCause); setVal('hc-injuryDesc', r.injuryDesc);
@@ -13710,10 +13711,9 @@ const HumanClaims = {
             contractNo: getVal('hc-contractNo'), companyName: getVal('hc-companyName'),
             gcn: getVal('hc-gcn'), insType: getVal('hc-insType'), feeStatus: getVal('hc-feeStatus'),
             effFrom: getVal('hc-effFrom'), effTo: getVal('hc-effTo'),
-            effFrom: getVal('hc-effFrom'), effTo: getVal('hc-effTo'),
             limitA: getNum('hc-limitA'), limitB: getNum('hc-limitB'),
             limitC: getNum('hc-limitC'), limitD: getNum('hc-limitD'),
-            victimName: victimName, lossType: getVal('hc-lossType'),
+            victimName: victimName, victimAge: getVal('hc-victimAge'), lossType: getVal('hc-lossType'),
             victimAddress: getVal('hc-victimAddress'),
             accLocation: getVal('hc-accLocation'),     
             hospitalName: getVal('hc-hospitalName'),   
@@ -14333,11 +14333,13 @@ const HumanClaims = {
             const statusText = document.getElementById('med-ocr-status');
 
             // CẬP NHẬT PROMPT: Bổ sung noiDieuTri
+
             const PROMPT = `Đây là chứng từ y tế tại Việt Nam.
 Trích xuất thông tin và trả về CHỈ JSON (không markdown):
 {
     "noiDieuTri": "Tên bệnh viện hoặc cơ sở y tế ban hành giấy này",
     "tenNguoiBenh": "Tên bệnh nhân",
+    "tuoi": "Tuổi bệnh nhân (CHỈ lấy con số, ví dụ: 35)",
     "diaChiNguoiBenh": "Địa chỉ",
     "ngayNhapVien": "YYYY-MM-DD",
     "ngayXuatVien": "YYYY-MM-DD",
@@ -14409,6 +14411,7 @@ Nếu không có thông tin, để chuỗi rỗng "".`;
 
     showMedicalOcrResult(aiData) {
         const curName = document.getElementById('hc-victimName').value;
+        const curAge = document.getElementById('hc-victimAge').value;
         const curAddress = document.getElementById('hc-victimAddress').value;
         const curHospital = document.getElementById('hc-hospitalName').value; // <-- Lấy BV hiện tại
         const curInDate = document.getElementById('hc-inDate').value;
@@ -14436,15 +14439,21 @@ Nếu không có thông tin, để chuỗi rỗng "".`;
                                     <input type="text" id="ai-med-hospitalName" class="w-full bg-white border border-slate-200 rounded p-1.5 outline-none focus:border-teal-500 font-bold text-teal-700" value="${aiData.noiDieuTri || ''}">
                                 </td>
                             </tr>
-                            <tr>
+                            
+                                <td class="px-3 py-2"><tr>
                                 <td class="px-3 py-2 font-semibold text-slate-700">Tên người bệnh<br><span class="text-[10px] font-normal text-slate-400">Đang có: ${curName || 'Trống'}</span></td>
                                 <td class="px-3 py-2">
                                     <input type="text" id="ai-med-victimName" class="w-full bg-white border border-slate-200 rounded p-1.5 outline-none focus:border-teal-500 font-bold text-rose-700 uppercase" value="${aiData.tenNguoiBenh || ''}">
                                 </td>
                             </tr>
                             <tr>
-                                <td class="px-3 py-2 font-semibold text-slate-700">Địa chỉ<br><span class="text-[10px] font-normal text-slate-400">Đang có: ${curAddress || 'Trống'}</span></td>
+                                <td class="px-3 py-2 font-semibold text-slate-700">Tuổi<br><span class="text-[10px] font-normal text-slate-400">Đang có: ${curAge || 'Trống'}</span></td>
                                 <td class="px-3 py-2">
+                                    <input type="number" id="ai-med-victimAge" class="w-full bg-white border border-slate-200 rounded p-1.5 outline-none focus:border-teal-500 font-bold text-rose-700" value="${aiData.tuoi || ''}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2 font-semibold text-slate-700">Địa chỉ<br><span class="text-[10px] font-normal text-slate-400">Đang có: ${curAddress || 'Trống'}</span></td>
                                     <textarea id="ai-med-victimAddress" rows="2" class="w-full bg-white border border-slate-200 rounded p-1.5 outline-none focus:border-teal-500 resize-none">${aiData.diaChiNguoiBenh || ''}</textarea>
                                 </td>
                             </tr>
@@ -14491,6 +14500,7 @@ Nếu không có thông tin, để chuỗi rỗng "".`;
                 return {
                     hospitalName: document.getElementById('ai-med-hospitalName').value.trim(),
                     victimName: document.getElementById('ai-med-victimName').value.trim(),
+                    victimAge: document.getElementById('ai-med-victimAge').value.trim(),
                     victimAddress: document.getElementById('ai-med-victimAddress').value.trim(),
                     inDate: document.getElementById('ai-med-inDate').value,
                     outDate: document.getElementById('ai-med-outDate').value,
@@ -14507,6 +14517,7 @@ Nếu không có thông tin, để chuỗi rỗng "".`;
     applyMedicalOcr(data) {
         if (data.hospitalName) document.getElementById('hc-hospitalName').value = data.hospitalName;
         if (data.victimName) document.getElementById('hc-victimName').value = data.victimName.toUpperCase();
+        if (data.victimAge) document.getElementById('hc-victimAge').value = data.victimAge;
         if (data.victimAddress) document.getElementById('hc-victimAddress').value = data.victimAddress;
         if (data.inDate) document.getElementById('hc-inDate').value = data.inDate;
         if (data.outDate) document.getElementById('hc-outDate').value = data.outDate;
