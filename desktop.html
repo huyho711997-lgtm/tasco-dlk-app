@@ -14413,7 +14413,7 @@ Nếu không có thông tin, để chuỗi rỗng "".`;
         const curName = document.getElementById('hc-victimName').value;
         const curAge = document.getElementById('hc-victimAge').value;
         const curAddress = document.getElementById('hc-victimAddress').value;
-        const curHospital = document.getElementById('hc-hospitalName').value; // <-- Lấy BV hiện tại
+        const curHospital = document.getElementById('hc-hospitalName').value;
         const curInDate = document.getElementById('hc-inDate').value;
         const curOutDate = document.getElementById('hc-outDate').value;
         const curDesc = document.getElementById('hc-injuryDesc').value;
@@ -14421,80 +14421,100 @@ Nếu không có thông tin, để chuỗi rỗng "".`;
         const fmtDate = (d) => d ? moment(d, 'YYYY-MM-DD').format('DD/MM/YYYY') : '';
 
         const html = `
-            <div class="text-left font-sans mt-2">
-                <p class="text-xs text-slate-500 mb-4">Kiểm tra và điều chỉnh lại các thông tin do AI bóc tách trước khi áp dụng vào hồ sơ.</p>
-                
-                <div class="border border-slate-200 rounded-xl overflow-hidden max-h-[50vh] overflow-y-auto">
-                    <table class="w-full text-sm text-left">
-                        <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 sticky top-0">
-                            <tr>
-                                <th class="px-3 py-2 w-1/3">Trường thông tin</th>
-                                <th class="px-3 py-2 w-2/3">Kết quả AI trích xuất (Có thể sửa)</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            <tr>
-                                <td class="px-3 py-2 font-semibold text-slate-700">Nơi điều trị<br><span class="text-[10px] font-normal text-slate-400">Đang có: ${curHospital || 'Trống'}</span></td>
-                                <td class="px-3 py-2">
-                                    <input type="text" id="ai-med-hospitalName" class="w-full bg-white border border-slate-200 rounded p-1.5 outline-none focus:border-teal-500 font-bold text-teal-700" value="${aiData.noiDieuTri || ''}">
-                                </td>
-                            </tr>
-                            
-                                <td class="px-3 py-2"><tr>
-                                <td class="px-3 py-2 font-semibold text-slate-700">Tên người bệnh<br><span class="text-[10px] font-normal text-slate-400">Đang có: ${curName || 'Trống'}</span></td>
-                                <td class="px-3 py-2">
-                                    <input type="text" id="ai-med-victimName" class="w-full bg-white border border-slate-200 rounded p-1.5 outline-none focus:border-teal-500 font-bold text-rose-700 uppercase" value="${aiData.tenNguoiBenh || ''}">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-3 py-2 font-semibold text-slate-700">Tuổi<br><span class="text-[10px] font-normal text-slate-400">Đang có: ${curAge || 'Trống'}</span></td>
-                                <td class="px-3 py-2">
-                                    <input type="number" id="ai-med-victimAge" class="w-full bg-white border border-slate-200 rounded p-1.5 outline-none focus:border-teal-500 font-bold text-rose-700" value="${aiData.tuoi || ''}">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-3 py-2 font-semibold text-slate-700">Địa chỉ<br><span class="text-[10px] font-normal text-slate-400">Đang có: ${curAddress || 'Trống'}</span></td>
-                                    <textarea id="ai-med-victimAddress" rows="2" class="w-full bg-white border border-slate-200 rounded p-1.5 outline-none focus:border-teal-500 resize-none">${aiData.diaChiNguoiBenh || ''}</textarea>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-3 py-2 font-semibold text-slate-700">Ngày nhập viện<br><span class="text-[10px] font-normal text-slate-400">Đang có: ${fmtDate(curInDate) || 'Trống'}</span></td>
-                                <td class="px-3 py-2">
-                                    <input type="date" id="ai-med-inDate" class="w-full bg-white border border-slate-200 rounded p-1.5 outline-none focus:border-teal-500" value="${aiData.ngayNhapVien || ''}">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-3 py-2 font-semibold text-slate-700">Ngày xuất viện<br><span class="text-[10px] font-normal text-slate-400">Đang có: ${fmtDate(curOutDate) || 'Trống'}</span></td>
-                                <td class="px-3 py-2">
-                                    <input type="date" id="ai-med-outDate" class="w-full bg-white border border-slate-200 rounded p-1.5 outline-none focus:border-teal-500" value="${aiData.ngayXuatVien || ''}">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-3 py-2 font-semibold text-slate-700">Chẩn đoán / Thương tật<br><span class="text-[10px] font-normal text-slate-400">Đang có: ${curDesc ? 'Đã nhập' : 'Trống'}</span></td>
-                                <td class="px-3 py-2">
-                                    <textarea id="ai-med-desc" rows="3" class="w-full bg-white border border-slate-200 rounded p-1.5 outline-none focus:border-teal-500 resize-none">${aiData.chanDoan || ''}</textarea>
-                                </td>
-                            </tr>
-                            ${aiData.tongTien ? `
-                            <tr class="bg-amber-50/50">
-                                <td class="px-3 py-2 font-semibold text-amber-700" colspan="2">
-                                    <span class="text-xs">💡 AI tìm thấy Tổng viện phí: <b>${Number(aiData.tongTien).toLocaleString('vi-VN')} đ</b> (Anh có thể note lại nếu cần)</span>
-                                </td>
-                            </tr>` : ''}
-                        </tbody>
-                    </table>
+            <div class="text-left font-sans mt-1">
+                <div class="bg-cyan-50/60 border border-cyan-100 rounded-xl p-3.5 mb-5 flex items-start gap-3 shadow-sm">
+                    <div class="mt-0.5 w-7 h-7 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600 shrink-0 border border-cyan-200">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v8M8 12h8"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-black text-cyan-900">Xác nhận dữ liệu Y tế</p>
+                        <p class="text-[11.5px] text-cyan-700 mt-0.5 leading-relaxed">Hệ thống đã bóc tách dữ liệu từ chứng từ. Anh vui lòng đối chiếu lại với bản gốc và chỉnh sửa (nếu cần) trước khi áp dụng.</p>
+                    </div>
+                </div>
+
+                <div class="max-h-[55vh] overflow-y-auto pr-1 pb-2 custom-scrollbar space-y-5">
+                    
+                    <div class="relative p-4 rounded-xl border border-slate-200 bg-white shadow-sm hover:border-cyan-300 transition-colors duration-300">
+                        <div class="absolute -top-3 left-4 px-2 bg-white text-[11px] font-black text-cyan-700 uppercase tracking-wide flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Thông tin bệnh nhân
+                        </div>
+                        <div class="grid grid-cols-12 gap-3.5 mt-1">
+                            <div class="col-span-9">
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1.5">Họ và tên <span class="text-rose-500">*</span></label>
+                                <input type="text" id="ai-med-victimName" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 outline-none focus:border-cyan-500 focus:bg-white focus:ring-4 focus:ring-cyan-50 font-bold text-rose-700 uppercase text-[13px] transition-all" value="${aiData.tenNguoiBenh || ''}">
+                                <p class="text-[9px] text-slate-400 mt-1.5">Đang có: <span class="font-semibold text-slate-600">${curName || 'Trống'}</span></p>
+                            </div>
+                            <div class="col-span-3">
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1.5">Tuổi</label>
+                                <input type="number" id="ai-med-victimAge" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 outline-none focus:border-cyan-500 focus:bg-white focus:ring-4 focus:ring-cyan-50 font-bold text-cyan-800 text-[13px] text-center transition-all" value="${aiData.tuoi || ''}">
+                                <p class="text-[9px] text-slate-400 mt-1.5 text-center">Đang có: <span class="font-semibold text-slate-600">${curAge || 'Trống'}</span></p>
+                            </div>
+                            <div class="col-span-12">
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1.5">Địa chỉ / Nơi thường trú</label>
+                                <input type="text" id="ai-med-victimAddress" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 outline-none focus:border-cyan-500 focus:bg-white focus:ring-4 focus:ring-cyan-50 font-semibold text-slate-700 text-[13px] transition-all" value="${aiData.diaChiNguoiBenh || ''}">
+                                <p class="text-[9px] text-slate-400 mt-1.5 truncate">Đang có: <span class="font-semibold text-slate-600">${curAddress || 'Trống'}</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative p-4 rounded-xl border border-slate-200 bg-white shadow-sm hover:border-teal-300 transition-colors duration-300">
+                        <div class="absolute -top-3 left-4 px-2 bg-white text-[11px] font-black text-teal-700 uppercase tracking-wide flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg> Cơ sở Y tế & Điều trị
+                        </div>
+                        <div class="grid grid-cols-12 gap-3.5 mt-1">
+                            <div class="col-span-12">
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1.5">Nơi điều trị (Bệnh viện / Phòng khám)</label>
+                                <input type="text" id="ai-med-hospitalName" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 outline-none focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-50 font-bold text-teal-800 text-[13px] transition-all" value="${aiData.noiDieuTri || ''}">
+                                <p class="text-[9px] text-slate-400 mt-1.5">Đang có: <span class="font-semibold text-slate-600">${curHospital || 'Trống'}</span></p>
+                            </div>
+                            <div class="col-span-6">
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1.5">Ngày nhập viện</label>
+                                <input type="date" id="ai-med-inDate" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 outline-none focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-50 font-bold text-slate-700 text-[13px] transition-all" value="${aiData.ngayNhapVien || ''}">
+                                <p class="text-[9px] text-slate-400 mt-1.5">Đang có: <span class="font-semibold text-slate-600">${fmtDate(curInDate) || 'Trống'}</span></p>
+                            </div>
+                            <div class="col-span-6">
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1.5">Ngày xuất viện</label>
+                                <input type="date" id="ai-med-outDate" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 outline-none focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-50 font-bold text-slate-700 text-[13px] transition-all" value="${aiData.ngayXuatVien || ''}">
+                                <p class="text-[9px] text-slate-400 mt-1.5">Đang có: <span class="font-semibold text-slate-600">${fmtDate(curOutDate) || 'Trống'}</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative p-4 rounded-xl border border-slate-200 bg-white shadow-sm hover:border-violet-300 transition-colors duration-300">
+                        <div class="absolute -top-3 left-4 px-2 bg-white text-[11px] font-black text-violet-700 uppercase tracking-wide flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Chẩn đoán Y khoa
+                        </div>
+                        <div class="mt-1">
+                            <textarea id="ai-med-desc" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-50 font-semibold text-slate-800 text-[13px] resize-none transition-all leading-relaxed" placeholder="Ghi nhận chẩn đoán / thương tật từ bác sĩ...">${aiData.chanDoan || ''}</textarea>
+                            <p class="text-[9px] text-slate-400 mt-1.5">Đang có: <span class="font-semibold text-slate-600">${curDesc ? 'Đã nhập liệu' : 'Trống'}</span></p>
+                        </div>
+                    </div>
+
+                    ${aiData.tongTien ? `
+                    <div class="p-3.5 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl flex items-center gap-4 shadow-sm relative overflow-hidden">
+                        <svg class="absolute -right-4 -bottom-4 w-20 h-20 text-orange-500/10 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        <div class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-amber-500 shadow-sm shrink-0 relative z-10">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        </div>
+                        <div class="relative z-10">
+                            <p class="text-[10px] font-black text-amber-800 uppercase tracking-wider mb-0.5">Tổng viện phí phát hiện</p>
+                            <p class="text-[17px] font-black text-orange-600 leading-none">${Number(aiData.tongTien).toLocaleString('vi-VN')} <span class="text-xs font-bold text-orange-500">VNĐ</span></p>
+                        </div>
+                    </div>` : ''}
+
                 </div>
             </div>
         `;
 
         Swal.fire({
-            title: '<span class="text-base font-black text-teal-800">Kiểm tra kết quả Y tế</span>',
+            title: '<span class="text-[15px] font-black text-cyan-800 uppercase tracking-wide">Kết quả OCR Y tế</span>',
             html: html,
-            width: 600,
+            width: 650,
             showCancelButton: true,
             confirmButtonText: 'Áp dụng vào Form',
-            cancelButtonText: 'Hủy',
-            confirmButtonColor: '#0d9488',
+            cancelButtonText: 'Hủy bỏ',
+            confirmButtonColor: '#0891b2', // màu cyan-600
+            cancelButtonColor: '#64748b',
             customClass: { popup: 'rnd' },
             preConfirm: () => {
                 return {
