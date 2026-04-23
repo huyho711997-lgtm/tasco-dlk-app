@@ -1932,7 +1932,7 @@ textarea.inp { resize:vertical; }
                   </label>
                 </div>
                 <div class="p-3 flex-1 overflow-y-auto custom-scrollbar">
-                  <div id="hc-img-grid" class="grid grid-cols-3 gap-2"></div>
+                  <div id="hc-img-grid" class="grid grid-cols-4 xl:grid-cols-5 gap-2"></div>
                   <div id="hc-img-empty" class="text-center py-6">
                     <p class="text-xs font-bold text-slate-400">Chưa có ảnh chứng từ</p>
                   </div>
@@ -14629,17 +14629,31 @@ Nếu không có thông tin, để chuỗi rỗng "".`;
         
         if (empty) empty.classList.add('hidden');
         if (grid) {
-            grid.innerHTML = imgs.map(url => `
-                <div class="relative aspect-square rounded-lg border border-slate-200 overflow-hidden group shadow-sm">
-                    <a href="${url}" data-fslightbox="hc-gallery">
-                        <img src="${url}" class="w-full h-full object-cover">
-                    </a>
-                    <button type="button" onclick="HumanClaims.deleteImage('${url}', event)" class="absolute top-1 right-1 w-6 h-6 bg-rose-500/90 text-white rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-600">
-                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                    </button>
-                </div>
-            `).join('');
-            // Gọi lại Lightbox để có thể click phóng to ảnh
+            grid.innerHTML = imgs.map(url => {
+                // Tạo URL Thumbnail từ Cloudinary (nếu là link cloudinary)
+                // c_thumb: cắt thông minh, w_150: rộng 150px, q_auto: tự tối ưu chất lượng
+                let thumbUrl = url;
+                if (url.includes('cloudinary.com')) {
+                    thumbUrl = url.replace('/upload/', '/upload/c_thumb,w_150,h_150,g_auto,f_auto,q_auto/');
+                }
+
+                return `
+                    <div class="relative aspect-square rounded-lg border border-slate-200 overflow-hidden group shadow-sm bg-slate-100">
+                        <a href="${url}" data-fslightbox="hc-gallery">
+                            <img src="${thumbUrl}" 
+                                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" 
+                                 loading="lazy"
+                                 title="Nhấn để xem ảnh lớn">
+                        </a>
+                        <button type="button" 
+                                onclick="HumanClaims.deleteImage('${url}', event)" 
+                                class="absolute top-1 right-1 w-5 h-5 bg-rose-500/80 text-white rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-600 shadow-sm z-20">
+                            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+            
             if (typeof refreshFsLightbox === 'function') setTimeout(refreshFsLightbox, 100);
         }
     },
