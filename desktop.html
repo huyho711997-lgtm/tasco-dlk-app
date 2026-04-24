@@ -1333,14 +1333,14 @@ textarea.inp { resize:vertical; }
       <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span class="sidebar-text whitespace-nowrap">BT Con Người</span>
     </button>  
-    <button title="Quản lý Hợp đồng" onclick="goView('contracts')" id="nav-contracts" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-      <span class="sidebar-text whitespace-nowrap">Quản lý Hợp đồng</span>
-    </button>    
     <button title="Bảng tỷ lệ thương tật" onclick="goView('injury_rates')" id="nav-injury_rates" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
       <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
       <span class="sidebar-text whitespace-nowrap">Bảng tỷ lệ thương tật</span>
-    </button>   
+    </button>
+    <button title="Hợp đồng BH Con người" onclick="goView('contracts')" id="nav-contracts" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <span class="sidebar-text whitespace-nowrap">HĐ BH Con người</span>
+    </button>
   </nav>
 </aside>
 
@@ -2025,6 +2025,286 @@ textarea.inp { resize:vertical; }
           </div>
         </div>
 
+      </div>
+    </div>
+    <!-- ══════════════════════════════════════════════════
+         VIEW: QUẢN LÝ HỢP ĐỒNG BH CON NGƯỜI
+    ══════════════════════════════════════════════════ -->
+    <div id="view-contracts" class="view hidden h-full flex flex-col" style="gap:0;overflow-y:hidden">
+
+      <!-- STICKY HEADER -->
+      <div class="mn-sticky-header shrink-0">
+        <div style="background:#0f172a;border-radius:14px 14px 0 0;overflow:hidden;">
+
+          <!-- Top row -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px 12px;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(16,185,129,.15);pointer-events:none;"></div>
+            <div style="position:absolute;bottom:-40px;left:30px;width:120px;height:120px;border-radius:50%;background:rgba(59,130,246,.08);pointer-events:none;"></div>
+            <div style="display:flex;align-items:center;gap:12px;position:relative;z-index:1;">
+              <div style="width:36px;height:36px;background:linear-gradient(135deg,#10b981,#059669);border-radius:9px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(16,185,129,.4);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </div>
+              <div>
+                <p style="color:#f1f5f9;font-size:15px;font-weight:800;margin:0;letter-spacing:-.2px">Hợp đồng BH Con người</p>
+                <p style="color:rgba(255,255,255,.4);font-size:11px;margin:2px 0 0;font-weight:400">Tra cứu hợp đồng & danh sách học sinh để đối chiếu bồi thường</p>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;position:relative;z-index:1;">
+              <button onclick="Contracts.openImportExcel()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.1);color:#f1f5f9;border:1px solid rgba(255,255,255,.15);transition:all .15s;" onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Import Excel HS
+              </button>
+              <button onclick="Contracts.openModal()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;box-shadow:0 4px 14px rgba(16,185,129,.4);transition:all .15s;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Thêm hợp đồng
+              </button>
+            </div>
+          </div>
+
+          <!-- Stats strip -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.06);">
+            <div style="padding:10px 20px;border-right:1px solid rgba(255,255,255,.06);">
+              <p style="font-size:10px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px;">Tổng hợp đồng</p>
+              <p id="ct-kpi-total" style="font-size:22px;font-weight:900;color:#6ee7b7;letter-spacing:-1px;line-height:1;">0</p>
+            </div>
+            <div style="padding:10px 20px;border-right:1px solid rgba(255,255,255,.06);">
+              <p style="font-size:10px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px;">Đang hiệu lực</p>
+              <p id="ct-kpi-active" style="font-size:22px;font-weight:900;color:#93c5fd;letter-spacing:-1px;line-height:1;">0</p>
+            </div>
+            <div style="padding:10px 20px;border-right:1px solid rgba(255,255,255,.06);">
+              <p style="font-size:10px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px;">Tổng học sinh</p>
+              <p id="ct-kpi-students" style="font-size:22px;font-weight:900;color:#fcd34d;letter-spacing:-1px;line-height:1;">0</p>
+            </div>
+            <div style="padding:10px 20px;">
+              <p style="font-size:10px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px;">Sắp hết hạn</p>
+              <p id="ct-kpi-expiring" style="font-size:22px;font-weight:900;color:#fca5a5;letter-spacing:-1px;line-height:1;">0</p>
+            </div>
+          </div>
+
+          <!-- Toolbar -->
+          <div style="display:flex;align-items:center;gap:8px;padding:9px 14px;background:rgba(0,0,0,.25);border-top:1px solid rgba(255,255,255,.06);flex-wrap:wrap;">
+            <div style="position:relative;flex:1;min-width:220px;">
+              <svg style="position:absolute;left:11px;top:50%;transform:translateY(-50%);pointer-events:none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input id="ct-search-inp" oninput="Contracts.render()" type="text" placeholder="Tìm số HĐ, tên trường, tên học sinh..." style="width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);border-radius:9px;padding:8px 12px 8px 34px;font-size:13px;font-weight:500;color:#f1f5f9;outline:none;font-family:inherit;transition:all .15s;" onfocus="this.style.background='rgba(255,255,255,.12)';this.style.borderColor='rgba(110,231,183,.5)'" onblur="this.style.background='rgba(255,255,255,.07)';this.style.borderColor='rgba(255,255,255,.1)'">
+            </div>
+            <div style="width:1px;height:28px;background:rgba(255,255,255,.1);flex-shrink:0;"></div>
+            <select id="ct-filter-type" onchange="Contracts.render()" style="appearance:auto;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);border-radius:9px;padding:8px 12px;font-size:12px;font-weight:600;color:#e2e8f0;outline:none;cursor:pointer;font-family:inherit;">
+              <option value="">Tất cả loại hình</option>
+              <option value="Học sinh">Học sinh / Sinh viên</option>
+              <option value="Giáo viên">Giáo viên</option>
+              <option value="Khác">Khác</option>
+            </select>
+            <select id="ct-filter-status" onchange="Contracts.render()" style="appearance:auto;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);border-radius:9px;padding:8px 12px;font-size:12px;font-weight:600;color:#e2e8f0;outline:none;cursor:pointer;font-family:inherit;">
+              <option value="">Tất cả trạng thái</option>
+              <option value="active">Đang hiệu lực</option>
+              <option value="expiring">Sắp hết hạn (≤30 ngày)</option>
+              <option value="expired">Đã hết hạn</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:0 0 14px 14px;border-top:none;flex:1;overflow-y:auto;">
+        <div style="padding:9px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;">
+          <span id="ct-count-text" style="font-size:12px;color:#94a3b8;"></span>
+        </div>
+        <div class="overflow-x-auto">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr style="background:#f8fafc;border-bottom:1.5px solid #e2e8f0;">
+                <th style="padding:10px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.06em;text-align:left;white-space:nowrap;">Số HĐ / Đơn vị</th>
+                <th style="padding:10px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.06em;text-align:left;white-space:nowrap;">Loại hình</th>
+                <th style="padding:10px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.06em;text-align:left;white-space:nowrap;">Hiệu lực</th>
+                <th style="padding:10px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.06em;text-align:center;white-space:nowrap;">Mức TN</th>
+                <th style="padding:10px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.06em;text-align:center;white-space:nowrap;">Học sinh</th>
+                <th style="padding:10px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.06em;text-align:left;white-space:nowrap;">Trạng thái</th>
+                <th style="padding:10px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.06em;text-align:center;">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="ct-tbl-body"></tbody>
+          </table>
+        </div>
+        <div style="padding:9px 16px;border-top:1px solid #e2e8f0;background:#f8fafc;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <span id="ct-pg-info" style="font-size:12px;color:#94a3b8;font-weight:600;"></span>
+          <div id="ct-pg-btns" style="display:flex;align-items:center;gap:4px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MODAL: THÊM / SỬA HỢP ĐỒNG ══ -->
+    <div id="ct-modal-wrap" class="fixed inset-0 z-[60] hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center" style="opacity:0;transition:opacity .3s;">
+      <div id="ct-modal-box" style="background:#f8fafc;width:min(96vw,860px);max-height:94vh;border-radius:1.25rem;box-shadow:0 20px 60px rgba(0,0,0,.25);display:flex;flex-direction:column;overflow:hidden;transform:scale(.96);transition:transform .3s;">
+        
+        <!-- Header -->
+        <div style="background:linear-gradient(135deg,#0f172a,#1e293b);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:rgba(16,185,129,.1);pointer-events:none;"></div>
+          <div style="display:flex;align-items:center;gap:12px;position:relative;z-index:1;">
+            <div style="width:38px;height:38px;background:linear-gradient(135deg,#10b981,#059669);border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(16,185,129,.4);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div>
+              <p id="ct-m-title" style="color:#f1f5f9;font-size:15px;font-weight:800;margin:0;">Thêm hợp đồng mới</p>
+              <p style="color:rgba(255,255,255,.4);font-size:11px;margin:2px 0 0;">Điền thông tin hợp đồng bảo hiểm con người</p>
+            </div>
+          </div>
+          <button onclick="Contracts.closeModal()" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#94a3b8;position:relative;z-index:1;transition:background .15s;" onmouseover="this.style.background='rgba(239,68,68,.2)';this.style.color='#fca5a5'" onmouseout="this.style.background='rgba(255,255,255,.1)';this.style.color='#94a3b8'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div style="flex:1;overflow-y:auto;padding:20px;">
+          
+          <!-- Thông tin hợp đồng chủ -->
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:16px;">
+            <div style="padding:10px 16px;background:#f0fdf4;border-bottom:1px solid #d1fae5;display:flex;align-items:center;gap:8px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span style="font-size:11px;font-weight:800;color:#065f46;text-transform:uppercase;letter-spacing:.06em;">Thông tin Hợp đồng chủ</span>
+            </div>
+            <div style="padding:16px;display:flex;flex-direction:column;gap:12px;">
+              <div style="display:grid;grid-template-columns:1fr 2fr;gap:12px;">
+                <div><label class="lbl">Số hợp đồng <span style="color:#e11d48;">*</span></label><input id="ct-f-no" class="inp font-mono" placeholder="HĐ-2025-001..."></div>
+                <div><label class="lbl">Tên trường / Đơn vị <span style="color:#e11d48;">*</span></label><input id="ct-f-unit" class="inp font-bold"></div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                <div>
+                  <label class="lbl">Loại hình BH</label>
+                  <select id="ct-f-type" class="inp">
+                    <option value="Học sinh">Học sinh / Sinh viên</option>
+                    <option value="Giáo viên">Giáo viên</option>
+                    <option value="Khác">Khác</option>
+                  </select>
+                </div>
+                <div><label class="lbl">Hiệu lực từ</label><input id="ct-f-from" type="date" class="inp"></div>
+                <div><label class="lbl">Đến ngày</label><input id="ct-f-to" type="date" class="inp"></div>
+              </div>
+              <div>
+                <label class="lbl">Mức trách nhiệm (VNĐ/người)</label>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:4px;">
+                  <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:8px 10px;">
+                    <p style="font-size:10px;font-weight:800;color:#1d4ed8;text-transform:uppercase;margin-bottom:4px;">Mức A</p>
+                    <input id="ct-f-lvlA" class="inp" placeholder="0" style="background:#fff;" oninput="this.value=this.value.replace(/\D/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')">
+                  </div>
+                  <div style="background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:8px 10px;">
+                    <p style="font-size:10px;font-weight:800;color:#a16207;text-transform:uppercase;margin-bottom:4px;">Mức B</p>
+                    <input id="ct-f-lvlB" class="inp" placeholder="0" style="background:#fff;" oninput="this.value=this.value.replace(/\D/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')">
+                  </div>
+                  <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 10px;">
+                    <p style="font-size:10px;font-weight:800;color:#15803d;text-transform:uppercase;margin-bottom:4px;">Mức C</p>
+                    <input id="ct-f-lvlC" class="inp" placeholder="0" style="background:#fff;" oninput="this.value=this.value.replace(/\D/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')">
+                  </div>
+                  <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;padding:8px 10px;">
+                    <p style="font-size:10px;font-weight:800;color:#6d28d9;text-transform:uppercase;margin-bottom:4px;">Mức D</p>
+                    <input id="ct-f-lvlD" class="inp" placeholder="0" style="background:#fff;" oninput="this.value=this.value.replace(/\D/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')">
+                  </div>
+                </div>
+              </div>
+              <div><label class="lbl">Ghi chú</label><textarea id="ct-f-note" class="inp" rows="2" placeholder="Ghi chú thêm về hợp đồng..."></textarea></div>
+            </div>
+          </div>
+
+          <!-- Danh sách học sinh -->
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+            <div style="padding:10px 16px;background:#f8fafc;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <span style="font-size:11px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:.06em;">Danh sách học sinh</span>
+                <span id="ct-m-stu-count" style="background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:800;">0 học sinh</span>
+              </div>
+              <div style="display:flex;gap:6px;">
+                <button onclick="Contracts.importStuExcel()" style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;transition:all .12s;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Import Excel
+                </button>
+                <button onclick="Contracts.addStuRow()" style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;transition:all .12s;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                  Thêm dòng
+                </button>
+              </div>
+            </div>
+            <div style="max-height:280px;overflow-y:auto;">
+              <table style="width:100%;border-collapse:collapse;">
+                <thead style="position:sticky;top:0;z-index:5;">
+                  <tr style="background:#f8fafc;border-bottom:1.5px solid #e2e8f0;">
+                    <th style="padding:8px 12px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:center;width:44px;">#</th>
+                    <th style="padding:8px 12px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Họ và tên</th>
+                    <th style="padding:8px 12px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Ngày sinh</th>
+                    <th style="padding:8px 12px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Lớp / Khối</th>
+                    <th style="padding:8px 12px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Địa chỉ</th>
+                    <th style="padding:8px 12px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:center;width:36px;"></th>
+                  </tr>
+                </thead>
+                <tbody id="ct-stu-tbody"></tbody>
+              </table>
+              <div id="ct-stu-empty" style="padding:32px;text-align:center;color:#94a3b8;">
+                <svg style="margin:0 auto 8px;display:block;" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+                <p style="font-size:12px;font-weight:700;">Chưa có học sinh nào</p>
+                <p style="font-size:11px;margin-top:4px;">Nhấn <b>Import Excel</b> để nạp danh sách hoặc <b>Thêm dòng</b> để nhập thủ công</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div style="background:linear-gradient(to right,#f8fafc,#f1f5f9);border-top:1px solid #e2e8f0;padding:14px 20px;display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-shrink:0;">
+          <button onclick="Contracts.closeModal()" style="padding:9px 18px;background:#fff;color:#64748b;border:1.5px solid #e2e8f0;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;">Hủy</button>
+          <button onclick="Contracts.save()" style="display:inline-flex;align-items:center;gap:6px;padding:9px 24px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(16,185,129,.35);transition:all .18s;font-family:inherit;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Lưu hợp đồng
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL XEM CHI TIẾT HỢP ĐỒNG -->
+    <div id="ct-detail-wrap" class="fixed inset-0 z-[60] hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center" style="opacity:0;transition:opacity .3s;">
+      <div style="background:#fff;width:min(96vw,980px);max-height:92vh;border-radius:1.25rem;box-shadow:0 20px 60px rgba(0,0,0,.25);display:flex;flex-direction:column;overflow:hidden;transform:scale(.96);transition:transform .3s;" id="ct-detail-box">
+        <div id="ct-detail-header" style="background:#0f172a;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+          <div>
+            <p id="ct-d-title" style="color:#f1f5f9;font-size:16px;font-weight:800;margin:0;"></p>
+            <p id="ct-d-sub" style="color:rgba(255,255,255,.4);font-size:11px;margin:3px 0 0;"></p>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button id="ct-d-edit-btn" onclick="Contracts.editFromDetail()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.1);color:#f1f5f9;border:1px solid rgba(255,255,255,.15);">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Sửa
+            </button>
+            <button onclick="Contracts.closeDetail()" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#94a3b8;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px;">
+          <!-- Info cards -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;" id="ct-d-info-cards"></div>
+          <!-- Mức trách nhiệm -->
+          <div id="ct-d-levels" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;"></div>
+          <!-- Tìm kiếm trong danh sách HS -->
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input id="ct-d-stu-search" oninput="Contracts.filterDetailStudents()" type="text" placeholder="Tìm tên học sinh, ngày sinh, lớp..." style="flex:1;border:none;background:transparent;outline:none;font-size:13px;color:#334155;font-weight:500;font-family:inherit;">
+            <span id="ct-d-stu-count" style="font-size:11px;color:#94a3b8;font-weight:700;white-space:nowrap;"></span>
+          </div>
+          <!-- Bảng HS -->
+          <div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead>
+                <tr style="background:#f8fafc;border-bottom:1.5px solid #e2e8f0;">
+                  <th style="padding:9px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:center;width:44px;">#</th>
+                  <th style="padding:9px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Họ và tên</th>
+                  <th style="padding:9px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Ngày sinh</th>
+                  <th style="padding:9px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Lớp / Khối</th>
+                  <th style="padding:9px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Địa chỉ</th>
+                </tr>
+              </thead>
+              <tbody id="ct-detail-stu-tbody"></tbody>
+            </table>
+            <div id="ct-detail-stu-empty" style="display:none;padding:24px;text-align:center;color:#94a3b8;font-size:12px;font-weight:700;">Không tìm thấy học sinh nào</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -3614,89 +3894,6 @@ textarea.inp { resize:vertical; }
     </div>
   </div>
 </div>
-
-<div id="view-contracts" class="view hidden h-full flex flex-col gap-4 overflow-hidden">
-  <div class="grid grid-cols-12 gap-4 h-full">
-    
-    <div class="col-span-4 flex flex-col gap-3">
-      <div class="card p-4 flex flex-col gap-3 bg-white shadow-sm border-slate-200">
-        <div class="flex items-center justify-between">
-            <h4 class="font-bold text-slate-800 text-sm uppercase tracking-wider">Danh sách Hợp đồng</h4>
-            <button onclick="ContractManager.openAddModal()" class="p-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-md">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-            </button>
-        </div>
-        <div class="relative">
-          <input type="text" id="ct-search" oninput="ContractManager.renderList()" placeholder="Tìm số HĐ, tên trường..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-400">
-          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        </div>
-      </div>
-      
-      <div id="ct-list" class="flex-1 overflow-y-auto space-y-2 custom-scrollbar pb-4">
-          </div>
-    </div>
-
-    <div class="col-span-8 flex flex-col gap-4 min-h-0">
-      <div id="ct-detail-empty" class="card flex-1 flex flex-col items-center justify-center opacity-40">
-          <svg class="w-20 h-20 text-slate-300 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          <p class="font-bold text-slate-500 text-lg">Chọn một hợp đồng để xem chi tiết</p>
-      </div>
-
-      <div id="ct-detail-box" class="hidden flex-1 flex flex-col gap-4 min-h-0 overflow-hidden">
-        <div class="card p-5 bg-white border-l-4 border-blue-600 shadow-md shrink-0">
-          <div class="flex justify-between items-start mb-4">
-            <div>
-              <h2 id="det-unitName" class="text-xl font-black text-slate-800 leading-none">---</h2>
-              <p id="det-voucherNo" class="text-sm font-mono font-bold text-blue-600 mt-2 tracking-wide uppercase">---</p>
-            </div>
-            <div id="det-status" class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">---</div>
-          </div>
-          <div class="grid grid-cols-4 gap-4 pt-4 border-t border-slate-100">
-            <div><label class="lbl">Loại hình</label><p id="det-type" class="text-sm font-bold text-slate-700">---</p></div>
-            <div><label class="lbl">Hiệu lực</label><p id="det-period" class="text-sm font-bold text-slate-700">---</p></div>
-            <div class="col-span-2">
-              <label class="lbl text-emerald-600">Mức trách nhiệm (A-B-C-D)</label>
-              <p id="det-limits" class="text-sm font-black text-emerald-600">---</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="card flex-1 flex flex-col overflow-hidden bg-white shadow-sm border-slate-200 rounded-2xl">
-          <div class="px-5 py-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center shrink-0">
-            <div class="flex items-center gap-2">
-              <h4 class="font-black text-slate-700 text-sm uppercase tracking-wider">Danh sách Học sinh / NĐBH</h4>
-              <span id="det-student-count" class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-[10px] font-black">0</span>
-            </div>
-            <div class="flex gap-2">
-              <button onclick="ContractManager.importExcel()" class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold hover:bg-emerald-100 transition-all">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Nhập Excel
-              </button>
-              <button onclick="ContractManager.addStudent()" class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 shadow-md">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg> Thêm NĐBH
-              </button>
-            </div>
-          </div>
-          <div class="flex-1 overflow-y-auto custom-scrollbar">
-            <table class="w-full text-left border-collapse">
-              <thead class="sticky top-0 bg-white shadow-sm z-10">
-                <tr>
-                  <th class="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">STT</th>
-                  <th class="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Họ và tên</th>
-                  <th class="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Ngày sinh</th>
-                  <th class="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Lớp / Nhóm</th>
-                  <th class="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Địa chỉ</th>
-                  <th class="px-5 py-3 w-12"></th>
-                </tr>
-              </thead>
-              <tbody id="ct-student-body" class="divide-y divide-slate-50">
-                </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 <script>
 /* ═══════════════════════════════════════
    CONFIG & GLOBALS
@@ -3748,7 +3945,6 @@ window.onload = function() {
   listenGara();
   listenParts();
   initKeyboard();
-  ContractManager.init();
   setTimeout(function(){ autoNotifCheck(); setInterval(autoNotifCheck,10*60*1000); }, 3000);
 };
 
@@ -3846,7 +4042,6 @@ function toggleSidebar() {
 
 var viewTitles={handover: 'Phiếu bàn giao hồ sơ',dashboard:'Bảng điều khiển',manage:'Quản lý Hồ sơ',calendar:'Lịch giám định',overdue:'Hồ sơ trễ hẹn',import:'Tiếp nhận AI',stats:'Thống kê & Báo cáo',kanban:'Kanban Hồ sơ',cloud:'Cloud của tôi'};
 viewTitles['human_claims'] = 'Hồ sơ Bồi thường Con người';
-viewTitles['contracts'] = 'Quản lý Hợp đồng';
 
 function goView(v) {
   document.querySelectorAll('.view').forEach(function(el){ 
@@ -3859,8 +4054,8 @@ function goView(v) {
   if(t){
     t.classList.remove('hidden'); 
     // Bật lại flex cho các tab cần thiết để không hỏng layout
-      if(['calendar','kanban','cloud','manage','garages','partsprices','handover', 'contracts', 'human_claims', 'injury_rates'].includes(v)) {
-      t.classList.add('flex');
+    if(['calendar','kanban','cloud','manage','garages','partsprices','handover'].includes(v)) {
+        t.classList.add('flex');
     }
   }
   
@@ -15253,300 +15448,428 @@ document.addEventListener('DOMContentLoaded', () => {
     InjuryRates.init();
 });
 
-/* ═══════════════════════════════════════
-   MODULE: QUẢN LÝ HỢP ĐỒNG
-═══════════════════════════════════════ */
-const ContractManager = {
-    _data: [],
-    _currentId: null,
+/* ═══════════════════════════════════════════════════════════════
+   MODULE: QUẢN LÝ HỢP ĐỒNG BH CON NGƯỜI
+   Firebase path: Contracts/{id}  →  { no, unit, type, from, to, lvlA, lvlB, lvlC, lvlD, note, students:{...} }
+═══════════════════════════════════════════════════════════════ */
+var Contracts = {
+    _data: [],        // danh sách hợp đồng
+    _filtered: [],
+    _pgCur: 1,
+    _pgSize: 20,
+    _editId: null,    // null = thêm mới, string = đang sửa
+    _stuRows: [],     // [{name,dob,cls,address}] — bảng tạm trong modal
+    _detailId: null,  // id hợp đồng đang xem chi tiết
+    _detailStudents: [],
 
+    /* ── INIT ── */
     init() {
-        // Lắng nghe dữ liệu từ Firebase
-        db.ref('InsuranceContracts').on('value', snap => {
-            const raw = snap.val() || {};
-            this._data = Object.keys(raw).map(k => Object.assign({ id: k }, raw[k]))
-                         // Sửa lỗi sắp xếp ngày tháng
-                         .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-            this.renderList();
-            if(this._currentId) this.showDetail(this._currentId);
+        db.ref('Contracts').on('value', snap => {
+            var raw = snap.val() || {};
+            this._data = Object.keys(raw).map(k => Object.assign({ _id: k }, raw[k]));
+            this._data.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+            this.render();
+            this._updateKPIs();
+            // Cập nhật dropdown cho màn hình HumanClaims nếu đang mở
+            this._rebuildHCDropdown && this._rebuildHCDropdown();
         });
     },
 
-    renderList() {
-        const q = (document.getElementById('ct-search')?.value || '').toLowerCase();
-        const listEl = document.getElementById('ct-list');
-        if(!listEl) return;
+    /* ── RENDER BẢNG ── */
+    render() {
+        var q = (document.getElementById('ct-search-inp')?.value || '').toLowerCase().trim();
+        var fType = document.getElementById('ct-filter-type')?.value || '';
+        var fStatus = document.getElementById('ct-filter-status')?.value || '';
+        var today = new Date(); today.setHours(0,0,0,0);
+        var in30 = new Date(today); in30.setDate(in30.getDate()+30);
 
-        const filtered = this._data.filter(c => 
-            [c.voucherNo, c.unitName].join(' ').toLowerCase().includes(q)
-        );
+        this._filtered = this._data.filter(c => {
+            var stuNames = Object.values(c.students||{}).map(s=>s.name||'').join(' ');
+            var txt = [c.no, c.unit, stuNames].join(' ').toLowerCase();
+            if (q && !txt.includes(q)) return false;
+            if (fType && c.type !== fType) return false;
+            if (fStatus) {
+                var toD = c.to ? new Date(c.to) : null;
+                if (fStatus === 'active' && (!toD || toD < today)) return false;
+                if (fStatus === 'expiring' && (!toD || toD < today || toD > in30)) return false;
+                if (fStatus === 'expired' && (!toD || toD >= today)) return false;
+            }
+            return true;
+        });
 
-        listEl.innerHTML = filtered.map(c => {
-            const isActive = c.id === this._currentId;
-            const isExpired = moment().isAfter(moment(c.effTo, 'YYYY-MM-DD'));
-            // Chống lỗi khi students là object từ firebase
-            const studentCount = c.students ? (Array.isArray(c.students) ? c.students.length : Object.keys(c.students).length) : 0;
-            
-            return `
-            <div onclick="ContractManager.showDetail('${c.id}')" class="p-4 bg-white border rounded-2xl cursor-pointer transition-all hover:shadow-md ${isActive ? 'border-blue-500 ring-2 ring-blue-50 bg-blue-50/30' : 'border-slate-100'}">
-                <div class="flex justify-between items-start">
-                    <span class="text-[10px] font-black font-mono text-blue-600 bg-blue-50 px-2 py-0.5 rounded tracking-wider uppercase">${c.voucherNo}</span>
-                    <span class="text-[9px] font-black px-1.5 py-0.5 rounded ${isExpired ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}">${isExpired ? 'HẾT HẠN' : 'HIỆU LỰC'}</span>
-                </div>
-                <p class="mt-2 font-bold text-slate-800 text-[13.5px] leading-tight">${c.unitName}</p>
-                <div class="flex justify-between items-center mt-3 pt-3 border-t border-slate-100/50">
-                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wide">${c.insType}</p>
-                    <p class="text-[11px] text-slate-500 font-bold">${studentCount} NĐBH</p>
-                </div>
-            </div>`;
-        }).join('') || '<p class="text-center py-10 text-slate-400 text-xs font-bold italic">Không tìm thấy hợp đồng</p>';
-    },
+        var total = this._filtered.length;
+        var totalPage = Math.max(1, Math.ceil(total / this._pgSize));
+        if (this._pgCur > totalPage) this._pgCur = totalPage;
+        var start = (this._pgCur-1)*this._pgSize, end = Math.min(start+this._pgSize, total);
+        var page = this._filtered.slice(start, end);
 
-    showDetail(id) {
-        this._currentId = id;
-        const c = this._data.find(x => x.id === id);
-        if(!c) return;
+        var tbody = document.getElementById('ct-tbl-body');
+        var countEl = document.getElementById('ct-count-text');
+        if (countEl) countEl.innerHTML = `Hiển thị <strong>${page.length}</strong> / <strong>${total}</strong> hợp đồng`;
 
-        document.getElementById('ct-detail-empty').classList.add('hidden');
-        document.getElementById('ct-detail-box').classList.remove('hidden');
-        document.getElementById('ct-detail-box').classList.add('flex'); // Đảm bảo box luôn là flex
-
-        // Thông tin HĐ
-        document.getElementById('det-unitName').textContent = c.unitName;
-        document.getElementById('det-voucherNo').textContent = c.voucherNo;
-        document.getElementById('det-type').textContent = c.insType;
-        document.getElementById('det-period').textContent = `${moment(c.effFrom).format('DD/MM/YY')} - ${moment(c.effTo).format('DD/MM/YY')}`;
-        
-        // Tránh hiển thị NaN nếu limit rỗng
-        const la = Number(c.limitA || 0).toLocaleString();
-        const lb = Number(c.limitB || 0).toLocaleString();
-        const lc = Number(c.limitC || 0).toLocaleString();
-        const ld = Number(c.limitD || 0).toLocaleString();
-        document.getElementById('det-limits').textContent = `A: ${la} | B: ${lb} | C: ${lc} | D: ${ld}`;
-        
-        const isExpired = moment().isAfter(moment(c.effTo));
-        const stBadge = document.getElementById('det-status');
-        stBadge.textContent = isExpired ? 'Đã hết hạn' : 'Đang hiệu lực';
-        stBadge.className = `px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${isExpired ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`;
-
-        // Render Học sinh (Xử lý an toàn Object/Array từ Firebase)
-        const safeStudents = Array.isArray(c.students) ? c.students : (c.students ? Object.values(c.students) : []);
-        this.renderStudents(safeStudents);
-        this.renderList(); // Refresh active state in list
-    },
-
-    renderStudents(list) {
-        document.getElementById('det-student-count').textContent = list.length;
-        const tbody = document.getElementById('ct-student-body');
-        tbody.innerHTML = list.map((s, i) => `
-            <tr class="hover:bg-slate-50 transition-colors">
-                <td class="px-5 py-3 text-xs font-bold text-slate-400">${i + 1}</td>
-                <td class="px-5 py-3 text-sm font-bold text-slate-800 uppercase">${s.name}</td>
-                <td class="px-5 py-3 text-xs text-slate-600">${s.dob || '---'}</td>
-                <td class="px-5 py-3 text-xs font-semibold text-blue-600">${s.class || '---'}</td>
-                <td class="px-5 py-3 text-xs text-slate-500">${s.address || '---'}</td>
-                <td class="px-5 py-3 text-right">
-                    <button onclick="ContractManager.deleteStudent('${i}')" class="text-slate-300 hover:text-rose-500 transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                </td>
-            </tr>
-        `).join('') || '<tr><td colspan="6" class="py-10 text-center text-slate-400 italic text-xs">Chưa có danh sách học sinh</td></tr>';
-    },
-
-    // ── BỔ SUNG CÁC HÀM CÒN THIẾU ──
-
-    openAddModal() {
-        Swal.fire({
-            title: 'Thêm Hợp đồng mới',
-            html: `
-                <div class="space-y-3 text-left font-sans mt-2">
-                    <div><label class="lbl">Tên Đơn vị / Trường học</label><input id="ct-m-unit" class="inp" placeholder="VD: Trường Tiểu học Lê Lợi..."></div>
-                    <div><label class="lbl">Số Hợp đồng</label><input id="ct-m-voucher" class="inp" placeholder="VD: HD-2026/001..."></div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div><label class="lbl">Hiệu lực từ</label><input id="ct-m-from" type="date" class="inp"></div>
-                        <div><label class="lbl">Đến ngày</label><input id="ct-m-to" type="date" class="inp"></div>
-                    </div>
-                    <div>
-                        <label class="lbl">Loại hình bảo hiểm</label>
-                        <select id="ct-m-type" class="inp">
-                            <option value="Bảo hiểm Tai nạn Học sinh">Bảo hiểm Tai nạn Học sinh</option>
-                            <option value="Bảo hiểm Tai nạn Giáo viên">Bảo hiểm Tai nạn Giáo viên</option>
-                            <option value="Khác">Khác</option>
-                        </select>
-                    </div>
-                    <div class="grid grid-cols-4 gap-3">
-                        <div><label class="lbl text-center">Mức A</label><input id="ct-m-la" type="number" class="inp text-center" placeholder="10.000.000"></div>
-                        <div><label class="lbl text-center">Mức B</label><input id="ct-m-lb" type="number" class="inp text-center" placeholder="10.000.000"></div>
-                        <div><label class="lbl text-center">Mức C</label><input id="ct-m-lc" type="number" class="inp text-center" placeholder="10.000.000"></div>
-                        <div><label class="lbl text-center">Mức D</label><input id="ct-m-ld" type="number" class="inp text-center" placeholder="10.000.000"></div>
-                    </div>
-                </div>
-            `,
-            width: 600,
-            showCancelButton: true,
-            confirmButtonText: 'Tạo Hợp đồng',
-            cancelButtonText: 'Hủy',
-            confirmButtonColor: '#2563eb',
-            customClass: { popup: 'rnd' },
-            preConfirm: () => {
-                const unitName = document.getElementById('ct-m-unit').value.trim();
-                const voucherNo = document.getElementById('ct-m-voucher').value.trim();
-                if (!unitName || !voucherNo) {
-                    Swal.showValidationMessage('Vui lòng nhập Tên Đơn vị và Số Hợp đồng!');
-                    return false;
+        if (!tbody) return;
+        if (!page.length) {
+            tbody.innerHTML = `<tr><td colspan="7" style="padding:48px;text-align:center;color:#94a3b8;font-weight:700;font-size:13px;">Không tìm thấy hợp đồng nào</td></tr>`;
+        } else {
+            var today2 = new Date(); today2.setHours(0,0,0,0);
+            tbody.innerHTML = page.map((c,i) => {
+                var stuCount = Object.keys(c.students||{}).length;
+                var toD = c.to ? new Date(c.to) : null;
+                var status = '', statusStyle = '';
+                if (!toD) { status='Không rõ'; statusStyle='background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;'; }
+                else if (toD < today2) { status='Hết hạn'; statusStyle='background:#fff1f2;color:#e11d48;border:1px solid #fecdd3;'; }
+                else {
+                    var diff = Math.round((toD-today2)/(1000*60*60*24));
+                    if (diff<=30) { status=`Còn ${diff} ngày`; statusStyle='background:#fffbeb;color:#d97706;border:1px solid #fde68a;'; }
+                    else { status='Đang hiệu lực'; statusStyle='background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;'; }
                 }
-                return {
-                    unitName: unitName,
-                    voucherNo: voucherNo,
-                    effFrom: document.getElementById('ct-m-from').value,
-                    effTo: document.getElementById('ct-m-to').value,
-                    insType: document.getElementById('ct-m-type').value,
-                    limitA: parseInt(document.getElementById('ct-m-la').value) || 0,
-                    limitB: parseInt(document.getElementById('ct-m-lb').value) || 0,
-                    limitC: parseInt(document.getElementById('ct-m-lc').value) || 0,
-                    limitD: parseInt(document.getElementById('ct-m-ld').value) || 0,
-                    students: [],
-                    createdAt: new Date().toISOString()
-                };
-            }
-        }).then((res) => {
-            if(res.isConfirmed) {
-                const newId = 'CT_' + Date.now();
-                db.ref('InsuranceContracts/' + newId).set(res.value).then(() => {
-                    Toast.fire({icon: 'success', title: 'Đã tạo hợp đồng mới!'});
-                    this.showDetail(newId);
-                });
-            }
-        });
-    },
-
-    addStudent() {
-        if(!this._currentId) return;
-        Swal.fire({
-            title: 'Thêm Người được bảo hiểm',
-            html: `
-                <div class="space-y-3 text-left font-sans mt-2">
-                    <div><label class="lbl">Họ và tên</label><input id="st-m-name" class="inp uppercase" placeholder="NGUYỄN VĂN A"></div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div><label class="lbl">Ngày sinh</label><input id="st-m-dob" class="inp" placeholder="DD/MM/YYYY"></div>
-                        <div><label class="lbl">Lớp / Nhóm</label><input id="st-m-class" class="inp" placeholder="VD: Lớp 1A..."></div>
+                var lvls = [c.lvlA,c.lvlB,c.lvlC,c.lvlD].filter(Boolean);
+                var lvlBadges = ['A','B','C','D'].filter((_,i)=>([c.lvlA,c.lvlB,c.lvlC,c.lvlD][i]))
+                    .map(l=>`<span style="padding:2px 6px;border-radius:5px;font-size:10px;font-weight:800;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;">Mức ${l}</span>`).join('');
+                return `<tr style="border-bottom:1px solid #f1f5f9;transition:background .08s;cursor:pointer;" onclick="Contracts.openDetail('${c._id}')" onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='transparent'">
+                  <td style="padding:13px 14px;">
+                    <p style="font-size:13px;font-weight:800;color:#0f172a;font-family:monospace;">${c.no||'—'}</p>
+                    <p style="font-size:11px;color:#94a3b8;margin-top:2px;font-weight:600;">${c.unit||'—'}</p>
+                  </td>
+                  <td style="padding:13px 14px;">
+                    <span style="padding:3px 9px;border-radius:6px;font-size:11px;font-weight:700;background:#fdf4ff;color:#7c3aed;border:1px solid #e9d5ff;">${c.type||'—'}</span>
+                  </td>
+                  <td style="padding:13px 14px;font-size:12px;color:#475569;">
+                    ${c.from ? new Date(c.from).toLocaleDateString('vi-VN') : '—'} → ${c.to ? new Date(c.to).toLocaleDateString('vi-VN') : '—'}
+                  </td>
+                  <td style="padding:13px 14px;text-align:center;">
+                    <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap;">${lvlBadges||'<span style="color:#94a3b8;font-size:12px;">—</span>'}</div>
+                  </td>
+                  <td style="padding:13px 14px;text-align:center;">
+                    <span style="display:inline-flex;align-items:center;justify-content:center;min-width:36px;padding:4px 12px;background:#f0fdfa;color:#0d9488;border:1px solid #99f6e4;border-radius:20px;font-size:13px;font-weight:800;">${stuCount}</span>
+                  </td>
+                  <td style="padding:13px 14px;">
+                    <span style="padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;${statusStyle}">${status}</span>
+                  </td>
+                  <td style="padding:13px 14px;text-align:center;" onclick="event.stopPropagation()">
+                    <div style="display:flex;gap:4px;justify-content:center;">
+                      <button onclick="Contracts.openModal('${c._id}')" style="width:28px;height:28px;border-radius:7px;border:1.5px solid #e2e8f0;background:transparent;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:#94a3b8;transition:all .12s;" title="Sửa" onmouseover="this.style.background='#eff6ff';this.style.color='#2563eb';this.style.borderColor='#bfdbfe'" onmouseout="this.style.background='transparent';this.style.color='#94a3b8';this.style.borderColor='#e2e8f0'">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      </button>
+                      <button onclick="Contracts.delete('${c._id}')" style="width:28px;height:28px;border-radius:7px;border:1.5px solid #e2e8f0;background:transparent;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:#94a3b8;transition:all .12s;" title="Xóa" onmouseover="this.style.background='#fff1f2';this.style.color='#e11d48';this.style.borderColor='#fecdd3'" onmouseout="this.style.background='transparent';this.style.color='#94a3b8';this.style.borderColor='#e2e8f0'">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                      </button>
                     </div>
-                    <div><label class="lbl">Địa chỉ</label><input id="st-m-addr" class="inp" placeholder="Nhập địa chỉ..."></div>
-                </div>
-            `,
-            showCancelButton: true,
-            confirmButtonText: 'Thêm vào HĐ',
-            cancelButtonText: 'Hủy',
-            confirmButtonColor: '#2563eb',
-            customClass: { popup: 'rnd' },
-            preConfirm: () => {
-                const name = document.getElementById('st-m-name').value.trim();
-                if (!name) { Swal.showValidationMessage('Vui lòng nhập Họ và tên!'); return false; }
-                return {
-                    name: name,
-                    dob: document.getElementById('st-m-dob').value.trim(),
-                    class: document.getElementById('st-m-class').value.trim(),
-                    address: document.getElementById('st-m-addr').value.trim(),
-                };
-            }
-        }).then((res) => {
-            if(res.isConfirmed) {
-                const contract = this._data.find(x => x.id === this._currentId);
-                const safeStudents = Array.isArray(contract.students) ? contract.students : (contract.students ? Object.values(contract.students) : []);
-                const updatedStudents = [...safeStudents, res.value];
-                db.ref('InsuranceContracts/' + this._currentId + '/students').set(updatedStudents).then(() => {
-                    Toast.fire({icon: 'success', title: 'Đã thêm NĐBH!'});
-                });
-            }
-        });
-    },
-
-    deleteStudent(idx) {
-        if(!this._currentId) return;
-        Swal.fire({
-            title: 'Xóa NĐBH này?',
-            text: 'Dữ liệu sẽ bị xóa khỏi hợp đồng',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-            confirmButtonText: 'Xóa',
-            cancelButtonText: 'Hủy',
-            customClass: { popup: 'rnd' }
-        }).then((r) => {
-            if(r.isConfirmed) {
-                const contract = this._data.find(x => x.id === this._currentId);
-                const safeStudents = Array.isArray(contract.students) ? contract.students : (contract.students ? Object.values(contract.students) : []);
-                safeStudents.splice(idx, 1);
-                db.ref('InsuranceContracts/' + this._currentId + '/students').set(safeStudents).then(() => {
-                    Toast.fire({icon: 'success', title: 'Đã xóa khỏi danh sách!'});
-                });
-            }
-        });
-    },
-
-    async importExcel() {
-        if(!this._currentId) return;
-        if (typeof XLSX === 'undefined') {
-            Toast.fire({icon: 'error', title: 'Thư viện Excel chưa sẵn sàng!'});
-            return;
+                  </td>
+                </tr>`;
+            }).join('');
         }
 
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = '.xlsx, .xls, .csv';
-        fileInput.onchange = async (e) => {
-            const file = e.target.files[0];
-            if(!file) return;
+        // Pagination
+        var pgInfo = document.getElementById('ct-pg-info');
+        var pgBtns = document.getElementById('ct-pg-btns');
+        if (pgInfo) pgInfo.textContent = total ? `${start+1}–${end} / ${total}` : '';
+        if (pgBtns) {
+            var tp = Math.ceil(total / this._pgSize);
+            var html = '';
+            var btnStyle = (active) => `padding:5px 10px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid ${active?'#2563eb':'#e2e8f0'};background:${active?'#2563eb':'#fff'};color:${active?'#fff':'#64748b'};transition:all .12s;font-family:inherit;`;
+            if (this._pgCur > 1) html += `<button style="${btnStyle(false)}" onclick="Contracts._goPage(${this._pgCur-1})">‹</button>`;
+            for (var p=Math.max(1,this._pgCur-2); p<=Math.min(tp,this._pgCur+2); p++) {
+                html += `<button style="${btnStyle(p===this._pgCur)}" onclick="Contracts._goPage(${p})">${p}</button>`;
+            }
+            if (this._pgCur < tp) html += `<button style="${btnStyle(false)}" onclick="Contracts._goPage(${this._pgCur+1})">›</button>`;
+            pgBtns.innerHTML = html;
+        }
+    },
 
-            Swal.fire({title: 'Đang đọc dữ liệu...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass:{popup:'rnd'}});
-            
-            const reader = new FileReader();
-            reader.onload = async (evt) => {
+    _goPage(p) { this._pgCur = p; this.render(); },
+
+    /* ── KPIs ── */
+    _updateKPIs() {
+        var today = new Date(); today.setHours(0,0,0,0);
+        var in30 = new Date(today); in30.setDate(in30.getDate()+30);
+        var total=0, active=0, stuCount=0, expiring=0;
+        this._data.forEach(c => {
+            total++;
+            stuCount += Object.keys(c.students||{}).length;
+            var toD = c.to ? new Date(c.to) : null;
+            if (toD && toD >= today) active++;
+            if (toD && toD >= today && toD <= in30) expiring++;
+        });
+        var s = (id,v) => { var el=document.getElementById(id); if(el) el.textContent=v; };
+        s('ct-kpi-total', total);
+        s('ct-kpi-active', active);
+        s('ct-kpi-students', stuCount);
+        s('ct-kpi-expiring', expiring);
+    },
+
+    /* ── MODAL MỞ / ĐÓNG ── */
+    openModal(id) {
+        this._editId = id || null;
+        this._stuRows = [];
+        var wrap = document.getElementById('ct-modal-wrap');
+        var box  = document.getElementById('ct-modal-box');
+        // Clear form
+        ['ct-f-no','ct-f-unit','ct-f-note'].forEach(f => { var el=document.getElementById(f); if(el) el.value=''; });
+        ['ct-f-lvlA','ct-f-lvlB','ct-f-lvlC','ct-f-lvlD'].forEach(f => { var el=document.getElementById(f); if(el) el.value=''; });
+        var sel = document.getElementById('ct-f-type'); if(sel) sel.value='Học sinh';
+        var fd = document.getElementById('ct-f-from'), td = document.getElementById('ct-f-to');
+        if(fd) fd.value=''; if(td) td.value='';
+
+        if (id) {
+            var c = this._data.find(x=>x._id===id);
+            if (c) {
+                document.getElementById('ct-m-title').textContent = 'Sửa hợp đồng';
+                document.getElementById('ct-f-no').value = c.no||'';
+                document.getElementById('ct-f-unit').value = c.unit||'';
+                document.getElementById('ct-f-type').value = c.type||'Học sinh';
+                if(fd) fd.value = c.from||'';
+                if(td) td.value = c.to||'';
+                document.getElementById('ct-f-lvlA').value = c.lvlA ? this._fmtNum(c.lvlA) : '';
+                document.getElementById('ct-f-lvlB').value = c.lvlB ? this._fmtNum(c.lvlB) : '';
+                document.getElementById('ct-f-lvlC').value = c.lvlC ? this._fmtNum(c.lvlC) : '';
+                document.getElementById('ct-f-lvlD').value = c.lvlD ? this._fmtNum(c.lvlD) : '';
+                document.getElementById('ct-f-note').value = c.note||'';
+                this._stuRows = Object.values(c.students||{}).map(s=>({name:s.name||'',dob:s.dob||'',cls:s.cls||'',address:s.address||''}));
+            }
+        } else {
+            document.getElementById('ct-m-title').textContent = 'Thêm hợp đồng mới';
+        }
+        this._renderStuRows();
+        wrap.classList.remove('hidden');
+        requestAnimationFrame(()=>{ wrap.style.opacity='1'; box.style.transform='scale(1)'; });
+    },
+
+    closeModal() {
+        var wrap = document.getElementById('ct-modal-wrap');
+        var box  = document.getElementById('ct-modal-box');
+        wrap.style.opacity='0'; box.style.transform='scale(.96)';
+        setTimeout(()=>wrap.classList.add('hidden'),300);
+    },
+
+    /* ── SAVE ── */
+    save() {
+        var no   = (document.getElementById('ct-f-no')?.value||'').trim();
+        var unit = (document.getElementById('ct-f-unit')?.value||'').trim();
+        if (!no || !unit) { Swal.fire({icon:'warning',title:'Thiếu thông tin',text:'Vui lòng nhập Số hợp đồng và Tên đơn vị.',customClass:{popup:'rnd'}}); return; }
+        var parseNum = id => parseInt((document.getElementById(id)?.value||'').replace(/[^\d]/g,''))||null;
+        var payload = {
+            no, unit,
+            type: document.getElementById('ct-f-type')?.value||'Học sinh',
+            from: document.getElementById('ct-f-from')?.value||'',
+            to:   document.getElementById('ct-f-to')?.value||'',
+            lvlA: parseNum('ct-f-lvlA'),
+            lvlB: parseNum('ct-f-lvlB'),
+            lvlC: parseNum('ct-f-lvlC'),
+            lvlD: parseNum('ct-f-lvlD'),
+            note: document.getElementById('ct-f-note')?.value||'',
+            createdAt: this._editId ? (this._data.find(x=>x._id===this._editId)?.createdAt||Date.now()) : Date.now()
+        };
+        // Học sinh
+        var students = {};
+        this._stuRows.forEach((s,i)=>{ if(s.name.trim()) students['s_'+i]={name:s.name.trim(),dob:s.dob||'',cls:s.cls||'',address:s.address||''}; });
+        payload.students = students;
+
+        Swal.fire({title:'Đang lưu...',allowOutsideClick:false,didOpen:()=>Swal.showLoading(),customClass:{popup:'rnd'}});
+        var ref = this._editId ? db.ref('Contracts/'+this._editId) : db.ref('Contracts').push();
+        ref.set(payload).then(()=>{
+            Swal.fire({icon:'success',title:'Đã lưu!',text:`Hợp đồng ${no} đã được lưu thành công.`,customClass:{popup:'rnd'}});
+            this.closeModal();
+        }).catch(e=>Swal.fire({icon:'error',title:'Lỗi',text:e.message,customClass:{popup:'rnd'}}));
+    },
+
+    /* ── XÓA ── */
+    async delete(id) {
+        var c = this._data.find(x=>x._id===id);
+        var res = await Swal.fire({title:`Xóa hợp đồng ${c?.no||''}?`,text:'Toàn bộ danh sách học sinh trong hợp đồng này cũng sẽ bị xóa.',icon:'warning',showCancelButton:true,confirmButtonColor:'#e11d48',confirmButtonText:'Xóa',cancelButtonText:'Hủy',customClass:{popup:'rnd'}});
+        if (!res.isConfirmed) return;
+        await db.ref('Contracts/'+id).remove();
+        Toast.fire({icon:'success',title:'Đã xóa hợp đồng!'});
+    },
+
+    /* ── XEM CHI TIẾT ── */
+    openDetail(id) {
+        var c = this._data.find(x=>x._id===id);
+        if (!c) return;
+        this._detailId = id;
+        this._detailStudents = Object.values(c.students||{});
+
+        document.getElementById('ct-d-title').textContent = `${c.no||'—'} — ${c.unit||'—'}`;
+        document.getElementById('ct-d-sub').textContent = `${c.type||''} · ${c.from?new Date(c.from).toLocaleDateString('vi-VN'):'?'} → ${c.to?new Date(c.to).toLocaleDateString('vi-VN'):'?'}`;
+
+        // Info cards
+        var today = new Date(); today.setHours(0,0,0,0);
+        var toD = c.to ? new Date(c.to) : null;
+        var statusTxt = !toD ? 'Không rõ' : (toD<today ? 'Hết hạn' : `Còn ${Math.round((toD-today)/(86400000))} ngày`);
+        var statusColor = !toD ? '#64748b' : (toD<today ? '#e11d48' : '#16a34a');
+        document.getElementById('ct-d-info-cards').innerHTML = [
+            {label:'Số hợp đồng', val:`<span style="font-family:monospace;font-size:14px;">${c.no||'—'}</span>`, bg:'#eff6ff', bc:'#bfdbfe'},
+            {label:'Đơn vị', val:`<span style="font-weight:800;">${c.unit||'—'}</span>`, bg:'#f0fdf4', bc:'#bbf7d0'},
+            {label:'Hiệu lực đến', val:`<span style="color:${statusColor};font-weight:800;">${c.to?new Date(c.to).toLocaleDateString('vi-VN'):'—'}</span><br><small style="color:${statusColor};font-size:11px;">${statusTxt}</small>`, bg:'#fffbeb', bc:'#fde68a'},
+            {label:'Tổng học sinh', val:`<span style="font-size:22px;font-weight:900;color:#0d9488;">${this._detailStudents.length}</span>`, bg:'#f0fdfa', bc:'#99f6e4'},
+        ].map(card=>`<div style="background:${card.bg};border:1px solid ${card.bc};border-radius:10px;padding:12px 14px;">
+            <p style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">${card.label}</p>
+            <p>${card.val}</p></div>`).join('');
+
+        // Levels
+        var lvls = [{k:'A',v:c.lvlA,bg:'#eff6ff',bc:'#bfdbfe',tc:'#1d4ed8'},{k:'B',v:c.lvlB,bg:'#fefce8',bc:'#fde68a',tc:'#a16207'},{k:'C',v:c.lvlC,bg:'#f0fdf4',bc:'#bbf7d0',tc:'#15803d'},{k:'D',v:c.lvlD,bg:'#f5f3ff',bc:'#ddd6fe',tc:'#6d28d9'}];
+        document.getElementById('ct-d-levels').innerHTML = lvls.map(l=>l.v?`<div style="background:${l.bg};border:1px solid ${l.bc};border-radius:10px;padding:10px 14px;text-align:center;">
+            <p style="font-size:10px;font-weight:800;color:${l.tc};text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Mức ${l.k}</p>
+            <p style="font-size:15px;font-weight:800;color:${l.tc};">${this._fmtNum(l.v)} ₫</p></div>`:``).join('');
+
+        document.getElementById('ct-d-stu-search').value='';
+        this.filterDetailStudents();
+
+        var wrap = document.getElementById('ct-detail-wrap');
+        var box  = document.getElementById('ct-detail-box');
+        wrap.classList.remove('hidden');
+        requestAnimationFrame(()=>{ wrap.style.opacity='1'; box.style.transform='scale(1)'; });
+    },
+
+    filterDetailStudents() {
+        var q = (document.getElementById('ct-d-stu-search')?.value||'').toLowerCase().trim();
+        var list = q ? this._detailStudents.filter(s=>[s.name,s.dob,s.cls,s.address].join(' ').toLowerCase().includes(q)) : [...this._detailStudents];
+        var tbody = document.getElementById('ct-detail-stu-tbody');
+        var empty = document.getElementById('ct-detail-stu-empty');
+        document.getElementById('ct-d-stu-count').textContent = `${list.length} học sinh`;
+        if (!list.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+        empty.style.display='none';
+        tbody.innerHTML = list.map((s,i)=>`<tr style="border-bottom:1px solid #f1f5f9;transition:background .08s;" onmouseover="this.style.background='#f0fdfa'" onmouseout="this.style.background='transparent'">
+            <td style="padding:10px 14px;text-align:center;font-size:12px;font-weight:700;color:#94a3b8;">${i+1}</td>
+            <td style="padding:10px 14px;font-size:13px;font-weight:700;color:#0f172a;">${s.name||'—'}</td>
+            <td style="padding:10px 14px;font-size:12px;color:#475569;">${s.dob||'—'}</td>
+            <td style="padding:10px 14px;font-size:12px;color:#475569;">${s.cls||'—'}</td>
+            <td style="padding:10px 14px;font-size:12px;color:#475569;">${s.address||'—'}</td>
+        </tr>`).join('');
+    },
+
+    closeDetail() {
+        var wrap = document.getElementById('ct-detail-wrap');
+        var box  = document.getElementById('ct-detail-box');
+        wrap.style.opacity='0'; box.style.transform='scale(.96)';
+        setTimeout(()=>wrap.classList.add('hidden'),300);
+    },
+
+    editFromDetail() { this.closeDetail(); setTimeout(()=>this.openModal(this._detailId),320); },
+
+    /* ── BẢNG HỌC SINH TRONG MODAL ── */
+    _renderStuRows() {
+        var tbody = document.getElementById('ct-stu-tbody');
+        var empty = document.getElementById('ct-stu-empty');
+        var count = document.getElementById('ct-m-stu-count');
+        if (count) count.textContent = `${this._stuRows.length} học sinh`;
+        if (!this._stuRows.length) {
+            if(tbody) tbody.innerHTML='';
+            if(empty) empty.style.display='block';
+            return;
+        }
+        if(empty) empty.style.display='none';
+        tbody.innerHTML = this._stuRows.map((s,i)=>`<tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:6px 12px;text-align:center;font-size:11px;color:#94a3b8;font-weight:700;">${i+1}</td>
+            <td style="padding:6px 8px;"><input value="${s.name}" oninput="Contracts._stuRows[${i}].name=this.value" placeholder="Họ tên..." class="inp" style="min-width:160px;"></td>
+            <td style="padding:6px 8px;"><input value="${s.dob}" oninput="Contracts._stuRows[${i}].dob=this.value" placeholder="DD/MM/YYYY" class="inp" style="width:120px;"></td>
+            <td style="padding:6px 8px;"><input value="${s.cls}" oninput="Contracts._stuRows[${i}].cls=this.value" placeholder="12A1..." class="inp" style="width:90px;"></td>
+            <td style="padding:6px 8px;"><input value="${s.address}" oninput="Contracts._stuRows[${i}].address=this.value" placeholder="Địa chỉ..." class="inp" style="min-width:180px;"></td>
+            <td style="padding:6px 8px;text-align:center;"><button onclick="Contracts._removeStu(${i})" style="width:24px;height:24px;border-radius:6px;border:1.5px solid #fecdd3;background:#fff1f2;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:#e11d48;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></td>
+        </tr>`).join('');
+    },
+
+    addStuRow() {
+        this._stuRows.push({name:'',dob:'',cls:'',address:''});
+        this._renderStuRows();
+        // Scroll xuống cuối
+        var tbody = document.getElementById('ct-stu-tbody');
+        if (tbody) { var last = tbody.lastElementChild; if(last) last.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+    },
+
+    _removeStu(i) { this._stuRows.splice(i,1); this._renderStuRows(); },
+
+    /* ── IMPORT EXCEL HỌC SINH ── */
+    importStuExcel() {
+        var inp = document.createElement('input'); inp.type='file'; inp.accept='.xlsx,.xls,.csv';
+        inp.onchange = e => {
+            var file = e.target.files[0]; if(!file) return;
+            var reader = new FileReader();
+            reader.onload = ev => {
                 try {
-                    const data = new Uint8Array(evt.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const rows = XLSX.utils.sheet_to_json(firstSheet, {defval: ''});
-
-                    const students = rows.map(r => {
-                        const keys = Object.keys(r);
-                        // Tự động tìm cột dựa theo keyword thường dùng
-                        const nameKey = keys.find(k => k.toLowerCase().includes('tên') || k.toLowerCase().includes('name'));
-                        const dobKey = keys.find(k => k.toLowerCase().includes('sinh') || k.toLowerCase().includes('dob'));
-                        const classKey = keys.find(k => k.toLowerCase().includes('lớp') || k.toLowerCase().includes('class'));
-                        const addrKey = keys.find(k => k.toLowerCase().includes('chỉ') || k.toLowerCase().includes('address'));
-                        
-                        if(!nameKey || !String(r[nameKey]).trim()) return null;
-
-                        return {
-                            name: String(r[nameKey]).trim(),
-                            dob: dobKey ? String(r[dobKey]).trim() : '',
-                            class: classKey ? String(r[classKey]).trim() : '',
-                            address: addrKey ? String(r[addrKey]).trim() : ''
-                        };
-                    }).filter(Boolean);
-
-                    if(!students.length) {
-                        Swal.fire({icon:'warning', title:'Cấu trúc file sai', text:'Không tìm thấy dữ liệu. File Excel cần có dòng tiêu đề chứa chữ "Họ tên", "Ngày sinh", "Lớp"...', customClass:{popup:'rnd'}});
-                        return;
-                    }
-
-                    const contract = this._data.find(x => x.id === this._currentId);
-                    const safeStudents = Array.isArray(contract.students) ? contract.students : (contract.students ? Object.values(contract.students) : []);
-                    const updatedStudents = [...safeStudents, ...students];
-
-                    await db.ref('InsuranceContracts/' + this._currentId + '/students').set(updatedStudents);
-                    Swal.close();
-                    Toast.fire({icon: 'success', title: `Đã nạp thành công ${students.length} người!`});
-                } catch(err) {
-                    Swal.close();
-                    Toast.fire({icon: 'error', title: 'Lỗi đọc file: ' + err.message});
-                }
+                    var wb = XLSX.read(ev.target.result, {type:'array'});
+                    var ws = wb.Sheets[wb.SheetNames[0]];
+                    var rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+                    // Bỏ header, đọc từ dòng 2
+                    var newRows = rows.slice(1).filter(r=>r[0]||r[1]).map(r=>({
+                        name: String(r[1]||r[0]||'').trim(),
+                        dob:  String(r[2]||'').trim(),
+                        cls:  String(r[3]||'').trim(),
+                        address: String(r[4]||'').trim()
+                    })).filter(r=>r.name);
+                    if (!newRows.length) { Swal.fire({icon:'warning',title:'Không đọc được dữ liệu',text:'File cần có cột: STT | HỌ TÊN | NGÀY SINH | LỚP | ĐỊA CHỈ',customClass:{popup:'rnd'}}); return; }
+                    this._stuRows = [...this._stuRows, ...newRows];
+                    this._renderStuRows();
+                    Toast.fire({icon:'success',title:`Đã thêm ${newRows.length} học sinh`});
+                } catch(err) { Swal.fire({icon:'error',title:'Lỗi đọc file',text:err.message,customClass:{popup:'rnd'}}); }
             };
             reader.readAsArrayBuffer(file);
         };
-        fileInput.click();
+        inp.click();
+    },
+
+    /* ── IMPORT EXCEL NGOÀI MÀNG HÌNH CHÍNH ── */
+    openImportExcel() {
+        Swal.fire({
+            title:'Import danh sách học sinh',
+            html:`<p style="font-size:13px;color:#475569;margin-bottom:12px;">File Excel cần có các cột theo thứ tự:<br><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:12px;">STT | HỌ TÊN | NGÀY SINH | LỚP | ĐỊA CHỈ</code></p>
+            <p style="font-size:12px;color:#94a3b8;">Học sinh sẽ được import vào hợp đồng đang chọn (hoặc tạo mới).</p>`,
+            icon:'info',
+            confirmButtonText:'Tải file mẫu',
+            showCancelButton:true,
+            cancelButtonText:'Đóng',
+            customClass:{popup:'rnd'}
+        }).then(res=>{
+            if(res.isConfirmed) this._downloadStuTemplate();
+        });
+    },
+
+    _downloadStuTemplate() {
+        if(typeof XLSX==='undefined') return;
+        var data=[['STT','HỌ VÀ TÊN','NGÀY SINH','LỚP/KHỐI','ĐỊA CHỈ'],
+            [1,'Nguyễn Văn An','15/03/2010','10A1','Buôn Ma Thuột, Đắk Lắk'],
+            [2,'Trần Thị Bình','22/07/2011','9B','Cư M\'gar, Đắk Lắk']];
+        var ws=XLSX.utils.aoa_to_sheet(data);
+        ws['!cols']=[{wch:6},{wch:30},{wch:14},{wch:12},{wch:35}];
+        var wb=XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb,ws,'DanhSachHS');
+        XLSX.writeFile(wb,'Mau_DanhSachHocSinh.xlsx');
+    },
+
+    /* ── SEARCH CHO DROPDOWN Ở HumanClaims ── */
+    searchForHC(q) {
+        if (!q) return [];
+        q = q.toLowerCase();
+        return this._data.filter(c => [c.no, c.unit].join(' ').toLowerCase().includes(q)).slice(0,8);
+    },
+
+    /* ── HELPERS ── */
+    _fmtNum(n) { return n ? Number(n).toLocaleString('vi-VN') : ''; },
+};
+
+window.Contracts = Contracts;
+
+// Patch goView để init module
+var _origGoView = goView;
+goView = function(v) {
+    _origGoView(v);
+    if (v === 'contracts') {
+        if (!Contracts._data.length) Contracts.init();
+        else { Contracts.render(); Contracts._updateKPIs(); }
+        // Đảm bảo flex layout
+        var t = document.getElementById('view-contracts');
+        if (t) t.classList.add('flex');
     }
 };
+
+// Patch viewTitles
+viewTitles['contracts'] = 'Hợp đồng BH Con người';
+
+document.addEventListener('DOMContentLoaded', () => {
+    InjuryRates.init();
+    // Pre-load dữ liệu hợp đồng để dropdown HumanClaims hoạt động ngay
+    Contracts.init();
+});
 </script>
 
 
