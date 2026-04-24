@@ -3859,9 +3859,9 @@ function goView(v) {
   if(t){
     t.classList.remove('hidden'); 
     // Bật lại flex cho các tab cần thiết để không hỏng layout
-      if(['calendar','kanban','cloud','manage','garages','partsprices','handover', 'contracts'].includes(v)) {
-          t.classList.add('flex');
-      }
+      if(['calendar','kanban','cloud','manage','garages','partsprices','handover', 'contracts', 'human_claims', 'injury_rates'].includes(v)) {
+      t.classList.add('flex');
+    }
   }
   
   document.querySelectorAll('.nav-btn').forEach(function(el){ el.classList.remove('sidebar-active'); });
@@ -15265,7 +15265,8 @@ const ContractManager = {
         db.ref('InsuranceContracts').on('value', snap => {
             const raw = snap.val() || {};
             this._data = Object.keys(raw).map(k => Object.assign({ id: k }, raw[k]))
-                         .sort((a,b) => b.createdAt - a.createdAt);
+                         // Sửa lỗi sắp xếp ngày tháng
+                         .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
             this.renderList();
             if(this._currentId) this.showDetail(this._currentId);
         });
@@ -15283,6 +15284,8 @@ const ContractManager = {
         listEl.innerHTML = filtered.map(c => {
             const isActive = c.id === this._currentId;
             const isExpired = moment().isAfter(moment(c.effTo, 'YYYY-MM-DD'));
+            // Chống lỗi khi students là object từ firebase
+            const studentCount = c.students ? (Array.isArray(c.students) ? c.students.length : Object.keys(c.students).length) : 0;
             
             return `
             <div onclick="ContractManager.showDetail('${c.id}')" class="p-4 bg-white border rounded-2xl cursor-pointer transition-all hover:shadow-md ${isActive ? 'border-blue-500 ring-2 ring-blue-50 bg-blue-50/30' : 'border-slate-100'}">
@@ -15293,7 +15296,7 @@ const ContractManager = {
                 <p class="mt-2 font-bold text-slate-800 text-[13.5px] leading-tight">${c.unitName}</p>
                 <div class="flex justify-between items-center mt-3 pt-3 border-t border-slate-100/50">
                     <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wide">${c.insType}</p>
-                    <p class="text-[11px] text-slate-500 font-bold">${(c.students || []).length} NĐBH</p>
+                    <p class="text-[11px] text-slate-500 font-bold">${studentCount} NĐBH</p>
                 </div>
             </div>`;
         }).join('') || '<p class="text-center py-10 text-slate-400 text-xs font-bold italic">Không tìm thấy hợp đồng</p>';
@@ -15306,21 +15309,29 @@ const ContractManager = {
 
         document.getElementById('ct-detail-empty').classList.add('hidden');
         document.getElementById('ct-detail-box').classList.remove('hidden');
+        document.getElementById('ct-detail-box').classList.add('flex'); // Đảm bảo box luôn là flex
 
         // Thông tin HĐ
         document.getElementById('det-unitName').textContent = c.unitName;
         document.getElementById('det-voucherNo').textContent = c.voucherNo;
         document.getElementById('det-type').textContent = c.insType;
         document.getElementById('det-period').textContent = `${moment(c.effFrom).format('DD/MM/YY')} - ${moment(c.effTo).format('DD/MM/YY')}`;
-        document.getElementById('det-limits').textContent = `A: ${Number(c.limitA).toLocaleString()} | B: ${Number(c.limitB).toLocaleString()} | C: ${Number(c.limitC).toLocaleString()} | D: ${Number(c.limitD).toLocaleString()}`;
+        
+        // Tránh hiển thị NaN nếu limit rỗng
+        const la = Number(c.limitA || 0).toLocaleString();
+        const lb = Number(c.limitB || 0).toLocaleString();
+        const lc = Number(c.limitC || 0).toLocaleString();
+        const ld = Number(c.limitD || 0).toLocaleString();
+        document.getElementById('det-limits').textContent = `A: ${la} | B: ${lb} | C: ${lc} | D: ${ld}`;
         
         const isExpired = moment().isAfter(moment(c.effTo));
         const stBadge = document.getElementById('det-status');
         stBadge.textContent = isExpired ? 'Đã hết hạn' : 'Đang hiệu lực';
         stBadge.className = `px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${isExpired ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`;
 
-        // Render Học sinh
-        this.renderStudents(c.students || []);
+        // Render Học sinh (Xử lý an toàn Object/Array từ Firebase)
+        const safeStudents = Array.isArray(c.students) ? c.students : (c.students ? Object.values(c.students) : []);
+        this.renderStudents(safeStudents);
         this.renderList(); // Refresh active state in list
     },
 
@@ -15339,9 +15350,203 @@ const ContractManager = {
                 </td>
             </tr>
         `).join('') || '<tr><td colspan="6" class="py-10 text-center text-slate-400 italic text-xs">Chưa có danh sách học sinh</td></tr>';
+    },
+
+    // ── BỔ SUNG CÁC HÀM CÒN THIẾU ──
+
+    openAddModal() {
+        Swal.fire({
+            title: 'Thêm Hợp đồng mới',
+            html: `
+                <div class="space-y-3 text-left font-sans mt-2">
+                    <div><label class="lbl">Tên Đơn vị / Trường học</label><input id="ct-m-unit" class="inp" placeholder="VD: Trường Tiểu học Lê Lợi..."></div>
+                    <div><label class="lbl">Số Hợp đồng</label><input id="ct-m-voucher" class="inp" placeholder="VD: HD-2026/001..."></div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label class="lbl">Hiệu lực từ</label><input id="ct-m-from" type="date" class="inp"></div>
+                        <div><label class="lbl">Đến ngày</label><input id="ct-m-to" type="date" class="inp"></div>
+                    </div>
+                    <div>
+                        <label class="lbl">Loại hình bảo hiểm</label>
+                        <select id="ct-m-type" class="inp">
+                            <option value="Bảo hiểm Tai nạn Học sinh">Bảo hiểm Tai nạn Học sinh</option>
+                            <option value="Bảo hiểm Tai nạn Giáo viên">Bảo hiểm Tai nạn Giáo viên</option>
+                            <option value="Khác">Khác</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-4 gap-3">
+                        <div><label class="lbl text-center">Mức A</label><input id="ct-m-la" type="number" class="inp text-center" placeholder="10.000.000"></div>
+                        <div><label class="lbl text-center">Mức B</label><input id="ct-m-lb" type="number" class="inp text-center" placeholder="10.000.000"></div>
+                        <div><label class="lbl text-center">Mức C</label><input id="ct-m-lc" type="number" class="inp text-center" placeholder="10.000.000"></div>
+                        <div><label class="lbl text-center">Mức D</label><input id="ct-m-ld" type="number" class="inp text-center" placeholder="10.000.000"></div>
+                    </div>
+                </div>
+            `,
+            width: 600,
+            showCancelButton: true,
+            confirmButtonText: 'Tạo Hợp đồng',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#2563eb',
+            customClass: { popup: 'rnd' },
+            preConfirm: () => {
+                const unitName = document.getElementById('ct-m-unit').value.trim();
+                const voucherNo = document.getElementById('ct-m-voucher').value.trim();
+                if (!unitName || !voucherNo) {
+                    Swal.showValidationMessage('Vui lòng nhập Tên Đơn vị và Số Hợp đồng!');
+                    return false;
+                }
+                return {
+                    unitName: unitName,
+                    voucherNo: voucherNo,
+                    effFrom: document.getElementById('ct-m-from').value,
+                    effTo: document.getElementById('ct-m-to').value,
+                    insType: document.getElementById('ct-m-type').value,
+                    limitA: parseInt(document.getElementById('ct-m-la').value) || 0,
+                    limitB: parseInt(document.getElementById('ct-m-lb').value) || 0,
+                    limitC: parseInt(document.getElementById('ct-m-lc').value) || 0,
+                    limitD: parseInt(document.getElementById('ct-m-ld').value) || 0,
+                    students: [],
+                    createdAt: new Date().toISOString()
+                };
+            }
+        }).then((res) => {
+            if(res.isConfirmed) {
+                const newId = 'CT_' + Date.now();
+                db.ref('InsuranceContracts/' + newId).set(res.value).then(() => {
+                    Toast.fire({icon: 'success', title: 'Đã tạo hợp đồng mới!'});
+                    this.showDetail(newId);
+                });
+            }
+        });
+    },
+
+    addStudent() {
+        if(!this._currentId) return;
+        Swal.fire({
+            title: 'Thêm Người được bảo hiểm',
+            html: `
+                <div class="space-y-3 text-left font-sans mt-2">
+                    <div><label class="lbl">Họ và tên</label><input id="st-m-name" class="inp uppercase" placeholder="NGUYỄN VĂN A"></div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label class="lbl">Ngày sinh</label><input id="st-m-dob" class="inp" placeholder="DD/MM/YYYY"></div>
+                        <div><label class="lbl">Lớp / Nhóm</label><input id="st-m-class" class="inp" placeholder="VD: Lớp 1A..."></div>
+                    </div>
+                    <div><label class="lbl">Địa chỉ</label><input id="st-m-addr" class="inp" placeholder="Nhập địa chỉ..."></div>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Thêm vào HĐ',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#2563eb',
+            customClass: { popup: 'rnd' },
+            preConfirm: () => {
+                const name = document.getElementById('st-m-name').value.trim();
+                if (!name) { Swal.showValidationMessage('Vui lòng nhập Họ và tên!'); return false; }
+                return {
+                    name: name,
+                    dob: document.getElementById('st-m-dob').value.trim(),
+                    class: document.getElementById('st-m-class').value.trim(),
+                    address: document.getElementById('st-m-addr').value.trim(),
+                };
+            }
+        }).then((res) => {
+            if(res.isConfirmed) {
+                const contract = this._data.find(x => x.id === this._currentId);
+                const safeStudents = Array.isArray(contract.students) ? contract.students : (contract.students ? Object.values(contract.students) : []);
+                const updatedStudents = [...safeStudents, res.value];
+                db.ref('InsuranceContracts/' + this._currentId + '/students').set(updatedStudents).then(() => {
+                    Toast.fire({icon: 'success', title: 'Đã thêm NĐBH!'});
+                });
+            }
+        });
+    },
+
+    deleteStudent(idx) {
+        if(!this._currentId) return;
+        Swal.fire({
+            title: 'Xóa NĐBH này?',
+            text: 'Dữ liệu sẽ bị xóa khỏi hợp đồng',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Xóa',
+            cancelButtonText: 'Hủy',
+            customClass: { popup: 'rnd' }
+        }).then((r) => {
+            if(r.isConfirmed) {
+                const contract = this._data.find(x => x.id === this._currentId);
+                const safeStudents = Array.isArray(contract.students) ? contract.students : (contract.students ? Object.values(contract.students) : []);
+                safeStudents.splice(idx, 1);
+                db.ref('InsuranceContracts/' + this._currentId + '/students').set(safeStudents).then(() => {
+                    Toast.fire({icon: 'success', title: 'Đã xóa khỏi danh sách!'});
+                });
+            }
+        });
+    },
+
+    async importExcel() {
+        if(!this._currentId) return;
+        if (typeof XLSX === 'undefined') {
+            Toast.fire({icon: 'error', title: 'Thư viện Excel chưa sẵn sàng!'});
+            return;
+        }
+
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.xlsx, .xls, .csv';
+        fileInput.onchange = async (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+
+            Swal.fire({title: 'Đang đọc dữ liệu...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass:{popup:'rnd'}});
+            
+            const reader = new FileReader();
+            reader.onload = async (evt) => {
+                try {
+                    const data = new Uint8Array(evt.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rows = XLSX.utils.sheet_to_json(firstSheet, {defval: ''});
+
+                    const students = rows.map(r => {
+                        const keys = Object.keys(r);
+                        // Tự động tìm cột dựa theo keyword thường dùng
+                        const nameKey = keys.find(k => k.toLowerCase().includes('tên') || k.toLowerCase().includes('name'));
+                        const dobKey = keys.find(k => k.toLowerCase().includes('sinh') || k.toLowerCase().includes('dob'));
+                        const classKey = keys.find(k => k.toLowerCase().includes('lớp') || k.toLowerCase().includes('class'));
+                        const addrKey = keys.find(k => k.toLowerCase().includes('chỉ') || k.toLowerCase().includes('address'));
+                        
+                        if(!nameKey || !String(r[nameKey]).trim()) return null;
+
+                        return {
+                            name: String(r[nameKey]).trim(),
+                            dob: dobKey ? String(r[dobKey]).trim() : '',
+                            class: classKey ? String(r[classKey]).trim() : '',
+                            address: addrKey ? String(r[addrKey]).trim() : ''
+                        };
+                    }).filter(Boolean);
+
+                    if(!students.length) {
+                        Swal.fire({icon:'warning', title:'Cấu trúc file sai', text:'Không tìm thấy dữ liệu. File Excel cần có dòng tiêu đề chứa chữ "Họ tên", "Ngày sinh", "Lớp"...', customClass:{popup:'rnd'}});
+                        return;
+                    }
+
+                    const contract = this._data.find(x => x.id === this._currentId);
+                    const safeStudents = Array.isArray(contract.students) ? contract.students : (contract.students ? Object.values(contract.students) : []);
+                    const updatedStudents = [...safeStudents, ...students];
+
+                    await db.ref('InsuranceContracts/' + this._currentId + '/students').set(updatedStudents);
+                    Swal.close();
+                    Toast.fire({icon: 'success', title: `Đã nạp thành công ${students.length} người!`});
+                } catch(err) {
+                    Swal.close();
+                    Toast.fire({icon: 'error', title: 'Lỗi đọc file: ' + err.message});
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        };
+        fileInput.click();
     }
 };
-
 </script>
 
 
