@@ -15685,11 +15685,17 @@ var Contracts = {
                 var isSelected = this._selectedIds.has(c._id);
                 var rowBg = isSelected ? '#ecfdf5' : 'transparent';
                 
-                var chkCol = this._selectMode ? `<td style="padding:13px 14px;text-align:center;" onclick="event.stopPropagation()">
-                    <input type="checkbox" ${isSelected ? 'checked' : ''} onclick="Contracts.toggleSelect(event, '${c._id}', ${i})" style="width:16px;height:16px;cursor:pointer;accent-color:#10b981;border-radius:4px;">
+                // 1. Bỏ sự kiện click riêng ở <td>, đổi CSS checkbox thành pointer-events:none để click xuyên qua
+                var chkCol = this._selectMode ? `<td style="padding:13px 14px;text-align:center;">
+                    <input type="checkbox" ${isSelected ? 'checked' : ''} style="width:16px;height:16px;cursor:pointer;accent-color:#10b981;border-radius:4px;pointer-events:none;">
                 </td>` : '';
 
-                return `<tr style="border-bottom:1px solid #f1f5f9;transition:background .08s;cursor:pointer;background:${rowBg}" onclick="Contracts.openDetail('${c._id}')" onmouseover="if(!${isSelected}) this.style.background='#f0fdf4'" onmouseout="if(!${isSelected}) this.style.background='transparent'">
+                // 2. Tự động đổi hành động click của Dòng (Row) tùy theo chế độ đang Bật hay Tắt
+                var rowOnClick = this._selectMode 
+                    ? `Contracts.toggleSelect(event, '${c._id}', ${i})` 
+                    : `Contracts.openDetail('${c._id}')`;
+
+                return `<tr style="border-bottom:1px solid #f1f5f9;transition:background .08s;cursor:pointer;background:${rowBg}" onclick="${rowOnClick}" onmouseover="if(!${isSelected}) this.style.background='#f0fdf4'" onmouseout="if(!${isSelected}) this.style.background='transparent'">
                   ${chkCol}
                   <td style="padding:13px 14px;">
                     <p style="font-size:13px;font-weight:800;color:#0f172a;font-family:monospace;">${c.no||'—'}</p>
