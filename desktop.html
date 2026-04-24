@@ -2256,11 +2256,15 @@ textarea.inp { resize:vertical; }
                 <span id="ct-m-stu-count" style="background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:800;">0 học sinh</span>
               </div>
               <div style="display:flex;gap:6px;">
-                <button onclick="Contracts.importStuExcel()" style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;transition:all .12s;">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                  Import Excel
+                <button onclick="Contracts._downloadStuTemplate()" style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;background:#f8fafc;color:#475569;border:1px solid #e2e8f0;transition:all .12s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'" title="Tải file mẫu Excel">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Tải mẫu
                 </button>
-                <button onclick="Contracts.addStuRow()" style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;transition:all .12s;">
+                <button onclick="Contracts.importStuExcel()" style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;transition:all .12s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Import
+                </button>
+                <button onclick="Contracts.addStuRow()" style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;transition:all .12s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
                   Thêm dòng
                 </button>
