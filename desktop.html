@@ -2173,22 +2173,34 @@ textarea.inp { resize:vertical; }
               <span style="font-size:11px;font-weight:800;color:#065f46;text-transform:uppercase;letter-spacing:.06em;">Thông tin Hợp đồng chủ</span>
             </div>
             <div style="padding:16px;display:flex;flex-direction:column;gap:12px;">
-              <div style="display:grid;grid-template-columns:1fr 2fr;gap:12px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:12px;">
                 <div><label class="lbl">Số hợp đồng <span style="color:#e11d48;">*</span></label><input id="ct-f-no" class="inp font-mono" placeholder="HĐ-2025-001..."></div>
                 <div><label class="lbl">Tên trường / Đơn vị <span style="color:#e11d48;">*</span></label><input id="ct-f-unit" class="inp font-bold"></div>
+                <div><label class="lbl">Địa chỉ trường học</label><input id="ct-f-address" class="inp" placeholder="Nhập địa chỉ..."></div>
               </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+              
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;">
                 <div>
-                  <label class="lbl">Loại hình BH</label>
+                  <label class="lbl">Loại đối tượng BH</label>
                   <select id="ct-f-type" class="inp">
                     <option value="Học sinh">Học sinh / Sinh viên</option>
                     <option value="Giáo viên">Giáo viên</option>
                     <option value="Khác">Khác</option>
                   </select>
                 </div>
-                <div><label class="lbl">Hiệu lực từ</label><input id="ct-f-from" type="datetime-local" class="inp text-[12px]"></div>
-                <div><label class="lbl">Đến ngày</label><input id="ct-f-to" type="datetime-local" class="inp text-[12px]"></div>
+                <div><label class="lbl">Ngày hợp đồng</label><input id="ct-f-createdDate" type="date" class="inp text-[12px]"></div>
+                <div><label class="lbl">Bắt đầu hiệu lực</label><input id="ct-f-from" type="datetime-local" class="inp text-[12px]"></div>
+                <div><label class="lbl">Hết hiệu lực</label><input id="ct-f-to" type="datetime-local" class="inp text-[12px]"></div>
               </div>
+
+              <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr;gap:12px;">
+                <div><label class="lbl">Cán bộ cấp đơn</label><input id="ct-f-issuer" class="inp" placeholder="Tên cán bộ..."></div>
+                <div><label class="lbl">Tổng số người BH</label><input id="ct-f-totalInsured" type="number" class="inp text-center" placeholder="0"></div>
+                <div><label class="lbl">Phí NET</label><input id="ct-f-netFee" class="inp font-mono text-right text-blue-700" placeholder="0" oninput="BaoLanh.formatNumber(this)"></div>
+                <div><label class="lbl">Phí NET quy đổi</label><input id="ct-f-netFeeConv" class="inp font-mono text-right text-amber-600" placeholder="0" oninput="BaoLanh.formatNumber(this)"></div>
+                <div><label class="lbl">Phí quy đổi</label><input id="ct-f-feeConv" class="inp font-mono text-right text-emerald-600" placeholder="0" oninput="BaoLanh.formatNumber(this)"></div>
+              </div>
+
               <div>
                 <label class="lbl">Mức trách nhiệm (VNĐ/người)</label>
                 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:4px;">
@@ -15610,14 +15622,17 @@ var Contracts = {
     },
 
     /* ── MODAL MỞ / ĐÓNG ── */
+    /* ── MODAL MỞ / ĐÓNG ── */
     openModal(id) {
         this._editId = id || null;
         this._stuRows = [];
         var wrap = document.getElementById('ct-modal-wrap');
         var box  = document.getElementById('ct-modal-box');
-        // Clear form
-        ['ct-f-no','ct-f-unit','ct-f-note'].forEach(f => { var el=document.getElementById(f); if(el) el.value=''; });
-        ['ct-f-lvlA','ct-f-lvlB','ct-f-lvlC','ct-f-lvlD'].forEach(f => { var el=document.getElementById(f); if(el) el.value=''; });
+        
+        // Clear form cũ
+        ['ct-f-no','ct-f-unit','ct-f-note','ct-f-address','ct-f-issuer','ct-f-totalInsured','ct-f-createdDate'].forEach(f => { var el=document.getElementById(f); if(el) el.value=''; });
+        ['ct-f-lvlA','ct-f-lvlB','ct-f-lvlC','ct-f-lvlD','ct-f-netFee','ct-f-netFeeConv','ct-f-feeConv'].forEach(f => { var el=document.getElementById(f); if(el) el.value=''; });
+        
         var sel = document.getElementById('ct-f-type'); if(sel) sel.value='Học sinh';
         var fd = document.getElementById('ct-f-from'), td = document.getElementById('ct-f-to');
         if(fd) fd.value=''; if(td) td.value='';
@@ -15629,12 +15644,22 @@ var Contracts = {
                 document.getElementById('ct-f-no').value = c.no||'';
                 document.getElementById('ct-f-unit').value = c.unit||'';
                 document.getElementById('ct-f-type').value = c.type||'Học sinh';
+                document.getElementById('ct-f-address').value = c.address||'';
+                document.getElementById('ct-f-issuer').value = c.issuer||'';
+                document.getElementById('ct-f-totalInsured').value = c.totalInsured||'';
+                document.getElementById('ct-f-createdDate').value = c.createdDate||'';
+                
                 if(fd) fd.value = c.from ? moment(c.from).format('YYYY-MM-DDTHH:mm') : '';
                 if(td) td.value = c.to ? moment(c.to).format('YYYY-MM-DDTHH:mm') : '';
+                
                 document.getElementById('ct-f-lvlA').value = c.lvlA ? this._fmtNum(c.lvlA) : '';
                 document.getElementById('ct-f-lvlB').value = c.lvlB ? this._fmtNum(c.lvlB) : '';
                 document.getElementById('ct-f-lvlC').value = c.lvlC ? this._fmtNum(c.lvlC) : '';
                 document.getElementById('ct-f-lvlD').value = c.lvlD ? this._fmtNum(c.lvlD) : '';
+                document.getElementById('ct-f-netFee').value = c.netFee ? this._fmtNum(c.netFee) : '';
+                document.getElementById('ct-f-netFeeConv').value = c.netFeeConv ? this._fmtNum(c.netFeeConv) : '';
+                document.getElementById('ct-f-feeConv').value = c.feeConv ? this._fmtNum(c.feeConv) : '';
+                
                 document.getElementById('ct-f-note').value = c.note||'';
                 this._stuRows = Object.values(c.students||{}).map(s=>({name:s.name||'',dob:s.dob||'',cls:s.cls||'',address:s.address||''}));
             }
@@ -15654,20 +15679,32 @@ var Contracts = {
     },
 
     /* ── SAVE ── */
+    /* ── SAVE ── */
     save() {
         var no   = (document.getElementById('ct-f-no')?.value||'').trim();
         var unit = (document.getElementById('ct-f-unit')?.value||'').trim();
         if (!no || !unit) { Swal.fire({icon:'warning',title:'Thiếu thông tin',text:'Vui lòng nhập Số hợp đồng và Tên đơn vị.',customClass:{popup:'rnd'}}); return; }
+        
         var parseNum = id => parseInt((document.getElementById(id)?.value||'').replace(/[^\d]/g,''))||null;
+        
         var payload = {
             no, unit,
+            address: document.getElementById('ct-f-address')?.value||'',
+            createdDate: document.getElementById('ct-f-createdDate')?.value||'',
             type: document.getElementById('ct-f-type')?.value||'Học sinh',
             from: document.getElementById('ct-f-from')?.value||'',
             to:   document.getElementById('ct-f-to')?.value||'',
+            issuer: document.getElementById('ct-f-issuer')?.value||'',
+            totalInsured: parseInt(document.getElementById('ct-f-totalInsured')?.value) || 0,
+            
             lvlA: parseNum('ct-f-lvlA'),
             lvlB: parseNum('ct-f-lvlB'),
             lvlC: parseNum('ct-f-lvlC'),
             lvlD: parseNum('ct-f-lvlD'),
+            netFee: parseNum('ct-f-netFee'),
+            netFeeConv: parseNum('ct-f-netFeeConv'),
+            feeConv: parseNum('ct-f-feeConv'),
+            
             note: document.getElementById('ct-f-note')?.value||'',
             createdAt: this._editId ? (this._data.find(x=>x._id===this._editId)?.createdAt||Date.now()) : Date.now()
         };
@@ -15891,16 +15928,26 @@ var Contracts = {
 
                 var validData = [];
                 
-                // Hàm hỗ trợ đọc ngày tháng từ định dạng của Excel
-                var parseDate = (dStr) => {
+                // Thuật toán parse ngày siêu mạnh: Cân cả String "DD/MM/YYYY HH:mm:ss" và Serial Excel
+                var parseDateTime = (dStr) => {
                     if (!dStr) return "";
-                    if (typeof dStr === 'number') { // Định dạng Serial của Excel
-                        var date = new Date((dStr - (25567 + 2)) * 86400 * 1000);
-                        return date.toISOString().split('T')[0];
+                    if (typeof dStr === 'number') { 
+                        var excelEpoch = new Date(1899, 11, 30);
+                        var date = new Date(excelEpoch.getTime() + dStr * 86400000);
+                        return moment(date).format('YYYY-MM-DDTHH:mm');
                     }
-                    var m = moment(String(dStr).trim(), ['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD'], true);
-                    if (m.isValid()) return m.format('YYYY-MM-DD');
-                    return "";
+                    dStr = String(dStr).trim();
+                    var m = moment(dStr, [
+                        'DD/MM/YYYY HH:mm:ss', 'DD/MM/YYYY HH:mm', 'DD/MM/YYYY', 
+                        'YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DDTHH:mm', 'YYYY-MM-DD', 'MM/DD/YYYY'
+                    ], true);
+                    if (!m.isValid()) m = moment(dStr);
+                    return m.isValid() ? m.format('YYYY-MM-DDTHH:mm') : "";
+                };
+                
+                var parseDateOnly = (dStr) => {
+                    var dt = parseDateTime(dStr);
+                    return dt ? dt.split('T')[0] : "";
                 };
 
                 rows.forEach(r => {
@@ -15910,20 +15957,30 @@ var Contracts = {
                         return k ? r[k] : "";
                     };
 
-                    var no = getVal(['số', 'hđ', 'hợp đồng', 'no']);
-                    var unit = getVal(['tên', 'đơn vị', 'trường', 'unit']);
+                    var no = getVal(['số', 'hđ', 'hợp đồng', 'no', 'tên hiện thị']);
+                    var unit = getVal(['tên', 'đơn vị', 'trường', 'unit', 'người mua']);
 
                     if (no && unit) {
                         validData.push({
                             no: String(no).trim(),
                             unit: String(unit).trim(),
-                            type: String(getVal(['loại', 'type'])).trim() || 'Học sinh',
-                            from: parseDate(getVal(['từ', 'from', 'bắt đầu'])),
-                            to: parseDate(getVal(['đến', 'to', 'kết thúc'])),
-                            lvlA: parseInt(String(getVal(['mức a', 'a'])).replace(/[^\d]/g, '')) || null,
-                            lvlB: parseInt(String(getVal(['mức b', 'b'])).replace(/[^\d]/g, '')) || null,
-                            lvlC: parseInt(String(getVal(['mức c', 'c'])).replace(/[^\d]/g, '')) || null,
-                            lvlD: parseInt(String(getVal(['mức d', 'd'])).replace(/[^\d]/g, '')) || null,
+                            address: String(getVal(['địa chỉ', 'address'])).trim(),
+                            createdDate: parseDateOnly(getVal(['ngày hợp đồng', 'ngày tạo'])),
+                            type: String(getVal(['loại', 'đối tượng'])).trim() || 'Học sinh',
+                            from: parseDateTime(getVal(['hiệu lực', 'từ ngày', 'bắt đầu'])),
+                            to: parseDateTime(getVal(['hết hiệu lực', 'đến ngày', 'kết thúc', 'hết hạn'])),
+                            
+                            issuer: String(getVal(['cán bộ', 'người cấp', 'cấp đơn'])).trim(),
+                            totalInsured: parseInt(getVal(['tổng số người', 'số người', 'số lượng'])) || 0,
+                            
+                            netFee: parseInt(String(getVal(['phí net'])).replace(/[^\d]/g, '')) || null,
+                            netFeeConv: parseInt(String(getVal(['phí net quy đổi'])).replace(/[^\d]/g, '')) || null,
+                            feeConv: parseInt(String(getVal(['phí quy đổi'])).replace(/[^\d]/g, '')) || null,
+                            
+                            lvlA: parseInt(String(getVal(['mức a'])).replace(/[^\d]/g, '')) || null,
+                            lvlB: parseInt(String(getVal(['mức b'])).replace(/[^\d]/g, '')) || null,
+                            lvlC: parseInt(String(getVal(['mức c'])).replace(/[^\d]/g, '')) || null,
+                            lvlD: parseInt(String(getVal(['mức d'])).replace(/[^\d]/g, '')) || null,
                             note: String(getVal(['ghi chú', 'note'])).trim(),
                             createdAt: Date.now()
                         });
@@ -15931,7 +15988,7 @@ var Contracts = {
                 });
 
                 if (!validData.length) {
-                    Swal.fire({icon: 'error', title: 'File trống hoặc sai cấu trúc', text: 'Đảm bảo file có ít nhất 2 cột: SỐ HỢP ĐỒNG và TÊN ĐƠN VỊ.', customClass: {popup:'rnd'}});
+                    Swal.fire({icon: 'error', title: 'File trống hoặc sai cấu trúc', text: 'Đảm bảo file có ít nhất cột: SỐ HỢP ĐỒNG và TÊN TRƯỜNG/ĐƠN VỊ.', customClass: {popup:'rnd'}});
                     return;
                 }
 
