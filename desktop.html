@@ -15899,13 +15899,43 @@ var Contracts = {
             Toast.fire({icon: 'error', title: 'Thư viện Excel đang tải, vui lòng thử lại!'});
             return;
         }
+        
+        // Dữ liệu mẫu đã được cập nhật đầy đủ các cột mới
         var data = [
-            ["SỐ HỢP ĐỒNG", "TÊN ĐƠN VỊ", "LOẠI HÌNH", "TỪ NGÀY", "ĐẾN NGÀY", "MỨC A", "MỨC B", "MỨC C", "MỨC D", "GHI CHÚ"],
-            ["HĐ-2025-001", "Trường THCS Lê Lợi", "Học sinh", "05/09/2025", "04/09/2026", 20000000, 20000000, 20000000, 20000000, "Đã thu phí"],
-            ["HĐ-2025-002", "Trường THPT Chu Văn An", "Giáo viên", "01/10/2025", "30/09/2026", 50000000, 50000000, 50000000, 50000000, ""]
+            [
+                "SỐ HỢP ĐỒNG", "TÊN TRƯỜNG HỌC", "ĐỊA CHỈ TRƯỜNG HỌC", 
+                "NGÀY HỢP ĐỒNG", "LOẠI ĐỐI TƯỢNG BẢO HIỂM", 
+                "NGÀY BẮT ĐẦU HIỆU LỰC", "NGÀY HẾT HIỆU LỰC", 
+                "CÁN BỘ CẤP ĐƠN", "TỔNG SỐ NGƯỜI BẢO HIỂM", 
+                "PHÍ NET", "PHÍ NET QUY ĐỔI", "PHÍ QUY ĐỔI", 
+                "MỨC A", "MỨC B", "MỨC C", "MỨC D", "GHI CHÚ"
+            ],
+            [
+                "DO.TTKD015/A05/2500447122", "Trung Tâm Hỗ Trợ PTGD Hòa Nhập Trẻ Khuyết Tật", 
+                "82 Nguyễn Chí Thanh, P. Tân An, tỉnh Đắk Lắk", "08/11/2025", "Giáo viên", 
+                "08/11/2025 07:00", "08/11/2026 07:00", "Trần Minh Phúc", 48, 
+                7200000, 7200000, 7200000, 20000000, 20000000, 20000000, 20000000, ""
+            ],
+            [
+                "DO.TTKD015/A05/2500439076", "TRƯỜNG THPT LÊ DUẨN", 
+                "129B Phan Huy Chú, Phường Thành Nhất, Tỉnh Đắk Lắk", "20/10/2025", "Giáo viên", 
+                "20/10/2025 07:00", "20/10/2026 07:00", "Trần Minh Phúc", 56, 
+                8400000, 8400000, 8400000, 30000000, 30000000, 30000000, 30000000, "Đã thu phí"
+            ]
         ];
+        
         var ws = XLSX.utils.aoa_to_sheet(data);
-        ws['!cols'] = [{wch: 18}, {wch: 35}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 25}];
+        
+        // Tùy chỉnh độ rộng cột cho đẹp
+        ws['!cols'] = [
+            {wch: 28}, {wch: 45}, {wch: 50}, // Số HĐ, Tên, Địa chỉ
+            {wch: 16}, {wch: 25},            // Ngày HĐ, Đối tượng
+            {wch: 22}, {wch: 22},            // Bắt đầu, Kết thúc
+            {wch: 20}, {wch: 25},            // Cán bộ, Tổng người
+            {wch: 15}, {wch: 18}, {wch: 15}, // Phí
+            {wch: 15}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 25} // Mức A B C D, Ghi chú
+        ];
+        
         var wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "DanhSachHopDong");
         XLSX.writeFile(wb, "Mau_Nhap_DanhSachHopDong.xlsx");
