@@ -1217,6 +1217,8 @@ textarea.inp { resize:vertical; }
 .login-btn:hover { opacity: 0.95; transform: translateY(-1px); }
 .login-btn:active { transform: scale(0.97); box-shadow: 0 4px 10px rgba(37,99,235,0.4); }
 .login-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+
 </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -2110,12 +2112,27 @@ textarea.inp { resize:vertical; }
               <option value="expiring">Sắp hết hạn (≤30 ngày)</option>
               <option value="expired">Đã hết hạn</option>
             </select>
+            
+            <div style="width:1px;height:28px;background:rgba(255,255,255,.1);flex-shrink:0;"></div>
+            <button id="ct-select-mode-btn" onclick="Contracts.toggleSelectMode()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:rgba(255,255,255,.1);color:#f1f5f9;border:1.5px solid rgba(255,255,255,.15);border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+                Chọn nhiều
+            </button>
+
           </div>
         </div>
       </div>
 
       <!-- TABLE -->
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:0 0 14px 14px;border-top:none;flex:1;overflow-y:auto;">
+      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:0 0 14px 14px;border-top:none;flex:1;overflow-y:auto;display:flex;flex-direction:column;">
+        
+        <div id="ct-action-bar" style="display:none;align-items:center;justify-content:space-between;padding:10px 16px;background:linear-gradient(135deg,#10b981,#059669);border-bottom:1px solid #047857;flex-shrink:0;">
+          <span id="ct-sel-count" style="font-size:13px;font-weight:700;color:#fff;">Đã chọn 0 mục</span>
+          <div style="display:flex;gap:8px;">
+            <button onclick="Contracts.clearSelection()" style="padding:6px 12px;background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s" onmouseover="this.style.background='rgba(255,255,255,.3)'" onmouseout="this.style.background='rgba(255,255,255,.2)'">Bỏ chọn</button>
+            <button onclick="Contracts.deleteSelected()" style="padding:6px 12px;background:#ef4444;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:800;cursor:pointer;transition:all .15s;box-shadow:0 2px 6px rgba(225,29,72,.3)" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">Xóa vĩnh viễn</button>
+          </div>
+        </div>
         <div style="padding:9px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;">
           <span id="ct-count-text" style="font-size:12px;color:#94a3b8;"></span>
         </div>
@@ -2123,6 +2140,10 @@ textarea.inp { resize:vertical; }
           <table style="width:100%;border-collapse:collapse;">
             <thead>
               <tr style="background:#f8fafc;border-bottom:1.5px solid #e2e8f0;">
+                <th id="th-ct-chk" style="padding:10px 14px;width:40px;display:none;text-align:center;">
+                  <input type="checkbox" id="ct-chk-all" onchange="Contracts.toggleSelectAll(this.checked)" style="cursor:pointer;accent-color:#10b981;width:15px;height:15px;border-radius:4px;">
+                </th>
+                
                 <th style="padding:10px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.06em;text-align:left;white-space:nowrap;">Số HĐ / Đơn vị</th>
                 <th style="padding:10px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.06em;text-align:left;white-space:nowrap;">Loại hình</th>
                 <th style="padding:10px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.06em;text-align:left;white-space:nowrap;">Hiệu lực</th>
@@ -15485,6 +15506,11 @@ var Contracts = {
     _detailId: null,  // id hợp đồng đang xem chi tiết
     _detailStudents: [],
 
+    // THÊM 3 BIẾN NÀY
+    _selectMode: false,
+    _selectedIds: new Set(),
+    _lastClickedIdx: null,
+
     /* ── INIT ── */
     init() {
         db.ref('Contracts').on('value', snap => {
@@ -15498,7 +15524,96 @@ var Contracts = {
         });
     },
 
-    /* ── RENDER BẢNG ── */
+    /* ── LOGIC CHỌN VÀ XOÁ HÀNG LOẠT ── */
+    toggleSelectMode() {
+        this._selectMode = !this._selectMode;
+        if (!this._selectMode) {
+            this._selectedIds.clear();
+            this._lastClickedIdx = null;
+        }
+        var btn = document.getElementById('ct-select-mode-btn');
+        if (btn) {
+            if (this._selectMode) {
+                btn.style.background = '#10b981';
+                btn.style.color = '#fff';
+                btn.style.borderColor = '#10b981';
+                btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg> Đang chọn';
+            } else {
+                btn.style.background = 'rgba(255,255,255,.1)';
+                btn.style.color = '#f1f5f9';
+                btn.style.borderColor = 'rgba(255,255,255,.15)';
+                btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg> Chọn nhiều';
+            }
+        }
+        this.render();
+    },
+
+    toggleSelect(e, id, index) {
+        if (!this._selectMode) return;
+        if (e && e.shiftKey) e.preventDefault();
+        
+        if (e && e.shiftKey && this._lastClickedIdx !== null) {
+            const start = (this._pgCur - 1) * this._pgSize;
+            const end = Math.min(start + this._pgSize, this._filtered.length);
+            const pageData = this._filtered.slice(start, end);
+            
+            const startIdx = Math.min(this._lastClickedIdx, index);
+            const endIdx = Math.max(this._lastClickedIdx, index);
+            for (let i = startIdx; i <= endIdx; i++) {
+                if (pageData[i]) this._selectedIds.add(pageData[i]._id);
+            }
+        } else {
+            if (this._selectedIds.has(id)) this._selectedIds.delete(id);
+            else this._selectedIds.add(id);
+            this._lastClickedIdx = index;
+        }
+        this.render();
+    },
+
+    toggleSelectAll(checked) {
+        const start = (this._pgCur - 1) * this._pgSize;
+        const end = Math.min(start + this._pgSize, this._filtered.length);
+        const pageData = this._filtered.slice(start, end);
+        
+        pageData.forEach(r => {
+            if (checked) this._selectedIds.add(r._id);
+            else this._selectedIds.delete(r._id);
+        });
+        this.render();
+    },
+
+    clearSelection() {
+        this._selectedIds.clear();
+        this._lastClickedIdx = null;
+        this.render();
+    },
+
+    async deleteSelected() {
+        const n = this._selectedIds.size;
+        if (!n) return;
+        const res = await Swal.fire({
+            title: `Xóa ${n} hợp đồng?`,
+            text: 'Toàn bộ danh sách học sinh trong các hợp đồng này cũng sẽ bị xóa vĩnh viễn.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e11d48',
+            confirmButtonText: 'Xóa vĩnh viễn',
+            cancelButtonText: 'Hủy',
+            customClass: { popup: 'rnd' }
+        });
+        if (!res.isConfirmed) return;
+        
+        Swal.fire({ title: 'Đang xóa...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass: {popup:'rnd'} });
+        let updates = {};
+        this._selectedIds.forEach(id => { updates[id] = null; });
+        await db.ref('Contracts').update(updates);
+        Swal.close();
+        Toast.fire({ icon: 'success', title: `Đã xóa ${n} hợp đồng!` });
+        this.clearSelection();
+        this.toggleSelectMode();
+    },
+
+    /* ── RENDER BẢNG NÂNG CẤP ── */
     render() {
         var q = (document.getElementById('ct-search-inp')?.value || '').toLowerCase().trim();
         var fType = document.getElementById('ct-filter-type')?.value || '';
@@ -15531,8 +15646,25 @@ var Contracts = {
         if (countEl) countEl.innerHTML = `Hiển thị <strong>${page.length}</strong> / <strong>${total}</strong> hợp đồng`;
 
         if (!tbody) return;
+
+        // Xử lý UI Checkbox & Thanh Xoá
+        var thChk = document.getElementById('th-ct-chk');
+        if (thChk) thChk.style.display = this._selectMode ? '' : 'none';
+
+        var actionBar = document.getElementById('ct-action-bar');
+        var selCountEl = document.getElementById('ct-sel-count');
+        if (this._selectMode && this._selectedIds.size > 0) {
+            if (actionBar) actionBar.style.display = 'flex';
+            if (selCountEl) selCountEl.textContent = `Đã chọn ${this._selectedIds.size} hợp đồng`;
+        } else {
+            if (actionBar) actionBar.style.display = 'none';
+        }
+
+        var chkAll = document.getElementById('ct-chk-all');
+        if (chkAll) chkAll.checked = page.length > 0 && page.every(r => this._selectedIds.has(r._id));
+
         if (!page.length) {
-            tbody.innerHTML = `<tr><td colspan="7" style="padding:48px;text-align:center;color:#94a3b8;font-weight:700;font-size:13px;">Không tìm thấy hợp đồng nào</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="${this._selectMode ? 8 : 7}" style="padding:48px;text-align:center;color:#94a3b8;font-weight:700;font-size:13px;">Không tìm thấy hợp đồng nào</td></tr>`;
         } else {
             var today2 = new Date(); today2.setHours(0,0,0,0);
             tbody.innerHTML = page.map((c,i) => {
@@ -15549,7 +15681,16 @@ var Contracts = {
                 var lvls = [c.lvlA,c.lvlB,c.lvlC,c.lvlD].filter(Boolean);
                 var lvlBadges = ['A','B','C','D'].filter((_,i)=>([c.lvlA,c.lvlB,c.lvlC,c.lvlD][i]))
                     .map(l=>`<span style="padding:2px 6px;border-radius:5px;font-size:10px;font-weight:800;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;">Mức ${l}</span>`).join('');
-                return `<tr style="border-bottom:1px solid #f1f5f9;transition:background .08s;cursor:pointer;" onclick="Contracts.openDetail('${c._id}')" onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='transparent'">
+                
+                var isSelected = this._selectedIds.has(c._id);
+                var rowBg = isSelected ? '#ecfdf5' : 'transparent';
+                
+                var chkCol = this._selectMode ? `<td style="padding:13px 14px;text-align:center;" onclick="event.stopPropagation()">
+                    <input type="checkbox" ${isSelected ? 'checked' : ''} onclick="Contracts.toggleSelect(event, '${c._id}', ${i})" style="width:16px;height:16px;cursor:pointer;accent-color:#10b981;border-radius:4px;">
+                </td>` : '';
+
+                return `<tr style="border-bottom:1px solid #f1f5f9;transition:background .08s;cursor:pointer;background:${rowBg}" onclick="Contracts.openDetail('${c._id}')" onmouseover="if(!${isSelected}) this.style.background='#f0fdf4'" onmouseout="if(!${isSelected}) this.style.background='transparent'">
+                  ${chkCol}
                   <td style="padding:13px 14px;">
                     <p style="font-size:13px;font-weight:800;color:#0f172a;font-family:monospace;">${c.no||'—'}</p>
                     <p style="font-size:11px;color:#94a3b8;margin-top:2px;font-weight:600;">${c.unit||'—'}</p>
