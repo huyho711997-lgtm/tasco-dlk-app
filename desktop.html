@@ -15929,19 +15929,59 @@ var Contracts = {
                 var validData = [];
                 
                 // Thuật toán parse ngày siêu mạnh: Cân cả String "DD/MM/YYYY HH:mm:ss" và Serial Excel
+                // Thuật toán parse ngày siêu mạnh: Fix lệch múi giờ (06:53) và lộn DD/MM
                 var parseDateTime = (dStr) => {
                     if (!dStr) return "";
+                    
+                    // 1. NẾU LÀ SỐ SERIAL EXCEL (VD: 45536.29167)
                     if (typeof dStr === 'number') { 
-                        var excelEpoch = new Date(1899, 11, 30);
-                        var date = new Date(excelEpoch.getTime() + dStr * 86400000);
-                        return moment(date).format('YYYY-MM-DDTHH:mm');
+                        // Dùng cơ chế tính toán thủ công để tránh lỗi timezone của Date object
+                        var excelEpoch = new Date(Date.UTC(1899, 11, 30)); 
+                        var msPerDay = 86400000;
+                        var totalMs = Math.round(dStr * msPerDay);
+                        var dateUTC = new Date(excelEpoch.getTime() + totalMs);
+                        
+                        // Lấy từng thành phần theo UTC để không bị trừ múi giờ địa phương
+                        var yyyy = dateUTC.getUTCFullYear();
+                        var mm = String(dateUTC.getUTCMonth() + 1).padStart(2, '0');
+                        var dd = String(dateUTC.getUTCDate()).padStart(2, '0');
+                        var hh = String(dateUTC.getUTCHours()).padStart(2, '0');
+                        var min = String(dateUTC.getUTCMinutes()).padStart(2, '0');
+                        
+                        return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
                     }
+
+                    // 2. NẾU LÀ CHUỖI TEXT (VD: "1/9/2025 7:00:00 AM")
                     dStr = String(dStr).trim();
-                    var m = moment(dStr, [
+                    
+                    // Ép Moment.js đọc theo chuẩn DD/MM/YYYY trước tiên
+                    var formats = [
+                        'DD/MM/YYYY h:mm:ss A', 'DD/MM/YYYY hh:mm:ss a',
                         'DD/MM/YYYY HH:mm:ss', 'DD/MM/YYYY HH:mm', 'DD/MM/YYYY', 
-                        'YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DDTHH:mm', 'YYYY-MM-DD', 'MM/DD/YYYY'
-                    ], true);
-                    if (!m.isValid()) m = moment(dStr);
+                        'YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DDTHH:mm', 'YYYY-MM-DD',
+                        'MM/DD/YYYY h:mm:ss A', 'MM/DD/YYYY HH:mm:ss', 'MM/DD/YYYY'
+                    ];
+                    
+                    var m = moment(dStr, formats, false); // Dùng false để loose parsing
+                    
+                    // Xử lý riêng cho trường hợp chuỗi "1/9/2025 7:00:00 AM" nếu Moment vẫn nhầm
+                    if (!m.isValid() || dStr.toLowerCase().includes('am') || dStr.toLowerCase().includes('pm')) {
+                        // Cắt chuỗi thủ công nếu định dạng quá dị
+                        var parts = dStr.split(/[\s,]+/);
+                        if (parts.length >= 2 && parts[0].includes('/')) {
+                            var dateParts = parts[0].split('/');
+                            // Đảm bảo là DD/MM/YYYY
+                            var day = dateParts[0];
+                            var month = dateParts[1];
+                            var year = dateParts[2];
+                            
+                            if (year && year.length === 2) year = '20' + year; // Đề phòng năm dạng "25"
+                            
+                            var timeStr = parts.slice(1).join(' '); // "7:00:00 AM"
+                            m = moment(`${day}/${month}/${year} ${timeStr}`, ['DD/MM/YYYY h:mm:ss a', 'DD/MM/YYYY HH:mm:ss']);
+                        }
+                    }
+
                     return m.isValid() ? m.format('YYYY-MM-DDTHH:mm') : "";
                 };
                 
