@@ -2050,6 +2050,16 @@ textarea.inp { resize:vertical; }
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;position:relative;z-index:1;">
+              
+              <button onclick="Contracts.downloadContractTemplate()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.1);color:#f1f5f9;border:1px solid rgba(255,255,255,.15);transition:all .15s;" onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Tải mẫu HĐ
+              </button>
+              <label style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.1);color:#f1f5f9;border:1px solid rgba(255,255,255,.15);transition:all .15s;margin-bottom:0;" onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Import HĐ
+                <input type="file" class="hidden" accept=".xlsx, .xls, .csv" onchange="Contracts.importContractExcel(event)">
+              </label>
               <button onclick="Contracts.openImportExcel()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.1);color:#f1f5f9;border:1px solid rgba(255,255,255,.15);transition:all .15s;" onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Import Excel HS
@@ -15846,6 +15856,103 @@ var Contracts = {
 
     /* ── HELPERS ── */
     _fmtNum(n) { return n ? Number(n).toLocaleString('vi-VN') : ''; },
+
+    /* ── IMPORT EXCEL HỢP ĐỒNG (HÀNG LOẠT) ── */
+    downloadContractTemplate() {
+        if (typeof XLSX === 'undefined') {
+            Toast.fire({icon: 'error', title: 'Thư viện Excel đang tải, vui lòng thử lại!'});
+            return;
+        }
+        var data = [
+            ["SỐ HỢP ĐỒNG", "TÊN ĐƠN VỊ", "LOẠI HÌNH", "TỪ NGÀY", "ĐẾN NGÀY", "MỨC A", "MỨC B", "MỨC C", "MỨC D", "GHI CHÚ"],
+            ["HĐ-2025-001", "Trường THCS Lê Lợi", "Học sinh", "05/09/2025", "04/09/2026", 20000000, 20000000, 20000000, 20000000, "Đã thu phí"],
+            ["HĐ-2025-002", "Trường THPT Chu Văn An", "Giáo viên", "01/10/2025", "30/09/2026", 50000000, 50000000, 50000000, 50000000, ""]
+        ];
+        var ws = XLSX.utils.aoa_to_sheet(data);
+        ws['!cols'] = [{wch: 18}, {wch: 35}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 25}];
+        var wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "DanhSachHopDong");
+        XLSX.writeFile(wb, "Mau_Nhap_DanhSachHopDong.xlsx");
+    },
+
+    importContractExcel(event) {
+        var file = event.target.files[0];
+        event.target.value = '';
+        if (!file) return;
+
+        Swal.fire({ title: 'Đang đọc file...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass: {popup:'rnd'} });
+
+        var reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                var data = new Uint8Array(e.target.result);
+                var workbook = XLSX.read(data, {type: 'array'});
+                var firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                var rows = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
+
+                var validData = [];
+                
+                // Hàm hỗ trợ đọc ngày tháng từ định dạng của Excel
+                var parseDate = (dStr) => {
+                    if (!dStr) return "";
+                    if (typeof dStr === 'number') { // Định dạng Serial của Excel
+                        var date = new Date((dStr - (25567 + 2)) * 86400 * 1000);
+                        return date.toISOString().split('T')[0];
+                    }
+                    var m = moment(String(dStr).trim(), ['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD'], true);
+                    if (m.isValid()) return m.format('YYYY-MM-DD');
+                    return "";
+                };
+
+                rows.forEach(r => {
+                    var keys = Object.keys(r);
+                    var getVal = (keywords) => {
+                        var k = keys.find(key => keywords.some(kw => key.toLowerCase().includes(kw)));
+                        return k ? r[k] : "";
+                    };
+
+                    var no = getVal(['số', 'hđ', 'hợp đồng', 'no']);
+                    var unit = getVal(['tên', 'đơn vị', 'trường', 'unit']);
+
+                    if (no && unit) {
+                        validData.push({
+                            no: String(no).trim(),
+                            unit: String(unit).trim(),
+                            type: String(getVal(['loại', 'type'])).trim() || 'Học sinh',
+                            from: parseDate(getVal(['từ', 'from', 'bắt đầu'])),
+                            to: parseDate(getVal(['đến', 'to', 'kết thúc'])),
+                            lvlA: parseInt(String(getVal(['mức a', 'a'])).replace(/[^\d]/g, '')) || null,
+                            lvlB: parseInt(String(getVal(['mức b', 'b'])).replace(/[^\d]/g, '')) || null,
+                            lvlC: parseInt(String(getVal(['mức c', 'c'])).replace(/[^\d]/g, '')) || null,
+                            lvlD: parseInt(String(getVal(['mức d', 'd'])).replace(/[^\d]/g, '')) || null,
+                            note: String(getVal(['ghi chú', 'note'])).trim(),
+                            createdAt: Date.now()
+                        });
+                    }
+                });
+
+                if (!validData.length) {
+                    Swal.fire({icon: 'error', title: 'File trống hoặc sai cấu trúc', text: 'Đảm bảo file có ít nhất 2 cột: SỐ HỢP ĐỒNG và TÊN ĐƠN VỊ.', customClass: {popup:'rnd'}});
+                    return;
+                }
+
+                Swal.fire({ title: 'Đang đẩy lên máy chủ...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass: {popup:'rnd'} });
+
+                var updates = {};
+                validData.forEach((item, i) => {
+                    var key = 'Contracts/' + Date.now() + '_' + i;
+                    updates[key] = item;
+                });
+
+                await db.ref().update(updates);
+                Swal.fire({icon: 'success', title: 'Hoàn tất!', text: `Đã import ${validData.length} hợp đồng vào hệ thống.`, customClass: {popup:'rnd'}});
+
+            } catch (err) {
+                Swal.fire({icon: 'error', title: 'Lỗi xử lý file', text: err.message, customClass: {popup:'rnd'}});
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
 };
 
 </script>
