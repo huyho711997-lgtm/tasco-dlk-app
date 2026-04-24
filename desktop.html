@@ -15847,29 +15847,6 @@ var Contracts = {
     _fmtNum(n) { return n ? Number(n).toLocaleString('vi-VN') : ''; },
 };
 
-window.Contracts = Contracts;
-
-// Patch goView để init module
-var _origGoView = goView;
-goView = function(v) {
-    _origGoView(v);
-    if (v === 'contracts') {
-        if (!Contracts._data.length) Contracts.init();
-        else { Contracts.render(); Contracts._updateKPIs(); }
-        // Đảm bảo flex layout
-        var t = document.getElementById('view-contracts');
-        if (t) t.classList.add('flex');
-    }
-};
-
-// Patch viewTitles
-viewTitles['contracts'] = 'Hợp đồng BH Con người';
-
-document.addEventListener('DOMContentLoaded', () => {
-    InjuryRates.init();
-    // Pre-load dữ liệu hợp đồng để dropdown HumanClaims hoạt động ngay
-    Contracts.init();
-});
 </script>
 
 
