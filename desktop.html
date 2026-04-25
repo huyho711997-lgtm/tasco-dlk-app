@@ -1920,11 +1920,19 @@ textarea.inp { resize:vertical; }
                     <div><label class="lbl">Hiệu lực từ</label><input id="hc-effFrom" type="datetime-local" class="inp text-[11px]" onchange="HumanClaims.checkWarnings()"></div>
                     <div><label class="lbl">Đến</label><input id="hc-effTo" type="datetime-local" class="inp text-[11px]" onchange="HumanClaims.checkWarnings()"></div>
                   </div>
-                  <div class="grid grid-cols-4 gap-3 pt-2 border-t border-slate-100">
-                    <div><label class="lbl !text-[10px]">Mức trách nhiệm A</label><input id="hc-limitA" class="inp font-mono text-right text-rose-600" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
-                    <div><label class="lbl !text-[10px]">Mức trách nhiệm B</label><input id="hc-limitB" class="inp font-mono text-right text-emerald-600" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
-                    <div><label class="lbl !text-[10px]">Mức trách nhiệm C</label><input id="hc-limitC" class="inp font-mono text-right text-amber-600" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
-                    <div><label class="lbl !text-[10px]">Mức trách nhiệm D</label><input id="hc-limitD" class="inp font-mono text-right text-blue-600" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
+                  <div class="pt-2 border-t border-slate-100 relative">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="lbl !mb-0">Mức trách nhiệm (VNĐ/người/vụ)</label>
+                        <button type="button" onclick="HumanClaims.showCoverageInfo()" class="w-5 h-5 rounded-full bg-slate-100 text-slate-500 hover:bg-blue-100 hover:text-blue-600 flex items-center justify-center transition-colors" title="Xem giải thích Mức A, B, C, D">
+                            <span class="font-serif font-bold italic text-xs">i</span>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-4 gap-3">
+                        <div><label class="lbl !text-[10px] text-rose-500">Mức A (Tử vong do ốm/bệnh)</label><input id="hc-limitA" class="inp font-mono text-right text-rose-600" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
+                        <div><label class="lbl !text-[10px] text-emerald-500">Mức B (Tai nạn)</label><input id="hc-limitB" class="inp font-mono text-right text-emerald-600" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
+                        <div><label class="lbl !text-[10px] text-amber-500">Mức C (Phẫu thuật)</label><input id="hc-limitC" class="inp font-mono text-right text-amber-600" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
+                        <div><label class="lbl !text-[10px] text-blue-500">Mức D (Nằm viện)</label><input id="hc-limitD" class="inp font-mono text-right text-blue-600" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -14420,6 +14428,36 @@ const HumanClaims = {
         document.getElementById('hc-calc-hospital').textContent = valHospital.toLocaleString('vi-VN') + ' đ';
         document.getElementById('hc-calc-total').innerHTML = total.toLocaleString('vi-VN') + '<span class="text-lg text-emerald-400 ml-1">đ</span>';
     },
+
+    showCoverageInfo() {
+        Swal.fire({
+            title: '<span style="font-size:16px;font-weight:800;color:#1e293b">Chi tiết Phạm vi Bảo hiểm</span>',
+            html: `
+                <div class="text-left font-sans text-[13px] text-slate-600 leading-relaxed space-y-3 mt-2">
+                    <div class="p-3 bg-rose-50 border border-rose-100 rounded-lg">
+                        <strong class="text-rose-700 block mb-1">Mức A (Phạm vi bảo hiểm A)</strong>
+                        Chết do ốm đau, bệnh tật.
+                    </div>
+                    <div class="p-3 bg-emerald-50 border border-emerald-100 rounded-lg">
+                        <strong class="text-emerald-700 block mb-1">Mức B (Phạm vi bảo hiểm B)</strong>
+                        Chết, thương tật thân thể do tai nạn.
+                    </div>
+                    <div class="p-3 bg-amber-50 border border-amber-100 rounded-lg">
+                        <strong class="text-amber-700 block mb-1">Mức C (Phạm vi bảo hiểm C)</strong>
+                        Phẫu thuật do ốm đau, bệnh tật, thai sản.
+                    </div>
+                    <div class="p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                        <strong class="text-blue-700 block mb-1">Mức D (Phạm vi bảo hiểm D)</strong>
+                        Nằm viện do ốm đau, bệnh tật, thai sản, thương tật thân thể do tai nạn.
+                    </div>
+                </div>
+            `,
+            confirmButtonText: 'Đã hiểu',
+            confirmButtonColor: '#3b82f6',
+            customClass: { popup: 'rnd !w-[420px]' }
+        });
+    },
+    
     /* ── KIỂM TRA NĐBH CÓ TRONG DANH SÁCH HỢP ĐỒNG KHÔNG ── */
     checkInsuredPerson() {
         const nameInp = document.getElementById('hc-victimName');
