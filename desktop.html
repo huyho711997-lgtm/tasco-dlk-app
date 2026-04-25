@@ -1883,12 +1883,17 @@ textarea.inp { resize:vertical; }
                           <input id="hc-contractNo" class="inp font-mono" placeholder="Tìm số HĐ..." oninput="HumanClaims.searchContract(this.value, 'no')">
                           <div id="hc-contract-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl hidden max-h-48 overflow-y-auto"></div>
                       </div>
-
                       <div class="relative"> <label class="lbl">Tên đơn vị tham gia BH</label>
                           <input id="hc-companyName" class="inp font-bold text-blue-800" placeholder="Tìm theo tên đơn vị..." oninput="HumanClaims.searchContract(this.value, 'unit')">
                           <div id="hc-unit-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl hidden max-h-48 overflow-y-auto"></div>
                       </div>
                   </div>
+                  
+                  <div>
+                    <label class="lbl">Địa chỉ đơn vị tham gia BH</label>
+                    <input id="hc-companyAddress" class="inp" placeholder="Số nhà, đường, phường/xã, quận/huyện...">
+                  </div>
+
                   <div class="grid grid-cols-3 gap-3">
                     <div><label class="lbl">Số GCN</label><input id="hc-gcn" class="inp font-mono"></div>
                     <div><label class="lbl">Loại hình BH</label>
@@ -1910,6 +1915,7 @@ textarea.inp { resize:vertical; }
                     <div><label class="lbl">Mức phí</label><input id="hc-premium" class="inp font-mono text-right text-blue-600" oninput="BaoLanh.formatNumber(this)" placeholder="VD: 500.000"></div>
                     <div><label class="lbl">Ngày nộp phí</label><input id="hc-feeDate" type="date" class="inp"></div>
                   </div>
+
                   <div class="grid grid-cols-2 gap-3">
                     <div><label class="lbl">Hiệu lực từ</label><input id="hc-effFrom" type="datetime-local" class="inp text-[11px]" onchange="HumanClaims.checkWarnings()"></div>
                     <div><label class="lbl">Đến</label><input id="hc-effTo" type="datetime-local" class="inp text-[11px]" onchange="HumanClaims.checkWarnings()"></div>
@@ -14171,6 +14177,7 @@ const HumanClaims = {
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
         
         setVal('hc-contractNo', r.contractNo); setVal('hc-companyName', r.companyName);
+        setVal('hc-companyAddress', r.companyAddress); // Nạp địa chỉ
         setVal('hc-gcn', r.gcn); setVal('hc-insType', r.insType); setVal('hc-feeStatus', r.feeStatus);
         setVal('hc-premium', r.premium ? Number(r.premium).toLocaleString('vi-VN') : '');
         setVal('hc-feeDate', r.feeDate);
@@ -14285,6 +14292,7 @@ const HumanClaims = {
 
         const payload = {
             contractNo: getVal('hc-contractNo'), companyName: getVal('hc-companyName'),
+            companyAddress: getVal('hc-companyAddress'),
             gcn: getVal('hc-gcn'), insType: getVal('hc-insType'), feeStatus: getVal('hc-feeStatus'),
             premium: getNum('hc-premium'), feeDate: getVal('hc-feeDate'),
             effFrom: getVal('hc-effFrom'), effTo: getVal('hc-effTo'),
@@ -14533,22 +14541,16 @@ const HumanClaims = {
     selectContract(id) {
         const c = Contracts._data.find(x => x._id === id);
         if (!c) return;
-
-        // 1. Điền thông tin văn bản
         document.getElementById('hc-contractNo').value = c.no || '';
         document.getElementById('hc-companyName').value = c.unit || '';
-        
-        // 2. XỬ LÝ LOẠI HÌNH BH (CẬP NHẬT CHỐNG LỖI UNICODE BỘ GÕ)
+        document.getElementById('hc-companyAddress').value = c.address || ''; // Tự động điền địa chỉ
         const insTypeEl = document.getElementById('hc-insType');
         if (insTypeEl) {
-            // Hàm chuẩn hóa: chuyển về chữ thường và lột bỏ toàn bộ dấu tiếng Việt
             const normType = String(c.type || '')
                 .toLowerCase()
                 .normalize('NFD')
                 .replace(/[\u0300-\u036f]/g, '')
                 .replace(/đ/g, 'd');
-            
-            // So sánh không dấu để đảm bảo độ chính xác tuyệt đối
             if (normType.includes('hoc sinh') || normType.includes('sinh vien')) {
                 insTypeEl.value = 'Học sinh'; // Gán khớp với value="Học sinh" trong HTML
             } else if (normType.includes('giao vien')) {
@@ -14558,11 +14560,8 @@ const HumanClaims = {
             }
         }
         
-        // 3. Điền ngày hiệu lực
         if (c.from) document.getElementById('hc-effFrom').value = moment(c.from).format('YYYY-MM-DDTHH:mm');
         if (c.to) document.getElementById('hc-effTo').value = moment(c.to).format('YYYY-MM-DDTHH:mm');
-
-        // 4. Điền các mức trách nhiệm
         const fmt = (val) => val ? Number(val).toLocaleString('vi-VN') : '';
         document.getElementById('hc-limitA').value = fmt(c.lvlA);
         document.getElementById('hc-limitB').value = fmt(c.lvlB);
