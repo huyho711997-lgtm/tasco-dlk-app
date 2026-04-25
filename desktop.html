@@ -14714,13 +14714,7 @@ const HumanClaims = {
     },
 
     async processMedicalOcr(file) {
-        Swal.fire({
-            title: 'AI đang phân tích...',
-            html: '<p class="text-sm text-slate-500 mt-2">Đang đọc thông tin bệnh viện, chẩn đoán, ngày nhập/xuất viện...</p><p id="med-ocr-status" class="text-xs text-blue-600 mt-2 font-bold animate-pulse">Đang tối ưu hóa hình ảnh...</p>',
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading(),
-            customClass: { popup: 'rnd' }
-        });
+        AppLoader.show('AI đang phân tích...', 'Đang đọc thông tin bệnh viện, chẩn đoán...');
 
         const compressImg = (f, maxW = 1200) => new Promise((resolve, reject) => {
             if (f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')) {
