@@ -14435,7 +14435,6 @@ const HumanClaims = {
         targetDropdown.classList.remove('hidden');
     },
 
-    // Cập nhật thêm lệnh ẩn cả 2 dropdown khi chọn xong
     selectContract(id) {
         const c = Contracts._data.find(x => x._id === id);
         if (!c) return;
@@ -14444,20 +14443,22 @@ const HumanClaims = {
         document.getElementById('hc-contractNo').value = c.no || '';
         document.getElementById('hc-companyName').value = c.unit || '';
         
-        // 2. XỬ LÝ LOẠI HÌNH BH (BẢN SỬA LỖI KHÔNG LINK ĐƯỢC HỌC SINH)
+        // 2. XỬ LÝ LOẠI HÌNH BH (CẬP NHẬT CHỐNG LỖI UNICODE BỘ GÕ)
         const insTypeEl = document.getElementById('hc-insType');
         if (insTypeEl) {
-            // Chuyển dữ liệu từ DB sang chữ thường để so sánh cho dễ
-            const dbType = String(c.type || '').toLowerCase();
+            // Hàm chuẩn hóa: chuyển về chữ thường và lột bỏ toàn bộ dấu tiếng Việt
+            const normType = String(c.type || '')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/đ/g, 'd');
             
-            if (dbType.includes('học sinh') || dbType.includes('sinh viên')) {
-                // Nếu trong chữ có từ "học sinh" hoặc "sinh viên" thì chọn option "Học sinh"
-                insTypeEl.value = 'Học sinh';
-            } else if (dbType.includes('giáo viên')) {
-                // Nếu trong chữ có từ "giáo viên"
-                insTypeEl.value = 'Giáo viên';
+            // So sánh không dấu để đảm bảo độ chính xác tuyệt đối
+            if (normType.includes('hoc sinh') || normType.includes('sinh vien')) {
+                insTypeEl.value = 'Học sinh'; // Gán khớp với value="Học sinh" trong HTML
+            } else if (normType.includes('giao vien')) {
+                insTypeEl.value = 'Giáo viên'; // Gán khớp với value="Giáo viên" trong HTML
             } else {
-                // Các trường hợp còn lại
                 insTypeEl.value = 'Khác';
             }
         }
@@ -14473,40 +14474,12 @@ const HumanClaims = {
         document.getElementById('hc-limitC').value = fmt(c.lvlC);
         document.getElementById('hc-limitD').value = fmt(c.lvlD);
 
-        // Ẩn các dropdown gợi ý
+        // 5. Ẩn các dropdown gợi ý sau khi chọn
         if (document.getElementById('hc-contract-dropdown')) document.getElementById('hc-contract-dropdown').classList.add('hidden');
         if (document.getElementById('hc-unit-dropdown')) document.getElementById('hc-unit-dropdown').classList.add('hidden');
         
         this.checkWarnings();
         this.calculateTotal();
-        Toast.fire({ icon: 'success', title: 'Đã nạp thông tin hợp đồng!' });
-    },
-    
-    selectContract(id) {
-        const c = Contracts._data.find(x => x._id === id);
-        if (!c) return;
-
-        // 1. Điền các thông tin cơ bản
-        document.getElementById('hc-contractNo').value = c.no || '';
-        document.getElementById('hc-companyName').value = c.unit || '';
-        document.getElementById('hc-insType').value = c.type || 'Học sinh';
-        
-        // 2. Điền ngày hiệu lực (Format đúng để input datetime-local nhận diện)
-        if (c.from) document.getElementById('hc-effFrom').value = moment(c.from).format('YYYY-MM-DDTHH:mm');
-        if (c.to) document.getElementById('hc-effTo').value = moment(c.to).format('YYYY-MM-DDTHH:mm');
-
-        // 3. Điền các mức trách nhiệm (Định dạng số có dấu phẩy)
-        const fmt = (val) => val ? Number(val).toLocaleString('vi-VN') : '';
-        document.getElementById('hc-limitA').value = fmt(c.lvlA);
-        document.getElementById('hc-limitB').value = fmt(c.lvlB);
-        document.getElementById('hc-limitC').value = fmt(c.lvlC);
-        document.getElementById('hc-limitD').value = fmt(c.lvlD);
-
-        // 4. Đóng gợi ý và kiểm tra cảnh báo
-        document.getElementById('hc-contract-dropdown').classList.add('hidden');
-        this.checkWarnings();
-        this.calculateTotal(); // Tính toán lại số tiền bồi thường dự kiến
-        
         Toast.fire({ icon: 'success', title: 'Đã nạp thông tin hợp đồng!' });
     },
 
