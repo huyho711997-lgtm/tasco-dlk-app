@@ -12676,22 +12676,45 @@ const MyCloud = {
         const itemsToDownload = keysToDownload.map(key => this.items.find(i => i.key === key)).filter(Boolean);
         if (itemsToDownload.length === 0) return;
 
+        // 1. Thêm giao diện Thanh tiến độ vào popup
         Swal.fire({
-            title: 'Đang chuẩn bị tải xuống...',
-            html: '<p class="text-xs text-slate-500 mt-2 text-center">Vui lòng chờ giây lát...</p>',
+            title: 'Đang tải xuống...',
+            html: `
+                <div class="mt-2">
+                    <div style="height:6px;background:#e2e8f0;border-radius:999px;overflow:hidden">
+                        <div id="dl-progress-fill" style="height:100%;width:0%;background:#2563eb;transition:width .2s"></div>
+                    </div>
+                    <p id="dl-progress-text" class="text-xs text-slate-500 mt-2 text-center font-bold">0 / ${itemsToDownload.length} file</p>
+                </div>
+            `,
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading(),
             customClass: { popup: 'rnd' }
         });
 
+        // Hàm cập nhật UI tiến độ
+        let completed = 0;
+        const total = itemsToDownload.length;
+        const updateProgress = () => {
+            completed++;
+            const pct = Math.round((completed / total) * 100);
+            const fill = document.getElementById('dl-progress-fill');
+            const txt = document.getElementById('dl-progress-text');
+            if (fill) fill.style.width = pct + '%';
+            if (txt) txt.textContent = `${completed} / ${total} file (${pct}%)`;
+        };
+
         try {
-            // 1. NẾU TRÌNH DUYỆT HỖ TRỢ CHỌN FOLDER -> LƯU RỜI RẠC
+            // =========================================================
+            // CÁCH 1: NẾU TRÌNH DUYỆT HỖ TRỢ CHỌN FOLDER -> LƯU RỜI RẠC
+            // =========================================================
             if (window.showDirectoryPicker) {
                 try {
                     const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
                     let successCount = 0;
-                    for (let i = 0; i < itemsToDownload.length; i++) {
-                        const item = itemsToDownload[i];
+
+                    // Tải và lưu song song (Chạy đồng thời)
+                    const writePromises = itemsToDownload.map(async (item, i) => {
                         try {
                             const res = await fetch(item.url);
                             const blob = await res.blob();
@@ -12709,9 +12732,18 @@ const MyCloud = {
                             const writable = await fileHandle.createWritable();
                             await writable.write(blob);
                             await writable.close();
+                            
                             successCount++;
-                        } catch (e) { console.error("Lỗi lưu file:", e); }
-                    }
+                        } catch (e) {
+                            console.error("Lỗi lưu file:", e);
+                        } finally {
+                            updateProgress();
+                        }
+                    });
+
+                    // Chờ tất cả file xử lý xong
+                    await Promise.all(writePromises);
+
                     Swal.close();
                     Toast.fire({ icon: 'success', title: `Đã lưu thành công ${successCount} file!` });
                     
@@ -12726,10 +12758,13 @@ const MyCloud = {
                 }
             } 
             
-            // 2. NẾU TRÌNH DUYỆT CHẶN (FALLBACK) -> NÉN ZIP LẠI ĐỂ TRÁNH BỊ HỎI NHIỀU LẦN
+            // =========================================================
+            // CÁCH 2: NẾU TRÌNH DUYỆT CHẶN (FALLBACK) -> NÉN ZIP
+            // =========================================================
             const zip = new JSZip();
-            for (let i = 0; i < itemsToDownload.length; i++) {
-                const item = itemsToDownload[i];
+            
+            // Fetch song song để tăng tốc độ tải
+            const fetchPromises = itemsToDownload.map(async (item, i) => {
                 try {
                     const res = await fetch(item.url);
                     const blob = await res.blob();
@@ -12743,10 +12778,24 @@ const MyCloud = {
                         dlName = safeNote + '_' + baseName + ext;
                     }
                     zip.file(dlName, blob);
-                } catch (e) { console.error("Lỗi gom file:", e); }
+                } catch (e) {
+                    console.error("Lỗi tải file gom ZIP:", e);
+                } finally {
+                    updateProgress();
+                }
+            });
+
+            await Promise.all(fetchPromises);
+
+            // Đổi trạng thái thông báo khi bắt đầu nén ZIP
+            const txt = document.getElementById('dl-progress-text');
+            if (txt) {
+                txt.textContent = "Đang nén file ZIP, vui lòng không đóng trang...";
+                txt.classList.add("animate-pulse", "text-blue-600");
             }
-            
-            const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+
+            // Nén ZIP (có thể mất vài giây tùy vào CPU và số lượng ảnh)
+            const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
             Swal.close();
 
             const defaultFileName = 'TascoCloud_Download_' + moment().format('DDMMYYYY_HHmm') + '.zip';
@@ -12758,7 +12807,7 @@ const MyCloud = {
             document.body.removeChild(a);
             URL.revokeObjectURL(a.href);
             
-            Toast.fire({ icon: 'success', title: 'Đã tải xuống dạng ZIP (Do trình duyệt không hỗ trợ thư mục)!' });
+            Toast.fire({ icon: 'success', title: 'Đã tải xuống dạng ZIP!' });
 
             this._selectMode = false;
             this._selectedKeys.clear();
