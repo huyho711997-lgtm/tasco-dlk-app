@@ -1878,15 +1878,16 @@ textarea.inp { resize:vertical; }
                 </div>
                 <div class="p-4 space-y-3">
                   <div class="grid grid-cols-2 gap-3">
-                    <div class="relative">
-                        <label class="lbl">Số HĐ gốc (Gõ để tìm kiếm)</label>
-                        <input id="hc-contractNo" class="inp font-mono" placeholder="Tìm số HĐ..." oninput="HumanClaims.searchContract(this.value)">
-                        <div id="hc-contract-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl hidden max-h-48 overflow-y-auto"></div>
-                    </div>
-                    <div>
-                        <label class="lbl">Tên đơn vị tham gia BH</label>
-                        <input id="hc-companyName" class="inp font-bold text-blue-800" placeholder="Tìm theo tên đơn vị..." oninput="HumanClaims.searchContract(this.value)">
-                    </div>
+                      <div class="relative">
+                          <label class="lbl">Số HĐ gốc (Gõ để tìm kiếm)</label>
+                          <input id="hc-contractNo" class="inp font-mono" placeholder="Tìm số HĐ..." oninput="HumanClaims.searchContract(this.value, 'no')">
+                          <div id="hc-contract-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl hidden max-h-48 overflow-y-auto"></div>
+                      </div>
+
+                      <div class="relative"> <label class="lbl">Tên đơn vị tham gia BH</label>
+                          <input id="hc-companyName" class="inp font-bold text-blue-800" placeholder="Tìm theo tên đơn vị..." oninput="HumanClaims.searchContract(this.value, 'unit')">
+                          <div id="hc-unit-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl hidden max-h-48 overflow-y-auto"></div>
+                      </div>
                   </div>
                   <div class="grid grid-cols-3 gap-3">
                     <div><label class="lbl">Số GCN</label><input id="hc-gcn" class="inp font-mono"></div>
@@ -14391,28 +14392,26 @@ const HumanClaims = {
         }
     },
 
-    /* ── TÍNH NĂNG AUTOCOMPLETE HỢP ĐỒNG ── */
-    searchContract(val) {
-        // Hàm chuẩn hóa tiếng Việt: chuyển chữ thường, bỏ dấu để tìm kiếm chính xác
+    /* ── TÍNH NĂNG AUTOCOMPLETE HỢP ĐỒNG (FIX VỊ TRÍ) ── */
+    searchContract(val, type) {
         const norm = (s) => {
-            return String(s || '')
-                .toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .replace(/đ/g, 'd')
-                .replace(/Đ/g, 'd')
-                .trim();
+            return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'd').trim();
         };
 
         const query = norm(val);
-        const dropdown = document.getElementById('hc-contract-dropdown');
+        
+        // Xác định dropdown nào sẽ hiển thị dựa trên tham số 'type'
+        const targetDropdown = document.getElementById(type === 'no' ? 'hc-contract-dropdown' : 'hc-unit-dropdown');
+        const otherDropdown = document.getElementById(type === 'no' ? 'hc-unit-dropdown' : 'hc-contract-dropdown');
+        
+        // Ẩn dropdown còn lại ngay lập tức
+        if (otherDropdown) otherDropdown.classList.add('hidden');
         
         if (!query) {
-            dropdown.classList.add('hidden');
+            targetDropdown.classList.add('hidden');
             return;
         }
 
-        // Tìm kiếm trong dữ liệu Hợp đồng (Số HĐ hoặc Tên đơn vị)
         const matches = Contracts._data.filter(c => {
             const noMatch = norm(c.no).includes(query);
             const unitMatch = norm(c.unit).includes(query);
@@ -14420,12 +14419,12 @@ const HumanClaims = {
         }).slice(0, 8);
 
         if (matches.length === 0) {
-            dropdown.innerHTML = '<div class="p-3 text-xs text-slate-400 italic">Không tìm thấy hợp đồng nào</div>';
-            dropdown.classList.remove('hidden');
+            targetDropdown.innerHTML = '<div class="p-3 text-xs text-slate-400 italic">Không tìm thấy hợp đồng nào</div>';
+            targetDropdown.classList.remove('hidden');
             return;
         }
 
-        dropdown.innerHTML = matches.map(c => `
+        targetDropdown.innerHTML = matches.map(c => `
             <div onclick="HumanClaims.selectContract('${c._id}')" class="p-3 border-b border-slate-50 hover:bg-blue-50 cursor-pointer transition-colors">
                 <p class="text-[13px] font-black text-blue-700 font-mono">${c.no}</p>
                 <p class="text-[11px] font-bold text-slate-600 mt-0.5">${c.unit}</p>
@@ -14433,7 +14432,34 @@ const HumanClaims = {
             </div>
         `).join('');
         
-        dropdown.classList.remove('hidden');
+        targetDropdown.classList.remove('hidden');
+    },
+
+    // Cập nhật thêm lệnh ẩn cả 2 dropdown khi chọn xong
+    selectContract(id) {
+        const c = Contracts._data.find(x => x._id === id);
+        if (!c) return;
+
+        document.getElementById('hc-contractNo').value = c.no || '';
+        document.getElementById('hc-companyName').value = c.unit || '';
+        document.getElementById('hc-insType').value = c.type || 'Học sinh';
+        
+        if (c.from) document.getElementById('hc-effFrom').value = moment(c.from).format('YYYY-MM-DDTHH:mm');
+        if (c.to) document.getElementById('hc-effTo').value = moment(c.to).format('YYYY-MM-DDTHH:mm');
+
+        const fmt = (val) => val ? Number(val).toLocaleString('vi-VN') : '';
+        document.getElementById('hc-limitA').value = fmt(c.lvlA);
+        document.getElementById('hc-limitB').value = fmt(c.lvlB);
+        document.getElementById('hc-limitC').value = fmt(c.lvlC);
+        document.getElementById('hc-limitD').value = fmt(c.lvlD);
+
+        // ẨN CẢ 2 DROPDOWN
+        document.getElementById('hc-contract-dropdown').classList.add('hidden');
+        document.getElementById('hc-unit-dropdown').classList.add('hidden');
+        
+        this.checkWarnings();
+        this.calculateTotal();
+        Toast.fire({ icon: 'success', title: 'Đã nạp thông tin hợp đồng!' });
     },
 
     selectContract(id) {
