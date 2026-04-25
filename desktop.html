@@ -1893,9 +1893,9 @@ textarea.inp { resize:vertical; }
                     <div><label class="lbl">Số GCN</label><input id="hc-gcn" class="inp font-mono"></div>
                     <div><label class="lbl">Loại hình BH</label>
                       <select id="hc-insType" class="inp">
-                        <option value="Học sinh">Học sinh / Sinh viên</option>
-                        <option value="Giáo viên">Giáo viên</option>
-                        <option value="Khác">Khác</option>
+                          <option value="Học sinh">Học sinh / Sinh viên</option>
+                          <option value="Giáo viên">Giáo viên</option>
+                          <option value="Khác">Khác</option>
                       </select>
                     </div>
                     <div><label class="lbl">Tình trạng phí</label>
@@ -14440,28 +14440,43 @@ const HumanClaims = {
         const c = Contracts._data.find(x => x._id === id);
         if (!c) return;
 
+        // 1. Điền thông tin văn bản
         document.getElementById('hc-contractNo').value = c.no || '';
         document.getElementById('hc-companyName').value = c.unit || '';
-        document.getElementById('hc-insType').value = c.type || 'Học sinh';
         
+        // 2. Xử lý Loại hình BH (Đảm bảo khớp với giá trị của <select>)
+        const insTypeEl = document.getElementById('hc-insType');
+        if (insTypeEl) {
+            // Lấy giá trị type từ hợp đồng, nếu không có mặc định là 'Học sinh'
+            let typeVal = c.type || 'Học sinh';
+            
+            // Xử lý trường hợp dữ liệu Excel ghi "Học sinh / Sinh viên" nhưng value trong code là "Học sinh"
+            if (typeVal.includes('Học sinh')) typeVal = 'Học sinh';
+            if (typeVal.includes('Giáo viên')) typeVal = 'Giáo viên';
+            
+            insTypeEl.value = typeVal;
+        }
+        
+        // 3. Điền ngày hiệu lực
         if (c.from) document.getElementById('hc-effFrom').value = moment(c.from).format('YYYY-MM-DDTHH:mm');
         if (c.to) document.getElementById('hc-effTo').value = moment(c.to).format('YYYY-MM-DDTHH:mm');
 
+        // 4. Điền các mức trách nhiệm
         const fmt = (val) => val ? Number(val).toLocaleString('vi-VN') : '';
         document.getElementById('hc-limitA').value = fmt(c.lvlA);
         document.getElementById('hc-limitB').value = fmt(c.lvlB);
         document.getElementById('hc-limitC').value = fmt(c.lvlC);
         document.getElementById('hc-limitD').value = fmt(c.lvlD);
 
-        // ẨN CẢ 2 DROPDOWN
-        document.getElementById('hc-contract-dropdown').classList.add('hidden');
-        document.getElementById('hc-unit-dropdown').classList.add('hidden');
+        // Ẩn cả 2 dropdown sau khi chọn
+        if (document.getElementById('hc-contract-dropdown')) document.getElementById('hc-contract-dropdown').classList.add('hidden');
+        if (document.getElementById('hc-unit-dropdown')) document.getElementById('hc-unit-dropdown').classList.add('hidden');
         
         this.checkWarnings();
         this.calculateTotal();
         Toast.fire({ icon: 'success', title: 'Đã nạp thông tin hợp đồng!' });
     },
-
+    
     selectContract(id) {
         const c = Contracts._data.find(x => x._id === id);
         if (!c) return;
