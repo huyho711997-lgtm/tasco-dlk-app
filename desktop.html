@@ -1879,11 +1879,14 @@ textarea.inp { resize:vertical; }
                 <div class="p-4 space-y-3">
                   <div class="grid grid-cols-2 gap-3">
                     <div class="relative">
-                      <label class="lbl">Số HĐ gốc (Gõ để tìm kiếm)</label>
-                      <input id="hc-contractNo" class="inp font-mono" placeholder="Tìm hợp đồng..." oninput="HumanClaims.searchContract(this.value)">
-                      <div id="hc-contract-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl hidden max-h-48 overflow-y-auto"></div>
+                        <label class="lbl">Số HĐ gốc (Gõ để tìm kiếm)</label>
+                        <input id="hc-contractNo" class="inp font-mono" placeholder="Tìm số HĐ..." oninput="HumanClaims.searchContract(this.value)">
+                        <div id="hc-contract-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl hidden max-h-48 overflow-y-auto"></div>
                     </div>
-                    <div><label class="lbl">Tên đơn vị tham gia BH</label><input id="hc-companyName" class="inp font-bold text-blue-800"></div>
+                    <div>
+                        <label class="lbl">Tên đơn vị tham gia BH</label>
+                        <input id="hc-companyName" class="inp font-bold text-blue-800" placeholder="Tìm theo tên đơn vị..." oninput="HumanClaims.searchContract(this.value)">
+                    </div>
                   </div>
                   <div class="grid grid-cols-3 gap-3">
                     <div><label class="lbl">Số GCN</label><input id="hc-gcn" class="inp font-mono"></div>
@@ -14390,7 +14393,18 @@ const HumanClaims = {
 
     /* ── TÍNH NĂNG AUTOCOMPLETE HỢP ĐỒNG ── */
     searchContract(val) {
-        const query = val.trim().toLowerCase();
+        // Hàm chuẩn hóa tiếng Việt: chuyển chữ thường, bỏ dấu để tìm kiếm chính xác
+        const norm = (s) => {
+            return String(s || '')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/đ/g, 'd')
+                .replace(/Đ/g, 'd')
+                .trim();
+        };
+
+        const query = norm(val);
         const dropdown = document.getElementById('hc-contract-dropdown');
         
         if (!query) {
@@ -14398,11 +14412,12 @@ const HumanClaims = {
             return;
         }
 
-        // Tìm kiếm trong Contracts._data (tìm theo số HĐ hoặc tên Đơn vị)
-        const matches = Contracts._data.filter(c => 
-            (c.no && c.no.toLowerCase().includes(query)) || 
-            (c.unit && c.unit.toLowerCase().includes(query))
-        ).slice(0, 8); // Lấy tối đa 8 kết quả
+        // Tìm kiếm trong dữ liệu Hợp đồng (Số HĐ hoặc Tên đơn vị)
+        const matches = Contracts._data.filter(c => {
+            const noMatch = norm(c.no).includes(query);
+            const unitMatch = norm(c.unit).includes(query);
+            return noMatch || unitMatch;
+        }).slice(0, 8);
 
         if (matches.length === 0) {
             dropdown.innerHTML = '<div class="p-3 text-xs text-slate-400 italic">Không tìm thấy hợp đồng nào</div>';
