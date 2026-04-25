@@ -1911,12 +1911,9 @@ textarea.inp { resize:vertical; }
                     </div>
                   </div>
                   
-                  <div class="grid grid-cols-2 gap-3">
+                  <div class="grid grid-cols-4 gap-3">
                     <div><label class="lbl">Mức phí</label><input id="hc-premium" class="inp font-mono text-right text-blue-600" oninput="BaoLanh.formatNumber(this)" placeholder="VD: 500.000"></div>
                     <div><label class="lbl">Ngày nộp phí</label><input id="hc-feeDate" type="date" class="inp"></div>
-                  </div>
-
-                  <div class="grid grid-cols-2 gap-3">
                     <div><label class="lbl">Hiệu lực từ</label><input id="hc-effFrom" type="datetime-local" class="inp text-[11px]" onchange="HumanClaims.checkWarnings()"></div>
                     <div><label class="lbl">Đến</label><input id="hc-effTo" type="datetime-local" class="inp text-[11px]" onchange="HumanClaims.checkWarnings()"></div>
                   </div>
