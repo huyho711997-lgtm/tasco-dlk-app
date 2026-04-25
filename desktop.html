@@ -14444,17 +14444,22 @@ const HumanClaims = {
         document.getElementById('hc-contractNo').value = c.no || '';
         document.getElementById('hc-companyName').value = c.unit || '';
         
-        // 2. Xử lý Loại hình BH (Đảm bảo khớp với giá trị của <select>)
+        // 2. XỬ LÝ LOẠI HÌNH BH (BẢN SỬA LỖI KHÔNG LINK ĐƯỢC HỌC SINH)
         const insTypeEl = document.getElementById('hc-insType');
         if (insTypeEl) {
-            // Lấy giá trị type từ hợp đồng, nếu không có mặc định là 'Học sinh'
-            let typeVal = c.type || 'Học sinh';
+            // Chuyển dữ liệu từ DB sang chữ thường để so sánh cho dễ
+            const dbType = String(c.type || '').toLowerCase();
             
-            // Xử lý trường hợp dữ liệu Excel ghi "Học sinh / Sinh viên" nhưng value trong code là "Học sinh"
-            if (typeVal.includes('Học sinh')) typeVal = 'Học sinh';
-            if (typeVal.includes('Giáo viên')) typeVal = 'Giáo viên';
-            
-            insTypeEl.value = typeVal;
+            if (dbType.includes('học sinh') || dbType.includes('sinh viên')) {
+                // Nếu trong chữ có từ "học sinh" hoặc "sinh viên" thì chọn option "Học sinh"
+                insTypeEl.value = 'Học sinh';
+            } else if (dbType.includes('giáo viên')) {
+                // Nếu trong chữ có từ "giáo viên"
+                insTypeEl.value = 'Giáo viên';
+            } else {
+                // Các trường hợp còn lại
+                insTypeEl.value = 'Khác';
+            }
         }
         
         // 3. Điền ngày hiệu lực
@@ -14468,7 +14473,7 @@ const HumanClaims = {
         document.getElementById('hc-limitC').value = fmt(c.lvlC);
         document.getElementById('hc-limitD').value = fmt(c.lvlD);
 
-        // Ẩn cả 2 dropdown sau khi chọn
+        // Ẩn các dropdown gợi ý
         if (document.getElementById('hc-contract-dropdown')) document.getElementById('hc-contract-dropdown').classList.add('hidden');
         if (document.getElementById('hc-unit-dropdown')) document.getElementById('hc-unit-dropdown').classList.add('hidden');
         
