@@ -14315,13 +14315,22 @@ const HumanClaims = {
         });
     },
 
-    /* ── Logic Tiện ích & Tính toán ── */
     calculateDays() {
         const inDate = document.getElementById('hc-inDate').value;
         const outDate = document.getElementById('hc-outDate').value;
+        
         if (inDate && outDate) {
-            const days = moment(outDate).diff(moment(inDate), 'days');
+            // Tính toán chênh lệch ngày giữa ngày ra và ngày vào
+            const start = moment(inDate);
+            const end = moment(outDate);
+            
+            // .diff với 'days' sẽ trả về số ngày trọn vẹn (Vd: 16 - 15 = 1)
+            const days = end.diff(start, 'days');
+            
+            // Đảm bảo không bị số âm và gán vào input
             document.getElementById('hc-days').value = Math.max(0, days);
+            
+            // Cập nhật lại tổng tiền trợ cấp nằm viện sau khi số ngày thay đổi
             this.calculateTotal();
         }
     },
@@ -14866,18 +14875,18 @@ const HumanClaims = {
             // CẬP NHẬT PROMPT: Bổ sung noiDieuTri
 
             const PROMPT = `Đây là chứng từ y tế tại Việt Nam.
-Trích xuất thông tin và trả về CHỈ JSON (không markdown):
-{
-    "noiDieuTri": "Tên bệnh viện hoặc cơ sở y tế ban hành giấy này",
-    "tenNguoiBenh": "Tên bệnh nhân",
-    "tuoi": "Tuổi bệnh nhân (CHỈ lấy con số, ví dụ: 35)",
-    "diaChiNguoiBenh": "Địa chỉ",
-    "ngayNhapVien": "YYYY-MM-DD",
-    "ngayXuatVien": "YYYY-MM-DD",
-    "chanDoan": "Chẩn đoán ngắn gọn",
-    "tongTien": "Tổng viện phí (số nguyên)"
-}
-Nếu không có thông tin, để chuỗi rỗng "".`;
+            Trích xuất thông tin và trả về CHỈ JSON (không markdown):
+            {
+                "noiDieuTri": "Tên bệnh viện hoặc cơ sở y tế ban hành giấy này",
+                "tenNguoiBenh": "Tên bệnh nhân",
+                "tuoi": "Tuổi bệnh nhân (CHỈ lấy con số, ví dụ: 35)",
+                "diaChiNguoiBenh": "Địa chỉ",
+                "ngayNhapVien": "YYYY-MM-DD",
+                "ngayXuatVien": "YYYY-MM-DD",
+                "chanDoan": "Chẩn đoán ngắn gọn",
+                "tongTien": "Tổng viện phí (số nguyên)"
+            }
+            Nếu không có thông tin, để chuỗi rỗng "".`;
 
             let dataResponse = null;
             const maxRetries = GEM_KEYS.length * 2; 
@@ -15068,7 +15077,10 @@ Nếu không có thông tin, để chuỗi rỗng "".`;
     applyMedicalOcr(data) {
         if (data.hospitalName) document.getElementById('hc-hospitalName').value = data.hospitalName;
         if (data.victimName) document.getElementById('hc-victimName').value = data.victimName.toUpperCase();
-        if (data.victimAge) document.getElementById('hc-victimAge').value = data.victimAge;
+        
+        // Thêm dòng này để lấy tuổi từ AI đưa vào hồ sơ
+        if (data.tuoi) document.getElementById('hc-victimAge').value = data.tuoi;
+        
         if (data.victimAddress) document.getElementById('hc-victimAddress').value = data.victimAddress;
         if (data.inDate) document.getElementById('hc-inDate').value = data.inDate;
         if (data.outDate) document.getElementById('hc-outDate').value = data.outDate;
@@ -15078,7 +15090,7 @@ Nếu không có thông tin, để chuỗi rỗng "".`;
             descEl.value = descEl.value ? (descEl.value + '\n' + data.desc) : data.desc;
         }
 
-        this.calculateDays();
+        this.calculateDays(); // Gọi hàm tính ngày nằm viện sau khi điền ngày
         Toast.fire({ icon: 'success', title: 'Đã điền thông tin y tế vào form!' });
     },
     generateEmail() {
