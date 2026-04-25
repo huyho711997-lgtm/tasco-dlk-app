@@ -3945,9 +3945,6 @@ textarea.inp { resize:vertical; }
 /* ═══════════════════════════════════════
    CONFIG & GLOBALS
 ═══════════════════════════════════════ */
-/* ═══════════════════════════════════════
-   CONFIG & GLOBALS
-═══════════════════════════════════════ */
 var DB_URL    = "https://quanlygiamdinh-default-rtdb.asia-southeast1.firebasedatabase.app";
 var CL_URL    = "https://api.cloudinary.com/v1_1/drnarbfoa/image/upload";
 var CL_PRESET = "claim_ntn";
@@ -3981,6 +3978,50 @@ var db = firebase.database();
 moment.locale('vi');
 var Toast = Swal.mixin({ toast:true, position:'top-end', showConfirmButton:false, timer:2800, timerProgressBar:true });
 
+/* ═══════════════════════════════════════
+   APP LOADER - HIỆU ỨNG CHỜ CHUYÊN NGHIỆP
+═══════════════════════════════════════ */
+const AppLoader = {
+    show: function(title = 'Đang xử lý...', subtitle = 'Vui lòng chờ trong giây lát...') {
+        const html = `
+            <div class="flex flex-col items-center py-5 font-sans">
+                <div class="relative flex items-center justify-center w-24 h-24 mb-6 mt-2">
+                    <div class="absolute inset-2 rounded-full bg-blue-400/30 animate-[ping_1.5s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
+                    <div class="absolute inset-4 rounded-full bg-indigo-400/30 animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
+                    
+                    <div class="absolute inset-0 rounded-full border-[4px] border-slate-100 shadow-inner"></div>
+                    <div class="absolute inset-0 rounded-full border-[4px] border-transparent border-t-blue-600 border-r-indigo-500 animate-spin"></div>
+                    
+                    <div class="relative w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-sm z-10 border border-slate-50">
+                        <svg class="w-6 h-6 text-blue-600 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                        </svg>
+                    </div>
+                </div>
+                
+                <h3 class="text-lg font-black text-slate-800 tracking-tight mb-1.5">${title}</h3>
+                <p class="text-xs font-bold text-slate-500 animate-pulse" id="app-loader-sub">${subtitle}</p>
+            </div>
+        `;
+
+        Swal.fire({
+            html: html,
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            customClass: { popup: 'rnd !w-[360px] !p-0' }
+        });
+    },
+    
+    // Cập nhật dòng chữ nhỏ đang chạy để user biết tiến trình
+    updateText: function(newSubtitle) {
+        const sub = document.getElementById('app-loader-sub');
+        if (sub) sub.textContent = newSubtitle;
+    },
+
+    hide: function() {
+        Swal.close();
+    }
+};
 /* ═══════════════════════════════════════
    INIT
 ═══════════════════════════════════════ */
@@ -4866,7 +4907,9 @@ function saveModal() {
   if(nn&&nn.value.trim())upd.damageNguyenNhan=nn.value.trim();
   if(kn&&kn.value.trim())upd.damageKienNghi=kn.value.trim();
 
+  AppLoader.show('Đang lưu dữ liệu...', 'Hệ thống đang đồng bộ lên Cloud');
   db.ref('Workstation/'+curId).update(upd).then(function(){
+    AppLoader.hide(); // Đóng loader
     Toast.fire({icon:'success',title:'Đã lưu thay đổi!'});
     if(upd.auditLog)renderAuditLog(upd.auditLog);
     
