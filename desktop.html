@@ -15327,6 +15327,19 @@ const HumanClaims = {
     }
 };
 
+document.addEventListener('click', function(e) {
+    const dropdowns = ['hc-contract-dropdown', 'hc-unit-dropdown'];
+    const inputs = ['hc-contractNo', 'hc-companyName'];
+    
+    dropdowns.forEach((id, idx) => {
+        const drop = document.getElementById(id);
+        const inp = document.getElementById(inputs[idx]);
+        if (drop && inp && !inp.contains(e.target) && !drop.contains(e.target)) {
+            drop.classList.add('hidden');
+        }
+    });
+});
+
 // Khởi tạo khi load script
 document.addEventListener('DOMContentLoaded', () => {
     HumanClaims.init();
