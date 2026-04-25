@@ -14388,10 +14388,65 @@ const HumanClaims = {
         }
     },
 
-    /* ── STUB: Các hàm API tích hợp AI/Apps Script ── */
+    /* ── TÍNH NĂNG AUTOCOMPLETE HỢP ĐỒNG ── */
     searchContract(val) {
-        // Todo: Gọi API Apps Script để tìm số hợp đồng
-        console.log("Searching contract:", val);
+        const query = val.trim().toLowerCase();
+        const dropdown = document.getElementById('hc-contract-dropdown');
+        
+        if (!query) {
+            dropdown.classList.add('hidden');
+            return;
+        }
+
+        // Tìm kiếm trong Contracts._data (tìm theo số HĐ hoặc tên Đơn vị)
+        const matches = Contracts._data.filter(c => 
+            (c.no && c.no.toLowerCase().includes(query)) || 
+            (c.unit && c.unit.toLowerCase().includes(query))
+        ).slice(0, 8); // Lấy tối đa 8 kết quả
+
+        if (matches.length === 0) {
+            dropdown.innerHTML = '<div class="p-3 text-xs text-slate-400 italic">Không tìm thấy hợp đồng nào</div>';
+            dropdown.classList.remove('hidden');
+            return;
+        }
+
+        dropdown.innerHTML = matches.map(c => `
+            <div onclick="HumanClaims.selectContract('${c._id}')" class="p-3 border-b border-slate-50 hover:bg-blue-50 cursor-pointer transition-colors">
+                <p class="text-[13px] font-black text-blue-700 font-mono">${c.no}</p>
+                <p class="text-[11px] font-bold text-slate-600 mt-0.5">${c.unit}</p>
+                <p class="text-[10px] text-slate-400 mt-1">Hiệu lực: ${moment(c.from).format('DD/MM/YY')} - ${moment(c.to).format('DD/MM/YY')}</p>
+            </div>
+        `).join('');
+        
+        dropdown.classList.remove('hidden');
+    },
+
+    selectContract(id) {
+        const c = Contracts._data.find(x => x._id === id);
+        if (!c) return;
+
+        // 1. Điền các thông tin cơ bản
+        document.getElementById('hc-contractNo').value = c.no || '';
+        document.getElementById('hc-companyName').value = c.unit || '';
+        document.getElementById('hc-insType').value = c.type || 'Học sinh';
+        
+        // 2. Điền ngày hiệu lực (Format đúng để input datetime-local nhận diện)
+        if (c.from) document.getElementById('hc-effFrom').value = moment(c.from).format('YYYY-MM-DDTHH:mm');
+        if (c.to) document.getElementById('hc-effTo').value = moment(c.to).format('YYYY-MM-DDTHH:mm');
+
+        // 3. Điền các mức trách nhiệm (Định dạng số có dấu phẩy)
+        const fmt = (val) => val ? Number(val).toLocaleString('vi-VN') : '';
+        document.getElementById('hc-limitA').value = fmt(c.lvlA);
+        document.getElementById('hc-limitB').value = fmt(c.lvlB);
+        document.getElementById('hc-limitC').value = fmt(c.lvlC);
+        document.getElementById('hc-limitD').value = fmt(c.lvlD);
+
+        // 4. Đóng gợi ý và kiểm tra cảnh báo
+        document.getElementById('hc-contract-dropdown').classList.add('hidden');
+        this.checkWarnings();
+        this.calculateTotal(); // Tính toán lại số tiền bồi thường dự kiến
+        
+        Toast.fire({ icon: 'success', title: 'Đã nạp thông tin hợp đồng!' });
     },
 
     async suggestInjury() {
