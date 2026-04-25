@@ -2113,6 +2113,11 @@ textarea.inp { resize:vertical; }
                 Import HĐ
                 <input type="file" class="hidden" accept=".xlsx, .xls, .csv" onchange="Contracts.importContractExcel(event)">
               </label>
+              <label style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.1);color:#fcd34d;border:1px solid rgba(251,191,36,.3);transition:all .15s;margin-bottom:0;" onmouseover="this.style.background='rgba(251,191,36,.15)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Import DS NĐBH
+                <input type="file" class="hidden" accept=".xlsx, .xls, .csv" onchange="Contracts.importGlobalInsuredExcel(event)">
+              </label>
               <button onclick="Contracts.openImportExcel()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.1);color:#f1f5f9;border:1px solid rgba(255,255,255,.15);transition:all .15s;" onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Import Excel HS
@@ -16446,7 +16451,110 @@ var Contracts = {
             }
         };
         reader.readAsArrayBuffer(file);
+    },
+    /* ── IMPORT DANH SÁCH NGƯỜI ĐƯỢC BẢO HIỂM VÀO NHIỀU HỢP ĐỒNG ── */
+    importGlobalInsuredExcel(event) {
+        var file = event.target.files[0];
+        event.target.value = '';
+        if (!file) return;
+
+        if (typeof XLSX === 'undefined') {
+            Swal.fire({icon: 'error', title: 'Thiếu thư viện', text: 'Đang tải thư viện Excel, vui lòng thử lại sau.', customClass: {popup:'rnd'}});
+            return;
+        }
+
+        Swal.fire({ title: 'Đang đọc file...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass: {popup:'rnd'} });
+
+        var reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                var data = new Uint8Array(e.target.result);
+                var workbook = XLSX.read(data, {type: 'array'});
+                var firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                
+                // Đọc dưới dạng mảng 2 chiều để lấy đúng thứ tự cột, bỏ qua dòng tiêu đề
+                var rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: "" });
+                var dataRows = rows.slice(1); 
+
+                var updates = {};
+                var countSuccess = 0;
+                var notFoundContracts = new Set();
+
+                var parseMoney = (val) => {
+                    if (!val) return null;
+                    var num = parseInt(String(val).replace(/[^\d]/g, ''));
+                    return isNaN(num) ? null : num;
+                };
+
+                dataRows.forEach((r, i) => {
+                    var hdNo = String(r[0] || '').trim();
+                    if (!hdNo) return; // Bỏ qua dòng trống
+
+                    var gcn = String(r[1] || '').trim();
+                    var rawName = String(r[2] || '').trim();
+                    
+                    // Tách tên từ định dạng "[Mã] Tên", ví dụ: "[1925146] Phạm Thị Tuyết" -> "Phạm Thị Tuyết"
+                    var name = rawName;
+                    var nameMatch = rawName.match(/\]\s*(.*)/);
+                    if (nameMatch && nameMatch[1]) {
+                        name = nameMatch[1].trim();
+                    }
+
+                    var limitA = parseMoney(r[3]);
+                    var limitB = parseMoney(r[4]);
+                    var limitC = parseMoney(r[5]);
+                    var limitD = parseMoney(r[6]);
+
+                    // Tìm hợp đồng trong hệ thống dựa vào số HĐ
+                    var contract = this._data.find(c => c.no === hdNo);
+                    
+                    if (contract) {
+                        // Tạo ID ngẫu nhiên cho học sinh/người ĐBH
+                        var stuKey = 's_' + Date.now() + '_' + i + '_' + Math.random().toString(36).substr(2, 4);
+                        var path = `Contracts/${contract._id}/students/${stuKey}`;
+                        
+                        updates[path] = {
+                            name: name,
+                            gcn: gcn,
+                            rawInfo: rawName, // Lưu lại mã cũ phòng trường hợp cần tra cứu
+                            lvlA: limitA,
+                            lvlB: limitB,
+                            lvlC: limitC,
+                            lvlD: limitD
+                        };
+                        countSuccess++;
+                    } else {
+                        notFoundContracts.add(hdNo);
+                    }
+                });
+
+                if (countSuccess === 0) {
+                    var errorMsg = notFoundContracts.size > 0 
+                        ? `Hệ thống không tìm thấy các Số Hợp đồng này trong cơ sở dữ liệu: <br><b class="text-rose-500">${Array.from(notFoundContracts).slice(0, 3).join(', ')}...</b>`
+                        : `File Excel trống hoặc sai cấu trúc cột (Cột A phải là Số HĐBH).`;
+                        
+                    Swal.fire({icon: 'error', title: 'Không nạp được dữ liệu', html: errorMsg, customClass: {popup:'rnd'}});
+                    return;
+                }
+
+                Swal.fire({ title: 'Đang đẩy lên máy chủ...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass: {popup:'rnd'} });
+                
+                await db.ref().update(updates);
+                
+                var successMsg = `Đã import thành công <b>${countSuccess}</b> người vào các hợp đồng.`;
+                if (notFoundContracts.size > 0) {
+                    successMsg += `<br><br><span class="text-amber-600 text-xs">⚠️ Bỏ qua ${notFoundContracts.size} Số HĐ không tồn tại trong hệ thống.</span>`;
+                }
+
+                Swal.fire({icon: 'success', title: 'Hoàn tất!', html: successMsg, customClass: {popup:'rnd'}});
+
+            } catch (err) {
+                Swal.fire({icon: 'error', title: 'Lỗi xử lý file', text: err.message, customClass: {popup:'rnd'}});
+            }
+        };
+        reader.readAsArrayBuffer(file);
     }
+
 };
 
 </script>
