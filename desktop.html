@@ -1871,7 +1871,7 @@ textarea.inp { resize:vertical; }
             
             <div class="col-span-7 flex flex-col gap-5">
               
-              <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden shrink-0">
                 <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
                   <svg class="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                   <span class="text-xs font-black text-slate-700 uppercase tracking-wide">Thông tin Hợp đồng</span>
@@ -1937,21 +1937,21 @@ textarea.inp { resize:vertical; }
                 </div>
               </div>
 
-              <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
-                  <svg class="w-4 h-4 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                  <span class="text-xs font-black text-slate-700 uppercase tracking-wide">Người được bảo hiểm & Tai nạn</span>
+              <div class="bg-white rounded-xl border border-cyan-200 shadow-sm overflow-hidden shrink-0">
+                <div class="px-4 py-2.5 bg-cyan-50/50 border-b border-cyan-100 flex items-center gap-2">
+                  <svg class="w-4 h-4 text-cyan-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                  <span class="text-xs font-black text-cyan-800 uppercase tracking-wide">Người được bảo hiểm & Thông tin Y tế</span>
                 </div>
                 <div class="p-4 space-y-3">
                   <div class="grid grid-cols-12 gap-3">
                     <div class="col-span-6">
                         <label class="lbl">Người được Bảo hiểm</label>
-                        <input id="hc-victimName" class="inp font-bold text-rose-700 uppercase" oninput="HumanClaims.checkInsuredPerson()">
+                        <input id="hc-victimName" class="inp font-bold text-cyan-900 uppercase" oninput="HumanClaims.checkInsuredPerson()">
                         <div id="hc-victim-warning" class="hidden mt-1.5 text-[10px] font-bold px-2.5 py-1.5 rounded-md flex items-center gap-1.5"></div>
                     </div>
-                    <div class="col-span-2"><label class="lbl">Tuổi</label><input id="hc-victimAge" type="number" class="inp text-center font-bold text-rose-700" placeholder="VD: 35"></div>
+                    <div class="col-span-2"><label class="lbl">Tuổi</label><input id="hc-victimAge" type="number" class="inp text-center font-bold text-cyan-900" placeholder="VD: 35"></div>
                     <div class="col-span-4"><label class="lbl">Loại tổn thất</label>
-                      <select id="hc-lossType" class="inp">
+                      <select id="hc-lossType" class="inp font-bold text-slate-700">
                         <option value="Thương tật">Thương tật</option>
                         <option value="Phẫu thuật">Phẫu thuật</option>
                         <option value="Tử vong">Tử vong</option>
@@ -1964,7 +1964,7 @@ textarea.inp { resize:vertical; }
                     <div><label class="lbl">Ngày bị tai nạn</label><input id="hc-accDate" type="date" class="inp" onchange="HumanClaims.checkWarnings()"></div>
                     <div><label class="lbl">Ngày nhập viện</label><input id="hc-inDate" type="date" class="inp" onchange="HumanClaims.calculateDays()"></div>
                     <div><label class="lbl">Ngày ra viện</label><input id="hc-outDate" type="date" class="inp" onchange="HumanClaims.calculateDays()"></div>
-                    <div><label class="lbl">Số ngày nằm viện</label><input id="hc-days" type="number" class="inp text-center font-bold" oninput="HumanClaims.calculateTotal()"></div>
+                    <div><label class="lbl">Số ngày nằm viện</label><input id="hc-days" type="number" class="inp text-center font-bold text-blue-700" oninput="HumanClaims.calculateTotal()"></div>
                   </div>
                   
                   <div class="grid grid-cols-2 gap-3">
@@ -1980,29 +1980,28 @@ textarea.inp { resize:vertical; }
                               <option value="Tây y">Tây y (0.5% Mức D)</option>
                           </select>
                       </div>
-                      <div>
-                          </div>
+                      <div></div>
                   </div>
                   <div><label class="lbl">Nguyên nhân tai nạn</label><textarea id="hc-accCause" rows="2" class="inp resize-none"></textarea></div>
                   
-                  <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <div class="p-3 bg-cyan-50/30 rounded-lg border border-cyan-100 mt-2">
                     <div class="flex items-center justify-between mb-2">
-                      <label class="lbl !mb-0">Hậu quả / Thương tật</label>
-                      <button onclick="HumanClaims.suggestInjury()" class="px-2 py-1 bg-violet-100 text-violet-700 rounded text-[10px] font-bold hover:bg-violet-200 transition-colors flex items-center gap-1">
+                      <label class="lbl !mb-0 text-cyan-800">Chẩn đoán / Thương tật Y khoa</label>
+                      <button onclick="HumanClaims.suggestInjury()" class="px-2.5 py-1 bg-cyan-100 text-cyan-700 rounded-md text-[10px] font-bold hover:bg-cyan-200 transition-colors flex items-center gap-1.5 shadow-sm">
                         <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/></svg> AI Gợi ý TLTT
                       </button>
                     </div>
-                    <textarea id="hc-injuryDesc" rows="2" class="inp resize-none mb-2" placeholder="Gãy 1/3 dưới xương quay trái..."></textarea>
+                    <textarea id="hc-injuryDesc" rows="2" class="inp resize-none mb-2 text-[13px]" placeholder="Gãy 1/3 dưới xương quay trái..."></textarea>
                     
                     <div class="flex items-center gap-3">
-                      <div class="flex-1"><label class="text-[10px] font-semibold text-slate-500">Mục theo Bảng TLTT</label><input id="hc-injuryCode" class="inp text-xs text-violet-700 bg-white" readonly placeholder="AI tự điền..."></div>
-                      <div class="w-24"><label class="text-[10px] font-semibold text-slate-500">Tỷ lệ quy định</label><input id="hc-injuryRange" class="inp text-xs text-center bg-white font-mono" readonly placeholder="-- %"></div>
+                      <div class="flex-1"><label class="text-[10px] font-bold text-slate-500">Mục theo Bảng TLTT</label><input id="hc-injuryCode" class="inp text-xs text-cyan-800 bg-white border-cyan-200" readonly placeholder="AI tự điền..."></div>
+                      <div class="w-24"><label class="text-[10px] font-bold text-slate-500">Tỷ lệ quy định</label><input id="hc-injuryRange" class="inp text-xs text-center bg-white border-cyan-200 font-mono" readonly placeholder="-- %"></div>
                       <div class="w-28">
-                        <label class="text-[10px] font-semibold text-slate-500">Tỷ lệ thực tế</label>
-                        <div class="flex items-center">
-                          <button onclick="HumanClaims.adjPct(-1)" class="w-8 h-8 flex items-center justify-center bg-slate-200 rounded-l-lg hover:bg-slate-300 font-bold">-</button>
-                          <input id="hc-injuryRealPct" class="w-12 h-8 text-center text-sm font-black text-rose-600 bg-white border-y border-slate-200 outline-none" value="0" oninput="HumanClaims.calculateTotal()">
-                          <button onclick="HumanClaims.adjPct(1)" class="w-8 h-8 flex items-center justify-center bg-slate-200 rounded-r-lg hover:bg-slate-300 font-bold">+</button>
+                        <label class="text-[10px] font-bold text-slate-500">Tỷ lệ thực tế</label>
+                        <div class="flex items-center shadow-sm rounded-lg overflow-hidden border border-cyan-200">
+                          <button onclick="HumanClaims.adjPct(-1)" class="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 font-bold text-slate-600 border-r border-cyan-200">-</button>
+                          <input id="hc-injuryRealPct" class="w-12 h-8 text-center text-sm font-black text-rose-600 bg-white outline-none" value="0" oninput="HumanClaims.calculateTotal()">
+                          <button onclick="HumanClaims.adjPct(1)" class="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 font-bold text-slate-600 border-l border-cyan-200">+</button>
                         </div>
                       </div>
                     </div>
@@ -2013,13 +2012,13 @@ textarea.inp { resize:vertical; }
 
             </div>
 
-            <div class="col-span-5 flex flex-col gap-3"> 
+            <div class="col-span-5 flex flex-col gap-4"> 
               
-              <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden shrink-0 flex-1 flex flex-col min-h-[200px]">
+              <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden shrink-0 h-44 flex flex-col">
                 <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
                   <div class="flex items-center gap-2">
-                    <svg class="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                    <span class="text-[11px] font-black text-slate-700 uppercase tracking-wide">Ảnh đính kèm</span>
+                    <svg class="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <span class="text-[11px] font-black text-slate-700 uppercase tracking-wide">Ảnh chứng từ y tế</span>
                     <span id="hc-img-count" class="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-[10px] font-bold">0</span>
                   </div>
                   <label class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] font-bold cursor-pointer hover:bg-blue-200 transition-colors flex items-center gap-1">
@@ -2027,9 +2026,9 @@ textarea.inp { resize:vertical; }
                     <input type="file" multiple accept="image/*" class="hidden" onchange="HumanClaims.uploadImages(event)">
                   </label>
                 </div>
-                <div class="p-3 flex-1 overflow-y-auto custom-scrollbar">
-                  <div id="hc-img-grid" class="grid grid-cols-4 xl:grid-cols-5 gap-2"></div>
-                  <div id="hc-img-empty" class="text-center py-6">
+                <div class="p-3 flex-1 overflow-y-auto custom-scrollbar bg-slate-50/30">
+                  <div id="hc-img-grid" class="grid grid-cols-5 gap-2"></div>
+                  <div id="hc-img-empty" class="text-center py-4">
                     <p class="text-xs font-bold text-slate-400">Chưa có ảnh chứng từ</p>
                   </div>
                 </div>
@@ -2041,7 +2040,7 @@ textarea.inp { resize:vertical; }
                     <svg class="w-4 h-4 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
                     <span class="text-xs font-black text-slate-700 uppercase tracking-wide">Người thụ hưởng</span>
                   </div>
-                  <button type="button" onclick="HumanClaims.openOcrModal()" class="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg text-xs font-bold cursor-pointer hover:bg-purple-200 transition-colors flex items-center gap-1.5 shadow-sm">
+                  <button type="button" onclick="HumanClaims.openOcrModal()" class="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg text-[10px] font-bold cursor-pointer hover:bg-purple-200 transition-colors flex items-center gap-1.5 shadow-sm">
                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/><polyline points="16 21 16 19 8 19 8 21"/><path d="M12 9v4"/><path d="M8 11h8"/></svg> Quét CCCD
                   </button>
                 </div>
@@ -2075,11 +2074,11 @@ textarea.inp { resize:vertical; }
                 </div>
               </div>
 
-              <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-200 shadow-sm p-5 relative overflow-hidden shrink-0">
+              <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-200 shadow-sm p-5 relative overflow-hidden shrink-0 mt-auto">
                 <svg class="absolute -right-6 -bottom-6 w-32 h-32 text-emerald-500/10 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                 <p class="text-xs font-black text-emerald-800 uppercase tracking-widest mb-4">Giá trị chi trả</p>
                 <div class="space-y-2 mb-4 relative z-10">
-                  <div class="flex justify-between items-center"><span class="text-xs font-semibold text-emerald-700">Tiền Thương tật</span><span class="text-sm font-mono font-bold text-emerald-900" id="hc-calc-injury">0 đ</span></div>
+                  <div class="flex justify-between items-center"><span class="text-xs font-semibold text-emerald-700">Tiền Thương tật / PT</span><span class="text-sm font-mono font-bold text-emerald-900" id="hc-calc-injury">0 đ</span></div>
                   <div class="flex justify-between items-center"><span class="text-xs font-semibold text-emerald-700">Trợ cấp nằm viện</span><span class="text-sm font-mono font-bold text-emerald-900" id="hc-calc-hospital">0 đ</span></div>
                 </div>
                 <div class="pt-3 border-t border-emerald-200/60 flex justify-between items-end relative z-10">
@@ -14457,7 +14456,7 @@ const HumanClaims = {
             customClass: { popup: 'rnd !w-[420px]' }
         });
     },
-    
+
     /* ── KIỂM TRA NĐBH CÓ TRONG DANH SÁCH HỢP ĐỒNG KHÔNG ── */
     checkInsuredPerson() {
         const nameInp = document.getElementById('hc-victimName');
