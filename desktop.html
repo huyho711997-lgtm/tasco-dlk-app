@@ -1218,7 +1218,37 @@ textarea.inp { resize:vertical; }
 .login-btn:active { transform: scale(0.97); box-shadow: 0 4px 10px rgba(37,99,235,0.4); }
 .login-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
 
-
+/* ── CSS CHO SUB-MENU SIDEBAR ── */
+.nav-group-content {
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+.nav-group-content.hidden {
+  display: none;
+}
+/* Khi sidebar thu gọn, tự động ẩn chevron và ẩn sub-menu */
+#sidebar.collapsed .nav-group-content { display: none !important; }
+#sidebar.collapsed .chevron { display: none; }
+#sidebar.collapsed .nav-group-toggle { padding-left: 0; padding-right: 0; justify-content: center; }
+/* Style riêng cho menu con */
+.nav-sub-btn {
+  position: relative;
+}
+/* Dấu chấm nhỏ trước menu con */
+.nav-sub-btn::before {
+  content: '';
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #cbd5e1;
+  transition: all 0.2s;
+}
+.nav-sub-btn:hover::before { background-color: #3b82f6; transform: translateY(-50%) scale(1.5); }
+.nav-sub-btn.sidebar-active::before { background-color: #3b82f6; transform: translateY(-50%) scale(1.5); }
 </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -1280,69 +1310,90 @@ textarea.inp { resize:vertical; }
       <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Hệ thống bồi thường</p>
     </div>
   </div>
-  <nav class="flex-1 px-4 space-y-1 overflow-y-auto">
+  
+  <nav class="flex-1 px-4 pb-6 space-y-1.5 overflow-y-auto custom-scrollbar">
+    
     <button title="Dashboard" onclick="goView('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all sidebar-active">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg> 
+      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg> 
       <span class="sidebar-text whitespace-nowrap">Dashboard</span>
     </button>
+
     <button title="Kanban B1-B6" onclick="goView('kanban')" id="nav-kanban" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="4" height="15" rx="1"/></svg>
+      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="4" height="15" rx="1"/></svg>
       <span class="sidebar-text whitespace-nowrap">Kanban Hồ sơ</span>
     </button>   
-    <button title="Phiếu bàn giao HS" onclick="goView('handover')" id="nav-handover" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-      <span class="sidebar-text whitespace-nowrap">Bàn giao hồ sơ</span>
-    </button>    
-    <button title="Quản lý hồ sơ" onclick="goView('manage')" id="nav-manage" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v1"/><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v5z"/></svg> 
-      <span class="sidebar-text whitespace-nowrap">Quản lý hồ sơ</span>
-    </button>
-    <button title="Lịch giám định" onclick="goView('calendar')" id="nav-calendar" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="8" cy="15" r="1" fill="currentColor"/><circle cx="12" cy="15" r="1" fill="currentColor"/><circle cx="16" cy="15" r="1" fill="currentColor"/></svg> 
-      <span class="sidebar-text whitespace-nowrap">Lịch giám định</span>
-    </button>
-    <button title="Quá hạn hẹn" onclick="goView('overdue')" id="nav-overdue" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-rose-500 hover:bg-rose-50 transition-all">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6M22 6l-3-3"/></svg> 
-      <span class="sidebar-text whitespace-nowrap">Quá hạn hẹn</span>
-    </button>
-    <button title="Nhắc nhở" onclick="checkNotifications()" id="nav-notif" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all relative">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-      <span class="sidebar-text whitespace-nowrap">Nhắc nhở</span>
-      <span id="notif-badge" class="ml-auto hidden bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full min-w-[18px] text-center shrink-0"></span>
-    </button>
-    <button title="Thống kê" onclick="goView('stats')" id="nav-stats" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg> 
-      <span class="sidebar-text whitespace-nowrap">Thống kê</span>
-    </button>
-    <button title="Cloud của tôi" onclick="goView('cloud')" id="nav-cloud" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all mt-1">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
-      <span class="sidebar-text whitespace-nowrap">Cloud của tôi</span>
-    </button>
-    <div class="section-title pt-6 pb-2 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Nghiệp vụ</div>
-    <button title="Tiếp nhận AI" onclick="goView('import')" id="nav-import" class="nav-btn w-full flex items-center gap-3 px-4 py-4 bg-slate-900 text-white rounded-2xl text-sm font-bold hover:bg-blue-600 transition-all shadow-lg mt-1">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 15h.01M16 15h.01"/></svg> 
-      <span class="sidebar-text whitespace-nowrap">Tiếp nhận AI</span>
-    </button>
-    <button title="Quản lý Gara" onclick="goView('garages')" id="nav-garages" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all mt-1">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-      <span class="sidebar-text whitespace-nowrap">Quản lý Gara</span>
-    </button>  
-    <button title="Kho giá phụ tùng" onclick="goView('partsprices')" id="nav-partsprices" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-      <span class="sidebar-text whitespace-nowrap">Kho giá phụ tùng</span>
-    </button> 
-    <button title="Bồi thường con người" onclick="goView('human_claims')" id="nav-human_claims" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      <span class="sidebar-text whitespace-nowrap">BT Con Người</span>
-    </button>  
-    <button title="Bảng tỷ lệ thương tật" onclick="goView('injury_rates')" id="nav-injury_rates" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-      <span class="sidebar-text whitespace-nowrap">Bảng tỷ lệ thương tật</span>
-    </button>
-    <button title="Hợp đồng BH Con người" onclick="goView('contracts')" id="nav-contracts" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
-      <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-      <span class="sidebar-text whitespace-nowrap">HĐ BH Con người</span>
-    </button>
+
+    <div class="nav-group mt-2">
+      <div class="section-title pt-4 pb-2 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Xe Cơ Giới</div>
+      <button onclick="toggleNavGroup(this)" class="nav-group-toggle w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all group">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 shrink-0 text-slate-500 group-hover:text-blue-600 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span class="sidebar-text whitespace-nowrap">Quản lý Hồ sơ</span>
+        </div>
+        <svg class="chevron w-4 h-4 text-slate-400 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="nav-group-content hidden flex-col mt-1 space-y-0.5">
+        <button title="Tiếp nhận AI" onclick="goView('import')" id="nav-import" class="nav-btn nav-sub-btn w-full flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-all"><span class="sidebar-text whitespace-nowrap">Tiếp nhận AI</span></button>
+        <button title="Danh sách hồ sơ" onclick="goView('manage')" id="nav-manage" class="nav-btn nav-sub-btn w-full flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-all"><span class="sidebar-text whitespace-nowrap">Danh sách hồ sơ</span></button>
+        <button title="Quá hạn hẹn" onclick="goView('overdue')" id="nav-overdue" class="nav-btn nav-sub-btn w-full flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-xl text-[13px] font-semibold text-rose-500 hover:text-rose-600 hover:bg-rose-50 transition-all"><span class="sidebar-text whitespace-nowrap">Quá hạn hẹn</span></button>
+        <button title="Bàn giao hồ sơ" onclick="goView('handover')" id="nav-handover" class="nav-btn nav-sub-btn w-full flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-all"><span class="sidebar-text whitespace-nowrap">Bàn giao hồ sơ</span></button>
+      </div>
+    </div>
+
+    <div class="nav-group mt-1">
+      <button onclick="toggleNavGroup(this)" class="nav-group-toggle w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all group">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 shrink-0 text-slate-500 group-hover:text-pink-600 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="sidebar-text whitespace-nowrap">Con Người (HS/GV)</span>
+        </div>
+        <svg class="chevron w-4 h-4 text-slate-400 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="nav-group-content hidden flex-col mt-1 space-y-0.5">
+        <button title="Hồ sơ Bồi thường" onclick="goView('human_claims')" id="nav-human_claims" class="nav-btn nav-sub-btn w-full flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:text-pink-600 hover:bg-pink-50 transition-all"><span class="sidebar-text whitespace-nowrap">Hồ sơ Bồi thường</span></button>
+        <button title="Quản lý Hợp đồng" onclick="goView('contracts')" id="nav-contracts" class="nav-btn nav-sub-btn w-full flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:text-pink-600 hover:bg-pink-50 transition-all"><span class="sidebar-text whitespace-nowrap">Quản lý Hợp đồng</span></button>
+        <button title="Bảng tỷ lệ thương tật" onclick="goView('injury_rates')" id="nav-injury_rates" class="nav-btn nav-sub-btn w-full flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:text-pink-600 hover:bg-pink-50 transition-all"><span class="sidebar-text whitespace-nowrap">Bảng tỷ lệ thương tật</span></button>
+      </div>
+    </div>
+
+    <div class="nav-group mt-1">
+      <div class="section-title pt-4 pb-2 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Đói tác & Kho</div>
+      <button onclick="toggleNavGroup(this)" class="nav-group-toggle w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all group">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 shrink-0 text-slate-500 group-hover:text-teal-600 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          <span class="sidebar-text whitespace-nowrap">Gara & Phụ tùng</span>
+        </div>
+        <svg class="chevron w-4 h-4 text-slate-400 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="nav-group-content hidden flex-col mt-1 space-y-0.5">
+        <button title="Quản lý Gara" onclick="goView('garages')" id="nav-garages" class="nav-btn nav-sub-btn w-full flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:text-teal-600 hover:bg-teal-50 transition-all"><span class="sidebar-text whitespace-nowrap">Danh sách Gara</span></button>
+        <button title="Kho giá phụ tùng" onclick="goView('partsprices')" id="nav-partsprices" class="nav-btn nav-sub-btn w-full flex items-center gap-3 pl-12 pr-4 py-2.5 rounded-xl text-[13px] font-semibold text-slate-500 hover:text-teal-600 hover:bg-teal-50 transition-all"><span class="sidebar-text whitespace-nowrap">Kho giá phụ tùng</span></button>
+      </div>
+    </div>
+
+    <div class="nav-group mt-1">
+      <div class="section-title pt-4 pb-2 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Tiện ích</div>
+      <button title="Lịch giám định" onclick="goView('calendar')" id="nav-calendar" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+        <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><circle cx="8" cy="15" r="1" fill="currentColor"/><circle cx="12" cy="15" r="1" fill="currentColor"/><circle cx="16" cy="15" r="1" fill="currentColor"/></svg> 
+        <span class="sidebar-text whitespace-nowrap">Lịch giám định</span>
+      </button>
+      
+      <button title="Nhắc nhở" onclick="checkNotifications()" id="nav-notif" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all relative">
+        <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        <span class="sidebar-text whitespace-nowrap">Nhắc nhở</span>
+        <span id="notif-badge" class="ml-auto hidden bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full min-w-[18px] text-center shrink-0"></span>
+      </button>
+
+      <button title="Thống kê" onclick="goView('stats')" id="nav-stats" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+        <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg> 
+        <span class="sidebar-text whitespace-nowrap">Báo cáo & Thống kê</span>
+      </button>
+
+      <button title="Cloud của tôi" onclick="goView('cloud')" id="nav-cloud" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all mt-1">
+        <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+        <span class="sidebar-text whitespace-nowrap">Cloud của tôi</span>
+      </button>
+    </div>
+
   </nav>
 </aside>
 
@@ -4176,7 +4227,75 @@ function goView(v) {
   }
 }
 
+// 1. Hàm xử lý Click đóng/mở Menu Accordion
+function toggleNavGroup(btn) {
+  // Nếu sidebar đang thu nhỏ, mở nó ra trước khi mở menu con
+  var sidebar = document.getElementById('sidebar');
+  if (sidebar.classList.contains('collapsed')) {
+    toggleSidebar();
+  }
 
+  var content = btn.nextElementSibling;
+  var chevron = btn.querySelector('.chevron');
+
+  // Đóng các nhóm khác đang mở (Tạo hiệu ứng Accordion chuẩn)
+  document.querySelectorAll('.nav-group-content').forEach(function(el) {
+    if (el !== content && !el.classList.contains('hidden')) {
+      el.classList.add('hidden');
+      el.classList.remove('flex');
+      var otherChevron = el.previousElementSibling.querySelector('.chevron');
+      if (otherChevron) otherChevron.style.transform = 'rotate(0deg)';
+    }
+  });
+
+  // Mở/Đóng nhóm hiện tại
+  if (content.classList.contains('hidden')) {
+    content.classList.remove('hidden');
+    content.classList.add('flex');
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
+  } else {
+    content.classList.add('hidden');
+    content.classList.remove('flex');
+    if (chevron) chevron.style.transform = 'rotate(0deg)';
+  }
+}
+
+// 2. Chỉnh sửa nhẹ hàm goView cũ để giữ Sub-menu mở khi đang xem
+const _originalGoView = goView;
+goView = function(v) {
+  _originalGoView(v); // Gọi hàm chuyển màn hình gốc
+
+  // Xóa class active của tất cả nút
+  document.querySelectorAll('.nav-btn').forEach(function(el) { 
+    el.classList.remove('sidebar-active', 'text-blue-600', 'bg-blue-50', 'text-pink-600', 'bg-pink-50', 'text-teal-600', 'bg-teal-50'); 
+  });
+
+  var nb = document.getElementById('nav-' + v);
+  if (nb) {
+    nb.classList.add('sidebar-active');
+    
+    // Đổi màu nền (highlight) tùy theo nhóm để trông đẹp hơn
+    if (v === 'human_claims' || v === 'contracts' || v === 'injury_rates') {
+        nb.classList.add('text-pink-600', 'bg-pink-50');
+    } else if (v === 'garages' || v === 'partsprices') {
+        nb.classList.add('text-teal-600', 'bg-teal-50');
+    } else if (v !== 'dashboard' && v !== 'kanban' && v !== 'calendar' && v !== 'stats' && v !== 'cloud') {
+        nb.classList.add('text-blue-600', 'bg-blue-50');
+    }
+
+    // Tự động mở Group chứa Menu vừa click
+    var groupContent = nb.closest('.nav-group-content');
+    if (groupContent && groupContent.classList.contains('hidden')) {
+      var toggleBtn = groupContent.previousElementSibling;
+      if (toggleBtn) {
+        groupContent.classList.remove('hidden');
+        groupContent.classList.add('flex');
+        var chevron = toggleBtn.querySelector('.chevron');
+        if (chevron) chevron.style.transform = 'rotate(180deg)';
+      }
+    }
+  }
+};
 /* ═══════════════════════════════════════
    FILTER PILLS
 ═══════════════════════════════════════ */
