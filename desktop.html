@@ -15060,7 +15060,7 @@ const HumanClaims = {
                 return {
                     hospitalName: document.getElementById('ai-med-hospitalName').value.trim(),
                     victimName: document.getElementById('ai-med-victimName').value.trim(),
-                    victimAge: document.getElementById('ai-med-victimAge').value.trim(),
+                    victimAge: document.getElementById('ai-med-victimAge').value.trim(), // Đảm bảo key này là victimAge
                     victimAddress: document.getElementById('ai-med-victimAddress').value.trim(),
                     inDate: document.getElementById('ai-med-inDate').value,
                     outDate: document.getElementById('ai-med-outDate').value,
@@ -15078,8 +15078,8 @@ const HumanClaims = {
         if (data.hospitalName) document.getElementById('hc-hospitalName').value = data.hospitalName;
         if (data.victimName) document.getElementById('hc-victimName').value = data.victimName.toUpperCase();
         
-        // Thêm dòng này để lấy tuổi từ AI đưa vào hồ sơ
-        if (data.tuoi) document.getElementById('hc-victimAge').value = data.tuoi;
+        // SỬA TẠI ĐÂY: Đổi data.tuoi thành data.victimAge cho khớp với kết quả trả về từ bảng thông báo
+        if (data.victimAge) document.getElementById('hc-victimAge').value = data.victimAge;
         
         if (data.victimAddress) document.getElementById('hc-victimAddress').value = data.victimAddress;
         if (data.inDate) document.getElementById('hc-inDate').value = data.inDate;
@@ -15090,7 +15090,7 @@ const HumanClaims = {
             descEl.value = descEl.value ? (descEl.value + '\n' + data.desc) : data.desc;
         }
 
-        this.calculateDays(); // Gọi hàm tính ngày nằm viện sau khi điền ngày
+        this.calculateDays(); 
         Toast.fire({ icon: 'success', title: 'Đã điền thông tin y tế vào form!' });
     },
     generateEmail() {
