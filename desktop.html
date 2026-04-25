@@ -1949,8 +1949,20 @@ textarea.inp { resize:vertical; }
                   </div>
                   
                   <div class="grid grid-cols-2 gap-3">
-                    <div><label class="lbl">Địa điểm bị tai nạn</label><input id="hc-accLocation" class="inp" placeholder="Nơi xảy ra tai nạn..."></div>
-                    <div><label class="lbl">Nơi điều trị</label><input id="hc-hospitalName" class="inp font-bold text-teal-700" placeholder="Tên bệnh viện / Phòng khám..."></div>
+                      <div><label class="lbl">Địa điểm bị tai nạn</label><input id="hc-accLocation" class="inp" placeholder="Nơi xảy ra tai nạn..."></div>
+                      <div><label class="lbl">Nơi điều trị</label><input id="hc-hospitalName" class="inp font-bold text-teal-700" placeholder="Tên bệnh viện / Phòng khám..."></div>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-3 mt-3">
+                      <div>
+                          <label class="lbl">Phương thức điều trị</label>
+                          <select id="hc-treatmentMethod" class="inp font-bold text-blue-700" onchange="HumanClaims.calculateTotal()">
+                              <option value="Đông y" selected>Đông y (0.3% Mức D)</option>
+                              <option value="Tây y">Tây y (0.5% Mức D)</option>
+                          </select>
+                      </div>
+                      <div>
+                          </div>
                   </div>
                   <div><label class="lbl">Nguyên nhân tai nạn</label><textarea id="hc-accCause" rows="2" class="inp resize-none"></textarea></div>
                   
@@ -14174,6 +14186,7 @@ const HumanClaims = {
         setVal('hc-payeeName', r.payeeName); setVal('hc-payeeRelation', r.payeeRelation);
         setVal('hc-payeeCccd', r.payeeCccd); setVal('hc-payeeIssueDate', r.payeeIssueDate); setVal('hc-payeeIssuePlace', r.payeeIssuePlace);
         setVal('hc-payeeBankNo', r.payeeBankNo); setVal('hc-payeeBankName', r.payeeBankName);
+        setVal('hc-treatmentMethod', r.treatmentMethod || 'Đông y');
 
         this.calculateTotal();
         this.checkWarnings();
@@ -14285,6 +14298,7 @@ const HumanClaims = {
             payeeBankNo: getVal('hc-payeeBankNo'), payeeBankName: getVal('hc-payeeBankName'),
             totalAmount: parseInt(document.getElementById('hc-calc-total').textContent.replace(/[^\d]/g, '')) || 0,
             images: this._currentId ? (this._data.find(r => r.id === this._currentId)?.images || []) : (this._tempImages || []),
+            treatmentMethod: getVal('hc-treatmentMethod'),
             updatedAt: new Date().toISOString()
         };
 
@@ -14359,19 +14373,40 @@ const HumanClaims = {
     },
 
     calculateTotal() {
+        // Lấy các mức trách nhiệm
         const limitB = parseInt(document.getElementById('hc-limitB').value.replace(/[^\d]/g, '')) || 0;
+        const limitC = parseInt(document.getElementById('hc-limitC').value.replace(/[^\d]/g, '')) || 0;
         const limitD = parseInt(document.getElementById('hc-limitD').value.replace(/[^\d]/g, '')) || 0;
+        
+        // Lấy thông số tính toán
+        const lossType = document.getElementById('hc-lossType').value;
         const pct = parseInt(document.getElementById('hc-injuryRealPct').value) || 0;
         const days = parseInt(document.getElementById('hc-days').value) || 0;
+        const method = document.getElementById('hc-treatmentMethod').value;
 
-        const valInjury = Math.round(limitB * (pct / 100));
-        // Giả sử trợ cấp nằm viện là 0.5% Mức D / ngày
-        const valHospital = Math.round(limitD * 0.005 * days); 
-        const total = valInjury + valHospital;
+        // 1. Tính tiền Thương tật hoặc Phẫu thuật
+        let valInjuryOrSurgery = 0;
+        if (lossType === 'Thương tật') {
+            valInjuryOrSurgery = Math.round(limitB * (pct / 100));
+        } else if (lossType === 'Phẫu thuật') {
+            valInjuryOrSurgery = Math.round(limitC * (pct / 100));
+        } else if (lossType === 'Tử vong') {
+            // Nếu có mức A cho tử vong thì tính mức A, ở đây tạm tính theo mức B hoặc C tùy quy tắc của anh
+            valInjuryOrSurgery = limitB; 
+        }
 
-        document.getElementById('hc-calc-injury').textContent = valInjury.toLocaleString('vi-VN') + ' đ';
+        // 2. Tính trợ cấp nằm viện (Mức D)
+        // Tây y: 0.5% , Đông y: 0.3%
+        const rateHospital = (method === 'Tây y') ? 0.005 : 0.003;
+        const valHospital = Math.round(limitD * rateHospital * days);
+
+        // 3. Tổng cộng
+        const total = valInjuryOrSurgery + valHospital;
+
+        // Hiển thị lên giao diện
+        document.getElementById('hc-calc-injury').textContent = valInjuryOrSurgery.toLocaleString('vi-VN') + ' đ';
         document.getElementById('hc-calc-hospital').textContent = valHospital.toLocaleString('vi-VN') + ' đ';
-        document.getElementById('hc-calc-total').innerHTML = total.toLocaleString('vi-VN') + '<span class="text-lg text-emerald-400">đ</span>';
+        document.getElementById('hc-calc-total').innerHTML = total.toLocaleString('vi-VN') + '<span class="text-lg text-emerald-400 ml-1">đ</span>';
     },
     /* ── KIỂM TRA NĐBH CÓ TRONG DANH SÁCH HỢP ĐỒNG KHÔNG ── */
     checkInsuredPerson() {
