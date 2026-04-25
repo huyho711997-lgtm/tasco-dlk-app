@@ -1905,6 +1905,11 @@ textarea.inp { resize:vertical; }
                       </select>
                     </div>
                   </div>
+                  
+                  <div class="grid grid-cols-2 gap-3">
+                    <div><label class="lbl">Mức phí</label><input id="hc-premium" class="inp font-mono text-right text-blue-600" oninput="BaoLanh.formatNumber(this)" placeholder="VD: 500.000"></div>
+                    <div><label class="lbl">Ngày nộp phí</label><input id="hc-feeDate" type="date" class="inp"></div>
+                  </div>
                   <div class="grid grid-cols-2 gap-3">
                     <div><label class="lbl">Hiệu lực từ</label><input id="hc-effFrom" type="datetime-local" class="inp text-[11px]" onchange="HumanClaims.checkWarnings()"></div>
                     <div><label class="lbl">Đến</label><input id="hc-effTo" type="datetime-local" class="inp text-[11px]" onchange="HumanClaims.checkWarnings()"></div>
@@ -14167,7 +14172,8 @@ const HumanClaims = {
         
         setVal('hc-contractNo', r.contractNo); setVal('hc-companyName', r.companyName);
         setVal('hc-gcn', r.gcn); setVal('hc-insType', r.insType); setVal('hc-feeStatus', r.feeStatus);
-        setVal('hc-effFrom', r.effFrom); setVal('hc-effTo', r.effTo);
+        setVal('hc-premium', r.premium ? Number(r.premium).toLocaleString('vi-VN') : '');
+        setVal('hc-feeDate', r.feeDate);
         setVal('hc-effFrom', r.effFrom); setVal('hc-effTo', r.effTo);
         setVal('hc-limitA', r.limitA ? Number(r.limitA).toLocaleString('vi-VN') : '');
         setVal('hc-limitB', r.limitB ? Number(r.limitB).toLocaleString('vi-VN') : '');
@@ -14175,19 +14181,16 @@ const HumanClaims = {
         setVal('hc-limitD', r.limitD ? Number(r.limitD).toLocaleString('vi-VN') : '');
         setVal('hc-accLocation', r.accLocation);   
         setVal('hc-hospitalName', r.hospitalName); 
-        
         setVal('hc-victimName', r.victimName); setVal('hc-victimAge', r.victimAge); setVal('hc-victimAddress', r.victimAddress); setVal('hc-lossType', r.lossType);
         setVal('hc-accDate', r.accDate); setVal('hc-inDate', r.inDate);
         setVal('hc-outDate', r.outDate); setVal('hc-days', r.days);
         setVal('hc-accCause', r.accCause); setVal('hc-injuryDesc', r.injuryDesc);
         setVal('hc-injuryCode', r.injuryCode); setVal('hc-injuryRange', r.injuryRange);
         setVal('hc-injuryRealPct', r.injuryRealPct || 0);
-
         setVal('hc-payeeName', r.payeeName); setVal('hc-payeeRelation', r.payeeRelation);
         setVal('hc-payeeCccd', r.payeeCccd); setVal('hc-payeeIssueDate', r.payeeIssueDate); setVal('hc-payeeIssuePlace', r.payeeIssuePlace);
         setVal('hc-payeeBankNo', r.payeeBankNo); setVal('hc-payeeBankName', r.payeeBankName);
         setVal('hc-treatmentMethod', r.treatmentMethod || 'Đông y');
-
         this.calculateTotal();
         this.checkWarnings();
         this.checkInsuredPerson();
@@ -14283,6 +14286,7 @@ const HumanClaims = {
         const payload = {
             contractNo: getVal('hc-contractNo'), companyName: getVal('hc-companyName'),
             gcn: getVal('hc-gcn'), insType: getVal('hc-insType'), feeStatus: getVal('hc-feeStatus'),
+            premium: getNum('hc-premium'), feeDate: getVal('hc-feeDate'),
             effFrom: getVal('hc-effFrom'), effTo: getVal('hc-effTo'),
             limitA: getNum('hc-limitA'), limitB: getNum('hc-limitB'),
             limitC: getNum('hc-limitC'), limitD: getNum('hc-limitD'),
