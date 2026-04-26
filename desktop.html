@@ -1946,7 +1946,7 @@ textarea.inp { resize:vertical; }
                         <input id="hc-victimName" class="inp font-bold text-cyan-900 uppercase" oninput="HumanClaims.checkInsuredPerson()">
                         <div id="hc-victim-warning" class="hidden mt-1.5 text-[10px] font-bold px-2.5 py-1.5 rounded-md flex items-center gap-1.5"></div>
                     </div>
-                    <div class="col-span-2"><label class="lbl">Tuổi</label><input id="hc-victimAge" type="number" class="inp text-center font-bold text-cyan-900" placeholder="VD: 35"></div>
+                    <div class="col-span-2"><label class="lbl">Tuổi</label><input id="hc-victimAge" type="number" class="inp text-center font-bold text-cyan-900 text-[13px]" placeholder="VD: 35"></div>
                     <div class="col-span-4"><label class="lbl">Loại tổn thất</label>
                       <select id="hc-lossType" class="inp font-bold text-slate-700">
                         <option value="Thương tật">Thương tật</option>
@@ -1958,10 +1958,10 @@ textarea.inp { resize:vertical; }
                   
                   <div><label class="lbl">Địa chỉ</label><input id="hc-victimAddress" class="inp" placeholder="Số nhà, đường, phường/xã, quận/huyện..."></div>
                   <div class="grid grid-cols-4 gap-3">
-                    <div><label class="lbl">Ngày bị tai nạn</label><input id="hc-accDate" type="date" class="inp" onchange="HumanClaims.checkWarnings()"></div>
-                    <div><label class="lbl">Ngày nhập viện</label><input id="hc-inDate" type="date" class="inp" onchange="HumanClaims.calculateDays()"></div>
-                    <div><label class="lbl">Ngày ra viện</label><input id="hc-outDate" type="date" class="inp" onchange="HumanClaims.calculateDays()"></div>
-                    <div><label class="lbl">Số ngày nằm viện</label><input id="hc-days" type="number" class="inp text-center font-bold text-blue-700" oninput="HumanClaims.calculateTotal()"></div>
+                    <div><label class="lbl">Ngày bị tai nạn</label><input id="hc-accDate" type="date" class="inp text-[13px]" onchange="HumanClaims.checkWarnings()"></div>
+                    <div><label class="lbl">Ngày nhập viện</label><input id="hc-inDate" type="date" class="inp text-[13px]" onchange="HumanClaims.calculateDays()"></div>
+                    <div><label class="lbl">Ngày ra viện</label><input id="hc-outDate" type="date" class="inp text-[13px]" onchange="HumanClaims.calculateDays()"></div>
+                    <div><label class="lbl">Số ngày nằm viện</label><input id="hc-days" type="number" class="inp text-center font-bold text-blue-700 text-[13px]" oninput="HumanClaims.calculateTotal()"></div>
                   </div>
                   
                   <div class="grid grid-cols-2 gap-3">
