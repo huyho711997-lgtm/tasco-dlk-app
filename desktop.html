@@ -4070,7 +4070,6 @@ var GEM_KEYS  = [
                 ];
 var GEM_MODEL = "gemini-2.5-flash";
 var WORD_URL  = "https://script.google.com/macros/s/AKfycbwQA00iOlnCsRwUkh9CN8w7fWONqw_-_EpCXCOJcwdBKoLe3RNuOatTzWQsmkjpHmUg/exec";
-var WEB_APP_URL  = "https://script.google.com/macros/s/AKfycbwQA00iOlnCsRwUkh9CN8w7fWONqw_-_EpCXCOJcwdBKoLe3RNuOatTzWQsmkjpHmUg/exec";
 var gemKeyIdx = 0;
 var statsInited = false;
 var allData   = [];
@@ -15558,7 +15557,7 @@ const HumanClaims = {
             didOpen: () => {
                 Swal.showLoading();
                 
-                fetch(WEB_APP_URL, {
+                fetch(WORD_URL, {
                     method: 'POST',
                     body: JSON.stringify(payload)
                 })
