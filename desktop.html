@@ -1880,7 +1880,7 @@ textarea.inp { resize:vertical; }
                   <div class="grid grid-cols-2 gap-3">
                       <div class="relative">
                           <label class="lbl">Số HĐ gốc (Gõ để tìm kiếm)</label>
-                          <input id="hc-contractNo" class="inp font-mono" placeholder="Tìm số HĐ..." oninput="HumanClaims.searchContract(this.value, 'no')">
+                          <input id="hc-contractNo" class="inp text-[13px]" placeholder="Tìm số HĐ..." oninput="HumanClaims.searchContract(this.value, 'no')">
                           <div id="hc-contract-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl hidden max-h-48 overflow-y-auto"></div>
                       </div>
                       <div class="relative"> <label class="lbl">Tên đơn vị tham gia BH</label>
@@ -1895,7 +1895,7 @@ textarea.inp { resize:vertical; }
                   </div>
 
                   <div class="grid grid-cols-3 gap-3">
-                    <div><label class="lbl">Số GCN</label><input id="hc-gcn" class="inp font-mono"></div>
+                    <div><label class="lbl">Số GCN</label><input id="hc-gcn" class="inp text-[13px]"></div>
                     <div><label class="lbl">Loại hình BH</label>
                       <select id="hc-insType" class="inp">
                           <option value="Học sinh">Học sinh, sinh viên</option>
@@ -1912,10 +1912,10 @@ textarea.inp { resize:vertical; }
                   </div>
                   
                   <div class="grid grid-cols-4 gap-3">
-                    <div><label class="lbl">Mức phí</label><input id="hc-premium" class="inp font-mono text-right text-blue-600" oninput="BaoLanh.formatNumber(this)" placeholder="VD: 500.000"></div>
+                    <div><label class="lbl">Mức phí</label><input id="hc-premium" class="inp text-right text-slate-800 text-[13px]" oninput="BaoLanh.formatNumber(this)" placeholder="VD: 500.000"></div>
                     <div><label class="lbl">Ngày nộp phí</label><input id="hc-feeDate" type="date" class="inp"></div>
-                    <div><label class="lbl">Hiệu lực từ</label><input id="hc-effFrom" type="datetime-local" class="inp text-[11px]" onchange="HumanClaims.checkWarnings()"></div>
-                    <div><label class="lbl">Đến</label><input id="hc-effTo" type="datetime-local" class="inp text-[11px]" onchange="HumanClaims.checkWarnings()"></div>
+                    <div><label class="lbl">Hiệu lực từ</label><input id="hc-effFrom" type="datetime-local" class="inp text-[13px]" onchange="HumanClaims.checkWarnings()"></div>
+                    <div><label class="lbl">Đến</label><input id="hc-effTo" type="datetime-local" class="inp text-[13px]" onchange="HumanClaims.checkWarnings()"></div>
                   </div>
                   <div class="pt-2 border-t border-slate-100 relative">
                     <div class="flex items-center justify-between mb-2">
@@ -1925,10 +1925,10 @@ textarea.inp { resize:vertical; }
                         </button>
                     </div>
                     <div class="grid grid-cols-4 gap-3">
-                      <div><label class="lbl !text-[10px] text-slate-600">Mức A (Tử vong do ốm/bệnh)</label><input id="hc-limitA" class="inp text-right text-slate-800 text-[13px]" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
-                      <div><label class="lbl !text-[10px] text-slate-600">Mức B (Tai nạn)</label><input id="hc-limitB" class="inp text-right text-slate-800 text-[13px]" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
-                      <div><label class="lbl !text-[10px] text-slate-600">Mức C (Phẫu thuật)</label><input id="hc-limitC" class="inp text-right text-slate-800 text-[13px]" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
-                      <div><label class="lbl !text-[10px] text-slate-600">Mức D (Nằm viện)</label><input id="hc-limitD" class="inp text-right text-slate-800 text-[13px]" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
+                      <div><label class="lbl !text-[10px] text-slate-600">Mức A (Tử vong do ốm/bệnh)</label><input id="hc-limitA" class="inp font-mono text-right text-slate-800" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
+                      <div><label class="lbl !text-[10px] text-slate-600">Mức B (Tai nạn)</label><input id="hc-limitB" class="inp font-mono text-right text-slate-800" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
+                      <div><label class="lbl !text-[10px] text-slate-600">Mức C (Phẫu thuật)</label><input id="hc-limitC" class="inp font-mono text-right text-slate-800" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
+                      <div><label class="lbl !text-[10px] text-slate-600">Mức D (Nằm viện)</label><input id="hc-limitD" class="inp font-mono text-right text-slate-800" oninput="BaoLanh.formatNumber(this); HumanClaims.calculateTotal()"></div>
                     </div>
                   </div>
                 </div>
@@ -2060,14 +2060,14 @@ textarea.inp { resize:vertical; }
                     </div>
                   </div>
                   <div class="grid grid-cols-2 gap-3">
-                    <div><label class="lbl">Số CCCD</label><input id="hc-payeeCccd" class="inp font-bold text-slate-700 text-[13px]"></div>
+                    <div><label class="lbl">Số CCCD</label><input id="hc-payeeCccd" class="inp font-mono font-bold text-slate-700"></div>
                     <div><label class="lbl">Ngày cấp</label><input id="hc-payeeIssueDate" class="inp text-center" placeholder="DD/MM/YYYY"></div>
                   </div>
                   <div>
                     <label class="lbl">Nơi cấp</label><input id="hc-payeeIssuePlace" class="inp">
                   </div>
                   <div class="grid grid-cols-5 gap-3 pt-3 border-t border-slate-100">
-                    <div class="col-span-2"><label class="lbl">Số tài khoản</label><input id="hc-payeeBankNo" class="inp font-bold text-purple-700 text-[13px]"></div>
+                    <div class="col-span-2"><label class="lbl">Số tài khoản</label><input id="hc-payeeBankNo" class="inp font-mono font-bold text-purple-700"></div>
                     <div class="col-span-3"><label class="lbl">Ngân hàng</label><input id="hc-payeeBankName" class="inp" placeholder="VD: Vietcombank, BIDV..."></div>
                   </div>
                 </div>
@@ -2320,19 +2320,19 @@ textarea.inp { resize:vertical; }
                 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:4px;">
                   <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;">
                     <p style="font-size:10px;font-weight:800;color:#475569;text-transform:uppercase;margin-bottom:4px;">Mức A</p>
-                    <input id="ct-f-lvlA" class="inp text-[13px]" placeholder="0" style="background:#fff;color:#0f172a;" oninput="this.value=this.value.replace(/\D/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')">
+                    <input id="ct-f-lvlA" class="inp font-mono" placeholder="0" style="background:#fff;color:#0f172a;" oninput="this.value=this.value.replace(/\D/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')">
                   </div>
                   <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;">
                     <p style="font-size:10px;font-weight:800;color:#475569;text-transform:uppercase;margin-bottom:4px;">Mức B</p>
-                    <input id="ct-f-lvlB" class="inp text-[13px]" placeholder="0" style="background:#fff;color:#0f172a;" oninput="this.value=this.value.replace(/\D/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')">
+                    <input id="ct-f-lvlB" class="inp font-mono" placeholder="0" style="background:#fff;color:#0f172a;" oninput="this.value=this.value.replace(/\D/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')">
                   </div>
                   <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;">
                     <p style="font-size:10px;font-weight:800;color:#475569;text-transform:uppercase;margin-bottom:4px;">Mức C</p>
-                    <input id="ct-f-lvlC" class="inp text-[13px]" placeholder="0" style="background:#fff;color:#0f172a;" oninput="this.value=this.value.replace(/\D/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')">
+                    <input id="ct-f-lvlC" class="inp font-mono" placeholder="0" style="background:#fff;color:#0f172a;" oninput="this.value=this.value.replace(/\D/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')">
                   </div>
                   <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;">
                     <p style="font-size:10px;font-weight:800;color:#475569;text-transform:uppercase;margin-bottom:4px;">Mức D</p>
-                    <input id="ct-f-lvlD" class="inp text-[13px]" placeholder="0" style="background:#fff;color:#0f172a;" oninput="this.value=this.value.replace(/\D/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')">
+                    <input id="ct-f-lvlD" class="inp font-mono" placeholder="0" style="background:#fff;color:#0f172a;" oninput="this.value=this.value.replace(/\D/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,',')">
                   </div>
                 </div>
               </div>
