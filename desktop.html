@@ -1854,6 +1854,10 @@ textarea.inp { resize:vertical; }
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> AI Quét Y Tế
             </button>
 
+            <button onclick="HumanClaims.printDossier()" class="w-8 h-8 flex items-center justify-center bg-slate-100 text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-600 hover:text-white transition-colors shadow-sm hidden" id="btn-hc-print" title="In Hồ sơ">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            </button>
+
             <button onclick="HumanClaims.openExportMultiModal()" class="w-8 h-8 flex items-center justify-center bg-blue-50 text-blue-600 border border-blue-200 rounded-xl hover:bg-blue-600 hover:text-white transition-colors hidden shadow-sm" id="btn-hc-export-multi" title="Tải xuống văn bản">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             </button>
@@ -14175,6 +14179,9 @@ const HumanClaims = {
         document.getElementById('btn-hc-email').classList.add('hidden');
         const btnExportMulti = document.getElementById('btn-hc-export-multi');
         if(btnExportMulti) btnExportMulti.classList.add('hidden');
+
+        const btnPrint = document.getElementById('btn-hc-print');
+        if(btnPrint) btnPrint.classList.add('hidden');
         
         const inputsToLock = document.querySelectorAll('#hc-m-body input, #hc-m-body select, #hc-m-body textarea');
         inputsToLock.forEach(el => el.disabled = false);
@@ -14261,11 +14268,16 @@ const HumanClaims = {
         if (currIdx <= 1) document.getElementById('btn-hc-email').classList.remove('hidden');
         else document.getElementById('btn-hc-email').classList.add('hidden');
 
-        // Hiện nút Xuất Word (Multi) khi đã có số HSBT
+        // Hiện nút Xuất Word (Multi) và nút In khi đã có số HSBT
         const btnExportMulti = document.getElementById('btn-hc-export-multi');
-        if(btnExportMulti) {
-            if (currIdx >= 2) btnExportMulti.classList.remove('hidden');
-            else btnExportMulti.classList.add('hidden');
+        const btnPrint = document.getElementById('btn-hc-print');
+
+        if (currIdx >= 2) {
+            if (btnExportMulti) btnExportMulti.classList.remove('hidden');
+            if (btnPrint) btnPrint.classList.remove('hidden');
+        } else {
+            if (btnExportMulti) btnExportMulti.classList.add('hidden');
+            if (btnPrint) btnPrint.classList.add('hidden');
         }
     },
 
