@@ -84,9 +84,6 @@ textarea.inp { resize:vertical; }
 .m-tab.active{color:#2563eb;border-bottom-color:#2563eb;}
 .m-tab-panel{display:none;}
 .m-tab-panel.active{display:flex;flex-direction:column;}
-.hc-tab-panel{display:none;animation:fadeIn .2s ease-in-out;}
-.hc-tab-panel.active{display:block;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(-2px)}to{opacity:1;transform:translateY(0)}}
 .dm-card{background:#fff;border:1px solid #e2e8f0;border-radius:.875rem;padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;transition:all .15s;}
 .dm-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08);}
 .dm-chip{display:inline-flex;align-items:center;gap:2px;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;}
@@ -1938,148 +1935,70 @@ textarea.inp { resize:vertical; }
               </div>
 
               <div class="bg-white rounded-xl border border-cyan-200 shadow-sm overflow-hidden shrink-0">
-                <!-- Header -->
-                <div class="px-4 py-3 bg-gradient-to-r from-cyan-50 to-teal-50 border-b border-cyan-100 flex items-center gap-2">
+                <div class="px-4 py-2.5 bg-cyan-50/50 border-b border-cyan-100 flex items-center gap-2">
                   <svg class="w-4 h-4 text-cyan-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                  <span class="text-xs font-black text-cyan-900 uppercase tracking-wide">Người được bảo hiểm & Sự cố Y tế</span>
+                  <span class="text-xs font-black text-cyan-800 uppercase tracking-wide">Người được bảo hiểm & Thông tin Y tế</span>
                 </div>
-
-                <!-- Tab Navigation -->
-                <div class="flex border-b border-slate-200 bg-slate-50/50 px-4">
-                  <button class="m-tab active" onclick="document.querySelectorAll('.hc-tab-panel').forEach(el => el.classList.remove('active')); document.getElementById('hc-tab-personal').classList.add('active'); document.querySelectorAll('.m-tab').forEach(el => el.classList.remove('active')); this.classList.add('active')">
-                    <svg class="w-3.5 h-3.5 inline mr-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    Cá nhân
-                  </button>
-                  <button class="m-tab" onclick="document.querySelectorAll('.hc-tab-panel').forEach(el => el.classList.remove('active')); document.getElementById('hc-tab-medical').classList.add('active'); document.querySelectorAll('.m-tab').forEach(el => el.classList.remove('active')); this.classList.add('active')">
-                    <svg class="w-3.5 h-3.5 inline mr-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20m-8-8h16"/></svg>
-                    Y tế
-                  </button>
-                  <button class="m-tab" onclick="document.querySelectorAll('.hc-tab-panel').forEach(el => el.classList.remove('active')); document.getElementById('hc-tab-treatment').classList.add('active'); document.querySelectorAll('.m-tab').forEach(el => el.classList.remove('active')); this.classList.add('active')">
-                    <svg class="w-3.5 h-3.5 inline mr-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M16 5L8 19M8 5l8 14"/></svg>
-                    Điều trị
-                  </button>
-                </div>
-
-                <!-- Content -->
                 <div class="p-4 space-y-3">
-
-                  <!-- TAB 1: Thông tin cá nhân -->
-                  <div id="hc-tab-personal" class="hc-tab-panel active space-y-3">
-                    <!-- Tên & Tuổi & Loại tổn thất -->
-                    <div class="grid grid-cols-12 gap-3">
-                      <div class="col-span-6">
-                        <label class="lbl">Tên người được bảo hiểm</label>
-                        <input id="hc-victimName" class="inp font-bold text-cyan-900 uppercase text-[13px]" placeholder="Họ tên đầy đủ" oninput="HumanClaims.checkInsuredPerson()">
+                  <div class="grid grid-cols-12 gap-3">
+                    <div class="col-span-6">
+                        <label class="lbl">Người được Bảo hiểm</label>
+                        <input id="hc-victimName" class="inp font-bold text-cyan-900 uppercase" oninput="HumanClaims.checkInsuredPerson()">
                         <div id="hc-victim-warning" class="hidden mt-1.5 text-[10px] font-bold px-2.5 py-1.5 rounded-md flex items-center gap-1.5"></div>
-                      </div>
-                      <div class="col-span-3">
-                        <label class="lbl">Tuổi</label>
-                        <input id="hc-victimAge" type="number" class="inp text-center font-bold text-cyan-900 text-[13px]" placeholder="VD: 35" min="0" max="150">
-                      </div>
-                      <div class="col-span-3">
-                        <label class="lbl">Loại tổn thất</label>
-                        <select id="hc-lossType" class="inp font-bold text-slate-700 text-[13px]">
-                          <option value="">— Chọn —</option>
-                          <option value="Thương tật">Thương tật</option>
-                          <option value="Phẫu thuật">Phẫu thuật</option>
-                          <option value="Tử vong">Tử vong</option>
-                        </select>
-                      </div>
                     </div>
-
-                    <!-- Địa chỉ -->
-                    <div>
-                      <label class="lbl">Địa chỉ hiện tại</label>
-                      <input id="hc-victimAddress" class="inp text-[13px]" placeholder="Số nhà, đường, phường/xã, quận/huyện...">
+                    <div class="col-span-2"><label class="lbl">Tuổi</label><input id="hc-victimAge" type="number" class="inp text-center font-bold text-cyan-900 text-[13px]" placeholder="VD: 35"></div>
+                    <div class="col-span-4"><label class="lbl">Loại tổn thất</label>
+                      <select id="hc-lossType" class="inp font-bold text-slate-700">
+                        <option value="Thương tật">Thương tật</option>
+                        <option value="Phẫu thuật">Phẫu thuật</option>
+                        <option value="Tử vong">Tử vong</option>
+                      </select>
                     </div>
                   </div>
-
-                  <!-- TAB 2: Thông tin Y tế -->
-                  <div id="hc-tab-medical" class="hc-tab-panel space-y-3">
-                    <!-- Ngày sự cố & Nằm viện -->
-                    <div class="grid grid-cols-4 gap-3">
-                      <div>
-                        <label class="lbl">Ngày bị tai nạn</label>
-                        <input id="hc-accDate" type="date" class="inp text-[13px]" onchange="HumanClaims.checkWarnings()">
-                      </div>
-                      <div>
-                        <label class="lbl">Ngày nhập viện</label>
-                        <input id="hc-inDate" type="date" class="inp text-[13px]" onchange="HumanClaims.calculateDays()">
-                      </div>
-                      <div>
-                        <label class="lbl">Ngày ra viện</label>
-                        <input id="hc-outDate" type="date" class="inp text-[13px]" onchange="HumanClaims.calculateDays()">
-                      </div>
-                      <div>
-                        <label class="lbl">Số ngày nằm viện</label>
-                        <input id="hc-days" type="number" class="inp text-center font-bold text-blue-700 text-[13px]" min="0" oninput="HumanClaims.calculateTotal()">
-                      </div>
-                    </div>
-
-                    <!-- Địa điểm & Nơi điều trị -->
-                    <div class="grid grid-cols-2 gap-3">
-                      <div>
-                        <label class="lbl">Địa điểm bị tai nạn</label>
-                        <input id="hc-accLocation" class="inp text-[13px]" placeholder="Nơi xảy ra sự cố...">
-                      </div>
-                      <div>
-                        <label class="lbl">Cơ sở y tế điều trị</label>
-                        <input id="hc-hospitalName" class="inp font-bold text-teal-700 text-[13px]" placeholder="Bệnh viện / Phòng khám...">
-                      </div>
-                    </div>
-
-                    <!-- Chẩn đoán Y khoa -->
-                    <div class="p-3 bg-cyan-50/40 rounded-lg border border-cyan-200 space-y-2">
-                      <div class="flex items-center justify-between">
-                        <label class="lbl !mb-0 text-cyan-800">Chẩn đoán / Thương tật Y khoa</label>
-                        <button onclick="HumanClaims.suggestInjury()" class="px-2.5 py-1 text-[11px] font-bold bg-cyan-100 text-cyan-700 rounded hover:bg-cyan-200 transition-all flex items-center gap-1 shadow-sm">
-                          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/></svg>
-                          AI Gợi ý
-                        </button>
-                      </div>
-                      <textarea id="hc-injuryDesc" rows="2" class="inp resize-none text-[13px]" placeholder="VD: Gãy 1/3 dưới xương quay trái..."></textarea>
-                    </div>
+                  
+                  <div><label class="lbl">Địa chỉ</label><input id="hc-victimAddress" class="inp" placeholder="Số nhà, đường, phường/xã, quận/huyện..."></div>
+                  <div class="grid grid-cols-4 gap-3">
+                    <div><label class="lbl">Ngày bị tai nạn</label><input id="hc-accDate" type="date" class="inp text-[13px]" onchange="HumanClaims.checkWarnings()"></div>
+                    <div><label class="lbl">Ngày nhập viện</label><input id="hc-inDate" type="date" class="inp text-[13px]" onchange="HumanClaims.calculateDays()"></div>
+                    <div><label class="lbl">Ngày ra viện</label><input id="hc-outDate" type="date" class="inp text-[13px]" onchange="HumanClaims.calculateDays()"></div>
+                    <div><label class="lbl">Số ngày nằm viện</label><input id="hc-days" type="number" class="inp text-center font-bold text-blue-700 text-[13px]" oninput="HumanClaims.calculateTotal()"></div>
+                  </div>
+                  
+                  <div class="grid grid-cols-2 gap-3">
+                      <div><label class="lbl">Địa điểm bị tai nạn</label><input id="hc-accLocation" class="inp" placeholder="Nơi xảy ra tai nạn..."></div>
+                      <div><label class="lbl">Nơi điều trị</label><input id="hc-hospitalName" class="inp font-bold text-teal-700" placeholder="Tên bệnh viện / Phòng khám..."></div>
                   </div>
 
-                  <!-- TAB 3: Điều trị & Tỷ lệ -->
-                  <div id="hc-tab-treatment" class="hc-tab-panel space-y-3">
-                    <!-- Phương thức điều trị -->
-                    <div class="grid grid-cols-2 gap-3">
+                  <div class="grid grid-cols-2 gap-3 mt-3">
                       <div>
-                        <label class="lbl">Phương thức điều trị</label>
-                        <select id="hc-treatmentMethod" class="inp font-bold text-blue-700 text-[13px]" onchange="HumanClaims.calculateTotal()">
-                          <option value="Đông y">Đông y (0.3% Mức D)</option>
-                          <option value="Tây y" selected>Tây y (0.5% Mức D)</option>
-                        </select>
+                          <label class="lbl">Phương thức điều trị</label>
+                          <select id="hc-treatmentMethod" class="inp font-bold text-blue-700" onchange="HumanClaims.calculateTotal()">
+                              <option value="Đông y" selected>Đông y (0.3% Mức D)</option>
+                              <option value="Tây y">Tây y (0.5% Mức D)</option>
+                          </select>
                       </div>
                       <div></div>
+                  </div>
+                  <div><label class="lbl">Nguyên nhân tai nạn</label><textarea id="hc-accCause" rows="2" class="inp resize-none"></textarea></div>
+                  
+                  <div class="p-3 bg-cyan-50/30 rounded-lg border border-cyan-100 mt-2">
+                    <div class="flex items-center justify-between mb-2">
+                      <label class="lbl !mb-0 text-cyan-800">Chẩn đoán / Thương tật Y khoa</label>
+                      <button onclick="HumanClaims.suggestInjury()" class="px-2.5 py-1 bg-cyan-100 text-cyan-700 rounded-md text-[10px] font-bold hover:bg-cyan-200 transition-colors flex items-center gap-1.5 shadow-sm">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/></svg> AI Gợi ý TLTT
+                      </button>
                     </div>
-
-                    <!-- Nguyên nhân -->
-                    <div>
-                      <label class="lbl">Nguyên nhân tai nạn</label>
-                      <textarea id="hc-accCause" rows="2" class="inp resize-none text-[13px]" placeholder="Mô tả chi tiết nguyên nhân..."></textarea>
-                    </div>
-
-                    <!-- Tỷ lệ TLTT -->
-                    <div class="p-3 bg-amber-50/40 rounded-lg border border-amber-200">
-                      <label class="text-[11px] font-bold text-amber-900 uppercase block mb-2.5">Tỷ lệ Thương tật Y khoa</label>
-                      <div class="grid grid-cols-12 gap-3">
-                        <div class="col-span-5">
-                          <label class="text-[10px] font-bold text-slate-600">Mục theo Bảng TLTT</label>
-                          <input id="hc-injuryCode" class="inp text-xs text-cyan-800 bg-white border-cyan-200 text-[12px]" readonly placeholder="AI tự điền...">
-                        </div>
-                        <div class="col-span-3">
-                          <label class="text-[10px] font-bold text-slate-600">Tỷ lệ quy định</label>
-                          <input id="hc-injuryRange" class="inp text-xs text-center bg-white border-cyan-200 text-[12px]" readonly placeholder="—%">
-                        </div>
-                        <div class="col-span-4">
-                          <label class="text-[10px] font-bold text-slate-600 block mb-1">Tỷ lệ thực tế</label>
-                          <div class="flex items-center rounded-lg overflow-hidden border border-rose-200 shadow-sm bg-white">
-                            <button onclick="HumanClaims.adjPct(-1)" class="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 font-bold text-slate-600 border-r border-slate-200 text-lg">−</button>
-                            <input id="hc-injuryRealPct" class="flex-1 h-8 text-center text-sm font-black text-rose-600 bg-white outline-none" value="0" oninput="HumanClaims.calculateTotal()">
-                            <button onclick="HumanClaims.adjPct(1)" class="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 font-bold text-slate-600 border-l border-slate-200 text-lg">+</button>
-                          </div>
+                    <textarea id="hc-injuryDesc" rows="2" class="inp resize-none mb-2 text-[13px]" placeholder="Gãy 1/3 dưới xương quay trái..."></textarea>
+                    
+                    <div class="flex items-center gap-3">
+                      <div class="flex-1"><label class="text-[10px] font-bold text-slate-500">Mục theo Bảng TLTT</label><input id="hc-injuryCode" class="inp text-xs text-cyan-800 bg-white border-cyan-200" readonly placeholder="AI tự điền..."></div>
+                      <div class="w-24"><label class="text-[10px] font-bold text-slate-500">Tỷ lệ quy định</label><input id="hc-injuryRange" class="inp text-xs text-center bg-white border-cyan-200 font-mono" readonly placeholder="-- %"></div>
+                      <div class="w-28">
+                        <label class="text-[10px] font-bold text-slate-500">Tỷ lệ thực tế</label>
+                        <div class="flex items-center shadow-sm rounded-lg overflow-hidden border border-cyan-200">
+                          <button onclick="HumanClaims.adjPct(-1)" class="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 font-bold text-slate-600 border-r border-cyan-200">-</button>
+                          <input id="hc-injuryRealPct" class="w-12 h-8 text-center text-sm font-black text-rose-600 bg-white outline-none" value="0" oninput="HumanClaims.calculateTotal()">
+                          <button onclick="HumanClaims.adjPct(1)" class="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 font-bold text-slate-600 border-l border-cyan-200">+</button>
                         </div>
                       </div>
                     </div>
