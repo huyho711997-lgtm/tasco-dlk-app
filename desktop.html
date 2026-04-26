@@ -2101,6 +2101,25 @@ textarea.inp { resize:vertical; }
                 </div>
             </div>
             
+            <!-- ========== NÚT TẢI FILE WORD - THÊM MỚI ========== -->
+            <div class="relative group">
+              <button class="px-3 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 font-bold text-xs flex items-center gap-1 shadow-sm">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Tải Word
+              </button>
+              <div class="absolute bottom-full left-0 mb-1 w-56 bg-white border border-slate-200 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all flex flex-col overflow-hidden z-50">
+                <button onclick="event.stopPropagation(); HumanClaims.downloadWordDoc('thongbao')" class="px-4 py-2.5 text-left text-xs font-semibold text-slate-700 hover:bg-blue-50 border-b border-slate-100 transition-colors">
+                  📄 Thông báo bồi thường
+                </button>
+                <button onclick="event.stopPropagation(); HumanClaims.downloadWordDoc('toinhan')" class="px-4 py-2.5 text-left text-xs font-semibold text-slate-700 hover:bg-green-50 border-b border-slate-100 transition-colors">
+                  📋 Tờ trình bồi thường
+                </button>
+                <button onclick="event.stopPropagation(); HumanClaims.downloadWordDoc('xacminh')" class="px-4 py-2.5 text-left text-xs font-semibold text-slate-700 hover:bg-amber-50 transition-colors">
+                  ✅ Xác minh phí bảo hiểm
+                </button>
+              </div>
+            </div>
+            <!-- ====== HẾT THÊM NÚT TẢI FILE ====== -->
+            
             <button onclick="HumanClaims.nextStatus()" id="hc-m-next-btn" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-bold text-sm hover:bg-blue-700 transition-colors shadow-md shadow-blue-200 flex items-center gap-2">
               Chuyển trạng thái <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
@@ -15448,6 +15467,130 @@ const HumanClaims = {
             
             this.renderImages(currentImgs);
             Toast.fire({icon: 'success', title: 'Đã xóa ảnh!'});
+        });
+    },
+    // ════════════════════════════════════════════════════════════════════════════════
+    // DOWNLOAD WORD DOCUMENTS - HỒSƠ BỒI THƯỜNG CON NGƯỜI
+    // ════════════════════════════════════════════════════════════════════════════════
+    downloadWordDoc(docType) {
+        const rec = this._data.find(r => r.id === this._currentId);
+        if (!rec) {
+            Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Vui lòng chọn hồ sơ trước' });
+            return;
+        }
+
+        // Dữ liệu để thay thế trong template
+        const pad = (n) => n < 10 ? '0' + n : String(n);
+        const today = new Date();
+        const ngay = pad(today.getDate());
+        const thang = pad(today.getMonth() + 1);
+        const nam = today.getFullYear();
+        const ngayTao = `${ngay}/${thang}/${nam}`;
+
+        // Chuẩn bị dữ liệu gửi lên backend
+        let payload = {
+            action: 'export_word',
+            data: {
+                bsx: rec.victimName || 'BH',
+                tenHienThi: rec.claimNo || '—',
+                ngayTao: ngayTao,
+                
+                // Người được bảo hiểm
+                nguoiDuocBH: rec.victimName || '',
+                diaChiBH: rec.victimAddress || '',
+                tuoiBH: rec.victimAge || '',
+                
+                // Bên nhận bồi thường (người thụ hưởng)
+                nguoiThuHuong: rec.payeeName || rec.victimName || '',
+                quanHeVoiNguoiBH: rec.payeeRelation || 'Bản thân',
+                cccdThuHuong: rec.payeeCccd || '',
+                
+                // Thông tin bảo hiểm
+                soGcn: rec.gcn || '',
+                soHopDong: rec.contractNo || '',
+                thoiHieuTu: rec.effFrom || '',
+                thoiHieuDen: rec.effTo || '',
+                
+                // Thông tin sự cố
+                loaiThatThat: rec.lossType || '',
+                ngayThatThat: rec.accDate || '',
+                diaDiemThatThat: rec.accLocation || '',
+                moTaSuCo: rec.accCause || '',
+                moTaThatThat: rec.injuryDesc || '',
+                
+                // Bệnh viện
+                tenBenh: rec.hospitalName || '',
+                ngayVaoVien: rec.inDate || '',
+                ngayRaVien: rec.outDate || '',
+                soNgayNamVien: rec.days || '0',
+                
+                // Số tiền bồi thường
+                tongTienBT: rec.totalAmount || '0',
+                tienThuongTat: rec.injuryAmount || '0',
+                tienNoiVien: rec.hospitalAmount || '0',
+                
+                // Người nhận tiền
+                tenNguoiNhan: rec.payeeName || rec.victimName || '',
+                stk: rec.payeeBankNo || '',
+                nganHang: rec.payeeBankName || '',
+                
+                // Người tạo hồ sơ
+                nguoiTao: rec.createdBy || 'Giám định viên',
+                chiNhanh: 'Đắk Lắk'
+            }
+        };
+
+        // Xác định loại export
+        if (docType === 'thongbao') {
+            payload.action = 'export_thongbao_bt';
+        } else if (docType === 'toinhan') {
+            payload.action = 'export_toinhan_bt';
+        } else if (docType === 'xacminh') {
+            payload.action = 'export_xacminh_bt';
+        }
+
+        // Gửi request tới backend
+        Swal.fire({
+            icon: 'info',
+            title: 'Đang tải...',
+            text: 'Vui lòng đợi...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+                
+                fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                })
+                .then(r => r.json())
+                .then(d => {
+                    if (!d.success) throw new Error(d.error);
+
+                    // Tải file
+                    const blob = new Blob([Uint8Array.from(atob(d.content), c => c.charCodeAt(0))], 
+                        { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = d.fileName || 'document.docx';
+                    a.click();
+                    URL.revokeObjectURL(url);
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công!',
+                        text: 'File đã được tải về',
+                        timer: 1500
+                    });
+                })
+                .catch(err => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi tải file',
+                        text: err.message || 'Vui lòng thử lại'
+                    });
+                });
+            }
         });
     }
 };
