@@ -15510,7 +15510,7 @@ const HumanClaims = {
             const response = await fetch(WORD_URL, {
                 method: 'POST',
                 headers: {
-                    // SỬA TẠI ĐÂY: Dùng text/plain để tránh lỗi CORS preflight của Google Apps Script
+                    // Đã đổi thành text/plain để sửa dứt điểm lỗi CORS chặn request
                     'Content-Type': 'text/plain;charset=utf-8'   
                 },
                 body: JSON.stringify({
@@ -15549,7 +15549,8 @@ const HumanClaims = {
             Swal.fire({
                 icon: 'error',
                 title: 'Lỗi tạo văn bản',
-                text: 'Backend không thể tạo file Word. Vui lòng kiểm tra quyền truy cập thư mục Template hoặc ID file mẫu.'
+                // Đã đổi để hiển thị chính xác lỗi từ Server trả về thay vì câu thông báo cứng
+                text: error.message || 'Lỗi kết nối đến máy chủ. Vui lòng thử lại!' 
             });
         }
     },
