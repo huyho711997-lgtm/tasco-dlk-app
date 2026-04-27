@@ -15510,7 +15510,8 @@ const HumanClaims = {
             const response = await fetch(WORD_URL, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json;charset=utf-8'   // Nên dùng application/json thay vì text/plain
+                    // SỬA TẠI ĐÂY: Dùng text/plain để tránh lỗi CORS preflight của Google Apps Script
+                    'Content-Type': 'text/plain;charset=utf-8'   
                 },
                 body: JSON.stringify({
                     action: action,
