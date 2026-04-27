@@ -1850,15 +1850,16 @@ textarea.inp { resize:vertical; }
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Cảnh báo Hợp đồng!
             </div>
 
-            <button onclick="HumanClaims.openMedicalOcrModal()" class="px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-xs font-bold hover:bg-blue-100 flex items-center gap-2 transition-colors" id="btn-hc-ocr-medical">
+            <button onclick="HumanClaims.openMedicalOcrModal()" class="px-4 py-2 bg-teal-50 text-teal-700 border border-teal-200 rounded-xl text-xs font-bold hover:bg-teal-100 flex items-center gap-2 transition-colors" id="btn-hc-ocr-medical">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> AI Quét Y Tế
-            </button>
-            <button onclick="HumanClaims.printDossier()" class="px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-xs font-bold hover:bg-blue-100 flex items-center gap-2 transition-colors hidden" id="btn-hc-print">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> In HSBT
             </button>
             <button onclick="HumanClaims.generateEmail()" class="px-4 py-2 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-xl text-xs font-bold hover:bg-indigo-100 flex items-center gap-2 transition-colors hidden" id="btn-hc-email">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email xin số
             </button>
+            <button onclick="HumanClaims.printDossier()" class="px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-xs font-bold hover:bg-blue-100 flex items-center gap-2 transition-colors hidden" id="btn-hc-print">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> In HSBT
+            </button>
+            <div class="w-px h-6 bg-slate-200 mx-1"></div>
             <button onclick="HumanClaims.closeModal()" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-rose-100 hover:text-rose-600 transition-colors">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
             </button>
@@ -2101,9 +2102,22 @@ textarea.inp { resize:vertical; }
             </div>
             
             <!-- ========== NÚT TẢI FILE WORD - THÊM MỚI ========== -->
-            <button onclick="HumanClaims.openExportMultiModal()" class="px-3 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 font-bold text-xs flex items-center gap-1 shadow-sm">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Tải file Word
-            </button>
+            <div class="relative group">
+              <button class="px-3 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 font-bold text-xs flex items-center gap-1 shadow-sm">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Tải Word
+              </button>
+              <div class="absolute bottom-full left-0 mb-1 w-56 bg-white border border-slate-200 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all flex flex-col overflow-hidden z-50">
+                <button onclick="event.stopPropagation(); HumanClaims.downloadWordDoc('thongbao')" class="px-4 py-2.5 text-left text-xs font-semibold text-slate-700 hover:bg-blue-50 border-b border-slate-100 transition-colors">
+                  📄 Thông báo bồi thường
+                </button>
+                <button onclick="event.stopPropagation(); HumanClaims.downloadWordDoc('toinhan')" class="px-4 py-2.5 text-left text-xs font-semibold text-slate-700 hover:bg-green-50 border-b border-slate-100 transition-colors">
+                  📋 Tờ trình bồi thường
+                </button>
+                <button onclick="event.stopPropagation(); HumanClaims.downloadWordDoc('xacminh')" class="px-4 py-2.5 text-left text-xs font-semibold text-slate-700 hover:bg-amber-50 transition-colors">
+                  ✅ Xác minh phí bảo hiểm
+                </button>
+              </div>
+            </div>
             <!-- ====== HẾT THÊM NÚT TẢI FILE ====== -->
             
             <button onclick="HumanClaims.nextStatus()" id="hc-m-next-btn" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-bold text-sm hover:bg-blue-700 transition-colors shadow-md shadow-blue-200 flex items-center gap-2">
@@ -15577,202 +15591,6 @@ const HumanClaims = {
                 });
             }
         });
-    },
-    openExportMultiModal() {
-        const rec = this._data.find(r => r.id === this._currentId);
-        if (!rec) {
-            Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Vui lòng chọn hồ sơ trước', customClass: { popup: 'rnd' } });
-            return;
-        }
-
-        window.hcExportToggleAll = function(val) {
-            ['hc-chk-thongbao','hc-chk-toinhan','hc-chk-xacminh'].forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.checked = val;
-            });
-        };
-
-        html: '<div style="text-align:left;margin-top:10px">'
-              + '<p style="font-size:11px;color:#94a3b8;margin-bottom:10px;">Chọn các tài liệu cần tải. Hệ thống sẽ tự động ghép thành file nén ZIP nếu bạn chọn nhiều file.</p>'
-              + '<div style="display:flex;flex-direction:column;gap:8px;">'
-              
-              + '<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:12px;cursor:pointer;background:#fff;transition:all .15s">'
-              + '<input type="checkbox" id="hc-chk-thongbao" style="width:15px;height:15px;cursor:pointer">'
-              + '<div style="width:28px;height:28px;background:#f1f5f9;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
-              + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>'
-              + '</div>'
-              + '<div><p style="font-size:12px;font-weight:800;color:#1e293b;margin:0">Thông báo bồi thường</p></div>'
-              + '</label>'
-
-              + '<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:12px;cursor:pointer;background:#fff;transition:all .15s">'
-              + '<input type="checkbox" id="hc-chk-toinhan" style="width:15px;height:15px;cursor:pointer">'
-              + '<div style="width:28px;height:28px;background:#f1f5f9;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
-              + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'
-              + '</div>'
-              + '<div><p style="font-size:12px;font-weight:800;color:#1e293b;margin:0">Tờ trình bồi thường</p></div>'
-              + '</label>'
-
-              + '<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e2e8f0;border-radius:12px;cursor:pointer;background:#fff;transition:all .15s">'
-              + '<input type="checkbox" id="hc-chk-xacminh" style="width:15px;height:15px;cursor:pointer">'
-              + '<div style="width:28px;height:28px;background:#f1f5f9;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
-              + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
-              + '</div>'
-              + '<div><p style="font-size:12px;font-weight:800;color:#1e293b;margin:0">Xác minh phí bảo hiểm</p></div>'
-              + '</label>'
-              
-              + '</div>'
-              + '<div style="display:flex;justify-content:space-between;margin-top:10px">'
-              + '<button onclick="hcExportToggleAll(true)" style="font-size:11px;font-weight:700;color:#2563eb;background:none;border:none;cursor:pointer;padding:0">Chọn tất cả</button>'
-              + '<button onclick="hcExportToggleAll(false)" style="font-size:11px;font-weight:700;color:#94a3b8;background:none;border:none;cursor:pointer;padding:0">Bỏ chọn</button>'
-              + '</div>'
-              + '</div>',
-            showCancelButton: true,
-            confirmButtonText: 'Tải về',
-            cancelButtonText: 'Đóng',
-            confirmButtonColor: '#2563eb',
-            customClass: { popup: 'rnd' },
-            preConfirm: () => {
-                const thongbao = !!(document.getElementById('hc-chk-thongbao') && document.getElementById('hc-chk-thongbao').checked);
-                const toinhan = !!(document.getElementById('hc-chk-toinhan') && document.getElementById('hc-chk-toinhan').checked);
-                const xacminh = !!(document.getElementById('hc-chk-xacminh') && document.getElementById('hc-chk-xacminh').checked);
-                if (!thongbao && !toinhan && !xacminh) {
-                    Swal.showValidationMessage('Vui lòng chọn ít nhất 1 tài liệu!');
-                    return false;
-                }
-                return { thongbao, toinhan, xacminh };
-            }
-        }).then(res => {
-            if (res.isConfirmed && res.value) {
-                this.runExportMultiDocs(res.value);
-            }
-        });
-    },
-
-    async runExportMultiDocs(selected) {
-        const rec = this._data.find(r => r.id === this._currentId);
-        if (!rec) return;
-
-        const totalSelected = Object.values(selected).filter(Boolean).length;
-
-        // Nếu chỉ xuất 1 file, gọi lại hàm API cũ không cần nén ZIP
-        if (totalSelected === 1) {
-            if (selected.thongbao) { this.downloadWordDoc('thongbao'); return; }
-            if (selected.toinhan) { this.downloadWordDoc('toinhan'); return; }
-            if (selected.xacminh) { this.downloadWordDoc('xacminh'); return; }
-        }
-
-        Swal.fire({
-            title: 'Đang tạo ' + totalSelected + ' văn bản...',
-            html: '<div style="margin-top:12px;height:5px;background:#f1f5f9;border-radius:999px;overflow:hidden"><div id="hc-edoc-fill" style="height:100%;width:0%;background:#2563eb;transition:width .4s"></div></div><p class="text-xs text-slate-500 mt-3 text-center">Đang ghép thành file ZIP...</p>',
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading(),
-            customClass: { popup: 'rnd' }
-        });
-
-        // Mapping Data chuẩn bị gọi Server
-        const pad = (n) => n < 10 ? '0' + n : String(n);
-        const today = new Date();
-        const ngayTao = `${pad(today.getDate())}/${pad(today.getMonth() + 1)}/${today.getFullYear()}`;
-        
-        const baseData = {
-            bsx: rec.victimName || 'BH',
-            tenHienThi: rec.claimNo || '—',
-            ngayTao: ngayTao,
-            nguoiDuocBH: rec.victimName || '',
-            diaChiBH: rec.victimAddress || '',
-            tuoiBH: rec.victimAge || '',
-            nguoiThuHuong: rec.payeeName || rec.victimName || '',
-            quanHeVoiNguoiBH: rec.payeeRelation || 'Bản thân',
-            cccdThuHuong: rec.payeeCccd || '',
-            soGcn: rec.gcn || '',
-            soHopDong: rec.contractNo || '',
-            thoiHieuTu: rec.effFrom || '',
-            thoiHieuDen: rec.effTo || '',
-            loaiThatThat: rec.lossType || '',
-            ngayThatThat: rec.accDate || '',
-            diaDiemThatThat: rec.accLocation || '',
-            moTaSuCo: rec.accCause || '',
-            moTaThatThat: rec.injuryDesc || '',
-            tenBenh: rec.hospitalName || '',
-            ngayVaoVien: rec.inDate || '',
-            ngayRaVien: rec.outDate || '',
-            soNgayNamVien: rec.days || '0',
-            tongTienBT: rec.totalAmount || '0',
-            tienThuongTat: rec.injuryAmount || '0',
-            tienNoiVien: rec.hospitalAmount || '0',
-            tenNguoiNhan: rec.payeeName || rec.victimName || '',
-            stk: rec.payeeBankNo || '',
-            nganHang: rec.payeeBankName || '',
-            nguoiTao: rec.createdBy || 'Giám định viên',
-            chiNhanh: 'Đắk Lắk'
-        };
-
-        const callAPI = async (action) => {
-            const res = await fetch(WORD_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: action, data: baseData }),
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-            });
-            return await res.json();
-        };
-
-        try {
-            let tasks = {};
-            if (selected.thongbao) tasks.thongbao = callAPI('export_thongbao_bt');
-            if (selected.toinhan) tasks.toinhan = callAPI('export_toinhan_bt');
-            if (selected.xacminh) tasks.xacminh = callAPI('export_xacminh_bt');
-
-            const keys = Object.keys(tasks);
-            const results = await Promise.allSettled(keys.map(k => tasks[k]));
-
-            const fill = document.getElementById('hc-edoc-fill');
-            if (fill) fill.style.width = '80%';
-
-            if (typeof JSZip === 'undefined') {
-                throw new Error('Thư viện tạo file nén JSZip chưa được tải!');
-            }
-
-            const zip = new JSZip();
-            const namePrefix = (rec.victimName || 'HSBT').replace(/ /g, '_');
-            const fileNames = {
-                thongbao: `ThongBaoBT_${namePrefix}.docx`,
-                toinhan: `ToTrinhBT_${namePrefix}.docx`,
-                xacminh: `XacMinhPhi_${namePrefix}.docx`
-            };
-
-            let successCount = 0;
-            results.forEach((result, i) => {
-                const key = keys[i];
-                if (result.status === 'fulfilled' && result.value && result.value.success) {
-                    zip.file(fileNames[key], result.value.content, { base64: true });
-                    successCount++;
-                } else {
-                    console.error('Lỗi tạo file:', key, result);
-                }
-            });
-
-            if (fill) fill.style.width = '95%';
-            const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
-            if (fill) fill.style.width = '100%';
-
-            Swal.close();
-
-            const zipName = `HSBT_${namePrefix}.zip`;
-            const url = URL.createObjectURL(zipBlob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = zipName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            Toast.fire({ icon: 'success', title: `Đã tải xuống ${successCount}/${totalSelected} tài liệu.` });
-
-        } catch (err) {
-            Swal.close();
-            Swal.fire({ icon: 'error', title: 'Lỗi', text: err.message, customClass: { popup: 'rnd' } });
-        }
     }
 };
 
