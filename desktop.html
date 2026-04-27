@@ -1849,25 +1849,25 @@ textarea.inp { resize:vertical; }
             <div id="hc-m-ai-warning" class="hidden cursor-pointer px-3 py-1.5 bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-[11px] font-bold flex items-center gap-1.5 animate-pulse">
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Cảnh báo Hợp đồng!
             </div>
-            <div class="relative group">
-              <button class="px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-xs font-bold hover:bg-blue-100 flex items-center gap-2 transition-colors">
+            <div class="relative">
+              <button id="btn-hc-download" onclick="document.getElementById('hc-download-menu').classList.toggle('hidden'); document.getElementById('hc-download-menu').classList.toggle('opacity-0');" class="px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-xs font-bold hover:bg-blue-100 flex items-center gap-2 transition-colors">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Tải Word
               </button>
-              <div class="absolute top-full right-0 mt-2 w-[240px] bg-white border border-slate-200 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all flex flex-col overflow-hidden z-50">
-                <button onclick="event.stopPropagation(); HumanClaims.downloadWordDoc('thongbao')" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-blue-50 border-b border-slate-100 transition-colors flex items-center gap-3">
+              <div id="hc-download-menu" class="hidden opacity-0 absolute top-full right-0 mt-2 w-[240px] bg-white border border-slate-200 rounded-lg shadow-xl transition-all flex flex-col overflow-hidden z-50">
+                <button onclick="document.getElementById('hc-download-menu').classList.add('hidden', 'opacity-0'); HumanClaims.downloadWordDoc('thongbao')" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-blue-50 border-b border-slate-100 transition-colors flex items-center gap-3">
                   <div class="p-1.5 bg-blue-100 rounded-md shrink-0"><svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div>
                   Thông báo bồi thường
                 </button>
-                <button onclick="event.stopPropagation(); HumanClaims.downloadWordDoc('toinhan')" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-emerald-50 border-b border-slate-100 transition-colors flex items-center gap-3">
+                <button onclick="document.getElementById('hc-download-menu').classList.add('hidden', 'opacity-0'); HumanClaims.downloadWordDoc('toinhan')" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-emerald-50 border-b border-slate-100 transition-colors flex items-center gap-3">
                   <div class="p-1.5 bg-emerald-100 rounded-md shrink-0"><svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg></div>
                   Tờ trình bồi thường
                 </button>
-                <button onclick="event.stopPropagation(); HumanClaims.downloadWordDoc('xacminh')" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-amber-50 border-b border-slate-100 transition-colors flex items-center gap-3">
+                <button onclick="document.getElementById('hc-download-menu').classList.add('hidden', 'opacity-0'); HumanClaims.downloadWordDoc('xacminh')" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-amber-50 border-b border-slate-100 transition-colors flex items-center gap-3">
                   <div class="p-1.5 bg-amber-100 rounded-md shrink-0"><svg class="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div>
                   Xác minh phí bảo hiểm
                 </button>
-                <button onclick="event.stopPropagation(); HumanClaims.openExportMultiModal()" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-purple-50 transition-colors flex items-center gap-3">
+                <button onclick="document.getElementById('hc-download-menu').classList.add('hidden', 'opacity-0'); HumanClaims.openExportMultiModal()" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-purple-50 transition-colors flex items-center gap-3">
                   <div class="p-1.5 bg-purple-100 rounded-md shrink-0"><svg class="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg></div>
                   Tải nhiều file (ZIP)
                 </button>
@@ -15660,6 +15660,7 @@ const HumanClaims = {
         if (!rec) return;
 
         const totalSelected = Object.values(selected).filter(Boolean).length;
+        // Nếu chọn 1 file thì gọi thẳng hàm cũ (không cần nén ZIP)
         if (totalSelected === 1) {
             if (selected.thongbao) return this.downloadWordDoc('thongbao');
             if (selected.totrinh)  return this.downloadWordDoc('toinhan');
@@ -15740,9 +15741,12 @@ const HumanClaims = {
             if (selected.xacminh) { setDot('hc-st-xm', 'loading'); tasks.xacminh = callWordAPI('export_xacminh_bt'); }
 
             const keys = Object.keys(tasks);
+            // Kích hoạt chạy đa luồng đồng thời lấy tất cả API
             const results = await Promise.allSettled(keys.map(k => tasks[k]));
 
             const fill = document.getElementById('hc-fill'); if (fill) fill.style.width = '80%';
+
+            if (typeof JSZip === 'undefined') throw new Error("Thư viện nén ZIP chưa được tải, vui lòng tải lại trang.");
 
             const zip = new JSZip();
             const safeName = (rec.claimNo || 'HSBT').replace(/[^a-zA-Z0-9]/g, '_');
@@ -15799,6 +15803,13 @@ document.addEventListener('click', function(e) {
             drop.classList.add('hidden');
         }
     });
+
+    // Bổ sung: Ẩn menu tải Word khi click ra ngoài
+    const downloadMenu = document.getElementById('hc-download-menu');
+    const downloadBtn = document.getElementById('btn-hc-download');
+    if (downloadMenu && downloadBtn && !downloadBtn.contains(e.target) && !downloadMenu.contains(e.target)) {
+        downloadMenu.classList.add('hidden', 'opacity-0');
+    }
 });
 
 // Khởi tạo khi load script
