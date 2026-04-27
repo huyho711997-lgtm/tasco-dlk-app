@@ -15477,35 +15477,79 @@ const HumanClaims = {
     /* ── SỬA LỖI TẢI FILE ĐƠN LẺ VÀ ĐA LUỒNG ── */
     async downloadWordDoc(docType) {
         const rec = this._data.find(r => r.id === this._currentId);
-        if (!rec) return;
+        if (!rec) {
+            console.warn('Không tìm thấy bản ghi với ID:', this._currentId);
+            return;
+        }
 
+        // Hiển thị loader
         AppLoader.show('Đang tạo văn bản...', 'Vui lòng đợi giây lát');
-        
-        // Map hành động chuẩn xác cho Backend
-        const actions = { thongbao: 'export_thongbao_bt', toinhan: 'export_toinhan_bt', xacminh: 'export_xacminh_bt' };
-        
-        try {
-            const res = await fetch(WORD_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: actions[docType], data: this._preparePayload(rec) }),
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+
+        // Mapping action gửi về Backend
+        const actionMap = {
+            thongbao: 'export_thongbao_bt',
+            toinhan: 'export_toinhan_bt',
+            xacminh: 'export_xacminh_bt'
+        };
+
+        const action = actionMap[docType];
+
+        if (!action) {
+            AppLoader.hide();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Lỗi',
+                text: `Loại văn bản không hợp lệ: ${docType}`
             });
-            const d = await res.json();
+            return;
+        }
+
+        try {
+            const payload = this._preparePayload(rec);
+
+            const response = await fetch(WORD_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'   // Nên dùng application/json thay vì text/plain
+                },
+                body: JSON.stringify({
+                    action: action,
+                    data: payload
+                })
+            });
+
+            const result = await response.json();
+
             AppLoader.hide();
 
-            if (!d.success) throw new Error(d.error);
+            if (!result.success) {
+                throw new Error(result.error || 'Backend trả về lỗi không xác định');
+            }
 
-            const blob = new Blob([Uint8Array.from(atob(d.content), c => c.charCodeAt(0))], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = d.fileName || `${docType}_${rec.victimName}.docx`;
-            a.click();
-            URL.revokeObjectURL(url);
-            Toast.fire({ icon: 'success', title: 'Tải xuống hoàn tất' });
-        } catch (err) {
+            // Tạo và tải file Word
+            const link = document.createElement('a');
+            link.href = `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,${result.content}`;
+            link.download = result.fileName || `${docType}_${rec.victimName || 'document'}.docx`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            Toast.fire({
+                icon: 'success',
+                title: 'Tải xuống hoàn tất'
+            });
+
+        } catch (error) {
             AppLoader.hide();
-            Swal.fire({ icon: 'error', title: 'Lỗi Drive', text: 'Backend không thể tạo file. Anh vui lòng kiểm tra quyền truy cập thư mục Template hoặc ID file mẫu.' });
+            
+            console.error('Download Word Document Error:', error);
+            
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi tạo văn bản',
+                text: 'Backend không thể tạo file Word. Vui lòng kiểm tra quyền truy cập thư mục Template hoặc ID file mẫu.'
+            });
         }
     },
 
