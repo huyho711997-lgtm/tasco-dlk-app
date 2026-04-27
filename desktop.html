@@ -1900,6 +1900,11 @@ textarea.inp { resize:vertical; }
                   <span class="text-xs font-black text-slate-700 uppercase tracking-wide">Thông tin Hợp đồng</span>
                 </div>
                 <div class="p-4 space-y-3">
+                  <div>
+                    <label class="lbl text-rose-600">Số HSBT</label>
+                    <input id="hc-claimNo" class="inp font-bold text-rose-700 uppercase text-[13px]" placeholder="Nhập số hồ sơ bồi thường (nếu có)...">
+                  </div>
+                  
                   <div class="grid grid-cols-2 gap-3">
                       <div class="relative">
                           <label class="lbl">Số HĐ gốc (Gõ để tìm kiếm)</label>
@@ -14203,6 +14208,7 @@ const HumanClaims = {
     _fillForm(r) {
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
         
+        setVal('hc-claimNo', r.claimNo); // NẠP DỮ LIỆU SỐ HSBT
         setVal('hc-contractNo', r.contractNo); setVal('hc-companyName', r.companyName);
         setVal('hc-companyAddress', r.companyAddress); // Nạp địa chỉ
         setVal('hc-gcn', r.gcn); setVal('hc-insType', r.insType); setVal('hc-feeStatus', r.feeStatus);
@@ -14318,6 +14324,7 @@ const HumanClaims = {
         if (!victimName) { Toast.fire({icon:'warning', title:'Vui lòng nhập Tên người được bảo hiểm!'}); return; }
 
         const payload = {
+            claimNo: getVal('hc-claimNo'), // LƯU DỮ LIỆU SỐ HSBT VÀO PAYLOAD
             contractNo: getVal('hc-contractNo'), companyName: getVal('hc-companyName'),
             companyAddress: getVal('hc-companyAddress'),
             gcn: getVal('hc-gcn'), insType: getVal('hc-insType'), feeStatus: getVal('hc-feeStatus'),
