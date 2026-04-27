@@ -1850,26 +1850,26 @@ textarea.inp { resize:vertical; }
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Cảnh báo Hợp đồng!
             </div>
             <div class="relative">
-              <button id="btn-hc-download" onclick="document.getElementById('hc-download-menu').classList.toggle('hidden'); document.getElementById('hc-download-menu').classList.toggle('opacity-0');" class="px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-xs font-bold hover:bg-blue-100 flex items-center gap-2 transition-colors">
+              <button id="btn-hc-download" onclick="event.stopPropagation(); document.getElementById('hc-download-menu').classList.toggle('hidden');" class="px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-xs font-bold hover:bg-blue-100 flex items-center gap-2 transition-colors">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Tải Word
               </button>
-              <div id="hc-download-menu" class="hidden opacity-0 absolute top-full right-0 mt-2 w-[240px] bg-white border border-slate-200 rounded-lg shadow-xl transition-all flex flex-col overflow-hidden z-50">
-                <button onclick="document.getElementById('hc-download-menu').classList.add('hidden', 'opacity-0'); HumanClaims.downloadWordDoc('thongbao')" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-blue-50 border-b border-slate-100 transition-colors flex items-center gap-3">
+              <div id="hc-download-menu" class="hidden absolute top-full right-0 mt-2 w-[250px] bg-white border border-slate-200 rounded-lg shadow-xl flex flex-col overflow-hidden z-50">
+                <button onclick="document.getElementById('hc-download-menu').classList.add('hidden'); HumanClaims.downloadWordDoc('thongbao')" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-blue-50 border-b border-slate-100 transition-colors flex items-center gap-3">
                   <div class="p-1.5 bg-blue-100 rounded-md shrink-0"><svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div>
                   Thông báo bồi thường
                 </button>
-                <button onclick="document.getElementById('hc-download-menu').classList.add('hidden', 'opacity-0'); HumanClaims.downloadWordDoc('toinhan')" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-emerald-50 border-b border-slate-100 transition-colors flex items-center gap-3">
+                <button onclick="document.getElementById('hc-download-menu').classList.add('hidden'); HumanClaims.downloadWordDoc('toinhan')" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-emerald-50 border-b border-slate-100 transition-colors flex items-center gap-3">
                   <div class="p-1.5 bg-emerald-100 rounded-md shrink-0"><svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg></div>
                   Tờ trình bồi thường
                 </button>
-                <button onclick="document.getElementById('hc-download-menu').classList.add('hidden', 'opacity-0'); HumanClaims.downloadWordDoc('xacminh')" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-amber-50 border-b border-slate-100 transition-colors flex items-center gap-3">
+                <button onclick="document.getElementById('hc-download-menu').classList.add('hidden'); HumanClaims.downloadWordDoc('xacminh')" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-amber-50 border-b border-slate-100 transition-colors flex items-center gap-3">
                   <div class="p-1.5 bg-amber-100 rounded-md shrink-0"><svg class="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div>
                   Xác minh phí bảo hiểm
                 </button>
-                <button onclick="document.getElementById('hc-download-menu').classList.add('hidden', 'opacity-0'); HumanClaims.openExportMultiModal()" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-purple-50 transition-colors flex items-center gap-3">
-                  <div class="p-1.5 bg-purple-100 rounded-md shrink-0"><svg class="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg></div>
-                  Tải nhiều file (ZIP)
+                <button onclick="document.getElementById('hc-download-menu').classList.add('hidden'); HumanClaims.openExportMultiModal()" class="px-4 py-3 text-left text-sm font-semibold text-white bg-slate-800 hover:bg-slate-700 transition-colors flex items-center gap-3">
+                  <div class="p-1.5 bg-slate-700 rounded-md shrink-0"><svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg></div>
+                  Tải nhiều file (Gom ZIP)
                 </button>
               </div>
             </div>
@@ -15474,126 +15474,120 @@ const HumanClaims = {
     // ════════════════════════════════════════════════════════════════════════════════
     // DOWNLOAD WORD DOCUMENTS - HỒSƠ BỒI THƯỜNG CON NGƯỜI
     // ════════════════════════════════════════════════════════════════════════════════
-    downloadWordDoc(docType) {
+    /* ── SỬA LỖI TẢI FILE ĐƠN LẺ VÀ ĐA LUỒNG ── */
+    async downloadWordDoc(docType) {
         const rec = this._data.find(r => r.id === this._currentId);
-        if (!rec) {
-            Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Vui lòng chọn hồ sơ trước' });
-            return;
+        if (!rec) return;
+
+        AppLoader.show('Đang tạo văn bản...', 'Vui lòng đợi giây lát');
+        
+        // Map hành động chuẩn xác cho Backend
+        const actions = { thongbao: 'export_thongbao_bt', toinhan: 'export_toinhan_bt', xacminh: 'export_xacminh_bt' };
+        
+        try {
+            const res = await fetch(WORD_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: actions[docType], data: this._preparePayload(rec) }),
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+            });
+            const d = await res.json();
+            AppLoader.hide();
+
+            if (!d.success) throw new Error(d.error);
+
+            const blob = new Blob([Uint8Array.from(atob(d.content), c => c.charCodeAt(0))], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = d.fileName || `${docType}_${rec.victimName}.docx`;
+            a.click();
+            URL.revokeObjectURL(url);
+            Toast.fire({ icon: 'success', title: 'Tải xuống hoàn tất' });
+        } catch (err) {
+            AppLoader.hide();
+            Swal.fire({ icon: 'error', title: 'Lỗi Drive', text: 'Backend không thể tạo file. Anh vui lòng kiểm tra quyền truy cập thư mục Template hoặc ID file mẫu.' });
         }
+    },
 
-        // Dữ liệu để thay thế trong template
-        const pad = (n) => n < 10 ? '0' + n : String(n);
-        const today = new Date();
-        const ngay = pad(today.getDate());
-        const thang = pad(today.getMonth() + 1);
-        const nam = today.getFullYear();
-        const ngayTao = `${ngay}/${thang}/${nam}`;
+    openExportMultiModal() {
+        const rec = this._data.find(r => r.id === this._currentId);
+        if (!rec) return;
 
-        // Chuẩn bị dữ liệu gửi lên backend
-        let payload = {
-            action: 'export_word',
-            data: {
-                bsx: rec.victimName || 'BH',
-                tenHienThi: rec.claimNo || '—',
-                ngayTao: ngayTao,
-                
-                // Người được bảo hiểm
-                nguoiDuocBH: rec.victimName || '',
-                diaChiBH: rec.victimAddress || '',
-                tuoiBH: rec.victimAge || '',
-                
-                // Bên nhận bồi thường (người thụ hưởng)
-                nguoiThuHuong: rec.payeeName || rec.victimName || '',
-                quanHeVoiNguoiBH: rec.payeeRelation || 'Bản thân',
-                cccdThuHuong: rec.payeeCccd || '',
-                
-                // Thông tin bảo hiểm
-                soGcn: rec.gcn || '',
-                soHopDong: rec.contractNo || '',
-                thoiHieuTu: rec.effFrom || '',
-                thoiHieuDen: rec.effTo || '',
-                
-                // Thông tin sự cố
-                loaiThatThat: rec.lossType || '',
-                ngayThatThat: rec.accDate || '',
-                diaDiemThatThat: rec.accLocation || '',
-                moTaSuCo: rec.accCause || '',
-                moTaThatThat: rec.injuryDesc || '',
-                
-                // Bệnh viện
-                tenBenh: rec.hospitalName || '',
-                ngayVaoVien: rec.inDate || '',
-                ngayRaVien: rec.outDate || '',
-                soNgayNamVien: rec.days || '0',
-                
-                // Số tiền bồi thường
-                tongTienBT: rec.totalAmount || '0',
-                tienThuongTat: rec.injuryAmount || '0',
-                tienNoiVien: rec.hospitalAmount || '0',
-                
-                // Người nhận tiền
-                tenNguoiNhan: rec.payeeName || rec.victimName || '',
-                stk: rec.payeeBankNo || '',
-                nganHang: rec.payeeBankName || '',
-                
-                // Người tạo hồ sơ
-                nguoiTao: rec.createdBy || 'Giám định viên',
-                chiNhanh: 'Đắk Lắk'
-            }
-        };
+        const html = `
+        <div class="text-left mt-2">
+            <p class="text-[12px] text-slate-500 mb-4 font-semibold">Đánh dấu các file anh muốn tải về trong bộ hồ sơ này:</p>
+            <div class="space-y-2">
+                <label class="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer hover:bg-blue-50 transition-all">
+                    <input type="checkbox" id="chk-tb" class="w-5 h-5 accent-blue-600" checked>
+                    <span class="text-sm font-bold text-slate-700">Thông báo bồi thường</span>
+                </label>
+                <label class="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer hover:bg-blue-50 transition-all">
+                    <input type="checkbox" id="chk-tt" class="w-5 h-5 accent-blue-600" checked>
+                    <span class="text-sm font-bold text-slate-700">Tờ trình bồi thường</span>
+                </label>
+                <label class="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer hover:bg-blue-50 transition-all">
+                    <input type="checkbox" id="chk-xm" class="w-5 h-5 accent-blue-600" checked>
+                    <span class="text-sm font-bold text-slate-700">Xác minh phí bảo hiểm</span>
+                </label>
+            </div>
+        </div>`;
 
-        // Xác định loại export
-        if (docType === 'thongbao') {
-            payload.action = 'export_thongbao_bt';
-        } else if (docType === 'toinhan') {
-            payload.action = 'export_toinhan_bt';
-        } else if (docType === 'xacminh') {
-            payload.action = 'export_xacminh_bt';
-        }
-
-        // Gửi request tới backend
         Swal.fire({
-            icon: 'info',
-            title: 'Đang tải...',
-            text: 'Vui lòng đợi...',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-                
-                fetch(WORD_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                })
-                .then(r => r.json())
-                .then(d => {
-                    if (!d.success) throw new Error(d.error);
-
-                    // Tải file
-                    const blob = new Blob([Uint8Array.from(atob(d.content), c => c.charCodeAt(0))], 
-                        { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = d.fileName || 'document.docx';
-                    a.click();
-                    URL.revokeObjectURL(url);
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Thành công!',
-                        text: 'File đã được tải về',
-                        timer: 1500
-                    });
-                })
-                .catch(err => {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Lỗi tải file',
-                        text: err.message || 'Vui lòng thử lại'
-                    });
-                });
+            title: '<span class="text-base font-black">Chọn file cần tải hàng loạt</span>',
+            html: html,
+            showCancelButton: true,
+            confirmButtonText: 'Bắt đầu gom file (.ZIP)',
+            confirmButtonColor: '#2563eb',
+            cancelButtonText: 'Đóng',
+            customClass: { popup: 'rnd' },
+            preConfirm: () => {
+                return {
+                    thongbao: document.getElementById('chk-tb').checked,
+                    totrinh: document.getElementById('chk-tt').checked,
+                    xacminh: document.getElementById('chk-xm').checked
+                }
             }
+        }).then(res => {
+            if (res.isConfirmed) this.runExportMultiDocs(res.value);
         });
+    },
+
+    /* Hàm chuẩn bị dữ liệu gửi lên (Dùng chung cho cả đơn và đa) */
+    _preparePayload(rec) {
+        const today = new Date();
+        const pad = (n) => n < 10 ? '0' + n : String(n);
+        return {
+            bsx: rec.victimName || 'BH',
+            tenHienThi: rec.claimNo || '—',
+            ngayTao: `${pad(today.getDate())}/${pad(today.getMonth() + 1)}/${today.getFullYear()}`,
+            nguoiDuocBH: rec.victimName || '',
+            diaChiBH: rec.victimAddress || '',
+            tuoiBH: rec.victimAge || '',
+            nguoiThuHuong: rec.payeeName || rec.victimName || '',
+            quanHeVoiNguoiBH: rec.payeeRelation || 'Bản thân',
+            cccdThuHuong: rec.payeeCccd || '',
+            soGcn: rec.gcn || '',
+            soHopDong: rec.contractNo || '',
+            thoiHieuTu: rec.effFrom || '',
+            thoiHieuDen: rec.effTo || '',
+            loaiThatThat: rec.lossType || '',
+            ngayThatThat: rec.accDate || '',
+            diaDiemThatThat: rec.accLocation || '',
+            moTaSuCo: rec.accCause || '',
+            moTaThatThat: rec.injuryDesc || '',
+            tenBenh: rec.hospitalName || '',
+            ngayVaoVien: rec.inDate || '',
+            ngayRaVien: rec.outDate || '',
+            soNgayNamVien: rec.days || '0',
+            tongTienBT: rec.totalAmount || '0',
+            tienThuongTat: rec.injuryAmount || '0',
+            tienNoiVien: rec.hospitalAmount || '0',
+            tenNguoiNhan: rec.payeeName || rec.victimName || '',
+            stk: rec.payeeBankNo || '',
+            nganHang: rec.payeeBankName || '',
+            nguoiTao: rec.createdBy || 'Giám định viên',
+            chiNhanh: 'Đắk Lắk'
+        };
     },
 
     openExportMultiModal() {
@@ -15804,11 +15798,12 @@ document.addEventListener('click', function(e) {
         }
     });
 
-    // Bổ sung: Ẩn menu tải Word khi click ra ngoài
+    // Ẩn menu tải Word khi click ra ngoài
     const downloadMenu = document.getElementById('hc-download-menu');
     const downloadBtn = document.getElementById('btn-hc-download');
-    if (downloadMenu && downloadBtn && !downloadBtn.contains(e.target) && !downloadMenu.contains(e.target)) {
-        downloadMenu.classList.add('hidden', 'opacity-0');
+    if (downloadMenu && !downloadMenu.classList.contains('hidden') && 
+        downloadBtn && !downloadBtn.contains(e.target) && !downloadMenu.contains(e.target)) {
+        downloadMenu.classList.add('hidden');
     }
 });
 
