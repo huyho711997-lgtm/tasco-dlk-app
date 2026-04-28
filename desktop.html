@@ -12736,48 +12736,56 @@ const MyCloud = {
         let successCount = 0;
         let processedCount = 0;
 
-        // Chạy đa luồng (Parallel) bằng Promise.all
-        const uploadPromises = files.map(async (file, i) => {
-            try {
-                const fd = new FormData();
-                fd.append('file', file);
-                fd.append('upload_preset', CL_CLOUD_PRESET); 
-                
-                const res = await fetch(CL_CLOUD_URL, { method: 'POST', body: fd });
-                const data = await res.json();
-
-                if (data.secure_url) {
-                    const newKey = 'file_' + Date.now() + '_' + i + '_' + Math.random().toString(36).substr(2, 5);
-                    const isPdfUpload = file.name.toLowerCase().endsWith('.pdf');
+        // Xử lý đa luồng có kiểm soát (Concurrency Limit)
+        // Tải từng cụm 3 ảnh cùng lúc để tối ưu băng thông và chống nghẽn trình duyệt
+        const CONCURRENCY_LIMIT = 3; 
+        
+        for (let i = 0; i < files.length; i += CONCURRENCY_LIMIT) {
+            const chunk = files.slice(i, i + CONCURRENCY_LIMIT);
+            
+            const uploadPromises = chunk.map(async (file, index) => {
+                const globalIndex = i + index; // Giữ nguyên vị trí index thực tế của file để tạo Key
+                try {
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    fd.append('upload_preset', CL_CLOUD_PRESET); 
                     
-                    let finalUrl = data.secure_url;
-                    if (isPdfUpload) {
-                        finalUrl = data.secure_url.replace('/raw/upload/', '/image/upload/fl_attachment:false/').replace('/auto/upload/', '/image/upload/fl_attachment:false/');
-                        if (!finalUrl.toLowerCase().endsWith('.pdf')) finalUrl += '.pdf';
+                    const res = await fetch(CL_CLOUD_URL, { method: 'POST', body: fd });
+                    const data = await res.json();
+
+                    if (data.secure_url) {
+                        const newKey = 'file_' + Date.now() + '_' + globalIndex + '_' + Math.random().toString(36).substr(2, 5);
+                        const isPdfUpload = file.name.toLowerCase().endsWith('.pdf');
+                        
+                        let finalUrl = data.secure_url;
+                        if (isPdfUpload) {
+                            finalUrl = data.secure_url.replace('/raw/upload/', '/image/upload/fl_attachment:false/').replace('/auto/upload/', '/image/upload/fl_attachment:false/');
+                            if (!finalUrl.toLowerCase().endsWith('.pdf')) finalUrl += '.pdf';
+                        }
+
+                        await db.ref('Users/' + userId + '/myCloud/' + newKey).set({
+                            url: finalUrl,
+                            fileName: file.name,
+                            fileType: isPdfUpload ? 'pdf' : (file.type || 'other'),
+                            timestamp: Date.now(),
+                            note: noteText || '',
+                            size: file.size || 0
+                        });
+                        successCount++;
                     }
-
-                    await db.ref('Users/' + userId + '/myCloud/' + newKey).set({
-                        url: finalUrl,
-                        fileName: file.name,
-                        fileType: isPdfUpload ? 'pdf' : (file.type || 'other'),
-                        timestamp: Date.now(),
-                        note: noteText || '',
-                        size: file.size || 0
-                    });
-                    successCount++;
+                } catch (e) {
+                    console.error("Lỗi upload: ", e);
+                } finally {
+                    // Cập nhật tiến độ trên giao diện liên tục
+                    processedCount++;
+                    const progEl = document.getElementById('mc-up-progress');
+                    if (progEl) progEl.textContent = `Đang xử lý ${processedCount} / ${files.length}`;
                 }
-            } catch (e) {
-                console.error("Lỗi upload: ", e);
-            } finally {
-                // Cập nhật tiến độ trên giao diện
-                processedCount++;
-                const progEl = document.getElementById('mc-up-progress');
-                if (progEl) progEl.textContent = `Đang xử lý ${processedCount} / ${files.length}`;
-            }
-        });
+            });
 
-        // Đợi tất cả các luồng hoàn tất
-        await Promise.all(uploadPromises);
+            // Chờ các luồng trong cụm hiện tại hoàn tất trước khi kích hoạt cụm tiếp theo
+            await Promise.all(uploadPromises);
+        }
         
         Swal.close();
         if (successCount > 0) {
