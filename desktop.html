@@ -17,6 +17,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 * { box-sizing: border-box; }
@@ -1629,6 +1630,9 @@ textarea.inp { resize:vertical; }
             <span class="text-slate-700 font-black text-[13px]" id="desk-mycloud-selected-count">Đã chọn 0</span>
          </div>
          <div class="flex gap-2">
+            <button onclick="MyCloud.generatePDF()" class="bg-violet-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 hover:bg-violet-600 shadow-md shadow-violet-200 transition-all active:scale-95">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Tạo PDF
+            </button>
             <button onclick="MyCloud.downloadSelected()" class="bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 hover:bg-emerald-600 shadow-md shadow-emerald-200 transition-all active:scale-95">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Tải xuống
             </button>
@@ -13046,6 +13050,89 @@ const MyCloud = {
         } catch (e) {
             Swal.close();
             Toast.fire({ icon: 'error', title: 'Lỗi xử lý tải xuống!' });
+        }
+    },
+
+    async generatePDF() {
+        if (this._selectedKeys.size === 0) return;
+
+        // Lọc chỉ lấy các file là hình ảnh từ danh sách đã chọn
+        const keysToProcess = Array.from(this._selectedKeys);
+        const imageItems = keysToProcess
+            .map(key => this.items.find(i => i.key === key))
+            .filter(item => item && item.url.match(/\.(jpeg|jpg|gif|png|webp)/i) != null && !(item.fileName || '').toLowerCase().includes('.pdf'));
+
+        if (imageItems.length === 0) {
+            Toast.fire({ icon: 'warning', title: 'Vui lòng chọn ít nhất 1 hình ảnh để ghép PDF!' });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Đang tạo PDF...',
+            html: '<p class="text-sm text-slate-500 mt-2 font-bold">Đang tải và căn chỉnh ' + imageItems.length + ' ảnh...</p>',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading(),
+            customClass: { popup: 'rnd' }
+        });
+
+        try {
+            const { jsPDF } = window.jspdf;
+            // Khởi tạo file PDF khổ A4
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+
+            for (let i = 0; i < imageItems.length; i++) {
+                const imgUrl = imageItems[i].url;
+                
+                // Tải ảnh dưới dạng Image object để lấy kích thước thật
+                const img = await new Promise((resolve, reject) => {
+                    const imgObj = new Image();
+                    imgObj.crossOrigin = 'Anonymous'; // Cần thiết để lấy ảnh từ Cloudinary mà không dính lỗi CORS
+                    imgObj.onload = () => resolve(imgObj);
+                    imgObj.onerror = () => reject(new Error('Không thể tải ảnh: ' + imageItems[i].fileName));
+                    imgObj.src = imgUrl;
+                });
+
+                // Tính toán tỷ lệ ảnh để fit vừa trang A4 (giữ nguyên aspect ratio)
+                const imgRatio = img.width / img.height;
+                let finalWidth = pageWidth;
+                let finalHeight = pageWidth / imgRatio;
+
+                // Nếu chiều cao sau khi scale bề ngang vẫn lớn hơn trang A4, thì scale theo chiều cao
+                if (finalHeight > pageHeight) {
+                    finalHeight = pageHeight;
+                    finalWidth = pageHeight * imgRatio;
+                }
+
+                // Căn giữa ảnh trên trang
+                const x = (pageWidth - finalWidth) / 2;
+                const y = (pageHeight - finalHeight) / 2;
+
+                // Chèn ảnh vào Document
+                doc.addImage(img, 'JPEG', x, y, finalWidth, finalHeight);
+
+                // Nếu chưa phải ảnh cuối cùng, tạo thêm trang mới
+                if (i < imageItems.length - 1) {
+                    doc.addPage();
+                }
+            }
+
+            const fileName = 'TascoCloud_Images_' + moment().format('DDMMYYYY_HHmm') + '.pdf';
+            doc.save(fileName);
+            
+            Swal.close();
+            Toast.fire({ icon: 'success', title: 'Đã tạo và tải xuống file PDF!' });
+            
+            // Tắt chế độ chọn sau khi xong
+            this._selectMode = false;
+            this._selectedKeys.clear();
+            this.render();
+
+        } catch (error) {
+            console.error(error);
+            Swal.close();
+            Toast.fire({ icon: 'error', title: 'Lỗi tạo PDF: ' + error.message });
         }
     },
 
