@@ -10405,6 +10405,11 @@ function _cmpStatCard(val, label, bg, color, border) {
     '#_clb_cnt{position:fixed;top:19px;left:50%;transform:translateX(-50%);',
     'font-size:13px;font-weight:700;color:rgba(255,255,255,.5);',
     'font-family:monospace;letter-spacing:.5px;pointer-events:none;z-index:2;}',
+    /* Resolution Label */
+    '#_clb_res{position:fixed;top:19px;left:18px;',
+    'font-size:12px;font-weight:800;color:rgba(255,255,255,.8);',
+    'background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.14);',
+    'padding:4px 10px;border-radius:8px;pointer-events:none;z-index:2;font-family:monospace;}',
     /* Nav arrows */
     '._clb_nav{position:fixed;top:50%;transform:translateY(-50%);',
     'width:46px;height:62px;border-radius:11px;',
@@ -10465,6 +10470,7 @@ function _cmpStatCard(val, label, bg, color, border) {
   var spin    = el('div', '_clb_spin');
   var img     = el('img', '_clb_img');
   var counter = el('div', '_clb_cnt');
+  var resLbl  = el('div', '_clb_res');
   var xbtn    = el('button', '_clb_x');
   var pvBtn   = el('button', '_clb_pv', '_clb_nav');
   var nxBtn   = el('button', '_clb_nx', '_clb_nav');
@@ -10615,6 +10621,7 @@ function _cmpStatCard(val, label, bg, color, border) {
   stage.appendChild(spin);
   stage.appendChild(img);
   overlay.appendChild(counter);
+  overlay.appendChild(resLbl);
   overlay.appendChild(xbtn);
   overlay.appendChild(pvBtn);
   overlay.appendChild(nxBtn);
@@ -10644,11 +10651,13 @@ function _cmpStatCard(val, label, bg, color, border) {
   function groupIdx(idx) { return groupImgs(idx).indexOf(idx); }
 
   /* ── Load ── */
+  /* ── Load ── */
   function load(idx) {
     S.cur = idx;
     reset();
     img.classList.remove('vis');
     spin.style.display = 'block';
+    resLbl.style.display = 'none'; // <-- Ẩn kích thước khi đang tải ảnh mới
 
     var gi = groupImgs(idx);
     var ci = gi.indexOf(idx);
@@ -10668,6 +10677,13 @@ function _cmpStatCard(val, label, bg, color, border) {
       img.src = src;
       spin.style.display = 'none';
       img.classList.add('vis');
+      
+      // <-- Lấy và hiển thị kích thước gốc của ảnh
+      if (tmp.naturalWidth && tmp.naturalHeight) {
+          resLbl.textContent = tmp.naturalWidth + ' × ' + tmp.naturalHeight;
+          resLbl.style.display = 'block';
+      }
+      
       appl();
     };
     tmp.src = src;
