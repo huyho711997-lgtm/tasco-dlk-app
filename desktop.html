@@ -12723,37 +12723,85 @@ const MyCloud = {
         // Tránh tạo nhiều nút nếu hàm được gọi lại nhiều lần
         if (document.getElementById('mc-lb-download-btn')) return;
 
-        // Tạo nút bấm gắn chết ở góc trên bên trái (để không đè vào nút X đóng ảnh bên phải)
+        // Tạo nút Tải ảnh gốc (Giữ nguyên)
         const btn = document.createElement('button');
         btn.id = 'mc-lb-download-btn';
         btn.innerHTML = `<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> Tải ảnh gốc`;
         btn.className = 'fixed top-4 left-4 z-[2147483647] bg-black/50 hover:bg-black/80 backdrop-blur-md border border-white/20 text-white px-4 py-2 rounded-lg font-bold shadow-lg flex items-center transition-all hidden pointer-events-auto';
         document.body.appendChild(btn);
 
-        // Sự kiện khi bấm vào nút
+        // Tạo nút Xem ảnh HD (Mới)
+        const btnHD = document.createElement('button');
+        btnHD.id = 'mc-lb-hd-btn';
+        btnHD.innerHTML = `<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg> Xem ảnh HD`;
+        btnHD.className = 'fixed top-4 left-[160px] z-[2147483647] bg-blue-600/90 hover:bg-blue-600 backdrop-blur-md border border-blue-400/50 text-white px-4 py-2 rounded-lg font-bold shadow-lg flex items-center transition-all hidden pointer-events-auto';
+        document.body.appendChild(btnHD);
+
+        // Hàm hỗ trợ lấy URL hiện tại của ảnh đang xem
+        const getCurrentUrl = () => {
+            const fs = window.fsLightboxInstances['mycloud'];
+            if (!fs || !fs.props || !fs.props.sources) return null;
+            let currentIndex = 0;
+            if (fs.stageIndexes && fs.stageIndexes.current !== undefined) {
+                currentIndex = fs.stageIndexes.current;
+            } else if (fs.core && fs.core.stageManager && fs.core.stageManager.current !== undefined) {
+                currentIndex = fs.core.stageManager.current; 
+            }
+            return fs.props.sources[currentIndex];
+        };
+
+        // Sự kiện Tải ảnh gốc
         btn.onclick = () => {
             try {
-                // Lấy đối tượng dữ liệu của fslightbox hiện tại
-                const fs = window.fsLightboxInstances['mycloud'];
-                if (fs && fs.props && fs.props.sources) {
-                    let currentIndex = 0;
-                    // Lấy vị trí (index) của bức ảnh đang hiển thị trên màn hình
-                    if (fs.stageIndexes && fs.stageIndexes.current !== undefined) {
-                        currentIndex = fs.stageIndexes.current;
-                    } else if (fs.core && fs.core.stageManager && fs.core.stageManager.current !== undefined) {
-                        currentIndex = fs.core.stageManager.current; // Hỗ trợ tương thích ngược
-                    }
-                    
-                    // Lấy URL ảnh gốc từ mảng dữ liệu dựa vào vị trí index
-                    const currentUrl = fs.props.sources[currentIndex];
-                    if (currentUrl) {
-                        window.open(currentUrl, '_blank');
-                    } else {
-                        Toast.fire({ icon: 'error', title: 'Không tìm thấy link ảnh gốc!' });
-                    }
+                const currentUrl = getCurrentUrl();
+                if (currentUrl) {
+                    window.open(currentUrl, '_blank');
+                } else {
+                    Toast.fire({ icon: 'error', title: 'Không tìm thấy link ảnh gốc!' });
                 }
             } catch (e) {
                 console.error('Lỗi lấy link từ fslightbox:', e);
+            }
+        };
+
+        // Sự kiện Xem ảnh HD
+        btnHD.onclick = () => {
+            try {
+                let currentUrl = getCurrentUrl();
+                if (currentUrl) {
+                    // Cố gắng ép Cloudinary trả về chất lượng cao nhất bằng parameter
+                    if (currentUrl.includes('cloudinary.com') && currentUrl.includes('/upload/')) {
+                        // Nếu chưa có param nào, thêm q_auto:best
+                        if (!currentUrl.match(/\/upload\/[a-z_0-9,]+\//)) {
+                            currentUrl = currentUrl.replace('/upload/', '/upload/q_auto:best,f_auto/');
+                        }
+                    }
+                    
+                    // Lấy thẻ img hiện tại trong fslightbox và cập nhật src
+                    const activeImage = document.querySelector('.fslightbox-source');
+                    if (activeImage && activeImage.tagName === 'IMG') {
+                        // Hiển thị loading nhẹ
+                        const oldText = btnHD.innerHTML;
+                        btnHD.innerHTML = `<svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/></svg> Đang tải HD...`;
+                        
+                        activeImage.onload = () => {
+                            btnHD.innerHTML = `<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Đã tải HD`;
+                            setTimeout(() => btnHD.innerHTML = oldText, 2000);
+                            activeImage.onload = null; // xóa sự kiện sau khi tải xong
+                        };
+                        activeImage.src = currentUrl;
+                        
+                        // Cũng có thể mở popup để xem độ phân giải gốc 100%
+                        // window.open(currentUrl, '_blank');
+                    } else {
+                        // Nếu không tìm thấy thẻ ảnh (ví dụ video), mở tab mới
+                        window.open(currentUrl, '_blank');
+                    }
+                } else {
+                    Toast.fire({ icon: 'error', title: 'Không tìm thấy link ảnh!' });
+                }
+            } catch (e) {
+                console.error('Lỗi tải ảnh HD:', e);
             }
         };
 
@@ -12761,9 +12809,11 @@ const MyCloud = {
         const observer = new MutationObserver(() => {
             const fsContainer = document.querySelector('.fslightbox-container');
             if (fsContainer && btn.classList.contains('hidden')) {
-                btn.classList.remove('hidden'); // Trình xem ảnh Mở -> Hiện nút
+                btn.classList.remove('hidden');
+                btnHD.classList.remove('hidden');
             } else if (!fsContainer && !btn.classList.contains('hidden')) {
-                btn.classList.add('hidden'); // Trình xem ảnh Đóng -> Ẩn nút
+                btn.classList.add('hidden');
+                btnHD.classList.add('hidden');
             }
         });
         observer.observe(document.body, { childList: true });
