@@ -14875,12 +14875,21 @@ const HumanClaims = {
             const snap = await db.ref('InjuryRates').once('value');
             const rawRates = snap.val() || {};
             
-            const ratesDataForAI = Object.keys(rawRates)
+            // Tạo bản đồ gốc để tra cứu lại sau khi AI trả về
+            const fullRatesMap = {};
+            
+            const compactRatesForAI = Object.keys(rawRates)
                 .map(k => rawRates[k])
-                .filter(r => r.type === typeToFetch)
-                .map(r => ({ stt: r.stt, name: r.name, min: r.minPct, max: r.maxPct }));
+                .filter(r => {
+                    if (r.type === typeToFetch) {
+                        fullRatesMap[r.stt] = r;
+                        return true;
+                    }
+                    return false;
+                })
+                .map(r => `${r.stt}: ${r.name}`); // Rút gọn tối đa (Chỉ gửi text)
 
-            if (!ratesDataForAI.length) {
+            if (!compactRatesForAI.length) {
                 throw new Error(`Bảng tỷ lệ ${lossType} trên hệ thống đang trống!`);
             }
 
@@ -14889,22 +14898,19 @@ const HumanClaims = {
 CHẨN ĐOÁN CỦA BỆNH NHÂN: "${desc}"
 
 NHIỆM VỤ:
-1. Phân tích chẩn đoán trên (xác định bộ phận cơ thể bị tổn thương: đầu, mặt, cổ, ngực, bụng, chi trên (tay), chi dưới (chân), v.v. và loại tổn thương: gãy, nứt, đứt, xước, sẹo...).
-2. Đối chiếu cẩn thận với BẢNG TỶ LỆ (${lossType}) được cung cấp bên dưới.
-3. Tìm và trích xuất TỐI ĐA 10 mục PHÙ HỢP NHẤT hoặc có ý nghĩa y khoa tương đương. Mở rộng từ khóa tìm kiếm nếu cần (Ví dụ: "tay" -> "chi trên", "chân" -> "chi dưới", "răng" -> "răng", "xước/rách" -> "sẹo/tổn thương phần mềm", "ngón tay" -> "đốt ngón tay").
-4. Trả về KẾT QUẢ DƯỚI DẠNG MẢNG JSON HỢP LỆ. Nếu không có gì khớp, trả về mảng rỗng [].
+1. Phân tích chẩn đoán trên.
+2. Đối chiếu với BẢNG TỶ LỆ (${lossType}) bên dưới (định dạng "stt: tên mục").
+3. Tìm TỐI ĐA 10 mục PHÙ HỢP NHẤT. Có thể mở rộng từ khóa y khoa đồng nghĩa (Vd: "tay" -> "chi trên").
+4. Trả về MẢNG JSON. Nếu không khớp, trả về [].
 
 BẢNG TỶ LỆ:
-${JSON.stringify(ratesDataForAI)}
+${JSON.stringify(compactRatesForAI)}
 
-ĐỊNH DẠNG ĐẦU RA YÊU CẦU BẮT BUỘC (Chỉ trả về JSON Array, không có văn bản nào khác):
+ĐỊNH DẠNG ĐẦU RA YÊU CẦU BẮT BUỘC (Chỉ JSON Array):
 [
   {
     "stt": "số thứ tự trong bảng",
-    "name": "tên mục trong bảng",
-    "min": "số tỷ lệ min (hoặc null)",
-    "max": "số tỷ lệ max (hoặc null)",
-    "reason": "Lý do ngắn gọn vì sao chọn mục này dựa trên chẩn đoán"
+    "reason": "Lý do chọn ngắn gọn"
   }
 ]`;
 
@@ -14942,13 +14948,9 @@ ${JSON.stringify(ratesDataForAI)}
                     const data = await res.json();
 
                     if (!res.ok) {
-                        // Nếu lỗi 400 (Bad Request), dừng lại và hiển thị lỗi ngay vì retry cũng vô dụng
-                        if (res.status === 400) {
-                            throw new Error(`Lỗi cú pháp API (400): ${data.error?.message}`);
-                        }
-                        if (res.status === 429 || res.status === 503 || (data.error && data.error.message.includes('high demand'))) {
-                            throw new Error('Overloaded'); 
-                        }
+                        // Báo lỗi 400 ra màn hình luôn
+                        if (res.status === 400) throw new Error(`Lỗi cú pháp hoặc Dữ liệu quá lớn (400): ${data.error?.message}`);
+                        if (res.status === 429 || res.status === 503 || (data.error && data.error.message.includes('high demand'))) throw new Error('Overloaded'); 
                         throw new Error(data.error?.message || 'Lỗi API');
                     }
 
@@ -14957,26 +14959,18 @@ ${JSON.stringify(ratesDataForAI)}
                     try { 
                         parsedArray = JSON.parse(raw.trim()); 
                     } catch (_) {
-                        // Cứu cánh nếu model phớt lờ response_mime_type
                         const m = raw.match(/\[[\s\S]*\]/);
                         if (m) try { parsedArray = JSON.parse(m[0]); } catch (_) {}
                     }
                     
                     if (Array.isArray(parsedArray)) break; 
-                    else throw new Error("API không trả về mảng JSON hợp lệ");
+                    else throw new Error("API không trả về JSON Array");
 
                 } catch (err) {
                     console.warn(`[Lần ${attempt + 1}] Lỗi model ${currentModel}:`, err.message);
-                    
-                    // Nếu lỗi do code gửi sai (400) thì không cần retry, báo lỗi thẳng
-                    if (err.message.includes('Lỗi cú pháp API')) {
-                        throw err;
-                    }
+                    if (err.message.includes('Lỗi cú pháp')) throw err;
 
-                    if (attempt === maxRetries - 1) {
-                        throw new Error('Máy chủ Google AI hiện đang quá tải. Anh vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau ít phút.');
-                    }
-                    // Tăng dần thời gian nghỉ để tránh bị Google block IP
+                    if (attempt === maxRetries - 1) throw new Error('Máy chủ Google AI hiện đang quá tải. Vui lòng thử lại sau ít phút.');
                     const delay = Math.min(2000 * (attempt + 1), 8000);
                     if (statusEl) statusEl.textContent = `Đang đợi kết nối lại sau ${delay/1000}s...`;
                     await new Promise(r => setTimeout(r, delay)); 
@@ -14984,6 +14978,21 @@ ${JSON.stringify(ratesDataForAI)}
             }
 
             if (!parsedArray) throw new Error('AI không thể trả lời định dạng chuẩn lúc này.');
+
+            // Khôi phục lại dữ liệu chi tiết từ stt AI trả về
+            parsedArray = parsedArray.map(item => {
+                const fullItem = fullRatesMap[item.stt];
+                if (fullItem) {
+                    return {
+                        stt: fullItem.stt,
+                        name: fullItem.name,
+                        min: fullItem.minPct,
+                        max: fullItem.maxPct,
+                        reason: item.reason
+                    };
+                }
+                return null;
+            }).filter(Boolean);
 
             Swal.close();
 
