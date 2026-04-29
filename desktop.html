@@ -14933,7 +14933,7 @@ ${JSON.stringify(ratesDataForAI)}
                             contents: [{ parts: [{ text: PROMPT }] }],
                             generationConfig: { 
                                 temperature: 0.1,
-                                responseMimeType: "application/json"
+                                response_mime_type: "application/json"
                             }
                         })
                     });
@@ -14942,6 +14942,10 @@ ${JSON.stringify(ratesDataForAI)}
                     const data = await res.json();
 
                     if (!res.ok) {
+                        // Nếu lỗi 400 (Bad Request), dừng lại và hiển thị lỗi ngay vì retry cũng vô dụng
+                        if (res.status === 400) {
+                            throw new Error(`Lỗi cú pháp API (400): ${data.error?.message}`);
+                        }
                         if (res.status === 429 || res.status === 503 || (data.error && data.error.message.includes('high demand'))) {
                             throw new Error('Overloaded'); 
                         }
@@ -14953,15 +14957,22 @@ ${JSON.stringify(ratesDataForAI)}
                     try { 
                         parsedArray = JSON.parse(raw.trim()); 
                     } catch (_) {
-                        // Cứu cánh nếu model phớt lờ responseMimeType
+                        // Cứu cánh nếu model phớt lờ response_mime_type
                         const m = raw.match(/\[[\s\S]*\]/);
                         if (m) try { parsedArray = JSON.parse(m[0]); } catch (_) {}
                     }
                     
                     if (Array.isArray(parsedArray)) break; 
+                    else throw new Error("API không trả về mảng JSON hợp lệ");
 
                 } catch (err) {
                     console.warn(`[Lần ${attempt + 1}] Lỗi model ${currentModel}:`, err.message);
+                    
+                    // Nếu lỗi do code gửi sai (400) thì không cần retry, báo lỗi thẳng
+                    if (err.message.includes('Lỗi cú pháp API')) {
+                        throw err;
+                    }
+
                     if (attempt === maxRetries - 1) {
                         throw new Error('Máy chủ Google AI hiện đang quá tải. Anh vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau ít phút.');
                     }
