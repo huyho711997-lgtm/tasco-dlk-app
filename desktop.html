@@ -15397,7 +15397,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
     async processMedicalOcr(file) {
         AppLoader.show('AI đang phân tích...', 'Đang đọc thông tin bệnh viện, chẩn đoán...');
 
-        const compressImg = (f, maxW = 1200) => new Promise((resolve, reject) => {
+        const compressImg = (f, maxW = 1600) => new Promise((resolve, reject) => {
             if (f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')) {
                 reject(new Error('Hệ thống hiện tại chỉ hỗ trợ AI quét định dạng ảnh (JPG/PNG), chưa hỗ trợ PDF cho phần y tế.'));
                 return;
@@ -15412,7 +15412,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                     canvas.width = w; canvas.height = h;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, w, h);
-                    resolve(canvas.toDataURL('image/jpeg', 0.8).split(',')[1]);
+                    resolve(canvas.toDataURL('image/jpeg', 0.85).split(',')[1]);
                 };
                 img.onerror = () => reject(new Error('Không thể đọc file ảnh này.'));
                 img.src = e.target.result;
@@ -15442,46 +15442,36 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             Nếu không có thông tin, để chuỗi rỗng "".`;
 
             let dataResponse = null;
-            const maxRetries = GEM_KEYS.length * 2; 
+            const modelsToTry = ['gemini-2.5-pro', 'gemini-2.5-flash'];
 
-            for (let attempt = 0; attempt < maxRetries; attempt++) {
-                const key = nextGemKey();
-                if (statusText) statusText.textContent = `Đang đọc tài liệu (Thử lần ${attempt + 1}/${maxRetries})...`;
-                
+            const callAi = async (model, keyIdx) => {
+                const key = GEM_KEYS[keyIdx % GEM_KEYS.length];
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: 'image/jpeg', data: b64 } }] }],
+                        generationConfig: { 
+                            temperature: 0.1,
+                            response_mime_type: "application/json"
+                        }
+                    })
+                });
+                if (!res.ok) throw new Error(`Model ${model} failed`);
+                const data = await res.json();
+                return data;
+            };
+
+            // Gọi song song cả 2 model để đảm bảo tốc độ và độ chính xác
+            try {
+                dataResponse = await Promise.any(modelsToTry.map((m, idx) => callAi(m, idx)));
+            } catch (err) {
+                // Thử lại lần cuối nếu cả 2 cùng lỗi
                 try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 60000);
-
-                    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent?key=' + key, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        signal: controller.signal,
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: 'image/jpeg', data: b64 } }] }],
-                            generationConfig: { temperature: 0.1, maxOutputTokens: 2048 }
-                        })
-                    });
-                    
-                    clearTimeout(timeoutId);
-                    dataResponse = await res.json();
-                    
-                    if (res.ok && !dataResponse.error) break;
-
-                    console.warn(`[Lần ${attempt + 1}] Lỗi từ Google API:`, dataResponse.error);
-                    
-                    if (statusText) statusText.textContent = `Máy chủ bận, đang chuyển đổi luồng...`;
-                    await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
-
-                } catch (err) {
-                    console.error(`[Lần ${attempt + 1}] Lỗi Mạng/Timeout:`, err);
-                    if (attempt === maxRetries - 1) throw err;
-                    if (statusText) statusText.textContent = `Đang kết nối lại...`;
-                    await new Promise(r => setTimeout(r, 2000));
+                    dataResponse = await callAi('gemini-2.5-pro', 1);
+                } catch (e) {
+                    throw new Error('Google AI đang bận hoặc ảnh quá mờ. Anh hãy thử chụp ảnh rõ nét hơn nhé.');
                 }
-            }
-
-            if (!dataResponse || dataResponse.error) {
-                throw new Error(dataResponse?.error?.message || 'Google AI đang quá tải, vui lòng thử lại sau vài phút.');
             }
 
             const raw = (dataResponse.candidates && dataResponse.candidates[0].content.parts[0].text) || '';
