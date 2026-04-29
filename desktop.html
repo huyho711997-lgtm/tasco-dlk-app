@@ -14985,12 +14985,22 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             if (!parsedArray) throw new Error('AI không thể trả lời định dạng chuẩn lúc này.');
 
             // Khôi phục lại dữ liệu chi tiết từ mảng stt (ID) AI trả về
-            parsedArray = parsedArray.map(sttVal => {
-                // Đảm bảo lấy được ID dù AI trả về string, number hay object
+            let expandedIds = new Set();
+            parsedArray.forEach(sttVal => {
                 let id = typeof sttVal === 'object' ? sttVal.stt : String(sttVal);
                 if (id) id = id.trim();
+                if (fullRatesMap[id]) expandedIds.add(id);
                 
-                const fullItem = fullRatesMap[id] || fullRatesMap[sttVal];
+                // Tự động thêm các mục con (Ví dụ: AI trả về 29 -> tự động thêm 29.1, 29.2...)
+                Object.keys(fullRatesMap).forEach(key => {
+                    if (key.startsWith(id + '.')) {
+                        expandedIds.add(key);
+                    }
+                });
+            });
+
+            parsedArray = Array.from(expandedIds).map(id => {
+                const fullItem = fullRatesMap[id];
                 if (fullItem) {
                     return {
                         stt: fullItem.stt,
