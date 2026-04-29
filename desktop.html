@@ -14894,25 +14894,17 @@ const HumanClaims = {
             }
 
             // 2. Prompt gửi toàn bộ dữ liệu cho AI phân tích ngữ nghĩa
-            const PROMPT = `Bạn là Bác sĩ giám định y khoa và chuyên gia bồi thường bảo hiểm.
-CHẨN ĐOÁN CỦA BỆNH NHÂN: "${desc}"
+            const PROMPT = `Chuyên gia y khoa và bồi thường bảo hiểm.
+CHẨN ĐOÁN: "${desc}"
 
-NHIỆM VỤ:
-1. Phân tích chẩn đoán trên.
-2. Đối chiếu với BẢNG TỶ LỆ (${lossType}) bên dưới (định dạng "stt: tên mục").
-3. Tìm TỐI ĐA 10 mục PHÙ HỢP NHẤT. Có thể mở rộng từ khóa y khoa đồng nghĩa (Vd: "tay" -> "chi trên").
-4. Trả về MẢNG JSON. Nếu không khớp, trả về [].
+YÊU CẦU:
+1. Đối chiếu chẩn đoán trên với BẢNG TỶ LỆ (${lossType}) bên dưới. Mở rộng từ đồng nghĩa nếu cần (Vd: tay->chi trên, xước->phần mềm).
+2. Tìm TỐI ĐA 8 mã (stt) phù hợp nhất.
+3. TRẢ VỀ DẠNG MẢNG CHUỖI CÁC SỐ THỨ TỰ (stt). Tuyệt đối không giải thích, không thêm text thừa.
+Ví dụ đầu ra chuẩn: ["1.1", "12a", "5.1"]
 
 BẢNG TỶ LỆ:
-${JSON.stringify(compactRatesForAI)}
-
-ĐỊNH DẠNG ĐẦU RA YÊU CẦU BẮT BUỘC (Chỉ JSON Array):
-[
-  {
-    "stt": "số thứ tự trong bảng",
-    "reason": "Lý do chọn ngắn gọn"
-  }
-]`;
+${JSON.stringify(compactRatesForAI)}`;
 
             // 3. Gọi API với cơ chế Retry chống nghẽn mạng (Không bỏ cuộc)
             let parsedArray = null;
@@ -14979,16 +14971,16 @@ ${JSON.stringify(compactRatesForAI)}
 
             if (!parsedArray) throw new Error('AI không thể trả lời định dạng chuẩn lúc này.');
 
-            // Khôi phục lại dữ liệu chi tiết từ stt AI trả về
-            parsedArray = parsedArray.map(item => {
-                const fullItem = fullRatesMap[item.stt];
+            // Khôi phục lại dữ liệu chi tiết từ mảng stt (ID) AI trả về
+            parsedArray = parsedArray.map(sttVal => {
+                const fullItem = fullRatesMap[sttVal];
                 if (fullItem) {
                     return {
                         stt: fullItem.stt,
                         name: fullItem.name,
                         min: fullItem.minPct,
                         max: fullItem.maxPct,
-                        reason: item.reason
+                        reason: 'Mục tương đồng được AI đề xuất'
                     };
                 }
                 return null;
