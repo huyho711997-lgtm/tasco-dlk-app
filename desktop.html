@@ -14885,45 +14885,56 @@ const HumanClaims = {
             }
 
             // 2. Prompt gửi toàn bộ dữ liệu cho AI phân tích ngữ nghĩa
-            const PROMPT = `Bạn là chuyên gia y tế và bảo hiểm xe cơ giới.
-            CHẨN ĐOÁN CỦA BỆNH NHÂN: "${desc}"
-            BẢNG TỶ LỆ (${lossType}): ${JSON.stringify(ratesDataForAI)}
+            const PROMPT = `Bạn là Bác sĩ giám định y khoa và chuyên gia bồi thường bảo hiểm.
+CHẨN ĐOÁN CỦA BỆNH NHÂN: "${desc}"
 
-            Hãy đọc kỹ toàn bộ bảng và tìm TỐI ĐA 10 mục khớp nhất hoặc có ý nghĩa y khoa tương đương với chẩn đoán trên. (Ví dụ: tay = chi trên, xước = trầy, gãy = gãy xương/tổn thương xương...).
-            - Sắp xếp theo mức độ phù hợp giảm dần.
-            - Trả về CHỈ MẢNG JSON (không markdown, không giải thích ngoài JSON):
-            [
-              {
-                "stt": "số thứ tự",
-                "name": "tên mục",
-                "min": "số tỷ lệ min (hoặc null)",
-                "max": "số tỷ lệ max (hoặc null)",
-                "reason": "Lý do ngắn gọn (1 câu) vì sao chọn mục này"
-              }
-            ]
-            Nếu không có mục nào liên quan, trả về mảng rỗng [].`;
+NHIỆM VỤ:
+1. Phân tích chẩn đoán trên (xác định bộ phận cơ thể bị tổn thương: đầu, mặt, cổ, ngực, bụng, chi trên (tay), chi dưới (chân), v.v. và loại tổn thương: gãy, nứt, đứt, xước, sẹo...).
+2. Đối chiếu cẩn thận với BẢNG TỶ LỆ (${lossType}) được cung cấp bên dưới.
+3. Tìm và trích xuất TỐI ĐA 10 mục PHÙ HỢP NHẤT hoặc có ý nghĩa y khoa tương đương. Mở rộng từ khóa tìm kiếm nếu cần (Ví dụ: "tay" -> "chi trên", "chân" -> "chi dưới", "răng" -> "răng", "xước/rách" -> "sẹo/tổn thương phần mềm", "ngón tay" -> "đốt ngón tay").
+4. Trả về KẾT QUẢ DƯỚI DẠNG MẢNG JSON HỢP LỆ. Nếu không có gì khớp, trả về mảng rỗng [].
+
+BẢNG TỶ LỆ:
+${JSON.stringify(ratesDataForAI)}
+
+ĐỊNH DẠNG ĐẦU RA YÊU CẦU BẮT BUỘC (Chỉ trả về JSON Array, không có văn bản nào khác):
+[
+  {
+    "stt": "số thứ tự trong bảng",
+    "name": "tên mục trong bảng",
+    "min": "số tỷ lệ min (hoặc null)",
+    "max": "số tỷ lệ max (hoặc null)",
+    "reason": "Lý do ngắn gọn vì sao chọn mục này dựa trên chẩn đoán"
+  }
+]`;
 
             // 3. Gọi API với cơ chế Retry chống nghẽn mạng (Không bỏ cuộc)
             let parsedArray = null;
-            const maxRetries = GEM_KEYS.length * 2; 
+            const fallbackModels = ['gemini-2.0-flash', 'gemini-1.5-pro', GEM_MODEL];
+            const maxRetries = GEM_KEYS.length * fallbackModels.length; 
             const statusEl = document.getElementById('ai-retry-status');
 
             for (let attempt = 0; attempt < maxRetries; attempt++) {
                 const key = nextGemKey();
-                if (statusEl && attempt > 0) statusEl.textContent = `Máy chủ bận, đang thử lại bằng kênh dự phòng (Lần ${attempt + 1}/${maxRetries})...`;
+                const currentModel = fallbackModels[Math.floor(attempt / GEM_KEYS.length) % fallbackModels.length];
+                
+                if (statusEl && attempt > 0) statusEl.textContent = `Máy chủ bận, đang thử model ${currentModel} (Lần ${attempt + 1}/${maxRetries})...`;
 
                 try {
-                    // Chờ tối đa 45 giây cho tác vụ đọc dữ liệu dài
+                    // Chờ tối đa 60 giây cho tác vụ đọc dữ liệu dài
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 45000);
+                    const timeoutId = setTimeout(() => controller.abort(), 60000);
 
-                    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent?key=' + key, {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${key}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         signal: controller.signal,
                         body: JSON.stringify({
                             contents: [{ parts: [{ text: PROMPT }] }],
-                            generationConfig: { temperature: 0.1 }
+                            generationConfig: { 
+                                temperature: 0.1,
+                                responseMimeType: "application/json"
+                            }
                         })
                     });
                     
@@ -14940,8 +14951,9 @@ const HumanClaims = {
                     const raw = (data.candidates && data.candidates[0].content.parts[0].text) || '';
                     
                     try { 
-                        parsedArray = JSON.parse(raw.replace(/```json|```/gi, '').trim()); 
+                        parsedArray = JSON.parse(raw.trim()); 
                     } catch (_) {
+                        // Cứu cánh nếu model phớt lờ responseMimeType
                         const m = raw.match(/\[[\s\S]*\]/);
                         if (m) try { parsedArray = JSON.parse(m[0]); } catch (_) {}
                     }
@@ -14949,13 +14961,13 @@ const HumanClaims = {
                     if (Array.isArray(parsedArray)) break; 
 
                 } catch (err) {
-                    console.warn(`[Lần ${attempt + 1}] Lỗi:`, err.message);
+                    console.warn(`[Lần ${attempt + 1}] Lỗi model ${currentModel}:`, err.message);
                     if (attempt === maxRetries - 1) {
-                        throw new Error('Máy chủ Google AI hiện đang quá tải. Anh vui lòng thử lại sau ít phút.');
+                        throw new Error('Máy chủ Google AI hiện đang quá tải. Anh vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau ít phút.');
                     }
                     // Tăng dần thời gian nghỉ để tránh bị Google block IP
                     const delay = Math.min(2000 * (attempt + 1), 8000);
-                    if (statusEl) statusEl.textContent = `Đang đợi ${delay/1000}s để kết nối lại...`;
+                    if (statusEl) statusEl.textContent = `Đang đợi kết nối lại sau ${delay/1000}s...`;
                     await new Promise(r => setTimeout(r, delay)); 
                 }
             }
