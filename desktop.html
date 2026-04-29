@@ -15400,7 +15400,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
     async processMedicalOcr(file) {
         AppLoader.show('AI đang phân tích...', 'Đang đọc thông tin bệnh viện, chẩn đoán...');
 
-        const compressImg = (f, maxW = 1600) => new Promise((resolve, reject) => {
+        const compressImg = (f, maxW = 1200) => new Promise((resolve, reject) => {
             if (f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')) {
                 reject(new Error('Hệ thống hiện tại chỉ hỗ trợ AI quét định dạng ảnh (JPG/PNG), chưa hỗ trợ PDF cho phần y tế.'));
                 return;
@@ -15415,7 +15415,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                     canvas.width = w; canvas.height = h;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, w, h);
-                    resolve(canvas.toDataURL('image/jpeg', 0.85).split(',')[1]);
+                    resolve(canvas.toDataURL('image/jpeg', 0.8).split(',')[1]);
                 };
                 img.onerror = () => reject(new Error('Không thể đọc file ảnh này.'));
                 img.src = e.target.result;
@@ -15445,15 +15445,16 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             Nếu không có thông tin, để chuỗi rỗng "".`;
 
             let dataResponse = null;
-            const modelsToTry = ['gemini-2.5-pro', 'gemini-2.5-flash'];
+            // Sử dụng chính xác các model mà hệ thống hỗ trợ
+            const modelsToTry = [GEM_MODEL, 'gemini-2.5-flash-lite', 'gemini-2.5-pro'];
 
             const callAi = async (model, keyIdx) => {
-                // Thêm một chút delay cho model thứ 2 để tránh 429 nếu dùng chung 1 key
-                if (keyIdx > 0) await new Promise(r => setTimeout(r, 400)); 
+                // Thêm delay để tránh bị 429 khi dùng chung key
+                if (keyIdx > 0) await new Promise(r => setTimeout(r, 600)); 
 
                 const key = GEM_KEYS[keyIdx % GEM_KEYS.length];
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 45000); // Giới hạn 45s
+                const timeoutId = setTimeout(() => controller.abort(), 60000); // Tăng lên 60s cho ảnh
 
                 try {
                     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
@@ -15469,31 +15470,32 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         })
                     });
                     
+                    const data = await res.json();
                     if (!res.ok) {
-                        const errData = await res.json().catch(() => ({}));
-                        throw new Error(errData.error?.message || `Model ${model} failed with status ${res.status}`);
+                        throw new Error(data.error?.message || `Status ${res.status}`);
                     }
 
-                    const data = await res.json();
                     if (!data.candidates || !data.candidates[0].content.parts[0].text) {
-                        throw new Error(`Model ${model} returned empty response`);
+                        throw new Error(`Empty response`);
                     }
                     return data;
+                } catch (e) {
+                    throw e;
                 } finally {
                     clearTimeout(timeoutId);
                 }
             };
 
-            // Gọi song song cả 2 model để đảm bảo tốc độ và độ chính xác
+            // Gọi song song các model để đảm bảo tốc độ
             try {
                 dataResponse = await Promise.any(modelsToTry.map((m, idx) => callAi(m, idx)));
             } catch (err) {
-                // Nếu cả 2 cùng lỗi, thử lại lần cuối với model ổn định nhất và key dự phòng
+                // Thử lại lần cuối với model mặc định và key kế tiếp
                 try {
-                    dataResponse = await callAi('gemini-2.5-pro', 1);
+                    dataResponse = await callAi(GEM_MODEL, 1);
                 } catch (e) {
-                    console.error("OCR Final Error:", e);
-                    throw new Error('Máy chủ AI hiện đang quá tải hoặc không đọc được ảnh. Anh hãy thử chụp lại ảnh rõ nét hơn, đủ ánh sáng và không bị mất góc nhé.');
+                    console.error("OCR Error:", e);
+                    throw new Error('Hệ thống AI hiện đang quá tải (Lỗi 429/503). Anh hãy thử chụp lại ảnh rõ nét, đủ ánh sáng và nhấn quét lại sau 5-10 giây nhé.');
                 }
             }
 
