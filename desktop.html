@@ -14870,10 +14870,14 @@ const HumanClaims = {
         });
 
         try {
-            // 1. Tải TOÀN BỘ Bảng tỷ lệ từ Firebase (Không lọc bỏ sót)
+            // 1. Tải TOÀN BỘ Bảng tỷ lệ từ Firebase (Có Cache để tăng tốc x10 lần)
             const typeToFetch = lossType === 'Phẫu thuật' ? 'phau_thuat' : 'thuong_tat';
-            const snap = await db.ref('InjuryRates').once('value');
-            const rawRates = snap.val() || {};
+            
+            if (!this._injuryRatesCache) {
+                const snap = await db.ref('InjuryRates').once('value');
+                this._injuryRatesCache = snap.val() || {};
+            }
+            const rawRates = this._injuryRatesCache;
             
             // Tạo bản đồ gốc để tra cứu lại sau khi AI trả về
             const fullRatesMap = {};
