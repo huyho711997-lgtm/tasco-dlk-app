@@ -2139,9 +2139,12 @@ textarea.inp { resize:vertical; }
 
           <div class="flex items-center gap-3">
             <span class="text-[11px] text-slate-400 font-semibold" id="hc-m-save-status"></span>
-            <button onclick="HumanClaims.saveData()" class="px-8 py-2.5 bg-slate-800 text-white rounded-xl text-sm font-extrabold hover:bg-slate-700 transition-colors shadow-lg flex items-center gap-2">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <button onclick="HumanClaims.saveData()" class="px-6 py-2.5 bg-slate-500 text-white rounded-xl text-xs font-black hover:bg-slate-600 transition-colors flex items-center gap-2">
               Lưu hồ sơ
+            </button>
+            <button onclick="HumanClaims.saveAndClose()" class="px-8 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-extrabold hover:bg-slate-800 transition-colors shadow-lg flex items-center gap-2">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Lưu & Thoát
             </button>
           </div>
         </div>
@@ -14407,7 +14410,7 @@ const HumanClaims = {
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'Có, thoát đi',
-                cancelButtonText: 'Ở lại lưu',
+                cancelButtonText: 'Tiếp tục chỉnh sửa',
                 customClass: { popup: 'rnd' }
             });
             if (!result.isConfirmed) return;
@@ -14609,6 +14612,17 @@ const HumanClaims = {
             saveStatus.textContent = 'Lỗi lưu dữ liệu!';
             Toast.fire({icon:'error', title:'Lỗi: ' + e.message});
         }
+    },
+
+    async saveAndClose() {
+        const victimName = document.getElementById('hc-victimName')?.value.trim();
+        if (!victimName) { Toast.fire({icon:'warning', title:'Vui lòng nhập Tên người được bảo hiểm!'}); return; }
+        
+        await this.saveData();
+        const w = document.getElementById('hc-modal-wrap');
+        const b = document.getElementById('hc-modal-box');
+        w.classList.add('opacity-0'); b.classList.add('scale-95');
+        setTimeout(() => { w.classList.add('hidden'); }, 300);
     },
 
     deleteRecord(id) {
