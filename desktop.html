@@ -14279,6 +14279,7 @@ const HumanClaims = {
     _curPage: 1,
     _currentId: null,
     _tempImages: [],
+    _isModified: false, // Cờ theo dõi sự thay đổi của form
     
     // Cấu hình quy trình trạng thái
     STATUS_FLOW: ['new', 'req_no', 'has_no', 'req_fund', 'funding', 'paid'],
@@ -14299,6 +14300,14 @@ const HumanClaims = {
             
             // Luôn gọi lệnh renderTable để dữ liệu được chuẩn bị sẵn
             this.renderTable();
+        });
+
+        // Theo dõi bất kỳ sự thay đổi nào trong form bồi thường con người
+        document.getElementById('hc-modal-box')?.addEventListener('input', () => {
+            this._isModified = true;
+        });
+        document.getElementById('hc-modal-box')?.addEventListener('change', () => {
+            this._isModified = true;
         });
     },
 
@@ -14373,6 +14382,7 @@ const HumanClaims = {
         const b = document.getElementById('hc-modal-box');
         
         this._resetForm();
+        this._isModified = false; // Reset cờ thay đổi khi mở form mới hoặc mở chi tiết
         
         if (id) {
             const rec = this._data.find(r => r.id === id);
@@ -14387,7 +14397,22 @@ const HumanClaims = {
         setTimeout(() => { w.classList.remove('opacity-0'); b.classList.remove('scale-95'); }, 10);
     },
 
-    closeModal() {
+    async closeModal() {
+        if (this._isModified) {
+            const result = await Swal.fire({
+                title: 'Dữ liệu chưa được lưu!',
+                text: 'Bạn đã thay đổi một số thông tin nhưng chưa lưu. Bạn có chắc chắn muốn thoát không?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Có, thoát đi',
+                cancelButtonText: 'Ở lại lưu',
+                customClass: { popup: 'rnd' }
+            });
+            if (!result.isConfirmed) return;
+        }
+
         const w = document.getElementById('hc-modal-wrap');
         const b = document.getElementById('hc-modal-box');
         w.classList.add('opacity-0'); b.classList.add('scale-95');
@@ -14578,6 +14603,7 @@ const HumanClaims = {
                 this._updateUIStatus('new');
             }
             saveStatus.textContent = 'Đã lưu lúc ' + moment().format('HH:mm:ss');
+            this._isModified = false; // Đã lưu thành công, reset cờ
             Toast.fire({icon:'success', title:'Lưu hồ sơ thành công!'});
         } catch (e) {
             saveStatus.textContent = 'Lỗi lưu dữ liệu!';
