@@ -15445,32 +15445,52 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             const modelsToTry = ['gemini-2.5-pro', 'gemini-2.5-flash'];
 
             const callAi = async (model, keyIdx) => {
+                // Thêm một chút delay cho model thứ 2 để tránh 429 nếu dùng chung 1 key
+                if (keyIdx > 0) await new Promise(r => setTimeout(r, 400)); 
+
                 const key = GEM_KEYS[keyIdx % GEM_KEYS.length];
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: 'image/jpeg', data: b64 } }] }],
-                        generationConfig: { 
-                            temperature: 0.1,
-                            response_mime_type: "application/json"
-                        }
-                    })
-                });
-                if (!res.ok) throw new Error(`Model ${model} failed`);
-                const data = await res.json();
-                return data;
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 45000); // Giới hạn 45s
+
+                try {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        signal: controller.signal,
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: 'image/jpeg', data: b64 } }] }],
+                            generationConfig: { 
+                                temperature: 0.1,
+                                maxOutputTokens: 2048
+                            }
+                        })
+                    });
+                    
+                    if (!res.ok) {
+                        const errData = await res.json().catch(() => ({}));
+                        throw new Error(errData.error?.message || `Model ${model} failed with status ${res.status}`);
+                    }
+
+                    const data = await res.json();
+                    if (!data.candidates || !data.candidates[0].content.parts[0].text) {
+                        throw new Error(`Model ${model} returned empty response`);
+                    }
+                    return data;
+                } finally {
+                    clearTimeout(timeoutId);
+                }
             };
 
             // Gọi song song cả 2 model để đảm bảo tốc độ và độ chính xác
             try {
                 dataResponse = await Promise.any(modelsToTry.map((m, idx) => callAi(m, idx)));
             } catch (err) {
-                // Thử lại lần cuối nếu cả 2 cùng lỗi
+                // Nếu cả 2 cùng lỗi, thử lại lần cuối với model ổn định nhất và key dự phòng
                 try {
                     dataResponse = await callAi('gemini-2.5-pro', 1);
                 } catch (e) {
-                    throw new Error('Google AI đang bận hoặc ảnh quá mờ. Anh hãy thử chụp ảnh rõ nét hơn nhé.');
+                    console.error("OCR Final Error:", e);
+                    throw new Error('Máy chủ AI hiện đang quá tải hoặc không đọc được ảnh. Anh hãy thử chụp lại ảnh rõ nét hơn, đủ ánh sáng và không bị mất góc nhé.');
                 }
             }
 
