@@ -14538,7 +14538,8 @@ const HumanClaims = {
                         contractNo: c.no,
                         unit: c.unit,
                         effFrom: c.from,
-                        effTo: c.to
+                        effTo: c.to,
+                        type: c.type
                     });
                 }
             });
@@ -14558,9 +14559,14 @@ const HumanClaims = {
                     <p class="text-[13px] font-black text-slate-800 uppercase group-hover:text-cyan-700 transition-colors">${m.name}</p>
                     <span class="text-[9px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded font-black border border-slate-200 uppercase">${m.cls || 'NĐBH'}</span>
                 </div>
-                <div class="flex items-center gap-2 mt-1.5">
-                    <span class="text-[10px] px-2 py-0.5 bg-teal-50 text-teal-700 rounded-md font-bold border border-teal-100 shadow-sm">${m.contractNo}</span>
-                    <span class="text-[10px] text-slate-500 font-bold truncate max-w-[180px]">${m.unit}</span>
+                <div class="flex items-center gap-2 mt-1 flex-wrap">
+                    <span class="text-[9px] px-1.5 py-0.5 bg-teal-50 text-teal-700 rounded font-black border border-teal-100 shadow-sm">${m.contractNo}</span>
+                    <span class="text-[9px] px-1.5 py-0.5 bg-purple-50 text-purple-600 rounded font-black border border-purple-100 shadow-sm">${m.type || 'HĐBH'}</span>
+                    <span class="text-[10px] text-slate-400 font-bold">${m.effFrom ? moment(m.effFrom).format('DD/MM/YY') : '??'} - ${m.effTo ? moment(m.effTo).format('DD/MM/YY') : '??'}</span>
+                </div>
+                <div class="flex items-center gap-1.5 mt-1 text-[10px] text-slate-500 font-bold">
+                    <svg class="w-3 h-3 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span class="truncate max-w-[200px]">${m.unit}</span>
                 </div>
             </div>
         `).join('');
