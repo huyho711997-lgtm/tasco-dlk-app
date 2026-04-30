@@ -2117,16 +2117,52 @@ textarea.inp { resize:vertical; }
                 </div>
               </div>
 
-              <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-200 shadow-sm p-5 relative overflow-hidden shrink-0">
-                <svg class="absolute -right-6 -bottom-6 w-32 h-32 text-emerald-500/10 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                <p class="text-xs font-black text-emerald-800 uppercase tracking-widest mb-4">Giá trị chi trả</p>
-                <div class="space-y-2 mb-4 relative z-10">
-                  <div class="flex justify-between items-center"><span class="text-xs font-semibold text-emerald-700">Tiền Thương tật / PT</span><span class="text-sm font-mono font-bold text-emerald-900" id="hc-calc-injury">0 đ</span></div>
-                  <div class="flex justify-between items-center"><span class="text-xs font-semibold text-emerald-700">Trợ cấp nằm viện</span><span class="text-sm font-mono font-bold text-emerald-900" id="hc-calc-hospital">0 đ</span></div>
+              <div class="group bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl shadow-[0_8px_30px_rgb(16,185,129,0.2)] hover:shadow-[0_8px_30px_rgb(16,185,129,0.4)] p-6 relative overflow-hidden shrink-0 transition-all duration-500 hover:-translate-y-1">
+                <!-- Dynamic Background Effects -->
+                <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] opacity-50"></div>
+                <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+                <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-teal-400/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+
+                <!-- Decorative Icon -->
+                <svg class="absolute -right-4 -bottom-4 w-32 h-32 text-white/5 pointer-events-none group-hover:scale-110 transition-transform duration-500 group-hover:rotate-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                
+                <div class="relative z-10 flex items-center justify-between mb-5">
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white border border-white/20 shadow-sm">
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
+                    <p class="text-sm font-black text-white uppercase tracking-widest">Giá trị chi trả</p>
+                  </div>
                 </div>
-                <div class="pt-3 border-t border-emerald-200/60 flex justify-between items-end relative z-10">
-                  <span class="text-xs font-black text-emerald-800 uppercase mb-1">Tổng cộng</span>
-                  <span class="text-3xl font-black text-emerald-600 tracking-tight" id="hc-calc-total">0<span class="text-lg text-emerald-400 ml-1">đ</span></span>
+
+                <div class="space-y-3 mb-5 relative z-10">
+                  <div class="flex justify-between items-center group/item">
+                    <span class="text-[13px] font-semibold text-emerald-50 group-hover/item:text-white transition-colors flex items-center gap-1.5">
+                      <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                      Tiền Thương tật / PT
+                    </span>
+                    <span class="text-[15px] font-mono font-bold text-white bg-black/10 px-2.5 py-1 rounded-lg border border-white/10 group-hover/item:bg-black/20 transition-colors" id="hc-calc-injury">0 đ</span>
+                  </div>
+                  <div class="flex justify-between items-center group/item">
+                    <span class="text-[13px] font-semibold text-emerald-50 group-hover/item:text-white transition-colors flex items-center gap-1.5">
+                      <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 10v4M10 12h4"/></svg>
+                      Trợ cấp nằm viện
+                    </span>
+                    <span class="text-[15px] font-mono font-bold text-white bg-black/10 px-2.5 py-1 rounded-lg border border-white/10 group-hover/item:bg-black/20 transition-colors" id="hc-calc-hospital">0 đ</span>
+                  </div>
+                </div>
+
+                <div class="pt-4 border-t border-white/20 flex justify-between items-end relative z-10 bg-black/5 -mx-6 -mb-6 px-6 pb-6 pt-5">
+                  <div class="flex flex-col">
+                    <span class="text-[11px] font-black text-emerald-100 uppercase tracking-widest mb-1 opacity-80">Tổng cộng</span>
+                    <div class="flex items-center gap-2">
+                      <div class="w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></div>
+                      <span class="text-[10px] text-emerald-50 font-semibold">Đã tự động tính toán</span>
+                    </div>
+                  </div>
+                  <div class="flex items-baseline gap-1 bg-white px-4 py-2 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.1)] group-hover:scale-105 transition-transform duration-300">
+                    <span class="text-3xl font-black text-emerald-600 tracking-tight" id="hc-calc-total">0</span><span class="text-lg font-bold text-emerald-500">đ</span>
+                  </div>
                 </div>
               </div>
 
