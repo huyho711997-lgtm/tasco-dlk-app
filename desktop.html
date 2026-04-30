@@ -4146,6 +4146,69 @@ const AppLoader = {
 
     hide: function() {
         Swal.close();
+    },
+
+    // Loader chuyên dụng cho OCR với hiệu ứng quét ảnh High-tech
+    showOcr: function(imgBase64) {
+        const html = `
+            <div class="flex flex-col items-center py-4 font-sans overflow-hidden">
+                <div class="relative w-full max-w-[280px] aspect-[3/4] bg-slate-100 rounded-2xl overflow-hidden border-2 border-teal-500/30 shadow-2xl group mb-6">
+                    <!-- Ảnh xem trước -->
+                    <img src="data:image/jpeg;base64,${imgBase64}" class="w-full h-full object-cover opacity-60 grayscale-[30%] blur-[0.5px]">
+                    
+                    <!-- Lớp phủ Gradient -->
+                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-teal-500/5 to-teal-500/20"></div>
+
+                    <!-- Hiệu ứng thanh quét (Scanning Beam) -->
+                    <div class="absolute top-0 left-0 w-full h-[3px] bg-teal-400 shadow-[0_0_20px_4px_rgba(45,212,191,0.8)] z-20 animate-[ocrScan_2.5s_ease-in-out_infinite]"></div>
+                    
+                    <!-- Hiệu ứng ô lưới (Grid) -->
+                    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none"></div>
+
+                    <!-- Các điểm dữ liệu đang bay (Data nodes) -->
+                    <div class="absolute top-1/4 left-1/4 w-2 h-2 bg-teal-400 rounded-full animate-ping"></div>
+                    <div class="absolute top-2/3 right-1/3 w-1.5 h-1.5 bg-cyan-400 rounded-full animate-ping" style="animation-delay: 0.5s"></div>
+                    <div class="absolute bottom-1/3 left-1/2 w-2 h-2 bg-indigo-400 rounded-full animate-ping" style="animation-delay: 1.2s"></div>
+                </div>
+
+                <div class="text-center px-4">
+                    <h3 class="text-lg font-black text-slate-800 tracking-tight flex items-center justify-center gap-2">
+                        <span class="relative flex h-3 w-3">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-teal-500"></span>
+                        </span>
+                        ĐANG PHÂN TÍCH...
+                    </h3>
+                    <p class="text-[11px] font-bold text-slate-500 mt-2 tracking-widest uppercase opacity-70 italic animate-pulse" id="app-loader-sub">
+                        Trích xuất dữ liệu y khoa bằng AI
+                    </p>
+                    
+                    <!-- Progress bar nhỏ bên dưới -->
+                    <div class="w-48 h-1 bg-slate-100 rounded-full mx-auto mt-5 overflow-hidden border border-slate-200/50">
+                        <div class="h-full bg-gradient-to-r from-teal-400 to-indigo-500 animate-[loading_2s_infinite]"></div>
+                    </div>
+                </div>
+            </div>
+            <style>
+                @keyframes ocrScan {
+                    0% { top: 0%; opacity: 0.8; }
+                    50% { top: 100%; opacity: 1; }
+                    100% { top: 0%; opacity: 0.8; }
+                }
+                @keyframes loading {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(100%); }
+                }
+            </style>
+        `;
+
+        Swal.fire({
+            html: html,
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            background: '#ffffff',
+            customClass: { popup: 'rnd !w-[380px] !p-0 !border-0' }
+        });
     }
 };
 /* ═══════════════════════════════════════
@@ -15398,7 +15461,8 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
     },
 
     async processMedicalOcr(file) {
-        AppLoader.show('AI đang phân tích...', 'Đang đọc thông tin bệnh viện, chẩn đoán...');
+        // Hiển thị Loader mặc định trước khi đọc file
+        AppLoader.show('Đang chuẩn bị...', 'Đang nén dữ liệu hình ảnh...');
 
         const compressImg = (f, maxW = 1200) => new Promise((resolve, reject) => {
             if (f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')) {
@@ -15426,6 +15490,10 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
 
         try {
             const b64 = await compressImg(file);
+            
+            // CHUYỂN SANG LOADER QUÉT XỊN XÒ SAU KHI CÓ BASE64
+            AppLoader.showOcr(b64);
+            
             const statusText = document.getElementById('med-ocr-status');
 
             // CẬP NHẬT PROMPT: Bổ sung noiDieuTri
