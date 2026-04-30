@@ -4152,7 +4152,7 @@ var GEM_KEYS  = [
                 "AIzaSy" + "DFJ9cYVurWxNnv_d91EACsiksNA18awNY",
                 "AIzaSy" + "AF3VuqNf8VoNnnyAZPEEkTUFnW8RC9FHE"
                 ];
-var GEM_MODEL = "gemini-1.5-flash";
+var GEM_MODEL = "gemini-2.5-flash";
 var WORD_URL  = "https://script.google.com/macros/s/AKfycbwQA00iOlnCsRwUkh9CN8w7fWONqw_-_EpCXCOJcwdBKoLe3RNuOatTzWQsmkjpHmUg/exec";
 var gemKeyIdx = 0;
 var statsInited = false;
@@ -13854,7 +13854,7 @@ const BaoLanh = {
             }
             Nếu không tìm thấy một giá trị nào, để 0. Chỉ trả về JSON thuần, không giải thích.`;
 
-            const MODELS_TO_TRY = ['gemini-1.5-pro', 'gemini-1.5-flash'];
+            const MODELS_TO_TRY = ['gemini-2.5-pro', 'gemini-2.5-flash'];
             let dataResponse = null;
             
             const callAi = async (model, keyIdx) => {
@@ -13879,7 +13879,7 @@ const BaoLanh = {
                 dataResponse = await Promise.any(MODELS_TO_TRY.map((m, idx) => callAi(m, idx)));
             } catch (err) {
                 try {
-                    dataResponse = await callAi('gemini-1.5-pro', 1);
+                    dataResponse = await callAi('gemini-2.5-pro', 1);
                 } catch (e) {
                     throw new Error('Máy chủ AI hiện đang bận. Anh hãy thử lại sau ít giây nhé.');
                 }
@@ -15382,7 +15382,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
 
             // 3. Gọi API với cơ chế Song mã (Parallel Race) để lấy kết quả nhanh nhất
             let parsedArray = null;
-            const modelsToTry = ['gemini-1.5-pro', 'gemini-1.5-flash']; // Ưu tiên Pro vì ổn định hơn
+            const modelsToTry = ['gemini-2.5-pro', 'gemini-2.5-flash']; // Ưu tiên Pro vì ổn định hơn
             const statusEl = document.getElementById('ai-retry-status');
 
             // Tạo các hàm gọi AI độc lập
@@ -15413,7 +15413,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             } catch (err) {
                 // Nếu cả 2 đều lỗi, thử lại lần cuối với key khác
                 try {
-                    parsedArray = await callAi('gemini-1.5-pro', 1);
+                    parsedArray = await callAi('gemini-2.5-pro', 1);
                 } catch (e) {
                     throw new Error('Máy chủ AI hiện đang quá tải. Hãy chọn mục thủ công hoặc thử lại sau.');
                 }
@@ -15710,35 +15710,16 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
 
         try {
             let frontData = {}, backData = {};
-            const compressCccd = (f) => new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        let w = img.width, h = img.height;
-                        if (w > 1200) { h = Math.round(h * 1200 / w); w = 1200; }
-                        canvas.width = w; canvas.height = h;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, w, h);
-                        resolve(canvas.toDataURL('image/jpeg', 0.8).split(',')[1]);
-                    };
-                    img.onerror = () => reject(new Error('Không đọc được ảnh'));
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(f);
-            });
+            document.getElementById('hc-ocr-status-text').textContent = backFile ? 'Đang nhận dạng song song 2 mặt...' : 'Đang phân tích mặt trước...';
 
-            document.getElementById('hc-ocr-status-text').textContent = backFile ? 'Đang mã hóa & nhận dạng 2 mặt...' : 'Đang phân tích mặt trước...';
-
-            const frontB64 = await compressCccd(frontFile);
+            const frontB64 = await toB64(frontFile);
             const frontPrompt = 'Đây là ảnh mặt trước CCCD/CMND Việt Nam. Trích xuất và trả về JSON (CHỈ JSON): {"soId":"...","hoTen":"...","ngaySinh":"DD/MM/YYYY","queQuan":"...","thuongTru":"..."}';
             
             // Xử lý song song nếu có cả 2 mặt ảnh
             const tasks = [callGemini(frontB64, frontPrompt, 'Mặt trước')];
 
             if (backFile) {
-                const backB64 = await compressCccd(backFile);
+                const backB64 = await toB64(backFile);
                 const backPrompt = 'Đây là ảnh mặt sau CCCD/CMND Việt Nam. Trích xuất và trả về JSON (CHỈ JSON): {"ngayCap":"DD/MM/YYYY","noiCap":"..."}. Nếu là thẻ CCCD gắn chip cấp bởi Cục Cảnh sát QLHC về TTXH thì noiCap ghi là "Cục Cảnh sát QLHC về TTXH".';
                 tasks.push(callGemini(backB64, backPrompt, 'Mặt sau'));
             }
@@ -15883,7 +15864,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
 
             let dataResponse = null;
             // Sử dụng chính xác các model mà hệ thống hỗ trợ
-            const modelsToTry = ['gemini-1.5-flash', 'gemini-1.5-pro'];
+            const modelsToTry = [GEM_MODEL, 'gemini-2.5-flash-lite', 'gemini-2.5-pro'];
 
             const callAi = async (model, keyIdx) => {
                 // Thêm delay để tránh bị 429 khi dùng chung key
