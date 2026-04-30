@@ -1400,6 +1400,11 @@ textarea.inp { resize:vertical; }
         <span class="sidebar-text whitespace-nowrap">Báo cáo & Thống kê</span>
       </button>
 
+      <button title="Quản lý người dùng" onclick="goView('manage_users')" id="nav-manage-users" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all hidden">
+        <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> 
+        <span class="sidebar-text whitespace-nowrap">Quản lý người dùng</span>
+      </button>
+
       <button title="Cloud của tôi" onclick="goView('cloud')" id="nav-cloud" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all mt-1">
         <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
         <span class="sidebar-text whitespace-nowrap">Cloud của tôi</span>
@@ -2965,6 +2970,41 @@ textarea.inp { resize:vertical; }
     </div>
 
 
+    <!-- VIEW: QUẢN LÝ NGƯỜI DÙNG -->
+    <div id="view-manage_users" class="view hidden h-full flex flex-col bg-slate-50">
+      <header class="bg-white border-b border-slate-200 px-8 py-6 shrink-0">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-black text-slate-800 tracking-tight">Quản lý người dùng</h1>
+            <p class="text-slate-400 text-sm font-medium mt-1">Phân quyền và quản lý tài khoản truy cập hệ thống</p>
+          </div>
+          <button onclick="UsersMgmt.openAdd()" class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Thêm người dùng
+          </button>
+        </div>
+      </header>
+
+      <div class="flex-1 p-8 overflow-y-auto">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <table class="w-full border-collapse">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200">
+                <th class="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center w-16">STT</th>
+                <th class="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Người dùng</th>
+                <th class="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Vai trò</th>
+                <th class="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Trạng thái</th>
+                <th class="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Hành động</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbl-body">
+              <!-- Load bằng JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- GARA EDIT MODAL -->
     <div id="gara-modal-wrap" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity duration-200">
       <div id="gara-modal-box" class="bg-white rounded-lg shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-200" style="width:680px;max-height:88vh">
@@ -4227,6 +4267,7 @@ const AppLoader = {
    INIT
 ═══════════════════════════════════════ */
 window.onload = function() {
+  UsersMgmt.init();
   Auth.init(); // <--- Gọi hàm này đầu tiên
   initCalendar();
   initFpDefault();
@@ -13527,6 +13568,182 @@ const Auth = {
         } else {
             // Mở màn hình đăng nhập
             document.getElementById('login-screen').classList.remove('hide');
+        }
+    }
+};
+
+const UsersMgmt = {
+    _data: [],
+    
+    init() {
+        db.ref('Users').on('value', snap => {
+            const raw = snap.val() || {};
+            this._data = Object.keys(raw).map(k => ({ id: k, ...raw[k] }));
+            if (this.isActive()) this.render();
+        });
+    },
+
+    isActive() {
+        const el = document.getElementById('view-manage_users');
+        return el && !el.classList.contains('hidden');
+    },
+
+    render() {
+        const tbody = document.getElementById('users-tbl-body');
+        if (!tbody) return;
+
+        if (this._data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-400 font-bold">Chưa có người dùng nào</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = this._data.map((u, i) => `
+            <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                <td class="p-4 text-center font-bold text-slate-400 text-sm">${i + 1}</td>
+                <td class="p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-white shadow-sm shrink-0" style="background: linear-gradient(135deg, ${u.color || '#2563eb'}, ${u.color ? u.color + 'cc' : '#1d4ed8'})">
+                            ${u.avatar || (u.name ? u.name.charAt(0) : '?')}
+                        </div>
+                        <div>
+                            <p class="font-extrabold text-slate-800 text-sm">${u.name || 'N/A'}</p>
+                            <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wide">${u.username}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="p-4">
+                    <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${u.role === 'admin' ? 'bg-rose-50 text-rose-600 border border-rose-100' : (u.role === 'viewer' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-blue-50 text-blue-600 border border-blue-100')}">
+                        ${u.role === 'admin' ? 'Quản trị viên' : (u.role === 'viewer' ? 'Xem báo cáo' : 'Giám định viên')}
+                    </span>
+                </td>
+                <td class="p-4">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full ${u.active !== false ? 'bg-emerald-500' : 'bg-slate-300'}"></span>
+                        <span class="text-xs font-bold ${u.active !== false ? 'text-emerald-600' : 'text-slate-400'}">
+                            ${u.active !== false ? 'Hoạt động' : 'Đã khóa'}
+                        </span>
+                    </div>
+                </td>
+                <td class="p-4 text-right">
+                    <div class="flex items-center justify-end gap-1">
+                        <button onclick="UsersMgmt.openEdit('${u.id}')" class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Chỉnh sửa">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </button>
+                        ${u.username !== 'admin' ? `
+                        <button onclick="UsersMgmt.deleteUser('${u.id}')" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all" title="Xóa">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        </button>
+                        ` : ''}
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    },
+
+    openAdd() {
+        this.showModal();
+    },
+
+    openEdit(id) {
+        const u = this._data.find(x => x.id === id);
+        if (u) this.showModal(u);
+    },
+
+    async showModal(user = null) {
+        const { value: formValues } = await Swal.fire({
+            title: user ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới',
+            html: `
+                <div class="text-left space-y-4 p-2">
+                    <div>
+                        <label class="lbl">Họ tên người dùng</label>
+                        <input id="u-name" class="inp" value="${user ? (user.name || '') : ''}" placeholder="Nhập họ tên...">
+                    </div>
+                    <div>
+                        <label class="lbl">Tên đăng nhập</label>
+                        <input id="u-username" class="inp" value="${user ? (user.username || '') : ''}" placeholder="Nhập username..." ${user ? 'disabled' : ''}>
+                    </div>
+                    <div>
+                        <label class="lbl">Mật khẩu</label>
+                        <input id="u-password" type="password" class="inp" value="${user ? (user.password || '') : ''}" placeholder="${user ? 'Để trống nếu không đổi' : 'Nhập mật khẩu...'}">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="lbl">Quyền hạn</label>
+                            <select id="u-role" class="inp">
+                                <option value="user" ${user?.role === 'user' ? 'selected' : ''}>Giám định viên</option>
+                                <option value="admin" ${user?.role === 'admin' ? 'selected' : ''}>Quản trị viên</option>
+                                <option value="viewer" ${user?.role === 'viewer' ? 'selected' : ''}>Xem báo cáo</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="lbl">Trạng thái</label>
+                            <select id="u-active" class="inp">
+                                <option value="true" ${user?.active !== false ? 'selected' : ''}>Hoạt động</option>
+                                <option value="false" ${user?.active === false ? 'selected' : ''}>Khóa tài khoản</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="lbl">Màu sắc định danh</label>
+                        <input id="u-color" type="color" class="w-full h-10 rounded-lg cursor-pointer border-none" value="${user ? user.color || '#2563eb' : '#2563eb'}">
+                    </div>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Lưu thông tin',
+            cancelButtonText: 'Hủy bỏ',
+            customClass: { popup: 'rnd' },
+            preConfirm: () => {
+                const name = document.getElementById('u-name').value.trim();
+                const username = document.getElementById('u-username').value.trim();
+                const password = document.getElementById('u-password').value;
+                const role = document.getElementById('u-role').value;
+                const active = document.getElementById('u-active').value === 'true';
+                const color = document.getElementById('u-color').value;
+
+                if (!name || !username || (!user && !password)) {
+                    Swal.showValidationMessage('Vui lòng nhập đầy đủ thông tin bắt buộc');
+                    return false;
+                }
+                return { name, username, password, role, active, color };
+            }
+        });
+
+        if (formValues) {
+            Swal.fire({ title: 'Đang lưu...', didOpen: () => Swal.showLoading(), customClass: { popup: 'rnd' } });
+            const ref = user ? db.ref('Users/' + user.id) : db.ref('Users').push();
+            
+            const payload = { ...formValues };
+            if (user && !payload.password) delete payload.password; // Không đổi pass nếu để trống
+
+            try {
+                await ref.update(payload);
+                Swal.close();
+                Toast.fire({ icon: 'success', title: 'Đã lưu thông tin người dùng!' });
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Lỗi', text: err.message, customClass: { popup: 'rnd' } });
+            }
+        }
+    },
+
+    async deleteUser(id) {
+        const u = this._data.find(x => x.id === id);
+        if (u.username === 'admin') return;
+
+        const res = await Swal.fire({
+            title: 'Xóa người dùng?',
+            text: `Bạn có chắc muốn xóa tài khoản "${u.name}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xóa ngay',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#e11d48',
+            customClass: { popup: 'rnd' }
+        });
+
+        if (res.isConfirmed) {
+            await db.ref('Users/' + id).remove();
+            Toast.fire({ icon: 'success', title: 'Đã xóa người dùng!' });
         }
     }
 };
