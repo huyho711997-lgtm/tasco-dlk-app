@@ -14958,10 +14958,10 @@ const HumanClaims = {
         // 5. Hiển thị kết quả
         if (isMatched) {
             warnEl.className = 'mt-1.5 text-[10px] font-bold px-2.5 py-1.5 rounded-md flex items-center gap-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200';
-            warnEl.innerHTML = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Người này CÓ trong danh sách hợp đồng';
+            warnEl.innerHTML = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Đã khớp danh sách';
         } else {
             warnEl.className = 'mt-1.5 text-[10px] font-bold px-2.5 py-1.5 rounded-md flex items-center gap-1.5 bg-rose-50 text-rose-600 border border-rose-200';
-            warnEl.innerHTML = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> KHÔNG CÓ trong danh sách (Cần kiểm tra lại)';
+            warnEl.innerHTML = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Không tìm thấy tên';
         }
         warnEl.classList.remove('hidden');
     },
