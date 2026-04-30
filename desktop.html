@@ -14536,9 +14536,14 @@ const HumanClaims = {
                         address: s.address,
                         contractNo: c.no,
                         unit: c.unit,
+                        unitAddress: c.address || '',
                         effFrom: c.from,
                         effTo: c.to,
-                        type: c.type
+                        type: c.type,
+                        lvlA: c.lvlA,
+                        lvlB: c.lvlB,
+                        lvlC: c.lvlC,
+                        lvlD: c.lvlD
                     });
                 }
             });
@@ -14573,10 +14578,8 @@ const HumanClaims = {
     },
 
     selectInsured(m) {
+        // 1. Điền thông tin Người được bảo hiểm
         document.getElementById('hc-victimName').value = m.name.toUpperCase();
-        document.getElementById('hc-contractNo').value = m.contractNo;
-        document.getElementById('hc-companyName').value = m.unit;
-        
         if (m.address) document.getElementById('hc-victimAddress').value = m.address;
         
         // Tính tuổi
@@ -14587,16 +14590,43 @@ const HumanClaims = {
                 document.getElementById('hc-victimAge').value = age;
             }
         }
-        
-        // Hiệu lực
-        if (m.effFrom) document.getElementById('hc-effFrom').value = moment(m.effFrom).format('YYYY-MM-DD');
-        if (m.effTo) document.getElementById('hc-effTo').value = moment(m.effTo).format('YYYY-MM-DD');
 
-        document.getElementById('hc-insured-suggestions').classList.add('hidden');
+        // 2. Điền thông tin Hợp đồng (Link dữ liệu)
+        document.getElementById('hc-contractNo').value = m.contractNo || '';
+        document.getElementById('hc-companyName').value = m.unit || '';
+        document.getElementById('hc-companyAddress').value = m.unitAddress || '';
         
-        // Chạy các hàm kiểm tra tự động
+        // Nhận diện Loại hình BH
+        const insTypeEl = document.getElementById('hc-insType');
+        if (insTypeEl) {
+            const normType = String(m.type || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
+            if (normType.includes('hoc sinh') || normType.includes('sinh vien')) {
+                insTypeEl.value = 'Học sinh';
+            } else if (normType.includes('giao vien')) {
+                insTypeEl.value = 'Giáo viên';
+            } else {
+                insTypeEl.value = 'Khác';
+            }
+        }
+
+        // Hiệu lực (datetime-local)
+        if (m.effFrom) document.getElementById('hc-effFrom').value = moment(m.effFrom).format('YYYY-MM-DDTHH:mm');
+        if (m.effTo) document.getElementById('hc-effTo').value = moment(m.effTo).format('YYYY-MM-DDTHH:mm');
+
+        // Các mức trách nhiệm
+        const fmt = (val) => val ? Number(val).toLocaleString('vi-VN') : '';
+        document.getElementById('hc-limitA').value = fmt(m.lvlA);
+        document.getElementById('hc-limitB').value = fmt(m.lvlB);
+        document.getElementById('hc-limitC').value = fmt(m.lvlC);
+        document.getElementById('hc-limitD').value = fmt(m.lvlD);
+
+        // 3. Kết thúc
+        document.getElementById('hc-insured-suggestions').classList.add('hidden');
         this.checkWarnings();
+        this.calculateTotal();
         this._isModified = true;
+        
+        Toast.fire({ icon: 'success', title: 'Đã liên kết dữ liệu hợp đồng!' });
     },
 
     _resetForm() {
