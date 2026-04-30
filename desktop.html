@@ -114,6 +114,11 @@ textarea.inp { resize:vertical; }
   100% { top: 0%; opacity: 0.8; }
 }
 #cal-panel{animation:panelIn .25s ease;}
+/* OCR Scanning States */
+.swal2-popup.is-scanning .swal2-actions { display: none !important; }
+.swal2-popup.is-scanning #hc-med-scanner { display: flex !important; }
+.swal2-popup.is-scanning #hc-med-placeholder { display: none !important; }
+.swal2-popup.is-scanning #hc-med-preview { opacity: 0.5; filter: blur(0.5px); transform: scale(0.99); }
 .section-card{background:#fff;border:1px solid #e2e8f0;border-radius:.875rem;overflow:hidden;}
 .section-header{display:flex;align-items:center;justify-content:space-between;padding:.625rem 1rem;background:#f8fafc;border-bottom:1px solid #f1f5f9;}
 .section-header-title{display:flex;align-items:center;gap:.375rem;font-size:.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#475569;}
@@ -15487,25 +15492,11 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
     },
 
     async processMedicalOcr(file) {
-        // 1. Hiển thị trạng thái quét ngay trên Form hiện tại (Đồng bộ)
-        const scanner = document.getElementById('hc-med-scanner');
-        const placeholder = document.getElementById('hc-med-placeholder');
-        const preview = document.getElementById('hc-med-preview');
-        const statusSub = document.getElementById('hc-med-status-sub');
+        // 1. Kích hoạt trạng thái quét bằng CSS (Cực kỳ ổn định)
+        const popup = Swal.getPopup();
+        if (popup) popup.classList.add('is-scanning');
 
-        if (scanner) scanner.classList.remove('hidden');
-        if (placeholder) placeholder.classList.add('hidden');
-        if (preview) {
-            preview.classList.remove('hidden');
-            preview.classList.add('opacity-60', 'blur-[0.5px]');
-        }
-        
-        // Ẩn các nút của Swal để user không bấm bậy khi đang quét
-        Swal.update({
-            showConfirmButton: false,
-            showCancelButton: false,
-            allowOutsideClick: false
-        });
+        const statusSub = document.getElementById('hc-med-status-sub');
 
         const compressImg = (f, maxW = 1200) => new Promise((resolve, reject) => {
             if (f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')) {
