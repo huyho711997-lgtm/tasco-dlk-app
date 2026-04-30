@@ -13854,7 +13854,7 @@ const BaoLanh = {
             }
             Nếu không tìm thấy một giá trị nào, để 0. Chỉ trả về JSON thuần, không giải thích.`;
 
-            const MODELS_TO_TRY = ['gemini-2.5-pro', 'gemini-2.5-flash'];
+            const MODELS_TO_TRY = ['gemini-1.5-pro', 'gemini-1.5-flash'];
             let dataResponse = null;
             
             const callAi = async (model, keyIdx) => {
@@ -13879,7 +13879,7 @@ const BaoLanh = {
                 dataResponse = await Promise.any(MODELS_TO_TRY.map((m, idx) => callAi(m, idx)));
             } catch (err) {
                 try {
-                    dataResponse = await callAi('gemini-2.5-pro', 1);
+                    dataResponse = await callAi('gemini-1.5-pro', 1);
                 } catch (e) {
                     throw new Error('Máy chủ AI hiện đang bận. Anh hãy thử lại sau ít giây nhé.');
                 }
@@ -15413,7 +15413,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             } catch (err) {
                 // Nếu cả 2 đều lỗi, thử lại lần cuối với key khác
                 try {
-                    parsedArray = await callAi('gemini-2.5-pro', 1);
+                    parsedArray = await callAi('gemini-1.5-pro', 1);
                 } catch (e) {
                     throw new Error('Máy chủ AI hiện đang quá tải. Hãy chọn mục thủ công hoặc thử lại sau.');
                 }
@@ -15708,6 +15708,8 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             }
         };
 
+        try {
+            let frontData = {}, backData = {};
             const compressCccd = (f) => new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
