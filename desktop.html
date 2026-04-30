@@ -2033,9 +2033,14 @@ textarea.inp { resize:vertical; }
                   <div class="p-3 bg-cyan-50/30 rounded-lg border border-cyan-100 mt-2">
                     <div class="flex items-center justify-between mb-2">
                       <label class="lbl !mb-0 text-cyan-800">Chẩn đoán / Thương tật Y khoa</label>
-                      <button onclick="HumanClaims.suggestInjury()" class="px-2.5 py-1 bg-cyan-100 text-cyan-700 rounded-md text-[10px] font-bold hover:bg-cyan-200 transition-colors flex items-center gap-1.5 shadow-sm">
-                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/></svg> AI Gợi ý TLTT
-                      </button>
+                      <div class="flex items-center gap-1.5">
+                        <button onclick="HumanClaims.manualInjuryInput()" class="px-2.5 py-1 bg-amber-100 text-amber-700 rounded-md text-[10px] font-bold hover:bg-amber-200 transition-colors flex items-center gap-1.5 shadow-sm" title="Nhập tay tỷ lệ thương tật">
+                          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Nhập tay
+                        </button>
+                        <button onclick="HumanClaims.suggestInjury()" class="px-2.5 py-1 bg-cyan-100 text-cyan-700 rounded-md text-[10px] font-bold hover:bg-cyan-200 transition-colors flex items-center gap-1.5 shadow-sm">
+                          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/></svg> AI Gợi ý
+                        </button>
+                      </div>
                     </div>
                     <textarea id="hc-injuryDesc" rows="2" class="inp resize-none mb-2 text-[13px]" placeholder="Gãy 1/3 dưới xương quay trái..."></textarea>
                     
@@ -15288,6 +15293,106 @@ const HumanClaims = {
         this.calculateTotal();
 
         Toast.fire({ icon: 'success', title: 'Đã nạp thông tin hợp đồng!' });
+    },
+
+    manualInjuryInput() {
+        // Lấy giá trị hiện tại để hiển thị sẵn trong dialog
+        const curCode = document.getElementById('hc-injuryCode').value || '';
+        const curRange = document.getElementById('hc-injuryRange').value || '';
+        const curPct = document.getElementById('hc-injuryRealPct').value || '0';
+
+        const html = `
+        <div class="text-left font-sans mt-1">
+            <div class="bg-amber-50/60 border border-amber-200 rounded-xl p-3.5 mb-5 flex items-start gap-3 shadow-sm">
+                <div class="mt-0.5 w-7 h-7 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0 border border-amber-200">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </div>
+                <div>
+                    <p class="text-sm font-black text-amber-900">Nhập tay Tỷ lệ Thương tật</p>
+                    <p class="text-[11.5px] text-amber-700 mt-0.5 leading-relaxed">Tra cứu Bảng tỷ lệ thương tật (Nghị định 36/2016/TT-BYT hoặc bảng quy tắc BH) và nhập trực tiếp mục tương ứng.</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="relative p-4 rounded-xl border border-slate-200 bg-white shadow-sm hover:border-amber-300 transition-colors duration-300">
+                    <div class="absolute -top-3 left-4 px-2 bg-white text-[11px] font-black text-amber-700 uppercase tracking-wide flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Mục thương tật
+                    </div>
+                    <div class="mt-1">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1.5">Tên mục / Mã số theo Bảng TLTT <span class="text-rose-500">*</span></label>
+                        <input type="text" id="manual-injuryCode" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 outline-none focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-50 font-bold text-amber-800 text-[13px] transition-all" value="${curCode}" placeholder="VD: Mục 19.1: Mất một ngón tay cái bên phải">
+                        <p class="text-[9px] text-slate-400 mt-1.5">Ghi đầy đủ số mục và tên thương tật theo bảng quy tắc</p>
+                    </div>
+                </div>
+
+                <div class="relative p-4 rounded-xl border border-slate-200 bg-white shadow-sm hover:border-violet-300 transition-colors duration-300">
+                    <div class="absolute -top-3 left-4 px-2 bg-white text-[11px] font-black text-violet-700 uppercase tracking-wide flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Tỷ lệ % thương tật
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mt-1">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 mb-1.5">Tỷ lệ quy định (Khoảng %)</label>
+                            <input type="text" id="manual-injuryRange" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 outline-none focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-50 font-mono font-bold text-violet-800 text-[13px] text-center transition-all" value="${curRange}" placeholder="VD: 21 - 25%">
+                            <p class="text-[9px] text-slate-400 mt-1.5">Khoảng tỷ lệ ghi trong bảng TLTT</p>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 mb-1.5">Tỷ lệ thực tế áp dụng (%) <span class="text-rose-500">*</span></label>
+                            <div class="relative">
+                                <input type="number" id="manual-injuryRealPct" min="0" max="100" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 pr-8 outline-none focus:border-rose-500 focus:bg-white focus:ring-4 focus:ring-rose-50 font-black text-rose-600 text-lg text-center transition-all" value="${curPct}" placeholder="0">
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">%</span>
+                            </div>
+                            <p class="text-[9px] text-slate-400 mt-1.5">Tỷ lệ thực tế để tính bồi thường</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-gradient-to-r from-slate-50 to-blue-50/50 border border-slate-200 rounded-xl flex items-center gap-3 shadow-sm">
+                    <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-blue-500 shadow-sm shrink-0">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    </div>
+                    <p class="text-[11px] text-slate-600 leading-relaxed">Tỷ lệ thực tế phải nằm trong khoảng quy định. Nếu vượt quá, cần có biên bản giám định y khoa bổ sung.</p>
+                </div>
+            </div>
+        </div>`;
+
+        Swal.fire({
+            title: '<span class="text-[15px] font-black text-amber-800 uppercase tracking-wide flex items-center gap-2"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Nhập tay TLTT</span>',
+            html: html,
+            width: 580,
+            showCancelButton: true,
+            confirmButtonText: '<svg class="w-4 h-4 inline mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Áp dụng',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#d97706',
+            customClass: { popup: 'rnd' },
+            preConfirm: () => {
+                const code = document.getElementById('manual-injuryCode').value.trim();
+                const range = document.getElementById('manual-injuryRange').value.trim();
+                const pct = document.getElementById('manual-injuryRealPct').value.trim();
+
+                if (!code) {
+                    Swal.showValidationMessage('Vui lòng nhập tên mục thương tật!');
+                    return false;
+                }
+                if (!pct || isNaN(pct) || Number(pct) < 0) {
+                    Swal.showValidationMessage('Vui lòng nhập tỷ lệ % hợp lệ (≥ 0)!');
+                    return false;
+                }
+                if (Number(pct) > 100) {
+                    Swal.showValidationMessage('Tỷ lệ % không được vượt quá 100!');
+                    return false;
+                }
+                return { code, range, pct: Number(pct) };
+            }
+        }).then((res) => {
+            if (res.isConfirmed) {
+                const { code, range, pct } = res.value;
+                document.getElementById('hc-injuryCode').value = code;
+                document.getElementById('hc-injuryRange').value = range || '--';
+                document.getElementById('hc-injuryRealPct').value = pct;
+                this.calculateTotal();
+                Toast.fire({ icon: 'success', title: 'Đã cập nhật tỷ lệ thương tật!' });
+            }
+        });
     },
 
     async suggestInjury() {
