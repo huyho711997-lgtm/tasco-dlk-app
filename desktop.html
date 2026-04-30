@@ -15432,6 +15432,15 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
 
                         <img id="hc-med-preview" class="hidden w-full max-h-[600px] object-contain p-2 z-10" />
 
+                        <!-- Hiệu ứng quét (Scanning UI) - Ẩn mặc định -->
+                        <div id="hc-med-scanner" class="absolute inset-0 z-30 hidden flex-col items-center justify-center bg-black/20 backdrop-blur-[2px]">
+                            <div class="absolute top-0 left-0 w-full h-[3px] bg-teal-400 shadow-[0_0_20px_4px_rgba(45,212,191,0.8)] z-40 animate-[ocrScan_2.5s_ease-in-out_infinite]"></div>
+                            <div class="px-6 py-3 bg-white/90 backdrop-blur rounded-2xl shadow-2xl border border-teal-500/30 text-center animate-bounce">
+                                <p class="text-teal-800 font-black text-sm tracking-widest uppercase">Đang phân tích...</p>
+                                <p class="text-[10px] text-teal-600 font-bold mt-1" id="hc-med-status-sub">AI đang trích xuất dữ liệu y khoa</p>
+                            </div>
+                        </div>
+
                         <div id="hc-med-overlay" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity hidden z-20">
                             <span class="px-4 py-2 bg-white/20 backdrop-blur text-white text-xs font-bold rounded-lg border border-white/30 shadow-lg">Chọn ảnh khác</span>
                         </div>
@@ -15461,8 +15470,22 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
     },
 
     async processMedicalOcr(file) {
-        // Hiển thị Loader mặc định trước khi đọc file
-        AppLoader.show('Đang chuẩn bị...', 'Đang nén dữ liệu hình ảnh...');
+        // 1. Hiển thị trạng thái quét ngay trên Form hiện tại (Đồng bộ)
+        const scanner = document.getElementById('hc-med-scanner');
+        const placeholder = document.getElementById('hc-med-placeholder');
+        const preview = document.getElementById('hc-med-preview');
+        const statusSub = document.getElementById('hc-med-status-sub');
+
+        if (scanner) scanner.classList.remove('hidden');
+        if (placeholder) placeholder.classList.add('hidden');
+        if (preview) preview.classList.add('opacity-50', 'blur-[1px]');
+        
+        // Ẩn các nút của Swal để user không bấm bậy khi đang quét
+        Swal.update({
+            showConfirmButton: false,
+            showCancelButton: false,
+            allowOutsideClick: false
+        });
 
         const compressImg = (f, maxW = 1200) => new Promise((resolve, reject) => {
             if (f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')) {
@@ -15490,14 +15513,8 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
 
         try {
             const b64 = await compressImg(file);
+            if (statusSub) statusSub.textContent = 'Gửi dữ liệu tới AI...';
             
-            // CHUYỂN SANG LOADER QUÉT XỊN XÒ SAU KHI CÓ BASE64
-            AppLoader.showOcr(b64);
-            
-            const statusText = document.getElementById('med-ocr-status');
-
-            // CẬP NHẬT PROMPT: Bổ sung noiDieuTri
-
             const PROMPT = `Đây là chứng từ y tế tại Việt Nam.
             Trích xuất thông tin và trả về CHỈ JSON (không markdown):
             {
@@ -15556,10 +15573,12 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
 
             // Gọi song song các model để đảm bảo tốc độ
             try {
+                if (statusSub) statusSub.textContent = 'AI đang đọc hồ sơ...';
                 dataResponse = await Promise.any(modelsToTry.map((m, idx) => callAi(m, idx)));
             } catch (err) {
                 // Thử lại lần cuối với model mặc định và key kế tiếp
                 try {
+                    if (statusSub) statusSub.textContent = 'Thử lại luồng dự phòng...';
                     dataResponse = await callAi(GEM_MODEL, 1);
                 } catch (e) {
                     console.error("OCR Error:", e);
