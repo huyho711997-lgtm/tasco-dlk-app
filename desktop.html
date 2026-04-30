@@ -15495,6 +15495,9 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             setVal('hc-payeeIssuePlace', backData.noiCap || frontData.thuongTru || frontData.queQuan);
 
             Swal.close();
+            // Tự động lưu ảnh CCCD vào danh sách chứng từ
+            this._autoUploadOcr([frontFile, backFile].filter(f => !!f));
+            
             Toast.fire({ icon: 'success', title: 'Đã nhận dạng CCCD thành công!' });
 
         } catch(e) {
@@ -15684,6 +15687,9 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             if (!parsed) throw new Error('Không bóc tách được dữ liệu từ ảnh này.');
 
             Swal.close();
+            // Tự động lưu ảnh chứng từ y tế vào danh sách
+            this._autoUploadOcr([file]);
+            
             this.showMedicalOcrResult(parsed);
 
         } catch (e) {
@@ -15897,6 +15903,44 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         Swal.close();
         Toast.fire({ icon: 'success', title: `Đã tải lên ${newImages.length} ảnh!` });
         this.renderImages(currentImgs);
+    },
+
+    // 2.5 Hàm tự động đẩy ảnh OCR vào danh sách chứng từ
+    async _autoUploadOcr(files) {
+        if (!files || !files.length) return;
+        
+        // Thông báo nhẹ cho người dùng
+        Toast.fire({ icon: 'info', title: 'Đang tự động tải ảnh lên hồ sơ...' });
+
+        const newImages = [];
+        for (let f of files) {
+            const fd = new FormData();
+            fd.append('file', f);
+            fd.append('upload_preset', CL_PRESET);
+            try {
+                const res = await fetch(CL_URL, { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.secure_url) newImages.push(data.secure_url);
+            } catch (err) { console.error('Lỗi upload OCR:', err); }
+        }
+
+        if (!newImages.length) return;
+
+        let currentImgs = [];
+        if (this._currentId) {
+            // Hồ sơ cũ -> Cập nhật Firebase
+            const rec = this._data.find(r => r.id === this._currentId) || {};
+            currentImgs = rec.images || [];
+            currentImgs = [...currentImgs, ...newImages];
+            await db.ref('HumanClaims/' + this._currentId + '/images').set(currentImgs);
+        } else {
+            // Hồ sơ mới -> Lưu tạm bộ nhớ
+            this._tempImages = [...(this._tempImages || []), ...newImages];
+            currentImgs = this._tempImages;
+        }
+        
+        this.renderImages(currentImgs);
+        Toast.fire({ icon: 'success', title: `Đã tự động lưu ${newImages.length} ảnh vào danh sách chứng từ!` });
     },
 
     // 3. Hàm Hiển thị ảnh ra giao diện
