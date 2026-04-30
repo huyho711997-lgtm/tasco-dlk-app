@@ -18,6 +18,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 * { box-sizing: border-box; }
@@ -15435,14 +15436,25 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                             <span class="text-[11px] text-slate-400 mt-1">(Hỗ trợ JPG, PNG, WEBP)</span>
                         </div>
 
-                        <img id="hc-med-preview" class="hidden w-full max-h-[600px] object-contain p-2 z-10" />
+                        <img id="hc-med-preview" class="hidden w-full max-h-[600px] object-contain p-2 z-10 transition-all duration-700" />
 
-                        <!-- Hiệu ứng quét (Scanning UI) - Ẩn mặc định -->
-                        <div id="hc-med-scanner" class="absolute inset-0 z-30 hidden flex-col items-center justify-center bg-black/20 backdrop-blur-[2px]">
-                            <div class="absolute top-0 left-0 w-full h-[3px] bg-teal-400 shadow-[0_0_20px_4px_rgba(45,212,191,0.8)] z-40 animate-[ocrScan_2.5s_ease-in-out_infinite]"></div>
-                            <div class="px-6 py-3 bg-white/90 backdrop-blur rounded-2xl shadow-2xl border border-teal-500/30 text-center animate-bounce">
-                                <p class="text-teal-800 font-black text-sm tracking-widest uppercase">Đang phân tích...</p>
-                                <p class="text-[10px] text-teal-600 font-bold mt-1" id="hc-med-status-sub">AI đang trích xuất dữ liệu y khoa</p>
+                        <!-- Hiệu ứng quét (Scanning UI) - Trong suốt hơn -->
+                        <div id="hc-med-scanner" class="absolute inset-0 z-30 hidden flex-col items-center justify-center bg-teal-900/10 backdrop-blur-[1px] transition-opacity duration-500">
+                            <div class="absolute top-0 left-0 w-full h-[4px] bg-gradient-to-r from-transparent via-teal-400 to-transparent shadow-[0_0_25px_5px_rgba(45,212,191,0.9)] z-40 animate-[ocrScan_2.5s_ease-in-out_infinite]"></div>
+                            
+                            <!-- Hiệu ứng tia sét/hào quang nhỏ xung quanh -->
+                            <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(45,212,191,0.1)_0%,transparent_70%)] animate-pulse"></div>
+
+                            <div class="px-6 py-4 bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-teal-500/30 text-center transform scale-90 animate-[fadeInScale_0.4s_ease-out_forwards]">
+                                <div class="flex items-center justify-center gap-3 mb-2">
+                                    <div class="w-2 h-2 bg-teal-500 rounded-full animate-ping"></div>
+                                    <p class="text-teal-900 font-black text-sm tracking-[0.2em] uppercase">AI Scanning</p>
+                                </div>
+                                <p class="text-[11px] text-slate-500 font-bold italic tracking-wide" id="hc-med-status-sub">Đang trích xuất dữ liệu y khoa...</p>
+                                
+                                <div class="w-32 h-1 bg-slate-100 rounded-full mx-auto mt-4 overflow-hidden">
+                                    <div class="h-full bg-teal-500 animate-[loading_1.5s_infinite]"></div>
+                                </div>
                             </div>
                         </div>
 
@@ -15468,7 +15480,9 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                 // KHÔNG đóng modal, bắt đầu quét ngay tại đây
                 this.processMedicalOcr(file);
                 return false; 
-            }
+            },
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' }
         });
     },
 
@@ -15481,7 +15495,10 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
 
         if (scanner) scanner.classList.remove('hidden');
         if (placeholder) placeholder.classList.add('hidden');
-        if (preview) preview.classList.add('opacity-50', 'blur-[1px]');
+        if (preview) {
+            preview.classList.remove('hidden');
+            preview.classList.add('opacity-60', 'blur-[0.5px]');
+        }
         
         // Ẩn các nút của Swal để user không bấm bậy khi đang quét
         Swal.update({
