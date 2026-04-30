@@ -1989,7 +1989,6 @@ textarea.inp { resize:vertical; }
                         <input id="hc-victimName" class="inp font-bold text-cyan-900 uppercase" oninput="HumanClaims.searchInsured(this.value)" autocomplete="off" placeholder="Nhập tên để tìm kiếm...">
                         <!-- Dropdown gợi ý NĐBH -->
                         <div id="hc-insured-suggestions" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl z-[100] hidden overflow-hidden max-h-[280px] overflow-y-auto border-t-4 border-t-cyan-500 animate__animated animate__fadeIn animate__faster"></div>
-                        <div id="hc-victim-warning" class="hidden mt-1.5 text-[10px] font-bold px-2.5 py-1.5 rounded-md flex items-center gap-1.5"></div>
                     </div>
                     <div class="col-span-2"><label class="lbl">Tuổi</label><input id="hc-victimAge" type="number" class="inp text-center font-bold text-cyan-900 text-[13px]" placeholder="VD: 35"></div>
                     <div class="col-span-4"><label class="lbl">Loại tổn thất</label>
@@ -14596,7 +14595,6 @@ const HumanClaims = {
         document.getElementById('hc-insured-suggestions').classList.add('hidden');
         
         // Chạy các hàm kiểm tra tự động
-        this.checkInsuredPerson();
         this.checkWarnings();
         this._isModified = true;
     },
@@ -14650,7 +14648,7 @@ const HumanClaims = {
         setVal('hc-treatmentMethod', r.treatmentMethod || 'Đông y');
         this.calculateTotal();
         this.checkWarnings();
-        this.checkInsuredPerson();
+
         this._updateUIStatus(r.status || 'new');
         this.renderImages(r.images || []);
     },
@@ -14913,58 +14911,8 @@ const HumanClaims = {
         });
     },
 
-    /* ── KIỂM TRA NĐBH CÓ TRONG DANH SÁCH HỢP ĐỒNG KHÔNG ── */
-    checkInsuredPerson() {
-        const nameInp = document.getElementById('hc-victimName');
-        const contractNoInp = document.getElementById('hc-contractNo');
-        const warnEl = document.getElementById('hc-victim-warning');
+    checkWarnings() {
 
-        if (!nameInp || !contractNoInp || !warnEl) return;
-
-        const name = nameInp.value.trim();
-        const contractNo = contractNoInp.value.trim();
-
-        // 1. Nếu chưa có tên hoặc chưa có số hợp đồng thì ẩn cảnh báo
-        if (!name || !contractNo) {
-            warnEl.classList.add('hidden');
-            return;
-        }
-
-        // 2. Lấy danh sách hợp đồng từ object Contracts
-        const contract = Contracts._data.find(c => c.no === contractNo);
-        
-        if (!contract) {
-            warnEl.className = 'mt-1.5 text-[10px] font-bold px-2.5 py-1.5 rounded-md flex items-center gap-1.5 bg-slate-50 text-slate-500 border border-slate-200';
-            warnEl.innerHTML = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Chưa lưu hợp đồng vào hệ thống';
-            warnEl.classList.remove('hidden');
-            return;
-        }
-
-        if (!contract.students || Object.keys(contract.students).length === 0) {
-            warnEl.className = 'mt-1.5 text-[10px] font-bold px-2.5 py-1.5 rounded-md flex items-center gap-1.5 bg-amber-50 text-amber-600 border border-amber-200';
-            warnEl.innerHTML = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Hợp đồng này chưa import danh sách NĐBH';
-            warnEl.classList.remove('hidden');
-            return;
-        }
-
-        // 3. Chuẩn hóa tên (bỏ dấu tiếng Việt, đưa về chữ thường) để đối chiếu chính xác
-        const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').trim();
-        const searchName = norm(name);
-
-        // 4. Quét danh sách
-        const students = Object.values(contract.students);
-        const isMatched = students.some(s => norm(s.name).includes(searchName) || searchName.includes(norm(s.name)));
-
-        // 5. Hiển thị kết quả
-        if (isMatched) {
-            warnEl.className = 'mt-1.5 text-[10px] font-bold px-2.5 py-1.5 rounded-md flex items-center gap-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200';
-            warnEl.innerHTML = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> Đã khớp danh sách';
-        } else {
-            warnEl.className = 'mt-1.5 text-[10px] font-bold px-2.5 py-1.5 rounded-md flex items-center gap-1.5 bg-rose-50 text-rose-600 border border-rose-200';
-            warnEl.innerHTML = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Không tìm thấy tên';
-        }
-        warnEl.classList.remove('hidden');
-    },
     checkWarnings() {
         const effFrom = document.getElementById('hc-effFrom').value;
         const effTo = document.getElementById('hc-effTo').value;
@@ -15067,7 +15015,7 @@ const HumanClaims = {
         
         this.checkWarnings();
         this.calculateTotal();
-        this.checkInsuredPerson();
+
         Toast.fire({ icon: 'success', title: 'Đã nạp thông tin hợp đồng!' });
     },
 
@@ -15857,7 +15805,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         }
 
         this.calculateDays(); 
-        this.checkInsuredPerson();
+
         Toast.fire({ icon: 'success', title: 'Đã điền thông tin y tế vào form!' });
     },
     generateEmail() {
