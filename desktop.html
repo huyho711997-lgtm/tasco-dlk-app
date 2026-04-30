@@ -2971,33 +2971,50 @@ textarea.inp { resize:vertical; }
 
 
     <!-- VIEW: QUẢN LÝ NGƯỜI DÙNG -->
-    <div id="view-manage_users" class="view hidden h-full flex flex-col bg-slate-50">
-      <header class="bg-white border-b border-slate-200 px-8 py-6 shrink-0">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-2xl font-black text-slate-800 tracking-tight">Quản lý người dùng</h1>
-            <p class="text-slate-400 text-sm font-medium mt-1">Phân quyền và quản lý tài khoản truy cập hệ thống</p>
+    <div id="view-manage_users" class="view hidden h-full flex flex-col" style="gap:0;overflow-y:auto">
+      
+      <div class="mn-sticky-header">
+        <div class="mn-header">
+          <div class="mn-header-top">
+            <div class="mn-brand">
+              <div class="mn-icon-wrap" style="background: linear-gradient(135deg,#6366f1,#4f46e5); box-shadow: 0 4px 14px rgba(99,102,241,.4);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div>
+                <p style="color:#f1f5f9;font-size:14px;font-weight:800;margin:0;letter-spacing:-.2px">Quản lý Người dùng</p>
+                <p style="color:rgba(255,255,255,.4);font-size:11px;margin:1px 0 0;font-weight:400">Phân quyền và quản lý tài khoản truy cập hệ thống</p>
+              </div>
+            </div>
+            <div class="mn-actions">
+              <button class="mn-btn mn-btn-primary" style="background: linear-gradient(135deg,#6366f1,#4f46e5); border:none; box-shadow: 0 4px 14px rgba(99,102,241,.4);" onclick="UsersMgmt.openAdd()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Thêm người dùng
+              </button>
+            </div>
           </div>
-          <button onclick="UsersMgmt.openAdd()" class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Thêm người dùng
-          </button>
-        </div>
-      </header>
 
-      <div class="flex-1 p-8 overflow-y-auto">
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <table class="w-full border-collapse">
-            <thead>
-              <tr class="bg-slate-50 border-b border-slate-200">
-                <th class="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center w-16">STT</th>
-                <th class="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Người dùng</th>
-                <th class="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Vai trò</th>
-                <th class="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Trạng thái</th>
-                <th class="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Hành động</th>
+          <div class="mn-toolbar">
+            <div class="mn-search-wrap">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input id="users-search-inp" oninput="UsersMgmt.render()" type="text" placeholder="Tìm tên, username..." class="mn-search-inp focus:!border-blue-400 focus:!ring-blue-500/20">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mn-table-card">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead class="sticky top-0 bg-slate-50/95 backdrop-blur z-10 border-b border-slate-100">
+              <tr>
+                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide text-center w-16">STT</th>
+                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Người dùng</th>
+                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Vai trò</th>
+                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide">Trạng thái</th>
+                <th class="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wide text-right">Hành động</th>
               </tr>
             </thead>
-            <tbody id="users-tbl-body">
+            <tbody id="users-tbl-body" class="divide-y divide-slate-50">
               <!-- Load bằng JS -->
             </tbody>
           </table>
@@ -4372,6 +4389,7 @@ function toggleSidebar() {
 
 var viewTitles={handover: 'Phiếu bàn giao hồ sơ',dashboard:'Bảng điều khiển',manage:'Quản lý Hồ sơ',calendar:'Lịch giám định',overdue:'Hồ sơ trễ hẹn',import:'Tiếp nhận AI',stats:'Thống kê & Báo cáo',kanban:'Kanban Hồ sơ',cloud:'Cloud của tôi'};
 viewTitles['human_claims'] = 'Hồ sơ Bồi thường Con người';
+viewTitles['manage_users'] = 'Quản lý Người dùng';
 
 function goView(v) {
   document.querySelectorAll('.view').forEach(function(el){ 
@@ -4384,10 +4402,12 @@ function goView(v) {
   if(t){
     t.classList.remove('hidden'); 
     // Bật lại flex cho các tab cần thiết để không hỏng layout
-    if(['calendar','kanban','cloud','manage','garages','partsprices','handover'].includes(v)) {
+    if(['calendar','kanban','cloud','manage','garages','partsprices','handover','manage_users'].includes(v)) {
         t.classList.add('flex');
     }
   }
+  
+  if(v === 'manage_users') UsersMgmt.render();
   
   document.querySelectorAll('.nav-btn').forEach(function(el){ el.classList.remove('sidebar-active'); });
   var nb=document.getElementById('nav-'+v); if(nb)nb.classList.add('sidebar-active');
@@ -13592,15 +13612,21 @@ const UsersMgmt = {
         const tbody = document.getElementById('users-tbl-body');
         if (!tbody) return;
 
-        if (this._data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-400 font-bold">Chưa có người dùng nào</td></tr>';
+        const q = (document.getElementById('users-search-inp')?.value || '').toLowerCase().trim();
+        const filtered = this._data.filter(u => 
+            (u.name || '').toLowerCase().includes(q) || 
+            (u.username || '').toLowerCase().includes(q)
+        );
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-slate-400 font-bold text-sm">Không tìm thấy người dùng nào</td></tr>`;
             return;
         }
 
-        tbody.innerHTML = this._data.map((u, i) => `
-            <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                <td class="p-4 text-center font-bold text-slate-400 text-sm">${i + 1}</td>
-                <td class="p-4">
+        tbody.innerHTML = filtered.map((u, i) => `
+            <tr class="hover:bg-slate-50/50 transition-colors">
+                <td class="px-6 py-4 text-center font-bold text-slate-400 text-sm">${i + 1}</td>
+                <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-white shadow-sm shrink-0" style="background: linear-gradient(135deg, ${u.color || '#2563eb'}, ${u.color ? u.color + 'cc' : '#1d4ed8'})">
                             ${u.avatar || (u.name ? u.name.charAt(0) : '?')}
@@ -13611,12 +13637,12 @@ const UsersMgmt = {
                         </div>
                     </div>
                 </td>
-                <td class="p-4">
+                <td class="px-6 py-4">
                     <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${u.role === 'admin' ? 'bg-rose-50 text-rose-600 border border-rose-100' : (u.role === 'viewer' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-blue-50 text-blue-600 border border-blue-100')}">
                         ${u.role === 'admin' ? 'Quản trị viên' : (u.role === 'viewer' ? 'Xem báo cáo' : 'Giám định viên')}
                     </span>
                 </td>
-                <td class="p-4">
+                <td class="px-6 py-4">
                     <div class="flex items-center gap-1.5">
                         <span class="w-1.5 h-1.5 rounded-full ${u.active !== false ? 'bg-emerald-500' : 'bg-slate-300'}"></span>
                         <span class="text-xs font-bold ${u.active !== false ? 'text-emerald-600' : 'text-slate-400'}">
@@ -13624,7 +13650,7 @@ const UsersMgmt = {
                         </span>
                     </div>
                 </td>
-                <td class="p-4 text-right">
+                <td class="px-6 py-4 text-right">
                     <div class="flex items-center justify-end gap-1">
                         <button onclick="UsersMgmt.openEdit('${u.id}')" class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Chỉnh sửa">
                             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
