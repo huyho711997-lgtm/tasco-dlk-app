@@ -1941,9 +1941,7 @@ textarea.inp { resize:vertical; }
             <button onclick="HumanClaims.generateEmail()" class="px-4 py-2 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-xl text-xs font-bold hover:bg-indigo-100 flex items-center gap-2 transition-colors hidden" id="btn-hc-email">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email xin số
             </button>
-            <button onclick="HumanClaims.printDossier()" class="px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-xs font-bold hover:bg-blue-100 flex items-center gap-2 transition-colors hidden" id="btn-hc-print">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> In HSBT
-            </button>
+
             <div class="w-px h-6 bg-slate-200 mx-1"></div>
             <button onclick="HumanClaims.closeModal()" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-rose-100 hover:text-rose-600 transition-colors">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
@@ -15232,12 +15230,7 @@ const HumanClaims = {
             }
         }
 
-        // Hiện nút In khi đã có số HSBT trở đi
-        const btnPrint = document.getElementById('btn-hc-print');
-        if (btnPrint) {
-            if (currIdx >= 2) btnPrint.classList.remove('hidden');
-            else btnPrint.classList.add('hidden');
-        }
+
     },
 
     nextStatus() {
