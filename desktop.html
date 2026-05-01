@@ -16607,7 +16607,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         const ccList = normalize(s.cc);
 
         const mailtoUrl = `mailto:${encodeURIComponent(toList)}?cc=${encodeURIComponent(ccList)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        const outlookWebUrl = `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(toList)}&cc=${encodeURIComponent(ccList)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        const outlookWebUrl = `https://outlook.office.com/mail/deeplink/compose?mailtouri=${encodeURIComponent(mailtoUrl)}`;
 
         Swal.fire({
             html: `
