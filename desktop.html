@@ -14750,7 +14750,8 @@ const HumanClaims = {
                         <label class="text-[11px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5 ml-1">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg> Đồng kính gửi (Cc)
                         </label>
-                        <input id="set-mail-cc" class="inp w-full !bg-white shadow-sm" value="${s.cc || ''}" placeholder="Email1, Email2... (Cách nhau bởi dấu phẩy)">
+                        <input id="set-mail-cc" class="inp w-full !bg-white shadow-sm" value="${s.cc || ''}" placeholder="email1@example.com; email2@example.com (Dùng dấu ; hoặc , để phân tách)">
+                        <p class="text-[10px] text-slate-400 italic ml-1">* Bạn có thể dùng dấu phẩy (,) hoặc chấm phẩy (;) để phân tách nhiều email.</p>
                     </div>
 
                     <div class="space-y-1.5">
@@ -14803,10 +14804,15 @@ const HumanClaims = {
             confirmButtonColor: '#4f46e5',
             customClass: { popup: 'rnd' },
             preConfirm: () => {
+                const toVal = document.getElementById('set-mail-to').value.trim();
+                const ccVal = document.getElementById('set-mail-cc').value.trim();
+                // Tự động chuẩn hóa dấu phẩy thành dấu chấm phẩy để đồng bộ
+                const normalizeEmails = (str) => str.replace(/,/g, ';').replace(/\s+/g, '').replace(/;+/g, ';');
+                
                 return {
                     senderName: document.getElementById('set-mail-sender').value.trim(),
-                    to: document.getElementById('set-mail-to').value.trim(),
-                    cc: document.getElementById('set-mail-cc').value.trim(),
+                    to: normalizeEmails(toVal),
+                    cc: normalizeEmails(ccVal),
                     subjectTemplate: document.getElementById('set-mail-subject').value.trim(),
                     bodyTemplate: document.getElementById('set-mail-body').value.trim()
                 }
@@ -16597,8 +16603,13 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             .replace(/{{YEAR}}/g, currentYear)
             .replace(/{{SENDER}}/g, senderName);
 
-        const mailtoUrl = `mailto:${s.to}?cc=${s.cc}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        const outlookWebUrl = `https://outlook.office.com/mail/deeplink/compose?to=${s.to}&cc=${s.cc}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        // Chuẩn hóa danh sách email (Outlook Web thích dùng dấu ;)
+        const normalize = (str) => (str || '').replace(/[,;\s\n]+/g, ';').replace(/^;|;$/g, '');
+        const toList = normalize(s.to);
+        const ccList = normalize(s.cc);
+
+        const mailtoUrl = `mailto:${encodeURIComponent(toList)}?cc=${encodeURIComponent(ccList)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        const outlookWebUrl = `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(toList)}&cc=${encodeURIComponent(ccList)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
         Swal.fire({
             html: `
@@ -16618,11 +16629,19 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                     
                     <!-- Fields Nhập liệu sạch sẽ -->
                     <div class="px-6 py-2 space-y-0 bg-white">
-                        <div class="flex items-center py-4 border-b border-slate-100">
-                            <span class="w-24 text-[11px] font-black text-slate-400 uppercase tracking-wider">To:</span>
-                            <span class="text-sm font-bold text-indigo-600 bg-indigo-50/50 px-2.5 py-1 rounded-lg border border-indigo-100">${s.to}</span>
-                            ${s.cc ? `<span class="ml-2 text-[10px] text-slate-400 font-bold">Cc: ${s.cc}</span>` : ''}
+                        <div class="flex items-start py-4 border-b border-slate-100">
+                            <span class="w-24 text-[11px] font-black text-slate-400 uppercase tracking-wider mt-1.5">To:</span>
+                            <div class="flex-1 flex flex-wrap gap-1.5">
+                                ${toList.split(';').filter(x=>x).map(email => `<span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100">${email}</span>`).join('')}
+                            </div>
                         </div>
+                        ${ccList ? `
+                        <div class="flex items-start py-4 border-b border-slate-100">
+                            <span class="w-24 text-[11px] font-black text-slate-400 uppercase tracking-wider mt-1.5">Cc:</span>
+                            <div class="flex-1 flex flex-wrap gap-1.5">
+                                ${ccList.split(';').filter(x=>x).map(email => `<span class="text-xs font-bold text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">${email}</span>`).join('')}
+                            </div>
+                        </div>` : ''}
                         <div class="flex items-center py-4 border-b border-slate-100 group">
                             <span class="w-24 text-[11px] font-black text-slate-400 uppercase tracking-wider">Subject:</span>
                             <input id="email-subject" class="flex-1 text-sm font-bold text-slate-700 bg-transparent outline-none truncate pr-4" value="${subject}" readonly>
