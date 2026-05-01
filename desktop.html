@@ -2045,7 +2045,7 @@ textarea.inp { resize:vertical; }
                     <textarea id="hc-injuryDesc" rows="2" class="inp resize-none mb-2 text-[13px]" placeholder="Gãy 1/3 dưới xương quay trái..."></textarea>
                     
                     <div class="flex items-center gap-3">
-                      <div class="flex-1"><label class="text-[10px] font-bold text-slate-500">Mục theo Bảng TLTT</label><input id="hc-injuryCode" class="inp text-xs text-cyan-800 bg-white border-cyan-200" readonly placeholder="AI tự điền..."></div>
+                      <div class="flex-1"><label class="text-[10px] font-bold text-slate-500">Mục theo Bảng TLTT</label><input id="hc-injuryCode" class="inp text-xs text-cyan-800 bg-white border-cyan-200" placeholder="Chọn từ bảng tra cứu..."></div>
                       <div class="w-24"><label class="text-[10px] font-bold text-slate-500">Tỷ lệ quy định</label><input id="hc-injuryRange" class="inp text-xs text-center bg-white border-cyan-200 font-mono" readonly placeholder="-- %"></div>
                       <div class="w-28">
                         <label class="text-[10px] font-bold text-slate-500">Tỷ lệ thực tế</label>
@@ -15302,41 +15302,74 @@ const HumanClaims = {
 
         // 2. Load dữ liệu từ cache hoặc Firebase
         if (!this._injuryRatesCache) {
-            Swal.fire({ title: false, html: '<div class="py-6 text-center"><div class="inline-block w-8 h-8 border-4 border-amber-200 border-t-amber-600 rounded-full animate-spin mb-3"></div><p class="text-sm font-bold text-slate-600">Đang tải bảng TLTT...</p></div>', showConfirmButton: false, allowOutsideClick: false, customClass:{popup:'rnd'} });
-            const snap = await db.ref('InjuryRates').once('value');
-            this._injuryRatesCache = snap.val() || {};
-            Swal.close();
+            Swal.fire({ 
+                title: false, 
+                html: '<div class="py-6 text-center"><div class="inline-block w-8 h-8 border-4 border-amber-200 border-t-amber-600 rounded-full animate-spin mb-3"></div><p class="text-sm font-bold text-slate-600">Đang tải bảng tỷ lệ...</p></div>', 
+                showConfirmButton: false, 
+                allowOutsideClick: false, 
+                customClass:{popup:'rnd'} 
+            });
+            try {
+                const snap = await db.ref('InjuryRates').once('value');
+                this._injuryRatesCache = snap.val() || {};
+                Swal.close();
+            } catch (err) {
+                console.error(err);
+                Swal.fire('Lỗi', 'Không thể tải dữ liệu từ máy chủ', 'error');
+                return;
+            }
         }
+        
         const rawRates = this._injuryRatesCache;
         const allItems = Object.keys(rawRates).map(k => ({ id: k, ...rawRates[k] }))
-            .sort((a, b) => (parseFloat(a.stt)||0) - (parseFloat(b.stt)||0));
+            .sort((a, b) => {
+                const numA = parseFloat(a.stt) || 0;
+                const numB = parseFloat(b.stt) || 0;
+                return numA - numB;
+            });
 
         // 3. Hàm render bảng nội bộ
-        const self = this;
-        const PAGE_SIZE = 80;
-
-        function renderLookup(tab, query) {
+        const PAGE_SIZE = 100;
+        const renderLookup = (tab, query) => {
+            this._lookupTab = tab;
             const q = (query || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d');
+            
             const filtered = allItems.filter(r => {
-                if ((r.type || 'thuong_tat') !== tab) return false;
+                const rType = r.type || 'thuong_tat';
+                if (rType !== tab) return false;
                 if (!q) return true;
-                const txt = [r.stt, r.name].join(' ').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d');
+                const txt = [r.stt, r.name, r.minPct, r.maxPct].join(' ').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d');
                 return txt.includes(q);
             });
+
             const shown = filtered.slice(0, PAGE_SIZE);
             const hasMore = filtered.length > PAGE_SIZE;
 
             let rows = '';
             if (!shown.length) {
-                rows = '<tr><td colspan="4" class="px-4 py-12 text-center text-slate-400 font-bold text-sm">Không tìm thấy mục nào phù hợp.</td></tr>';
+                rows = '<tr><td colspan="4" class="px-4 py-16 text-center text-slate-400 font-bold text-sm">Không tìm thấy mục nào phù hợp.</td></tr>';
             } else {
                 rows = shown.map(r => {
-                    const rangeStr = (r.minPct != null && r.maxPct != null) ? `${r.minPct} - ${r.maxPct}%` : (r.minPct || r.maxPct || '—') + (r.minPct || r.maxPct ? '%' : '');
-                    return `<tr class="cursor-pointer transition-all hover:bg-amber-50 border-b border-slate-100 group" data-stt="${r.stt}" data-name="${(r.name||'').replace(/"/g,'&quot;')}" data-min="${r.minPct||0}" data-max="${r.maxPct||0}" data-range="${rangeStr}" onclick="HumanClaims._pickInjuryRow(this)">
-                        <td class="px-3 py-2.5 text-center font-black text-slate-800 text-[13px] w-16">${r.stt || '—'}</td>
-                        <td class="px-3 py-2.5 font-semibold text-slate-700 text-[12.5px] leading-snug group-hover:text-amber-800 transition-colors">${r.name || '—'}</td>
-                        <td class="px-3 py-2.5 text-center font-black text-blue-600 text-[12px] w-20">${r.minPct != null ? r.minPct+'%' : '—'}</td>
-                        <td class="px-3 py-2.5 text-center font-black text-rose-600 text-[12px] w-20">${r.maxPct != null ? r.maxPct+'%' : '—'}</td>
+                    const min = r.minPct != null ? r.minPct : null;
+                    const max = r.maxPct != null ? r.maxPct : null;
+                    let rangeStr = '--';
+                    if (min !== null && max !== null) {
+                        rangeStr = (min === max) ? `${min}%` : `${min} - ${max}%`;
+                    } else if (min !== null || max !== null) {
+                        rangeStr = `${min || max}%`;
+                    }
+
+                    return `<tr class="cursor-pointer transition-all hover:bg-amber-50 border-b border-slate-100 group" 
+                                onclick="HumanClaims._pickInjuryRow(this)"
+                                data-stt="${r.stt}" 
+                                data-name="${(r.name||'').replace(/"/g,'&quot;')}" 
+                                data-min="${min||0}" 
+                                data-max="${max||0}" 
+                                data-range="${rangeStr}">
+                        <td class="px-3 py-3 text-center font-black text-slate-800 text-[13px] w-16 bg-slate-50/50">${r.stt || '—'}</td>
+                        <td class="px-3 py-3 font-semibold text-slate-700 text-[12.5px] leading-snug group-hover:text-amber-700 transition-colors">${r.name || '—'}</td>
+                        <td class="px-3 py-3 text-center font-black text-blue-600 text-[12px] w-20">${min !== null ? min+'%' : '—'}</td>
+                        <td class="px-3 py-3 text-center font-black text-rose-600 text-[12px] w-20">${max !== null ? max+'%' : '—'}</td>
                     </tr>`;
                 }).join('');
             }
@@ -15345,74 +15378,94 @@ const HumanClaims = {
             if (tbody) tbody.innerHTML = rows;
 
             const info = document.getElementById('hc-lookup-info');
-            if (info) info.textContent = hasMore ? `Hiển thị ${PAGE_SIZE} / ${filtered.length} mục (thu hẹp bằng tìm kiếm)` : `${filtered.length} mục`;
+            if (info) info.textContent = hasMore ? `Hiển thị ${PAGE_SIZE} / ${filtered.length} mục (sử dụng tìm kiếm để thu hẹp)` : `Tìm thấy ${filtered.length} mục`;
 
-            // Cập nhật style tab
+            // Cập nhật giao diện tab
             const btnTT = document.getElementById('hc-lookup-tab-tt');
             const btnPT = document.getElementById('hc-lookup-tab-pt');
             if (btnTT && btnPT) {
-                const onCls = 'bg-amber-600 text-white shadow-sm';
-                const offCls = 'text-slate-500 hover:bg-slate-100';
-                btnTT.className = `px-4 py-1.5 text-[11px] font-bold rounded-lg transition-all ${tab === 'thuong_tat' ? onCls : offCls}`;
-                btnPT.className = `px-4 py-1.5 text-[11px] font-bold rounded-lg transition-all ${tab === 'phau_thuat' ? onCls : offCls}`;
+                const activeCls = ['bg-amber-600', 'text-white', 'shadow-md', 'scale-105'];
+                const inactiveCls = ['text-slate-500', 'hover:bg-slate-200', 'hover:text-slate-700'];
+                
+                if (tab === 'thuong_tat') {
+                    btnTT.classList.add(...activeCls); btnTT.classList.remove(...inactiveCls);
+                    btnPT.classList.remove(...activeCls); btnPT.classList.add(...inactiveCls);
+                } else {
+                    btnPT.classList.add(...activeCls); btnPT.classList.remove(...inactiveCls);
+                    btnTT.classList.remove(...activeCls); btnTT.classList.add(...inactiveCls);
+                }
             }
-        }
+        };
 
         // 4. Tạo HTML cho dialog
-        const tabLabel = activeTab === 'thuong_tat' ? 'Thương tật' : 'Phẫu thuật';
         const html = `
         <div class="text-left font-sans -mx-2">
-            <div class="flex items-center gap-2 mb-3 px-1">
-                <div class="flex bg-slate-100 p-1 rounded-lg shrink-0">
-                    <button id="hc-lookup-tab-tt" type="button" onclick="HumanClaims._lookupTab='thuong_tat'; HumanClaims._renderLookupFn()" class="px-4 py-1.5 text-[11px] font-bold rounded-lg transition-all">Thương tật</button>
-                    <button id="hc-lookup-tab-pt" type="button" onclick="HumanClaims._lookupTab='phau_thuat'; HumanClaims._renderLookupFn()" class="px-4 py-1.5 text-[11px] font-bold rounded-lg transition-all">Phẫu thuật</button>
+            <div class="flex flex-col sm:flex-row items-center gap-3 mb-4 px-1">
+                <div class="flex bg-slate-200 p-1 rounded-xl shrink-0 w-full sm:w-auto">
+                    <button id="hc-lookup-tab-tt" type="button" onclick="HumanClaims._renderLookupFn('thuong_tat')" class="flex-1 sm:flex-none px-5 py-2 text-[11px] font-extrabold rounded-lg transition-all">THƯƠNG TẬT</button>
+                    <button id="hc-lookup-tab-pt" type="button" onclick="HumanClaims._renderLookupFn('phau_thuat')" class="flex-1 sm:flex-none px-5 py-2 text-[11px] font-extrabold rounded-lg transition-all">PHẪU THUẬT</button>
                 </div>
-                <div class="relative flex-1">
-                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                    <input id="hc-lookup-search" type="text" oninput="HumanClaims._renderLookupFn()" class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[12px] font-semibold text-slate-700 outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-50 transition-all" placeholder="Tìm theo STT hoặc tên thương tật...">
+                <div class="relative flex-1 w-full">
+                    <div class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    </div>
+                    <input id="hc-lookup-search" type="text" oninput="HumanClaims._renderLookupFn()" 
+                        class="w-full pl-10 pr-4 py-2.5 bg-white border-2 border-slate-200 rounded-xl text-[13px] font-bold text-slate-700 outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-50 transition-all" 
+                        placeholder="Tìm theo STT hoặc tên thương tật...">
                 </div>
             </div>
-            <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm bg-white">
-                <div class="max-h-[52vh] overflow-y-auto custom-scrollbar">
+            
+            <div class="rounded-2xl border-2 border-slate-100 overflow-hidden shadow-sm bg-white">
+                <div class="max-h-[55vh] overflow-y-auto custom-scrollbar">
                     <table class="w-full text-left border-collapse">
-                        <thead class="sticky top-0 bg-slate-50/95 backdrop-blur z-10 border-b border-slate-200">
+                        <thead class="sticky top-0 bg-slate-800 text-white z-10">
                             <tr>
-                                <th class="px-3 py-2.5 text-[10px] font-bold text-slate-400 uppercase tracking-wide text-center w-16">STT</th>
-                                <th class="px-3 py-2.5 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Tên thương tật / Phẫu thuật</th>
-                                <th class="px-3 py-2.5 text-[10px] font-bold text-slate-400 uppercase tracking-wide text-center w-20">Thấp</th>
-                                <th class="px-3 py-2.5 text-[10px] font-bold text-slate-400 uppercase tracking-wide text-center w-20">Cao</th>
+                                <th class="px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-center w-16">STT</th>
+                                <th class="px-3 py-3 text-[10px] font-bold uppercase tracking-widest">Tên thương tật / Phẫu thuật</th>
+                                <th class="px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-center w-20">Thấp</th>
+                                <th class="px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-center w-20">Cao</th>
                             </tr>
                         </thead>
-                        <tbody id="hc-lookup-tbody"></tbody>
+                        <tbody id="hc-lookup-tbody" class="divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
             </div>
-            <div class="flex items-center justify-between mt-2.5 px-1">
-                <span id="hc-lookup-info" class="text-[10px] text-slate-400 font-semibold"></span>
-                <span class="text-[10px] text-amber-600 font-bold flex items-center gap-1">
-                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg> Nhấn vào hàng để chọn
-                </span>
+            
+            <div class="flex items-center justify-between mt-3 px-1">
+                <span id="hc-lookup-info" class="text-[11px] text-slate-400 font-bold"></span>
+                <div class="flex items-center gap-4">
+                    <span class="text-[10px] text-slate-400 italic">Chọn dòng để áp dụng vào hồ sơ</span>
+                    <button onclick="Swal.close()" class="px-3 py-1 text-[11px] font-bold text-slate-500 hover:text-slate-800">Đóng</button>
+                </div>
             </div>
         </div>`;
 
-        // 5. Gắn hàm render vào HumanClaims tạm thời
+        // 5. Gắn hàm render vào HumanClaims
         this._lookupTab = activeTab;
-        this._renderLookupFn = () => {
+        this._renderLookupFn = (newTab) => {
+            if (newTab) this._lookupTab = newTab;
             const q = document.getElementById('hc-lookup-search')?.value || '';
             renderLookup(this._lookupTab, q);
         };
 
         Swal.fire({
-            title: '<span class="text-[14px] font-black text-amber-800 uppercase tracking-wide flex items-center gap-2"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Tra cứu Bảng TLTT</span>',
+            title: `<div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center shadow-inner">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </div>
+                <div class="text-left">
+                    <div class="text-[15px] font-black text-slate-800 leading-tight">TRA CỨU BẢNG TỶ LỆ</div>
+                    <div class="text-[10px] font-bold text-amber-600 uppercase tracking-tighter">Hồ sơ đang ở loại: ${lossType}</div>
+                </div>
+            </div>`,
             html: html,
-            width: 720,
+            width: 850,
             showConfirmButton: false,
-            showCancelButton: true,
-            cancelButtonText: 'Đóng',
-            customClass: { popup: 'rnd' },
+            showCancelButton: false,
+            customClass: { popup: 'rnd', title: 'px-6 pt-6 border-b border-slate-100 pb-4' },
             didOpen: () => {
-                renderLookup(activeTab, '');
-                setTimeout(() => document.getElementById('hc-lookup-search')?.focus(), 200);
+                this._renderLookupFn(activeTab);
+                setTimeout(() => document.getElementById('hc-lookup-search')?.focus(), 300);
             }
         });
     },
