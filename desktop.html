@@ -16090,6 +16090,8 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             Toast.fire({ icon: 'error', title: 'Lỗi xử lý OCR: ' + (e.message || 'Hệ thống bận') });
         }
     },
+
+
     openMedicalOcrModal() {
         Swal.fire({
             title: '<span class="text-lg font-black text-teal-800 flex items-center gap-2"><svg class="w-5 h-5 text-teal-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Quét chứng từ Y tế</span>',
@@ -16465,12 +16467,12 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             `,
             showCancelButton: true,
             showDenyButton: true,
-            confirmButtonText: '<div class="flex items-center gap-2 font-bold">Outlook Web <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg></div>',
-            denyButtonText: '<div class="flex items-center gap-2 font-bold text-[10px]">Dùng App (Outlook/Mail)</div>',
-            cancelButtonText: 'Đóng',
-            confirmButtonColor: '#0078d4',
+            confirmButtonText: '<div class="flex items-center gap-2.5 font-black text-sm uppercase tracking-wide px-2">Outlook Web <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg></div>',
+            denyButtonText: '<div class="flex items-center gap-2 font-bold text-xs uppercase opacity-80">Outlook App</div>',
+            cancelButtonText: 'Hủy bỏ',
+            confirmButtonColor: '#0078d4', 
             denyButtonColor: '#4f46e5',
-            customClass: { popup: 'rnd w-[600px]' }
+            customClass: { popup: 'rnd w-[750px]' }
         }).then(r => {
             if(r.isConfirmed) { window.open(outlookWebUrl, '_blank'); }
             else if(r.isDenied) { window.location.href = mailtoUrl; }
