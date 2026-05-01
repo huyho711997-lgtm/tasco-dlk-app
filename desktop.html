@@ -1893,6 +1893,10 @@ textarea.inp { resize:vertical; }
                 </button>
               </div>
             </div>
+            <button onclick="HumanClaims.openPaymentRequisition()" class="px-4 py-2 bg-violet-50 text-violet-600 border border-violet-200 rounded-xl text-xs font-bold hover:bg-violet-100 flex items-center gap-2 transition-colors">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"></path></svg>
+              In phiếu (A4)
+            </button>
             <button onclick="HumanClaims.openMedicalOcrModal()" class="px-4 py-2 bg-teal-50 text-teal-700 border border-teal-200 rounded-xl text-xs font-bold hover:bg-teal-100 flex items-center gap-2 transition-colors" id="btn-hc-ocr-medical">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> AI Quét Y Tế
             </button>
@@ -16825,7 +16829,265 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             Swal.close();
             Toast.fire({ icon: 'error', title: 'Lỗi: ' + e.message });
         }
-    }
+    },
+
+    openPaymentRequisition() {
+        const rec = this._data.find(r => r.id === this._currentId);
+        if (!rec) return;
+
+        const today = new Date();
+        const ngay = today.getDate();
+        const thang = today.getMonth() + 1;
+        const nam = today.getFullYear();
+        
+        const amount = rec.totalAmount || 0;
+        const amountStr = amount.toLocaleString('vi-VN');
+        const amountWords = this._docTien(amount);
+
+        const html = `
+        <div id="hc-payment-req-modal" class="fixed inset-0 z-[9999] flex flex-col bg-slate-900/60 backdrop-blur-sm p-4 overflow-hidden">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <div class="flex items-center gap-3 text-white">
+                    <div class="w-10 h-10 bg-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-black leading-tight">Giấy đề nghị thanh toán</h2>
+                        <p class="text-[11px] font-bold text-violet-300 uppercase tracking-widest">Xem trước & Chỉnh sửa nội dung</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="HumanClaims.printPaymentReq()" class="px-6 py-2.5 bg-emerald-500 text-white rounded-xl font-black text-sm hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"></path></svg>
+                        In phiếu (A4)
+                    </button>
+                    <button onclick="HumanClaims.closePaymentReq()" class="w-10 h-10 bg-white/10 text-white hover:bg-rose-500 hover:text-white rounded-xl transition-all flex items-center justify-center border border-white/10">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col items-center p-8 overflow-y-auto custom-scrollbar" id="payment-req-container">
+                <!-- A4 CONTENT START -->
+                <div class="a4-page bg-white p-[20mm] shadow-lg relative text-black leading-normal font-serif text-[13.5px] print:p-0 print:shadow-none" id="print-area">
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+                        .a4-page { 
+                            width: 210mm; min-height: 297mm; box-sizing: border-box; 
+                            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                            color: #1e293b;
+                        }
+                        .a4-page [contenteditable] { outline: none; border-bottom: 1px dashed transparent; transition: all 0.2s; }
+                        .a4-page [contenteditable]:hover { border-bottom-color: #cbd5e1; background: #f8fafc; }
+                        .a4-page [contenteditable]:focus { border-bottom-color: #3b82f6; background: #eff6ff; }
+                        .print-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+                        .print-table th, .print-table td { border: 1px solid #94a3b8; padding: 10px 12px; font-size: 12.5px; line-height: 1.4; }
+                        .print-table th { background: #f8fafc; text-align: center; font-weight: 800; text-transform: uppercase; color: #475569; font-size: 11px; }
+                        .print-table td { color: #1e293b; }
+                        @media print {
+                            body * { visibility: hidden; }
+                            #print-area, #print-area * { visibility: visible; }
+                            #print-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
+                            .a4-page { border: none !important; box-shadow: none !important; width: 100% !important; height: auto !important; padding: 15mm !important; }
+                            .print-table th, .print-table td { border-color: #000 !important; }
+                        }
+                    </style>
+
+                    <div class="flex justify-between items-start mb-8">
+                        <div class="flex flex-col gap-1">
+                            <div class="flex items-center gap-2">
+                                <img src="https://tascoinsurance.vn/wp-content/uploads/2023/10/logo-tasco-insurance.png" style="height:48px" onerror="this.src='https://lh3.googleusercontent.com/d/1bpOB60B7o1NDwahpZsVxct9PbfdwvKmK'">
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Mã hồ sơ</p>
+                            <p class="text-[13px] font-black text-slate-900 font-mono" contenteditable="true">${rec.claimNo || 'HS-' + Date.now()}</p>
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-10">
+                        <h1 class="text-[24px] font-black uppercase tracking-tight text-slate-900 mb-1" contenteditable="true">GIẤY ĐỀ NGHỊ THANH TOÁN / TẠM ƯNG</h1>
+                        <p class="text-[14px] italic text-slate-500 font-medium" contenteditable="true">Payment requisition</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex items-baseline gap-3">
+                            <span class="font-bold text-slate-700 whitespace-nowrap">Họ và tên / Full name:</span>
+                            <span class="flex-1 border-b border-slate-200 px-1 font-semibold text-slate-900" contenteditable="true">${Auth.getCurrentUser()?.name || 'Huy Hồ'}</span>
+                        </div>
+                        <div class="flex items-baseline gap-3">
+                            <span class="font-bold text-slate-700 whitespace-nowrap">Bộ phận / Division:</span>
+                            <span class="flex-1 border-b border-slate-200 px-1 font-semibold text-slate-900" contenteditable="true">Chi nhánh Đắk Lắk</span>
+                        </div>
+                        <div class="flex flex-col gap-2 mt-6">
+                            <span class="font-bold text-slate-700">Nội dung thanh toán / Description:</span>
+                            <div class="flex-1 min-h-[3em] border-b border-slate-200 leading-relaxed font-medium text-slate-800" contenteditable="true">
+                                Thanh toán hồ sơ bồi thường nạn nhân ${rec.victimName || ''}, theo số hồ sơ: ${rec.claimNo || ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <table class="print-table mt-8">
+                        <thead>
+                            <tr>
+                                <th class="w-12">STT<br><span>No.</span></th>
+                                <th>Diễn giải<br><span>Details</span></th>
+                                <th class="w-28">Ngày hóa đơn<br><span>Invoice Date</span></th>
+                                <th class="w-24">Số hóa đơn<br><span>Invoice No</span></th>
+                                <th class="w-32 text-right">Số tiền trước thuế<br><span>Before VAT</span></th>
+                                <th class="w-20 text-right">Thuế<br><span>VAT</span></th>
+                                <th class="w-32 text-right">Tổng cộng<br><span>Total</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-center font-bold text-slate-500">1</td>
+                                <td class="font-semibold" contenteditable="true">Chi trả tiền bảo hiểm ${rec.lossType || 'Thương tật'} - Nạn nhân: ${rec.victimName || ''}</td>
+                                <td class="text-center" contenteditable="true">${ngay}/${thang}/${nam}</td>
+                                <td class="text-center" contenteditable="true">0</td>
+                                <td class="text-right font-medium" contenteditable="true">${amountStr}</td>
+                                <td class="text-right" contenteditable="true">0</td>
+                                <td class="text-right font-black text-slate-900" contenteditable="true">${amountStr}</td>
+                            </tr>
+                            <tr class="bg-slate-50">
+                                <td colspan="2" class="text-center font-black text-slate-700 uppercase tracking-tighter">Tổng cộng / Total</td>
+                                <td></td>
+                                <td></td>
+                                <td class="text-right font-bold">${amountStr}</td>
+                                <td class="text-right font-bold">0</td>
+                                <td class="text-right font-black text-blue-700 text-[14px]">${amountStr}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="mt-6 flex flex-col gap-2 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                        <p class="font-bold text-slate-700 flex items-baseline gap-2">
+                            Bằng chữ / <span class="italic font-medium text-slate-400">in word:</span> 
+                            <span class="flex-1 font-black italic text-slate-900" contenteditable="true">${amountWords} đồng./.</span>
+                        </p>
+                    </div>
+
+                    <div class="mt-8 space-y-1.5 italic text-[12px] leading-relaxed text-slate-500 font-medium">
+                        <p>Tôi xác nhận số tiền đề nghị thanh toán/tạm ứng là trung thực, chính xác, đúng quy định và hợp pháp.</p>
+                        <p>I confirm that the amounts requested for payment is genuine, validity, accuracy and legality.</p>
+                    </div>
+
+                    <div class="mt-6 p-5 bg-white border border-slate-200 rounded-2xl space-y-3 shadow-sm">
+                        <p class="font-bold text-slate-700 uppercase text-[11px] tracking-widest border-b border-slate-100 pb-2 mb-3">Thông tin chuyển khoản / information bank</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Người thụ hưởng</p>
+                                <p class="font-black text-slate-900 text-[13px]" contenteditable="true">${rec.payeeName || rec.victimName || '—'}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Số tài khoản</p>
+                                <p class="font-black text-blue-700 text-[14px] font-mono" contenteditable="true">${rec.payeeBankNo || '—'}</p>
+                            </div>
+                            <div class="col-span-2">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Tại ngân hàng</p>
+                                <p class="font-bold text-slate-800" contenteditable="true">${rec.payeeBankName || '—'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-12 grid grid-cols-4 gap-6 text-center">
+                        <div class="flex flex-col h-36">
+                            <span class="font-black text-[12px] text-slate-700 uppercase">Người đề nghị</span>
+                            <span class="text-[10px] italic text-slate-400 font-medium">Requester</span>
+                            <div class="mt-auto pt-4 border-t border-slate-100">
+                                <p class="text-[12px] font-black text-slate-900" contenteditable="true">${Auth.getCurrentUser()?.name || 'Huy Hồ'}</p>
+                                <p class="text-[10px] font-bold text-slate-400" contenteditable="true">${ngay}/${thang}/${nam}</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col h-36">
+                            <span class="font-black text-[12px] text-slate-700 uppercase">GĐ Đơn Vị</span>
+                            <span class="text-[10px] italic text-slate-400 font-medium">Verified by</span>
+                            <div class="mt-auto pt-4 border-t border-slate-100">
+                                <p class="text-[12px] font-black text-slate-300" contenteditable="true">...........................</p>
+                                <p class="text-[10px] font-bold text-slate-300" contenteditable="true">.../.../20...</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col h-36">
+                            <span class="font-black text-[12px] text-slate-700 uppercase">PT Kế Toán</span>
+                            <span class="text-[10px] italic text-slate-400 font-medium">Accountant</span>
+                            <div class="mt-auto pt-4 border-t border-slate-100">
+                                <p class="text-[12px] font-black text-slate-300" contenteditable="true">...........................</p>
+                                <p class="text-[10px] font-bold text-slate-300" contenteditable="true">.../.../20...</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col h-36">
+                            <span class="font-black text-[12px] text-slate-700 uppercase">Lãnh đạo</span>
+                            <span class="text-[10px] italic text-slate-400 font-medium">Approved by</span>
+                            <div class="mt-auto pt-4 border-t border-slate-100">
+                                <p class="text-[12px] font-black text-slate-300" contenteditable="true">...........................</p>
+                                <p class="text-[10px] font-bold text-slate-300" contenteditable="true">.../.../20...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- A4 CONTENT END -->
+            </div>
+        </div>`;
+
+        document.body.insertAdjacentHTML('beforeend', html);
+    },
+
+    printPaymentReq() {
+        window.print();
+    },
+
+    closePaymentReq() {
+        const modal = document.getElementById('hc-payment-req-modal');
+        if (modal) modal.remove();
+    },
+
+    _docTien(number) {
+        if (number === 0) return 'Không';
+        const ChuSo = [" không", " một", " hai", " ba", " bốn", " năm", " sáu", " bảy", " tám", " chín"];
+        const Tien = ["", " nghìn", " triệu", " tỷ", " nghìn tỷ", " triệu tỷ"];
+
+        let str = "";
+        let i = 0;
+        let num = number;
+
+        const docGroup3 = (n) => {
+            let s = "";
+            let tram = Math.floor(n / 100);
+            let chuc = Math.floor((n % 100) / 10);
+            let donvi = n % 10;
+            if (tram === 0 && chuc === 0 && donvi === 0) return "";
+            if (tram !== 0) {
+                s += ChuSo[tram] + " trăm";
+                if (chuc === 0 && donvi !== 0) s += " linh";
+            }
+            if (chuc !== 0 && chuc !== 1) {
+                s += ChuSo[chuc] + " mươi";
+                if (donvi === 1) s += " mốt";
+            }
+            if (chuc === 1) {
+                s += " mười";
+                if (donvi === 1) s += " một";
+            }
+            if (donvi === 5 && chuc !== 0) s += " lăm";
+            else if (donvi !== 0 && !(chuc !== 0 && donvi === 5) && !(chuc !== 0 && chuc !== 1 && donvi === 1) && !(chuc === 1 && donvi === 1)) s += ChuSo[donvi];
+            return s;
+        };
+
+        if (num < 0) { str = "Trừ "; num = -num; }
+        do {
+            let ty = num % 1000;
+            num = Math.floor(num / 1000);
+            if (ty > 0) {
+                let temp = docGroup3(ty);
+                str = temp + Tien[i] + str;
+            } else if (i === 0) {
+                str = str;
+            }
+            i++;
+        } while (num > 0);
+
+        return str.trim().charAt(0).toUpperCase() + str.trim().slice(1);
+    },
 };
 
 document.addEventListener('click', function(e) {
