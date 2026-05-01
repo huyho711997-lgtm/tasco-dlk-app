@@ -15329,7 +15329,6 @@ const HumanClaims = {
             });
 
         // 3. Hàm render bảng nội bộ
-        const PAGE_SIZE = 100;
         const renderLookup = (tab, query) => {
             this._lookupTab = tab;
             const q = (query || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d');
@@ -15342,14 +15341,11 @@ const HumanClaims = {
                 return txt.includes(q);
             });
 
-            const shown = filtered.slice(0, PAGE_SIZE);
-            const hasMore = filtered.length > PAGE_SIZE;
-
             let rows = '';
-            if (!shown.length) {
+            if (!filtered.length) {
                 rows = '<tr><td colspan="4" class="px-4 py-16 text-center text-slate-400 font-bold text-sm">Không tìm thấy mục nào phù hợp.</td></tr>';
             } else {
-                rows = shown.map(r => {
+                rows = filtered.map(r => {
                     const min = r.minPct != null ? r.minPct : null;
                     const max = r.maxPct != null ? r.maxPct : null;
                     let rangeStr = '--';
@@ -15378,7 +15374,7 @@ const HumanClaims = {
             if (tbody) tbody.innerHTML = rows;
 
             const info = document.getElementById('hc-lookup-info');
-            if (info) info.textContent = hasMore ? `Hiển thị ${PAGE_SIZE} / ${filtered.length} mục (sử dụng tìm kiếm để thu hẹp)` : `Tìm thấy ${filtered.length} mục`;
+            if (info) info.textContent = `Tổng số: ${filtered.length} mục`;
 
             // Cập nhật giao diện tab
             const btnTT = document.getElementById('hc-lookup-tab-tt');
