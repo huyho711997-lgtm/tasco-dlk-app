@@ -16555,30 +16555,30 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         const currentYear = new Date().getFullYear();
         const currentUser = Auth.getCurrentUser();
         
-        const settings = this._emailSettings || {
+        const s = this._emailSettings || {
             to: 'banxcg@tasco.com.vn',
             cc: '',
             subjectTemplate: '[TASCO ĐẮK LẮK] Xin cấp số HSBT - NĐBH: {{NDBH}} - HĐ: {{HD}}',
             bodyTemplate: '...'
         };
 
-        const senderName = settings.senderName || (currentUser?.name || 'Cán bộ Bồi thường');
+        const senderName = s.senderName || (currentUser?.name || 'Cán bộ Bồi thường');
 
-        let subject = settings.subjectTemplate
+        let subject = s.subjectTemplate
             .replace(/{{NDBH}}/g, victim)
             .replace(/{{HD}}/g, hdog)
             .replace(/{{YEAR}}/g, currentYear)
             .replace(/{{SENDER}}/g, senderName);
 
-        let body = settings.bodyTemplate
+        let body = s.bodyTemplate
             .replace(/{{NDBH}}/g, victim)
             .replace(/{{HD}}/g, hdog)
             .replace(/{{TOTAL}}/g, total)
             .replace(/{{YEAR}}/g, currentYear)
             .replace(/{{SENDER}}/g, senderName);
 
-        const mailtoUrl = `mailto:${settings.to}?cc=${settings.cc}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        const outlookWebUrl = `https://outlook.office.com/mail/deeplink/compose?to=${settings.to}&cc=${settings.cc}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        const mailtoUrl = `mailto:${s.to}?cc=${s.cc}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        const outlookWebUrl = `https://outlook.office.com/mail/deeplink/compose?to=${s.to}&cc=${s.cc}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
         Swal.fire({
             html: `
