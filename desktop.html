@@ -16869,158 +16869,147 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
 
             <div class="flex-1 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col items-center p-8 overflow-y-auto custom-scrollbar" id="payment-req-container">
                 <!-- A4 CONTENT START -->
-                <div class="a4-page bg-white p-[20mm] shadow-lg relative text-black leading-normal font-serif text-[13.5px] print:p-0 print:shadow-none" id="print-area">
+                <div class="a4-page bg-white p-[20mm] shadow-lg relative text-black leading-normal font-serif text-[12px] print:p-0 print:shadow-none" id="print-area">
                     <style>
                         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
                         .a4-page { 
                             width: 210mm; min-height: 297mm; box-sizing: border-box; 
                             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                            color: #1e293b;
+                            color: #000;
                         }
                         .a4-page [contenteditable] { outline: none; border-bottom: 1px dashed transparent; transition: all 0.2s; }
                         .a4-page [contenteditable]:hover { border-bottom-color: #cbd5e1; background: #f8fafc; }
                         .a4-page [contenteditable]:focus { border-bottom-color: #3b82f6; background: #eff6ff; }
                         .print-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-                        .print-table th, .print-table td { border: 1px solid #94a3b8; padding: 10px 12px; font-size: 12.5px; line-height: 1.4; }
-                        .print-table th { background: #f8fafc; text-align: center; font-weight: 800; text-transform: uppercase; color: #475569; font-size: 11px; }
-                        .print-table td { color: #1e293b; }
+                        .print-table th, .print-table td { border: 1px solid #000; padding: 6px 8px; font-size: 11px; line-height: 1.3; }
+                        .print-table th { text-align: center; font-weight: 700; }
+                        .print-table .sub-hdr td { text-align: center; font-style: italic; font-size: 10px; height: 20px; }
                         @media print {
                             body * { visibility: hidden; }
                             #print-area, #print-area * { visibility: visible; }
                             #print-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
-                            .a4-page { border: none !important; box-shadow: none !important; width: 100% !important; height: auto !important; padding: 15mm !important; }
-                            .print-table th, .print-table td { border-color: #000 !important; }
+                            .a4-page { border: none !important; box-shadow: none !important; width: 100% !important; height: auto !important; padding: 10mm !important; }
                         }
                     </style>
 
-                    <div class="flex justify-between items-start mb-8">
-                        <div class="flex flex-col gap-1">
-                            <div class="flex items-center gap-2">
-                                <img src="https://tascoinsurance.vn/wp-content/uploads/2023/10/logo-tasco-insurance.png" style="height:48px" onerror="this.src='https://lh3.googleusercontent.com/d/1bpOB60B7o1NDwahpZsVxct9PbfdwvKmK'">
-                            </div>
+                    <div class="mb-6">
+                        <img src="https://tascoinsurance.vn/wp-content/uploads/2023/10/logo-tasco-insurance.png" style="height:42px">
+                    </div>
+
+                    <div class="text-center mb-8">
+                        <h1 class="text-[20px] font-bold uppercase tracking-tight mb-1" contenteditable="true">GIẤY ĐỀ NGHỊ THANH TOÁN/TẠM ƯNG</h1>
+                        <p class="text-[16px]" contenteditable="true">Payment requisition</p>
+                    </div>
+
+                    <div class="space-y-2 mb-6">
+                        <div class="flex items-baseline">
+                            <span class="w-[180px]">Họ và tên / Full name:</span>
+                            <span class="font-bold" contenteditable="true">${Auth.getCurrentUser()?.name || 'Hồ Quang Huy'}</span>
                         </div>
-                        <div class="text-right">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Mã hồ sơ</p>
-                            <p class="text-[13px] font-black text-slate-900 font-mono" contenteditable="true">${rec.claimNo || 'HS-' + Date.now()}</p>
+                        <div class="flex items-baseline">
+                            <span class="w-[180px]">Bộ phận / Division:</span>
+                            <span contenteditable="true">Chi nhánh Đắk Lắk</span>
+                        </div>
+                        <div class="flex items-baseline">
+                            <span class="w-[180px]">Nội dung thanh toán / Description:</span>
+                            <span class="flex-1" contenteditable="true">Thanh toán hồ sơ bồi thường nạn nhân ${rec.victimName || ''}, theo số hồ sơ: ${rec.claimNo || ''}</span>
                         </div>
                     </div>
 
-                    <div class="text-center mb-10">
-                        <h1 class="text-[24px] font-black uppercase tracking-tight text-slate-900 mb-1" contenteditable="true">GIẤY ĐỀ NGHỊ THANH TOÁN / TẠM ƯNG</h1>
-                        <p class="text-[14px] italic text-slate-500 font-medium" contenteditable="true">Payment requisition</p>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div class="flex items-baseline gap-3">
-                            <span class="font-bold text-slate-700 whitespace-nowrap">Họ và tên / Full name:</span>
-                            <span class="flex-1 border-b border-slate-200 px-1 font-semibold text-slate-900" contenteditable="true">${Auth.getCurrentUser()?.name || 'Huy Hồ'}</span>
-                        </div>
-                        <div class="flex items-baseline gap-3">
-                            <span class="font-bold text-slate-700 whitespace-nowrap">Bộ phận / Division:</span>
-                            <span class="flex-1 border-b border-slate-200 px-1 font-semibold text-slate-900" contenteditable="true">Chi nhánh Đắk Lắk</span>
-                        </div>
-                        <div class="flex flex-col gap-2 mt-6">
-                            <span class="font-bold text-slate-700">Nội dung thanh toán / Description:</span>
-                            <div class="flex-1 min-h-[3em] border-b border-slate-200 leading-relaxed font-medium text-slate-800" contenteditable="true">
-                                Thanh toán hồ sơ bồi thường nạn nhân ${rec.victimName || ''}, theo số hồ sơ: ${rec.claimNo || ''}
-                            </div>
-                        </div>
-                    </div>
-
-                    <table class="print-table mt-8">
+                    <table class="print-table">
                         <thead>
                             <tr>
-                                <th class="w-12">STT<br><span>No.</span></th>
-                                <th>Diễn giải<br><span>Details</span></th>
-                                <th class="w-28">Ngày hóa đơn<br><span>Invoice Date</span></th>
-                                <th class="w-24">Số hóa đơn<br><span>Invoice No</span></th>
-                                <th class="w-32 text-right">Số tiền trước thuế<br><span>Before VAT</span></th>
-                                <th class="w-20 text-right">Thuế<br><span>VAT</span></th>
-                                <th class="w-32 text-right">Tổng cộng<br><span>Total</span></th>
+                                <th class="w-10">STT<br>No.</th>
+                                <th>Diễn giải<br>Details</th>
+                                <th class="w-24">Ngày hóa đơn<br>Invoice Date</th>
+                                <th class="w-20">Số hóa đơn<br>Invoice No</th>
+                                <th class="w-28">Số tiền trước thuế<br>Amount before VAT</th>
+                                <th class="w-20">Thuế GTGT<br>VAT</th>
+                                <th class="w-28">Tổng tiền<br>Total</th>
+                            </tr>
+                            <tr class="sub-hdr">
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                                <td>5</td>
+                                <td>6</td>
+                                <td>7</td>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td class="text-center font-bold text-slate-500">1</td>
-                                <td class="font-semibold" contenteditable="true">Chi trả tiền bảo hiểm ${rec.lossType || 'Thương tật'} - Nạn nhân: ${rec.victimName || ''}</td>
+                                <td class="text-center">1</td>
+                                <td contenteditable="true">Chi trả tiền bảo hiểm ${rec.lossType || 'Thương tật'} - Nạn nhân: ${rec.victimName || ''}</td>
                                 <td class="text-center" contenteditable="true">${ngay}/${thang}/${nam}</td>
                                 <td class="text-center" contenteditable="true">0</td>
-                                <td class="text-right font-medium" contenteditable="true">${amountStr}</td>
+                                <td class="text-right" contenteditable="true">${amountStr}</td>
                                 <td class="text-right" contenteditable="true">0</td>
-                                <td class="text-right font-black text-slate-900" contenteditable="true">${amountStr}</td>
+                                <td class="text-right" contenteditable="true">${amountStr}</td>
                             </tr>
-                            <tr class="bg-slate-50">
-                                <td colspan="2" class="text-center font-black text-slate-700 uppercase tracking-tighter">Tổng cộng / Total</td>
+                            <tr>
+                                <td colspan="2" class="text-center font-bold">Tổng cộng / Total</td>
                                 <td></td>
                                 <td></td>
                                 <td class="text-right font-bold">${amountStr}</td>
                                 <td class="text-right font-bold">0</td>
-                                <td class="text-right font-black text-blue-700 text-[14px]">${amountStr}</td>
+                                <td class="text-right font-bold">${amountStr}</td>
                             </tr>
                         </tbody>
                     </table>
 
-                    <div class="mt-6 flex flex-col gap-2 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                        <p class="font-bold text-slate-700 flex items-baseline gap-2">
-                            Bằng chữ / <span class="italic font-medium text-slate-400">in word:</span> 
-                            <span class="flex-1 font-black italic text-slate-900" contenteditable="true">${amountWords} đồng./.</span>
+                    <div class="mt-4 mb-6">
+                        <p>
+                            Bằng chữ / <span class="italic">in word:</span> 
+                            <span class="font-bold italic" contenteditable="true">${amountWords} đồng./.</span>
                         </p>
                     </div>
 
-                    <div class="mt-8 space-y-1.5 italic text-[12px] leading-relaxed text-slate-500 font-medium">
+                    <div class="mb-6 space-y-1">
                         <p>Tôi xác nhận số tiền đề nghị thanh toán/tạm ứng là trung thực, chính xác, đúng quy định và hợp pháp.</p>
-                        <p>I confirm that the amounts requested for payment is genuine, validity, accuracy and legality.</p>
+                        <p class="italic">I confirm that the amounts requested for payment is genuine, validity, accuracy and legality</p>
                     </div>
 
-                    <div class="mt-6 p-5 bg-white border border-slate-200 rounded-2xl space-y-3 shadow-sm">
-                        <p class="font-bold text-slate-700 uppercase text-[11px] tracking-widest border-b border-slate-100 pb-2 mb-3">Thông tin chuyển khoản / information bank</p>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Người thụ hưởng</p>
-                                <p class="font-black text-slate-900 text-[13px]" contenteditable="true">${rec.payeeName || rec.victimName || '—'}</p>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Số tài khoản</p>
-                                <p class="font-black text-blue-700 text-[14px] font-mono" contenteditable="true">${rec.payeeBankNo || '—'}</p>
-                            </div>
-                            <div class="col-span-2">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Tại ngân hàng</p>
-                                <p class="font-bold text-slate-800" contenteditable="true">${rec.payeeBankName || '—'}</p>
-                            </div>
+                    <div class="mb-10">
+                        <p class="font-bold">Thông tin chuyển khoản / information bank:</p>
+                        <div class="ml-2 space-y-1 mt-1">
+                            <p>Người thụ hưởng / Beneficiary name: <span class="font-bold uppercase" contenteditable="true">${rec.payeeName || rec.victimName || '—'}</span></p>
+                            <p>Tài khoản / Account number: <span class="font-bold" contenteditable="true">${rec.payeeBankNo || '—'}</span></p>
+                            <p>Tại ngân hàng / At bank: <span class="font-bold" contenteditable="true">${rec.payeeBankName || '—'}</span></p>
                         </div>
                     </div>
 
-                    <div class="mt-12 grid grid-cols-4 gap-6 text-center">
-                        <div class="flex flex-col h-36">
-                            <span class="font-black text-[12px] text-slate-700 uppercase">Người đề nghị</span>
-                            <span class="text-[10px] italic text-slate-400 font-medium">Requester</span>
-                            <div class="mt-auto pt-4 border-t border-slate-100">
-                                <p class="text-[12px] font-black text-slate-900" contenteditable="true">${Auth.getCurrentUser()?.name || 'Huy Hồ'}</p>
-                                <p class="text-[10px] font-bold text-slate-400" contenteditable="true">${ngay}/${thang}/${nam}</p>
+                    <div class="grid grid-cols-4 gap-2 text-center text-[11px]">
+                        <div class="flex flex-col">
+                            <span class="font-bold">Chữ ký người đề nghị</span>
+                            <span class="italic">Requester's signature</span>
+                            <div class="mt-16">
+                                <p class="font-bold" contenteditable="true">Tên/Name: ${Auth.getCurrentUser()?.name || 'Hồ Quang Huy'}</p>
+                                <p contenteditable="true">Ngày/Date: ${ngay}/${thang}/${nam}</p>
                             </div>
                         </div>
-                        <div class="flex flex-col h-36">
-                            <span class="font-black text-[12px] text-slate-700 uppercase">GĐ Đơn Vị</span>
-                            <span class="text-[10px] italic text-slate-400 font-medium">Verified by</span>
-                            <div class="mt-auto pt-4 border-t border-slate-100">
-                                <p class="text-[12px] font-black text-slate-300" contenteditable="true">...........................</p>
-                                <p class="text-[10px] font-bold text-slate-300" contenteditable="true">.../.../20...</p>
+                        <div class="flex flex-col">
+                            <span class="font-bold">Giám Đốc Đơn Vị</span>
+                            <span class="italic">Verified by</span>
+                            <div class="mt-16">
+                                <p class="font-bold" contenteditable="true">Tên/Name: ...........................</p>
+                                <p contenteditable="true">Ngày/Date: .../.../20...</p>
                             </div>
                         </div>
-                        <div class="flex flex-col h-36">
-                            <span class="font-black text-[12px] text-slate-700 uppercase">PT Kế Toán</span>
-                            <span class="text-[10px] italic text-slate-400 font-medium">Accountant</span>
-                            <div class="mt-auto pt-4 border-t border-slate-100">
-                                <p class="text-[12px] font-black text-slate-300" contenteditable="true">...........................</p>
-                                <p class="text-[10px] font-bold text-slate-300" contenteditable="true">.../.../20...</p>
+                        <div class="flex flex-col">
+                            <span class="font-bold">PT Kế Toán</span>
+                            <span class="italic">Approved</span>
+                            <div class="mt-16">
+                                <p class="font-bold" contenteditable="true">Tên/Name: ...........................</p>
+                                <p contenteditable="true">Ngày/Date: .../.../20...</p>
                             </div>
                         </div>
-                        <div class="flex flex-col h-36">
-                            <span class="font-black text-[12px] text-slate-700 uppercase">Lãnh đạo</span>
-                            <span class="text-[10px] italic text-slate-400 font-medium">Approved by</span>
-                            <div class="mt-auto pt-4 border-t border-slate-100">
-                                <p class="text-[12px] font-black text-slate-300" contenteditable="true">...........................</p>
-                                <p class="text-[10px] font-bold text-slate-300" contenteditable="true">.../.../20...</p>
+                        <div class="flex flex-col">
+                            <span class="font-bold">Lãnh đạo phê duyệt</span>
+                            <span class="italic">Approved by</span>
+                            <div class="mt-16">
+                                <p class="font-bold" contenteditable="true">Tên/Name: ...........................</p>
+                                <p contenteditable="true">Ngày/Date: .../.../20...</p>
                             </div>
                         </div>
                     </div>
