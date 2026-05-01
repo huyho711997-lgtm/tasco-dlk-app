@@ -4467,6 +4467,8 @@ function goView(v) {
   }
   
   if(v === 'manage_users') UsersMgmt.render();
+  if(v === 'human_claims') HumanClaims.renderTable();
+
   
   document.querySelectorAll('.nav-btn').forEach(function(el){ el.classList.remove('sidebar-active'); });
   var nb=document.getElementById('nav-'+v); if(nb)nb.classList.add('sidebar-active');
@@ -14697,9 +14699,12 @@ const HumanClaims = {
         db.ref('HumanClaims').on('value', snap => {
             const raw = snap.val() || {};
             this._data = Object.keys(raw).map(k => Object.assign({ id: k }, raw[k]))
-                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                .sort((a, b) => {
+                    const dateB = b.createdAt ? new Date(b.createdAt) : 0;
+                    const dateA = a.createdAt ? new Date(a.createdAt) : 0;
+                    return dateB - dateA;
+                });
             
-            // Luôn gọi lệnh renderTable để dữ liệu được chuẩn bị sẵn
             this.renderTable();
         });
 
@@ -14822,7 +14827,8 @@ const HumanClaims = {
         const q = (document.getElementById('hc-search-inp')?.value || '').toLowerCase();
         const stt = document.getElementById('hc-filter-status')?.value || '';
         
-        let filtered = this._data.filter(r => {
+        let filtered = (this._data || []).filter(r => {
+            if (!r) return false;
             const text = [r.claimNo, r.victimName, r.hospitalName, r.gcn].join(' ').toLowerCase();
             return text.includes(q) && (!stt || r.status === stt);
         });
@@ -15204,13 +15210,19 @@ const HumanClaims = {
             inputsToLock.forEach(el => el.disabled = false);
         }
 
-        // Hiện nút Email khi ở trạng thái Mới thêm hoặc Xin số
-        if (currIdx <= 1) document.getElementById('btn-hc-email').classList.remove('hidden');
-        else document.getElementById('btn-hc-email').classList.add('hidden');
+        // Hiện nút Email khi ở trạng thái Mới thêm, Xin số hoặc Đã có số (để có thể gửi lại nếu cần)
+        const btnEmail = document.getElementById('btn-hc-email');
+        if (btnEmail) {
+            if (currIdx <= 2) btnEmail.classList.remove('hidden');
+            else btnEmail.classList.add('hidden');
+        }
 
-        // Hiện nút In khi đã có số HSBT
-        if (currIdx >= 2) document.getElementById('btn-hc-print').classList.remove('hidden');
-        else document.getElementById('btn-hc-print').classList.add('hidden');
+        // Hiện nút In khi đã có số HSBT trở đi
+        const btnPrint = document.getElementById('btn-hc-print');
+        if (btnPrint) {
+            if (currIdx >= 2) btnPrint.classList.remove('hidden');
+            else btnPrint.classList.add('hidden');
+        }
     },
 
     nextStatus() {
