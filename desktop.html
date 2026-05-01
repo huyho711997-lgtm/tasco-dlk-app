@@ -17341,39 +17341,39 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         </div>
                     </div>
 
-                    <div class="text-center mb-8">
+                    <div class="text-center mb-1">
                         <h1 class="text-[19px] font-bold uppercase tracking-tight" contenteditable="true">THÔNG BÁO KẾT QUẢ GIẢI QUYẾT QUYỀN LỢI BẢO HIỂM</h1>
                     </div>
 
-                    <div class="space-y-1 text-[14px] mb-6 text-center">
+                    <div class="text-[14px] mb-6 text-center">
                         <p class="font-bold">Hồ sơ số: <span contenteditable="true">${rec.claimNo || rec.caseNo || '—'}</span></p>
-                        <p class="font-bold uppercase">KÍNH GỬI: <span contenteditable="true">${victimName} - ${payeeName} ${payeeRelation}</span></p>
+                        <p class="font-bold uppercase mt-4">KÍNH GỬI: <span contenteditable="true">${victimName} - ${payeeName} ${payeeRelation}</span></p>
                     </div>
 
-                    <div class="text-[14px] leading-relaxed text-justify space-y-3 mb-6">
+                    <div class="text-[14px] leading-relaxed text-justify space-y-2 mb-6">
                         <p>Căn cứ vào Hợp đồng bảo hiểm/GCNBH số: <span class="font-bold" contenteditable="true">${rec.policyNo || rec.contractNo || '—'}</span></p>
-                        <p>Công ty TNHH Bảo hiểm TASCO – CN Nam Tây Nguyên đã xem xét hồ sơ yêu cầu bồi thường của Quý khách hàng. Chúng tôi thông báo về việc giải quyết quyền lợi bảo hiểm của em <span class="font-bold" contenteditable="true">${victimName}</span> như sau:</p>
+                        <p>Công ty TNHH Bảo hiểm TASCO – Chi nhánh Đắk Lắk đã xem xét hồ sơ yêu cầu bồi thường của Quý khách hàng. Chúng tôi thông báo về việc giải quyết quyền lợi bảo hiểm của em <span class="font-bold" contenteditable="true">${victimName}</span> như sau:</p>
                     </div>
 
                     <table class="print-table">
                         <thead>
                             <tr>
-                                <th rowspan="2" style="width: 15%">Ngày rủi ro</th>
-                                <th rowspan="2" style="width: 20%">Nguyên nhân</th>
-                                <th colspan="4">Hậu quả</th>
-                                <th rowspan="2" style="width: 18%">Tổng số tiền chi trả</th>
+                                <th rowspan="2" style="width: 13%">Ngày rủi ro</th>
+                                <th rowspan="2" style="width: 18%">Nguyên nhân</th>
+                                <th colspan="4" style="padding: 4px;">Hậu quả</th>
+                                <th rowspan="2" style="width: 16%">Tổng số tiền chi trả</th>
                             </tr>
                             <tr>
-                                <th colspan="2">Thương tật/phẫu thuật/tử vong</th>
-                                <th colspan="2">Nằm viện</th>
+                                <th colspan="2" style="font-size: 11.5px; padding: 4px;">Thương tật/phẫu thuật/tử vong</th>
+                                <th colspan="2" style="font-size: 11.5px; padding: 4px;">Nằm viện</th>
                             </tr>
-                            <tr style="font-size: 11px; font-style: italic;">
+                            <tr style="font-size: 11px; font-weight: normal;">
+                                <th style="height: 25px;"></th>
                                 <th></th>
-                                <th></th>
-                                <th>Nội dung</th>
-                                <th>Số tiền</th>
-                                <th>Số ngày</th>
-                                <th>Số tiền</th>
+                                <th style="width: 16%">Nội dung</th>
+                                <th style="width: 12%">Số tiền</th>
+                                <th style="width: 8%">Số ngày</th>
+                                <th style="width: 10%">Số tiền</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -17395,13 +17395,13 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                     </div>
 
                     <div class="text-[14px] leading-relaxed text-justify space-y-4 mb-10">
-                        <p>Trên đây là nội dung số tiền Công ty TNHH Bảo hiểm TASCO – Chi nhánh Nam Tây Nguyên sẽ thanh toán cho Quý khách. Chúng tôi tin tưởng rằng việc giải quyết bồi thường đã đảm bảo quyền lợi của Quý khách. Chúng tôi xin được chia sẻ với Quý khách về rủi ro vừa qua và hy vọng rằng những điều may mắn sẽ đến với Quý khách trong thời gian tới.</p>
+                        <p>Trên đây là nội dung số tiền Công ty TNHH Bảo hiểm TASCO – Chi nhánh Đắk Lắk sẽ thanh toán cho Quý khách. Chúng tôi tin tưởng rằng việc giải quyết bồi thường đã đảm bảo quyền lợi của Quý khách. Chúng tôi xin được chia sẻ với Quý khách về rủi ro vừa qua và hy vọng rằng những điều may mắn sẽ đến với Quý khách trong thời gian tới.</p>
                         <p>Trân trọng kính chào!</p>
                     </div>
 
                     <div class="flex justify-end pr-10">
                         <div class="text-center">
-                            <p class="font-bold uppercase text-[13px]">CÔNG TY TNHH BẢO HIỂM TASCO NAM TÂY NGUYÊN</p>
+                            <p class="font-bold uppercase text-[13px]">CÔNG TY TNHH BẢO HIỂM TASCO CHI NHÁNH ĐẮK LẮK</p>
                         </div>
                     </div>
 
