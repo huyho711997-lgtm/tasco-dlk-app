@@ -17049,7 +17049,12 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         const dd = String(today.getDate()).padStart(2, '0');
         const mm = String(today.getMonth() + 1).padStart(2, '0');
         const yyyy = today.getFullYear();
-        const dateStr = `Đắk Lắk, ${dd}/${mm}/${yyyy}`;
+        const dateStr = `ngày ${dd} tháng ${mm} năm ${yyyy}`;
+
+        const fmt = (d) => d ? moment(d).format('DD/MM/YYYY') : '/ /';
+        const rangeStr = (rec.effFrom && rec.effTo) 
+            ? `Từ ${fmt(rec.effFrom)} đến ${fmt(rec.effTo)}`
+            : 'Từ / / đến / /';
 
         const html = `
         <div id="hc-premium-verify-modal" class="fixed inset-0 z-[9999] flex flex-col bg-slate-900/60 backdrop-blur-sm p-4 overflow-hidden">
@@ -17100,7 +17105,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                             <p class="text-[10px] italic mt-1">For everyone</p>
                         </div>
                         <div class="text-right italic">
-                            <p contenteditable="true">${dateStr}</p>
+                            <p contenteditable="true">Đắk Lắk, ${dateStr}</p>
                         </div>
                     </div>
 
@@ -17109,7 +17114,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                     </div>
 
                     <div class="mb-6 leading-relaxed text-justify">
-                        <p>Hiện nay chúng tôi đang thụ lý hồ sơ tổn thất của người được bảo hiểm là <span class="font-bold uppercase" contenteditable="true">${rec.victimName || '—'}</span> bị tai nạn ngày <span contenteditable="true">/ /</span>. Để có cơ sở giải quyết vụ việc, chúng tôi đề nghị Quý Ban/Đơn vị/Bộ phận kế toán xác nhận tình hình nộp phí bảo hiểm với thông tin cụ thể như sau:</p>
+                        <p>Hiện nay chúng tôi đang thụ lý hồ sơ tổn thất của người được bảo hiểm là <span class="font-bold uppercase" contenteditable="true">${rec.victimName || '—'}</span> bị tai nạn ngày <span contenteditable="true" class="font-bold">${fmt(rec.accDate)}</span>. Để có cơ sở giải quyết vụ việc, chúng tôi đề nghị Quý Ban/Đơn vị/Bộ phận kế toán xác nhận tình hình nộp phí bảo hiểm với thông tin cụ thể như sau:</p>
                     </div>
 
                     <div class="space-y-1.5 mb-10 ml-6">
@@ -17119,11 +17124,11 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         </div>
                         <div class="flex">
                             <span class="w-[200px] shrink-0">- Số GCNBH</span>
-                            <span contenteditable="true">: Chưa có</span>
+                            <span contenteditable="true">: ${rec.gcn || 'Chưa có'}</span>
                         </div>
                         <div class="flex">
                             <span class="w-[200px] shrink-0">- Đơn vị được bảo hiểm</span>
-                            <span contenteditable="true">: —</span>
+                            <span contenteditable="true" class="font-bold uppercase">: ${rec.companyName || '—'}</span>
                         </div>
                         <div class="flex">
                             <span class="w-[200px] shrink-0">- Đối tượng bảo hiểm</span>
@@ -17131,15 +17136,15 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         </div>
                         <div class="flex">
                             <span class="w-[200px] shrink-0">- Loại hình bảo hiểm</span>
-                            <span contenteditable="true">: —</span>
+                            <span contenteditable="true" class="font-bold">: ${rec.insType || '—'}</span>
                         </div>
                         <div class="flex">
                             <span class="w-[200px] shrink-0">- Thời hạn bảo hiểm</span>
-                            <span contenteditable="true">: Từ / / đến / /</span>
+                            <span contenteditable="true" class="font-bold">: ${rangeStr}</span>
                         </div>
                         <div class="flex">
                             <span class="w-[200px] shrink-0">- Ngày cấp</span>
-                            <span contenteditable="true">: ${dd}/${mm}/${yyyy}</span>
+                            <span contenteditable="true">: ${fmt(rec.accDate)}</span>
                         </div>
                         <div class="flex">
                             <span class="w-[200px] shrink-0">- Đơn vị cấp bảo hiểm</span>
@@ -17181,7 +17186,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                     </div>
 
                     <div class="text-right italic mb-8 mr-10">
-                        <p contenteditable="true">${dateStr}</p>
+                        <p contenteditable="true">Đắk Lắk, ${dateStr}</p>
                     </div>
 
                     <div class="grid grid-cols-2 gap-10 text-center">
