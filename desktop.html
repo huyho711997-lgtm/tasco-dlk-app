@@ -16437,6 +16437,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         const body = `Kính gửi Ban XCG & Con Người,\n\nĐơn vị Tasco Đắk Lắk xin cấp số HSBT cho trường hợp phát sinh trong năm ${currentYear}:\n\n- Người được bảo hiểm: ${victim.toUpperCase()}\n- Số hợp đồng/GCN: ${hdog}\n- Ước tính bồi thường: ${total}\n\nKính mong Quý Ban xem xét và cấp số để đơn vị tiếp tục thụ lý.\n\nTrân trọng cảm ơn.`;
         
         const mailtoUrl = `mailto:banxcg@tasco.com.vn?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        const outlookWebUrl = `https://outlook.office.com/mail/deeplink/compose?to=banxcg@tasco.com.vn&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
         Swal.fire({
             title: '<div class="flex items-center gap-3 text-indigo-600"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2H3m14 4h.01M9 16h.01"></path></svg> Soạn Email xin cấp số</div>',
@@ -16463,12 +16464,16 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                 </div>
             `,
             showCancelButton: true,
-            confirmButtonText: '<div class="flex items-center gap-2 font-bold">Mở App Email <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg></div>',
+            showDenyButton: true,
+            confirmButtonText: '<div class="flex items-center gap-2 font-bold">Outlook Web <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg></div>',
+            denyButtonText: '<div class="flex items-center gap-2 font-bold text-[10px]">Dùng App (Outlook/Mail)</div>',
             cancelButtonText: 'Đóng',
-            confirmButtonColor: '#4f46e5',
-            customClass: { popup: 'rnd w-[550px]' }
+            confirmButtonColor: '#0078d4',
+            denyButtonColor: '#4f46e5',
+            customClass: { popup: 'rnd w-[600px]' }
         }).then(r => {
-            if(r.isConfirmed) { window.location.href = mailtoUrl; }
+            if(r.isConfirmed) { window.open(outlookWebUrl, '_blank'); }
+            else if(r.isDenied) { window.location.href = mailtoUrl; }
         });
     },
 
