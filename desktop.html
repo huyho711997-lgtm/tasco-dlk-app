@@ -16856,6 +16856,13 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         const amountStr = amount.toLocaleString('vi-VN');
         const amountWords = this._docTien(amount);
 
+        const toTitleCase = (str) => {
+            if (!str) return '—';
+            return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        };
+        const victimName = toTitleCase(rec.victimName);
+        const payeeName = toTitleCase(rec.payeeName || rec.victimName);
+
         const html = `
         <div id="hc-payment-req-modal" class="fixed inset-0 z-[9999] flex flex-col bg-slate-900/60 backdrop-blur-sm p-4 overflow-hidden">
             <div class="flex items-center justify-between mb-4 px-2">
@@ -16923,7 +16930,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         </div>
                         <div class="flex items-baseline">
                             <span class="w-[170px] shrink-0">Nội dung thanh toán / Description:</span>
-                            <span class="flex-1" contenteditable="true">Thanh toán hồ sơ bồi thường nạn nhân ${rec.victimName || ''}, theo số hồ sơ: ${rec.claimNo || ''}</span>
+                            <span class="flex-1" contenteditable="true">Thanh toán hồ sơ bồi thường nạn nhân ${victimName}, theo số hồ sơ: ${rec.claimNo || ''}</span>
                         </div>
                     </div>
 
@@ -16951,7 +16958,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         <tbody>
                             <tr>
                                 <td class="text-center">1</td>
-                                <td contenteditable="true" class="font-medium">Chi trả tiền bảo hiểm ${rec.lossType || 'Thương tật'} - Nạn nhân: ${rec.victimName || ''}</td>
+                                <td contenteditable="true" class="font-medium">Chi trả tiền bảo hiểm ${rec.lossType || 'Thương tật'} - Nạn nhân: ${victimName}</td>
                                 <td class="text-center" contenteditable="true">${ngay}/${thang}/${nam}</td>
                                 <td class="text-center" contenteditable="true">0</td>
                                 <td class="text-right" contenteditable="true">${amountStr}</td>
@@ -16984,7 +16991,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                     <div class="mb-8">
                         <p class="font-bold border-b border-black/10 pb-1 mb-2">Thông tin chuyển khoản / information bank:</p>
                         <div class="ml-1 space-y-0.5 mt-1">
-                            <p>Người thụ hưởng / Beneficiary name: <span class="font-bold uppercase" contenteditable="true">${rec.payeeName || rec.victimName || '—'}</span></p>
+                            <p>Người thụ hưởng / Beneficiary name: <span class="font-bold" contenteditable="true">${payeeName}</span></p>
                             <p>Tài khoản / Account number: <span class="font-bold" contenteditable="true">${rec.payeeBankNo || '—'}</span></p>
                             <p>Tại ngân hàng / At bank: <span class="font-bold" contenteditable="true">${rec.payeeBankName || '—'}</span></p>
                         </div>
