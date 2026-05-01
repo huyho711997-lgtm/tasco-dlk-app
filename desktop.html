@@ -14707,12 +14707,11 @@ const HumanClaims = {
         });
 
         // Theo dõi bất kỳ sự thay đổi nào trong form bồi thường con người
-        document.getElementById('hc-modal-box')?.addEventListener('input', () => {
-            this._isModified = true;
-        });
-        document.getElementById('hc-modal-box')?.addEventListener('change', () => {
-            this._isModified = true;
-        });
+        const modalBox = document.getElementById('hc-modal-box');
+        if (modalBox) {
+            modalBox.addEventListener('input', () => { this._isModified = true; });
+            modalBox.addEventListener('change', () => { this._isModified = true; });
+        }
 
         // Đóng gợi ý khi click ra ngoài
         document.addEventListener('click', (e) => {
@@ -14901,9 +14900,11 @@ const HumanClaims = {
         this._isModified = false; // Reset cờ thay đổi khi mở form mới hoặc mở chi tiết
         
         if (id) {
-            const rec = this._data.find(r => r.id === id);
-            if (rec) this._fillForm(rec);
-            document.getElementById('hc-m-title').textContent = rec.claimNo || 'Chi tiết hồ sơ';
+            const rec = (this._data || []).find(r => r.id === id);
+            if (rec) {
+                this._fillForm(rec);
+                document.getElementById('hc-m-title').textContent = rec.claimNo || 'Chi tiết hồ sơ';
+            }
         } else {
             document.getElementById('hc-m-title').textContent = 'Thêm hồ sơ mới';
             this._updateUIStatus('new');
@@ -15222,14 +15223,12 @@ const HumanClaims = {
                 // Đổi tên nút tùy theo giai đoạn
                 if (currIdx >= 3) {
                     btnEmail.innerHTML = `<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email xin nguồn`;
-                    btnEmail.classList.replace('bg-indigo-50', 'bg-amber-50');
-                    btnEmail.classList.replace('text-indigo-600', 'text-amber-600');
-                    btnEmail.classList.replace('border-indigo-200', 'border-amber-200');
+                    btnEmail.classList.remove('bg-indigo-50', 'text-indigo-600', 'border-indigo-200');
+                    btnEmail.classList.add('bg-amber-50', 'text-amber-600', 'border-amber-200');
                 } else {
                     btnEmail.innerHTML = `<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email xin số`;
-                    btnEmail.classList.replace('bg-amber-50', 'bg-indigo-50');
-                    btnEmail.classList.replace('text-amber-600', 'text-indigo-600');
-                    btnEmail.classList.replace('border-amber-200', 'border-indigo-200');
+                    btnEmail.classList.remove('bg-amber-50', 'text-amber-600', 'border-amber-200');
+                    btnEmail.classList.add('bg-indigo-50', 'text-indigo-600', 'border-indigo-200');
                 }
             } else {
                 btnEmail.classList.add('hidden');
