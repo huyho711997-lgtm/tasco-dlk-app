@@ -17278,11 +17278,15 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                     <style>
                         #print-cccd-area { 
                             width: 210mm; min-height: 297mm; box-sizing: border-box; 
-                            padding: 15mm;
+                            padding: 20mm 0;
                             background: #fff;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
                         }
                         .cccd-frame {
-                            width: 155mm; 
+                            width: 150mm; 
                             aspect-ratio: 1.58;
                             border: 1px solid #e2e8f0;
                             border-radius: 12px;
@@ -17292,7 +17296,6 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                             align-items: center;
                             justify-content: center;
                             position: relative;
-                            group;
                         }
                         .cccd-frame img {
                             width: 100%;
@@ -17319,12 +17322,19 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                             background: #3b82f6;
                         }
                         @media print {
+                            @page { size: A4; margin: 0; }
                             body * { visibility: hidden; }
                             #print-cccd-area, #print-cccd-area * { visibility: visible; }
-                            #print-cccd-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 15mm 0; }
-                            .a4-page { border: none !important; box-shadow: none !important; width: 100% !important; height: auto !important; }
-                            .cccd-frame { box-shadow: none; border: 1px solid #000; }
+                            #print-cccd-area { 
+                                position: absolute; 
+                                left: 0; right: 0; top: 0;
+                                width: 210mm; 
+                                margin: 0 auto; 
+                                padding: 20mm 0; 
+                                border: none !important;
+                            }
                             .change-img-btn { display: none !important; }
+                            .cccd-frame { border: 1px solid #000; box-shadow: none !important; }
                         }
                     </style>
 
