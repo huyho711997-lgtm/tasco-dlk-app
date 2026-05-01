@@ -15343,34 +15343,28 @@ const HumanClaims = {
 
             let rows = '';
             if (!filtered.length) {
-                rows = '<tr><td colspan="4" class="px-4 py-20 text-center"><div class="flex flex-col items-center gap-3 opacity-40"><svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m21 21-4.35-4.35"/><circle cx="11" cy="11" r="8"/><path d="M8 11h6"/></svg><p class="text-sm font-bold">Không tìm thấy dữ liệu phù hợp</p></div></td></tr>';
+                rows = '<tr><td colspan="4" class="px-4 py-10 text-center text-slate-400 font-bold text-xs italic">Không tìm thấy dữ liệu phù hợp</td></tr>';
             } else {
                 rows = filtered.map(r => {
                     const min = r.minPct != null ? r.minPct : null;
                     const max = r.maxPct != null ? r.maxPct : null;
                     let rangeStr = '--';
                     if (min !== null && max !== null) {
-                        rangeStr = (min === max) ? `${min}%` : `${min} - ${max}%`;
+                        rangeStr = (min === max) ? `${min}%` : `${min}-${max}%`;
                     } else if (min !== null || max !== null) {
                         rangeStr = `${min || max}%`;
                     }
 
-                    return `<tr class="cursor-pointer transition-all hover:bg-indigo-50/50 border-b border-slate-50 group" 
-                                onclick="HumanClaims._pickInjuryRow(this)"
-                                data-stt="${r.stt}" 
-                                data-name="${(r.name||'').replace(/"/g,'&quot;')}" 
-                                data-min="${min||0}" 
-                                data-max="${max||0}" 
-                                data-range="${rangeStr}">
-                        <td class="px-3 py-3.5 text-center font-black text-slate-400 text-[11px] w-14 tabular-nums">${r.stt || '—'}</td>
-                        <td class="px-4 py-3.5">
-                            <div class="font-bold text-slate-700 text-[13px] leading-snug group-hover:text-indigo-600 transition-colors">${r.name || '—'}</div>
+                    return `<tr class="cursor-pointer hover:bg-blue-50 border-b border-slate-100 transition-colors group" onclick="HumanClaims._pickInjuryRow(this)" data-stt="${r.stt}" data-name="${(r.name||'').replace(/"/g,'&quot;')}" data-min="${min||0}" data-max="${max||0}" data-range="${rangeStr}">
+                        <td class="px-2 py-2 text-center font-bold text-slate-500 text-[11px] bg-slate-50/50 w-10">${r.stt || ''}</td>
+                        <td class="px-3 py-2">
+                            <div class="text-[12.5px] font-semibold text-slate-700 leading-tight group-hover:text-blue-700">${r.name || '—'}</div>
                         </td>
-                        <td class="px-3 py-3.5 text-center w-20">
-                            <span class="inline-block px-2 py-1 rounded-md bg-blue-50 text-blue-600 font-black text-[11px] min-w-[42px] tabular-nums">${min !== null ? min+'%' : '—'}</span>
+                        <td class="px-2 py-2 text-center w-16">
+                            <span class="text-[11.5px] font-black text-blue-600">${min !== null ? min+'%' : '—'}</span>
                         </td>
-                        <td class="px-3 py-3.5 text-center w-20">
-                            <span class="inline-block px-2 py-1 rounded-md bg-rose-50 text-rose-600 font-black text-[11px] min-w-[42px] tabular-nums">${max !== null ? max+'%' : '—'}</span>
+                        <td class="px-2 py-2 text-center w-16">
+                            <span class="text-[11.5px] font-black text-rose-600">${max !== null ? max+'%' : '—'}</span>
                         </td>
                     </tr>`;
                 }).join('');
@@ -15378,74 +15372,76 @@ const HumanClaims = {
 
             const tbody = document.getElementById('hc-lookup-tbody');
             if (tbody) tbody.innerHTML = rows;
-
             const info = document.getElementById('hc-lookup-info');
-            if (info) info.innerHTML = `<span class="text-slate-400">Kết quả:</span> <span class="text-indigo-600">${filtered.length} mục</span>`;
+            if (info) info.textContent = `${filtered.length} kết quả`;
 
-            // Cập nhật giao diện tab
+            // Tabs UI
             const btnTT = document.getElementById('hc-lookup-tab-tt');
             const btnPT = document.getElementById('hc-lookup-tab-pt');
             if (btnTT && btnPT) {
-                const activeCls = ['bg-white', 'text-indigo-600', 'shadow-sm', 'ring-1', 'ring-slate-200'];
-                const inactiveCls = ['text-slate-500', 'hover:text-slate-700'];
-                
+                const active = 'bg-blue-600 text-white shadow-sm';
+                const inactive = 'text-slate-500 hover:bg-slate-100';
                 if (tab === 'thuong_tat') {
-                    btnTT.classList.add(...activeCls); btnTT.classList.remove(...inactiveCls);
-                    btnPT.classList.remove(...activeCls); btnPT.classList.add(...inactiveCls);
+                    btnTT.className = `flex-1 py-1.5 text-[11px] font-bold rounded-md transition-all ${active}`;
+                    btnPT.className = `flex-1 py-1.5 text-[11px] font-bold rounded-md transition-all ${inactive}`;
                 } else {
-                    btnPT.classList.add(...activeCls); btnPT.classList.remove(...inactiveCls);
-                    btnTT.classList.remove(...activeCls); btnTT.classList.add(...inactiveCls);
+                    btnPT.className = `flex-1 py-1.5 text-[11px] font-bold rounded-md transition-all ${active}`;
+                    btnTT.className = `flex-1 py-1.5 text-[11px] font-bold rounded-md transition-all ${inactive}`;
                 }
             }
         };
 
-        // 4. Tạo HTML cho dialog
         const html = `
-        <div class="text-left font-sans -mx-2">
-            <div class="flex flex-col sm:flex-row items-center gap-4 mb-5 px-1">
-                <div class="flex bg-slate-100 p-1 rounded-xl shrink-0 w-full sm:w-auto shadow-inner border border-slate-200/50">
-                    <button id="hc-lookup-tab-tt" type="button" onclick="HumanClaims._renderLookupFn('thuong_tat')" class="flex-1 sm:flex-none px-6 py-2 text-[11px] font-black rounded-lg transition-all tracking-tight">THƯƠNG TẬT</button>
-                    <button id="hc-lookup-tab-pt" type="button" onclick="HumanClaims._renderLookupFn('phau_thuat')" class="flex-1 sm:flex-none px-6 py-2 text-[11px] font-black rounded-lg transition-all tracking-tight">PHẪU THUẬT</button>
+        <div class="text-left font-sans flex flex-col bg-white -m-6 h-[85vh]">
+            <!-- Header Compact -->
+            <div class="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+                <div>
+                    <h3 class="text-[14px] font-black text-slate-800 uppercase tracking-tight">Tra cứu danh mục thương tật</h3>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mt-0.5">Hồ sơ: <span class="text-blue-600">${lossType}</span></p>
                 </div>
-                <div class="relative flex-1 w-full group">
-                    <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                    </div>
+                <button onclick="Swal.close()" class="p-1.5 hover:bg-slate-200 rounded-md transition-colors text-slate-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="p-3 bg-white border-b border-slate-100 flex flex-col gap-2">
+                <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+                    <button id="hc-lookup-tab-tt" onclick="HumanClaims._renderLookupFn('thuong_tat')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md transition-all">THƯƠNG TẬT</button>
+                    <button id="hc-lookup-tab-pt" onclick="HumanClaims._renderLookupFn('phau_thuat')" class="flex-1 py-1.5 text-[11px] font-bold rounded-md transition-all">PHẪU THUẬT</button>
+                </div>
+                <div class="relative">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                     <input id="hc-lookup-search" type="text" oninput="HumanClaims._renderLookupFn()" 
-                        class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-semibold text-slate-700 outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-50 transition-all placeholder:text-slate-400 placeholder:font-medium" 
-                        placeholder="Tìm kiếm theo STT, tên hoặc tỷ lệ...">
+                        class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-semibold text-slate-700 outline-none focus:border-blue-500 focus:bg-white transition-all placeholder:text-slate-400" 
+                        placeholder="Tìm theo STT, tên hoặc tỷ lệ...">
                 </div>
             </div>
-            
-            <div class="rounded-2xl border border-slate-200 overflow-hidden shadow-2xl bg-white">
-                <div class="max-h-[55vh] overflow-y-auto custom-scrollbar scroll-smooth">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="sticky top-0 bg-slate-50/95 backdrop-blur-md z-10 border-b border-slate-200">
+
+            <!-- Table Area -->
+            <div class="flex-1 overflow-hidden flex flex-col bg-white">
+                <div class="overflow-y-auto flex-1 custom-scrollbar">
+                    <table class="w-full text-left border-collapse table-fixed">
+                        <thead class="sticky top-0 bg-slate-700 text-white z-10">
                             <tr>
-                                <th class="px-3 py-3.5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center w-14">STT</th>
-                                <th class="px-4 py-3.5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Danh mục chi tiết</th>
-                                <th class="px-3 py-3.5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center w-20">Mức Min</th>
-                                <th class="px-3 py-3.5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center w-20">Mức Max</th>
+                                <th class="px-2 py-2 text-[10px] font-bold uppercase tracking-wider text-center w-10">STT</th>
+                                <th class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider">Danh mục chi tiết</th>
+                                <th class="px-2 py-2 text-[10px] font-bold uppercase tracking-wider text-center w-16">Min</th>
+                                <th class="px-2 py-2 text-[10px] font-bold uppercase tracking-wider text-center w-16">Max</th>
                             </tr>
                         </thead>
-                        <tbody id="hc-lookup-tbody" class="divide-y divide-slate-50"></tbody>
+                        <tbody id="hc-lookup-tbody" class="divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
             </div>
-            
-            <div class="flex items-center justify-between mt-4 px-2">
-                <div id="hc-lookup-info" class="text-[12px] font-bold"></div>
-                <div class="flex items-center gap-3">
-                    <span class="flex items-center gap-1.5 text-[11px] font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full ring-1 ring-amber-100">
-                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>
-                        Nhấn để chọn
-                    </span>
-                    <button onclick="Swal.close()" class="px-4 py-1.5 text-[12px] font-black text-slate-500 hover:text-slate-800 transition-colors uppercase tracking-tight">Đóng</button>
+
+            <!-- Footer -->
+            <div class="px-4 py-2 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+                <span id="hc-lookup-info" class="text-[11px] font-bold text-slate-500 italic"></span>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 uppercase tracking-tighter animate-pulse">Nhấn dòng để chọn</span>
                 </div>
             </div>
         </div>`;
 
-        // 5. Gắn hàm render vào HumanClaims
         this._lookupTab = activeTab;
         this._renderLookupFn = (newTab) => {
             if (newTab) this._lookupTab = newTab;
@@ -15454,26 +15450,16 @@ const HumanClaims = {
         };
 
         Swal.fire({
-            title: `<div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
-                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                </div>
-                <div class="text-left">
-                    <div class="text-[17px] font-black text-slate-800 leading-tight tracking-tight uppercase">Bảng Tỷ Lệ Thương Tật</div>
-                    <div class="flex items-center gap-2 mt-1">
-                        <span class="text-[10px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md uppercase tracking-tighter">Hồ sơ: ${lossType}</span>
-                        <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-tighter">Tra cứu thông minh</span>
-                    </div>
-                </div>
-            </div>`,
             html: html,
-            width: 850,
+            width: 800,
             showConfirmButton: false,
             showCancelButton: false,
-            customClass: { popup: 'rnd', title: 'px-6 pt-6 border-b border-slate-100/80 pb-5 bg-slate-50/30' },
+            padding: 0,
+            background: '#fff',
+            customClass: { popup: 'rounded-lg overflow-hidden' },
             didOpen: () => {
                 this._renderLookupFn(activeTab);
-                setTimeout(() => document.getElementById('hc-lookup-search')?.focus(), 300);
+                setTimeout(() => document.getElementById('hc-lookup-search')?.focus(), 200);
             }
         });
     },
