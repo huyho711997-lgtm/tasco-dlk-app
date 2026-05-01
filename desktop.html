@@ -2013,19 +2013,26 @@ textarea.inp { resize:vertical; }
                 </div>
                 <div class="p-4 space-y-3">
                   <div class="grid grid-cols-12 gap-3">
-                    <div class="col-span-6 relative">
+                    <div class="col-span-4 relative">
                         <label class="lbl">Người được Bảo hiểm</label>
                         <input id="hc-victimName" class="inp font-bold text-cyan-900 uppercase" oninput="HumanClaims.searchInsured(this.value)" autocomplete="off" placeholder="Nhập tên để tìm kiếm...">
                         <!-- Dropdown gợi ý NĐBH -->
                         <div id="hc-insured-suggestions" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl z-[100] hidden overflow-hidden max-h-[280px] overflow-y-auto border-t-4 border-t-cyan-500 animate__animated animate__fadeIn animate__faster"></div>
                     </div>
                     <div class="col-span-2"><label class="lbl">Tuổi</label><input id="hc-victimAge" type="number" class="inp text-center font-bold text-cyan-900 text-[13px]" placeholder="VD: 35"></div>
-                    <div class="col-span-4"><label class="lbl">Loại tổn thất</label>
+                    <div class="col-span-3"><label class="lbl">Loại tổn thất</label>
                       <select id="hc-lossType" class="inp font-bold text-slate-700">
                         <option value="Thương tật">Thương tật</option>
                         <option value="Phẫu thuật">Phẫu thuật</option>
                         <option value="Tử vong">Tử vong</option>
                       </select>
+                    </div>
+                    <div class="col-span-3">
+                        <label class="lbl">Phương thức điều trị</label>
+                        <select id="hc-treatmentMethod" class="inp font-bold text-blue-700" onchange="HumanClaims.calculateTotal()">
+                            <option value="Đông y" selected>Đông y (0.3% Mức D)</option>
+                            <option value="Tây y">Tây y (0.5% Mức D)</option>
+                        </select>
                     </div>
                   </div>
                   
@@ -2042,16 +2049,7 @@ textarea.inp { resize:vertical; }
                       <div><label class="lbl">Nơi điều trị</label><input id="hc-hospitalName" class="inp font-bold text-teal-700" placeholder="Tên bệnh viện / Phòng khám..."></div>
                   </div>
 
-                  <div class="grid grid-cols-2 gap-3 mt-3">
-                      <div>
-                          <label class="lbl">Phương thức điều trị</label>
-                          <select id="hc-treatmentMethod" class="inp font-bold text-blue-700" onchange="HumanClaims.calculateTotal()">
-                              <option value="Đông y" selected>Đông y (0.3% Mức D)</option>
-                              <option value="Tây y">Tây y (0.5% Mức D)</option>
-                          </select>
-                      </div>
-                      <div></div>
-                  </div>
+
                   <div><label class="lbl">Nguyên nhân tai nạn</label><textarea id="hc-accCause" rows="2" class="inp resize-none"></textarea></div>
                   
                   <div class="p-3 bg-cyan-50/30 rounded-lg border border-cyan-100 mt-2">
