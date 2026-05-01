@@ -16430,15 +16430,53 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
     generateEmail() {
         const victim = document.getElementById('hc-victimName').value || '___';
         const hdog = document.getElementById('hc-contractNo').value || '___';
-        const msg = `Kính gửi Ban XCG & Con Người,\n\nĐơn vị Tasco Đắk Lắk xin cấp số HSBT cho trường hợp:\n- NĐBH: ${victim}\n- Thuộc HĐ: ${hdog}\n- Ước tính BT: ${document.getElementById('hc-calc-total').textContent}\n\nTrân trọng.`;
+        const total = document.getElementById('hc-calc-total').textContent;
+        const currentYear = new Date().getFullYear();
         
+        const subject = `[TASCO ĐẮK LẮK] Xin cấp số HSBT - NĐBH: ${victim.toUpperCase()} - HĐ: ${hdog}`;
+        const body = `Kính gửi Ban XCG & Con Người,\n\nĐơn vị Tasco Đắk Lắk xin cấp số HSBT cho trường hợp phát sinh trong năm ${currentYear}:\n\n- Người được bảo hiểm: ${victim.toUpperCase()}\n- Số hợp đồng/GCN: ${hdog}\n- Ước tính bồi thường: ${total}\n\nKính mong Quý Ban xem xét và cấp số để đơn vị tiếp tục thụ lý.\n\nTrân trọng cảm ơn.`;
+        
+        const mailtoUrl = `mailto:banxcg@tasco.com.vn?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
         Swal.fire({
-            title: 'Nội dung Email',
-            html: `<textarea rows="6" class="inp w-full text-sm font-mono p-3 bg-slate-50">${msg}</textarea>`,
-            confirmButtonText: 'Copy', customClass: {popup:'rnd'}
+            title: '<div class="flex items-center gap-3 text-indigo-600"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2H3m14 4h.01M9 16h.01"></path></svg> Soạn Email xin cấp số</div>',
+            html: `
+                <div class="text-left space-y-4 mt-4">
+                    <div>
+                        <label class="text-[11px] font-black text-slate-400 uppercase mb-1 block">Tiêu đề Email</label>
+                        <div class="flex gap-2">
+                            <input id="email-subject" class="inp flex-1 text-sm font-bold bg-slate-50 border-slate-200" value="${subject}" readonly>
+                            <button onclick="HumanClaims.copyText('email-subject')" class="px-3 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors" title="Copy tiêu đề">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-black text-slate-400 uppercase mb-1 block">Nội dung Email</label>
+                        <div class="relative">
+                            <textarea id="email-body" rows="8" class="inp w-full text-[13px] font-medium leading-relaxed bg-slate-50 border-slate-200 p-4 resize-none" readonly>${body}</textarea>
+                            <button onclick="HumanClaims.copyText('email-body')" class="absolute top-3 right-3 p-2 bg-white/80 backdrop-blur shadow-sm border border-slate-200 text-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white transition-all">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: '<div class="flex items-center gap-2 font-bold">Mở App Email <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg></div>',
+            cancelButtonText: 'Đóng',
+            confirmButtonColor: '#4f46e5',
+            customClass: { popup: 'rnd w-[550px]' }
         }).then(r => {
-            if(r.isConfirmed) { navigator.clipboard.writeText(msg); Toast.fire({icon:'success', title:'Đã copy!'}); }
+            if(r.isConfirmed) { window.location.href = mailtoUrl; }
         });
+    },
+
+    copyText(id) {
+        const el = document.getElementById(id);
+        el.select();
+        navigator.clipboard.writeText(el.value);
+        Toast.fire({ icon: 'success', title: 'Đã copy vào bộ nhớ tạm!' });
     },
 
     printDossier() {
