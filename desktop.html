@@ -16869,7 +16869,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
 
             <div class="flex-1 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col items-center p-8 overflow-y-auto custom-scrollbar" id="payment-req-container">
                 <!-- A4 CONTENT START -->
-                <div class="a4-page bg-white p-[20mm] shadow-lg relative text-black leading-normal font-serif text-[12px] print:p-0 print:shadow-none" id="print-area">
+                <div class="a4-page bg-white p-[15mm_20mm] shadow-lg relative text-black leading-[1.2] font-serif text-[12px] print:p-0 print:shadow-none" id="print-area">
                     <style>
                         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
                         .a4-page { 
@@ -16880,38 +16880,38 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         .a4-page [contenteditable] { outline: none; border-bottom: 1px dashed transparent; transition: all 0.2s; }
                         .a4-page [contenteditable]:hover { border-bottom-color: #cbd5e1; background: #f8fafc; }
                         .a4-page [contenteditable]:focus { border-bottom-color: #3b82f6; background: #eff6ff; }
-                        .print-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-                        .print-table th, .print-table td { border: 1px solid #000; padding: 6px 8px; font-size: 11px; line-height: 1.3; }
-                        .print-table th { text-align: center; font-weight: 700; }
-                        .print-table .sub-hdr td { text-align: center; font-style: italic; font-size: 10px; height: 20px; }
+                        .print-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+                        .print-table th, .print-table td { border: 1px solid #000; padding: 4px 6px; font-size: 11px; line-height: 1.2; }
+                        .print-table th { text-align: center; font-weight: 700; background: #fafafa; }
+                        .print-table .sub-hdr td { text-align: center; font-style: italic; font-size: 9px; height: 16px; background: #fff; }
                         @media print {
                             body * { visibility: hidden; }
                             #print-area, #print-area * { visibility: visible; }
                             #print-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
-                            .a4-page { border: none !important; box-shadow: none !important; width: 100% !important; height: auto !important; padding: 10mm !important; }
+                            .a4-page { border: none !important; box-shadow: none !important; width: 100% !important; height: auto !important; padding: 5mm 10mm !important; }
                         }
                     </style>
 
-                    <div class="mb-6">
-                        <img src="https://tascoinsurance.vn/wp-content/uploads/2023/10/logo-tasco-insurance.png" style="height:42px">
+                    <div class="mb-4">
+                        <img src="https://tascoinsurance.vn/wp-content/uploads/2023/10/logo-tasco-insurance.png" style="height:38px" onerror="this.src='https://lh3.googleusercontent.com/d/1bpOB60B7o1NDwahpZsVxct9PbfdwvKmK'">
                     </div>
 
-                    <div class="text-center mb-8">
-                        <h1 class="text-[20px] font-bold uppercase tracking-tight mb-1" contenteditable="true">GIẤY ĐỀ NGHỊ THANH TOÁN/TẠM ƯNG</h1>
-                        <p class="text-[16px]" contenteditable="true">Payment requisition</p>
+                    <div class="text-center mb-6">
+                        <h1 class="text-[19px] font-black uppercase tracking-tight mb-0.5" contenteditable="true">GIẤY ĐỀ NGHỊ THANH TOÁN/TẠM ƯNG</h1>
+                        <p class="text-[15px] font-medium" contenteditable="true">Payment requisition</p>
                     </div>
 
-                    <div class="space-y-2 mb-6">
+                    <div class="space-y-1 mb-5">
                         <div class="flex items-baseline">
-                            <span class="w-[180px]">Họ và tên / Full name:</span>
+                            <span class="w-[170px] shrink-0">Họ và tên / Full name:</span>
                             <span class="font-bold" contenteditable="true">${Auth.getCurrentUser()?.name || 'Hồ Quang Huy'}</span>
                         </div>
                         <div class="flex items-baseline">
-                            <span class="w-[180px]">Bộ phận / Division:</span>
+                            <span class="w-[170px] shrink-0">Bộ phận / Division:</span>
                             <span contenteditable="true">Chi nhánh Đắk Lắk</span>
                         </div>
                         <div class="flex items-baseline">
-                            <span class="w-[180px]">Nội dung thanh toán / Description:</span>
+                            <span class="w-[170px] shrink-0">Nội dung thanh toán / Description:</span>
                             <span class="flex-1" contenteditable="true">Thanh toán hồ sơ bồi thường nạn nhân ${rec.victimName || ''}, theo số hồ sơ: ${rec.claimNo || ''}</span>
                         </div>
                     </div>
@@ -16921,11 +16921,11 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                             <tr>
                                 <th class="w-10">STT<br>No.</th>
                                 <th>Diễn giải<br>Details</th>
-                                <th class="w-24">Ngày hóa đơn<br>Invoice Date</th>
+                                <th class="w-22">Ngày hóa đơn<br>Invoice Date</th>
                                 <th class="w-20">Số hóa đơn<br>Invoice No</th>
-                                <th class="w-28">Số tiền trước thuế<br>Amount before VAT</th>
-                                <th class="w-20">Thuế GTGT<br>VAT</th>
-                                <th class="w-28">Tổng tiền<br>Total</th>
+                                <th class="w-26">Số tiền trước thuế<br>Amount before VAT</th>
+                                <th class="w-18">Thuế GTGT<br>VAT</th>
+                                <th class="w-26">Tổng tiền<br>Total</th>
                             </tr>
                             <tr class="sub-hdr">
                                 <td>1</td>
@@ -16940,76 +16940,76 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         <tbody>
                             <tr>
                                 <td class="text-center">1</td>
-                                <td contenteditable="true">Chi trả tiền bảo hiểm ${rec.lossType || 'Thương tật'} - Nạn nhân: ${rec.victimName || ''}</td>
+                                <td contenteditable="true" class="font-medium">Chi trả tiền bảo hiểm ${rec.lossType || 'Thương tật'} - Nạn nhân: ${rec.victimName || ''}</td>
                                 <td class="text-center" contenteditable="true">${ngay}/${thang}/${nam}</td>
                                 <td class="text-center" contenteditable="true">0</td>
                                 <td class="text-right" contenteditable="true">${amountStr}</td>
                                 <td class="text-right" contenteditable="true">0</td>
-                                <td class="text-right" contenteditable="true">${amountStr}</td>
+                                <td class="text-right font-bold" contenteditable="true">${amountStr}</td>
                             </tr>
                             <tr>
-                                <td colspan="2" class="text-center font-bold">Tổng cộng / Total</td>
+                                <td colspan="2" class="text-center font-bold uppercase text-[10px]">Tổng cộng / Total</td>
                                 <td></td>
                                 <td></td>
                                 <td class="text-right font-bold">${amountStr}</td>
                                 <td class="text-right font-bold">0</td>
-                                <td class="text-right font-bold">${amountStr}</td>
+                                <td class="text-right font-black">${amountStr}</td>
                             </tr>
                         </tbody>
                     </table>
 
-                    <div class="mt-4 mb-6">
+                    <div class="mt-3 mb-5">
                         <p>
                             Bằng chữ / <span class="italic">in word:</span> 
                             <span class="font-bold italic" contenteditable="true">${amountWords} đồng./.</span>
                         </p>
                     </div>
 
-                    <div class="mb-6 space-y-1">
+                    <div class="mb-5 space-y-0.5 text-[11.5px]">
                         <p>Tôi xác nhận số tiền đề nghị thanh toán/tạm ứng là trung thực, chính xác, đúng quy định và hợp pháp.</p>
-                        <p class="italic">I confirm that the amounts requested for payment is genuine, validity, accuracy and legality</p>
+                        <p class="italic opacity-80">I confirm that the amounts requested for payment is genuine, validity, accuracy and legality</p>
                     </div>
 
-                    <div class="mb-10">
-                        <p class="font-bold">Thông tin chuyển khoản / information bank:</p>
-                        <div class="ml-2 space-y-1 mt-1">
+                    <div class="mb-8">
+                        <p class="font-bold border-b border-black/10 pb-1 mb-2">Thông tin chuyển khoản / information bank:</p>
+                        <div class="ml-1 space-y-0.5 mt-1">
                             <p>Người thụ hưởng / Beneficiary name: <span class="font-bold uppercase" contenteditable="true">${rec.payeeName || rec.victimName || '—'}</span></p>
                             <p>Tài khoản / Account number: <span class="font-bold" contenteditable="true">${rec.payeeBankNo || '—'}</span></p>
                             <p>Tại ngân hàng / At bank: <span class="font-bold" contenteditable="true">${rec.payeeBankName || '—'}</span></p>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-4 gap-2 text-center text-[11px]">
+                    <div class="grid grid-cols-4 gap-2 text-center text-[10.5px] leading-tight">
                         <div class="flex flex-col">
-                            <span class="font-bold">Chữ ký người đề nghị</span>
-                            <span class="italic">Requester's signature</span>
-                            <div class="mt-16">
+                            <span class="font-bold uppercase">Chữ ký người đề nghị</span>
+                            <span class="italic text-[9px]">Requester's signature</span>
+                            <div class="mt-14">
                                 <p class="font-bold" contenteditable="true">Tên/Name: ${Auth.getCurrentUser()?.name || 'Hồ Quang Huy'}</p>
-                                <p contenteditable="true">Ngày/Date: ${ngay}/${thang}/${nam}</p>
+                                <p contenteditable="true" class="text-[9px]">Ngày/Date: ${ngay}/${thang}/${nam}</p>
                             </div>
                         </div>
                         <div class="flex flex-col">
-                            <span class="font-bold">Giám Đốc Đơn Vị</span>
-                            <span class="italic">Verified by</span>
-                            <div class="mt-16">
+                            <span class="font-bold uppercase">Giám Đốc Đơn Vị</span>
+                            <span class="italic text-[9px]">Verified by</span>
+                            <div class="mt-14">
                                 <p class="font-bold" contenteditable="true">Tên/Name: ...........................</p>
-                                <p contenteditable="true">Ngày/Date: .../.../20...</p>
+                                <p contenteditable="true" class="text-[9px]">Ngày/Date: .../.../20...</p>
                             </div>
                         </div>
                         <div class="flex flex-col">
-                            <span class="font-bold">PT Kế Toán</span>
-                            <span class="italic">Approved</span>
-                            <div class="mt-16">
+                            <span class="font-bold uppercase">PT Kế Toán</span>
+                            <span class="italic text-[9px]">Approved</span>
+                            <div class="mt-14">
                                 <p class="font-bold" contenteditable="true">Tên/Name: ...........................</p>
-                                <p contenteditable="true">Ngày/Date: .../.../20...</p>
+                                <p contenteditable="true" class="text-[9px]">Ngày/Date: .../.../20...</p>
                             </div>
                         </div>
                         <div class="flex flex-col">
-                            <span class="font-bold">Lãnh đạo phê duyệt</span>
-                            <span class="italic">Approved by</span>
-                            <div class="mt-16">
+                            <span class="font-bold uppercase">Lãnh đạo phê duyệt</span>
+                            <span class="italic text-[9px]">Approved by</span>
+                            <div class="mt-14">
                                 <p class="font-bold" contenteditable="true">Tên/Name: ...........................</p>
-                                <p contenteditable="true">Ngày/Date: .../.../20...</p>
+                                <p contenteditable="true" class="text-[9px]">Ngày/Date: .../.../20...</p>
                             </div>
                         </div>
                     </div>
