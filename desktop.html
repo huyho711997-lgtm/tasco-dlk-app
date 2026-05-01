@@ -1903,9 +1903,13 @@ textarea.inp { resize:vertical; }
                   <div class="p-1.5 bg-violet-100 rounded-md shrink-0"><svg class="w-4 h-4 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg></div>
                   Giấy đề nghị thanh toán
                 </button>
-                <button onclick="document.getElementById('hc-print-menu').classList.add('hidden'); HumanClaims.openPremiumVerification()" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-amber-50 transition-colors flex items-center gap-3">
+                <button onclick="document.getElementById('hc-print-menu').classList.add('hidden'); HumanClaims.openPremiumVerification()" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-amber-50 border-b border-slate-100 transition-colors flex items-center gap-3">
                   <div class="p-1.5 bg-amber-100 rounded-md shrink-0"><svg class="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div>
                   Xác minh nộp phí bảo hiểm
+                </button>
+                <button onclick="document.getElementById('hc-print-menu').classList.add('hidden'); HumanClaims.openCccdPrint()" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-emerald-50 transition-colors flex items-center gap-3">
+                  <div class="p-1.5 bg-emerald-100 rounded-md shrink-0"><svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="7" y1="15" x2="7.01" y2="15"/><line x1="11" y1="15" x2="13" y2="15"/></svg></div>
+                  In CCCD (2 mặt)
                 </button>
               </div>
             </div>
@@ -17229,6 +17233,110 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
 
     closePremiumVerify() {
         const modal = document.getElementById('hc-premium-verify-modal');
+        if (modal) modal.remove();
+    },
+
+    openCccdPrint() {
+        const rec = this._data.find(r => r.id === this._currentId);
+        if (!rec) return;
+
+        const imgs = rec.images || [];
+        if (imgs.length === 0) {
+            Toast.fire({ icon: 'warning', title: 'Hồ sơ chưa có ảnh để in!' });
+            return;
+        }
+
+        // Mặc định lấy 2 ảnh đầu tiên. Nếu chỉ có 1 ảnh thì mặt sau để trống hoặc dùng chung.
+        const frontImg = imgs[0];
+        const backImg = imgs[1] || imgs[0];
+
+        const html = `
+        <div id="hc-cccd-print-modal" class="fixed inset-0 z-[9999] flex flex-col bg-slate-900/60 backdrop-blur-sm p-4 overflow-hidden">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <div class="flex items-center gap-3 text-white">
+                    <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="7" y1="15" x2="7.01" y2="15"/><line x1="11" y1="15" x2="13" y2="15"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-black leading-tight">In Căn cước công dân</h2>
+                        <p class="text-[11px] font-bold text-emerald-300 uppercase tracking-widest">In 2 mặt trên 1 mặt giấy A4</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="HumanClaims.printCccd()" class="px-6 py-2.5 bg-emerald-500 text-white rounded-xl font-black text-sm hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"></path></svg>
+                        In ngay (A4)
+                    </button>
+                    <button onclick="HumanClaims.closeCccdPrint()" class="w-10 h-10 bg-white/10 text-white hover:bg-rose-500 hover:text-white rounded-xl transition-all flex items-center justify-center border border-white/10">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col items-center p-8 overflow-y-auto custom-scrollbar">
+                <div class="a4-page bg-white shadow-lg relative print:shadow-none flex flex-col items-center justify-center gap-12" id="print-cccd-area">
+                    <style>
+                        #print-cccd-area { 
+                            width: 210mm; min-height: 297mm; box-sizing: border-box; 
+                            padding: 20mm;
+                            background: #fff;
+                        }
+                        .cccd-frame {
+                            width: 120mm; /* To hơn kích thước thực tế để nhìn rõ hơn khi in */
+                            aspect-ratio: 1.58;
+                            border: 1px solid #e2e8f0;
+                            border-radius: 8px;
+                            overflow: hidden;
+                            background: #f8fafc;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+                        }
+                        .cccd-frame img {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: contain;
+                        }
+                        @media print {
+                            body * { visibility: hidden; }
+                            #print-cccd-area, #print-cccd-area * { visibility: visible; }
+                            #print-cccd-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 15mm 0; }
+                            .a4-page { border: none !important; box-shadow: none !important; width: 100% !important; height: auto !important; }
+                            .cccd-frame { box-shadow: none; border: 1px solid #ccc; }
+                        }
+                    </style>
+
+                    <div class="flex flex-col items-center gap-2">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mặt trước / Front side</span>
+                        <div class="cccd-frame">
+                            <img src="${frontImg}" onerror="this.src='https://placehold.co/600x400?text=No+Front+Image'">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-center gap-2">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mặt sau / Back side</span>
+                        <div class="cccd-frame">
+                            <img src="${backImg}" onerror="this.src='https://placehold.co/600x400?text=No+Back+Image'">
+                        </div>
+                    </div>
+                    
+                    <div class="absolute bottom-10 text-[10px] text-slate-400 font-medium italic">
+                        In từ hệ thống TASCO - ${new Date().toLocaleString('vi-VN')}
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+        document.body.insertAdjacentHTML('beforeend', html);
+    },
+
+    printCccd() {
+        window.print();
+    },
+
+    closeCccdPrint() {
+        const modal = document.getElementById('hc-cccd-print-modal');
         if (modal) modal.remove();
     },
 
