@@ -1883,7 +1883,7 @@ textarea.inp { resize:vertical; }
                   <div class="p-1.5 bg-emerald-100 rounded-md shrink-0"><svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg></div>
                   Tờ trình bồi thường
                 </button>
-                <button onclick="document.getElementById('hc-download-menu').classList.add('hidden'); HumanClaims.downloadWordDoc('xacminh')" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-amber-50 border-b border-slate-100 transition-colors flex items-center gap-3">
+                <button onclick="document.getElementById('hc-download-menu').classList.add('hidden'); HumanClaims.openPremiumVerification()" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-amber-50 border-b border-slate-100 transition-colors flex items-center gap-3">
                   <div class="p-1.5 bg-amber-100 rounded-md shrink-0"><svg class="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div>
                   Xác minh phí bảo hiểm
                 </button>
@@ -17026,6 +17026,179 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
 
     closePaymentReq() {
         const modal = document.getElementById('hc-payment-req-modal');
+        if (modal) modal.remove();
+    },
+
+    openPremiumVerification() {
+        const rec = this._data.find(r => r.id === this._currentId);
+        if (!rec) return;
+
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const yyyy = today.getFullYear();
+        const dateStr = `Đắk Lắk, ${dd}/${mm}/${yyyy}`;
+
+        const html = `
+        <div id="hc-premium-verify-modal" class="fixed inset-0 z-[9999] flex flex-col bg-slate-900/60 backdrop-blur-sm p-4 overflow-hidden">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <div class="flex items-center gap-3 text-white">
+                    <div class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-black leading-tight">Xác minh phí bảo hiểm</h2>
+                        <p class="text-[11px] font-bold text-amber-200 uppercase tracking-widest">Xem trước & Chỉnh sửa nội dung</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="HumanClaims.printPremiumVerify()" class="px-6 py-2.5 bg-emerald-500 text-white rounded-xl font-black text-sm hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"></path></svg>
+                        In phiếu (A4)
+                    </button>
+                    <button onclick="HumanClaims.closePremiumVerify()" class="w-10 h-10 bg-white/10 text-white hover:bg-rose-500 hover:text-white rounded-xl transition-all flex items-center justify-center border border-white/10">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col items-center p-8 overflow-y-auto custom-scrollbar" id="premium-verify-container">
+                <!-- A4 CONTENT START -->
+                <div class="a4-page bg-white p-[20mm] shadow-lg relative text-black leading-[1.3] font-serif text-[13px] print:p-0 print:shadow-none" id="print-premium-area">
+                    <style>
+                        .a4-page { 
+                            width: 210mm; min-height: 297mm; box-sizing: border-box; 
+                            font-family: "Times New Roman", Times, serif;
+                            color: #000;
+                        }
+                        .a4-page [contenteditable] { outline: none; border-bottom: 1px dashed transparent; transition: all 0.2s; }
+                        .a4-page [contenteditable]:hover { border-bottom-color: #cbd5e1; background: #f8fafc; }
+                        .a4-page [contenteditable]:focus { border-bottom-color: #3b82f6; background: #eff6ff; }
+                        @media print {
+                            body * { visibility: hidden; }
+                            #print-premium-area, #print-premium-area * { visibility: visible; }
+                            #print-premium-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
+                            .a4-page { border: none !important; box-shadow: none !important; width: 100% !important; height: auto !important; padding: 10mm 15mm !important; }
+                        }
+                    </style>
+
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <img src="https://tascoinsurance.vn/wp-content/uploads/2023/10/logo-tasco-insurance.png" style="height:42px" onerror="this.src='https://lh3.googleusercontent.com/d/1bpOB60B7o1NDwahpZsVxct9PbfdwvKmK'">
+                            <p class="text-[10px] italic mt-1">For everyone</p>
+                        </div>
+                        <div class="text-right italic">
+                            <p contenteditable="true">${dateStr}</p>
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-10 mt-10">
+                        <h1 class="text-[20px] font-bold uppercase tracking-wide mb-1" contenteditable="true">BẢN XÁC MINH NỘP PHÍ BẢO HIỂM</h1>
+                    </div>
+
+                    <div class="mb-6 leading-relaxed text-justify">
+                        <p>Hiện nay chúng tôi đang thụ lý hồ sơ tổn thất của người được bảo hiểm là <span class="font-bold uppercase" contenteditable="true">${rec.victimName || '—'}</span> bị tai nạn ngày <span contenteditable="true">/ /</span>. Để có cơ sở giải quyết vụ việc, chúng tôi đề nghị Quý Ban/Đơn vị/Bộ phận kế toán xác nhận tình hình nộp phí bảo hiểm với thông tin cụ thể như sau:</p>
+                    </div>
+
+                    <div class="space-y-1.5 mb-10 ml-6">
+                        <div class="flex">
+                            <span class="w-[200px] shrink-0">- Đơn BH/SĐBS số</span>
+                            <span class="font-bold" contenteditable="true">: ${rec.policyNo || rec.contractNo || '—'}</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-[200px] shrink-0">- Số GCNBH</span>
+                            <span contenteditable="true">: Chưa có</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-[200px] shrink-0">- Đơn vị được bảo hiểm</span>
+                            <span contenteditable="true">: —</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-[200px] shrink-0">- Đối tượng bảo hiểm</span>
+                            <span class="font-bold uppercase" contenteditable="true">: ${rec.victimName || '—'}</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-[200px] shrink-0">- Loại hình bảo hiểm</span>
+                            <span contenteditable="true">: —</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-[200px] shrink-0">- Thời hạn bảo hiểm</span>
+                            <span contenteditable="true">: Từ / / đến / /</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-[200px] shrink-0">- Ngày cấp</span>
+                            <span contenteditable="true">: ${dd}/${mm}/${yyyy}</span>
+                        </div>
+                        <div class="flex">
+                            <span class="w-[200px] shrink-0">- Đơn vị cấp bảo hiểm</span>
+                            <span contenteditable="true">: Chi nhánh Đắk Lắk</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-10">
+                        <p class="font-bold mb-4 ml-6">Xác nhận của bộ phận kế toán</p>
+                        <div class="space-y-2 ml-6">
+                            <div class="flex">
+                                <span class="w-[200px] shrink-0">- Số phí bảo hiểm</span>
+                                <span class="flex-1 border-b border-dotted border-black" contenteditable="true">: </span>
+                            </div>
+                            <div class="flex">
+                                <span class="w-[200px] shrink-0">- Ngày thu phí</span>
+                                <span class="flex-1 border-b border-dotted border-black" contenteditable="true">: </span>
+                            </div>
+                            <div class="flex">
+                                <span class="w-[200px] shrink-0">- Số kỳ nộp phí</span>
+                                <span class="flex-1 border-b border-dotted border-black" contenteditable="true">: </span>
+                            </div>
+                            <div class="flex">
+                                <span class="w-[200px] shrink-0">- Tổng số phí phải nộp</span>
+                                <span class="flex-1 border-b border-dotted border-black" contenteditable="true">: </span>
+                            </div>
+                            <div class="flex gap-4 items-center">
+                                <span class="w-[200px] shrink-0">- Tình trạng nộp phí bảo hiểm</span>
+                                <div class="flex gap-4 items-center">
+                                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4"> Đầy đủ, đúng hạn;</label>
+                                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4"> Đầy đủ, không đúng hạn</label>
+                                </div>
+                            </div>
+                            <div class="flex">
+                                <span class="w-[200px] shrink-0">- Các đề nghị khác</span>
+                                <span class="flex-1 border-b border-dotted border-black" contenteditable="true">: </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-right italic mb-8 mr-10">
+                        <p contenteditable="true">${dateStr}</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-10 text-center">
+                        <div class="flex flex-col">
+                            <span class="font-bold">Trưởng BP Kế toán</span>
+                            <span class="italic text-[11px]">(Ký, ghi rõ họ tên)</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="font-bold">Cán bộ bồi thường</span>
+                            <span class="italic text-[11px]">(Ký, ghi rõ họ tên)</span>
+                            <div class="mt-20">
+                                <p class="font-bold uppercase" contenteditable="true">${Auth.getCurrentUser()?.name || 'Hồ Quang Huy'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- A4 CONTENT END -->
+            </div>
+        </div>`;
+
+        document.body.insertAdjacentHTML('beforeend', html);
+    },
+
+    printPremiumVerify() {
+        window.print();
+    },
+
+    closePremiumVerify() {
+        const modal = document.getElementById('hc-premium-verify-modal');
         if (modal) modal.remove();
     },
 
