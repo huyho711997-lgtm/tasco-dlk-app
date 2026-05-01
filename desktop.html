@@ -17234,13 +17234,55 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
     },
 
     downloadAsWord(containerId, fileName) {
-        const content = document.getElementById(containerId).innerHTML;
-        const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' " +
-            "xmlns:w='urn:schemas-microsoft-com:office:word' " +
-            "xmlns='http://www.w3.org/TR/REC-html40'>" +
-            "<head><meta charset='utf-8'><title>Export HTML to Word</title></head><body>";
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        // Trích xuất style
+        const styleEl = container.querySelector('style');
+        const styles = styleEl ? styleEl.innerHTML : '';
+        
+        // Lấy nội dung body và loại bỏ thẻ style bên trong
+        let bodyContent = container.innerHTML.replace(/<style>[\s\S]*?<\/style>/gi, '');
+
+        // Word-friendly CSS overrides
+        const wordCSS = `
+            ${styles}
+            @page { size: A4; margin: 2cm; }
+            .flex { display: block !important; }
+            .flex > div, .flex > span { display: inline-block !important; vertical-align: top; }
+            .grid { display: table !important; width: 100% !important; }
+            .grid-cols-2 > * { display: table-cell !important; width: 50% !important; }
+            .grid-cols-4 > * { display: table-cell !important; width: 25% !important; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #000; padding: 5px; }
+            .mb-4 { margin-bottom: 15px; }
+            .mb-6 { margin-bottom: 20px; }
+            .mt-10 { margin-top: 35px; }
+            .text-center { text-align: center !important; }
+            .text-right { text-align: right !important; }
+            .font-bold { font-weight: bold !important; }
+            .uppercase { text-transform: uppercase !important; }
+            .italic { font-style: italic !important; }
+            img { max-width: 100%; }
+        `;
+
+        const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' 
+            xmlns:w='urn:schemas-microsoft-com:office:word' 
+            xmlns='http://www.w3.org/TR/REC-html40'>
+            <head><meta charset='utf-8'><title>Export HTML to Word</title>
+            <!--[if gte mso 9]>
+            <xml>
+                <w:WordDocument>
+                    <w:View>Print</w:View>
+                    <w:Zoom>100</w:Zoom>
+                    <w:DoNotOptimizeForBrowser/>
+                </w:WordDocument>
+            </xml>
+            <![endif]-->
+            <style>${wordCSS}</style>
+            </head><body>`;
         const footer = "</body></html>";
-        const sourceHTML = header + content + footer;
+        const sourceHTML = header + bodyContent + footer;
 
         const blob = new Blob(['\ufeff', sourceHTML], {
             type: 'application/msword'
