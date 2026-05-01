@@ -17246,9 +17246,9 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             return;
         }
 
-        // Mặc định lấy 2 ảnh đầu tiên. Nếu chỉ có 1 ảnh thì mặt sau để trống hoặc dùng chung.
-        const frontImg = imgs[0];
-        const backImg = imgs[1] || imgs[0];
+        // Mặc định lấy 2 ảnh đầu tiên.
+        this._cccdFront = imgs[0];
+        this._cccdBack = imgs[1] || imgs[0];
 
         const html = `
         <div id="hc-cccd-print-modal" class="fixed inset-0 z-[9999] flex flex-col bg-slate-900/60 backdrop-blur-sm p-4 overflow-hidden">
@@ -17274,61 +17274,121 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             </div>
 
             <div class="flex-1 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col items-center p-8 overflow-y-auto custom-scrollbar">
-                <div class="a4-page bg-white shadow-lg relative print:shadow-none flex flex-col items-center justify-center gap-12" id="print-cccd-area">
+                <div class="a4-page bg-white shadow-lg relative print:shadow-none flex flex-col items-center justify-center gap-10" id="print-cccd-area">
                     <style>
                         #print-cccd-area { 
                             width: 210mm; min-height: 297mm; box-sizing: border-box; 
-                            padding: 20mm;
+                            padding: 15mm;
                             background: #fff;
                         }
                         .cccd-frame {
-                            width: 120mm; /* To hơn kích thước thực tế để nhìn rõ hơn khi in */
+                            width: 155mm; 
                             aspect-ratio: 1.58;
                             border: 1px solid #e2e8f0;
-                            border-radius: 8px;
+                            border-radius: 12px;
                             overflow: hidden;
                             background: #f8fafc;
                             display: flex;
                             align-items: center;
                             justify-content: center;
-                            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+                            position: relative;
+                            group;
                         }
                         .cccd-frame img {
                             width: 100%;
                             height: 100%;
                             object-fit: contain;
                         }
+                        .change-img-btn {
+                            position: absolute;
+                            top: 10px;
+                            right: 10px;
+                            padding: 6px 12px;
+                            background: rgba(0,0,0,0.6);
+                            color: #fff;
+                            font-size: 10px;
+                            font-weight: 700;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            opacity: 0.2;
+                            transition: all 0.2s;
+                            z-index: 20;
+                        }
+                        .cccd-frame:hover .change-img-btn {
+                            opacity: 1;
+                            background: #3b82f6;
+                        }
                         @media print {
                             body * { visibility: hidden; }
                             #print-cccd-area, #print-cccd-area * { visibility: visible; }
                             #print-cccd-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 15mm 0; }
                             .a4-page { border: none !important; box-shadow: none !important; width: 100% !important; height: auto !important; }
-                            .cccd-frame { box-shadow: none; border: 1px solid #ccc; }
+                            .cccd-frame { box-shadow: none; border: 1px solid #000; }
+                            .change-img-btn { display: none !important; }
                         }
                     </style>
 
                     <div class="flex flex-col items-center gap-2">
                         <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mặt trước / Front side</span>
                         <div class="cccd-frame">
-                            <img src="${frontImg}" onerror="this.src='https://placehold.co/600x400?text=No+Front+Image'">
+                            <button class="change-img-btn" onclick="HumanClaims.selectImageForCccd('front')">Thay đổi ảnh</button>
+                            <img id="cccd-front-preview" src="${this._cccdFront}" onerror="this.src='https://placehold.co/800x500?text=Chua+co+anh+mat+truoc'">
                         </div>
                     </div>
 
                     <div class="flex flex-col items-center gap-2">
                         <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mặt sau / Back side</span>
                         <div class="cccd-frame">
-                            <img src="${backImg}" onerror="this.src='https://placehold.co/600x400?text=No+Back+Image'">
+                            <button class="change-img-btn" onclick="HumanClaims.selectImageForCccd('back')">Thay đổi ảnh</button>
+                            <img id="cccd-back-preview" src="${this._cccdBack}" onerror="this.src='https://placehold.co/800x500?text=Chua+co+anh+mat+sau'">
                         </div>
                     </div>
                     
                     <div class="absolute bottom-10 text-[10px] text-slate-400 font-medium italic">
-                        In từ hệ thống TASCO - ${new Date().toLocaleString('vi-VN')}
+                        Trích xuất từ hồ sơ TASCO - ${rec.claimNo || '—'} - ${new Date().toLocaleString('vi-VN')}
                     </div>
                 </div>
             </div>
         </div>`;
 
         document.body.insertAdjacentHTML('beforeend', html);
+    },
+
+    selectImageForCccd(side) {
+        const rec = this._data.find(r => r.id === this._currentId);
+        if (!rec || !rec.images) return;
+
+        const html = `
+        <div class="grid grid-cols-4 gap-3 p-2 max-h-[60vh] overflow-y-auto custom-scrollbar">
+            ${rec.images.map((url, idx) => `
+                <div class="relative aspect-square border-2 border-slate-200 rounded-lg overflow-hidden cursor-pointer hover:border-blue-500 transition-all" onclick="HumanClaims.applyCccdImage('${side}', '${url}')">
+                    <img src="${url.replace('/upload/', '/upload/c_thumb,w_200,h_200/')}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/0 hover:bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-all">
+                        <span class="bg-blue-600 text-white px-2 py-1 rounded text-[9px] font-bold">Chọn ảnh này</span>
+                    </div>
+                </div>
+            `).join('')}
+        </div>`;
+
+        Swal.fire({
+            title: '<span class="text-sm font-black">Chọn ảnh cho ' + (side === 'front' ? 'Mặt trước' : 'Mặt sau') + '</span>',
+            html: html,
+            width: 600,
+            showConfirmButton: false,
+            customClass: { popup: 'rnd' }
+        });
+    },
+
+    applyCccdImage(side, url) {
+        if (side === 'front') {
+            this._cccdFront = url;
+            document.getElementById('cccd-front-preview').src = url;
+        } else {
+            this._cccdBack = url;
+            document.getElementById('cccd-back-preview').src = url;
+        }
+        Swal.close();
+        Toast.fire({ icon: 'success', title: 'Đã cập nhật ảnh mặt ' + (side === 'front' ? 'trước' : 'sau') });
     },
 
     printCccd() {
