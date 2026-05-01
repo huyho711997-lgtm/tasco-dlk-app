@@ -1907,9 +1907,13 @@ textarea.inp { resize:vertical; }
                   <div class="p-1.5 bg-amber-100 rounded-md shrink-0"><svg class="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div>
                   Xác minh nộp phí bảo hiểm
                 </button>
-                <button onclick="document.getElementById('hc-print-menu').classList.add('hidden'); HumanClaims.openCccdPrint()" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-emerald-50 transition-colors flex items-center gap-3">
+                <button onclick="document.getElementById('hc-print-menu').classList.add('hidden'); HumanClaims.openCccdPrint()" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-emerald-50 border-b border-slate-100 transition-colors flex items-center gap-3">
                   <div class="p-1.5 bg-emerald-100 rounded-md shrink-0"><svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="7" y1="15" x2="7.01" y2="15"/><line x1="11" y1="15" x2="13" y2="15"/></svg></div>
                   In CCCD (2 mặt)
+                </button>
+                <button onclick="document.getElementById('hc-print-menu').classList.add('hidden'); HumanClaims.openClaimNotification()" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-rose-50 transition-colors flex items-center gap-3">
+                  <div class="p-1.5 bg-rose-100 rounded-md shrink-0"><svg class="w-4 h-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div>
+                  Thông báo bồi thường
                 </button>
               </div>
             </div>
@@ -17251,6 +17255,225 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
 
     closePremiumVerify() {
         const modal = document.getElementById('hc-premium-verify-modal');
+        if (modal) modal.remove();
+    },
+
+    openClaimNotification() {
+        const rec = this._data.find(r => r.id === this._currentId);
+        if (!rec) return;
+
+        const toTitleCase = (str) => {
+            if (!str) return '—';
+            return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        };
+
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const yyyy = today.getFullYear();
+        const dateStr = `${dd}/${mm}/${yyyy}`;
+        const dateViet = `ngày ${dd} tháng ${mm} năm ${yyyy}`;
+
+        const fmt = (d) => d ? moment(d).format('DD/MM/YYYY') : '—';
+        const fmtPrice = (v) => (v || 0).toLocaleString('vi-VN');
+
+        const victimName = toTitleCase(rec.victimName);
+        const payeeName = toTitleCase(rec.payeeName);
+        const payeeRelation = rec.payeeRelation ? `(${rec.payeeRelation})` : '';
+        const amountWords = this._docTien(rec.totalAmount || 0);
+
+        const html = `
+        <div id="hc-claim-noti-modal" class="fixed inset-0 z-[9999] flex flex-col bg-slate-900/60 backdrop-blur-sm p-4 overflow-hidden">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <div class="flex items-center gap-3 text-white">
+                    <div class="w-10 h-10 bg-rose-500 rounded-xl flex items-center justify-center shadow-lg shadow-rose-500/20">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-black leading-tight">Thông báo bồi thường</h2>
+                        <p class="text-[11px] font-bold text-rose-200 uppercase tracking-widest">Xem trước & In mẫu 2 trang</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="HumanClaims.printClaimNoti()" class="px-6 py-2.5 bg-emerald-500 text-white rounded-xl font-black text-sm hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"></path></svg>
+                        In thông báo
+                    </button>
+                    <button onclick="HumanClaims.closeClaimNoti()" class="w-10 h-10 bg-white/10 text-white hover:bg-rose-500 hover:text-white rounded-xl transition-all flex items-center justify-center border border-white/10">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col items-center p-8 overflow-y-auto custom-scrollbar" id="claim-noti-container">
+                <style>
+                    .a4-page { 
+                        width: 210mm; min-height: 297mm; box-sizing: border-box; 
+                        font-family: "Times New Roman", Times, serif;
+                        color: #000;
+                        background: #fff;
+                        margin-bottom: 20px;
+                        padding: 15mm 20mm;
+                    }
+                    .a4-page [contenteditable] { outline: none; border-bottom: 1px dashed transparent; transition: all 0.2s; }
+                    .a4-page [contenteditable]:hover { border-bottom-color: #cbd5e1; background: #f8fafc; }
+                    .a4-page [contenteditable]:focus { border-bottom-color: #3b82f6; background: #eff6ff; }
+                    
+                    .print-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+                    .print-table th, .print-table td { border: 1px solid #000; padding: 6px 8px; font-size: 13px; vertical-align: middle; }
+                    .print-table th { background: #f9fafb; font-weight: bold; text-align: center; }
+                    
+                    @media print {
+                        body * { visibility: hidden; }
+                        #claim-noti-container, #claim-noti-container * { visibility: visible; }
+                        #claim-noti-container { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; overflow: visible; }
+                        .a4-page { border: none !important; box-shadow: none !important; margin: 0 !important; page-break-after: always; padding: 15mm 20mm !important; }
+                        .a4-page:last-child { page-break-after: auto; }
+                    }
+                </style>
+
+                <!-- PAGE 1 -->
+                <div class="a4-page shadow-lg relative print:shadow-none" id="noti-page-1">
+                    <div class="flex justify-between items-start mb-6">
+                        <img src="https://i.ibb.co/0jP8BN3c/undefined-Imgur.jpg" style="height:45px" onerror="this.src='https://lh3.googleusercontent.com/d/1bpOB60B7o1NDwahpZsVxct9PbfdwvKmK'">
+                        <div class="text-right text-[13px] italic">
+                            <p contenteditable="true">Đắk Lắk, ${dateViet}</p>
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-8">
+                        <h1 class="text-[19px] font-bold uppercase tracking-tight" contenteditable="true">THÔNG BÁO KẾT QUẢ GIẢI QUYẾT QUYỀN LỢI BẢO HIỂM</h1>
+                    </div>
+
+                    <div class="space-y-1 text-[14px] mb-6 text-center">
+                        <p class="font-bold">Hồ sơ số: <span contenteditable="true">${rec.claimNo || rec.caseNo || '—'}</span></p>
+                        <p class="font-bold uppercase">KÍNH GỬI: <span contenteditable="true">${victimName} - ${payeeName} ${payeeRelation}</span></p>
+                    </div>
+
+                    <div class="text-[14px] leading-relaxed text-justify space-y-3 mb-6">
+                        <p>Căn cứ vào Hợp đồng bảo hiểm/GCNBH số: <span class="font-bold" contenteditable="true">${rec.policyNo || rec.contractNo || '—'}</span></p>
+                        <p>Công ty TNHH Bảo hiểm TASCO – CN Nam Tây Nguyên đã xem xét hồ sơ yêu cầu bồi thường của Quý khách hàng. Chúng tôi thông báo về việc giải quyết quyền lợi bảo hiểm của em <span class="font-bold" contenteditable="true">${victimName}</span> như sau:</p>
+                    </div>
+
+                    <table class="print-table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" style="width: 15%">Ngày rủi ro</th>
+                                <th rowspan="2" style="width: 20%">Nguyên nhân</th>
+                                <th colspan="4">Hậu quả</th>
+                                <th rowspan="2" style="width: 18%">Tổng số tiền chi trả</th>
+                            </tr>
+                            <tr>
+                                <th colspan="2">Thương tật/phẫu thuật/tử vong</th>
+                                <th colspan="2">Nằm viện</th>
+                            </tr>
+                            <tr style="font-size: 11px; font-style: italic;">
+                                <th></th>
+                                <th></th>
+                                <th>Nội dung</th>
+                                <th>Số tiền</th>
+                                <th>Số ngày</th>
+                                <th>Số tiền</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-center" contenteditable="true">${fmt(rec.accDate)}</td>
+                                <td class="text-center" contenteditable="true">${rec.accReason || '—'}</td>
+                                <td class="text-center" contenteditable="true">${rec.injuryContent || '—'}</td>
+                                <td class="text-right" contenteditable="true">${fmtPrice(rec.injuryAmount)}</td>
+                                <td class="text-center" contenteditable="true">${rec.hospitalDays || 0}</td>
+                                <td class="text-right" contenteditable="true">${fmtPrice(rec.hospitalAmount)}</td>
+                                <td class="text-right font-bold" contenteditable="true">${fmtPrice(rec.totalAmount)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="text-[14px] italic mb-8">
+                        (Bằng chữ: <span class="font-bold" contenteditable="true">${amountWords} đồng chẵn</span>)
+                    </div>
+
+                    <div class="text-[14px] leading-relaxed text-justify space-y-4 mb-10">
+                        <p>Trên đây là nội dung số tiền Công ty TNHH Bảo hiểm TASCO – Chi nhánh Nam Tây Nguyên sẽ thanh toán cho Quý khách. Chúng tôi tin tưởng rằng việc giải quyết bồi thường đã đảm bảo quyền lợi của Quý khách. Chúng tôi xin được chia sẻ với Quý khách về rủi ro vừa qua và hy vọng rằng những điều may mắn sẽ đến với Quý khách trong thời gian tới.</p>
+                        <p>Trân trọng kính chào!</p>
+                    </div>
+
+                    <div class="flex justify-end pr-10">
+                        <div class="text-center">
+                            <p class="font-bold uppercase text-[13px]">CÔNG TY TNHH BẢO HIỂM TASCO NAM TÂY NGUYÊN</p>
+                        </div>
+                    </div>
+
+                    <div class="absolute bottom-[15mm] left-[20mm] right-[20mm] text-[10px] italic border-t border-black pt-2">
+                        <span class="font-bold">Ghi chú:</span> Đề nghị Quý khách có ý kiến xác nhận đồng ý việc giải quyết của Bảo hiểm Tasco ở phần dưới đây. Khi đến nhận tiền bồi thường, Quý khách cần mang theo thông báo này, giấy hẹn và Căn cước công dân (CCCD) hoặc Giấy uỷ quyền hợp pháp trong trường hợp nhận hộ tiền bồi thường và CCCD.
+                    </div>
+                </div>
+
+                <!-- PAGE 2 -->
+                <div class="a4-page shadow-lg relative print:shadow-none" id="noti-page-2">
+                    <div class="flex justify-between items-start mb-6">
+                        <img src="https://i.ibb.co/0jP8BN3c/undefined-Imgur.jpg" style="height:45px" onerror="this.src='https://lh3.googleusercontent.com/d/1bpOB60B7o1NDwahpZsVxct9PbfdwvKmK'">
+                    </div>
+
+                    <div class="mb-8">
+                        <h2 class="text-[16px] font-bold border-b-2 border-black pb-1 mb-6 uppercase">Ý kiến xác nhận của khách hàng:</h2>
+                        
+                        <div class="space-y-4 text-[14px]">
+                            <p>- Chúng tôi đồng ý với số tiền bồi thường của Bảo hiểm Tasco đã giải quyết ở trên và không còn thắc mắc khiếu nại gì.</p>
+                            
+                            <div class="flex items-center gap-6">
+                                <span>- Thái độ phục vụ của cán bộ Bảo hiểm Tasco:</span>
+                                <div class="flex gap-4">
+                                    <label class="flex items-center gap-1.5"><input type="checkbox" class="w-4 h-4"> Tốt</label>
+                                    <label class="flex items-center gap-1.5"><input type="checkbox" class="w-4 h-4"> Khá</label>
+                                    <label class="flex items-center gap-1.5"><input type="checkbox" class="w-4 h-4"> Trung bình</label>
+                                    <label class="flex items-center gap-1.5"><input type="checkbox" class="w-4 h-4"> Kém</label>
+                                </div>
+                            </div>
+
+                            <p>- Ý kiến khác:................................................................................................................................................</p>
+                            
+                            <div class="flex items-center gap-10 py-2">
+                                <span class="font-bold">- Đề nghị thanh toán bằng:</span>
+                                <div class="flex gap-8">
+                                    <label class="flex items-center gap-2 font-bold"><input type="checkbox" class="w-4 h-4"> Tiền mặt</label>
+                                    <label class="flex items-center gap-2 font-bold"><input type="checkbox" class="w-4 h-4" checked> Chuyển khoản</label>
+                                </div>
+                            </div>
+
+                            <div class="ml-6 space-y-1.5 font-bold">
+                                <p>+ Số tài khoản: <span contenteditable="true">${rec.payeeBankNo || '—'}</span></p>
+                                <p>+ Chủ tài khoản: <span class="uppercase" contenteditable="true">${payeeName}</span></p>
+                                <p>+ Tại Ngân hàng: <span contenteditable="true">${rec.payeeBankName || '—'}</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end mt-16 pr-10">
+                        <div class="text-center italic text-[14px]">
+                            <p contenteditable="true">Đắk Lắk, ${dateViet}</p>
+                            <p class="font-bold not-italic mt-1">Khách hàng</p>
+                            <p class="text-[12px] opacity-70 mt-1">(Ký và ghi họ tên)</p>
+                        </div>
+                    </div>
+
+                    <div class="absolute bottom-[15mm] left-[20mm] right-[20mm] text-[10px] italic border-t border-black pt-2">
+                        <span class="font-bold">Ghi chú:</span> Đề nghị Quý khách có ý kiến xác nhận đồng ý việc giải quyết của Bảo hiểm Tasco ở phần dưới đây. Khi đến nhận tiền bồi thường, Quý khách cần mang theo thông báo này, giấy hẹn và Căn cước công dân (CCCD) hoặc Giấy uỷ quyền hợp pháp trong trường hợp nhận hộ tiền bồi thường và CCCD.
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+        document.body.insertAdjacentHTML('beforeend', html);
+    },
+
+    printClaimNoti() {
+        window.print();
+    },
+
+    closeClaimNoti() {
+        const modal = document.getElementById('hc-claim-noti-modal');
         if (modal) modal.remove();
     },
 
