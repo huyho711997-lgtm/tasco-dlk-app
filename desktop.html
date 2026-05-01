@@ -2147,70 +2147,33 @@ textarea.inp { resize:vertical; }
                 </div>
               </div>
 
-              <div class="bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden flex flex-col shrink-0 w-80 group transition-all hover:shadow-2xl hover:border-emerald-200">
-                <div class="px-5 py-4 bg-slate-900 flex items-center justify-between transition-colors group-hover:bg-emerald-900">
-                  <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
-                      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    </div>
-                    <div class="flex flex-col">
-                      <span class="text-[10px] font-black text-emerald-400 uppercase tracking-widest leading-none mb-1">Financial Summary</span>
-                      <span class="text-[13px] font-black text-white uppercase tracking-wider leading-none">Giá trị chi trả</span>
-                    </div>
+              <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200 shadow-lg p-5 relative overflow-hidden shrink-0 w-80 transition-all hover:shadow-xl">
+                <!-- Decorative SVG from old design -->
+                <svg class="absolute -right-6 -bottom-6 w-32 h-32 text-emerald-500/10 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                
+                <div class="flex items-center gap-2 mb-5 relative z-10">
+                    <div class="w-1.5 h-4 bg-emerald-500 rounded-full shadow-sm shadow-emerald-500/40"></div>
+                    <p class="text-[11px] font-black text-emerald-800 uppercase tracking-widest">Giá trị chi trả</p>
+                </div>
+
+                <div class="space-y-3.5 mb-5 relative z-10">
+                  <div class="flex justify-between items-center group">
+                    <span class="text-xs font-bold text-emerald-700/80">Tiền Thương tật / PT</span>
+                    <span class="text-[15px] font-mono font-black text-emerald-900 bg-white/60 px-2.5 py-1 rounded-xl shadow-sm border border-emerald-100/50" id="hc-calc-injury">0 đ</span>
                   </div>
-                  <div class="flex flex-col items-end">
-                    <span class="px-2 py-0.5 bg-white/10 text-white rounded text-[10px] font-bold border border-white/10">Dự tính AI</span>
+                  <div class="flex justify-between items-center group">
+                    <span class="text-xs font-bold text-emerald-700/80">Trợ cấp nằm viện</span>
+                    <span class="text-[15px] font-mono font-black text-emerald-900 bg-white/60 px-2.5 py-1 rounded-xl shadow-sm border border-emerald-100/50" id="hc-calc-hospital">0 đ</span>
                   </div>
                 </div>
-                
-                <div class="p-5 space-y-5 bg-gradient-to-b from-white to-slate-50/50">
-                  <div class="space-y-4">
-                    <div class="flex items-start justify-between">
-                      <div class="flex flex-col">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-1">Thương tật / Phẫu thuật</span>
-                        <div class="flex items-center gap-2">
-                          <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                          <span class="text-[13px] font-extrabold text-slate-700">Tiền trả theo tỷ lệ</span>
-                        </div>
-                      </div>
-                      <div class="flex flex-col items-end">
-                        <span class="text-[15px] font-mono font-black text-slate-900 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm" id="hc-calc-injury">0 đ</span>
-                      </div>
-                    </div>
-                    
-                    <div class="flex items-start justify-between">
-                      <div class="flex flex-col">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-1">Trợ cấp nằm viện</span>
-                        <div class="flex items-center gap-2">
-                          <div class="w-1.5 h-1.5 rounded-full bg-amber-500"></div>
-                          <span class="text-[13px] font-extrabold text-slate-700">Tiền trả theo ngày</span>
-                        </div>
-                      </div>
-                      <div class="flex flex-col items-end">
-                        <span class="text-[15px] font-mono font-black text-slate-900 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm" id="hc-calc-hospital">0 đ</span>
-                      </div>
-                    </div>
-                  </div>
 
-                  <div class="pt-5 border-t-2 border-dashed border-slate-200 relative">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-white border border-slate-200 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-widest shadow-sm">
-                      Total Payout
-                    </div>
-                    
-                    <div class="flex items-center justify-between pt-2">
-                      <div class="flex flex-col">
-                        <div class="flex items-baseline gap-1">
-                          <span class="text-4xl font-black text-slate-900 tracking-tighter" id="hc-calc-total">0<span class="text-lg text-emerald-500 ml-1">đ</span></span>
-                        </div>
-                        <p class="text-[10px] font-bold text-emerald-600 mt-1 flex items-center gap-1">
-                          <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                          Đã bao gồm thuế & phí
-                        </p>
-                      </div>
-                      <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center border-2 border-emerald-100 group-hover:bg-emerald-500 group-hover:border-emerald-500 group-hover:text-white transition-all duration-300 shadow-inner">
-                        <svg class="w-10 h-10 text-emerald-600 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                      </div>
-                    </div>
+                <div class="pt-5 border-t border-emerald-200/80 flex justify-between items-end relative z-10">
+                  <div class="flex flex-col">
+                    <span class="text-[10px] font-black text-emerald-800 uppercase tracking-tighter mb-1 opacity-60">Tổng số tiền chi trả</span>
+                    <span class="text-4xl font-black text-emerald-600 tracking-tight" id="hc-calc-total">0<span class="text-xl text-emerald-400 ml-1 italic font-bold">đ</span></span>
+                  </div>
+                  <div class="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-600 border border-emerald-200/50 shadow-inner group hover:bg-emerald-500 hover:text-white transition-all">
+                    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   </div>
                 </div>
               </div>
@@ -14960,7 +14923,7 @@ const HumanClaims = {
         });
         document.getElementById('hc-calc-injury').textContent = '0 đ';
         document.getElementById('hc-calc-hospital').textContent = '0 đ';
-        document.getElementById('hc-calc-total').innerHTML = '0<span class="text-lg text-emerald-500">đ</span>';
+        document.getElementById('hc-calc-total').innerHTML = '0<span class="text-lg text-emerald-400">đ</span>';
         document.getElementById('hc-injuryRealPct').value = '0';
         document.getElementById('hc-m-ai-warning').classList.add('hidden');
         document.getElementById('btn-hc-email').classList.add('hidden');
@@ -15232,7 +15195,7 @@ const HumanClaims = {
         // Hiển thị lên giao diện
         document.getElementById('hc-calc-injury').textContent = valInjuryOrSurgery.toLocaleString('vi-VN') + ' đ';
         document.getElementById('hc-calc-hospital').textContent = valHospital.toLocaleString('vi-VN') + ' đ';
-        document.getElementById('hc-calc-total').innerHTML = total.toLocaleString('vi-VN') + '<span class="text-lg text-emerald-500 ml-1">đ</span>';
+        document.getElementById('hc-calc-total').innerHTML = total.toLocaleString('vi-VN') + '<span class="text-lg text-emerald-400 ml-1">đ</span>';
     },
 
     showCoverageInfo() {
