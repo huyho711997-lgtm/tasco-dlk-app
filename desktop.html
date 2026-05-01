@@ -15210,11 +15210,26 @@ const HumanClaims = {
             inputsToLock.forEach(el => el.disabled = false);
         }
 
-        // Hiện nút Email khi ở trạng thái Mới thêm, Xin số hoặc Đã có số (để có thể gửi lại nếu cần)
+        // Hiện nút Email khi ở các trạng thái cần gửi mail (đến bước Đang xin nguồn)
         const btnEmail = document.getElementById('btn-hc-email');
         if (btnEmail) {
-            if (currIdx <= 2) btnEmail.classList.remove('hidden');
-            else btnEmail.classList.add('hidden');
+            if (currIdx <= 4) {
+                btnEmail.classList.remove('hidden');
+                // Đổi tên nút tùy theo giai đoạn
+                if (currIdx >= 3) {
+                    btnEmail.innerHTML = `<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email xin nguồn`;
+                    btnEmail.classList.replace('bg-indigo-50', 'bg-amber-50');
+                    btnEmail.classList.replace('text-indigo-600', 'text-amber-600');
+                    btnEmail.classList.replace('border-indigo-200', 'border-amber-200');
+                } else {
+                    btnEmail.innerHTML = `<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email xin số`;
+                    btnEmail.classList.replace('bg-amber-50', 'bg-indigo-50');
+                    btnEmail.classList.replace('text-amber-600', 'text-indigo-600');
+                    btnEmail.classList.replace('border-amber-200', 'border-indigo-200');
+                }
+            } else {
+                btnEmail.classList.add('hidden');
+            }
         }
 
         // Hiện nút In khi đã có số HSBT trở đi
