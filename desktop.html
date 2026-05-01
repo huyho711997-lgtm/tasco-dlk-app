@@ -1983,12 +1983,12 @@ textarea.inp { resize:vertical; }
                     </div>
                   </div>
                   
-                  <div class="grid grid-cols-4 gap-3">
-                    <div><label class="lbl">Mức phí</label><input id="hc-premium" class="inp text-right text-slate-800 text-[13px]" oninput="BaoLanh.formatNumber(this)" placeholder="VD: 500.000"></div>
-                    <div><label class="lbl">Ngày nộp phí</label><input id="hc-feeDate" type="date" class="inp"></div>
-                    <div><label class="lbl">Hiệu lực từ</label><input id="hc-effFrom" type="datetime-local" class="inp text-[13px]" onchange="HumanClaims.checkWarnings()"></div>
-                    <div><label class="lbl">Đến</label><input id="hc-effTo" type="datetime-local" class="inp text-[13px]" onchange="HumanClaims.checkWarnings()"></div>
-                  </div>
+                    <div class="grid grid-cols-4 gap-3">
+                      <div><label class="lbl">Mức phí</label><input id="hc-premium" class="inp text-right text-slate-800 text-[13px]" oninput="BaoLanh.formatNumber(this)" placeholder="VD: 500.000"></div>
+                      <div><label class="lbl">Ngày nộp phí</label><input id="hc-feeDate" type="text" class="inp text-center" placeholder="DD/MM/YYYY" onblur="HumanClaims.applySmartDate(this)"></div>
+                      <div><label class="lbl">Hiệu lực từ</label><input id="hc-effFrom" type="datetime-local" class="inp text-[13px]" onchange="HumanClaims.checkWarnings()"></div>
+                      <div><label class="lbl">Đến</label><input id="hc-effTo" type="datetime-local" class="inp text-[13px]" onchange="HumanClaims.checkWarnings()"></div>
+                    </div>
                   <div class="pt-2 border-t border-slate-100 relative">
                     <div class="flex items-center justify-between mb-2">
                         <label class="lbl !mb-0">Mức trách nhiệm (VNĐ/người/vụ)</label>
@@ -2031,9 +2031,9 @@ textarea.inp { resize:vertical; }
                   
                   <div><label class="lbl">Địa chỉ</label><input id="hc-victimAddress" class="inp" placeholder="Số nhà, đường, phường/xã, quận/huyện..."></div>
                   <div class="grid grid-cols-4 gap-3">
-                    <div><label class="lbl">Ngày bị tai nạn</label><input id="hc-accDate" type="date" class="inp text-[13px]" onchange="HumanClaims.checkWarnings()"></div>
-                    <div><label class="lbl">Ngày nhập viện</label><input id="hc-inDate" type="date" class="inp text-[13px]" onchange="HumanClaims.calculateDays()"></div>
-                    <div><label class="lbl">Ngày ra viện</label><input id="hc-outDate" type="date" class="inp text-[13px]" onchange="HumanClaims.calculateDays()"></div>
+                    <div><label class="lbl">Ngày bị tai nạn</label><input id="hc-accDate" type="text" class="inp text-[13px] text-center" placeholder="DD/MM/YYYY" onblur="HumanClaims.applySmartDate(this)"></div>
+                    <div><label class="lbl">Ngày nhập viện</label><input id="hc-inDate" type="text" class="inp text-[13px] text-center" placeholder="DD/MM/YYYY" onblur="HumanClaims.applySmartDate(this)"></div>
+                    <div><label class="lbl">Ngày ra viện</label><input id="hc-outDate" type="text" class="inp text-[13px] text-center" placeholder="DD/MM/YYYY" onblur="HumanClaims.applySmartDate(this)"></div>
                     <div><label class="lbl">Số ngày nằm viện</label><input id="hc-days" type="number" class="inp text-center font-bold text-blue-700 text-[13px]" oninput="HumanClaims.calculateTotal()"></div>
                   </div>
                   
@@ -2139,7 +2139,7 @@ textarea.inp { resize:vertical; }
                   </div>
                   <div class="grid grid-cols-2 gap-3">
                     <div><label class="lbl">Số CCCD</label><input id="hc-payeeCccd" class="inp font-bold text-slate-700 text-[13px]"></div>
-                    <div><label class="lbl">Ngày cấp</label><input id="hc-payeeIssueDate" class="inp text-center" placeholder="DD/MM/YYYY"></div>
+                    <div><label class="lbl">Ngày cấp</label><input id="hc-payeeIssueDate" type="text" class="inp text-center" placeholder="DD/MM/YYYY" onblur="HumanClaims.applySmartDate(this)"></div>
                   </div>
                   <div>
                     <label class="lbl">Nơi cấp</label><input id="hc-payeeIssuePlace" class="inp">
@@ -14940,8 +14940,71 @@ const HumanClaims = {
         this.renderImages([]);
     },
 
+    /* ── Helper xử lý Ngày tháng Thông minh ── */
+    _parseSmartDate(input) {
+        if (!input) return null;
+        let s = input.toString().toLowerCase().trim();
+        if (!s) return null;
+
+        // Xử lý "ngày 11 tháng 02 năm 2026" -> "11 02 2026"
+        s = s.replace(/ngày|tháng|năm/g, ' ');
+        // Thay thế các ký tự phân cách . - bằng /
+        s = s.replace(/[.\-]/g, '/');
+        
+        let digits = s.replace(/\D/g, '');
+        let day, month, year;
+
+        if (digits.length === 8) {
+            day = digits.substring(0, 2);
+            month = digits.substring(2, 4);
+            year = digits.substring(4, 8);
+        } else if (digits.length === 6) {
+            day = digits.substring(0, 2);
+            month = digits.substring(2, 4);
+            year = '20' + digits.substring(4, 6);
+        } else {
+            // Thử parse bằng moment với các cụm phân cách (ví dụ nhập 1/2/2026)
+            const m = moment(s, ['DD/MM/YYYY', 'D/M/YYYY', 'DD-MM-YYYY', 'D-M-YYYY', 'DD.MM.YYYY', 'D.M.YYYY'], true);
+            if (m.isValid()) {
+                return { iso: m.format('YYYY-MM-DD'), display: m.format('DD/MM/YYYY') };
+            }
+            return null;
+        }
+
+        const m = moment(`${year}-${month}-${day}`, 'YYYY-MM-DD', true);
+        if (m.isValid()) {
+            return { iso: m.format('YYYY-MM-DD'), display: m.format('DD/MM/YYYY') };
+        }
+        return null;
+    },
+
+    applySmartDate(el) {
+        const res = this._parseSmartDate(el.value);
+        if (res) {
+            el.value = res.display;
+        }
+        
+        // Kích hoạt các hàm phụ thuộc
+        if (el.id === 'hc-accDate') this.checkWarnings();
+        if (el.id === 'hc-inDate' || el.id === 'hc-outDate') this.calculateDays();
+    },
+
     _fillForm(r) {
-        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+        const setVal = (id, val) => { 
+            const el = document.getElementById(id); 
+            if (!el) return;
+            // Tự động định dạng ngày sang DD/MM/YYYY khi nạp lên form nếu là trường ngày
+            if (val && (id.includes('Date') || id.includes('From') || id.includes('To'))) {
+                const m = moment(val, ['YYYY-MM-DD', 'DD/MM/YYYY', 'YYYY-MM-DDTHH:mm']);
+                if (m.isValid()) {
+                    // Nếu là datetime-local (hiệu lực từ/đến) thì giữ nguyên định dạng ISO cho input
+                    if (el.type === 'datetime-local') el.value = m.format('YYYY-MM-DDTHH:mm');
+                    else el.value = m.format('DD/MM/YYYY');
+                    return;
+                }
+            }
+            el.value = val || ''; 
+        };
         
         setVal('hc-claimNo', r.claimNo); // NẠP DỮ LIỆU SỐ HSBT
         setVal('hc-contractNo', r.contractNo); setVal('hc-companyName', r.companyName);
@@ -15052,7 +15115,19 @@ const HumanClaims = {
 
     /* ── Lưu Dữ liệu ── */
     async saveData() {
-        const getVal = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+        const getVal = id => { 
+            const el = document.getElementById(id); 
+            if (!el) return '';
+            let val = el.value.trim();
+            // Nếu là trường ngày (đang hiển thị DD/MM/YYYY), chuyển về ISO YYYY-MM-DD để lưu DB
+            if (val && (id.includes('Date') || id.includes('From') || id.includes('To'))) {
+                const res = this._parseSmartDate(val);
+                if (res) return res.iso;
+                // Nếu là datetime-local thì giữ nguyên
+                if (el.type === 'datetime-local') return val;
+            }
+            return val;
+        };
         const getNum = id => { const val = getVal(id); return val ? parseInt(val.replace(/[^\d]/g, '')) || 0 : 0; };
         
         const victimName = getVal('hc-victimName');
@@ -15137,8 +15212,13 @@ const HumanClaims = {
     },
 
     calculateDays() {
-        const inDate = document.getElementById('hc-inDate').value;
-        const outDate = document.getElementById('hc-outDate').value;
+        const getIso = id => {
+            const val = document.getElementById(id).value;
+            const res = this._parseSmartDate(val);
+            return res ? res.iso : val;
+        };
+        const inDate = getIso('hc-inDate');
+        const outDate = getIso('hc-outDate');
         
         if (inDate && outDate) {
             // Tính toán chênh lệch ngày giữa ngày ra và ngày vào
