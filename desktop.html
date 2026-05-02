@@ -18662,59 +18662,61 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         };
 
         const html = `
-        <div id="hc-claim-cover-modal" class="fixed inset-0 z-[9999] flex flex-col bg-slate-900/60 backdrop-blur-sm p-4 overflow-hidden font-sans">
-            <div class="flex items-center justify-between mb-4 px-2">
-                <div class="flex items-center gap-3 text-white">
-                    <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+        <div id="hc-claim-cover-modal" class="fixed inset-0 z-[9999] flex flex-col bg-slate-900/80 backdrop-blur-md p-4 overflow-hidden font-sans">
+            <div class="flex items-center justify-between mb-4 px-4">
+                <div class="flex items-center gap-4 text-white">
+                    <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-500/40 transform -rotate-3 hover:rotate-0 transition-transform">
+                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
                     </div>
                     <div>
-                        <h2 class="text-lg font-black leading-tight">Bìa hồ sơ bồi thường</h2>
-                        <p class="text-[11px] font-bold text-indigo-300 uppercase tracking-widest">Xem trước & In trang bìa A4</p>
+                        <h2 class="text-xl font-black leading-tight tracking-tight">Bìa Hồ Sơ Bồi Thường</h2>
+                        <p class="text-[12px] font-bold text-indigo-300 uppercase tracking-[2px]">Corporate Document Preview</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="window.print()" class="px-6 py-2.5 bg-emerald-500 text-white rounded-xl font-black text-sm hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"></path></svg>
-                        In trang bìa
+                <div class="flex items-center gap-4">
+                    <button onclick="window.print()" class="px-8 py-3 bg-indigo-500 text-white rounded-2xl font-black text-sm hover:bg-indigo-600 transition-all shadow-xl shadow-indigo-500/25 flex items-center gap-3 active:scale-95">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"></path></svg>
+                        IN TRANG BÌA
                     </button>
-                    <button onclick="document.getElementById('hc-claim-cover-modal').remove()" class="w-10 h-10 bg-white/10 text-white hover:bg-rose-500 hover:text-white rounded-xl transition-all flex items-center justify-center border border-white/10">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <button onclick="document.getElementById('hc-claim-cover-modal').remove()" class="w-12 h-12 bg-white/10 text-white hover:bg-rose-500 hover:text-white rounded-2xl transition-all flex items-center justify-center border border-white/10 active:scale-90 shadow-lg">
+                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
             </div>
 
-            <div id="print-area-cover" class="flex-1 bg-slate-200 overflow-y-auto p-12 flex flex-col items-center custom-scrollbar">
-                <div class="bg-white shadow-[0_0_50px_rgba(0,0,0,0.15)] text-black" style="width:210mm; height:297mm; padding:20mm 25mm; box-sizing:border-box; font-family:'Times New Roman',Times,serif; color:#000; display:flex; flex-direction:column; position:relative;">
+            <div id="print-area-cover" class="flex-1 bg-slate-300/50 overflow-y-auto p-12 flex flex-col items-center custom-scrollbar">
+                <div class="bg-white shadow-[0_30px_100px_rgba(0,0,0,0.3)] border border-slate-200" style="width:210mm; min-height:297mm; padding:25mm 30mm; box-sizing:border-box; font-family:'Times New Roman',Times,serif; color:#000; display:flex; flex-direction:column; position:relative; background:#fff;">
                     <style>
                         .a4-cover-editable [contenteditable] { 
                             outline: none; 
-                            border-bottom: 1px dashed transparent; 
+                            border-bottom: 1px dashed #cbd5e1; 
                             transition: all 0.2s; 
+                            cursor: text;
                         }
                         .a4-cover-editable [contenteditable]:hover { 
-                            border-bottom-color: #cbd5e1; 
                             background: #f8fafc; 
+                            border-bottom-color: #3b82f6;
                         }
                         .a4-cover-editable [contenteditable]:focus { 
-                            border-bottom-color: #3b82f6; 
                             background: #eff6ff; 
+                            border-bottom-color: #2563eb;
+                            border-bottom-style: solid;
                         }
                         
                         .cover-header-top { width: 100%; display: flex; justify-content: flex-start; margin-bottom: 30px; }
-                        .cover-logo-img { height: 48px; }
-                        .cover-title-section { width: 100%; text-align: center; margin-top: 6mm; margin-bottom: 8px; }
-                        .cover-main-title { font-size: 28px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; line-height: 1.2; }
-                        .cover-divider-thick { width: 100%; height: 3px; background: #000; margin-bottom: 20px; }
-                        .cover-sub-header { width: 100%; text-align: center; font-size: 15px; font-weight: bold; margin-bottom: 30px; letter-spacing: 0.5px; }
-                        .cover-info-grid { width: 100%; display: flex; flex-direction: column; }
-                        .cover-info-row { display: flex; align-items: flex-start; padding: 12px 5px; border-bottom: 1.5px solid #000; }
-                        .cover-info-label { width: 220px; font-weight: bold; text-transform: uppercase; font-size: 13px; flex-shrink: 0; line-height: 1.4; }
-                        .cover-info-value { flex: 1; font-size: 15px; font-weight: bold; line-height: 1.4; }
-                        .cover-footer-section { margin-top: auto; margin-bottom: 5mm; text-align: center; width: 100%; border-top: 2px solid #000; padding-top: 20px; }
-                        .footer-company-name { font-size: 14px; font-weight: bold; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
-                        .footer-address { font-size: 12px; color: #000; margin-bottom: 6px; line-height: 1.5; }
-                        .footer-slogan { font-size: 13px; font-weight: bold; font-style: italic; margin-top: 10px; }
+                        .cover-logo-img { height: 60px; }
+                        .cover-title-section { width: 100%; text-align: center; margin-top: 15mm; margin-bottom: 5px; }
+                        .cover-main-title { font-size: 36px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; line-height: 1.2; }
+                        .cover-divider-thick { width: 100%; height: 4px; background: #000; margin: 25px 0 35px 0; border-top: 1px solid #000; border-bottom: 1px solid #000; }
+                        .cover-sub-header { width: 100%; text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 60px; letter-spacing: 1px; color: #333; }
+                        .cover-info-grid { width: 100%; display: flex; flex-direction: column; gap: 0; }
+                        .cover-info-row { display: flex; align-items: flex-start; padding: 22px 5px; border-bottom: 1.5px solid #000; }
+                        .cover-info-label { width: 280px; font-weight: bold; text-transform: uppercase; font-size: 16px; flex-shrink: 0; line-height: 1.4; color: #000; }
+                        .cover-info-value { flex: 1; font-size: 19px; font-weight: bold; line-height: 1.4; color: #000; }
+                        .cover-footer-section { margin-top: auto; padding-top: 30px; text-align: center; width: 100%; border-top: 3px double #000; }
+                        .footer-company-name { font-size: 18px; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+                        .footer-address { font-size: 14px; color: #000; margin-bottom: 10px; line-height: 1.6; }
+                        .footer-slogan { font-size: 18px; font-weight: bold; font-style: italic; margin-top: 15px; letter-spacing: 0.5px; }
 
                         @media print {
                             @page { size: A4; margin: 0; }
@@ -18728,11 +18730,12 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                                 margin: 0 !important; 
                                 padding: 0 !important;
                                 overflow: visible !important;
+                                background: white !important;
                             }
                             #print-area-cover > div {
                                 width: 210mm !important;
                                 height: 297mm !important;
-                                padding: 20mm 25mm !important;
+                                padding: 25mm 30mm !important;
                                 margin: 0 auto !important;
                                 box-shadow: none !important;
                                 border: none !important;
@@ -18760,7 +18763,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                             <span class="cover-info-value uppercase" contenteditable="true">${rec.companyName || '—'}</span>
                         </div>
                         <div class="cover-info-row">
-                            <span class="cover-info-label">NGƯỜI THAM GIA BẢO HIỂM:</span>
+                            <span class="cover-info-label">NGƯỜI ĐƯỢC BẢO HIỂM:</span>
                             <span class="cover-info-value uppercase" contenteditable="true">${rec.victimName} - ${rec.victimAge || '—'} TUỔI</span>
                         </div>
                         <div class="cover-info-row">
@@ -18773,17 +18776,17 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         </div>
                         <div class="cover-info-row">
                             <span class="cover-info-label">NGƯỜI THỤ LÝ HỒ SƠ:</span>
-                            <span class="cover-info-value" contenteditable="true">${rec.createdBy || '...'}</span>
+                            <span class="cover-info-value uppercase" contenteditable="true">${rec.createdBy || '...'}</span>
                         </div>
                         <div class="cover-info-row" style="border:none">
-                            <span class="cover-info-label">NGÀY TẠO:</span>
+                            <span class="cover-info-label">NGÀY LẬP HỒ SƠ:</span>
                             <span class="cover-info-value" contenteditable="true">${formatDate(rec.createdAt) || '—'}</span>
                         </div>
                     </div>
 
                     <div class="cover-footer-section">
                         <div class="footer-company-name">CÔNG TY TNHH BẢO HIỂM TASCO - CHI NHÁNH ĐẮK LẮK</div>
-                        <div class="footer-address">Địa chỉ: Toà nhà VIB Đắk Lắk Building, số 27 Nguyễn Tất Thành, Tân Lợi, Buôn Ma Thuột, Đắk Lắk<br>Hotline: 1900 1562</div>
+                        <div class="footer-address">Địa chỉ: Toà nhà VIB Đắk Lắk Building, số 27 Nguyễn Tất Thành, Tân Lợi, Buôn Ma Thuột, Đắk Lắk<br>Hotline: 1900 1562 | Website: www.tasco.com.vn</div>
                         <div class="footer-slogan">Bảo hiểm nhanh, bồi thường gọn.</div>
                     </div>
                 </div>
