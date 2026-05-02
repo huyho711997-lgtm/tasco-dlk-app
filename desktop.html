@@ -15380,89 +15380,102 @@ const HumanClaims = {
 
     _renderVietQR(bankId, bankNo, amount, claimNo, payeeName, bankLogo) {
         const desc = `Thanh toan HSBT ${claimNo}`;
-        // Sử dụng -print.png để có chất lượng cao nhất
         const qrUrl = `https://img.vietqr.io/image/${bankId}-${bankNo}-print.png?amount=${amount}&addInfo=${encodeURIComponent(desc)}&accountName=${encodeURIComponent(payeeName)}`;
 
         Swal.fire({
             html: `
-                <div class="p-1">
-                    <div class="relative bg-slate-950 rounded-[3rem] overflow-hidden shadow-[0_32px_64px_-15px_rgba(0,0,0,0.6)] border border-white/10">
-                        <!-- Hiệu ứng ánh sáng nền -->
-                        <div class="absolute -top-24 -left-24 w-64 h-64 bg-indigo-500/20 rounded-full blur-[80px] pointer-events-none"></div>
-                        <div class="absolute -bottom-24 -right-24 w-64 h-64 bg-emerald-500/20 rounded-full blur-[80px] pointer-events-none"></div>
-
-                        <!-- Header: Nhận diện Ngân hàng -->
-                        <div class="relative px-8 pt-10 pb-6 text-center">
-                            <div class="w-20 h-20 bg-white rounded-3xl mx-auto mb-5 p-3 shadow-2xl flex items-center justify-center transform hover:scale-110 transition-transform duration-500">
-                                <img src="${bankLogo || 'https://api.vietqr.io/img/ICB.png'}" class="max-w-full max-h-full object-contain" alt="Bank Logo">
+                <div class="p-4">
+                    <div class="relative bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-[0_32px_64px_-15px_rgba(0,0,0,0.6)] border border-white/5 flex w-full max-w-4xl mx-auto min-h-[500px]">
+                        <!-- Cột Trái: Tập trung vào QR (Nền Sáng) -->
+                        <div class="w-2/5 bg-white p-12 flex flex-col items-center justify-center relative border-r border-slate-100">
+                            <div class="absolute top-8 left-10 flex items-center gap-2 opacity-80">
+                                <img src="https://api.vietqr.io/img/vietqr.png" class="h-4" alt="VietQR">
                             </div>
-                            <h3 class="text-white text-2xl font-black tracking-tight mb-1">VietQR <span class="text-indigo-400">Transfer</span></h3>
-                            <div class="flex items-center justify-center gap-2">
-                                <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_10px_#34d399]"></span>
-                                <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Transaction Verified</p>
-                            </div>
-                        </div>
-
-                        <!-- QR Code Area -->
-                        <div class="relative px-10 pb-10">
-                            <div class="relative group mx-auto w-fit">
-                                <!-- Border Gradient chuyển động -->
-                                <div class="absolute -inset-1 bg-gradient-to-tr from-indigo-500 via-purple-500 to-emerald-500 rounded-[3rem] blur opacity-30 group-hover:opacity-100 transition duration-1000"></div>
-                                <div class="relative bg-white p-6 rounded-[2.8rem] shadow-2xl">
-                                    <img src="${qrUrl}" class="w-64 h-64 rounded-xl" alt="VietQR">
+                            
+                            <div class="relative group">
+                                <div class="absolute -inset-6 bg-indigo-500/5 rounded-[3rem] blur-2xl group-hover:bg-indigo-500/10 transition-colors"></div>
+                                <div class="relative bg-white p-2 rounded-2xl">
+                                    <img src="${qrUrl}" class="w-64 h-64 relative z-10" alt="QR Code">
                                 </div>
                             </div>
-
-                            <!-- Thông tin chi tiết -->
-                            <div class="mt-10 space-y-3">
-                                <!-- Box Số tiền -->
-                                <div class="bg-white/5 backdrop-blur-md rounded-3xl p-6 border border-white/10 flex items-center justify-between group hover:bg-white/10 transition-all duration-300">
-                                    <div class="text-left">
-                                        <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Tổng tiền thanh toán</p>
-                                        <p class="text-3xl font-black text-white tracking-tighter">${amount.toLocaleString('vi-VN')}<span class="text-sm ml-1 text-emerald-400 font-bold">VND</span></p>
-                                    </div>
-                                    <div class="w-14 h-14 bg-emerald-500/20 rounded-2xl flex items-center justify-center text-emerald-400 border border-emerald-500/30">
-                                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    </div>
-                                </div>
-
-                                <!-- Box Thông tin tài khoản -->
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div class="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10 text-left">
-                                        <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Người nhận</p>
-                                        <p class="text-[11px] font-black text-slate-200 truncate">${payeeName || 'CHƯA CẬP NHẬT'}</p>
-                                    </div>
-                                    <div class="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10 text-left">
-                                        <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Số tài khoản</p>
-                                        <p class="text-[11px] font-black text-indigo-400 truncate">${bankNo}</p>
-                                    </div>
-                                </div>
-
-                                <!-- Box Nội dung -->
-                                <div class="bg-indigo-500/10 backdrop-blur-md rounded-2xl p-4 border border-indigo-500/20 text-left relative overflow-hidden group">
-                                    <div class="relative z-10">
-                                        <p class="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-1">Nội dung chuyển khoản</p>
-                                        <p class="text-[11px] font-bold text-indigo-300 italic line-clamp-1">"${desc}"</p>
-                                    </div>
-                                    <svg class="absolute -right-2 -bottom-2 w-12 h-12 text-indigo-500/10" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2z"/></svg>
+                            
+                            <div class="mt-8 text-center">
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Quét để thanh toán</p>
+                                <div class="flex items-center justify-center gap-3 grayscale opacity-60">
+                                    <img src="https://api.vietqr.io/img/napas247.png" class="h-5">
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Footer: Branding -->
-                        <div class="bg-white/5 px-10 py-6 border-t border-white/10 flex items-center justify-between">
-                            <div class="flex items-center gap-3 opacity-60">
-                                <span class="text-[9px] font-black text-slate-400 border border-slate-500 px-1.5 py-0.5 rounded italic">NAPAS</span>
-                                <span class="text-[9px] font-black text-slate-400 border border-slate-500 px-1.5 py-0.5 rounded italic">VIETQR</span>
+                        <!-- Cột Phải: Chi tiết giao dịch (Nền Tối Premium) -->
+                        <div class="w-3/5 p-12 relative flex flex-col justify-between">
+                            <!-- Hiệu ứng ánh sáng góc -->
+                            <div class="absolute top-0 right-0 w-80 h-80 bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+                            <div>
+                                <div class="flex items-center justify-between mb-10">
+                                    <div class="w-20 h-12 bg-white/5 rounded-2xl p-2 flex items-center justify-center border border-white/10 shadow-inner group hover:bg-white/10 transition-colors">
+                                        <img src="${bankLogo || 'https://api.vietqr.io/img/ICB.png'}" class="max-w-full max-h-full object-contain filter brightness-110" alt="Bank Logo">
+                                    </div>
+                                    <div class="text-right">
+                                        <h3 class="text-white text-2xl font-black tracking-tight uppercase leading-none mb-1">Payment <span class="text-indigo-400">Voucher</span></h3>
+                                        <p class="text-slate-500 text-[11px] font-bold uppercase tracking-[0.15em] opacity-80">${claimNo}</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-8">
+                                    <!-- Số tiền -->
+                                    <div class="pb-8 border-b border-white/5">
+                                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Tổng số tiền chi trả</p>
+                                        <div class="flex items-baseline gap-3">
+                                            <span class="text-6xl font-black text-white tracking-tighter">${amount.toLocaleString('vi-VN')}</span>
+                                            <span class="text-xl font-black text-emerald-400 uppercase tracking-wide">VND</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Thông tin chi tiết Grid -->
+                                    <div class="grid grid-cols-2 gap-x-10 gap-y-6">
+                                        <div class="text-left">
+                                            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Người thụ hưởng</p>
+                                            <p class="text-base font-black text-slate-100 uppercase tracking-tight">${payeeName || 'CHƯA CẬP NHẬT'}</p>
+                                        </div>
+                                        <div class="text-left">
+                                            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Tài khoản & Ngân hàng</p>
+                                            <p class="text-base font-black text-indigo-400 font-mono tracking-tight">${bankNo}</p>
+                                            <p class="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-wider">${bankId}</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Ghi chú nội dung -->
+                                    <div class="p-5 bg-white/5 rounded-[1.5rem] border border-white/5 text-left relative overflow-hidden">
+                                        <div class="relative z-10">
+                                            <p class="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-1.5">Nội dung chuyển khoản</p>
+                                            <p class="text-[12px] font-bold text-slate-300 italic opacity-90 leading-relaxed">"${desc}"</p>
+                                        </div>
+                                        <svg class="absolute -right-3 -bottom-3 w-16 h-16 text-indigo-500/5 transform rotate-12" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2z"/></svg>
+                                    </div>
+                                </div>
                             </div>
-                            <p class="text-[9px] text-slate-500 font-black uppercase tracking-widest italic">TASCO-DLK SECURED</p>
+
+                            <!-- Footer Bảo mật -->
+                            <div class="mt-12 flex items-center justify-between border-t border-white/5 pt-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Verified Secure</p>
+                                    </div>
+                                    <div class="w-px h-3 bg-white/10"></div>
+                                    <p class="text-[9px] font-bold text-slate-600 italic">VietQR Network</p>
+                                </div>
+                                <p class="text-[9px] font-black text-slate-500 tracking-[0.3em] uppercase">TASCO-DLK SYSTEM</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             `,
             showConfirmButton: false,
             showCloseButton: true,
-            width: 460,
+            width: 900,
             padding: 0,
             background: 'transparent',
             customClass: { popup: 'bg-transparent border-none shadow-none' }
