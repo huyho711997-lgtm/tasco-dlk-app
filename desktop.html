@@ -1884,9 +1884,8 @@ textarea.inp { resize:vertical; }
                 </button>
                 <div id="hc-m-status-menu" class="hidden absolute top-full right-0 mt-2 w-52 bg-white border border-slate-200 rounded-lg shadow-xl flex flex-col overflow-hidden z-50"></div>
               </div>
-            </div>
 
-            <div class="relative">
+              <div class="relative">
               <button id="btn-hc-download" onclick="event.stopPropagation(); document.getElementById('hc-download-menu').classList.toggle('hidden');" class="px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-xs font-bold hover:bg-blue-100 flex items-center gap-2 transition-colors">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Tải Word
@@ -1932,6 +1931,10 @@ textarea.inp { resize:vertical; }
                   <div class="p-1.5 bg-rose-100 rounded-md shrink-0"><svg class="w-4 h-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div>
                   Thông báo bồi thường
                 </button>
+                <button onclick="document.getElementById('hc-print-menu').classList.add('hidden'); HumanClaims.openClaimCover()" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-blue-50 transition-colors flex items-center gap-3">
+                  <div class="p-1.5 bg-blue-100 rounded-md shrink-0"><svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg></div>
+                  Trang bìa hồ sơ
+                </button>
               </div>
             </div>
             <button onclick="HumanClaims.openMedicalOcrModal()" class="px-4 py-2 bg-teal-50 text-teal-700 border border-teal-200 rounded-xl text-xs font-bold hover:bg-teal-100 flex items-center gap-2 transition-colors" id="btn-hc-ocr-medical">
@@ -1947,6 +1950,7 @@ textarea.inp { resize:vertical; }
             </button>
           </div>
         </div>
+      </div>
 
         <div class="flex-1 overflow-y-auto p-6" id="hc-m-body">
           <div class="grid grid-cols-12 gap-6">
@@ -18387,6 +18391,152 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         } while (num > 0);
 
         return str.trim().charAt(0).toUpperCase() + str.trim().slice(1);
+    },
+
+    openClaimCover() {
+        const rec = this._data.find(r => r.id === this._currentId);
+        if (!rec) return;
+
+        const currentYear = new Date().getFullYear();
+        const toTitleCase = (str) => {
+            if (!str) return '—';
+            return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        };
+
+        const html = `
+        <div id="hc-claim-cover-modal" class="fixed inset-0 z-[9999] flex flex-col bg-slate-900/60 backdrop-blur-sm p-4 overflow-hidden font-sans">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <div class="flex items-center gap-3 text-white">
+                    <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-black leading-tight">Bìa hồ sơ bồi thường</h2>
+                        <p class="text-[11px] font-bold text-indigo-300 uppercase tracking-widest">In trang bìa khổ A4</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="window.print()" class="px-6 py-2.5 bg-emerald-500 text-white rounded-xl font-black text-sm hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"></path></svg>
+                        In bìa hồ sơ
+                    </button>
+                    <button onclick="document.getElementById('hc-claim-cover-modal').remove()" class="w-10 h-10 bg-white/10 text-white hover:bg-rose-500 hover:text-white rounded-xl transition-all flex items-center justify-center border border-white/10">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 bg-slate-100 rounded-2xl shadow-inner overflow-y-auto p-10 flex flex-col items-center custom-scrollbar">
+                <div id="print-area-cover" class="a4-cover bg-white shadow-2xl relative p-[20mm_25mm] flex flex-col items-center">
+                    <style>
+                        .a4-cover {
+                            width: 210mm;
+                            height: 297mm;
+                            box-sizing: border-box;
+                            font-family: "Times New Roman", Times, serif;
+                            color: #000;
+                            border: 1px solid #e2e8f0;
+                        }
+                        .cover-border {
+                            position: absolute;
+                            inset: 10mm;
+                            border: 4px double #000;
+                            pointer-events: none;
+                        }
+                        .cover-content {
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: space-between;
+                            padding: 20mm 10mm;
+                            z-index: 10;
+                        }
+                        .cover-field {
+                            width: 100%;
+                            display: flex;
+                            align-items: flex-start;
+                            margin-bottom: 12px;
+                            font-size: 18px;
+                            line-height: 1.4;
+                        }
+                        .cover-label {
+                            width: 250px;
+                            flex-shrink: 0;
+                            font-weight: bold;
+                        }
+                        .cover-value {
+                            flex: 1;
+                            border-bottom: 1px dotted #000;
+                            padding-bottom: 2px;
+                            font-weight: bold;
+                            text-transform: uppercase;
+                        }
+                        @media print {
+                            body * { visibility: hidden; }
+                            #hc-claim-cover-modal { background: none; backdrop-filter: none; padding: 0; position: static; }
+                            #print-area-cover, #print-area-cover * { visibility: visible; }
+                            #print-area-cover { 
+                                position: fixed; 
+                                left: 0; top: 0; 
+                                width: 210mm; height: 297mm;
+                                margin: 0; padding: 20mm 25mm;
+                                border: none; box-shadow: none;
+                            }
+                            .a4-cover { border: none !important; }
+                        }
+                    </style>
+                    <div class="cover-border"></div>
+                    
+                    <div class="cover-content">
+                        <!-- Top: Company Info -->
+                        <div class="text-center w-full">
+                            <h2 class="text-[18px] font-bold uppercase mb-1">TỔNG CÔNG TY CỔ PHẦN BẢO HIỂM TASCO</h2>
+                            <h3 class="text-[17px] font-bold uppercase border-b-2 border-black inline-block px-4 pb-1">CHI NHÁNH ĐẮK LẮK</h3>
+                        </div>
+
+                        <!-- Middle: Main Title -->
+                        <div class="text-center mt-20 mb-20">
+                            <h1 class="text-[42px] font-black uppercase mb-4 tracking-widest">HỒ SƠ BỒI THƯỜNG</h1>
+                            <div class="w-48 h-1 bg-black mx-auto mb-6"></div>
+                            <h2 class="text-[22px] font-bold uppercase italic" contenteditable="true">BẢO HIỂM KẾT HỢP CON NGƯỜI</h2>
+                        </div>
+
+                        <!-- Bottom: Details -->
+                        <div class="w-full px-10 mb-20">
+                            <div class="cover-field">
+                                <span class="cover-label">Người được bảo hiểm:</span>
+                                <span class="cover-value" contenteditable="true">${toTitleCase(rec.victimName)}</span>
+                            </div>
+                            <div class="cover-field">
+                                <span class="cover-label">Số hồ sơ bồi thường:</span>
+                                <span class="cover-value" contenteditable="true">${rec.claimNo || '—'}</span>
+                            </div>
+                            <div class="cover-field">
+                                <span class="cover-label">Số hợp đồng bảo hiểm:</span>
+                                <span class="cover-value" contenteditable="true">${rec.contractNo || '—'}</span>
+                            </div>
+                            <div class="cover-field">
+                                <span class="cover-label">Đơn vị tham gia:</span>
+                                <span class="cover-value" contenteditable="true">${rec.companyName || '—'}</span>
+                            </div>
+                            <div class="cover-field">
+                                <span class="cover-label">Loại hình bảo hiểm:</span>
+                                <span class="cover-value" contenteditable="true">${rec.insType || 'Bảo hiểm Kết hợp con người'}</span>
+                            </div>
+                        </div>
+
+                        <!-- Footer: Year -->
+                        <div class="text-center mt-auto">
+                            <h4 class="text-[18px] font-bold uppercase tracking-widest" contenteditable="true">ĐẮK LẮK, NĂM ${currentYear}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+        document.body.insertAdjacentHTML('beforeend', html);
     },
 };
 
