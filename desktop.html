@@ -2168,28 +2168,15 @@ textarea.inp { resize:vertical; }
                     <div class="col-span-2"><label class="lbl">Số tài khoản</label><input id="hc-payeeBankNo" class="inp font-bold text-purple-700 text-[13px]"></div>
                     <div class="col-span-2">
                         <label class="lbl">Ngân hàng</label>
-                        <input id="hc-payeeBankName" class="inp" list="hc-bank-list" placeholder="Vietcombank, MB...">
-                        <datalist id="hc-bank-list">
-                            <option value="Vietcombank (VCB)">
-                            <option value="MB Bank (MB)">
-                            <option value="BIDV">
-                            <option value="Vietinbank (CTG)">
-                            <option value="Agribank (VBA)">
-                            <option value="Techcombank (TCB)">
-                            <option value="ACB">
-                            <option value="VPBank">
-                            <option value="Sacombank (STB)">
-                            <option value="TPBank">
-                            <option value="MSB">
-                            <option value="VIB">
-                            <option value="HD Bank">
-                            <option value="OCB">
-                            <option value="SHB">
-                            <option value="Eximbank">
-                        </datalist>
+                        <div class="relative group">
+                            <input id="hc-payeeBankName" class="inp pr-10 cursor-pointer font-bold text-slate-700 bg-white" readonly placeholder="Chọn Ngân hàng..." onclick="HumanClaims.openBankSelector()">
+                            <div class="absolute right-3 top-3 pointer-events-none text-slate-400 group-hover:text-indigo-500 transition-colors">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
                     </div>
                     <div class="flex items-end">
-                      <button onclick="HumanClaims.showVietQR()" class="w-full h-10 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-xl flex items-center justify-center hover:bg-indigo-100 transition-colors" title="Tạo mã QR VietQR">
+                      <button onclick="HumanClaims.showVietQR()" class="w-full h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200" title="Tạo mã QR VietQR">
                         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/><rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/></svg>
                       </button>
                     </div>
@@ -14742,6 +14729,105 @@ const HumanClaims = {
         'ncb': 'NCB',
     },
 
+    /* ── Bank Selector (VietQR API) ── */
+    async openBankSelector() {
+        if (!this._banks) {
+            Swal.fire({
+                title: 'Đang tải danh sách ngân hàng...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading(),
+                customClass: { popup: 'rnd' }
+            });
+            try {
+                const res = await fetch('https://api.vietqr.io/v2/banks');
+                const json = await res.json();
+                if (json.code === '00') {
+                    this._banks = json.data;
+                }
+            } catch (e) {
+                console.error('Failed to fetch banks', e);
+                this._banks = [
+                    { bin: '970436', code: 'VCB', name: 'Vietcombank', logo: 'https://api.vietqr.io/img/VCB.png' },
+                    { bin: '970422', code: 'MB', name: 'MB Bank', logo: 'https://api.vietqr.io/img/MB.png' },
+                    { bin: '970415', code: 'CTG', name: 'Vietinbank', logo: 'https://api.vietqr.io/img/CTG.png' },
+                    { bin: '970418', code: 'BIDV', name: 'BIDV', logo: 'https://api.vietqr.io/img/BIDV.png' },
+                    { bin: '970407', code: 'TCB', name: 'Techcombank', logo: 'https://api.vietqr.io/img/TCB.png' },
+                ];
+            }
+        }
+
+        const renderList = (data) => {
+            if (!data.length) return '<div class="p-8 text-center text-slate-400 font-bold">Không tìm thấy ngân hàng nào</div>';
+            return data.map(b => `
+                <div onclick="HumanClaims.selectBank('${b.code}', '${b.name}', '${b.logo}')" class="flex items-center gap-4 p-4 hover:bg-indigo-50 cursor-pointer border-b border-slate-50 transition-all group">
+                    <div class="w-14 h-9 bg-white rounded-lg border border-slate-100 p-1 flex items-center justify-center shadow-sm group-hover:border-indigo-200 group-hover:shadow-md transition-all">
+                        <img src="${b.logo}" class="max-w-full max-h-full object-contain" alt="${b.code}">
+                    </div>
+                    <div>
+                        <p class="text-sm font-black text-slate-700 group-hover:text-indigo-700 transition-colors">${b.code}</p>
+                        <p class="text-[10px] font-bold text-slate-400 group-hover:text-indigo-400 transition-colors truncate max-w-[300px]">${b.name}</p>
+                    </div>
+                    <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        Swal.fire({
+            title: '<span class="text-lg font-black">Chọn Ngân hàng</span>',
+            html: `
+                <div class="mb-4 relative">
+                    <input type="text" id="bank-search" class="inp !pl-10 !rounded-2xl" placeholder="Tìm tên hoặc mã ngân hàng (VCB, MB...)" oninput="HumanClaims.filterBanks(this.value)">
+                    <div class="absolute left-3.5 top-3.5 text-slate-400">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+                </div>
+                <div id="bank-list-container" class="max-h-[400px] overflow-y-auto custom-scrollbar border border-slate-100 rounded-2xl bg-white text-left">
+                    ${renderList(this._banks)}
+                </div>
+            `,
+            showConfirmButton: false,
+            showCloseButton: true,
+            width: 500,
+            customClass: { popup: 'rnd' }
+        });
+    },
+
+    filterBanks(q) {
+        const query = q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
+        const filtered = this._banks.filter(b => {
+            const bCode = b.code.toLowerCase();
+            const bName = b.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
+            return bCode.includes(query) || bName.includes(query);
+        });
+        const container = document.getElementById('bank-list-container');
+        if (container) {
+            container.innerHTML = filtered.map(b => `
+                <div onclick="HumanClaims.selectBank('${b.code}', '${b.name}', '${b.logo}')" class="flex items-center gap-4 p-4 hover:bg-indigo-50 cursor-pointer border-b border-slate-50 transition-all group">
+                    <div class="w-14 h-9 bg-white rounded-lg border border-slate-100 p-1 flex items-center justify-center shadow-sm group-hover:border-indigo-200 group-hover:shadow-md transition-all">
+                        <img src="${b.logo}" class="max-w-full max-h-full object-contain" alt="${b.code}">
+                    </div>
+                    <div>
+                        <p class="text-sm font-black text-slate-700 group-hover:text-indigo-700 transition-colors">${b.code}</p>
+                        <p class="text-[10px] font-bold text-slate-400 group-hover:text-indigo-400 transition-colors truncate max-w-[300px]">${b.name}</p>
+                    </div>
+                    <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                </div>
+            `).join('');
+        }
+    },
+
+    selectBank(code, name, logo) {
+        const input = document.getElementById('hc-payeeBankName');
+        input.value = `${code} - ${name}`;
+        input.dataset.bankId = code;
+        input.dataset.bankLogo = logo;
+        Swal.close();
+    },
+
     init() {
         // Admin check: Hiển thị nút cấu hình nếu là admin
         const currentUser = Auth.getCurrentUser();
@@ -15255,81 +15341,130 @@ const HumanClaims = {
     /* ── VietQR Payment ── */
     showVietQR() {
         const bankNo = document.getElementById('hc-payeeBankNo').value.trim();
-        const bankNameRaw = document.getElementById('hc-payeeBankName').value.trim();
-        const bankName = bankNameRaw.toLowerCase();
+        const bankNameEl = document.getElementById('hc-payeeBankName');
+        const bankNameRaw = bankNameEl.value.trim();
         const amount = parseInt(document.getElementById('hc-calc-total').textContent.replace(/[^\d]/g, '')) || 0;
         const claimNo = document.getElementById('hc-claimNo').value.trim() || 'Hồ sơ';
         const payeeName = document.getElementById('hc-payeeName').value.trim();
 
         if (!bankNo) { Toast.fire({ icon: 'warning', title: 'Vui lòng nhập Số tài khoản!' }); return; }
-        if (!bankName) { Toast.fire({ icon: 'warning', title: 'Vui lòng nhập Ngân hàng!' }); return; }
+        if (!bankNameRaw) { Toast.fire({ icon: 'warning', title: 'Vui lòng chọn Ngân hàng!' }); return; }
 
-        // Tìm Bank ID từ mapping
-        let bankId = '';
-        for (let key in this.BANK_MAP) {
-            if (bankName.includes(key)) {
-                bankId = this.BANK_MAP[key];
-                break;
-            }
-        }
+        let bankId = bankNameEl.dataset.bankId;
+        let bankLogo = bankNameEl.dataset.bankLogo;
 
         if (!bankId) {
-            // Thử trích xuất mã trong ngoặc nếu có (VD: Vietcombank (VCB) -> VCB)
-            const match = bankNameRaw.match(/\((.*?)\)/);
-            if (match && match[1]) {
-                bankId = match[1].toUpperCase();
-            }
-        }
-
-        if (!bankId) {
-            Swal.fire({
-                title: 'Không tìm thấy mã ngân hàng',
-                text: 'Hệ thống chưa nhận diện được ngân hàng này. Vui lòng nhập mã ngân hàng (VD: VCB, MB, CTG, TCB...)',
-                input: 'text',
-                showCancelButton: true,
-                confirmButtonText: 'Tạo QR',
-                cancelButtonText: 'Hủy',
-                customClass: { popup: 'rnd' }
-            }).then(r => {
-                if (r.isConfirmed && r.value) {
-                    this._renderVietQR(r.value.toUpperCase(), bankNo, amount, claimNo, payeeName);
+            // Cố gắng tìm lại từ mapping nếu user gõ tay (mặc dù đã set readonly)
+            const bankName = bankNameRaw.toLowerCase();
+            for (let key in this.BANK_MAP) {
+                if (bankName.includes(key)) {
+                    bankId = this.BANK_MAP[key];
+                    break;
                 }
-            });
+            }
+        }
+
+        if (!bankId) {
+            const match = bankNameRaw.match(/\((.*?)\)/) || bankNameRaw.match(/^([A-Z0-9]+)\s/);
+            if (match && match[1]) bankId = match[1].toUpperCase();
+        }
+
+        if (!bankId) {
+            Toast.fire({ icon: 'error', title: 'Không tìm thấy mã ngân hàng chuẩn. Vui lòng chọn lại từ danh sách!' });
+            this.openBankSelector();
             return;
         }
 
-        this._renderVietQR(bankId, bankNo, amount, claimNo, payeeName);
+        this._renderVietQR(bankId, bankNo, amount, claimNo, payeeName, bankLogo);
     },
 
-    _renderVietQR(bankId, bankNo, amount, claimNo, payeeName) {
+    _renderVietQR(bankId, bankNo, amount, claimNo, payeeName, bankLogo) {
         const desc = `Thanh toan HSBT ${claimNo}`;
         const qrUrl = `https://img.vietqr.io/image/${bankId}-${bankNo}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(desc)}&accountName=${encodeURIComponent(payeeName)}`;
 
         Swal.fire({
-            title: '<span class="text-lg font-black">Mã QR Thanh toán (VietQR)</span>',
             html: `
-                <div class="flex flex-col items-center gap-4">
-                    <img src="${qrUrl}" class="w-64 h-64 shadow-xl rounded-2xl border border-slate-100" alt="VietQR">
-                    <div class="text-left w-full bg-slate-50 p-4 rounded-xl border border-slate-200">
-                        <div class="mb-3">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Người thụ hưởng</p>
-                            <p class="text-[13px] font-black text-slate-700">${payeeName || 'CHƯA NHẬP TÊN'}</p>
+                <div class="p-2">
+                    <div class="relative bg-white rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100">
+                        <!-- Top Header -->
+                        <div class="bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-10 text-center relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+                                <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0 0 L100 0 L100 100 Z" fill="white"/></svg>
+                            </div>
+                            <div class="relative z-10">
+                                <div class="w-16 h-16 bg-white rounded-2xl mx-auto mb-4 p-2 shadow-lg flex items-center justify-center">
+                                    <img src="${bankLogo || 'https://api.vietqr.io/img/ICB.png'}" class="max-w-full max-h-full object-contain" alt="Bank">
+                                </div>
+                                <h3 class="text-white text-xl font-black tracking-tight uppercase mb-1">Chuyển khoản VietQR</h3>
+                                <div class="flex items-center justify-center gap-2">
+                                    <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+                                    <p class="text-blue-100 text-[10px] font-bold uppercase tracking-widest opacity-80">Nhanh chóng • An toàn</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Tài khoản & Ngân hàng</p>
-                            <p class="text-[13px] font-black text-indigo-700">${bankNo} <span class="text-slate-400 font-bold ml-1">(${bankId})</span></p>
+
+                        <!-- QR Code Area -->
+                        <div class="p-8 bg-white flex flex-col items-center">
+                            <div class="relative group">
+                                <div class="absolute -inset-6 bg-gradient-to-tr from-indigo-500/10 to-blue-500/10 rounded-[3rem] blur-2xl opacity-100"></div>
+                                <div class="relative bg-white p-5 rounded-[2.5rem] shadow-2xl border border-slate-50">
+                                    <img src="${qrUrl}" class="w-60 h-60 rounded-2xl" alt="QR">
+                                    <div class="absolute inset-0 border-2 border-slate-100/50 rounded-[2.5rem] pointer-events-none"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-8 w-full space-y-3">
+                                <div class="flex items-center justify-between p-5 bg-slate-50 rounded-3xl border border-slate-100 group hover:border-indigo-200 transition-all">
+                                    <div class="text-left">
+                                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Tổng tiền chi trả</p>
+                                        <p class="text-2xl font-black text-slate-800">${amount.toLocaleString('vi-VN')}<span class="text-sm ml-1 text-slate-400 font-bold">đ</span></p>
+                                    </div>
+                                    <div class="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
+                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3 text-left">
+                                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Người thụ hưởng</p>
+                                        <p class="text-[11px] font-black text-slate-700 truncate">${payeeName || 'CHƯA NHẬP'}</p>
+                                    </div>
+                                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Số tài khoản</p>
+                                        <p class="text-[11px] font-black text-indigo-600 truncate">${bankNo}</p>
+                                    </div>
+                                </div>
+
+                                <div class="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100/50 text-left relative overflow-hidden">
+                                    <div class="relative z-10">
+                                        <p class="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-1">Nội dung chuyển khoản</p>
+                                        <p class="text-[11px] font-bold text-indigo-700 italic">"${desc}"</p>
+                                    </div>
+                                    <svg class="absolute -right-2 -bottom-2 w-12 h-12 text-indigo-500/5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2z"/></svg>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Số tiền thanh toán</p>
-                            <p class="text-xl font-black text-emerald-600">${amount.toLocaleString('vi-VN')} đ</p>
+
+                        <!-- Footer -->
+                        <div class="bg-slate-50 px-8 py-5 border-t border-slate-100 text-center">
+                            <p class="text-[9px] text-slate-400 font-black mb-3 uppercase tracking-[0.2em]">Hỗ trợ quét trên tất cả ứng dụng</p>
+                            <div class="flex justify-center gap-5 opacity-30 grayscale group-hover:grayscale-0 transition-all">
+                                <img src="https://api.vietqr.io/img/VCB.png" class="h-3">
+                                <img src="https://api.vietqr.io/img/MB.png" class="h-3">
+                                <img src="https://api.vietqr.io/img/CTG.png" class="h-3">
+                                <img src="https://api.vietqr.io/img/BIDV.png" class="h-3">
+                                <img src="https://api.vietqr.io/img/TCB.png" class="h-3">
+                            </div>
                         </div>
                     </div>
-                    <p class="text-[10px] text-slate-400 font-medium italic">* Quét mã này bằng ứng dụng ngân hàng để thanh toán nhanh.</p>
                 </div>
             `,
-            showCloseButton: true,
             showConfirmButton: false,
-            customClass: { popup: 'rnd' }
+            showCloseButton: true,
+            width: 440,
+            padding: 0,
+            background: 'transparent',
+            customClass: { popup: 'bg-transparent border-none shadow-none' }
         });
     },
 
