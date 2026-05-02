@@ -18025,8 +18025,9 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                     
                     @media print {
                         body * { visibility: hidden; }
-                        #claim-noti-container, #claim-noti-container * { visibility: visible; }
-                        #claim-noti-container { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; overflow: visible; }
+                        #hc-claim-noti-modal, #hc-claim-noti-modal * { visibility: visible; }
+                        #hc-claim-noti-modal { position: static !important; overflow: visible !important; }
+                        #claim-noti-container { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; overflow: visible !important; }
                         .a4-page { border: none !important; box-shadow: none !important; margin: 0 !important; page-break-after: always; padding: 15mm 20mm !important; }
                         .a4-page:last-child { page-break-after: auto; }
                     }
@@ -18589,7 +18590,8 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         .a4-page [contenteditable]:focus { border-bottom-color: #3b82f6; background: #eff6ff; }
                         @media print {
                             body * { visibility: hidden !important; }
-                            #print-area-submission, #print-area-submission * { visibility: visible !important; }
+                            #hc-claim-submission-modal, #hc-claim-submission-modal * { visibility: visible !important; }
+                            #hc-claim-submission-modal { position: static !important; overflow: visible !important; }
                             #print-area-submission { 
                                 position: absolute !important; 
                                 left: 0 !important; 
@@ -18877,7 +18879,8 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
 
                         @media print {
                             body * { visibility: hidden !important; }
-                            #print-area-cover, #print-area-cover * { visibility: visible !important; }
+                            #hc-claim-cover-modal, #hc-claim-cover-modal * { visibility: visible !important; }
+                            #hc-claim-cover-modal { position: static !important; overflow: visible !important; }
                             #print-area-cover { 
                                 position: absolute !important; 
                                 left: 0 !important; 
