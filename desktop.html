@@ -18,6 +18,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://unpkg.com/docx@8.2.2/build/index.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -18821,44 +18823,109 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         document.body.insertAdjacentHTML('beforeend', html);
         const modal = document.getElementById('hc-claim-submission-modal');
         const btnExportWord = modal.querySelector('#btn-export-word');
-        btnExportWord.onclick = () => {
-            const content = modal.querySelector('.a4-page').innerHTML;
-            const style = `
-                <style>
-                    @page { size: 21cm 29.7cm; margin: 1.5cm 2cm; }
-                    body { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.3; color: #000; }
-                    table { width: 100%; border-collapse: collapse; margin: 12pt 0; }
-                    th, td { border: 1.0pt solid black; padding: 6pt; vertical-align: top; font-size: 11pt; }
-                    .bold { font-weight: bold; }
-                    .center { text-align: center; }
-                    .uppercase { text-transform: uppercase; }
-                    .section-title { font-weight: bold; font-size: 13pt; margin-top: 18pt; margin-bottom: 6pt; text-decoration: underline; }
-                    .cb { display: inline-block; width: 11pt; height: 11pt; border: 1pt solid black; margin-right: 4pt; text-align:center; font-family: 'Segoe UI Symbol', sans-serif; }
-                    .checked { background-color: #000; color: #fff; }
-                    .italic { font-style: italic; }
-                    .mb-1 { margin-bottom: 3pt; }
-                    .mb-2 { margin-bottom: 6pt; }
-                    .mb-3 { margin-bottom: 9pt; }
-                    .mb-4 { margin-bottom: 12pt; }
-                    .ml-4 { margin-left: 15pt; }
-                    .ml-6 { margin-left: 20pt; }
-                    img { max-height: 50pt; }
-                </style>
-            `;
-            const fullHtml = `
-                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-                <head><meta charset='utf-8'>${style}</head>
-                <body>${content}</body>
-                </html>
-            `;
-            const blob = new Blob(['\ufeff', fullHtml], { type: 'application/msword' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            const fileName = `To_trinh_BT_${(rec.victimName || 'HS').replace(/\s+/g, '_')}_${new Date().getTime()}.doc`;
-            link.download = fileName;
-            link.click();
-            URL.revokeObjectURL(url);
+        btnExportWord.onclick = async () => {
+            const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle, ImageRun } = docx;
+
+            // Fetch Logo
+            let logoData = null;
+            try {
+                const response = await fetch('https://lh3.googleusercontent.com/d/1bpOB60B7o1NDwahpZsVxct9PbfdwvKmK');
+                const blob = await response.blob();
+                logoData = await blob.arrayBuffer();
+            } catch (e) { console.error("Logo fetch failed", e); }
+
+            // Helper to create bold text
+            const bold = (text) => new TextRun({ text, bold: true, font: "Times New Roman" });
+            const normal = (text) => new TextRun({ text, font: "Times New Roman" });
+
+            // Create the document
+            const doc = new Document({
+                sections: [{
+                    properties: {
+                        page: { margin: { top: 1134, right: 1417, bottom: 1134, left: 1417 } },
+                    },
+                    children: [
+                        // Header: Logo and Date
+                        new Table({
+                            width: { size: 100, type: WidthType.PERCENTAGE },
+                            borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE } },
+                            rows: [
+                                new TableRow({
+                                    children: [
+                                        new TableCell({
+                                            width: { size: 50, type: WidthType.PERCENTAGE },
+                                            children: [
+                                                logoData ? new Paragraph({
+                                                    children: [
+                                                        new ImageRun({
+                                                            data: logoData,
+                                                            transformation: { width: 120, height: 45 },
+                                                        }),
+                                                    ],
+                                                }) : new Paragraph({ children: [bold("TASCO DAK LAK")] }),
+                                            ],
+                                        }),
+                                        new TableCell({
+                                            width: { size: 50, type: WidthType.PERCENTAGE },
+                                            children: [new Paragraph({ 
+                                                alignment: AlignmentType.RIGHT,
+                                                children: [new TextRun({ text: `Đắk Lắk, ngày ${ngay} tháng ${thang} năm ${nam}`, italics: true, font: "Times New Roman" })] 
+                                            })],
+                                        }),
+                                    ],
+                                }),
+                            ],
+                        }),
+
+                        new Paragraph({ spacing: { before: 400, after: 200 }, alignment: AlignmentType.CENTER, children: [new TextRun({ text: "TỜ TRÌNH BỒI THƯỜNG BẢO HIỂM CON NGƯỜI", bold: true, size: 32, font: "Times New Roman" })] }),
+                        new Paragraph({ spacing: { after: 400 }, alignment: AlignmentType.CENTER, children: [new TextRun({ text: `Hồ sơ số: ${rec.claimNo || '...................'}`, bold: true, font: "Times New Roman" })] }),
+
+                        new Paragraph({ children: [bold("I. TÌNH HÌNH CHUNG")], spacing: { after: 200 } }),
+                        new Table({
+                            width: { size: 100, type: WidthType.PERCENTAGE },
+                            rows: [
+                                new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [bold("Nghiệp vụ bảo hiểm")] })], width: { size: 30, type: WidthType.PERCENTAGE } }), new TableCell({ children: [new Paragraph({ children: [normal(rec.insType || 'Kết hợp con người')] })] })] }),
+                                new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [bold("Đơn bảo hiểm số")] })] }), new TableCell({ children: [new Paragraph({ children: [bold(rec.contractNo || '—')] })] })] }),
+                                new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [bold("Đơn vị tham gia bảo hiểm")] })] }), new TableCell({ children: [new Paragraph({ children: [normal(rec.companyName || '—')] })] })] }),
+                                new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [bold("Thời hạn bảo hiểm")] })] }), new TableCell({ children: [new Paragraph({ children: [normal(`Từ ${rec.contractStartDate || '—'} đến ${rec.contractEndDate || '—'}`)] })] })] }),
+                                new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [bold("Phí bảo hiểm")] })] }), new TableCell({ children: [new Paragraph({ children: [bold(`${amountStr(rec.contractPremium)} VNĐ`)] })] })] }),
+                                new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [bold("Họ tên người được BH")] })] }), new TableCell({ children: [new Paragraph({ children: [bold(rec.victimName.toUpperCase()), normal(` - Tuổi: ${rec.victimAge || '—'}`)] })] })] }),
+                                new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [bold("Nguyên nhân tổn thất")] })] }), new TableCell({ children: [new Paragraph({ children: [normal(rec.accidentCause || '—')] })] })] }),
+                                new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [bold("Hậu quả")] })] }), new TableCell({ children: [new Paragraph({ children: [normal(rec.accidentResult || '—')] })] })] }),
+                                new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [bold("Tỷ lệ thương tật")] })] }), new TableCell({ children: [new Paragraph({ children: [bold(`${rec.injuryRate || '0'} %`)] })] })] }),
+                                new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [bold("Chi phí y tế")] })] }), new TableCell({ children: [new Paragraph({ children: [normal(rec.medicalCost ? (rec.medicalCost).toLocaleString('vi-VN') + ' đ' : '—')] })] })] }),
+                            ]
+                        }),
+
+                        new Paragraph({ children: [bold("II. TÍNH TOÁN TRẢ TIỀN BẢO HIỂM")], spacing: { before: 400, after: 200 } }),
+                        new Paragraph({ children: [normal("1. Tỷ lệ Thương tật/phẫu thuật theo quy định: Mã số "), bold(rec.injuryCode || '...'), normal(", Đề xuất: "), bold(`${rec.injuryRate || '0'} %`), normal(" tương đương số tiền là: "), bold(`${amountStr(rec.injuryAmount)} đ`)] }),
+                        new Paragraph({ children: [normal("2. Hỗ trợ ngày nằm viện: "), bold(`${rec.hospitalDays || '0'} ngày`), normal(", số tiền: "), bold(`${amountStr(rec.hospitalSupportAmount)} đ`) ], spacing: { after: 200 } }),
+                        new Paragraph({ children: [bold("- Tổng số tiền bồi thường: "), bold(`${amountStr(rec.totalAmount)} đ`) ] }),
+                        new Paragraph({ children: [new TextRun({ text: `(Bằng chữ: ${totalAmountWords})`, italics: true, font: "Times New Roman" })], spacing: { after: 400 } }),
+
+                        new Paragraph({ children: [bold("IV. KIẾN NGHỊ:")], spacing: { after: 200 } }),
+                        new Paragraph({ children: [normal("Sau khi xem xét hồ sơ, Bồi thường viên đề xuất chi trả số tiền: "), bold(`${amountStr(rec.totalAmount)} đ`)] }),
+                        new Paragraph({ children: [bold("Duyệt bồi thường [X]   Từ chối bồi thường [ ]")], spacing: { after: 800 } }),
+
+                        new Table({
+                            width: { size: 100, type: WidthType.PERCENTAGE },
+                            borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE } },
+                            rows: [
+                                new TableRow({
+                                    children: [
+                                        new TableCell({ children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [bold("LÃNH ĐẠO PHÊ DUYỆT")] })] }),
+                                        new TableCell({ children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [bold("BỘ PHẬN GĐBT")] })] }),
+                                        new TableCell({ children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [bold("CÁN BỘ ĐỀ XUẤT")] }), new Paragraph({ alignment: AlignmentType.CENTER, children: [normal(rec.createdBy || '...')], spacing: { before: 1500 } })] }),
+                                    ]
+                                })
+                            ]
+                        })
+                    ]
+                }]
+            });
+
+            const blob = await Packer.toBlob(doc);
+            saveAs(blob, `To_trinh_BT_${(rec.victimName || 'HS').replace(/\s+/g, '_')}.docx`);
         };
     },
 
