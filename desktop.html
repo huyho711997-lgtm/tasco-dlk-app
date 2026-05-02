@@ -1959,21 +1959,28 @@ textarea.inp { resize:vertical; }
                   <span class="text-xs font-black text-slate-700 uppercase tracking-wide">Thông tin Hợp đồng</span>
                 </div>
                 <div class="p-4 space-y-3">
-                  <div>
-                    <label class="lbl text-rose-600">Số HSBT</label>
-                    <input id="hc-claimNo" class="inp font-bold text-rose-700 uppercase text-[13px]" placeholder="Nhập số hồ sơ bồi thường (nếu có)...">
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="lbl text-rose-600">Số HSBT</label>
+                      <input id="hc-claimNo" class="inp font-bold text-rose-700 uppercase text-[13px]" placeholder="Số hồ sơ bồi thường...">
+                    </div>
+                    <div class="relative">
+                      <label class="lbl">Số HĐ gốc (Gõ để tìm kiếm)</label>
+                      <input id="hc-contractNo" class="inp text-[13px]" placeholder="Tìm số HĐ..." oninput="HumanClaims.searchContract(this.value, 'no')">
+                      <div id="hc-contract-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl hidden max-h-48 overflow-y-auto"></div>
+                    </div>
                   </div>
                   
                   <div class="grid grid-cols-2 gap-3">
-                      <div class="relative">
-                          <label class="lbl">Số HĐ gốc (Gõ để tìm kiếm)</label>
-                          <input id="hc-contractNo" class="inp text-[13px]" placeholder="Tìm số HĐ..." oninput="HumanClaims.searchContract(this.value, 'no')">
-                          <div id="hc-contract-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl hidden max-h-48 overflow-y-auto"></div>
-                      </div>
-                      <div class="relative"> <label class="lbl">Tên đơn vị tham gia BH</label>
-                          <input id="hc-companyName" class="inp font-bold text-blue-800" placeholder="Tìm theo tên đơn vị..." oninput="HumanClaims.searchContract(this.value, 'unit')">
-                          <div id="hc-unit-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl hidden max-h-48 overflow-y-auto"></div>
-                      </div>
+                    <div class="relative">
+                      <label class="lbl">Tên đơn vị tham gia BH</label>
+                      <input id="hc-companyName" class="inp font-bold text-blue-800" placeholder="Tìm theo tên đơn vị..." oninput="HumanClaims.searchContract(this.value, 'unit')">
+                      <div id="hc-unit-dropdown" class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl hidden max-h-48 overflow-y-auto"></div>
+                    </div>
+                    <div>
+                      <label class="lbl">Ngày hợp đồng</label>
+                      <input id="hc-contractDate" type="text" class="inp text-center" placeholder="DD/MM/YYYY" onblur="HumanClaims.applySmartDate(this)">
+                    </div>
                   </div>
                   
                   <div>
@@ -15021,6 +15028,10 @@ const HumanClaims = {
         document.getElementById('hc-contractNo').value = m.contractNo || '';
         document.getElementById('hc-companyName').value = m.unit || '';
         document.getElementById('hc-companyAddress').value = m.unitAddress || '';
+        if (m.createdDate) {
+            const cDate = moment(m.createdDate, ['YYYY-MM-DD', 'DD/MM/YYYY']);
+            if (cDate.isValid()) document.getElementById('hc-contractDate').value = cDate.format('DD/MM/YYYY');
+        }
         
         // Nhận diện Loại hình BH
         const insTypeEl = document.getElementById('hc-insType');
@@ -15150,7 +15161,9 @@ const HumanClaims = {
         };
         
         setVal('hc-claimNo', r.claimNo); // NẠP DỮ LIỆU SỐ HSBT
-        setVal('hc-contractNo', r.contractNo); setVal('hc-companyName', r.companyName);
+        setVal('hc-contractNo', r.contractNo); 
+        setVal('hc-contractDate', r.contractDate); // Nạp ngày hợp đồng
+        setVal('hc-companyName', r.companyName);
         setVal('hc-companyAddress', r.companyAddress); // Nạp địa chỉ
         setVal('hc-gcn', r.gcn); setVal('hc-insType', r.insType); setVal('hc-feeStatus', r.feeStatus);
         setVal('hc-premium', r.premium ? Number(r.premium).toLocaleString('vi-VN') : '');
@@ -15304,7 +15317,9 @@ const HumanClaims = {
 
         const payload = {
             claimNo: getVal('hc-claimNo'), // LƯU DỮ LIỆU SỐ HSBT VÀO PAYLOAD
-            contractNo: getVal('hc-contractNo'), companyName: getVal('hc-companyName'),
+            contractNo: getVal('hc-contractNo'), 
+            contractDate: getVal('hc-contractDate'), // Lưu ngày hợp đồng
+            companyName: getVal('hc-companyName'),
             companyAddress: getVal('hc-companyAddress'),
             gcn: getVal('hc-gcn'), insType: getVal('hc-insType'), feeStatus: getVal('hc-feeStatus'),
             premium: getNum('hc-premium'), feeDate: getVal('hc-feeDate'),
@@ -15572,6 +15587,11 @@ const HumanClaims = {
         
         if (c.from) document.getElementById('hc-effFrom').value = moment(c.from).format('YYYY-MM-DDTHH:mm');
         if (c.to) document.getElementById('hc-effTo').value = moment(c.to).format('YYYY-MM-DDTHH:mm');
+        
+        if (c.createdDate) {
+            const cDate = moment(c.createdDate, ['YYYY-MM-DD', 'DD/MM/YYYY']);
+            if (cDate.isValid()) document.getElementById('hc-contractDate').value = cDate.format('DD/MM/YYYY');
+        }
         const fmt = (val) => val ? Number(val).toLocaleString('vi-VN') : '';
         document.getElementById('hc-limitA').value = fmt(c.lvlA);
         document.getElementById('hc-limitB').value = fmt(c.lvlB);
