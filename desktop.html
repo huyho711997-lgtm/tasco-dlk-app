@@ -18662,30 +18662,30 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         };
 
         const html = `
-        <div id="hc-claim-cover-modal" class="fixed inset-0 z-[9999] flex flex-col bg-slate-900/80 backdrop-blur-md p-4 overflow-hidden font-sans">
-            <div class="flex items-center justify-between mb-4 px-4">
-                <div class="flex items-center gap-4 text-white">
-                    <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-500/40 transform -rotate-3 hover:rotate-0 transition-transform">
-                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+        <div id="hc-claim-cover-modal" class="fixed inset-0 z-[9999] flex flex-col bg-slate-900/60 backdrop-blur-sm p-4 overflow-hidden font-sans">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <div class="flex items-center gap-3 text-white">
+                    <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
                     </div>
                     <div>
-                        <h2 class="text-xl font-black leading-tight tracking-tight">Bìa Hồ Sơ Bồi Thường</h2>
-                        <p class="text-[12px] font-bold text-indigo-300 uppercase tracking-[2px]">Corporate Document Preview</p>
+                        <h2 class="text-lg font-black leading-tight">Bìa hồ sơ bồi thường</h2>
+                        <p class="text-[11px] font-bold text-indigo-200 uppercase tracking-widest">Xem trước & In mẫu trang bìa</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    <button onclick="window.print()" class="px-8 py-3 bg-indigo-500 text-white rounded-2xl font-black text-sm hover:bg-indigo-600 transition-all shadow-xl shadow-indigo-500/25 flex items-center gap-3 active:scale-95">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"></path></svg>
-                        IN TRANG BÌA
+                <div class="flex items-center gap-3">
+                    <button onclick="window.print()" class="px-6 py-2.5 bg-emerald-500 text-white rounded-xl font-black text-sm hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"></path></svg>
+                        In trang bìa
                     </button>
-                    <button onclick="document.getElementById('hc-claim-cover-modal').remove()" class="w-12 h-12 bg-white/10 text-white hover:bg-rose-500 hover:text-white rounded-2xl transition-all flex items-center justify-center border border-white/10 active:scale-90 shadow-lg">
-                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <button onclick="document.getElementById('hc-claim-cover-modal').remove()" class="w-10 h-10 bg-white/10 text-white hover:bg-rose-500 hover:text-white rounded-xl transition-all flex items-center justify-center border border-white/10">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
             </div>
 
-            <div id="print-area-cover" class="flex-1 bg-slate-300/50 overflow-y-auto p-12 flex flex-col items-center custom-scrollbar">
-                <div class="bg-white shadow-[0_30px_100px_rgba(0,0,0,0.3)] border border-slate-200" style="width:210mm; min-height:297mm; padding:25mm 30mm; box-sizing:border-box; font-family:'Times New Roman',Times,serif; color:#000; display:flex; flex-direction:column; position:relative; background:#fff;">
+            <div class="flex-1 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col items-center p-8 overflow-y-auto custom-scrollbar" id="claim-cover-container">
+                <div class="bg-white shadow-[0_0_50px_rgba(0,0,0,0.1)] border border-slate-100 relative" style="width:210mm; min-height:297mm; padding:20mm 25mm; box-sizing:border-box; font-family:'Times New Roman',Times,serif; color:#000; display:flex; flex-direction:column; background:#fff;">
                     <style>
                         .a4-cover-editable [contenteditable] { 
                             outline: none; 
@@ -18724,7 +18724,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                             body > *:not(#hc-claim-cover-modal) { display: none !important; }
                             #hc-claim-cover-modal { display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; width: 210mm !important; padding: 0 !important; margin: 0 !important; background: white !important; overflow: visible !important; }
                             #hc-claim-cover-modal > div:first-child { display: none !important; }
-                            #print-area-cover { 
+                            #claim-cover-container { 
                                 display: block !important;
                                 width: 210mm !important; 
                                 margin: 0 !important; 
@@ -18732,7 +18732,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                                 overflow: visible !important;
                                 background: white !important;
                             }
-                            #print-area-cover > div {
+                            #claim-cover-container > div {
                                 width: 210mm !important;
                                 height: 297mm !important;
                                 padding: 20mm 25mm !important;
