@@ -18586,6 +18586,8 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         .right { text-align: right; }
                         .italic { font-style: italic; }
                         .section-title { font-weight: bold; margin-top: 15px; margin-bottom: 5px; }
+                        .cb { display: inline-block; width: 13px; height: 13px; border: 1.5px solid #000; margin-right: 3px; position: relative; top: 2px; text-align:center; font-size:10px; line-height:12px; font-weight:bold; }
+                        .cb.checked::after { content: '✔'; position:absolute; top:-3px; left:0px; font-size:10px; }
                         .checkbox { display: inline-block; width: 12px; height: 12px; border: 1px solid #000; margin-right: 4px; position: relative; top: 2px; }
                         .checkbox.checked::after { content: '✓'; position: absolute; top: -4px; left: 1px; font-size: 10px; font-weight: bold; }
                         
@@ -18698,12 +18700,14 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                             <td contenteditable="true">${rec.treatmentDate || '—'}</td>
                         </tr>
                         <tr>
+                            <td class="bold">Chi phí y tế</td>
+                            <td contenteditable="true">${rec.medicalCost ? (rec.medicalCost).toLocaleString('vi-VN') + ' đ' : '—'}</td>
+                        </tr>
+                        <tr>
                             <td class="bold">Trường hợp này</td>
                             <td>
-                                <div class="flex items-center justify-between">
-                                    <span>Thuộc phạm vi bảo hiểm</span>
-                                    <span class="checkbox checked"></span>
-                                </div>
+                                <div>Thuộc phạm vi bảo hiểm &nbsp;&nbsp; <span class="cb checked"></span></div>
+                                <div class="mt-1">Không thuộc phạm vi bảo hiểm &nbsp;&nbsp; <span class="cb"></span></div>
                             </td>
                         </tr>
                     </table>
@@ -18732,40 +18736,44 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         <div class="ml-4">MTN ĐK D: <span class="bold" contenteditable="true">${amountStr(rec.limitD)}</span> * 0.5% * <span class="bold" contenteditable="true">${rec.hospitalDays || '0'}</span> ngày = <span class="bold" contenteditable="true">${amountStr(rec.hospitalSupportAmount)}</span> đ</div>
                     </div>
 
-                    <div class="bold mb-1">- Tổng số tiền bồi thường (1+2): <span contenteditable="true">${amountStr(rec.totalAmount)}</span> đ</div>
-                    <div class="italic ml-4 mb-4">(Bằng chữ: <span contenteditable="true">${totalAmountWords}</span>)</div>
+                    <div class="bold mb-1">- Tổng số tiền bồi thường (1+2+3+4): <strong><span contenteditable="true">${amountStr(rec.totalAmount)}</span></strong> đ</div>
+                    <div class="italic ml-4 mb-2">(Bằng chữ: <span contenteditable="true">${totalAmountWords}</span>)</div>
+                    <div class="mb-1">- Đã chi tạm ứng bồi thường: 0 đ</div>
+                    <div class="mb-4">- Số tiền bồi thường còn lại: <span contenteditable="true">${amountStr(rec.totalAmount)}</span> đ</div>
 
-                    <div class="bold mb-1">- Đã chi tạm ứng bồi thường: 0 đ</div>
-                    <div class="bold mb-4">- Số tiền bồi thường còn lại: <span contenteditable="true">${amountStr(rec.totalAmount)}</span> đ</div>
-
-                    <div class="flex items-center gap-10">
+                    <div class="flex items-center gap-6">
                         <div class="section-title uppercase mt-0">III. CHI PHÍ KHÁC</div>
                         <div class="flex items-center gap-4">
-                            <span><span class="checkbox"></span> Có</span>
-                            <span><span class="checkbox checked"></span> Không</span>
+                            <span><span class="cb"></span> Có</span>
+                            <span><span class="cb"></span> Không</span>
                         </div>
                     </div>
+                    <div class="ml-4 mb-1">- Chi phí khác: 0 đ</div>
+                    <div class="ml-4 mb-1">- Đã chi tạm ứng: 0 đ</div>
+                    <div class="ml-4 mb-4">- Số tiền còn lại: <span contenteditable="true">${amountStr(rec.totalAmount)}</span> đ</div>
 
                     <div class="section-title uppercase">IV. KIẾN NGHỊ:</div>
                     <div class="italic mb-2">Sau khi xem xét toàn bộ hồ sơ kèm theo đây và căn cứ vào Hợp đồng bảo hiểm và thực tế tổn thất, Bồi thường viên đề xuất chi trả tiền bảo hiểm như sau:</div>
                     
-                    <div class="ml-4">
-                        <div class="flex items-center gap-2 mb-1"><span class="checkbox checked"></span> <span class="bold">Duyệt bồi thường</span></div>
+                    <div class="ml-2">
+                        <div class="flex items-center gap-2 mb-1"><span class="cb checked"></span> <span class="bold">Duyệt bồi thường</span></div>
                         <div class="ml-6 mb-1">1. Chi trả người được bảo hiểm: <span class="bold" contenteditable="true">${amountStr(rec.totalAmount)}</span> đ</div>
-                        <div class="ml-6 mb-2">2. Chi trả đối tượng khác: ................................................đ</div>
+                        <div class="ml-6 mb-1">2. Chi trả đối tượng khác: …………………………….đ</div>
                         <div class="bold ml-6 mb-1">Tổng cộng số tiền là : <span contenteditable="true">${amountStr(rec.totalAmount)}</span> đ</div>
-                        <div class="italic ml-6 mb-4">(Bằng chữ: <span contenteditable="true">${totalAmountWords}</span>)</div>
-                        <div class="flex items-center gap-2 mb-1"><span class="checkbox"></span> <span class="bold">Từ chối bồi thường</span></div>
+                        <div class="italic ml-6 mb-3">(Bằng chữ: <span contenteditable="true">${totalAmountWords}</span>)</div>
+                        <div class="flex items-center gap-2 mb-1"><span class="cb"></span> <span class="bold">Từ chối bồi thường</span></div>
                     </div>
 
                     <div class="bold mt-4">Kính trình!</div>
 
-                    <div class="mt-10 grid grid-cols-3 gap-4 center">
+                    <div class="mt-12 grid grid-cols-3 gap-4 center">
                         <div>
                             <div class="bold uppercase">LÃNH ĐẠO PHÊ DUYỆT</div>
+                            <div class="mt-20 bold uppercase">&nbsp;</div>
                         </div>
                         <div>
                             <div class="bold uppercase">BỘ PHẬN GĐBT</div>
+                            <div class="mt-20 bold uppercase">&nbsp;</div>
                         </div>
                         <div>
                             <div class="bold uppercase">CÁN BỘ ĐỀ XUẤT</div>
