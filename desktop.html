@@ -18024,11 +18024,13 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                     .print-table th { background: #f9fafb; font-weight: bold; text-align: center; }
                     
                     @media print {
+                        @page { size: A4; margin: 0; }
+                        html, body { height: auto !important; overflow: visible !important; margin: 0 !important; padding: 0 !important; }
                         body > *:not(#hc-claim-noti-modal) { display: none !important; }
-                        #hc-claim-noti-modal { display: block !important; position: static !important; padding: 0 !important; margin: 0 !important; background: white !important; }
+                        #hc-claim-noti-modal { display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; width: 210mm !important; padding: 0 !important; margin: 0 !important; background: white !important; overflow: visible !important; }
                         #hc-claim-noti-modal > div:first-child { display: none !important; }
-                        #claim-noti-container { display: block !important; width: 100% !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
-                        .a4-page { border: none !important; box-shadow: none !important; margin: 0 !important; page-break-after: always; padding: 10mm 15mm !important; }
+                        #claim-noti-container { display: block !important; width: 210mm !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
+                        .a4-page { width: 210mm !important; border: none !important; box-shadow: none !important; margin: 0 !important; page-break-after: always; padding: 10mm 15mm !important; }
                         .a4-page:last-child { page-break-after: auto; }
                     }
                 </style>
@@ -18589,17 +18591,20 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         .a4-page [contenteditable]:hover { border-bottom-color: #cbd5e1; background: #f8fafc; }
                         .a4-page [contenteditable]:focus { border-bottom-color: #3b82f6; background: #eff6ff; }
                         @media print {
+                            @page { size: A4; margin: 0; }
+                            html, body { height: auto !important; overflow: visible !important; margin: 0 !important; padding: 0 !important; }
                             body > *:not(#hc-claim-submission-modal) { display: none !important; }
-                            #hc-claim-submission-modal { display: block !important; position: static !important; padding: 0 !important; margin: 0 !important; background: white !important; }
+                            #hc-claim-submission-modal { display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; width: 210mm !important; padding: 0 !important; margin: 0 !important; background: white !important; overflow: visible !important; }
                             #hc-claim-submission-modal > div:first-child { display: none !important; }
                             #print-area-submission { 
                                 display: block !important;
-                                width: 100% !important;
+                                width: 210mm !important;
                                 margin: 0 !important; 
                                 padding: 0 !important;
                                 overflow: visible !important;
                             }
                             .a4-page {
+                                width: 210mm !important;
                                 border: none !important;
                                 box-shadow: none !important;
                                 margin: 0 !important;
@@ -18876,12 +18881,14 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         .footer-slogan { font-size: 13px; font-weight: bold; font-style: italic; margin-top: 10px; }
 
                         @media print {
+                            @page { size: A4; margin: 0; }
+                            html, body { height: auto !important; overflow: visible !important; margin: 0 !important; padding: 0 !important; }
                             body > *:not(#hc-claim-cover-modal) { display: none !important; }
-                            #hc-claim-cover-modal { display: block !important; position: static !important; padding: 0 !important; margin: 0 !important; background: white !important; }
+                            #hc-claim-cover-modal { display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; width: 210mm !important; padding: 0 !important; margin: 0 !important; background: white !important; overflow: visible !important; }
                             #hc-claim-cover-modal > div:first-child { display: none !important; }
                             #print-area-cover { 
                                 display: block !important;
-                                width: 100% !important; 
+                                width: 210mm !important; 
                                 margin: 0 !important; 
                                 padding: 0 !important;
                                 overflow: visible !important;
