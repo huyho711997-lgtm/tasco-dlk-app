@@ -44,6 +44,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; color:
 .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 0.5rem; }
 .inp { width:100%; background:#f8fafc; border:1px solid #e2e8f0; border-radius:.625rem; padding:.5rem .75rem; font-size:.8125rem; font-weight:600; color:#0f172a; outline:none; transition:border .2s,box-shadow .2s,background .2s; }
 .inp:focus { background:#fff; border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.12); }
+.inp-error { border-color: #ef4444 !important; background-color: #fef2f2 !important; color: #b91c1c !important; }
 .inp::placeholder { color:#94a3b8; font-weight:500; }
 select.inp { appearance:auto; cursor:pointer; }
 textarea.inp { resize:vertical; }
@@ -15115,9 +15116,17 @@ const HumanClaims = {
     },
 
     applySmartDate(el) {
+        if (!el.value) {
+            el.classList.remove('inp-error');
+            return;
+        }
         const res = this._parseSmartDate(el.value);
         if (res) {
             el.value = res.display;
+            el.classList.remove('inp-error');
+        } else {
+            el.classList.add('inp-error');
+            Toast.fire({ icon: 'error', title: 'Định dạng ngày không hợp lệ (DD/MM/YYYY)' });
         }
         
         // Kích hoạt các hàm phụ thuộc
