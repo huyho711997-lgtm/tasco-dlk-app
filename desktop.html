@@ -15393,14 +15393,14 @@ const HumanClaims = {
 
         Swal.fire({
             html: `
-                <div class="relative bg-slate-900 rounded-[3rem] border border-white/10 flex w-full max-w-4xl mx-auto min-h-[480px] shadow-2xl">
+                <div class="relative bg-slate-900 rounded-[3rem] border border-white/10 flex w-full max-w-4xl mx-auto min-h-[540px] shadow-2xl">
                     <!-- Nút X đóng tích hợp bên trong -->
                     <button type="button" onclick="Swal.close()" class="absolute top-6 right-6 z-50 w-9 h-9 rounded-full bg-white/5 text-white/40 hover:bg-white/10 hover:text-white flex items-center justify-center transition-all border border-white/10">
                         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
                     </button>
 
                     <!-- Cột Trái: Khu vực QR (Nền Trắng - Bo góc trái) -->
-                    <div class="w-[380px] bg-white p-8 flex flex-col items-center justify-center relative border-r border-slate-100 rounded-l-[3rem]">
+                    <div class="w-[420px] bg-white p-8 flex flex-col items-center justify-center relative border-r border-slate-100 rounded-l-[3rem]">
                         <div class="absolute top-10 left-10 flex items-center gap-1.5">
                             <div class="w-2 h-2 bg-indigo-600 rounded-full"></div>
                             <p class="text-[12px] font-black text-slate-800 tracking-wider">Viet<span class="text-indigo-600">QR</span></p>
@@ -15435,7 +15435,7 @@ const HumanClaims = {
                                 <div class="pb-8 border-b border-white/10">
                                     <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Số tiền cần thanh toán</p>
                                     <div class="flex items-baseline gap-3">
-                                        <span class="text-6xl font-black text-white tracking-tighter">${amount.toLocaleString('vi-VN')}</span>
+                                        <span class="text-5xl font-black text-white tracking-tighter">${amount.toLocaleString('vi-VN')}</span>
                                         <span class="text-xl font-black text-emerald-400 uppercase tracking-wider">VND</span>
                                     </div>
                                 </div>
