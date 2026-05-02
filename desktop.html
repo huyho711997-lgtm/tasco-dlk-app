@@ -1927,9 +1927,13 @@ textarea.inp { resize:vertical; }
                   <div class="p-1.5 bg-emerald-100 rounded-md shrink-0"><svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="7" y1="15" x2="7.01" y2="15"/><line x1="11" y1="15" x2="13" y2="15"/></svg></div>
                   In CCCD (2 mặt)
                 </button>
-                <button onclick="document.getElementById('hc-print-menu').classList.add('hidden'); HumanClaims.openClaimNotification()" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-rose-50 transition-colors flex items-center gap-3">
+                <button onclick="document.getElementById('hc-print-menu').classList.add('hidden'); HumanClaims.openClaimNotification()" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-rose-50 border-b border-slate-100 transition-colors flex items-center gap-3">
                   <div class="p-1.5 bg-rose-100 rounded-md shrink-0"><svg class="w-4 h-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div>
                   Thông báo bồi thường
+                </button>
+                <button onclick="document.getElementById('hc-print-menu').classList.add('hidden'); HumanClaims.openClaimSubmission()" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-indigo-50 border-b border-slate-100 transition-colors flex items-center gap-3">
+                  <div class="p-1.5 bg-indigo-100 rounded-md shrink-0"><svg class="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div>
+                  Tờ trình bồi thường
                 </button>
                 <button onclick="document.getElementById('hc-print-menu').classList.add('hidden'); HumanClaims.openClaimCover()" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-blue-50 transition-colors flex items-center gap-3">
                   <div class="p-1.5 bg-blue-100 rounded-md shrink-0"><svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg></div>
@@ -18391,6 +18395,260 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         } while (num > 0);
 
         return str.trim().charAt(0).toUpperCase() + str.trim().slice(1);
+    },
+
+    openClaimSubmission() {
+        const rec = this._data.find(r => r.id === this._currentId);
+        if (!rec) return;
+
+        const today = new Date();
+        const ngay = today.getDate();
+        const thang = today.getMonth() + 1;
+        const nam = today.getFullYear();
+
+        const toTitleCase = (str) => {
+            if (!str) return '—';
+            return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        };
+
+        const amountStr = (val) => (val || 0).toLocaleString('vi-VN');
+        const totalAmountWords = this._docTien(rec.totalAmount || 0);
+
+        const html = `
+        <div id="hc-claim-submission-modal" class="fixed inset-0 z-[9999] flex flex-col bg-slate-900/60 backdrop-blur-sm p-4 overflow-hidden font-sans">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <div class="flex items-center gap-3 text-white">
+                    <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-black leading-tight">Tờ trình bồi thường</h2>
+                        <p class="text-[11px] font-bold text-indigo-300 uppercase tracking-widest">Xem trước & In tờ trình A4</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="window.print()" class="px-6 py-2.5 bg-emerald-500 text-white rounded-xl font-black text-sm hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"></path></svg>
+                        In tờ trình
+                    </button>
+                    <button onclick="document.getElementById('hc-claim-submission-modal').remove()" class="w-10 h-10 bg-white/10 text-white hover:bg-rose-500 hover:text-white rounded-xl transition-all flex items-center justify-center border border-white/10">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col items-center p-8 overflow-y-auto custom-scrollbar">
+                <div id="print-area-submission" class="a4-submission bg-white relative p-[15mm_20mm] text-black print:p-0 print:shadow-none">
+                    <style>
+                        .a4-submission {
+                            width: 210mm;
+                            min-height: 297mm;
+                            box-sizing: border-box;
+                            font-family: "Times New Roman", Times, serif;
+                            color: #000;
+                            line-height: 1.3;
+                            font-size: 13px;
+                        }
+                        .a4-submission table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+                        .a4-submission th, .a4-submission td { border: 1px solid #000; padding: 5px 8px; vertical-align: top; }
+                        .a4-submission .no-border td { border: none; padding: 2px 0; }
+                        .bold { font-weight: bold; }
+                        .uppercase { text-transform: uppercase; }
+                        .center { text-align: center; }
+                        .right { text-align: right; }
+                        .italic { font-style: italic; }
+                        .section-title { font-weight: bold; margin-top: 15px; margin-bottom: 5px; }
+                        .checkbox { display: inline-block; width: 12px; height: 12px; border: 1px solid #000; margin-right: 4px; position: relative; top: 2px; }
+                        .checkbox.checked::after { content: '✓'; position: absolute; top: -4px; left: 1px; font-size: 10px; font-weight: bold; }
+                        
+                        @media print {
+                            body * { visibility: hidden; }
+                            #hc-claim-submission-modal { background: none; backdrop-filter: none; padding: 0; position: static; }
+                            #print-area-submission, #print-area-submission * { visibility: visible; }
+                            #print-area-submission { 
+                                position: fixed; 
+                                left: 0; top: 0; 
+                                width: 210mm;
+                                margin: 0; padding: 15mm 20mm;
+                                border: none; box-shadow: none;
+                            }
+                        }
+                    </style>
+
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="flex flex-col items-start">
+                            <img src="https://i.ibb.co/0jP8BN3c/undefined-Imgur.jpg" style="height: 50px;" onerror="this.src='https://lh3.googleusercontent.com/d/1bpOB60B7o1NDwahpZsVxct9PbfdwvKmK'">
+                        </div>
+                        <div class="italic text-[13px]">
+                            Đắk Lắk, ngày ${ngay} tháng ${thang} năm ${nam}
+                        </div>
+                    </div>
+
+                    <div class="center mb-8">
+                        <h1 class="text-[16px] bold uppercase mb-1">TỜ TRÌNH BỒI THƯỜNG BẢO HIỂM CON NGƯỜI</h1>
+                        <div class="bold text-[13px]">Hồ sơ số: <span contenteditable="true">${rec.claimNo || 'C/DO.TTKD015/A0.../...........'}</span></div>
+                    </div>
+
+                    <div class="section-title uppercase">I. TÌNH HÌNH CHUNG</div>
+                    <table>
+                        <tr>
+                            <td class="bold w-[220px]">Nghiệp vụ bảo hiểm</td>
+                            <td>
+                                <div>Bảo hiểm: <span class="bold" contenteditable="true">${rec.insType || 'Kết hợp con người'}</span></div>
+                                <div class="mt-1">- Mức trách nhiệm:</div>
+                                <div class="ml-4">Phạm vi A: <span contenteditable="true">${amountStr(rec.limitA)}</span> đ</div>
+                                <div class="ml-4">Phạm vi B: <span contenteditable="true">${amountStr(rec.limitB)}</span> đ</div>
+                                <div class="ml-4">Phạm vi C: <span contenteditable="true">${amountStr(rec.limitC)}</span> đ</div>
+                                <div class="ml-4">Phạm vi D: <span contenteditable="true">${amountStr(rec.limitD)}</span> đ</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="bold">Đơn bảo hiểm số</td>
+                            <td contenteditable="true" class="bold">${rec.contractNo || '—'}</td>
+                        </tr>
+                        <tr>
+                            <td class="bold">Đơn vị tham gia bảo hiểm</td>
+                            <td contenteditable="true">${rec.companyName || '—'}</td>
+                        </tr>
+                        <tr>
+                            <td class="bold">Thời hạn bảo hiểm</td>
+                            <td contenteditable="true">Từ ${rec.contractStartDate || '—'} đến ${rec.contractEndDate || '—'}</td>
+                        </tr>
+                        <tr>
+                            <td class="bold">Phí bảo hiểm</td>
+                            <td contenteditable="true"><span class="bold">${amountStr(rec.contractPremium)}</span> VNĐ</td>
+                        </tr>
+                        <tr>
+                            <td class="bold">Tình hình nộp phí bảo hiểm</td>
+                            <td>
+                                <div class="flex items-center gap-6">
+                                    <span>Ngày ${rec.paymentDate || '.../.../....'}</span>
+                                    <span><span class="checkbox checked"></span> Đầy đủ</span>
+                                    <span><span class="checkbox checked"></span> Đúng hạn</span>
+                                </div>
+                                <div class="flex items-center gap-6 mt-1">
+                                    <span>Phí BH: ${amountStr(rec.paidAmount)} đ</span>
+                                    <span class="text-[11px]"><span class="checkbox"></span> Không đầy đủ</span>
+                                    <span class="text-[11px]"><span class="checkbox"></span> K.đúng hạn</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="bold">Họ tên người được BH</td>
+                            <td><span class="bold uppercase" contenteditable="true">${rec.victimName}</span> - Tuổi: <span contenteditable="true">${rec.victimAge || '—'}</span></td>
+                        </tr>
+                        <tr>
+                            <td class="bold">Địa chỉ</td>
+                            <td contenteditable="true">${rec.victimAddress || '—'}</td>
+                        </tr>
+                        <tr>
+                            <td class="bold">Ngày tai nạn/bệnh</td>
+                            <td contenteditable="true" class="bold">${rec.accidentDate || '—'}</td>
+                        </tr>
+                        <tr>
+                            <td class="bold">Địa điểm</td>
+                            <td contenteditable="true">${rec.accidentPlace || '—'}</td>
+                        </tr>
+                        <tr>
+                            <td class="bold">Nguyên nhân tổn thất</td>
+                            <td contenteditable="true">${rec.accidentCause || '—'}</td>
+                        </tr>
+                        <tr>
+                            <td class="bold">Hậu quả</td>
+                            <td contenteditable="true">${rec.accidentResult || '—'}</td>
+                        </tr>
+                        <tr>
+                            <td class="bold">Tỷ lệ thương tật</td>
+                            <td><span class="bold" contenteditable="true">${rec.injuryRate || '0'}</span> %</td>
+                        </tr>
+                        <tr>
+                            <td class="bold">Nơi điều trị</td>
+                            <td contenteditable="true">${rec.treatmentPlace || '—'}</td>
+                        </tr>
+                        <tr>
+                            <td class="bold">Ngày điều trị</td>
+                            <td contenteditable="true">${rec.treatmentDate || '—'}</td>
+                        </tr>
+                        <tr>
+                            <td class="bold">Trường hợp này</td>
+                            <td>
+                                <div class="flex items-center justify-between">
+                                    <span>Thuộc phạm vi bảo hiểm</span>
+                                    <span class="checkbox checked"></span>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="section-title uppercase">II. TÍNH TOÁN TRẢ TIỀN BẢO HIỂM</div>
+                    <div class="flex items-center gap-6 mb-2">
+                        <span>- Bồi thường:</span>
+                        <span><span class="checkbox checked"></span> Có</span>
+                        <span><span class="checkbox"></span> Không</span>
+                    </div>
+                    <div class="italic mb-3 text-[12px]">
+                        Căn cứ vào kết quả xác minh và các điều khoản của hợp đồng, quy tắc bảo hiểm. Bồi thường viên đề xuất giải quyết chi trả tiền bảo hiểm như sau (Trường hợp thuộc phạm vi bồi thường: nêu chi tiết loại bệnh, tỷ lệ thương tật, viện phí, loại thuốc điều trị,... dẫn chiếu trong quy tắc):
+                    </div>
+                    
+                    <div class="ml-4 mb-4">
+                        <div class="mb-2">1. Tỷ lệ Thương tật/phẫu thuật theo quy định: Mã số <span class="bold" contenteditable="true">${rec.injuryCode || '...'}</span>, Từ <span class="bold" contenteditable="true">${rec.injuryRateMin || '...'}</span> % đến <span class="bold" contenteditable="true">${rec.injuryRateMax || '...'}</span> %</div>
+                        <div class="ml-4">Đề xuất: <span class="bold" contenteditable="true">${rec.injuryRate || '0'}</span> % tương đương số tiền là: <span class="bold" contenteditable="true">${amountStr(rec.injuryAmount)}</span> đ</div>
+                        <div class="ml-4 italic mt-1">Diễn giải lý do đề xuất: Dựa vào tỷ lệ thương tật tạm thời theo bảng tỷ lệ thương tật đề xuất em <span class="bold uppercase">${rec.victimName}</span> bị <span class="bold uppercase">${rec.accidentCause}</span> dẫn đến bị <span class="bold uppercase">${rec.accidentResult}</span> đề xuất tỷ lệ thương tật <span class="bold">${rec.injuryRate || '0'}</span>%.</div>
+                    </div>
+
+                    <div class="ml-4 mb-4">
+                        <div class="mb-2">2. Hỗ trợ ngày nằm viện:</div>
+                        <div class="ml-4">Căn cứ theo chứng từ của <span class="bold" contenteditable="true">${rec.treatmentPlace || '...'}</span></div>
+                        <div class="ml-4">Ngày vào viện: <span class="bold" contenteditable="true">${rec.admissionDate || '...'}</span> đến ngày: <span class="bold" contenteditable="true">${rec.dischargeDate || '...'}</span> thì ra viện.</div>
+                        <div class="ml-4">Đề xuất hỗ trợ <span class="bold" contenteditable="true">${rec.hospitalDays || '0'}</span> ngày nằm viện.</div>
+                        <div class="ml-4">MTN ĐK D: <span class="bold" contenteditable="true">${amountStr(rec.limitD)}</span> * 0.5% * <span class="bold" contenteditable="true">${rec.hospitalDays || '0'}</span> ngày = <span class="bold" contenteditable="true">${amountStr(rec.hospitalSupportAmount)}</span> đ</div>
+                    </div>
+
+                    <div class="bold mb-1">- Tổng số tiền bồi thường (1+2): <span contenteditable="true">${amountStr(rec.totalAmount)}</span> đ</div>
+                    <div class="italic ml-4 mb-4">(Bằng chữ: <span contenteditable="true">${totalAmountWords}</span>)</div>
+
+                    <div class="bold mb-1">- Đã chi tạm ứng bồi thường: 0 đ</div>
+                    <div class="bold mb-4">- Số tiền bồi thường còn lại: <span contenteditable="true">${amountStr(rec.totalAmount)}</span> đ</div>
+
+                    <div class="flex items-center gap-10">
+                        <div class="section-title uppercase mt-0">III. CHI PHÍ KHÁC</div>
+                        <div class="flex items-center gap-4">
+                            <span><span class="checkbox"></span> Có</span>
+                            <span><span class="checkbox checked"></span> Không</span>
+                        </div>
+                    </div>
+
+                    <div class="section-title uppercase">IV. KIẾN NGHỊ:</div>
+                    <div class="italic mb-2">Sau khi xem xét toàn bộ hồ sơ kèm theo đây và căn cứ vào Hợp đồng bảo hiểm và thực tế tổn thất, Bồi thường viên đề xuất chi trả tiền bảo hiểm như sau:</div>
+                    
+                    <div class="ml-4">
+                        <div class="flex items-center gap-2 mb-1"><span class="checkbox checked"></span> <span class="bold">Duyệt bồi thường</span></div>
+                        <div class="ml-6 mb-1">1. Chi trả người được bảo hiểm: <span class="bold" contenteditable="true">${amountStr(rec.totalAmount)}</span> đ</div>
+                        <div class="ml-6 mb-2">2. Chi trả đối tượng khác: ................................................đ</div>
+                        <div class="bold ml-6 mb-1">Tổng cộng số tiền là : <span contenteditable="true">${amountStr(rec.totalAmount)}</span> đ</div>
+                        <div class="italic ml-6 mb-4">(Bằng chữ: <span contenteditable="true">${totalAmountWords}</span>)</div>
+                        <div class="flex items-center gap-2 mb-1"><span class="checkbox"></span> <span class="bold">Từ chối bồi thường</span></div>
+                    </div>
+
+                    <div class="bold mt-4">Kính trình!</div>
+
+                    <div class="mt-10 grid grid-cols-3 gap-4 center">
+                        <div>
+                            <div class="bold uppercase">LÃNH ĐẠO PHÊ DUYỆT</div>
+                        </div>
+                        <div>
+                            <div class="bold uppercase">BỘ PHẬN GĐBT</div>
+                        </div>
+                        <div>
+                            <div class="bold uppercase">CÁN BỘ ĐỀ XUẤT</div>
+                            <div class="mt-20 bold uppercase" contenteditable="true">${rec.createdBy || '...'}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+        document.body.insertAdjacentHTML('beforeend', html);
     },
 
     openClaimCover() {
