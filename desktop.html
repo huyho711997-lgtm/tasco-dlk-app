@@ -18558,6 +18558,10 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
+                    <button id="btn-export-word" class="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Xuất Word
+                    </button>
                     <button onclick="window.print()" class="px-6 py-2.5 bg-emerald-500 text-white rounded-xl font-black text-sm hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"></path></svg>
                         In tờ trình
@@ -18815,6 +18819,39 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         </div>`;
 
         document.body.insertAdjacentHTML('beforeend', html);
+        const modal = document.getElementById('hc-claim-submission-modal');
+        const btnExportWord = modal.querySelector('#btn-export-word');
+        btnExportWord.onclick = () => {
+            const content = modal.querySelector('.a4-page').innerHTML;
+            const style = `
+                <style>
+                    @page { size: 21cm 29.7cm; margin: 2cm 2.5cm; }
+                    body { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.5; color: #000; }
+                    table { width: 100%; border-collapse: collapse; margin: 10pt 0; }
+                    th, td { border: 1px solid black; padding: 5pt; vertical-align: top; font-size: 11pt; }
+                    .bold { font-weight: bold; }
+                    .center { text-align: center; }
+                    .uppercase { text-transform: uppercase; }
+                    .section-title { font-weight: bold; font-size: 13pt; margin-top: 15pt; margin-bottom: 5pt; text-decoration: underline; }
+                    .cb { display: inline-block; width: 10pt; height: 10pt; border: 1pt solid black; margin-right: 3pt; text-align:center; }
+                    .checked { background-color: #000; color: #fff; }
+                    img { max-height: 50pt; }
+                </style>
+            `;
+            const fullHtml = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                <head><meta charset='utf-8'>${style}</head>
+                <body>${content}</body>
+                </html>
+            `;
+            const blob = new Blob(['\ufeff', fullHtml], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'To_trinh_BT_' + (rec.victimName || 'HS').replace(/\s+/g, '_') + '.doc';
+            link.click();
+            URL.revokeObjectURL(url);
+        };
     },
 
 
