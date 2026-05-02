@@ -1878,11 +1878,11 @@ textarea.inp { resize:vertical; }
 
             <div class="flex items-center gap-2" id="hc-m-workflow">
               <!-- Nút chuyển trạng thái -->
-              <div class="relative group">
-                <button id="hc-m-next-btn" class="px-4 py-2 bg-blue-600 text-white rounded-xl font-bold text-xs hover:bg-blue-700 transition-all shadow-md shadow-blue-200 flex items-center gap-2">
+              <div class="relative">
+                <button id="hc-m-next-btn" onclick="event.stopPropagation(); document.getElementById('hc-m-status-menu').classList.toggle('hidden')" class="px-4 py-2 bg-blue-600 text-white rounded-xl font-bold text-xs hover:bg-blue-700 transition-all shadow-md shadow-blue-200 flex items-center gap-2">
                   Chuyển trạng thái <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 9l-7 7-7-7"/></svg>
                 </button>
-                <div class="absolute top-full right-0 mt-2 w-52 bg-white border border-slate-200 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all flex flex-col overflow-hidden z-50" id="hc-m-status-menu"></div>
+                <div id="hc-m-status-menu" class="hidden absolute top-full right-0 mt-2 w-52 bg-white border border-slate-200 rounded-lg shadow-xl flex flex-col overflow-hidden z-50"></div>
               </div>
             </div>
 
@@ -15196,7 +15196,7 @@ const HumanClaims = {
             const label = this.STATUS_LABELS[st];
             const isCurrent = st === status;
             menuHtml += `
-                <button onclick="HumanClaims.changeStatus('${st}')" 
+                <button onclick="document.getElementById('hc-m-status-menu').classList.add('hidden'); HumanClaims.changeStatus('${st}')" 
                         class="w-full text-left px-4 py-3 text-[11px] font-bold transition-colors border-b border-slate-50 flex items-center justify-between group/item
                         ${isCurrent ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50'}">
                     <span class="flex items-center gap-2">
