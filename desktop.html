@@ -18574,18 +18574,34 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                             width: 210mm; min-height: 297mm; height: auto; box-sizing: border-box; 
                             font-family: "Times New Roman", Times, serif;
                             color: #000; background: #fff;
-                            margin-bottom: 20px; padding: 20mm 20mm;
-                            box-shadow: 0 0 40px rgba(0,0,0,0.12);
-                            font-size: 13px; line-height: 1.5;
+                            margin-bottom: 40px; padding: 20mm 25mm;
+                            box-shadow: 0 0 50px rgba(0,0,0,0.15);
+                            font-size: 13px; line-height: 1.6;
+                            position: relative;
                         }
-                        .a4-page table { width: 100%; border-collapse: collapse; margin: 8px 0; }
-                        .a4-page th, .a4-page td { border: 1px solid #000; padding: 5px 8px; vertical-align: top; font-size:13px; }
+                        /* Page break indicators for preview */
+                        .a4-page::before {
+                            content: "";
+                            position: absolute;
+                            top: 0; left: 0; right: 0; bottom: 0;
+                            pointer-events: none;
+                            background: repeating-linear-gradient(
+                                to bottom,
+                                transparent,
+                                transparent calc(297mm - 1px),
+                                #cbd5e1 calc(297mm - 1px),
+                                #cbd5e1 297mm,
+                                transparent 297mm
+                            );
+                            z-index: 10;
+                        }
+                        @media print { .a4-page::before { display: none !important; } }
+
+                        .a4-page table { width: 100%; border-collapse: collapse; margin: 12px 0; page-break-inside: auto; }
+                        .a4-page th, .a4-page td { border: 1px solid #000; padding: 8px 10px; vertical-align: top; font-size:13px; }
+                        .a4-page tr { page-break-inside: avoid; page-break-after: auto; }
                         .a4-page .bold { font-weight: bold; }
-                        .a4-page .uppercase { text-transform: uppercase; }
-                        .a4-page .center { text-align: center; }
-                        .a4-page .right { text-align: right; }
-                        .a4-page .italic { font-style: italic; }
-                        .a4-page .section-title { font-weight: bold; font-size: 15px; margin-top: 20px; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+                        .a4-page .section-title { font-weight: bold; font-size: 15px; margin-top: 25px; margin-bottom: 10px; text-decoration: underline; }
                         .cb { display: inline-block; width: 13px; height: 13px; border: 1.5px solid #000; margin-right: 3px; position: relative; top: 2px; text-align:center; font-size:10px; line-height:12px; font-weight:bold; }
                         .cb.checked::after { content: '✔'; position:absolute; top:-3px; left:0px; font-size:10px; }
                         .a4-page [contenteditable] { outline: none; border-bottom: 1px dashed transparent; transition: all 0.2s; }
@@ -18724,12 +18740,8 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                                 <div class="mt-1">Không thuộc phạm vi bảo hiểm &nbsp;&nbsp; <span class="cb"></span></div>
                             </td>
                         </tr>
-                        </tr>
                     </table>
-                </div>
 
-                <!-- PAGE 2 -->
-                <div class="a4-page relative print:shadow-none">
                     <div class="section-title uppercase">II. TÍNH TOÁN TRẢ TIỀN BẢO HIỂM</div>
                     <div class="flex items-center gap-6 mb-2">
                         <span>- Bồi thường:</span>
@@ -18758,10 +18770,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                     <div class="italic ml-4 mb-2">(Bằng chữ: <span contenteditable="true">${totalAmountWords}</span>)</div>
                     <div class="mb-1">- Đã chi tạm ứng bồi thường: 0 đ</div>
                     <div class="mb-4">- Số tiền bồi thường còn lại: <span contenteditable="true">${amountStr(rec.totalAmount)}</span> đ</div>
-                </div>
 
-                <!-- PAGE 3 -->
-                <div class="a4-page relative print:shadow-none">
                     <div class="flex items-center gap-6">
                         <div class="section-title uppercase mt-0">III. CHI PHÍ KHÁC</div>
                         <div class="flex items-center gap-4">
