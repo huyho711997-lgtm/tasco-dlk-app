@@ -18013,7 +18013,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         color: #000;
                         background: #fff;
                         margin-bottom: 20px;
-                        padding: 15mm 20mm;
+                        padding: 10mm 15mm;
                     }
                     .a4-page [contenteditable] { outline: none; border-bottom: 1px dashed transparent; transition: all 0.2s; }
                     .a4-page [contenteditable]:hover { border-bottom-color: #cbd5e1; background: #f8fafc; }
@@ -18024,10 +18024,9 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                     .print-table th { background: #f9fafb; font-weight: bold; text-align: center; }
                     
                     @media print {
-                        body * { visibility: hidden; }
-                        #hc-claim-noti-modal, #hc-claim-noti-modal * { visibility: visible; }
-                        #hc-claim-noti-modal { position: static !important; overflow: visible !important; }
-                        #claim-noti-container { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; overflow: visible !important; }
+                        body > *:not(#hc-claim-noti-modal) { display: none !important; }
+                        #hc-claim-noti-modal { display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; background: white !important; }
+                        #claim-noti-container { width: 100% !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
                         .a4-page { border: none !important; box-shadow: none !important; margin: 0 !important; page-break-after: always; padding: 15mm 20mm !important; }
                         .a4-page:last-child { page-break-after: auto; }
                     }
@@ -18046,13 +18045,13 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         <h1 class="text-[19px] font-bold uppercase tracking-tight" contenteditable="true">THÔNG BÁO KẾT QUẢ GIẢI QUYẾT QUYỀN LỢI BẢO HIỂM</h1>
                     </div>
 
-                    <div class="text-[14px] mb-6 text-center">
+                    <div class="text-[14px] mb-3 text-center">
                         <p class="font-bold">Hồ sơ số: <span contenteditable="true">${rec.claimNo || rec.caseNo || '—'}</span></p>
-                        <p class="font-bold uppercase mt-4">KÍNH GỬI: <span contenteditable="true">${victimName} - ${payeeName} ${payeeRelation}</span></p>
+                        <p class="font-bold uppercase mt-2">KÍNH GỬI: <span contenteditable="true">${victimName} - ${payeeName} ${payeeRelation}</span></p>
                     </div>
 
-                    <div class="text-[14px] leading-relaxed text-justify space-y-2 mb-6">
-                        <p>Căn cứ vào Hợp đồng bảo hiểm/GCNBH số: <span class="font-bold" contenteditable="true">${rec.policyNo || rec.contractNo || '—'}</span></p>
+                    <div class="text-[14px] leading-relaxed text-justify space-y-1 mb-3">
+                        <p>Căn cũ vào Hợp đồng bảo hiểm/GCNBH số: <span class="font-bold" contenteditable="true">${rec.policyNo || rec.contractNo || '—'}</span></p>
                         <p>Công ty TNHH Bảo hiểm TASCO – Chi nhánh Đắk Lắk đã xem xét hồ sơ yêu cầu bồi thường của Quý khách hàng. Chúng tôi thông báo về việc giải quyết quyền lợi bảo hiểm của em <span class="font-bold" contenteditable="true">${victimName}</span> như sau:</p>
                     </div>
 
@@ -18088,11 +18087,11 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         </tbody>
                     </table>
 
-                    <div class="text-[14px] italic mb-8">
+                    <div class="text-[14px] italic mb-4">
                         (Bằng chữ: <span class="font-bold" contenteditable="true">${amountWords} đồng chẵn</span>)
                     </div>
 
-                    <div class="text-[14px] leading-relaxed text-justify space-y-4 mb-10">
+                    <div class="text-[14px] leading-relaxed text-justify space-y-2 mb-4">
                         <p>Trên đây là nội dung số tiền Công ty TNHH Bảo hiểm TASCO – Chi nhánh Đắk Lắk sẽ thanh toán cho Quý khách. Chúng tôi tin tưởng rằng việc giải quyết bồi thường đã đảm bảo quyền lợi của Quý khách. Chúng tôi xin được chia sẻ với Quý khách về rủi ro vừa qua và hy vọng rằng những điều may mắn sẽ đến với Quý khách trong thời gian tới.</p>
                         <p>Trân trọng kính chào!</p>
                     </div>
@@ -18114,8 +18113,8 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         <img src="https://i.ibb.co/0jP8BN3c/undefined-Imgur.jpg" style="height:45px" onerror="this.src='https://lh3.googleusercontent.com/d/1bpOB60B7o1NDwahpZsVxct9PbfdwvKmK'">
                     </div>
 
-                    <div class="mb-8">
-                        <h2 class="text-[16px] font-bold border-b-2 border-black pb-1 mb-6 uppercase">Ý kiến xác nhận của khách hàng:</h2>
+                    <div class="mb-4">
+                        <h2 class="text-[15px] font-bold border-b-2 border-black pb-1 mb-4 uppercase">Ý kiến xác nhận của khách hàng:</h2>
                         
                         <div class="space-y-4 text-[14px]">
                             <p>- Chúng tôi đồng ý với số tiền bồi thường của Bảo hiểm Tasco đã giải quyết ở trên và không còn thắc mắc khiếu nại gì.</p>
@@ -18589,13 +18588,9 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         .a4-page [contenteditable]:hover { border-bottom-color: #cbd5e1; background: #f8fafc; }
                         .a4-page [contenteditable]:focus { border-bottom-color: #3b82f6; background: #eff6ff; }
                         @media print {
-                            body * { visibility: hidden !important; }
-                            #hc-claim-submission-modal, #hc-claim-submission-modal * { visibility: visible !important; }
-                            #hc-claim-submission-modal { position: static !important; overflow: visible !important; }
+                            body > *:not(#hc-claim-submission-modal) { display: none !important; }
+                            #hc-claim-submission-modal { display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; background: white !important; }
                             #print-area-submission { 
-                                position: absolute !important; 
-                                left: 0 !important; 
-                                top: 0 !important; 
                                 width: 100% !important;
                                 margin: 0 !important; 
                                 padding: 0 !important;
@@ -18878,13 +18873,9 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         .footer-slogan { font-size: 13px; font-weight: bold; font-style: italic; margin-top: 10px; }
 
                         @media print {
-                            body * { visibility: hidden !important; }
-                            #hc-claim-cover-modal, #hc-claim-cover-modal * { visibility: visible !important; }
-                            #hc-claim-cover-modal { position: static !important; overflow: visible !important; }
+                            body > *:not(#hc-claim-cover-modal) { display: none !important; }
+                            #hc-claim-cover-modal { display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; background: white !important; }
                             #print-area-cover { 
-                                position: absolute !important; 
-                                left: 0 !important; 
-                                top: 0 !important; 
                                 width: 100% !important; 
                                 margin: 0 !important; 
                                 padding: 0 !important;
