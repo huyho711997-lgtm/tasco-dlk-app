@@ -18571,11 +18571,12 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             <div id="print-area-submission" class="flex-1 bg-slate-200 overflow-y-auto p-8 flex flex-col items-center custom-scrollbar">
                     <style>
                         .a4-page { 
-                            width: 210mm; min-height: 297mm; box-sizing: border-box; 
+                            width: 210mm; min-height: 297mm; height: auto; box-sizing: border-box; 
                             font-family: "Times New Roman", Times, serif;
                             color: #000; background: #fff;
                             margin-bottom: 20px; padding: 20mm 20mm;
                             box-shadow: 0 0 40px rgba(0,0,0,0.12);
+                            font-size: 13px; line-height: 1.5;
                         }
                         .a4-page table { width: 100%; border-collapse: collapse; margin: 8px 0; }
                         .a4-page th, .a4-page td { border: 1px solid #000; padding: 5px 8px; vertical-align: top; font-size:13px; }
@@ -18584,7 +18585,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         .a4-page .center { text-align: center; }
                         .a4-page .right { text-align: right; }
                         .a4-page .italic { font-style: italic; }
-                        .a4-page .section-title { font-weight: bold; margin-top: 12px; margin-bottom: 4px; }
+                        .a4-page .section-title { font-weight: bold; font-size: 15px; margin-top: 20px; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
                         .cb { display: inline-block; width: 13px; height: 13px; border: 1.5px solid #000; margin-right: 3px; position: relative; top: 2px; text-align:center; font-size:10px; line-height:12px; font-weight:bold; }
                         .cb.checked::after { content: '✔'; position:absolute; top:-3px; left:0px; font-size:10px; }
                         .a4-page [contenteditable] { outline: none; border-bottom: 1px dashed transparent; transition: all 0.2s; }
@@ -18617,7 +18618,6 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         }
                     </style>
 
-                    <!-- PAGE 1 -->
                     <div class="a4-page relative print:shadow-none">
                         <div class="flex justify-between items-start mb-6">
                             <div class="flex flex-col items-start">
@@ -18629,7 +18629,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         </div>
 
                         <div class="center mb-8">
-                            <h1 class="text-[16px] bold uppercase mb-1">TỜ TRÌNH BỒI THƯỜNG BẢO HIỂM CON NGƯỜI</h1>
+                            <h1 class="text-[17px] bold uppercase mb-1">TỜ TRÌNH BỒI THƯỜNG BẢO HIỂM CON NGƯỜI</h1>
                             <div class="bold text-[13px]">Hồ sơ số: <span contenteditable="true">${rec.claimNo || 'C/DO.TTKD015/A0.../...........'}</span></div>
                         </div>
 
@@ -18724,11 +18724,9 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                                 <div class="mt-1">Không thuộc phạm vi bảo hiểm &nbsp;&nbsp; <span class="cb"></span></div>
                             </td>
                         </tr>
+                        </tr>
                     </table>
-                </div>
 
-                <!-- PAGE 2 -->
-                <div class="a4-page relative print:shadow-none">
                     <div class="section-title uppercase">II. TÍNH TOÁN TRẢ TIỀN BẢO HIỂM</div>
                     <div class="flex items-center gap-6 mb-2">
                         <span>- Bồi thường:</span>
