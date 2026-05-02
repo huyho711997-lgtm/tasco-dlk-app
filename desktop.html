@@ -18566,18 +18566,27 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             </div>
 
             <div id="print-area-submission" class="flex-1 bg-slate-200 overflow-y-auto p-8 flex flex-col items-center custom-scrollbar">
-                <div class="bg-white shadow-[0_0_40px_rgba(0,0,0,0.12)] text-black" style="width:210mm; min-height:297mm; padding:20mm 20mm; box-sizing:border-box; font-family:'Times New Roman',Times,serif; font-size:13px; line-height:1.4; color:#000;">
                     <style>
-                        #print-area-submission table { width: 100%; border-collapse: collapse; margin: 8px 0; }
-                        #print-area-submission th, #print-area-submission td { border: 1px solid #000; padding: 5px 8px; vertical-align: top; font-size:13px; }
-                        #print-area-submission .bold { font-weight: bold; }
-                        #print-area-submission .uppercase { text-transform: uppercase; }
-                        #print-area-submission .center { text-align: center; }
-                        #print-area-submission .right { text-align: right; }
-                        #print-area-submission .italic { font-style: italic; }
-                        #print-area-submission .section-title { font-weight: bold; margin-top: 12px; margin-bottom: 4px; }
+                        .a4-page { 
+                            width: 210mm; min-height: 297mm; box-sizing: border-box; 
+                            font-family: "Times New Roman", Times, serif;
+                            color: #000; background: #fff;
+                            margin-bottom: 20px; padding: 20mm 20mm;
+                            box-shadow: 0 0 40px rgba(0,0,0,0.12);
+                        }
+                        .a4-page table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+                        .a4-page th, .a4-page td { border: 1px solid #000; padding: 5px 8px; vertical-align: top; font-size:13px; }
+                        .a4-page .bold { font-weight: bold; }
+                        .a4-page .uppercase { text-transform: uppercase; }
+                        .a4-page .center { text-align: center; }
+                        .a4-page .right { text-align: right; }
+                        .a4-page .italic { font-style: italic; }
+                        .a4-page .section-title { font-weight: bold; margin-top: 12px; margin-bottom: 4px; }
                         .cb { display: inline-block; width: 13px; height: 13px; border: 1.5px solid #000; margin-right: 3px; position: relative; top: 2px; text-align:center; font-size:10px; line-height:12px; font-weight:bold; }
                         .cb.checked::after { content: '✔'; position:absolute; top:-3px; left:0px; font-size:10px; }
+                        .a4-page [contenteditable] { outline: none; border-bottom: 1px dashed transparent; transition: all 0.2s; }
+                        .a4-page [contenteditable]:hover { border-bottom-color: #cbd5e1; background: #f8fafc; }
+                        .a4-page [contenteditable]:focus { border-bottom-color: #3b82f6; background: #eff6ff; }
                         @media print {
                             body * { visibility: hidden !important; }
                             #print-area-submission, #print-area-submission * { visibility: visible !important; }
@@ -18590,34 +18599,37 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                                 padding: 0 !important;
                                 overflow: visible !important;
                             }
-                            #print-area-submission > div {
+                            .a4-page {
                                 border: none !important;
                                 box-shadow: none !important;
+                                margin: 0 !important;
                                 padding: 20mm 20mm !important;
-                                width: 210mm !important;
-                                margin: 0 auto !important;
+                                page-break-after: always;
                             }
+                            .a4-page:last-child { page-break-after: auto; }
                             table { page-break-inside: auto; }
                             tr { page-break-inside: avoid; }
                         }
                     </style>
 
-                    <div class="flex justify-between items-start mb-6">
-                        <div class="flex flex-col items-start">
-                            <img src="https://i.ibb.co/0jP8BN3c/undefined-Imgur.jpg" style="height: 50px;" onerror="this.src='https://lh3.googleusercontent.com/d/1bpOB60B7o1NDwahpZsVxct9PbfdwvKmK'">
+                    <!-- PAGE 1 -->
+                    <div class="a4-page relative print:shadow-none">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="flex flex-col items-start">
+                                <img src="https://i.ibb.co/0jP8BN3c/undefined-Imgur.jpg" style="height: 50px;" onerror="this.src='https://lh3.googleusercontent.com/d/1bpOB60B7o1NDwahpZsVxct9PbfdwvKmK'">
+                            </div>
+                            <div class="italic text-[13px]">
+                                Đắk Lắk, ngày ${ngay} tháng ${thang} năm ${nam}
+                            </div>
                         </div>
-                        <div class="italic text-[13px]">
-                            Đắk Lắk, ngày ${ngay} tháng ${thang} năm ${nam}
+
+                        <div class="center mb-8">
+                            <h1 class="text-[16px] bold uppercase mb-1">TỜ TRÌNH BỒI THƯỜNG BẢO HIỂM CON NGƯỜI</h1>
+                            <div class="bold text-[13px]">Hồ sơ số: <span contenteditable="true">${rec.claimNo || 'C/DO.TTKD015/A0.../...........'}</span></div>
                         </div>
-                    </div>
 
-                    <div class="center mb-8">
-                        <h1 class="text-[16px] bold uppercase mb-1">TỜ TRÌNH BỒI THƯỜNG BẢO HIỂM CON NGƯỜI</h1>
-                        <div class="bold text-[13px]">Hồ sơ số: <span contenteditable="true">${rec.claimNo || 'C/DO.TTKD015/A0.../...........'}</span></div>
-                    </div>
-
-                    <div class="section-title uppercase">I. TÌNH HÌNH CHUNG</div>
-                    <table>
+                        <div class="section-title uppercase">I. TÌNH HÌNH CHUNG</div>
+                        <table>
                         <tr>
                             <td class="bold w-[220px]">Nghiệp vụ bảo hiểm</td>
                             <td>
@@ -18708,7 +18720,10 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                             </td>
                         </tr>
                     </table>
+                </div>
 
+                <!-- PAGE 2 -->
+                <div class="a4-page relative print:shadow-none">
                     <div class="section-title uppercase">II. TÍNH TOÁN TRẢ TIỀN BẢO HIỂM</div>
                     <div class="flex items-center gap-6 mb-2">
                         <span>- Bồi thường:</span>
@@ -18722,7 +18737,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                     <div class="ml-4 mb-4">
                         <div class="mb-2">1. Tỷ lệ Thương tật/phẫu thuật theo quy định: Mã số <span class="bold" contenteditable="true">${rec.injuryCode || '...'}</span>, Từ <span class="bold" contenteditable="true">${rec.injuryRateMin || '...'}</span> % đến <span class="bold" contenteditable="true">${rec.injuryRateMax || '...'}</span> %</div>
                         <div class="ml-4">Đề xuất: <span class="bold" contenteditable="true">${rec.injuryRate || '0'}</span> % tương đương số tiền là: <span class="bold" contenteditable="true">${amountStr(rec.injuryAmount)}</span> đ</div>
-                        <div class="ml-4 italic mt-1">Diễn giải lý do đề xuất: Dựa vào tỷ lệ thương tật tạm thời theo bảng tỷ lệ thương tật đề xuất em <span class="bold uppercase">${rec.victimName}</span> bị <span class="bold uppercase">${rec.accidentCause}</span> dẫn đến bị <span class="bold uppercase">${rec.accidentResult}</span> đề xuất tỷ lệ thương tật <span class="bold">${rec.injuryRate || '0'}</span>%.</div>
+                        <div class="ml-4 italic mt-1">Diễn giải lý do đề xuất: Dựa vào tỷ lệ thương tật tạm thời theo bảng tỷ lệ thương tật đề xuất em <span class="bold uppercase">${rec.victimName || '...'}</span> bị <span class="bold uppercase">${rec.accidentCause || rec.accReason || '...'}</span> dẫn đến bị <span class="bold uppercase">${rec.accidentResult || rec.injuryContent || '...'}</span> đề xuất tỷ lệ thương tật <span class="bold">${rec.injuryRate || '0'}</span>%.</div>
                     </div>
 
                     <div class="ml-4 mb-4">
