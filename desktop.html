@@ -18565,8 +18565,8 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                 </div>
             </div>
 
-            <div class="flex-1 bg-slate-200 overflow-y-auto p-8 flex flex-col items-center custom-scrollbar">
-                <div id="print-area-submission" class="bg-white shadow-[0_0_40px_rgba(0,0,0,0.12)] text-black" style="width:210mm; min-height:297mm; padding:20mm 20mm; box-sizing:border-box; font-family:'Times New Roman',Times,serif; font-size:13px; line-height:1.4; color:#000;">
+            <div id="print-area-submission" class="flex-1 bg-slate-200 overflow-y-auto p-8 flex flex-col items-center custom-scrollbar">
+                <div class="bg-white shadow-[0_0_40px_rgba(0,0,0,0.12)] text-black" style="width:210mm; min-height:297mm; padding:20mm 20mm; box-sizing:border-box; font-family:'Times New Roman',Times,serif; font-size:13px; line-height:1.4; color:#000;">
                     <style>
                         #print-area-submission table { width: 100%; border-collapse: collapse; margin: 8px 0; }
                         #print-area-submission th, #print-area-submission td { border: 1px solid #000; padding: 5px 8px; vertical-align: top; font-size:13px; }
@@ -18585,10 +18585,17 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                                 position: absolute !important; 
                                 left: 0 !important; 
                                 top: 0 !important; 
-                                width: 210mm !important;
+                                width: 100% !important;
                                 margin: 0 !important; 
-                                padding: 20mm 20mm !important;
+                                padding: 0 !important;
+                                overflow: visible !important;
+                            }
+                            #print-area-submission > div {
+                                border: none !important;
                                 box-shadow: none !important;
+                                padding: 20mm 20mm !important;
+                                width: 210mm !important;
+                                margin: 0 auto !important;
                             }
                             table { page-break-inside: auto; }
                             tr { page-break-inside: avoid; }
@@ -18821,8 +18828,8 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                 </div>
             </div>
 
-            <div class="flex-1 bg-slate-200 overflow-y-auto p-12 flex flex-col items-center custom-scrollbar">
-                <div id="print-area-cover" class="bg-white shadow-[0_0_50px_rgba(0,0,0,0.15)] text-black" style="width:210mm; height:297mm; padding:20mm 25mm; box-sizing:border-box; font-family:'Times New Roman',Times,serif; color:#000; display:flex; flex-direction:column; position:relative;">
+            <div id="print-area-cover" class="flex-1 bg-slate-200 overflow-y-auto p-12 flex flex-col items-center custom-scrollbar">
+                <div class="bg-white shadow-[0_0_50px_rgba(0,0,0,0.15)] text-black" style="width:210mm; height:297mm; padding:20mm 25mm; box-sizing:border-box; font-family:'Times New Roman',Times,serif; color:#000; display:flex; flex-direction:column; position:relative;">
                     <style>
                         .a4-cover-editable [contenteditable] { 
                             outline: none; 
@@ -18860,10 +18867,16 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                                 position: absolute !important; 
                                 left: 0 !important; 
                                 top: 0 !important; 
-                                width: 210mm !important; 
-                                height: 297mm !important;
+                                width: 100% !important; 
                                 margin: 0 !important; 
+                                padding: 0 !important;
+                                overflow: visible !important;
+                            }
+                            #print-area-cover > div {
+                                width: 210mm !important;
+                                height: 297mm !important;
                                 padding: 20mm 25mm !important;
+                                margin: 0 auto !important;
                                 box-shadow: none !important;
                                 border: none !important;
                             }
