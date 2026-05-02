@@ -18703,20 +18703,20 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                             border-bottom-style: solid;
                         }
                         
-                        .cover-header-top { width: 100%; display: flex; justify-content: flex-start; margin-bottom: 30px; }
-                        .cover-logo-img { height: 60px; }
-                        .cover-title-section { width: 100%; text-align: center; margin-top: 15mm; margin-bottom: 5px; }
-                        .cover-main-title { font-size: 36px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; line-height: 1.2; }
-                        .cover-divider-thick { width: 100%; height: 4px; background: #000; margin: 25px 0 35px 0; border-top: 1px solid #000; border-bottom: 1px solid #000; }
-                        .cover-sub-header { width: 100%; text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 60px; letter-spacing: 1px; color: #333; }
-                        .cover-info-grid { width: 100%; display: flex; flex-direction: column; gap: 0; }
-                        .cover-info-row { display: flex; align-items: flex-start; padding: 22px 5px; border-bottom: 1.5px solid #000; }
-                        .cover-info-label { width: 280px; font-weight: bold; text-transform: uppercase; font-size: 16px; flex-shrink: 0; line-height: 1.4; color: #000; }
-                        .cover-info-value { flex: 1; font-size: 19px; font-weight: bold; line-height: 1.4; color: #000; }
-                        .cover-footer-section { margin-top: auto; padding-top: 30px; text-align: center; width: 100%; border-top: 3px double #000; }
-                        .footer-company-name { font-size: 18px; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
-                        .footer-address { font-size: 14px; color: #000; margin-bottom: 10px; line-height: 1.6; }
-                        .footer-slogan { font-size: 18px; font-weight: bold; font-style: italic; margin-top: 15px; letter-spacing: 0.5px; }
+                        .cover-header-top { width: 100%; display: flex; justify-content: flex-start; margin-bottom: 20px; }
+                        .cover-logo-img { height: 45px; }
+                        .cover-title-section { width: 100%; text-align: center; margin-top: 5mm; margin-bottom: 5px; }
+                        .cover-main-title { font-size: 32px; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px; }
+                        .cover-divider-thick { width: 100%; height: 2px; background: #000; margin: 15px 0 25px 0; }
+                        .cover-sub-header { width: 100%; text-align: center; font-size: 17px; font-weight: bold; margin-bottom: 45px; letter-spacing: 0.5px; }
+                        .cover-info-grid { width: 100%; display: flex; flex-direction: column; }
+                        .cover-info-row { display: flex; align-items: flex-start; padding: 15px 5px; border-bottom: 1.5px solid #000; }
+                        .cover-info-label { width: 280px; font-weight: bold; text-transform: uppercase; font-size: 15px; flex-shrink: 0; line-height: 1.4; color: #000; }
+                        .cover-info-value { flex: 1; font-size: 16px; font-weight: 500; line-height: 1.4; color: #000; }
+                        .cover-footer-section { margin-top: auto; padding-top: 20px; text-align: center; width: 100%; border-top: 2px solid #000; }
+                        .footer-company-name { font-size: 15px; font-weight: bold; text-transform: uppercase; margin-bottom: 6px; }
+                        .footer-address { font-size: 13px; color: #000; margin-bottom: 8px; }
+                        .footer-slogan { font-size: 15px; font-weight: bold; font-style: italic; margin-top: 10px; }
 
                         @media print {
                             @page { size: A4; margin: 0; }
@@ -18735,7 +18735,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                             #print-area-cover > div {
                                 width: 210mm !important;
                                 height: 297mm !important;
-                                padding: 25mm 30mm !important;
+                                padding: 20mm 25mm !important;
                                 margin: 0 auto !important;
                                 box-shadow: none !important;
                                 border: none !important;
@@ -18763,8 +18763,8 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                             <span class="cover-info-value uppercase" contenteditable="true">${rec.companyName || '—'}</span>
                         </div>
                         <div class="cover-info-row">
-                            <span class="cover-info-label">NGƯỜI ĐƯỢC BẢO HIỂM:</span>
-                            <span class="cover-info-value uppercase" contenteditable="true">${rec.victimName} - ${rec.victimAge || '—'} TUỔI</span>
+                            <span class="cover-info-label">NGƯỜI THAM GIA BẢO HIỂM:</span>
+                            <span class="cover-info-value uppercase" contenteditable="true">${rec.victimName} - ${rec.victimAge || '—'} Tuổi</span>
                         </div>
                         <div class="cover-info-row">
                             <span class="cover-info-label">NGUYÊN NHÂN TỔN THẤT:</span>
@@ -18776,17 +18776,17 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         </div>
                         <div class="cover-info-row">
                             <span class="cover-info-label">NGƯỜI THỤ LÝ HỒ SƠ:</span>
-                            <span class="cover-info-value uppercase" contenteditable="true">${rec.createdBy || '...'}</span>
+                            <span class="cover-info-value" contenteditable="true">${rec.createdBy || '...'}</span>
                         </div>
                         <div class="cover-info-row" style="border:none">
-                            <span class="cover-info-label">NGÀY LẬP HỒ SƠ:</span>
+                            <span class="cover-info-label">NGÀY TẠO:</span>
                             <span class="cover-info-value" contenteditable="true">${formatDate(rec.createdAt) || '—'}</span>
                         </div>
                     </div>
 
                     <div class="cover-footer-section">
-                        <div class="footer-company-name">CÔNG TY TNHH BẢO HIỂM TASCO - CHI NHÁNH ĐẮK LẮK</div>
-                        <div class="footer-address">Địa chỉ: Toà nhà VIB Đắk Lắk Building, số 27 Nguyễn Tất Thành, Tân Lợi, Buôn Ma Thuột, Đắk Lắk<br>Hotline: 1900 1562 | Website: www.tasco.com.vn</div>
+                        <div class="footer-company-name">CÔNG TY TNHH BẢO HIỂM TASCO - CHI NHÁNH NAM TÂY NGUYÊN</div>
+                        <div class="footer-address">Địa chỉ: Toà nhà VIB Đắk Lắk Building, số 27 Nguyễn Tất Thành, Tân Lợi, Buôn Ma Thuột, Đắk Lắk | Hotline: 1900 1562</div>
                         <div class="footer-slogan">Bảo hiểm nhanh, bồi thường gọn.</div>
                     </div>
                 </div>
