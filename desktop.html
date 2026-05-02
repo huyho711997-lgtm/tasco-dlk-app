@@ -18404,175 +18404,159 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         };
 
         const html = `
-        <div id="hc-claim-cover-modal" class="fixed inset-0 z-[9999] flex flex-col bg-slate-900/80 backdrop-blur-md p-4 overflow-hidden font-sans">
-            <!-- Modal Header -->
-            <div class="flex items-center justify-between mb-6 px-4">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-500/40">
-                        <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+        <div id="hc-claim-cover-modal" class="fixed inset-0 z-[9999] flex flex-col bg-slate-900/60 backdrop-blur-sm p-4 overflow-hidden font-sans">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <div class="flex items-center gap-3 text-white">
+                    <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
                     </div>
                     <div>
-                        <h2 class="text-xl font-black text-white leading-tight tracking-tight">Thiết kế Bìa hồ sơ</h2>
-                        <p class="text-xs font-bold text-indigo-300 uppercase tracking-[0.2em] opacity-80">Premium Dossier Cover • A4 Format</p>
+                        <h2 class="text-lg font-black leading-tight">Bìa hồ sơ bồi thường</h2>
+                        <p class="text-[11px] font-bold text-indigo-300 uppercase tracking-widest">Xem trước & In trang bìa A4</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    <button onclick="window.print()" class="group px-8 py-3 bg-white text-indigo-600 rounded-2xl font-black text-sm hover:bg-indigo-50 transition-all shadow-xl flex items-center gap-3">
-                        <svg class="w-5 h-5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"></path></svg>
+                <div class="flex items-center gap-3">
+                    <button onclick="window.print()" class="px-6 py-2.5 bg-emerald-500 text-white rounded-xl font-black text-sm hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"></path></svg>
                         In trang bìa
                     </button>
-                    <button onclick="document.getElementById('hc-claim-cover-modal').remove()" class="w-12 h-12 bg-white/10 text-white hover:bg-rose-500 rounded-2xl transition-all flex items-center justify-center border border-white/10 hover:border-rose-400">
+                    <button onclick="document.getElementById('hc-claim-cover-modal').remove()" class="w-10 h-10 bg-white/10 text-white hover:bg-rose-500 hover:text-white rounded-xl transition-all flex items-center justify-center border border-white/10">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
             </div>
 
-            <!-- Preview Area -->
-            <div class="flex-1 bg-slate-950/40 rounded-[32px] shadow-inner overflow-y-auto p-12 flex flex-col items-center custom-scrollbar border border-white/5">
-                <div id="print-area-cover" class="a4-cover bg-white relative overflow-hidden">
+            <div class="flex-1 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col items-center p-8 overflow-y-auto custom-scrollbar">
+                <div id="print-area-cover" class="a4-cover bg-white relative p-[20mm_20mm] flex flex-col items-center border border-slate-100 print:border-none print:p-0">
                     <style>
-                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-                        
                         .a4-cover {
                             width: 210mm;
                             height: 297mm;
                             box-sizing: border-box;
-                            background: #fff;
-                            color: #1e293b;
+                            font-family: "Times New Roman", Times, serif;
+                            color: #000;
                             display: flex;
                             flex-direction: column;
-                            padding: 25mm 20mm;
-                            font-family: 'Inter', -apple-system, sans-serif;
-                            position: relative;
+                            background: #fff;
                         }
                         
-                        .cover-accent-line {
+                        .cover-border-outer {
                             position: absolute;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 12px;
-                            background: linear-gradient(90deg, #4f46e5, #9333ea);
-                        }
-                        
-                        .cover-watermark {
-                            position: absolute;
-                            bottom: -50px;
-                            right: -50px;
-                            width: 400px;
-                            height: 400px;
-                            opacity: 0.03;
+                            inset: 10mm;
+                            border: 1px solid #000;
                             pointer-events: none;
-                            transform: rotate(-15deg);
+                        }
+                        
+                        .cover-border-inner {
+                            position: absolute;
+                            inset: 12mm;
+                            border: 3px double #000;
+                            pointer-events: none;
                         }
 
-                        .cover-header {
+                        .cover-header-section {
+                            width: 100%;
                             display: flex;
                             flex-direction: column;
                             align-items: center;
+                            margin-top: 15mm;
+                            margin-bottom: 40mm;
+                        }
+
+                        .cover-logo-img {
+                            height: 60px;
+                            margin-bottom: 15px;
+                        }
+
+                        .company-fullname {
+                            font-size: 18px;
+                            font-weight: bold;
+                            text-transform: uppercase;
+                            text-align: center;
+                            line-height: 1.3;
+                        }
+
+                        .branch-fullname {
+                            font-size: 16px;
+                            font-weight: bold;
+                            text-transform: uppercase;
+                            text-align: center;
+                            border-bottom: 1.5px solid #000;
+                            padding-bottom: 5px;
+                            margin-top: 5px;
+                            display: inline-block;
+                        }
+
+                        .cover-main-body {
+                            flex: 1;
+                            width: 100%;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: flex-start;
+                        }
+
+                        .cover-title-box {
                             text-align: center;
                             margin-bottom: 40mm;
                         }
 
-                        .cover-logo {
-                            height: 60px;
-                            margin-bottom: 20px;
-                        }
-
-                        .company-name {
-                            font-size: 14px;
-                            font-weight: 700;
-                            text-transform: uppercase;
-                            letter-spacing: 0.15em;
-                            color: #475569;
-                            margin-bottom: 4px;
-                        }
-
-                        .branch-name {
-                            font-size: 12px;
-                            font-weight: 800;
-                            color: #64748b;
-                            letter-spacing: 0.05em;
-                        }
-
-                        .cover-body {
-                            flex: 1;
-                            display: flex;
-                            flex-direction: column;
-                            align-items: center;
-                            justify-content: center;
-                            width: 100%;
-                        }
-
-                        .main-title-container {
-                            text-align: center;
-                            margin-bottom: 50mm;
-                        }
-
-                        .main-title {
-                            font-size: 48px;
+                        .cover-main-title {
+                            font-size: 44px;
                             font-weight: 900;
                             text-transform: uppercase;
-                            letter-spacing: -0.02em;
-                            color: #0f172a;
-                            line-height: 0.9;
-                            margin-bottom: 12px;
+                            margin-bottom: 10px;
+                            letter-spacing: 2px;
                         }
 
-                        .main-subtitle {
-                            font-size: 20px;
-                            font-weight: 700;
-                            color: #4f46e5;
+                        .cover-sub-title {
+                            font-size: 24px;
+                            font-weight: bold;
                             text-transform: uppercase;
-                            letter-spacing: 0.2em;
+                            font-style: italic;
+                            color: #000;
                         }
 
-                        .info-grid {
-                            width: 100%;
-                            max-width: 150mm;
+                        .cover-info-table {
+                            width: 90%;
                             display: flex;
                             flex-direction: column;
-                            gap: 16px;
-                            padding: 20px;
+                            gap: 15px;
                         }
 
-                        .info-row {
+                        .cover-info-item {
                             display: flex;
-                            align-items: baseline;
-                            border-bottom: 1px solid #f1f5f9;
-                            padding-bottom: 10px;
+                            align-items: flex-start;
+                            font-size: 18px;
+                            line-height: 1.4;
                         }
 
-                        .info-label {
-                            width: 220px;
-                            font-size: 13px;
-                            font-weight: 700;
-                            color: #94a3b8;
-                            text-transform: uppercase;
-                            letter-spacing: 0.05em;
+                        .cover-info-label {
+                            width: 250px;
+                            font-weight: bold;
                             flex-shrink: 0;
                         }
 
-                        .info-value {
-                            font-size: 18px;
-                            font-weight: 700;
-                            color: #1e293b;
+                        .cover-info-dots {
                             flex: 1;
-                            word-break: break-word;
-                        }
-
-                        .cover-footer {
-                            text-align: center;
-                            margin-top: auto;
-                            padding-top: 20mm;
-                        }
-
-                        .footer-location {
-                            font-size: 14px;
-                            font-weight: 800;
+                            border-bottom: 1.5px dotted #000;
+                            min-height: 24px;
+                            padding-left: 10px;
+                            font-weight: bold;
                             text-transform: uppercase;
-                            letter-spacing: 0.2em;
-                            color: #64748b;
+                        }
+
+                        .cover-footer-section {
+                            margin-top: auto;
+                            margin-bottom: 15mm;
+                            text-align: center;
+                            width: 100%;
+                        }
+
+                        .footer-text {
+                            font-size: 18px;
+                            font-weight: bold;
+                            text-transform: uppercase;
                         }
 
                         @media print {
@@ -18583,56 +18567,53 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                                 position: fixed; 
                                 left: 0; top: 0; 
                                 width: 210mm; height: 297mm;
-                                margin: 0; padding: 25mm 20mm;
+                                margin: 0; padding: 20mm 20mm;
                                 border: none; box-shadow: none;
                             }
-                            .cover-accent-line { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                            .a4-cover { font-family: 'Inter', sans-serif !important; }
                         }
                     </style>
                     
-                    <div class="cover-accent-line"></div>
-                    
-                    <svg class="cover-watermark" viewBox="0 0 24 24" fill="currentColor"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                    <div class="cover-border-outer"></div>
+                    <div class="cover-border-inner"></div>
 
-                    <div class="cover-header">
-                        <img src="https://i.ibb.co/0jP8BN3c/undefined-Imgur.jpg" class="cover-logo" onerror="this.src='https://lh3.googleusercontent.com/d/1bpOB60B7o1NDwahpZsVxct9PbfdwvKmK'">
-                        <div class="company-name">Tổng Công ty Cổ phần Bảo hiểm TASCO</div>
-                        <div class="branch-name">Chi nhánh Đắk Lắk</div>
+                    <div class="cover-header-section">
+                        <img src="https://i.ibb.co/0jP8BN3c/undefined-Imgur.jpg" class="cover-logo-img" onerror="this.src='https://lh3.googleusercontent.com/d/1bpOB60B7o1NDwahpZsVxct9PbfdwvKmK'">
+                        <div class="company-fullname">TỔNG CÔNG TY CỔ PHẦN BẢO HIỂM TASCO</div>
+                        <div class="branch-fullname">CHI NHÁNH ĐẮK LẮK</div>
                     </div>
 
-                    <div class="cover-body">
-                        <div class="main-title-container">
-                            <h1 class="main-title">Hồ sơ<br>Bồi thường</h1>
-                            <div class="main-subtitle" contenteditable="true">Con người</div>
+                    <div class="cover-main-body">
+                        <div class="cover-title-box">
+                            <h1 class="cover-main-title">HỒ SƠ BỒI THƯỜNG</h1>
+                            <div class="cover-sub-title" contenteditable="true">BẢO HIỂM KẾT HỢP CON NGƯỜI</div>
                         </div>
 
                         <div class="info-grid">
-                            <div class="info-row">
-                                <span class="info-label">Người được bảo hiểm</span>
-                                <span class="info-value uppercase" contenteditable="true">${toTitleCase(rec.victimName)}</span>
+                            <div class="cover-info-item">
+                                <span class="cover-info-label">Người được bảo hiểm:</span>
+                                <span class="cover-info-dots" contenteditable="true">${toTitleCase(rec.victimName)}</span>
                             </div>
-                            <div class="info-row">
-                                <span class="info-label">Số hồ sơ bồi thường</span>
-                                <span class="info-value font-mono" contenteditable="true">${rec.claimNo || '—'}</span>
+                            <div class="cover-info-item">
+                                <span class="cover-info-label">Số hồ sơ bồi thường:</span>
+                                <span class="cover-info-dots font-mono" contenteditable="true">${rec.claimNo || '—'}</span>
                             </div>
-                            <div class="info-row">
-                                <span class="info-label">Số hợp đồng bảo hiểm</span>
-                                <span class="info-value font-mono" contenteditable="true">${rec.contractNo || '—'}</span>
+                            <div class="cover-info-item">
+                                <span class="cover-info-label">Số hợp đồng bảo hiểm:</span>
+                                <span class="cover-info-dots font-mono" contenteditable="true">${rec.contractNo || '—'}</span>
                             </div>
-                            <div class="info-row">
-                                <span class="info-label">Đơn vị tham gia</span>
-                                <span class="info-value" contenteditable="true">${rec.companyName || '—'}</span>
+                            <div class="cover-info-item">
+                                <span class="cover-info-label">Đơn vị tham gia:</span>
+                                <span class="cover-info-dots" contenteditable="true">${rec.companyName || '—'}</span>
                             </div>
-                            <div class="info-row" style="border:none">
-                                <span class="info-label">Loại hình bảo hiểm</span>
-                                <span class="info-value" contenteditable="true">${rec.insType || 'Kết hợp con người'}</span>
+                            <div class="cover-info-item">
+                                <span class="cover-info-label">Loại hình bảo hiểm:</span>
+                                <span class="cover-info-dots" contenteditable="true">${rec.insType || 'KẾT HỢP CON NGƯỜI'}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="cover-footer">
-                        <div class="footer-location" contenteditable="true">Đắk Lắk, Năm ${currentYear}</div>
+                    <div class="cover-footer-section">
+                        <div class="footer-text" contenteditable="true">ĐẮK LẮK, NĂM ${currentYear}</div>
                     </div>
                 </div>
             </div>
