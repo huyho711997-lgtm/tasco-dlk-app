@@ -2052,8 +2052,8 @@ textarea.inp { resize:vertical; }
                     <div class="col-span-3">
                         <label class="lbl">Phương thức điều trị</label>
                         <select id="hc-treatmentMethod" class="inp font-bold text-blue-700" onchange="HumanClaims.calculateTotal()">
-                            <option value="Đông y" selected>Đông y (0.3% Mức D)</option>
-                            <option value="Tây y">Tây y (0.5% Mức D)</option>
+                            <option value="Đông y">Đông y (0.3% Mức D)</option>
+                            <option value="Tây y" selected>Tây y (0.5% Mức D)</option>
                         </select>
                     </div>
                   </div>
@@ -15059,6 +15059,9 @@ const HumanClaims = {
         } else {
             document.getElementById('hc-m-title').textContent = 'Thêm hồ sơ mới';
             this._updateUIStatus('new');
+            // Mặc định cho hồ sơ mới
+            document.getElementById('hc-treatmentMethod').value = 'Tây y';
+            document.getElementById('hc-claimNo').value = 'C/DO.TTKD015/A0../...........';
         }
 
         w.classList.remove('hidden');
@@ -15215,7 +15218,7 @@ const HumanClaims = {
     _resetForm() {
         const inputs = document.querySelectorAll('#hc-modal-box input, #hc-modal-box textarea, #hc-modal-box select');
         inputs.forEach(el => {
-            if (el.id === 'hc-lossType' || el.id === 'hc-insType' || el.id === 'hc-payeeRelation' || el.id === 'hc-feeStatus') return; // Giữ giá trị mặc định của select
+            if (el.id === 'hc-lossType' || el.id === 'hc-insType' || el.id === 'hc-payeeRelation' || el.id === 'hc-feeStatus' || el.id === 'hc-treatmentMethod') return; // Giữ giá trị mặc định của select
             el.value = '';
         });
         document.getElementById('hc-calc-injury').textContent = '0 đ';
@@ -15330,7 +15333,7 @@ const HumanClaims = {
         setVal('hc-payeeName', r.payeeName); setVal('hc-payeeRelation', r.payeeRelation);
         setVal('hc-payeeCccd', r.payeeCccd); setVal('hc-payeeIssueDate', r.payeeIssueDate); setVal('hc-payeeIssuePlace', r.payeeIssuePlace);
         setVal('hc-payeeBankNo', r.payeeBankNo); setVal('hc-payeeBankName', r.payeeBankName);
-        setVal('hc-treatmentMethod', r.treatmentMethod || 'Đông y');
+        setVal('hc-treatmentMethod', r.treatmentMethod || 'Tây y');
         this.calculateTotal();
         this.checkWarnings();
 
