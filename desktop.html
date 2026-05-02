@@ -18555,7 +18555,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button onclick="HumanClaims.printSubmission()" class="px-6 py-2.5 bg-emerald-500 text-white rounded-xl font-black text-sm hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                    <button onclick="window.print()" class="px-6 py-2.5 bg-emerald-500 text-white rounded-xl font-black text-sm hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"></path></svg>
                         In tờ trình
                     </button>
@@ -18579,12 +18579,19 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         .cb { display: inline-block; width: 13px; height: 13px; border: 1.5px solid #000; margin-right: 3px; position: relative; top: 2px; text-align:center; font-size:10px; line-height:12px; font-weight:bold; }
                         .cb.checked::after { content: '✔'; position:absolute; top:-3px; left:0px; font-size:10px; }
                         @media print {
-                            @page { size: A4; margin: 20mm; }
                             body * { visibility: hidden !important; }
-                            #print-area-submission { visibility: visible !important; position: fixed !important; top:0; left:0; width:100% !important; padding:0 !important; margin:0 !important; box-shadow:none !important; }
-                            #print-area-submission * { visibility: visible !important; }
-                            #print-area-submission table { page-break-inside: auto; }
-                            #print-area-submission tr { page-break-inside: avoid; }
+                            #print-area-submission, #print-area-submission * { visibility: visible !important; }
+                            #print-area-submission { 
+                                position: absolute !important; 
+                                left: 0 !important; 
+                                top: 0 !important; 
+                                width: 210mm !important;
+                                margin: 0 !important; 
+                                padding: 20mm 20mm !important;
+                                box-shadow: none !important;
+                            }
+                            table { page-break-inside: auto; }
+                            tr { page-break-inside: avoid; }
                         }
                     </style>
 
@@ -18770,39 +18777,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         document.body.insertAdjacentHTML('beforeend', html);
     },
 
-    printSubmission() {
-        const el = document.getElementById('print-area-submission');
-        if (!el) return;
-        const content = el.innerHTML;
-        const win = window.open('', '_blank', 'width=900,height=700');
-        win.document.write(`<!DOCTYPE html>
-<html><head>
-<meta charset="UTF-8">
-<title>Tờ trình bồi thường</title>
-<style>
-  @page { size: A4; margin: 20mm; }
-  * { box-sizing: border-box; }
-  body { font-family: "Times New Roman", Times, serif; font-size: 13px; line-height: 1.4; color: #000; margin: 0; padding: 0; }
-  table { width: 100%; border-collapse: collapse; margin: 8px 0; }
-  th, td { border: 1px solid #000; padding: 5px 8px; vertical-align: top; font-size: 13px; }
-  .bold { font-weight: bold; }
-  .uppercase { text-transform: uppercase; }
-  .center { text-align: center; }
-  .right { text-align: right; }
-  .italic { font-style: italic; }
-  .section-title { font-weight: bold; margin-top: 12px; margin-bottom: 4px; }
-  .cb { display: inline-block; width: 13px; height: 13px; border: 1.5px solid #000; margin-right: 3px; position: relative; top: 2px; text-align: center; font-size: 10px; line-height: 12px; font-weight: bold; }
-  .cb.checked::after { content: '✔'; position: absolute; top: -3px; left: 0; font-size: 10px; }
-  table { page-break-inside: auto; }
-  tr { page-break-inside: avoid; }
-  img { max-height: 50px; }
-  [contenteditable] { outline: none; border-bottom: none; background: transparent; }
-</style>
-</head><body>${content}</body></html>`);
-        win.document.close();
-        win.focus();
-        setTimeout(() => { win.print(); }, 500);
-    },
+
 
     openClaimCover() {
         const rec = this._data.find(r => r.id === this._currentId);
@@ -18836,7 +18811,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button onclick="HumanClaims.printCover()" class="px-6 py-2.5 bg-emerald-500 text-white rounded-xl font-black text-sm hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                    <button onclick="window.print()" class="px-6 py-2.5 bg-emerald-500 text-white rounded-xl font-black text-sm hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"></path></svg>
                         In trang bìa
                     </button>
@@ -18847,146 +18822,50 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             </div>
 
             <div class="flex-1 bg-slate-200 overflow-y-auto p-12 flex flex-col items-center custom-scrollbar">
-                <div id="print-area-cover" class="a4-cover bg-white relative p-[20mm_25mm] flex flex-col items-center shadow-[0_0_50px_rgba(0,0,0,0.15)] print:shadow-none print:p-0">
+                <div id="print-area-cover" class="bg-white shadow-[0_0_50px_rgba(0,0,0,0.15)] text-black" style="width:210mm; height:297mm; padding:20mm 25mm; box-sizing:border-box; font-family:'Times New Roman',Times,serif; color:#000; display:flex; flex-direction:column; position:relative;">
                     <style>
-                        .a4-cover {
-                            width: 210mm;
-                            height: 297mm;
-                            box-sizing: border-box;
-                            font-family: "Times New Roman", Times, serif;
-                            color: #000;
-                            display: flex;
-                            flex-direction: column;
-                            background: #fff;
-                            flex-shrink: 0;
-                        }
-
-                        .a4-cover [contenteditable] { 
+                        .a4-cover-editable [contenteditable] { 
                             outline: none; 
                             border-bottom: 1px dashed transparent; 
                             transition: all 0.2s; 
                         }
-                        .a4-cover [contenteditable]:hover { 
+                        .a4-cover-editable [contenteditable]:hover { 
                             border-bottom-color: #cbd5e1; 
                             background: #f8fafc; 
                         }
-                        .a4-cover [contenteditable]:focus { 
+                        .a4-cover-editable [contenteditable]:focus { 
                             border-bottom-color: #3b82f6; 
                             background: #eff6ff; 
                         }
                         
-                        .cover-header-top {
-                            width: 100%;
-                            display: flex;
-                            justify-content: flex-start;
-                            margin-bottom: 30px;
-                        }
-
-                        .cover-logo-img {
-                            height: 48px;
-                        }
-
-                        .cover-title-section {
-                            width: 100%;
-                            text-align: center;
-                            margin-top: 6mm;
-                            margin-bottom: 8px;
-                        }
-
-                        .cover-main-title {
-                            font-size: 28px;
-                            font-weight: bold;
-                            text-transform: uppercase;
-                            letter-spacing: 1px;
-                            line-height: 1.2;
-                        }
-
-                        .cover-divider-thick {
-                            width: 100%;
-                            height: 3px;
-                            background: #000;
-                            margin-bottom: 20px;
-                        }
-
-                        .cover-sub-header {
-                            width: 100%;
-                            text-align: center;
-                            font-size: 15px;
-                            font-weight: bold;
-                            margin-bottom: 30px;
-                            letter-spacing: 0.5px;
-                        }
-
-                        .cover-info-grid {
-                            width: 100%;
-                            display: flex;
-                            flex-direction: column;
-                        }
-
-                        .cover-info-row {
-                            display: flex;
-                            align-items: flex-start;
-                            padding: 12px 5px;
-                            border-bottom: 1.5px solid #000;
-                        }
-
-                        .cover-info-label {
-                            width: 220px;
-                            font-weight: bold;
-                            text-transform: uppercase;
-                            font-size: 13px;
-                            flex-shrink: 0;
-                            line-height: 1.4;
-                        }
-
-                        .cover-info-value {
-                            flex: 1;
-                            font-size: 15px;
-                            font-weight: bold;
-                            line-height: 1.4;
-                        }
-
-                        .cover-footer-section {
-                            margin-top: auto;
-                            margin-bottom: 5mm;
-                            text-align: center;
-                            width: 100%;
-                            border-top: 2px solid #000;
-                            padding-top: 20px;
-                        }
-
-                        .footer-company-name {
-                            font-size: 14px;
-                            font-weight: bold;
-                            text-transform: uppercase;
-                            margin-bottom: 6px;
-                            letter-spacing: 0.5px;
-                        }
-
-                        .footer-address {
-                            font-size: 12px;
-                            color: #000;
-                            margin-bottom: 6px;
-                            line-height: 1.5;
-                        }
-
-                        .footer-slogan {
-                            font-size: 13px;
-                            font-weight: bold;
-                            font-style: italic;
-                            margin-top: 10px;
-                        }
+                        .cover-header-top { width: 100%; display: flex; justify-content: flex-start; margin-bottom: 30px; }
+                        .cover-logo-img { height: 48px; }
+                        .cover-title-section { width: 100%; text-align: center; margin-top: 6mm; margin-bottom: 8px; }
+                        .cover-main-title { font-size: 28px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; line-height: 1.2; }
+                        .cover-divider-thick { width: 100%; height: 3px; background: #000; margin-bottom: 20px; }
+                        .cover-sub-header { width: 100%; text-align: center; font-size: 15px; font-weight: bold; margin-bottom: 30px; letter-spacing: 0.5px; }
+                        .cover-info-grid { width: 100%; display: flex; flex-direction: column; }
+                        .cover-info-row { display: flex; align-items: flex-start; padding: 12px 5px; border-bottom: 1.5px solid #000; }
+                        .cover-info-label { width: 220px; font-weight: bold; text-transform: uppercase; font-size: 13px; flex-shrink: 0; line-height: 1.4; }
+                        .cover-info-value { flex: 1; font-size: 15px; font-weight: bold; line-height: 1.4; }
+                        .cover-footer-section { margin-top: auto; margin-bottom: 5mm; text-align: center; width: 100%; border-top: 2px solid #000; padding-top: 20px; }
+                        .footer-company-name { font-size: 14px; font-weight: bold; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
+                        .footer-address { font-size: 12px; color: #000; margin-bottom: 6px; line-height: 1.5; }
+                        .footer-slogan { font-size: 13px; font-weight: bold; font-style: italic; margin-top: 10px; }
 
                         @media print {
-                            body * { visibility: hidden; }
-                            #hc-claim-cover-modal { background: none; backdrop-filter: none; padding: 0; position: static; }
-                            #print-area-cover, #print-area-cover * { visibility: visible; }
+                            body * { visibility: hidden !important; }
+                            #print-area-cover, #print-area-cover * { visibility: visible !important; }
                             #print-area-cover { 
-                                position: fixed; 
-                                left: 0; top: 0; 
-                                width: 210mm; height: 297mm;
-                                margin: 0; padding: 20mm 25mm;
-                                border: none; box-shadow: none;
+                                position: absolute !important; 
+                                left: 0 !important; 
+                                top: 0 !important; 
+                                width: 210mm !important; 
+                                height: 297mm !important;
+                                margin: 0 !important; 
+                                padding: 20mm 25mm !important;
+                                box-shadow: none !important;
+                                border: none !important;
                             }
                         }
                     </style>
@@ -19005,7 +18884,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         Số HSBT: <span contenteditable="true">${rec.claimNo || '—'}</span> | Nghiệp vụ: <span contenteditable="true">${rec.insType || 'Học sinh, sinh viên'}</span>
                     </div>
 
-                    <div class="cover-info-grid">
+                    <div class="cover-info-grid a4-cover-editable">
                         <div class="cover-info-row">
                             <span class="cover-info-label">ĐƠN VỊ THAM GIA BẢO HIỂM:</span>
                             <span class="cover-info-value uppercase" contenteditable="true">${rec.companyName || '—'}</span>
@@ -19044,42 +18923,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         document.body.insertAdjacentHTML('beforeend', html);
     },
 
-    printCover() {
-        const el = document.getElementById('print-area-cover');
-        if (!el) return;
-        const content = el.innerHTML;
-        const win = window.open('', '_blank', 'width=900,height=700');
-        win.document.write(`<!DOCTYPE html>
-<html><head>
-<meta charset="UTF-8">
-<title>Bìa hồ sơ bồi thường</title>
-<style>
-  @page { size: A4; margin: 0; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: "Times New Roman", Times, serif; font-size: 13px; color: #000; width: 210mm; height: 297mm; overflow: hidden; }
-  .a4-cover { width: 210mm; height: 297mm; padding: 20mm 25mm; display: flex; flex-direction: column; }
-  .cover-header-top { width:100%; display:flex; justify-content:flex-start; margin-bottom:30px; }
-  .cover-logo-img { height: 48px; }
-  .cover-title-section { width:100%; text-align:center; margin-top:6mm; margin-bottom:8px; }
-  .cover-main-title { font-size:28px; font-weight:bold; text-transform:uppercase; letter-spacing:1px; line-height:1.2; }
-  .cover-divider-thick { width:100%; height:3px; background:#000; margin-bottom:20px; }
-  .cover-sub-header { width:100%; text-align:center; font-size:15px; font-weight:bold; margin-bottom:30px; letter-spacing:0.5px; }
-  .cover-info-grid { width:100%; display:flex; flex-direction:column; }
-  .cover-info-row { display:flex; align-items:flex-start; padding:12px 5px; border-bottom:1.5px solid #000; }
-  .cover-info-label { width:220px; font-weight:bold; text-transform:uppercase; font-size:13px; flex-shrink:0; line-height:1.4; }
-  .cover-info-value { flex:1; font-size:15px; font-weight:bold; line-height:1.4; }
-  .cover-footer-section { margin-top:auto; text-align:center; width:100%; border-top:2px solid #000; padding-top:20px; }
-  .footer-company-name { font-size:14px; font-weight:bold; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.5px; }
-  .footer-address { font-size:12px; margin-bottom:6px; line-height:1.5; }
-  .footer-slogan { font-size:13px; font-weight:bold; font-style:italic; margin-top:10px; }
-  img { max-height:48px; }
-  [contenteditable] { outline:none; border-bottom:none; background:transparent; }
-</style>
-</head><body>${content}</body></html>`);
-        win.document.close();
-        win.focus();
-        setTimeout(() => { win.print(); }, 500);
-    },
+
 };
 
 document.addEventListener('click', function(e) {
