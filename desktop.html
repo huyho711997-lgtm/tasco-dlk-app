@@ -18025,9 +18025,10 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                     
                     @media print {
                         body > *:not(#hc-claim-noti-modal) { display: none !important; }
-                        #hc-claim-noti-modal { display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; background: white !important; }
-                        #claim-noti-container { width: 100% !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
-                        .a4-page { border: none !important; box-shadow: none !important; margin: 0 !important; page-break-after: always; padding: 15mm 20mm !important; }
+                        #hc-claim-noti-modal { display: block !important; position: static !important; padding: 0 !important; margin: 0 !important; background: white !important; }
+                        #hc-claim-noti-modal > div:first-child { display: none !important; }
+                        #claim-noti-container { display: block !important; width: 100% !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
+                        .a4-page { border: none !important; box-shadow: none !important; margin: 0 !important; page-break-after: always; padding: 10mm 15mm !important; }
                         .a4-page:last-child { page-break-after: auto; }
                     }
                 </style>
@@ -18589,8 +18590,10 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         .a4-page [contenteditable]:focus { border-bottom-color: #3b82f6; background: #eff6ff; }
                         @media print {
                             body > *:not(#hc-claim-submission-modal) { display: none !important; }
-                            #hc-claim-submission-modal { display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; background: white !important; }
+                            #hc-claim-submission-modal { display: block !important; position: static !important; padding: 0 !important; margin: 0 !important; background: white !important; }
+                            #hc-claim-submission-modal > div:first-child { display: none !important; }
                             #print-area-submission { 
+                                display: block !important;
                                 width: 100% !important;
                                 margin: 0 !important; 
                                 padding: 0 !important;
@@ -18874,8 +18877,10 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
 
                         @media print {
                             body > *:not(#hc-claim-cover-modal) { display: none !important; }
-                            #hc-claim-cover-modal { display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; background: white !important; }
+                            #hc-claim-cover-modal { display: block !important; position: static !important; padding: 0 !important; margin: 0 !important; background: white !important; }
+                            #hc-claim-cover-modal > div:first-child { display: none !important; }
                             #print-area-cover { 
+                                display: block !important;
                                 width: 100% !important; 
                                 margin: 0 !important; 
                                 padding: 0 !important;
