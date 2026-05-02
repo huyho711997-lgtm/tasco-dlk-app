@@ -15464,20 +15464,22 @@ const HumanClaims = {
     checkWarnings() {
         const effFrom = document.getElementById('hc-effFrom').value;
         const effTo = document.getElementById('hc-effTo').value;
-        const accDate = document.getElementById('hc-accDate').value;
+        const accDateStr = document.getElementById('hc-accDate').value;
         
         const warnEl = document.getElementById('hc-m-ai-warning');
         warnEl.classList.add('hidden');
 
-        if (accDate && effFrom) {
-            if (moment(accDate).isBefore(moment(effFrom), 'day')) {
+        if (accDateStr && effFrom) {
+            const accDate = moment(accDateStr, 'DD/MM/YYYY');
+            if (accDate.isValid() && accDate.isBefore(moment(effFrom), 'day')) {
                 warnEl.innerHTML = `<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Tai nạn TRƯỚC ngày hiệu lực!`;
                 warnEl.classList.remove('hidden');
                 return;
             }
         }
-        if (accDate && effTo) {
-            if (moment(accDate).isAfter(moment(effTo), 'day')) {
+        if (accDateStr && effTo) {
+            const accDate = moment(accDateStr, 'DD/MM/YYYY');
+            if (accDate.isValid() && accDate.isAfter(moment(effTo), 'day')) {
                 warnEl.innerHTML = `<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Tai nạn SAU ngày hết hiệu lực!`;
                 warnEl.classList.remove('hidden');
             }
@@ -16344,6 +16346,8 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                 "diaChiNguoiBenh": "Địa chỉ",
                 "ngayNhapVien": "YYYY-MM-DD",
                 "ngayXuatVien": "YYYY-MM-DD",
+                "ngayTaiNan": "YYYY-MM-DD (Ngày xảy ra tai nạn nếu có)",
+                "ngayNopPhi": "YYYY-MM-DD (Ngày nộp tiền/thu phí nếu có)",
                 "chanDoan": "Chẩn đoán ngắn gọn",
                 "tongTien": "Tổng viện phí (số nguyên)"
             }
@@ -16434,6 +16438,8 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         const curHospital = document.getElementById('hc-hospitalName').value;
         const curInDate = document.getElementById('hc-inDate').value;
         const curOutDate = document.getElementById('hc-outDate').value;
+        const curAccDate = document.getElementById('hc-accDate').value;
+        const curFeeDate = document.getElementById('hc-feeDate').value;
         const curDesc = document.getElementById('hc-injuryDesc').value;
 
         const fmtDate = (d) => d ? moment(d, 'YYYY-MM-DD').format('DD/MM/YYYY') : '';
@@ -16488,12 +16494,22 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                             <div class="col-span-6">
                                 <label class="block text-[10px] font-bold text-slate-500 mb-1.5">Ngày nhập viện</label>
                                 <input type="date" id="ai-med-inDate" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 outline-none focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-50 font-bold text-slate-700 text-[13px] transition-all" value="${aiData.ngayNhapVien || ''}">
-                                <p class="text-[9px] text-slate-400 mt-1.5">Đang có: <span class="font-semibold text-slate-600">${fmtDate(curInDate) || 'Trống'}</span></p>
+                                <p class="text-[9px] text-slate-400 mt-1.5">Đang có: <span class="font-semibold text-slate-600">${curInDate || 'Trống'}</span></p>
                             </div>
                             <div class="col-span-6">
                                 <label class="block text-[10px] font-bold text-slate-500 mb-1.5">Ngày xuất viện</label>
                                 <input type="date" id="ai-med-outDate" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 outline-none focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-50 font-bold text-slate-700 text-[13px] transition-all" value="${aiData.ngayXuatVien || ''}">
-                                <p class="text-[9px] text-slate-400 mt-1.5">Đang có: <span class="font-semibold text-slate-600">${fmtDate(curOutDate) || 'Trống'}</span></p>
+                                <p class="text-[9px] text-slate-400 mt-1.5">Đang có: <span class="font-semibold text-slate-600">${curOutDate || 'Trống'}</span></p>
+                            </div>
+                            <div class="col-span-6">
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1.5">Ngày bị tai nạn</label>
+                                <input type="date" id="ai-med-accDate" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 outline-none focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-50 font-bold text-slate-700 text-[13px] transition-all" value="${aiData.ngayTaiNan || ''}">
+                                <p class="text-[9px] text-slate-400 mt-1.5">Đang có: <span class="font-semibold text-slate-600">${curAccDate || 'Trống'}</span></p>
+                            </div>
+                            <div class="col-span-6">
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1.5">Ngày nộp phí</label>
+                                <input type="date" id="ai-med-feeDate" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 outline-none focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-50 font-bold text-slate-700 text-[13px] transition-all" value="${aiData.ngayNopPhi || ''}">
+                                <p class="text-[9px] text-slate-400 mt-1.5">Đang có: <span class="font-semibold text-slate-600">${curFeeDate || 'Trống'}</span></p>
                             </div>
                         </div>
                     </div>
@@ -16538,10 +16554,12 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                 return {
                     hospitalName: document.getElementById('ai-med-hospitalName').value.trim(),
                     victimName: document.getElementById('ai-med-victimName').value.trim(),
-                    victimAge: document.getElementById('ai-med-victimAge').value.trim(), // Đảm bảo key này là victimAge
+                    victimAge: document.getElementById('ai-med-victimAge').value.trim(), 
                     victimAddress: document.getElementById('ai-med-victimAddress').value.trim(),
                     inDate: document.getElementById('ai-med-inDate').value,
                     outDate: document.getElementById('ai-med-outDate').value,
+                    accDate: document.getElementById('ai-med-accDate').value,
+                    feeDate: document.getElementById('ai-med-feeDate').value,
                     desc: document.getElementById('ai-med-desc').value.trim()
                 };
             }
@@ -16560,8 +16578,14 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         if (data.victimAge) document.getElementById('hc-victimAge').value = data.victimAge;
         
         if (data.victimAddress) document.getElementById('hc-victimAddress').value = data.victimAddress;
-        if (data.inDate) document.getElementById('hc-inDate').value = data.inDate;
-        if (data.outDate) document.getElementById('hc-outDate').value = data.outDate;
+        
+        // Chuyển đổi định dạng YYYY-MM-DD sang DD/MM/YYYY cho các input text
+        const toVN = (d) => d ? moment(d, 'YYYY-MM-DD').format('DD/MM/YYYY') : '';
+        
+        if (data.inDate) document.getElementById('hc-inDate').value = toVN(data.inDate);
+        if (data.outDate) document.getElementById('hc-outDate').value = toVN(data.outDate);
+        if (data.accDate) document.getElementById('hc-accDate').value = toVN(data.accDate);
+        if (data.feeDate) document.getElementById('hc-feeDate').value = toVN(data.feeDate);
         
         const descEl = document.getElementById('hc-injuryDesc');
         if (data.desc) {
@@ -16569,6 +16593,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         }
 
         this.calculateDays(); 
+        this.checkWarnings(); 
 
         Toast.fire({ icon: 'success', title: 'Đã điền thông tin y tế vào form!' });
     },
