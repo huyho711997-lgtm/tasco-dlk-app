@@ -2166,7 +2166,33 @@ textarea.inp { resize:vertical; }
                   </div>
                   <div class="grid grid-cols-5 gap-3 pt-3 border-t border-slate-100">
                     <div class="col-span-2"><label class="lbl">Số tài khoản</label><input id="hc-payeeBankNo" class="inp font-bold text-purple-700 text-[13px]"></div>
-                    <div class="col-span-3"><label class="lbl">Ngân hàng</label><input id="hc-payeeBankName" class="inp" placeholder="VD: Vietcombank, BIDV..."></div>
+                    <div class="col-span-2">
+                        <label class="lbl">Ngân hàng</label>
+                        <input id="hc-payeeBankName" class="inp" list="hc-bank-list" placeholder="Vietcombank, MB...">
+                        <datalist id="hc-bank-list">
+                            <option value="Vietcombank (VCB)">
+                            <option value="MB Bank (MB)">
+                            <option value="BIDV">
+                            <option value="Vietinbank (CTG)">
+                            <option value="Agribank (VBA)">
+                            <option value="Techcombank (TCB)">
+                            <option value="ACB">
+                            <option value="VPBank">
+                            <option value="Sacombank (STB)">
+                            <option value="TPBank">
+                            <option value="MSB">
+                            <option value="VIB">
+                            <option value="HD Bank">
+                            <option value="OCB">
+                            <option value="SHB">
+                            <option value="Eximbank">
+                        </datalist>
+                    </div>
+                    <div class="flex items-end">
+                      <button onclick="HumanClaims.showVietQR()" class="w-full h-10 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-xl flex items-center justify-center hover:bg-indigo-100 transition-colors" title="Tạo mã QR VietQR">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/><rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/></svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -14683,6 +14709,39 @@ const HumanClaims = {
         'paid': { text: 'Đã thanh toán', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4' }
     },
 
+    BANK_MAP: {
+        'vcb': 'VCB', 'vietcombank': 'VCB',
+        'bidv': 'BIDV',
+        'ctg': 'CTG', 'vietinbank': 'CTG',
+        'vba': 'VBA', 'agribank': 'VBA',
+        'tcb': 'TCB', 'techcombank': 'TCB',
+        'mb': 'MB', 'mbb': 'MB', 'mb bank': 'MB',
+        'acb': 'ACB',
+        'vpb': 'VPB', 'vpbank': 'VPB',
+        'stb': 'STB', 'sacombank': 'STB',
+        'tpb': 'TPB', 'tpbank': 'TPB',
+        'shb': 'SHB',
+        'hdb': 'HDB', 'hdbank': 'HDB',
+        'ocb': 'OCB',
+        'msb': 'MSB',
+        'vib': 'VIB',
+        'lpbank': 'LPB', 'lpb': 'LPB',
+        'seabank': 'SEA',
+        'abbank': 'ABB',
+        'pvcombank': 'PVC',
+        'oceanbank': 'OJB',
+        'pgbank': 'PGB',
+        'eximbank': 'EIB',
+        'dongabank': 'DAB',
+        'baovietbank': 'BVB',
+        'namabank': 'NAB',
+        'vcc': 'VCC', 'vietcapitalbank': 'VCC',
+        'klb': 'KLB', 'kienlongbank': 'KLB',
+        'sgb': 'SGB', 'saigonbank': 'SGB',
+        'vbb': 'VBB', 'vietbank': 'VBB',
+        'ncb': 'NCB',
+    },
+
     init() {
         // Admin check: Hiển thị nút cấu hình nếu là admin
         const currentUser = Auth.getCurrentUser();
@@ -15191,6 +15250,87 @@ const HumanClaims = {
 
         this._updateUIStatus(r.status || 'new');
         this.renderImages(r.images || []);
+    },
+
+    /* ── VietQR Payment ── */
+    showVietQR() {
+        const bankNo = document.getElementById('hc-payeeBankNo').value.trim();
+        const bankNameRaw = document.getElementById('hc-payeeBankName').value.trim();
+        const bankName = bankNameRaw.toLowerCase();
+        const amount = parseInt(document.getElementById('hc-calc-total').textContent.replace(/[^\d]/g, '')) || 0;
+        const claimNo = document.getElementById('hc-claimNo').value.trim() || 'Hồ sơ';
+        const payeeName = document.getElementById('hc-payeeName').value.trim();
+
+        if (!bankNo) { Toast.fire({ icon: 'warning', title: 'Vui lòng nhập Số tài khoản!' }); return; }
+        if (!bankName) { Toast.fire({ icon: 'warning', title: 'Vui lòng nhập Ngân hàng!' }); return; }
+
+        // Tìm Bank ID từ mapping
+        let bankId = '';
+        for (let key in this.BANK_MAP) {
+            if (bankName.includes(key)) {
+                bankId = this.BANK_MAP[key];
+                break;
+            }
+        }
+
+        if (!bankId) {
+            // Thử trích xuất mã trong ngoặc nếu có (VD: Vietcombank (VCB) -> VCB)
+            const match = bankNameRaw.match(/\((.*?)\)/);
+            if (match && match[1]) {
+                bankId = match[1].toUpperCase();
+            }
+        }
+
+        if (!bankId) {
+            Swal.fire({
+                title: 'Không tìm thấy mã ngân hàng',
+                text: 'Hệ thống chưa nhận diện được ngân hàng này. Vui lòng nhập mã ngân hàng (VD: VCB, MB, CTG, TCB...)',
+                input: 'text',
+                showCancelButton: true,
+                confirmButtonText: 'Tạo QR',
+                cancelButtonText: 'Hủy',
+                customClass: { popup: 'rnd' }
+            }).then(r => {
+                if (r.isConfirmed && r.value) {
+                    this._renderVietQR(r.value.toUpperCase(), bankNo, amount, claimNo, payeeName);
+                }
+            });
+            return;
+        }
+
+        this._renderVietQR(bankId, bankNo, amount, claimNo, payeeName);
+    },
+
+    _renderVietQR(bankId, bankNo, amount, claimNo, payeeName) {
+        const desc = `Thanh toan HSBT ${claimNo}`;
+        const qrUrl = `https://img.vietqr.io/image/${bankId}-${bankNo}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(desc)}&accountName=${encodeURIComponent(payeeName)}`;
+
+        Swal.fire({
+            title: '<span class="text-lg font-black">Mã QR Thanh toán (VietQR)</span>',
+            html: `
+                <div class="flex flex-col items-center gap-4">
+                    <img src="${qrUrl}" class="w-64 h-64 shadow-xl rounded-2xl border border-slate-100" alt="VietQR">
+                    <div class="text-left w-full bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <div class="mb-3">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Người thụ hưởng</p>
+                            <p class="text-[13px] font-black text-slate-700">${payeeName || 'CHƯA NHẬP TÊN'}</p>
+                        </div>
+                        <div class="mb-3">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Tài khoản & Ngân hàng</p>
+                            <p class="text-[13px] font-black text-indigo-700">${bankNo} <span class="text-slate-400 font-bold ml-1">(${bankId})</span></p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Số tiền thanh toán</p>
+                            <p class="text-xl font-black text-emerald-600">${amount.toLocaleString('vi-VN')} đ</p>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-slate-400 font-medium italic">* Quét mã này bằng ứng dụng ngân hàng để thanh toán nhanh.</p>
+                </div>
+            `,
+            showCloseButton: true,
+            showConfirmButton: false,
+            customClass: { popup: 'rnd' }
+        });
     },
 
     /* ── Xử lý Trạng thái (Workflow) ── */
