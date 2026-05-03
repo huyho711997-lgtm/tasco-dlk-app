@@ -15627,12 +15627,21 @@ const HumanClaims = {
             `,
             showConfirmButton: true,
             confirmButtonText: 'Đóng lại',
-            confirmButtonColor: '#0f172a',
+            confirmButtonColor: '#475569',
+            showDenyButton: true,
+            denyButtonText: '<svg style="display:inline-block;width:14px;height:14px;margin-right:6px;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Xuất Tờ trình',
+            denyButtonColor: '#059669',
             customClass: {
                 popup: 'rounded-[1.5rem]',
-                confirmButton: 'rounded-lg px-8 py-2 text-[10px] font-black uppercase tracking-widest'
+                confirmButton: 'rounded-lg px-6 py-2 text-[10px] font-black uppercase tracking-widest order-2',
+                denyButton: 'rounded-lg px-6 py-2 text-[10px] font-black uppercase tracking-widest order-1'
             },
-            width: '420px'
+            width: '440px'
+        }).then(res => {
+            if (res.isDenied) {
+                this._currentId = id;
+                this.downloadWordDoc('toinhan');
+            }
         });
     },
 
@@ -18188,6 +18197,9 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
     _preparePayload(rec) {
         const today = new Date();
         const pad = (n) => n < 10 ? '0' + n : String(n);
+        const fmtD = (d) => d ? moment(d).format('DD/MM/YYYY') : '';
+        const fmtDT = (d) => d ? moment(d).format('DD/MM/YYYY HH:mm') : '';
+
         return {
             bsx: rec.victimName || 'BH',
             tenHienThi: rec.claimNo || '—',
@@ -18200,16 +18212,16 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             cccdThuHuong: rec.payeeCccd || '',
             soGcn: rec.gcn || '',
             soHopDong: rec.contractNo || '',
-            thoiHieuTu: rec.effFrom || '',
-            thoiHieuDen: rec.effTo || '',
+            thoiHieuTu: fmtDT(rec.effFrom),
+            thoiHieuDen: fmtDT(rec.effTo),
             loaiThatThat: rec.lossType || '',
-            ngayThatThat: rec.accDate || '',
+            ngayThatThat: fmtD(rec.accDate),
             diaDiemThatThat: rec.accLocation || '',
             moTaSuCo: rec.accCause || '',
             moTaThatThat: rec.injuryDesc || '',
             tenBenh: rec.hospitalName || '',
-            ngayVaoVien: rec.inDate || '',
-            ngayRaVien: rec.outDate || '',
+            ngayVaoVien: fmtD(rec.inDate),
+            ngayRaVien: fmtD(rec.outDate),
             soNgayNamVien: rec.days || '0',
             tongTienBT: rec.totalAmount || '0',
             tienThuongTat: rec.injuryAmount || '0',
