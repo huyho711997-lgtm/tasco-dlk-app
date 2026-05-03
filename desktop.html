@@ -2461,6 +2461,10 @@ textarea.inp { resize:vertical; }
                 Import DS NĐBH
                 <input type="file" class="hidden" accept=".xlsx, .xls, .csv" onchange="Contracts.importGlobalInsuredExcel(event)">
               </label>
+              <button onclick="Contracts.downloadInsuredTemplate()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.1);color:#fcd34d;border:1px solid rgba(251,191,36,.3);transition:all .15s;" onmouseover="this.style.background='rgba(251,191,36,.15)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Tải mẫu NĐBH
+              </button>
               <button onclick="Contracts.openImportExcel()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.1);color:#f1f5f9;border:1px solid rgba(255,255,255,.15);transition:all .15s;" onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Import Excel HS
@@ -20527,6 +20531,36 @@ var Contracts = {
         };
         reader.readAsArrayBuffer(file);
     },
+    downloadInsuredTemplate() {
+        if (typeof XLSX === 'undefined') {
+            Toast.fire({icon: 'error', title: 'Thư viện Excel đang tải, vui lòng thử lại!'});
+            return;
+        }
+        var headers = [
+            "Đối tượng/Các GCN/Hợp đồng",
+            "Đối tượng/Các GCN/Số GCN",
+            "Đối tượng/Các GCN/Đối tuợng bảo hiểm",
+            "Đối tượng/Phạm vi/Mức TN/Số Tiền BH quy đổi",
+            "Đối tượng/Phạm vi/Phạm vi bảo hiểm"
+        ];
+        var data = [
+            headers,
+            ["DO.TTKD015/A04/2600232355", "A042603/501718", "[2352747] Nguyễn Văn An", 8000000, "Phạm vi bảo hiểm A: Chết do ốm đau, bệnh tật"],
+            ["", "", "", 18000000, "Phạm vi bảo hiểm B: Chết, thương tật thân thể do tai nạn"],
+            ["", "", "", 8000000, "Phạm vi bảo hiểm C: Phẫu thuật do ốm đau, bệnh tật, thai sản"],
+            ["", "", "", 8000000, "Phạm vi bảo hiểm D: Nằm viện do ốm đau, bệnh tật, thai sản, thương tật thân thể do tai nạn"],
+            ["DO.TTKD015/A04/2600232355", "A042603/912518", "[2352748] Trần Thị Bình", 8000000, "Phạm vi bảo hiểm A: Chết do ốm đau, bệnh tật"],
+            ["", "", "", 18000000, "Phạm vi bảo hiểm B: Chết, thương tật thân thể do tai nạn"],
+            ["", "", "", 8000000, "Phạm vi bảo hiểm C: Phẫu thuật do ốm đau, bệnh tật, thai sản"],
+            ["", "", "", 8000000, "Phạm vi bảo hiểm D: Nằm viện do ốm đau, bệnh tật, thai sản, thương tật thân thể do tai nạn"]
+        ];
+        var ws = XLSX.utils.aoa_to_sheet(data);
+        ws['!cols'] = [{wch: 30}, {wch: 20}, {wch: 30}, {wch: 20}, {wch: 60}];
+        var wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Mau_NDBH");
+        XLSX.writeFile(wb, "Mau_Import_NDBH_Global.xlsx");
+    },
+
     /* ── IMPORT DANH SÁCH NGƯỜI ĐƯỢC BẢO HIỂM VÀO NHIỀU HỢP ĐỒNG ── */
     importGlobalInsuredExcel(event) {
         var file = event.target.files[0];
