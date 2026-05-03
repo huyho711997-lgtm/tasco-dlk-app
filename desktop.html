@@ -20615,10 +20615,14 @@ var Contracts = {
                     }
                     
                     if (currentPerson) {
-                        if (scopeText.includes('phạmvia')) currentPerson.lvlA = limitVal;
-                        else if (scopeText.includes('phạmvib')) currentPerson.lvlB = limitVal;
-                        else if (scopeText.includes('phạmvic')) currentPerson.lvlC = limitVal;
-                        else if (scopeText.includes('phạmvid')) currentPerson.lvlD = limitVal;
+                        // Logic nhận diện phạm vi linh hoạt hơn
+                        var isScope = scopeText.includes('phạmvi');
+                        if (isScope) {
+                            if (scopeText.includes('a')) currentPerson.lvlA = limitVal;
+                            else if (scopeText.includes('b')) currentPerson.lvlB = limitVal;
+                            else if (scopeText.includes('c')) currentPerson.lvlC = limitVal;
+                            else if (scopeText.includes('d')) currentPerson.lvlD = limitVal;
+                        }
                     }
                 });
 
