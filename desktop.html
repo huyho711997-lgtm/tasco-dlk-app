@@ -20583,8 +20583,8 @@ var Contracts = {
                 
                 var rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: "" });
                 
-                // Hàm chuẩn hóa chuỗi để so sánh
-                var norm = (t) => String(t || '').normalize('NFC').toLowerCase().replace(/\s/g, '');
+                // Hàm chuẩn hóa chuỗi để so sánh (giữ lại khoảng cách để regex \b hoạt động)
+                var norm = (t) => String(t || '').normalize('NFC').toLowerCase().trim().replace(/\s+/g, ' ');
 
                 // 1. Tìm dòng tiêu đề
                 var headerIdx = -1;
@@ -20599,20 +20599,20 @@ var Contracts = {
                         if (!c) return;
                         
                         // Ưu tiên Số HĐ
-                        if (c.includes('hợpđồng') || c === 'sốhđ' || c === 'hđ' || c.includes('mãhđ')) {
+                        if (c.includes('hợp đồng') || c.includes('hợpđồng') || c.includes('số hđ') || c === 'hđ' || c.includes('mã hđ')) {
                             idx.hd = cellIdx;
                         }
                         // Số GCN
-                        else if (c.includes('sốgcn') || c.includes('gcn') || c.includes('giấychứngnhận')) {
+                        else if (c.includes('số gcn') || c.includes('sốgcn') || c.includes('gcn') || c.includes('giấy chứng nhận')) {
                             idx.gcn = cellIdx;
                         }
                         // Phạm vi & Mức tiền
-                        else if (c.includes('phạmvi')) {
-                            if (c.includes('mứctn') || c.includes('tiềnbh') || c.includes('quyđổi')) idx.limit = cellIdx;
+                        else if (c.includes('phạm vi')) {
+                            if (c.includes('mức tn') || c.includes('tiền bh') || c.includes('quy đổi')) idx.limit = cellIdx;
                             else idx.scope = cellIdx;
                         }
                         // Tên người được BH
-                        else if (c.includes('bảohiểm') || c.includes('họtên') || c.includes('đốituợng') || c.includes('ngườithụhưởng')) {
+                        else if (c.includes('bảo hiểm') || c.includes('họ tên') || c.includes('đối tượng') || c.includes('người thụ hưởng')) {
                             if (idx.name === -1) idx.name = cellIdx;
                         }
                     });
@@ -20672,13 +20672,20 @@ var Contracts = {
                     }
                     
                     if (currentPerson) {
-                        // Logic nhận diện phạm vi linh hoạt hơn
-                        var isScope = scopeText.includes('phạmvi');
-                        if (isScope) {
-                            if (scopeText.includes('a')) currentPerson.lvlA = limitVal;
-                            else if (scopeText.includes('b')) currentPerson.lvlB = limitVal;
-                            else if (scopeText.includes('c')) currentPerson.lvlC = limitVal;
-                            else if (scopeText.includes('d')) currentPerson.lvlD = limitVal;
+                        // Logic nhận diện phạm vi chính xác hơn (tránh chữ 'b' trong 'bảo hiểm')
+                        // Tìm ký tự A, B, C, D đứng sau 'phạm vi'
+                        var m = scopeText.match(/phạmvi.*?\b([abcd])\b/);
+                        if (!m) {
+                            // Thử tìm theo định dạng 'phạm vi a:', 'phạm vi b:'...
+                            m = scopeText.match(/phạmvi.*?([abcd])[:\s]/);
+                        }
+                        
+                        if (m) {
+                            var letter = m[1];
+                            if (letter === 'a') currentPerson.lvlA = limitVal;
+                            else if (letter === 'b') currentPerson.lvlB = limitVal;
+                            else if (letter === 'c') currentPerson.lvlC = limitVal;
+                            else if (letter === 'd') currentPerson.lvlD = limitVal;
                         }
                     }
                 });
