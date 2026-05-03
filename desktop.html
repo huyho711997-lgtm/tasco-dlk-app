@@ -17272,7 +17272,12 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
 
     // 4. Hàm Xóa ảnh
     deleteImage(url, e) {
-        e.stopPropagation();
+        if (e) e.stopPropagation();
+        
+        // Capture the target before async
+        const btn = e ? e.currentTarget : null;
+        const item = btn ? btn.closest('.hc-img-item-animate') : null;
+
         Swal.fire({
             title: 'Xóa ảnh này?', icon: 'warning', showCancelButton: true,
             confirmButtonColor: '#ef4444', confirmButtonText: 'Xóa', cancelButtonText: 'Hủy',
@@ -17281,17 +17286,19 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             if (!r.isConfirmed) return;
 
             let currentImgs = [];
+            let rec = null;
             if (this._currentId) {
-                const rec = this._data.find(x => x.id === this._currentId) || {};
-                currentImgs = (rec.images || []).filter(i => i !== url);
+                rec = this._data.find(x => x.id === this._currentId);
+                if (rec) {
+                    rec.images = (rec.images || []).filter(i => i !== url);
+                    currentImgs = rec.images;
+                }
             } else {
                 this._tempImages = (this._tempImages || []).filter(i => i !== url);
                 currentImgs = this._tempImages;
             }
 
             // Hiệu ứng xóa chuyên nghiệp
-            const btn = e.currentTarget;
-            const item = btn.closest('.hc-img-item-animate');
             if (item) {
                 // Thêm lớp phủ mờ và spinner trong khi chờ DB xóa
                 const overlay = document.createElement('div');
