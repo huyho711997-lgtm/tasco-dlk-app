@@ -2682,6 +2682,7 @@ textarea.inp { resize:vertical; }
                 <thead style="position:sticky;top:0;z-index:5;">
                   <tr style="background:#f8fafc;border-bottom:1.5px solid #e2e8f0;">
                     <th style="padding:8px 12px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:center;width:44px;">#</th>
+                    <th style="padding:8px 12px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Số GCN</th>
                     <th style="padding:8px 12px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Họ và tên</th>
                     <th style="padding:8px 12px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Ngày sinh</th>
                     <th style="padding:8px 12px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Lớp / Khối</th>
@@ -2748,6 +2749,7 @@ textarea.inp { resize:vertical; }
               <thead>
                 <tr style="background:#f8fafc;border-bottom:1.5px solid #e2e8f0;">
                   <th style="padding:9px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:center;width:44px;">#</th>
+                  <th style="padding:9px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Số GCN</th>
                   <th style="padding:9px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Họ và tên</th>
                   <th style="padding:9px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Ngày sinh</th>
                   <th style="padding:9px 14px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;text-align:left;">Lớp / Khối</th>
@@ -19933,6 +19935,7 @@ var Contracts = {
         this.render();
     },
 
+
     toggleSelect(e, id, index) {
         if (!this._selectMode) return;
         if (e && e.shiftKey) e.preventDefault();
@@ -20193,7 +20196,13 @@ var Contracts = {
                 document.getElementById('ct-f-feeConv').value = c.feeConv ? this._fmtNum(c.feeConv) : '';
                 
                 document.getElementById('ct-f-note').value = c.note||'';
-                this._stuRows = Object.values(c.students||{}).map(s=>({name:s.name||'',dob:s.dob||'',cls:s.cls||'',address:s.address||''}));
+                this._stuRows = Object.values(c.students||{}).map(s=>({
+                    gcn: s.gcn||'',
+                    name: s.name||'',
+                    dob: s.dob||'',
+                    cls: s.cls||'',
+                    address: s.address||''
+                }));
             }
         } else {
             document.getElementById('ct-m-title').textContent = 'Thêm hợp đồng mới';
@@ -20242,7 +20251,17 @@ var Contracts = {
         };
         // Học sinh
         var students = {};
-        this._stuRows.forEach((s,i)=>{ if(s.name.trim()) students['s_'+i]={name:s.name.trim(),dob:s.dob||'',cls:s.cls||'',address:s.address||''}; });
+        this._stuRows.forEach((s,i)=>{ 
+            if(s.name.trim()) {
+                students['s_'+i] = {
+                    gcn: (s.gcn||'').trim(),
+                    name: s.name.trim(),
+                    dob: s.dob||'',
+                    cls: s.cls||'',
+                    address: s.address||''
+                };
+            }
+        });
         payload.students = students;
 
         Swal.fire({title:'Đang lưu...',allowOutsideClick:false,didOpen:()=>Swal.showLoading(),customClass:{popup:'rnd'}});
@@ -20310,6 +20329,7 @@ var Contracts = {
         empty.style.display='none';
         tbody.innerHTML = list.map((s,i)=>`<tr style="border-bottom:1px solid #f1f5f9;transition:background .08s;" onmouseover="this.style.background='#f0fdfa'" onmouseout="this.style.background='transparent'">
             <td style="padding:10px 14px;text-align:center;font-size:12px;font-weight:700;color:#94a3b8;">${i+1}</td>
+            <td style="padding:10px 14px;font-size:12px;font-weight:800;color:#4f46e5;font-family:monospace;">${s.gcn||'—'}</td>
             <td style="padding:10px 14px;font-size:13px;font-weight:700;color:#0f172a;">${s.name||'—'}</td>
             <td style="padding:10px 14px;font-size:12px;color:#475569;">${s.dob||'—'}</td>
             <td style="padding:10px 14px;font-size:12px;color:#475569;">${s.cls||'—'}</td>
@@ -20346,16 +20366,17 @@ var Contracts = {
         if(empty) empty.style.display='none';
         tbody.innerHTML = this._stuRows.map((s,i)=>`<tr style="border-bottom:1px solid #f1f5f9;">
             <td style="padding:6px 12px;text-align:center;font-size:11px;color:#94a3b8;font-weight:700;">${i+1}</td>
+            <td style="padding:6px 8px;"><input value="${s.gcn||''}" oninput="Contracts._stuRows[${i}].gcn=this.value" placeholder="Số GCN..." class="inp font-mono" style="width:110px;"></td>
             <td style="padding:6px 8px;"><input value="${s.name}" oninput="Contracts._stuRows[${i}].name=this.value" placeholder="Họ tên..." class="inp" style="min-width:160px;"></td>
-            <td style="padding:6px 8px;"><input value="${s.dob}" oninput="Contracts._stuRows[${i}].dob=this.value" placeholder="DD/MM/YYYY" class="inp" style="width:120px;"></td>
-            <td style="padding:6px 8px;"><input value="${s.cls}" oninput="Contracts._stuRows[${i}].cls=this.value" placeholder="12A1..." class="inp" style="width:90px;"></td>
+            <td style="padding:6px 8px;"><input value="${s.dob}" oninput="Contracts._stuRows[${i}].dob=this.value" placeholder="DD/MM/YYYY" class="inp" style="width:110px;"></td>
+            <td style="padding:6px 8px;"><input value="${s.cls}" oninput="Contracts._stuRows[${i}].cls=this.value" placeholder="12A1..." class="inp" style="width:80px;"></td>
             <td style="padding:6px 8px;"><input value="${s.address}" oninput="Contracts._stuRows[${i}].address=this.value" placeholder="Địa chỉ..." class="inp" style="min-width:180px;"></td>
             <td style="padding:6px 8px;text-align:center;"><button onclick="Contracts._removeStu(${i})" style="width:24px;height:24px;border-radius:6px;border:1.5px solid #fecdd3;background:#fff1f2;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:#e11d48;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></td>
         </tr>`).join('');
     },
 
     addStuRow() {
-        this._stuRows.push({name:'',dob:'',cls:'',address:''});
+        this._stuRows.push({gcn:'', name:'', dob:'', cls:'', address:''});
         this._renderStuRows();
         // Scroll xuống cuối
         var tbody = document.getElementById('ct-stu-tbody');
@@ -20376,13 +20397,14 @@ var Contracts = {
                     var ws = wb.Sheets[wb.SheetNames[0]];
                     var rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
                     // Bỏ header, đọc từ dòng 2
-                    var newRows = rows.slice(1).filter(r=>r[0]||r[1]).map(r=>({
-                        name: String(r[1]||r[0]||'').trim(),
-                        dob:  String(r[2]||'').trim(),
-                        cls:  String(r[3]||'').trim(),
-                        address: String(r[4]||'').trim()
+                    var newRows = rows.slice(1).filter(r=>r[1]||r[2]).map(r=>({
+                        gcn:  String(r[1]||'').trim(),
+                        name: String(r[2]||r[1]||'').trim(),
+                        dob:  String(r[3]||'').trim(),
+                        cls:  String(r[4]||'').trim(),
+                        address: String(r[5]||'').trim()
                     })).filter(r=>r.name);
-                    if (!newRows.length) { Swal.fire({icon:'warning',title:'Không đọc được dữ liệu',text:'File cần có cột: STT | HỌ TÊN | NGÀY SINH | LỚP | ĐỊA CHỈ',customClass:{popup:'rnd'}}); return; }
+                    if (!newRows.length) { Swal.fire({icon:'warning',title:'Không đọc được dữ liệu',text:'File cần có cột: STT | SỐ GCN | HỌ TÊN | NGÀY SINH | LỚP | ĐỊA CHỈ',customClass:{popup:'rnd'}}); return; }
                     this._stuRows = [...this._stuRows, ...newRows];
                     this._renderStuRows();
                     Toast.fire({icon:'success',title:`Đã thêm ${newRows.length} học sinh`});
@@ -20396,9 +20418,9 @@ var Contracts = {
     /* ── IMPORT EXCEL NGOÀI MÀNG HÌNH CHÍNH ── */
     openImportExcel() {
         Swal.fire({
-            title:'Import danh sách học sinh',
-            html:`<p style="font-size:13px;color:#475569;margin-bottom:12px;">File Excel cần có các cột theo thứ tự:<br><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:12px;">STT | HỌ TÊN | NGÀY SINH | LỚP | ĐỊA CHỈ</code></p>
-            <p style="font-size:12px;color:#94a3b8;">Học sinh sẽ được import vào hợp đồng đang chọn (hoặc tạo mới).</p>`,
+            title:'Import danh sách người được bảo hiểm',
+            html:`<p style="font-size:13px;color:#475569;margin-bottom:12px;">File Excel cần có các cột theo thứ tự:<br><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:12px;">STT | SỐ GCN | HỌ TÊN | NGÀY SINH | LỚP | ĐỊA CHỈ</code></p>
+            <p style="font-size:12px;color:#94a3b8;">Dữ liệu sẽ được import vào danh sách đang hiển thị.</p>`,
             icon:'info',
             confirmButtonText:'Tải file mẫu',
             showCancelButton:true,
@@ -20411,11 +20433,11 @@ var Contracts = {
 
     _downloadStuTemplate() {
         if(typeof XLSX==='undefined') return;
-        var data=[['STT','HỌ VÀ TÊN','NGÀY SINH','LỚP/KHỐI','ĐỊA CHỈ'],
-            [1,'Nguyễn Văn An','15/03/2010','10A1','Buôn Ma Thuột, Đắk Lắk'],
-            [2,'Trần Thị Bình','22/07/2011','9B','Cư M\'gar, Đắk Lắk']];
+        var data=[['STT','SỐ GCN','HỌ VÀ TÊN','NGÀY SINH','LỚP/KHỐI','ĐỊA CHỈ'],
+            [1,'A052512/002066','Phạm Thị Tuyết','15/03/2010','10A1','Buôn Ma Thuột, Đắk Lắk'],
+            [2,'A052512/022250','Phan Thị Lệ','22/07/2011','9B','Cư M\'gar, Đắk Lắk']];
         var ws=XLSX.utils.aoa_to_sheet(data);
-        ws['!cols']=[{wch:6},{wch:30},{wch:14},{wch:12},{wch:35}];
+        ws['!cols']=[{wch:6},{wch:18},{wch:30},{wch:14},{wch:12},{wch:35}];
         var wb=XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb,ws,'DanhSachHS');
         XLSX.writeFile(wb,'Mau_DanhSachHocSinh.xlsx');
