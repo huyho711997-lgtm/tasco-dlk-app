@@ -15539,7 +15539,6 @@ const HumanClaims = {
         const actionButtons = [
             document.getElementById('btn-hc-ocr-medical'),
             document.getElementById('btn-hc-ocr-cccd'),
-            document.getElementById('btn-hc-upload-imgs'),
             document.getElementById('btn-hc-save'),
             document.getElementById('btn-hc-save-close'),
             document.getElementById('btn-hc-manual-select'),
@@ -17079,7 +17078,6 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
 
     // 2. Hàm Tải ảnh lên Cloudinary
     async uploadImages(e) {
-        if (this._isLocked) return;
         const files = Array.from(e.target.files);
         e.target.value = '';
         if(!files.length) return;
