@@ -20547,22 +20547,39 @@ var Contracts = {
                 var workbook = XLSX.read(data, {type: 'array'});
                 var firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 
-                // Đọc dưới dạng mảng 2 chiều để xử lý logic đa dòng
                 var rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: "" });
-                var dataRows = rows.filter(r => r.some(cell => String(cell).trim() !== "")); // Loại bỏ dòng hoàn toàn trống
                 
-                // Tìm dòng tiêu đề (thường chứa chữ "Số HĐ" hoặc "Hợp đồng")
-                var headerIdx = dataRows.findIndex(r => r.some(cell => String(cell).toLowerCase().includes('hợp đồng') || String(cell).toLowerCase().includes('gcn')));
-                if (headerIdx !== -1) dataRows = dataRows.slice(headerIdx + 1);
+                // 1. Tìm dòng tiêu đề và xác định vị trí các cột
+                var headerIdx = -1;
+                var idx = { hd: 0, gcn: 1, name: 2, limit: 3, scope: 4 }; // Mặc định theo file mẫu
 
-                var updates = {};
-                var countSuccess = 0;
-                var notFoundContracts = new Set();
+                for (let i = 0; i < Math.min(rows.length, 20); i++) {
+                    let r = rows[i];
+                    let isHeader = r.some(cell => {
+                        let c = String(cell).toLowerCase();
+                        return c.includes('hợp đồng') || c.includes('gcn') || c.includes('đối tượng bảo hiểm');
+                    });
+                    if (isHeader) {
+                        headerIdx = i;
+                        // Cố gắng bắt chính xác index dựa trên từ khóa
+                        r.forEach((cell, cellIdx) => {
+                            let c = String(cell).toLowerCase();
+                            if (c.includes('hợp đồng')) idx.hd = cellIdx;
+                            else if (c.includes('gcn')) idx.gcn = cellIdx;
+                            else if (c.includes('đối tượng bảo hiểm')) idx.name = cellIdx;
+                            else if (c.includes('mức tn') || c.includes('số tiền bh')) idx.limit = cellIdx;
+                            else if (c.includes('phạm vi')) idx.scope = cellIdx;
+                        });
+                        break;
+                    }
+                }
+
+                var dataRows = headerIdx !== -1 ? rows.slice(headerIdx + 1) : rows;
+                dataRows = dataRows.filter(r => r.some(cell => String(cell).trim() !== ""));
 
                 var parseMoney = (val) => {
                     if (val === undefined || val === null || val === "") return null;
                     if (typeof val === 'number') return Math.round(val);
-                    // Xử lý định dạng VN: 8.000.000,00 -> 8000000
                     var s = String(val).replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
                     var num = parseFloat(s);
                     return isNaN(num) ? null : Math.round(num);
@@ -20572,20 +20589,20 @@ var Contracts = {
                 var currentPerson = null;
                 var lastHdNo = "";
 
-                // Giai đoạn 1: Gom nhóm dữ liệu đa dòng thành danh sách đối tượng người ĐBH
+                // Giai đoạn 1: Gom nhóm dữ liệu đa dòng
                 dataRows.forEach(r => {
-                    var hdNo = String(r[0] || '').trim();
-                    var gcn = String(r[1] || '').trim();
-                    var rawName = String(r[2] || '').trim();
-                    var limitVal = parseMoney(r[3]);
-                    var scopeText = String(r[4] || '').toLowerCase();
+                    var hdNo = String(r[idx.hd] || '').trim();
+                    var gcn = String(r[idx.gcn] || '').trim();
+                    var rawName = String(r[idx.name] || '').trim();
+                    var limitVal = parseMoney(r[idx.limit]);
+                    var scopeText = String(r[idx.scope] || '').toLowerCase();
 
-                    // Nếu có Tên mới hoặc GCN mới -> Bắt đầu một người mới
-                    if (rawName || gcn) {
+                    // Nếu có Tên mới hoặc GCN mới hoặc Số HĐ mới -> Coi như người mới
+                    // Lưu ý: Trong file mẫu đa dòng, các dòng phụ sẽ có Name và GCN trống
+                    if (rawName || gcn || (hdNo && hdNo !== lastHdNo)) {
                         if (hdNo) lastHdNo = hdNo;
                         
                         var name = rawName;
-                        // Tách tên từ [Mã] Tên
                         var nameMatch = rawName.match(/\]\s*(.*)/);
                         if (nameMatch && nameMatch[1]) name = nameMatch[1].trim();
 
@@ -20607,34 +20624,29 @@ var Contracts = {
                     }
                 });
 
-                // Giai đoạn 2: Ánh xạ vào Hợp đồng
+                // Giai đoạn 2: Ánh xạ và Update
+                var updates = {};
+                var countSuccess = 0;
+                var notFoundContracts = new Set();
                 var contractLimitUpdates = {}; 
 
                 people.forEach(p => {
                     if (!p.hdNo) return;
-                    // Tìm khớp không phân biệt hoa thường và khoảng trắng
                     var contract = this._data.find(c => 
                         String(c.no || '').trim().toLowerCase() === String(p.hdNo).toLowerCase()
                     );
                     
                     if (contract) {
                         if (!contractLimitUpdates[contract._id]) {
-                            contractLimitUpdates[contract._id] = {
-                                lvlA: p.lvlA, lvlB: p.lvlB, lvlC: p.lvlC, lvlD: p.lvlD
-                            };
+                            contractLimitUpdates[contract._id] = { lvlA: p.lvlA, lvlB: p.lvlB, lvlC: p.lvlC, lvlD: p.lvlD };
                         }
 
                         var stuKey = p.gcn ? p.gcn.replace(/[\.\#\$\/\[\]]/g, '_') : ('s_' + Math.random().toString(36).substr(2, 5));
                         var path = `Contracts/${contract._id}/students/${stuKey}`;
                         
                         updates[path] = {
-                            name: p.name,
-                            gcn: p.gcn,
-                            rawInfo: p.rawInfo,
-                            lvlA: p.lvlA,
-                            lvlB: p.lvlB,
-                            lvlC: p.lvlC,
-                            lvlD: p.lvlD
+                            name: p.name, gcn: p.gcn, rawInfo: p.rawInfo,
+                            lvlA: p.lvlA, lvlB: p.lvlB, lvlC: p.lvlC, lvlD: p.lvlD
                         };
                         countSuccess++;
                     } else {
@@ -20642,7 +20654,6 @@ var Contracts = {
                     }
                 });
 
-                // Cập nhật mức TN vào Hợp đồng
                 for (let cid in contractLimitUpdates) {
                     const l = contractLimitUpdates[cid];
                     if (l.lvlA !== null) updates[`Contracts/${cid}/lvlA`] = l.lvlA;
@@ -20652,27 +20663,24 @@ var Contracts = {
                 }
 
                 if (countSuccess === 0) {
-                    var errorMsg = notFoundContracts.size > 0 
-                        ? `Không tìm thấy ${notFoundContracts.size} Số Hợp đồng trong hệ thống. Ví dụ: <br><b class="text-rose-500">${Array.from(notFoundContracts).slice(0, 3).join(', ')}</b>`
-                        : `File Excel không có dữ liệu hợp lệ hoặc sai cấu trúc cột.`;
-                        
-                    Swal.fire({icon: 'error', title: 'Không nạp được dữ liệu', html: errorMsg, customClass: {popup:'rnd'}});
-                    return;
+                    var detailErr = notFoundContracts.size > 0 
+                        ? `Không tìm thấy ${notFoundContracts.size} Số HĐ trong hệ thống (Ví dụ: ${Array.from(notFoundContracts)[0]})`
+                        : `Không tìm thấy dữ liệu hợp lệ trong file (Số HĐ hoặc Tên trống).`;
+                    throw new Error(detailErr);
                 }
 
                 Swal.fire({ title: 'Đang đẩy lên máy chủ...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass: {popup:'rnd'} });
                 await db.ref().update(updates);
                 
                 Swal.fire({
-                    icon: 'success', 
-                    title: 'Hoàn tất!', 
-                    html: `Đã import <b>${countSuccess}</b> người và cập nhật mức TN cho <b>${Object.keys(contractLimitUpdates).length}</b> hợp đồng.`, 
+                    icon: 'success', title: 'Hoàn tất!', 
+                    html: `Đã import thành công <b>${countSuccess}</b> người.<br>Cập nhật mức TN cho <b>${Object.keys(contractLimitUpdates).length}</b> hợp đồng.`,
                     customClass: {popup:'rnd'}
                 });
 
             } catch (err) {
                 console.error("Lỗi Import:", err);
-                Swal.fire({icon: 'error', title: 'Lỗi xử lý file', text: err.message, customClass: {popup:'rnd'}});
+                Swal.fire({icon: 'error', title: 'Không nạp được dữ liệu', html: `<p style="font-size:13px;">${err.message}</p>`, customClass: {popup:'rnd'}});
             }
         };
         reader.readAsArrayBuffer(file);
