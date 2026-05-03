@@ -16773,6 +16773,7 @@ QUAN TRỌNG:
                 // ==========================================
                 // BƯỚC 3: MERGE KẾT QUẢ VÀO HẠNG MỤC GĐ & LƯU FIREBASE
                 // ==========================================
+                
                 const freshSnap = await db.ref(`Workstation/${this._id}/damageItems`).once('value');
                 const freshList = freshSnap.val() || item.damageItems || [];
                 let damageItems = JSON.parse(JSON.stringify(freshList));
