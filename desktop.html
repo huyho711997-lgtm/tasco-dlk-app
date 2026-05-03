@@ -2424,44 +2424,39 @@ textarea.inp { resize:vertical; }
           </div>
           </div>
 
-          <!-- TAB: HISTORY (Premium Dashboard Section) -->
-          <div id="hc-tab-history" class="hidden animate__animated animate__fadeIn animate__faster h-full flex flex-col">
+          <!-- TAB: HISTORY (Refined Dashboard) -->
+          <div id="hc-tab-history" class="hidden animate__animated animate__fadeIn animate__faster h-full flex flex-col gap-5">
             <!-- Header Stats -->
-            <div class="grid grid-cols-12 gap-6 mb-8">
-              <div class="col-span-8 bg-white rounded-3xl border border-slate-200 p-8 shadow-sm flex items-center justify-between relative overflow-hidden">
-                <div class="absolute right-0 top-0 w-48 h-48 bg-rose-50 rounded-full -mr-24 -mt-24 opacity-50"></div>
+            <div class="flex items-stretch gap-4 shrink-0">
+              <div class="flex-1 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex items-center justify-between relative overflow-hidden">
+                <div class="absolute right-0 top-0 w-32 h-32 bg-rose-50 rounded-full -mr-16 -mt-16 opacity-40"></div>
                 <div class="relative z-10">
-                  <h3 class="text-2xl font-black text-slate-800 tracking-tight mb-1">Tổng quan lịch sử</h3>
-                  <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Dữ liệu bồi thường tích lũy theo số GCN</p>
+                  <h3 class="text-base font-black text-slate-800 tracking-tight">Tổng quan lịch sử</h3>
+                  <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Dữ liệu tích lũy theo GCN</p>
                 </div>
-                <div class="flex items-center gap-10 relative z-10">
+                <div class="flex items-center gap-8 relative z-10">
                   <div class="text-right">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Tổng chi trả</p>
-                    <p id="hc-history-total-amount" class="text-3xl font-black text-rose-600 tracking-tighter">0 đ</p>
+                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Tổng chi trả</p>
+                    <p id="hc-history-total-amount" class="text-xl font-black text-rose-600 tracking-tight">0 đ</p>
                   </div>
-                  <div class="w-px h-12 bg-slate-100"></div>
+                  <div class="w-px h-8 bg-slate-100"></div>
                   <div class="text-right">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Số vụ bồi thường</p>
-                    <div class="flex items-center justify-end gap-2">
-                        <p id="hc-history-total-count" class="text-3xl font-black text-slate-800 tracking-tighter">0 vụ</p>
-                        <div class="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                    </div>
+                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Số vụ</p>
+                    <p id="hc-history-total-count" class="text-xl font-black text-slate-800 tracking-tight">0 vụ</p>
                   </div>
                 </div>
               </div>
               
-              <div class="col-span-4 bg-indigo-600 rounded-3xl p-8 shadow-lg shadow-indigo-100 text-white relative overflow-hidden flex flex-col justify-center">
-                <div class="absolute left-0 bottom-0 w-32 h-32 bg-white/10 rounded-full -ml-16 -mb-16"></div>
-                <p class="text-[10px] font-black uppercase tracking-[0.2em] mb-3 opacity-80">Phân tích rủi ro</p>
-                <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center border border-white/20 backdrop-blur-sm">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+              <div id="hc-risk-box" class="w-64 bg-indigo-600 rounded-2xl p-5 shadow-lg shadow-indigo-100 text-white relative overflow-hidden flex flex-col justify-center transition-colors duration-500">
+                <div class="absolute left-0 bottom-0 w-20 h-20 bg-white/10 rounded-full -ml-10 -mb-10"></div>
+                <p class="text-[9px] font-black uppercase tracking-widest mb-2 opacity-80">Phân tích rủi ro</p>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center border border-white/20 backdrop-blur-sm">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                     </div>
                     <div>
-                        <p class="text-sm font-bold opacity-90 leading-tight">Mức độ rủi ro dựa trên tần suất</p>
-                        <p id="hc-risk-level" class="text-lg font-black uppercase tracking-tight mt-0.5">Bình thường</p>
+                        <p class="text-[11px] font-bold opacity-90 leading-none">Mức độ rủi ro</p>
+                        <p id="hc-risk-level" class="text-sm font-black uppercase tracking-tight mt-1">Bình thường</p>
                     </div>
                 </div>
               </div>
@@ -2469,7 +2464,7 @@ textarea.inp { resize:vertical; }
 
             <!-- List Section -->
             <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 -mr-2">
-                <div id="hc-history-full-list" class="grid grid-cols-2 gap-6"></div>
+                <div id="hc-history-full-list" class="grid grid-cols-2 gap-4"></div>
             </div>
           </div>
         </div>
@@ -15521,17 +15516,17 @@ const HumanClaims = {
 
         if (!history || history.length === 0) {
             listEl.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-32 text-slate-300 col-span-2">
-                  <div class="w-32 h-32 bg-slate-50 rounded-full flex items-center justify-center mb-8 border border-slate-100 shadow-inner">
-                    <svg class="w-16 h-16 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div class="flex flex-col items-center justify-center py-20 text-slate-300 col-span-2">
+                  <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-5 border border-slate-100 shadow-inner">
+                    <svg class="w-10 h-10 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                   </div>
-                  <p class="text-lg font-black text-slate-400">Chưa có dữ liệu lịch sử</p>
-                  <p class="text-xs font-bold text-slate-300 mt-2">Người này chưa có hồ sơ bồi thường nào trước đó trong hệ thống.</p>
+                  <p class="text-base font-black text-slate-400">Chưa có dữ liệu lịch sử</p>
+                  <p class="text-[11px] font-bold text-slate-300 mt-1">Không tìm thấy hồ sơ bồi thường cũ cho GCN này.</p>
                 </div>`;
             totalAmountEl.textContent = '0 đ';
             totalCountEl.textContent = '0 vụ';
             badgeEl.classList.add('hidden');
-            if (document.getElementById('hc-risk-level')) document.getElementById('hc-risk-level').textContent = 'Bình thường';
+            if (document.getElementById('hc-risk-level')) document.getElementById('hc-risk-level').textContent = 'Thấp';
             return;
         }
 
@@ -15545,80 +15540,70 @@ const HumanClaims = {
 
         // Tính toán mức độ rủi ro
         const riskLevelEl = document.getElementById('hc-risk-level');
-        if (riskLevelEl) {
+        const riskBoxEl = document.getElementById('hc-risk-box');
+        if (riskLevelEl && riskBoxEl) {
+            riskBoxEl.classList.remove('bg-indigo-600', 'bg-rose-600', 'bg-amber-500');
             if (history.length >= 5) {
                 riskLevelEl.textContent = 'Rất cao';
-                riskLevelEl.parentElement.parentElement.classList.replace('bg-indigo-600', 'bg-rose-600');
+                riskBoxEl.classList.add('bg-rose-600');
             } else if (history.length >= 3) {
                 riskLevelEl.textContent = 'Trung bình';
-                riskLevelEl.parentElement.parentElement.classList.replace('bg-indigo-600', 'bg-amber-500');
+                riskBoxEl.classList.add('bg-amber-500');
             } else {
                 riskLevelEl.textContent = 'Thấp';
-                riskLevelEl.parentElement.parentElement.className = 'col-span-4 bg-indigo-600 rounded-3xl p-8 shadow-lg shadow-indigo-100 text-white relative overflow-hidden flex flex-col justify-center';
+                riskBoxEl.classList.add('bg-indigo-600');
             }
         }
 
         listEl.innerHTML = history.map(r => `
-            <div class="group bg-white border border-slate-200 rounded-[1.5rem] p-6 shadow-sm hover:shadow-xl hover:border-indigo-200 transition-all duration-300 relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-50/30 rounded-full -mr-16 -mt-16 transition-all group-hover:scale-150"></div>
+            <div class="group bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-lg hover:border-indigo-200 transition-all duration-300 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-50/30 rounded-full -mr-12 -mt-12 transition-all group-hover:scale-150"></div>
                 
                 <div class="relative z-10">
-                    <div class="flex items-start justify-between mb-6">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
-                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-indigo-100">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             </div>
                             <div>
-                                <h4 class="text-base font-black text-slate-800 uppercase tracking-tight leading-none mb-1.5">${r.claimNo || 'CHƯA CÓ SỐ HSBT'}</h4>
+                                <h4 class="text-sm font-black text-slate-800 uppercase tracking-tight mb-1">${r.claimNo || 'HSBT'}</h4>
                                 <div class="flex items-center gap-2">
-                                    <span class="px-2.5 py-0.5 bg-slate-100 text-slate-500 rounded-md text-[9px] font-black uppercase tracking-wider border border-slate-200/50">ID: ${r.id.substring(r.id.length - 6)}</span>
-                                    <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
-                                    <span class="text-[10px] font-bold text-slate-400">${moment(r.createdAt).format('DD/MM/YYYY')}</span>
+                                    <span class="text-[9px] font-bold text-slate-400">${moment(r.createdAt).format('DD/MM/YY')}</span>
                                 </div>
                             </div>
                         </div>
                         <div class="text-right">
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 shadow-sm border border-white/20" 
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest mb-1 shadow-sm border border-white/20" 
                                   style="background:${this.STATUS_LABELS[r.status]?.color}; color:#fff">
-                                <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
                                 ${this.STATUS_LABELS[r.status]?.text || 'Mới'}
                             </span>
-                            <p class="text-2xl font-black text-slate-900 tracking-tighter">${Number(r.totalAmount || 0).toLocaleString('vi-VN')}<span class="text-xs text-slate-400 ml-1">VND</span></p>
+                            <p class="text-lg font-black text-slate-900 tracking-tight">${Number(r.totalAmount || 0).toLocaleString('vi-VN')}<span class="text-[10px] text-slate-400 ml-0.5 font-bold">đ</span></p>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-4 gap-6 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                        <div class="space-y-1">
-                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">Ngày tai nạn</p>
-                            <div class="flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                <span class="text-xs font-black text-slate-700">${r.accDate ? moment(r.accDate).format('DD/MM/YYYY') : '—'}</span>
-                            </div>
+                    <div class="grid grid-cols-3 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 mb-3">
+                        <div class="space-y-0.5">
+                            <p class="text-[8px] font-black text-slate-400 uppercase tracking-wider">Tai nạn</p>
+                            <p class="text-[11px] font-black text-slate-700">${r.accDate ? moment(r.accDate).format('DD/MM/YY') : '—'}</p>
                         </div>
-                        <div class="space-y-1">
-                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">Loại tổn thất</p>
-                            <div class="flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                <span class="text-xs font-black text-slate-700">${r.lossType || '—'}</span>
-                            </div>
+                        <div class="space-y-0.5">
+                            <p class="text-[8px] font-black text-slate-400 uppercase tracking-wider">Loại</p>
+                            <p class="text-[11px] font-black text-slate-700 truncate">${r.lossType || '—'}</p>
                         </div>
-                        <div class="col-span-2 space-y-1 border-l border-slate-200 pl-6">
-                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">Nơi điều trị</p>
-                            <div class="flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5"/></svg>
-                                <span class="text-xs font-black text-slate-700 truncate" title="${r.hospitalName || ''}">${r.hospitalName || '—'}</span>
-                            </div>
+                        <div class="space-y-0.5 border-l border-slate-200 pl-3">
+                            <p class="text-[8px] font-black text-slate-400 uppercase tracking-wider">Nơi điều trị</p>
+                            <p class="text-[11px] font-black text-slate-700 truncate" title="${r.hospitalName || ''}">${r.hospitalName || '—'}</p>
                         </div>
                     </div>
 
-                    <div class="mt-4 flex items-center justify-between px-1">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            <span class="text-[11px] font-bold text-slate-500 italic truncate max-w-[400px]" title="${r.injuryDesc || ''}">${r.injuryDesc || '—'}</span>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-1.5 overflow-hidden">
+                            <svg class="w-3 h-3 text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <span class="text-[10px] font-bold text-slate-500 italic truncate" title="${r.injuryDesc || ''}">${r.injuryDesc || '—'}</span>
                         </div>
                         <button onclick="event.stopPropagation(); HumanClaims.showHistoryDetail('${r.id}')" 
-                                class="flex items-center gap-1.5 px-4 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-md active:scale-95">
-                            Chi tiết <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M9 5l7 7-7 7"/></svg>
+                                class="shrink-0 px-3 py-1.5 bg-slate-900 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-md active:scale-95 ml-3">
+                            Chi tiết
                         </button>
                     </div>
                 </div>
