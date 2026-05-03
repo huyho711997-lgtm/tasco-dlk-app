@@ -20588,7 +20588,7 @@ var Contracts = {
 
                 // 1. Tìm dòng tiêu đề
                 var headerIdx = -1;
-                var idx = { hd: -1, gcn: -1, name: -1, limit: -1, scope: -1 };
+                var idx = { hd: -1, gcn: -1, name: -1, limit: -1, scope: -1, lvlA: -1, lvlB: -1, lvlC: -1, lvlD: -1 };
 
                 for (let i = 0; i < Math.min(rows.length, 50); i++) {
                     let r = rows[i];
@@ -20606,7 +20606,12 @@ var Contracts = {
                         else if (c.includes('số gcn') || c.includes('sốgcn') || c.includes('gcn') || c.includes('giấy chứng nhận')) {
                             idx.gcn = cellIdx;
                         }
-                        // Phạm vi & Mức tiền
+                        // Kiểm tra các cột mức A, B, C, D trực tiếp (Cấu trúc phẳng)
+                        else if (c.includes('phạm vi bảo hiểm a')) idx.lvlA = cellIdx;
+                        else if (c.includes('phạm vi bảo hiểm b')) idx.lvlB = cellIdx;
+                        else if (c.includes('phạm vi bảo hiểm c')) idx.lvlC = cellIdx;
+                        else if (c.includes('phạm vi bảo hiểm d')) idx.lvlD = cellIdx;
+                        // Phạm vi & Mức tiền (Cấu trúc dọc/gộp dòng)
                         else if (c.includes('phạm vi')) {
                             if (c.includes('mức tn') || c.includes('tiền bh') || c.includes('quy đổi')) idx.limit = cellIdx;
                             else idx.scope = cellIdx;
@@ -20629,9 +20634,7 @@ var Contracts = {
                     if (idx.hd !== -1) found.push("Hợp đồng");
                     if (idx.gcn !== -1) found.push("GCN");
                     if (idx.name !== -1) found.push("Tên");
-                    if (idx.limit !== -1) found.push("Mức TN");
-                    if (idx.scope !== -1) found.push("Phạm vi");
-                    throw new Error(`Thiếu cột tiêu đề. Đã tìm thấy: <b>${found.join(', ') || 'Trống'}</b>.<br>Cần có ít nhất: Hợp đồng, GCN/Tên.`);
+                    throw new Error(`Thiếu cột tiêu đề. Đã tìm thấy: <b>${found.join(', ') || 'Trống'}</b>.<br>Cần ít nhất: Hợp đồng, GCN/Tên.`);
                 }
 
                 var dataRows = rows.slice(headerIdx + 1);
@@ -20646,46 +20649,53 @@ var Contracts = {
                 };
 
                 var people = [];
-                var currentPerson = null;
                 var lastHdNo = "";
+                var currentPerson = null;
 
                 dataRows.forEach(r => {
                     var hdNo = idx.hd !== -1 ? String(r[idx.hd] || '').trim() : "";
                     var gcn = idx.gcn !== -1 ? String(r[idx.gcn] || '').trim() : "";
                     var rawName = idx.name !== -1 ? String(r[idx.name] || '').trim() : "";
-                    var limitVal = idx.limit !== -1 ? parseMoney(r[idx.limit]) : null;
-                    var scopeText = idx.scope !== -1 ? norm(r[idx.scope]) : "";
-
-                    // Nếu có thông tin chính mới -> Người mới
-                    if (rawName || gcn || (hdNo && hdNo !== lastHdNo)) {
-                        if (hdNo) lastHdNo = hdNo;
-                        
-                        var name = rawName;
-                        var nameMatch = rawName.match(/\]\s*(.*)/);
-                        if (nameMatch && nameMatch[1]) name = nameMatch[1].trim();
-
-                        currentPerson = {
-                            hdNo: lastHdNo, gcn: gcn, name: name, rawInfo: rawName,
-                            lvlA: null, lvlB: null, lvlC: null, lvlD: null
-                        };
-                        people.push(currentPerson);
-                    }
                     
-                    if (currentPerson) {
-                        // Logic nhận diện phạm vi chính xác hơn (tránh chữ 'b' trong 'bảo hiểm')
-                        // Tìm ký tự A, B, C, D đứng sau 'phạm vi'
-                        var m = scopeText.match(/phạmvi.*?\b([abcd])\b/);
-                        if (!m) {
-                            // Thử tìm theo định dạng 'phạm vi a:', 'phạm vi b:'...
-                            m = scopeText.match(/phạmvi.*?([abcd])[:\s]/);
+                    var name = rawName;
+                    var nameMatch = rawName.match(/\]\s*(.*)/);
+                    if (nameMatch && nameMatch[1]) name = nameMatch[1].trim();
+
+                    // CHẾ ĐỘ 1: Cấu trúc phẳng (Mỗi người 1 dòng, A B C D là các cột riêng)
+                    if (idx.lvlA !== -1 || idx.lvlB !== -1 || idx.lvlC !== -1 || idx.lvlD !== -1) {
+                        if (hdNo) lastHdNo = hdNo;
+                        people.push({
+                            hdNo: lastHdNo, gcn: gcn, name: name, rawInfo: rawName,
+                            lvlA: idx.lvlA !== -1 ? parseMoney(r[idx.lvlA]) : null,
+                            lvlB: idx.lvlB !== -1 ? parseMoney(r[idx.lvlB]) : null,
+                            lvlC: idx.lvlC !== -1 ? parseMoney(r[idx.lvlC]) : null,
+                            lvlD: idx.lvlD !== -1 ? parseMoney(r[idx.lvlD]) : null
+                        });
+                    } 
+                    // CHẾ ĐỘ 2: Cấu trúc dọc (Gộp dòng, Phạm vi A B C D nằm ở các dòng khác nhau)
+                    else {
+                        var limitVal = idx.limit !== -1 ? parseMoney(r[idx.limit]) : null;
+                        var scopeText = idx.scope !== -1 ? norm(r[idx.scope]) : "";
+
+                        if (rawName || gcn || (hdNo && hdNo !== lastHdNo)) {
+                            if (hdNo) lastHdNo = hdNo;
+                            currentPerson = {
+                                hdNo: lastHdNo, gcn: gcn, name: name, rawInfo: rawName,
+                                lvlA: null, lvlB: null, lvlC: null, lvlD: null
+                            };
+                            people.push(currentPerson);
                         }
                         
-                        if (m) {
-                            var letter = m[1];
-                            if (letter === 'a') currentPerson.lvlA = limitVal;
-                            else if (letter === 'b') currentPerson.lvlB = limitVal;
-                            else if (letter === 'c') currentPerson.lvlC = limitVal;
-                            else if (letter === 'd') currentPerson.lvlD = limitVal;
+                        if (currentPerson) {
+                            var m = scopeText.match(/phạmvi.*?\b([abcd])\b/);
+                            if (!m) m = scopeText.match(/phạmvi.*?([abcd])[:\s]/);
+                            if (m) {
+                                var letter = m[1];
+                                if (letter === 'a') currentPerson.lvlA = limitVal;
+                                else if (letter === 'b') currentPerson.lvlB = limitVal;
+                                else if (letter === 'c') currentPerson.lvlC = limitVal;
+                                else if (letter === 'd') currentPerson.lvlD = limitVal;
+                            }
                         }
                     }
                 });
