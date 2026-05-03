@@ -4113,6 +4113,83 @@
         exportWordUrl: "https://script.google.com/macros/s/AKfycbwQA00iOlnCsRwUkh9CN8w7fWONqw_-_EpCXCOJcwdBKoLe3RNuOatTzWQsmkjpHmUg/exec"
     };
 
+    // ============================================================
+    // CLOUD HELPER (RESILIENT UPLOAD SYSTEM)
+    // ============================================================
+    const CloudHelper = {
+        _queue: [],
+        _activeCount: 0,
+        _maxConcurrent: 3,
+
+        /**
+         * Tải file lên Cloudinary với cơ chế retry và giới hạn tiến trình song song
+         * @param {File|Blob} file 
+         * @param {Object} config { url, preset }
+         * @param {Number} retries Số lần thử lại tối đa
+         * @returns {Promise<String>} URL ảnh hoặc chuỗi rỗng nếu thất bại
+         */
+        async upload(file, config, retries = 3) {
+            return new Promise((resolve) => {
+                this._queue.push({ file, config, retries, resolve });
+                this._processQueue();
+            });
+        },
+
+        async _processQueue() {
+            if (this._activeCount >= this._maxConcurrent || this._queue.length === 0) return;
+
+            const { file, config, retries, resolve } = this._queue.shift();
+            this._activeCount++;
+
+            try {
+                const url = await this._doUpload(file, config, retries);
+                resolve(url);
+            } catch (e) {
+                console.error('CloudHelper: Final failure', e);
+                resolve('');
+            } finally {
+                this._activeCount--;
+                this._processQueue();
+            }
+        },
+
+        async _doUpload(file, config, retries) {
+            for (let attempt = 0; attempt <= retries; attempt++) {
+                try {
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    fd.append('upload_preset', config.preset);
+
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 60000); // 1p timeout
+
+                    const res = await fetch(config.url, { 
+                        method: 'POST', 
+                        body: fd,
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+
+                    if (!res.ok) {
+                        const errorData = await res.json().catch(() => ({}));
+                        throw new Error(`HTTP ${res.status}: ${errorData.error?.message || 'Unknown'}`);
+                    }
+
+                    const data = await res.json();
+                    if (data.secure_url) return data.secure_url;
+                    throw new Error('Missing secure_url');
+
+                } catch (e) {
+                    if (attempt === retries) throw e;
+                    const delay = Math.pow(2, attempt) * 1000 + Math.random() * 500;
+                    console.warn(`CloudHelper: Retrying in ${Math.round(delay)}ms...`, e.message);
+                    await new Promise(r => setTimeout(r, delay));
+                }
+            }
+        }
+    };
+
     const GeminiKeys = (() => {
         let index = 0;
         return {
@@ -7766,14 +7843,7 @@
         },
 
         _uploadToCloudinary: async function(file) {
-            try {
-                var fd = new FormData();
-                fd.append('file', file);
-                fd.append('upload_preset', CONFIG.cloudinary.preset);
-                var res  = await fetch(CONFIG.cloudinary.url, { method: 'POST', body: fd });
-                var data = await res.json();
-                return data.secure_url || '';
-            } catch(e) { return ''; }
+            return await CloudHelper.upload(file, CONFIG.cloudinary);
         },
 
         _toBase64: async function(file) {
@@ -13025,15 +13095,10 @@
                 try {
                     // FIX: Dùng trực tiếp file gốc tải lên Cloudinary
                     // BỎ QUA ImageProcessor.addWatermark(file, bsxToStamp, gpsLocation)
-                    const fd = new FormData();
-                    fd.append('file', file);
-                    fd.append('upload_preset', CONFIG.cloudinary.preset);
+                    const secure_url = await CloudHelper.upload(file, CONFIG.cloudinary);
                     
-                    const res = await fetch(CONFIG.cloudinary.url, { method: 'POST', body: fd });
-                    const data = await res.json();
-                    
-                    if (data.secure_url) {
-                        tempObj.url = data.secure_url;
+                    if (secure_url) {
+                        tempObj.url = secure_url;
                         delete tempObj.isUploading;
                         delete tempObj.tempId;
                     }
@@ -13082,14 +13147,10 @@
                         ? CONFIG.cloudinary.url.replace('/image/upload', '/video/upload')
                         : CONFIG.cloudinary.url;
 
-                    const fd = new FormData();
-                    fd.append('file', processedFile);
-                    fd.append('upload_preset', CONFIG.cloudinary.preset);
-                    const res = await fetch(uploadUrl, { method: 'POST', body: fd });
-                    const data = await res.json();
+                    const secure_url = await CloudHelper.upload(processedFile, { ...CONFIG.cloudinary, url: uploadUrl });
                     
-                    if (data.secure_url) {
-                        tempObj.url = data.secure_url;
+                    if (secure_url) {
+                        tempObj.url = secure_url;
                         delete tempObj.isUploading;
                         delete tempObj.tempId;
                     }
@@ -17306,15 +17367,9 @@ QUAN TRỌNG:
             txt.textContent = `Đang nén và chuẩn bị ${totalFiles} file...`;
 
             const uploadPromises = files.map(async (file, i) => {
-                try {
-                    const fd = new FormData();
-                    fd.append('file', file);
-                    fd.append('upload_preset', CONFIG.cloudinaryCloud.preset);
-                    
-                    const res = await fetch(CONFIG.cloudinaryCloud.url, { method: 'POST', body: fd });
-                    const data = await res.json();
+                    const secure_url = await CloudHelper.upload(file, CONFIG.cloudinaryCloud);
 
-                    if (data.secure_url) {
+                    if (secure_url) {
                         const newKey = 'file_' + Date.now() + '_' + i + '_' + Math.random().toString(36).substr(2, 5);
                         const isPdfUpload = file.name.toLowerCase().endsWith('.pdf');
                         
@@ -17424,14 +17479,9 @@ QUAN TRỌNG:
                         ? CONFIG.cloudinaryCloud.url.replace('/image/upload', '/video/upload')
                         : CONFIG.cloudinaryCloud.url;
 
-                    const fd = new FormData();
-                    fd.append('file', processedFile);
-                    fd.append('upload_preset', CONFIG.cloudinaryCloud.preset);
+                    const secure_url = await CloudHelper.upload(processedFile, { ...CONFIG.cloudinaryCloud, url: uploadUrl });
 
-                    const res  = await fetch(uploadUrl, { method: 'POST', body: fd });
-                    const data = await res.json();
-
-                    if (data.secure_url) {
+                    if (secure_url) {
                         const ext = isVideo ? (processedFile.name.endsWith('.mp4') ? 'mp4' : 'webm') : 'jpg';
                         const prefix = isVideo ? 'TascoVid' : 'TascoCloud';
                         const newKey = 'file_' + Date.now() + '_' + i + '_' + Math.random().toString(36).substr(2,5);
