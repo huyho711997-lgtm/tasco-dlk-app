@@ -208,6 +208,22 @@ textarea.inp { resize:vertical; }
   transition: all .15s; font-family: inherit;
 }
 .modal-close-btn:hover { background: #f1f5f9; border-color: #cbd5e1; color: #475569; }
+/* Animation cho Hình ảnh */
+@keyframes hcImgIn {
+  from { opacity: 0; transform: scale(0.8) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes hcImgOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.5); }
+}
+.hc-img-item-animate {
+  animation: hcImgIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+.hc-img-removing {
+  animation: hcImgOut 0.3s ease forwards;
+  pointer-events: none;
+}
 /* ── PARTS PRICES REDESIGN ── */
 #view-partsprices { gap: 10px; }
 /* ── FIXED HEADER WRAPPER ── */
@@ -17185,7 +17201,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         
         if (empty) empty.classList.add('hidden');
         if (grid) {
-            grid.innerHTML = imgs.map(url => {
+            grid.innerHTML = imgs.map((url, index) => {
                 // Đổi c_thumb thành c_fit để không cắt ảnh, chỉ thu nhỏ lại cho vừa khung 150x150
                 let thumbUrl = url;
                 if (url.includes('cloudinary.com')) {
@@ -17193,7 +17209,8 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                 }
 
                 return `
-                    <div class="relative aspect-square rounded-lg border border-slate-200 overflow-hidden group shadow-sm bg-slate-50 flex items-center justify-center p-1">
+                    <div class="hc-img-item-animate relative aspect-square rounded-lg border border-slate-200 overflow-hidden group shadow-sm bg-slate-50 flex items-center justify-center p-1"
+                         style="animation-delay: ${index * 0.05}s">
                         <a href="${url}" data-fslightbox="hc-gallery" class="w-full h-full flex items-center justify-center">
                             <img src="${thumbUrl}" 
                                  class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105" 
@@ -17224,6 +17241,14 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             customClass: { popup: 'rnd' }
         }).then(async r => {
             if (!r.isConfirmed) return;
+
+            // Hiệu ứng xóa chuyên nghiệp
+            const btn = e.currentTarget;
+            const item = btn.closest('.hc-img-item-animate');
+            if (item) {
+                item.classList.add('hc-img-removing');
+                await new Promise(resolve => setTimeout(resolve, 300)); // Đợi animation
+            }
             
             let currentImgs = [];
             if (this._currentId) {
