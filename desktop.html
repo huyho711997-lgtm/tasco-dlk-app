@@ -15637,6 +15637,8 @@ const HumanClaims = {
             accDate: getVal('hc-accDate'), inDate: getVal('hc-inDate'), outDate: getVal('hc-outDate'), days: getNum('hc-days'),
             accCause: getVal('hc-accCause'), injuryDesc: getVal('hc-injuryDesc'),
             injuryCode: getVal('hc-injuryCode'), injuryRange: getVal('hc-injuryRange'), injuryRealPct: getNum('hc-injuryRealPct'),
+            injuryAmount: parseInt(document.getElementById('hc-calc-injury').textContent.replace(/[^\d]/g, '')) || 0,
+            hospitalAmount: parseInt(document.getElementById('hc-calc-hospital').textContent.replace(/[^\d]/g, '')) || 0,
             payeeName: getVal('hc-payeeName'), payeeRelation: getVal('hc-payeeRelation'), payeeCccd: getVal('hc-payeeCccd'),
             payeeIssueDate: getVal('hc-payeeIssueDate'), payeeIssuePlace: getVal('hc-payeeIssuePlace'),
             payeeBankNo: getVal('hc-payeeBankNo'), payeeBankName: getVal('hc-payeeBankName'),
@@ -18078,10 +18080,10 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
                         <tbody>
                             <tr>
                                 <td class="text-center" contenteditable="true">${fmt(rec.accDate)}</td>
-                                <td class="text-center" contenteditable="true">${rec.accReason || '—'}</td>
-                                <td class="text-center" contenteditable="true">${rec.injuryContent || '—'}</td>
+                                <td class="text-center" contenteditable="true">${rec.accCause || '—'}</td>
+                                <td class="text-center" contenteditable="true">${rec.injuryDesc || '—'}</td>
                                 <td class="text-right" contenteditable="true">${fmtPrice(rec.injuryAmount)}</td>
-                                <td class="text-center" contenteditable="true">${rec.hospitalDays || 0}</td>
+                                <td class="text-center" contenteditable="true">${rec.days || 0}</td>
                                 <td class="text-right" contenteditable="true">${fmtPrice(rec.hospitalAmount)}</td>
                                 <td class="text-right font-bold" contenteditable="true">${fmtPrice(rec.totalAmount)}</td>
                             </tr>
