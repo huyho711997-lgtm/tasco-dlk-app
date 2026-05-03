@@ -15380,6 +15380,7 @@ const HumanClaims = {
             Object.values(c.students).forEach(s => {
                 if (norm(s.name).includes(searchQ)) {
                     matches.push({
+                        gcn: s.gcn || '',
                         name: s.name,
                         dob: s.dob,
                         cls: s.cls,
@@ -15431,6 +15432,7 @@ const HumanClaims = {
     selectInsured(m) {
         // 1. Điền thông tin Người được bảo hiểm
         document.getElementById('hc-victimName').value = m.name.toUpperCase();
+        if (m.gcn) document.getElementById('hc-gcn').value = m.gcn;
         if (m.address) document.getElementById('hc-victimAddress').value = m.address;
         
         // Tính tuổi
