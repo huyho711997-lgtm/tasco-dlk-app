@@ -20347,12 +20347,12 @@ var Contracts = {
         // Dữ liệu mẫu đã được cập nhật đầy đủ các cột mới
         var data = [
             [
-                "SỐ HỢP ĐỒNG", "TÊN TRƯỜNG HỌC", "ĐỊA CHỈ TRƯỜNG HỌC", 
-                "NGÀY HỢP ĐỒNG", "LOẠI ĐỐI TƯỢNG BẢO HIỂM", 
-                "NGÀY BẮT ĐẦU HIỆU LỰC", "NGÀY HẾT HIỆU LỰC", 
-                "CÁN BỘ CẤP ĐƠN", "TỔNG SỐ NGƯỜI BẢO HIỂM", 
-                "PHÍ NET", "PHÍ NET QUY ĐỔI", "PHÍ QUY ĐỔI", 
-                "MỨC A", "MỨC B", "MỨC C", "MỨC D", "GHI CHÚ"
+                "Tên", "Trường học", "Địa chỉ", 
+                "Ngày hợp đồng", "Loại đối tượng bảo hiểm", 
+                "Ngày bắt đầu hiệu lực", "Ngày hết hiệu lực", 
+                "Cán bộ cấp đơn", "Tổng số người bảo hiểm", 
+                "Phí NET", "Phí NET quy đổi", "Phí quy đổi", 
+                "Mức A", "Mức B", "Mức C", "Mức D", "Ghi chú"
             ],
             [
                 "DO.TTKD015/A05/2500447122", "Trung Tâm Hỗ Trợ PTGD Hòa Nhập Trẻ Khuyết Tật", 
@@ -20471,8 +20471,8 @@ var Contracts = {
                         return k ? r[k] : "";
                     };
 
-                    var no = getVal(['số', 'hđ', 'hợp đồng', 'no', 'tên hiện thị']);
-                    var unit = getVal(['tên', 'đơn vị', 'trường', 'unit', 'người mua']);
+                    var no = getVal(['tên', 'số hđ', 'số hợp đồng', 'no']);
+                    var unit = getVal(['trường học', 'trường', 'đơn vị', 'unit']);
 
                     if (no && unit) {
                         validData.push({
@@ -20510,8 +20510,12 @@ var Contracts = {
 
                 var updates = {};
                 validData.forEach((item, i) => {
-                    var key = 'Contracts/' + Date.now() + '_' + i;
-                    updates[key] = item;
+                    // Sử dụng Số Hợp đồng (item.no) làm key để cập nhật nếu đã tồn tại
+                    // Tìm trong dữ liệu hiện có xem có số HĐ này chưa
+                    const existing = this._data.find(c => String(c.no || '').trim().toLowerCase() === String(item.no).toLowerCase());
+                    const keyId = existing ? existing._id : (Date.now() + '_' + i);
+                    
+                    updates['Contracts/' + keyId] = item;
                 });
 
                 await db.ref().update(updates);
