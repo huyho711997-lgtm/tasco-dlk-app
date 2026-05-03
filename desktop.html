@@ -17328,7 +17328,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         });
     },
 
-    // 5. Hàm mở Form xem toàn bộ ảnh
+    // 5. Hàm mở Form xem toàn bộ ảnh (Cải tiến: Nhỏ hơn, Lightbox, Xóa nhiều)
     openFullGallery() {
         let imgs = [];
         if (this._currentId) {
@@ -17344,37 +17344,122 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         }
 
         const gridHtml = imgs.map((url, index) => `
-            <div class="relative group aspect-[3/4] rounded-xl overflow-hidden border border-slate-200 bg-slate-50 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
-                <img src="${url}" class="w-full h-full object-cover cursor-pointer" onclick="window.open('${url}', '_blank')">
-                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                    <span class="text-white text-[10px] font-black uppercase tracking-widest">Click để phóng to</span>
+            <div class="relative group aspect-square rounded-lg overflow-hidden border border-slate-200 bg-white shadow-sm transition-all hover:ring-2 hover:ring-indigo-500">
+                <a data-fslightbox="hc-full-gallery" href="${url}" class="w-full h-full block">
+                    <img src="${url}" class="w-full h-full object-cover">
+                </a>
+                
+                <!-- Checkbox chọn để xóa -->
+                ${this._isLocked ? '' : `
+                <div class="absolute top-2 right-2 z-10">
+                    <input type="checkbox" value="${url}" class="hc-select-img w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer shadow-sm">
                 </div>
-                <div class="absolute top-2 left-2 px-2 py-1 bg-white/90 backdrop-blur rounded-lg shadow-sm">
-                    <span class="text-[9px] font-black text-slate-700">#${index + 1}</span>
+                `}
+
+                <div class="absolute bottom-0 left-0 right-0 bg-black/60 py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <span class="text-white text-[9px] font-bold">#${index + 1}</span>
                 </div>
             </div>
         `).join('');
 
         Swal.fire({
-            title: '<div class="flex items-center justify-center gap-3"><svg class="w-6 h-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><span class="uppercase tracking-widest font-black text-slate-800 text-lg">Toàn bộ ảnh chứng từ</span></div>',
+            title: `
+                <div class="flex items-center justify-between w-full pr-8">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-indigo-50 rounded-xl">
+                            <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <span class="uppercase tracking-widest font-black text-slate-800 text-base">Toàn bộ chứng từ (${imgs.length})</span>
+                    </div>
+                    ${this._isLocked ? '' : `
+                    <button id="btn-hc-delete-selected" onclick="HumanClaims.deleteSelectedImages()" class="px-4 py-2 bg-rose-50 text-rose-600 border border-rose-100 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-600 hover:text-white transition-all shadow-sm hidden">
+                        Xóa mục đã chọn
+                    </button>
+                    `}
+                </div>
+            `,
             html: `
-                <div class="p-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div class="p-4 max-h-[75vh] overflow-y-auto custom-scrollbar bg-slate-50/50 rounded-2xl border border-slate-100">
+                    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
                         ${gridHtml}
                     </div>
                 </div>
-                <div class="mt-4 flex justify-center">
-                    <p class="text-[11px] font-bold text-slate-400">Tổng cộng: ${imgs.length} ảnh</p>
-                </div>
             `,
-            width: '90%',
+            width: '95%',
             showConfirmButton: false,
             showCloseButton: true,
+            didOpen: () => {
+                refreshFsLightbox();
+                // Lắng nghe sự kiện check để hiện nút xóa
+                const checks = document.querySelectorAll('.hc-select-img');
+                const delBtn = document.getElementById('btn-hc-delete-selected');
+                checks.forEach(c => {
+                    c.addEventListener('change', () => {
+                        const selected = document.querySelectorAll('.hc-select-img:checked');
+                        if (selected.length > 0) {
+                            delBtn.classList.remove('hidden');
+                            delBtn.textContent = `Xóa ${selected.length} mục đã chọn`;
+                        } else {
+                            delBtn.classList.add('hidden');
+                        }
+                    });
+                });
+            },
             customClass: {
                 popup: 'rnd !p-6',
-                container: 'backdrop-blur-sm'
+                container: 'backdrop-blur-md'
             }
         });
+    },
+
+    // 5.5 Hàm xóa nhiều ảnh đã chọn
+    async deleteSelectedImages() {
+        const selected = Array.from(document.querySelectorAll('.hc-select-img:checked')).map(c => c.value);
+        if (!selected.length) return;
+
+        const result = await Swal.fire({
+            title: `Xóa ${selected.length} ảnh?`,
+            text: "Hành động này không thể hoàn tác!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Đúng, xóa hết!',
+            cancelButtonText: 'Hủy',
+            customClass: { popup: 'rnd' }
+        });
+
+        if (!result.isConfirmed) return;
+
+        Swal.fire({
+            title: 'Đang xử lý...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading(),
+            customClass: { popup: 'rnd' }
+        });
+
+        let currentImgs = [];
+        let rec = null;
+        if (this._currentId) {
+            rec = this._data.find(x => x.id === this._currentId);
+            if (rec) {
+                rec.images = (rec.images || []).filter(i => !selected.includes(i));
+                currentImgs = rec.images;
+                await db.ref('HumanClaims/' + this._currentId + '/images').set(currentImgs);
+            }
+        } else {
+            this._tempImages = (this._tempImages || []).filter(i => !selected.includes(i));
+            currentImgs = this._tempImages;
+        }
+
+        this.renderImages(currentImgs);
+        Swal.close(); // Đóng loading
+        
+        // Mở lại Gallery để thấy kết quả
+        if (currentImgs.length > 0) {
+            this.openFullGallery();
+        } else {
+            Swal.fire({ icon: 'success', title: 'Đã xóa toàn bộ ảnh!', customClass: { popup: 'rnd' } });
+        }
     },
     // ════════════════════════════════════════════════════════════════════════════════
     // DOWNLOAD WORD DOCUMENTS - HỒSƠ BỒI THƯỜNG CON NGƯỜI
