@@ -2126,8 +2126,21 @@ textarea.inp { resize:vertical; }
         </div>
       </div>
 
+        <!-- Tab Navigation -->
+        <div class="px-6 py-2 bg-slate-50 border-b border-slate-200 flex items-center gap-6 shrink-0">
+          <button id="hc-btn-tab-form" onclick="HumanClaims.switchTab('form')" class="pb-2 border-b-2 border-indigo-600 text-indigo-600 text-xs font-black uppercase tracking-widest transition-all">
+            Thông tin hồ sơ
+          </button>
+          <button id="hc-btn-tab-history" onclick="HumanClaims.switchTab('history')" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-600 text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2">
+            Lịch sử tổn thất
+            <span id="hc-tab-history-badge" class="bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded-full text-[9px] hidden">0</span>
+          </button>
+        </div>
+
         <div class="flex-1 overflow-y-auto p-6" id="hc-m-body">
-          <div class="grid grid-cols-12 gap-6">
+          <!-- TAB: FORM -->
+          <div id="hc-tab-form" class="animate__animated animate__fadeIn animate__faster">
+            <div class="grid grid-cols-12 gap-6">
             
             <div class="col-span-7 flex flex-col gap-5">
               
@@ -2409,6 +2422,36 @@ textarea.inp { resize:vertical; }
                 </div>
               </div>
 
+            </div>
+          </div>
+          </div>
+
+          <!-- TAB: HISTORY (Dedicated Section) -->
+          <div id="hc-tab-history" class="hidden animate__animated animate__fadeIn animate__faster">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
+              <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-black text-slate-800">Lịch sử tổn thất chi tiết</h3>
+                  <p class="text-xs font-bold text-slate-400 mt-0.5">Tất cả các vụ bồi thường được ghi nhận theo Số GCN của người này</p>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="text-right">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Tổng cộng</p>
+                    <p id="hc-history-total-amount" class="text-xl font-black text-rose-600">0 đ</p>
+                  </div>
+                  <div class="w-px h-8 bg-slate-200"></div>
+                  <div class="text-right">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Số vụ</p>
+                    <p id="hc-history-total-count" class="text-xl font-black text-slate-700">0 vụ</p>
+                  </div>
+                </div>
+              </div>
+              <div id="hc-history-full-list" class="p-6 space-y-4">
+                <div class="flex flex-col items-center justify-center py-20 text-slate-300">
+                  <svg class="w-16 h-16 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <p class="text-sm font-bold">Chưa có dữ liệu lịch sử</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -15346,6 +15389,26 @@ const HumanClaims = {
 
         w.classList.remove('hidden');
         setTimeout(() => { w.classList.remove('opacity-0'); b.classList.remove('scale-95'); }, 10);
+        
+        // Reset về tab đầu tiên
+        this.switchTab('form');
+    },
+
+    switchTab(tabId) {
+        const tabs = ['form', 'history'];
+        tabs.forEach(t => {
+            const btn = document.getElementById(`hc-btn-tab-${t}`);
+            const content = document.getElementById(`hc-tab-${t}`);
+            if (t === tabId) {
+                btn.classList.replace('border-transparent', 'border-indigo-600');
+                btn.classList.replace('text-slate-400', 'text-indigo-600');
+                content.classList.remove('hidden');
+            } else {
+                btn.classList.replace('border-indigo-600', 'border-transparent');
+                btn.classList.replace('text-indigo-600', 'text-slate-400');
+                content.classList.add('hidden');
+            }
+        });
     },
 
     async closeModal() {
@@ -15385,6 +15448,7 @@ const HumanClaims = {
         
         if (history.length === 0) {
             container.classList.add('hidden');
+            this._renderFullHistory([]);
             return;
         }
 
@@ -15413,6 +15477,81 @@ const HumanClaims = {
                 <div class="flex justify-between items-center mt-1 pt-1 border-t border-slate-50">
                     <span class="text-[10px] text-slate-400 truncate max-w-[150px] italic">${r.hospitalName || '—'}</span>
                     <span class="text-[11px] font-black text-rose-700">${Number(r.totalAmount || 0).toLocaleString('vi-VN')} đ</span>
+                </div>
+            </div>
+        `).join('');
+
+        // Cập nhật tab History chi tiết
+        this._renderFullHistory(history);
+    },
+
+    _renderFullHistory(history) {
+        const listEl = document.getElementById('hc-history-full-list');
+        const totalAmountEl = document.getElementById('hc-history-total-amount');
+        const totalCountEl = document.getElementById('hc-history-total-count');
+        const badgeEl = document.getElementById('hc-tab-history-badge');
+
+        if (!listEl) return;
+
+        if (!history || history.length === 0) {
+            listEl.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-20 text-slate-300">
+                  <svg class="w-16 h-16 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <p class="text-sm font-bold">Chưa có dữ liệu lịch sử</p>
+                </div>`;
+            totalAmountEl.textContent = '0 đ';
+            totalCountEl.textContent = '0 vụ';
+            badgeEl.classList.add('hidden');
+            return;
+        }
+
+        badgeEl.textContent = history.length;
+        badgeEl.classList.remove('hidden');
+        totalCountEl.textContent = `${history.length} vụ`;
+        
+        let totalSum = 0;
+        history.forEach(r => totalSum += (r.totalAmount || 0));
+        totalAmountEl.textContent = `${totalSum.toLocaleString('vi-VN')} đ`;
+
+        listEl.innerHTML = history.map(r => `
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border-l-4 border-l-rose-500">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600 shrink-0">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-black text-slate-800 uppercase tracking-tight">${r.claimNo || 'CHƯA CÓ SỐ HSBT'}</h4>
+                            <div class="flex items-center gap-2 mt-0.5">
+                                <span class="text-[10px] font-bold text-slate-400">Ngày tai nạn:</span>
+                                <span class="text-[10px] font-black text-slate-600">${r.accDate ? moment(r.accDate).format('DD/MM/YYYY') : '—'}</span>
+                                <span class="text-slate-200 mx-1">|</span>
+                                <span class="text-[10px] font-bold text-slate-400">Loại:</span>
+                                <span class="text-[10px] font-black text-rose-600 uppercase">${r.lossType || '—'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="inline-block px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider mb-2" 
+                              style="background:${this.STATUS_LABELS[r.status]?.color}20; color:${this.STATUS_LABELS[r.status]?.color}">
+                            ${this.STATUS_LABELS[r.status]?.text || 'Mới'}
+                        </span>
+                        <p class="text-lg font-black text-slate-800">${Number(r.totalAmount || 0).toLocaleString('vi-VN')} <span class="text-xs text-slate-400">VND</span></p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-50">
+                    <div class="flex flex-col">
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Nơi điều trị</span>
+                        <span class="text-[11px] font-bold text-slate-700 truncate" title="${r.hospitalName || ''}">${r.hospitalName || '—'}</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Chẩn đoán / Thương tật</span>
+                        <span class="text-[11px] font-bold text-slate-700 truncate" title="${r.injuryDesc || ''}">${r.injuryDesc || '—'}</span>
+                    </div>
+                    <div class="flex flex-col text-right">
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Số ngày nằm viện</span>
+                        <span class="text-[11px] font-black text-indigo-600">${r.days || 0} ngày</span>
+                    </div>
                 </div>
             </div>
         `).join('');
