@@ -224,6 +224,34 @@ textarea.inp { resize:vertical; }
   animation: hcImgOut 0.3s ease forwards;
   pointer-events: none;
 }
+/* Hiệu ứng Shimmer Loading */
+.hc-shimmer {
+  background: #f6f7f8;
+  background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+  background-repeat: no-repeat;
+  background-size: 800px 100%;
+  display: inline-block;
+  position: relative;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+  animation-iteration-count: infinite;
+  animation-name: shimmer;
+  animation-timing-function: linear;
+}
+@keyframes shimmer {
+  0% { background-position: -468px 0; }
+  100% { background-position: 468px 0; }
+}
+.hc-delete-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+  backdrop-filter: blur(2px);
+}
 /* ── PARTS PRICES REDESIGN ── */
 #view-partsprices { gap: 10px; }
 /* ── FIXED HEADER WRAPPER ── */
@@ -17109,40 +17137,50 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         e.target.value = '';
         if(!files.length) return;
 
-        Swal.fire({
-            title: 'Đang tải lên...',
-            html: '<p class="text-xs text-slate-500 mt-2">Vui lòng chờ trong giây lát...</p>',
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading(),
-            customClass: { popup: 'rnd' }
+        // Tạo placeholders shimmer ngay lập tức trong grid
+        const grid = document.getElementById('hc-img-grid');
+        const empty = document.getElementById('hc-img-empty');
+        if (empty) empty.classList.add('hidden');
+        
+        const placeholders = files.map(() => {
+            const div = document.createElement('div');
+            div.className = "hc-shimmer relative aspect-square rounded-lg border border-slate-200 overflow-hidden flex items-center justify-center p-1";
+            div.innerHTML = `<div class="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>`;
+            if (grid) grid.appendChild(div);
+            return div;
         });
 
         const newImages = [];
-        for(let f of files) {
+        for(let i = 0; i < files.length; i++) {
+            const f = files[i];
             const fd = new FormData();
             fd.append('file', f);
             fd.append('upload_preset', CL_PRESET); 
             try {
                 const res = await fetch(CL_URL, { method: 'POST', body: fd });
                 const data = await res.json();
-                if(data.secure_url) newImages.push(data.secure_url);
-            } catch(err) { console.error('Lỗi upload:', err); }
+                if(data.secure_url) {
+                    newImages.push(data.secure_url);
+                    // Có thể cập nhật placeholder tại đây nếu muốn mượt hơn
+                    placeholders[i].innerHTML = `<svg class="w-5 h-5 text-emerald-500 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>`;
+                }
+            } catch(err) { 
+                console.error('Lỗi upload:', err);
+                placeholders[i].innerHTML = `<svg class="w-5 h-5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M6 18L18 6M6 6l12 12"/></svg>`;
+            }
         }
 
         let currentImgs = [];
-        // Nếu là hồ sơ cũ -> Cập nhật thẳng vào Firebase
         if (this._currentId) {
             const rec = this._data.find(r => r.id === this._currentId) || {};
             currentImgs = rec.images || [];
             currentImgs = [...currentImgs, ...newImages];
             await db.ref('HumanClaims/' + this._currentId + '/images').set(currentImgs);
         } else {
-            // Nếu hồ sơ mới -> Lưu tạm vào bộ nhớ
             this._tempImages = [...(this._tempImages || []), ...newImages];
             currentImgs = this._tempImages;
         }
 
-        Swal.close();
         Toast.fire({ icon: 'success', title: `Đã tải lên ${newImages.length} ảnh!` });
         this.renderImages(currentImgs);
     },
@@ -17242,22 +17280,36 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         }).then(async r => {
             if (!r.isConfirmed) return;
 
-            // Hiệu ứng xóa chuyên nghiệp
-            const btn = e.currentTarget;
-            const item = btn.closest('.hc-img-item-animate');
-            if (item) {
-                item.classList.add('hc-img-removing');
-                await new Promise(resolve => setTimeout(resolve, 300)); // Đợi animation
-            }
-            
             let currentImgs = [];
             if (this._currentId) {
                 const rec = this._data.find(x => x.id === this._currentId) || {};
                 currentImgs = (rec.images || []).filter(i => i !== url);
-                await db.ref('HumanClaims/' + this._currentId + '/images').set(currentImgs);
             } else {
                 this._tempImages = (this._tempImages || []).filter(i => i !== url);
                 currentImgs = this._tempImages;
+            }
+
+            // Hiệu ứng xóa chuyên nghiệp
+            const btn = e.currentTarget;
+            const item = btn.closest('.hc-img-item-animate');
+            if (item) {
+                // Thêm lớp phủ mờ và spinner trong khi chờ DB xóa
+                const overlay = document.createElement('div');
+                overlay.className = "hc-delete-overlay rounded-lg";
+                overlay.innerHTML = `<div class="w-6 h-6 border-2 border-rose-500 border-t-transparent rounded-full animate-spin"></div>`;
+                item.appendChild(overlay);
+
+                if (this._currentId) {
+                    await db.ref('HumanClaims/' + this._currentId + '/images').set(currentImgs);
+                }
+                
+                // Hiệu ứng biến mất
+                item.classList.add('hc-img-removing');
+                await new Promise(resolve => setTimeout(resolve, 300));
+            } else {
+                if (this._currentId) {
+                    await db.ref('HumanClaims/' + this._currentId + '/images').set(currentImgs);
+                }
             }
             
             this.renderImages(currentImgs);
