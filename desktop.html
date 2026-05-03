@@ -2126,21 +2126,21 @@ textarea.inp { resize:vertical; }
         </div>
       </div>
 
-        <!-- Modern Segmented Tab Navigation -->
-        <div class="px-6 py-4 bg-white border-b border-slate-100 flex items-center shrink-0">
-          <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-2xl w-fit border border-slate-200/50 shadow-inner">
+        <!-- Compact Segmented Tab Navigation -->
+        <div class="px-6 py-2 bg-white border-b border-slate-100 flex items-center shrink-0">
+          <div class="flex items-center gap-1 p-0.5 bg-slate-100 rounded-xl w-fit border border-slate-200/50">
             <button id="hc-btn-tab-form" onclick="HumanClaims.switchTab('form')" 
-                    class="flex items-center gap-2.5 px-6 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300
+                    class="flex items-center gap-2 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300
                            bg-white text-indigo-600 shadow-sm border border-slate-200/50">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
               Hồ sơ bồi thường
             </button>
             <button id="hc-btn-tab-history" onclick="HumanClaims.switchTab('history')" 
-                    class="flex items-center gap-2.5 px-6 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300
+                    class="flex items-center gap-2 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300
                            text-slate-500 hover:text-slate-700 hover:bg-white/50">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               Lịch sử tổn thất
-              <span id="hc-tab-history-badge" class="bg-rose-500 text-white px-2 py-0.5 rounded-full text-[9px] font-black hidden shadow-sm shadow-rose-200 ring-2 ring-white">0</span>
+              <span id="hc-tab-history-badge" class="bg-rose-500 text-white px-1.5 py-0.5 rounded-full text-[8px] font-black hidden shadow-sm ring-1 ring-white">0</span>
             </button>
           </div>
         </div>
