@@ -2188,7 +2188,7 @@ textarea.inp { resize:vertical; }
                   </div>
 
                   <div class="grid grid-cols-3 gap-3">
-                    <div><label class="lbl">Số GCN</label><input id="hc-gcn" class="inp text-[13px]" oninput="HumanClaims.renderInsuredHistory(this.value)"></div>
+                    <div><label class="lbl">Số GCN</label><input id="hc-gcn" class="inp text-[13px]"></div>
                     <div><label class="lbl">Loại hình BH</label>
                       <select id="hc-insType" class="inp">
                           <option value="Học sinh">Học sinh, sinh viên</option>
@@ -2270,6 +2270,16 @@ textarea.inp { resize:vertical; }
                       <div><label class="lbl">Nơi điều trị</label><input id="hc-hospitalName" class="inp font-bold text-teal-700" placeholder="Tên bệnh viện / Phòng khám..."></div>
                   </div>
 
+                  <!-- Container Hiển thị Lịch sử Bồi thường (NĐBH) -->
+                  <div id="hc-insured-history-container" class="hidden animate__animated animate__fadeIn">
+                    <div class="p-3 bg-rose-50/50 border border-rose-100 rounded-lg">
+                      <div class="flex items-center justify-between mb-2">
+                        <span class="text-[10px] font-black text-rose-700 uppercase tracking-widest">Lịch sử bồi thường của người này</span>
+                        <span id="hc-history-count" class="text-[9px] font-bold text-rose-500 bg-white px-1.5 py-0.5 rounded border border-rose-100">0 vụ</span>
+                      </div>
+                      <div id="hc-history-list" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1"></div>
+                    </div>
+                  </div>
 
 
                   <div><label class="lbl">Nguyên nhân tai nạn</label><textarea id="hc-accCause" rows="2" class="inp resize-none"></textarea></div>
@@ -2424,47 +2434,32 @@ textarea.inp { resize:vertical; }
           </div>
           </div>
 
-          <!-- TAB: HISTORY (Refined Dashboard) -->
-          <div id="hc-tab-history" class="hidden animate__animated animate__fadeIn animate__faster h-full flex flex-col gap-5">
-            <!-- Header Stats -->
-            <div class="flex items-stretch gap-4 shrink-0">
-              <div class="flex-1 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex items-center justify-between relative overflow-hidden">
-                <div class="absolute right-0 top-0 w-32 h-32 bg-rose-50 rounded-full -mr-16 -mt-16 opacity-40"></div>
-                <div class="relative z-10">
-                  <h3 class="text-base font-black text-slate-800 tracking-tight">Tổng quan lịch sử</h3>
-                  <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Dữ liệu tích lũy theo GCN</p>
+          <!-- TAB: HISTORY (Dedicated Section) -->
+          <div id="hc-tab-history" class="hidden animate__animated animate__fadeIn animate__faster">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
+              <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-black text-slate-800">Lịch sử tổn thất chi tiết</h3>
+                  <p class="text-xs font-bold text-slate-400 mt-0.5">Tất cả các vụ bồi thường được ghi nhận theo Số GCN của người này</p>
                 </div>
-                <div class="flex items-center gap-8 relative z-10">
-                  <div class="text-right">
-                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Tổng chi trả</p>
-                    <p id="hc-history-total-amount" class="text-xl font-black text-rose-600 tracking-tight">0 đ</p>
-                  </div>
-                  <div class="w-px h-8 bg-slate-100"></div>
-                  <div class="text-right">
-                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Số vụ</p>
-                    <p id="hc-history-total-count" class="text-xl font-black text-slate-800 tracking-tight">0 vụ</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div id="hc-risk-box" class="w-64 bg-indigo-600 rounded-2xl p-5 shadow-lg shadow-indigo-100 text-white relative overflow-hidden flex flex-col justify-center transition-colors duration-500">
-                <div class="absolute left-0 bottom-0 w-20 h-20 bg-white/10 rounded-full -ml-10 -mb-10"></div>
-                <p class="text-[9px] font-black uppercase tracking-widest mb-2 opacity-80">Phân tích rủi ro</p>
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center border border-white/20 backdrop-blur-sm">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                    </div>
-                    <div>
-                        <p class="text-[11px] font-bold opacity-90 leading-none">Mức độ rủi ro</p>
-                        <p id="hc-risk-level" class="text-sm font-black uppercase tracking-tight mt-1">Bình thường</p>
-                    </div>
+                  <div class="text-right">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Tổng cộng</p>
+                    <p id="hc-history-total-amount" class="text-xl font-black text-rose-600">0 đ</p>
+                  </div>
+                  <div class="w-px h-8 bg-slate-200"></div>
+                  <div class="text-right">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Số vụ</p>
+                    <p id="hc-history-total-count" class="text-xl font-black text-slate-700">0 vụ</p>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <!-- List Section -->
-            <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 -mr-2">
-                <div id="hc-history-full-list" class="grid grid-cols-2 gap-4"></div>
+              <div id="hc-history-full-list" class="p-6 space-y-4">
+                <div class="flex flex-col items-center justify-center py-20 text-slate-300">
+                  <svg class="w-16 h-16 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <p class="text-sm font-bold">Chưa có dữ liệu lịch sử</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -14952,39 +14947,22 @@ const HumanClaims = {
         if (!history.length) {
             Swal.fire({
                 icon: 'info',
-                title: '<span class="text-lg font-black">Không tìm thấy lịch sử</span>',
-                html: `<p class="text-sm font-bold text-slate-500">Người có số GCN <span class="text-indigo-600">${gcn}</span> chưa có dữ liệu bồi thường trên hệ thống.</p>`,
+                title: 'Không tìm thấy lịch sử',
+                text: `Người có số GCN ${gcn} chưa có hồ sơ tổn thất nào trên hệ thống.`,
                 customClass: { popup: 'rnd' }
             });
             return;
         }
 
-        const totalSum = history.reduce((sum, r) => sum + (parseInt(r.totalAmount) || 0), 0);
-        
         const rowsHtml = history.map((r, i) => `
-            <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors group">
-                <td class="px-4 py-4 text-center">
-                    <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors">${i+1}</span>
-                </td>
-                <td class="px-4 py-4">
-                    <p class="text-xs font-black text-slate-700 tracking-tight">${r.claimNo || '—'}</p>
-                    <p class="text-[9px] font-bold text-slate-400 uppercase mt-0.5">${r.createdAt ? moment(r.createdAt).format('DD/MM/YYYY') : '—'}</p>
-                </td>
-                <td class="px-4 py-4">
-                    <div class="flex items-center gap-1.5">
-                        <svg class="w-3 h-3 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        <p class="text-xs font-bold text-slate-600">${r.accDate ? moment(r.accDate).format('DD/MM/YYYY') : '—'}</p>
-                    </div>
-                </td>
-                <td class="px-4 py-4">
-                    <p class="text-xs font-bold text-slate-600 truncate max-w-[200px]" title="${r.accCause || ''}">${r.accCause || '—'}</p>
-                    <p class="text-[10px] text-slate-400 italic mt-0.5 truncate max-w-[200px]">${r.hospitalName || '—'}</p>
-                </td>
-                <td class="px-4 py-4 text-right">
-                    <p class="text-sm font-black text-rose-600 tracking-tighter">${Number(r.totalAmount || 0).toLocaleString('vi-VN')}<span class="text-[10px] ml-0.5">đ</span></p>
-                </td>
-                <td class="px-4 py-4 text-center">
-                    <span class="inline-flex px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border" 
+            <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                <td class="px-4 py-3 text-center text-xs font-bold text-slate-400">${i+1}</td>
+                <td class="px-4 py-3 text-xs font-mono font-bold text-indigo-600">${r.claimNo || '—'}</td>
+                <td class="px-4 py-3 text-xs text-slate-600">${r.accDate ? moment(r.accDate).format('DD/MM/YYYY') : '—'}</td>
+                <td class="px-4 py-3 text-xs font-medium text-slate-700">${r.accCause || '—'}</td>
+                <td class="px-4 py-3 text-right text-xs font-black text-rose-600">${r.totalAmount ? Number(r.totalAmount).toLocaleString('vi-VN') + 'đ' : '0đ'}</td>
+                <td class="px-4 py-3 text-center">
+                    <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase border" 
                           style="color:${this.STATUS_LABELS[r.status||'new'].color}; background:${this.STATUS_LABELS[r.status||'new'].bg}; border-color:${this.STATUS_LABELS[r.status||'new'].border}">
                         ${this.STATUS_LABELS[r.status||'new'].text}
                     </span>
@@ -14993,54 +14971,36 @@ const HumanClaims = {
         `).join('');
 
         Swal.fire({
-            title: `
-                <div class="flex items-center justify-between w-full pr-8">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-rose-100 flex items-center justify-center text-rose-600 shadow-sm border border-rose-200/50">
-                            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                        <div class="text-left">
-                            <p class="text-lg font-black text-slate-800 leading-tight">Lịch sử tổn thất</p>
-                            <p class="text-xs font-bold text-slate-400 mt-0.5 tracking-wide">Số GCN: <span class="text-indigo-600">${gcn}</span></p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tổng chi trả</p>
-                        <p class="text-2xl font-black text-rose-600 tracking-tighter">${totalSum.toLocaleString('vi-VN')}<span class="text-sm ml-1 font-bold">đ</span></p>
-                    </div>
-                </div>`,
+            title: `<div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600 shadow-sm"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div><p class="text-left text-lg font-black text-slate-800 leading-tight">Lịch sử tổn thất</p><p class="text-left text-xs font-bold text-slate-400 mt-0.5">GCN: ${gcn}</p></div></div>`,
             html: `
-                <div class="mt-6 overflow-hidden border border-slate-200 rounded-3xl shadow-sm bg-white">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50/80 border-b border-slate-200">
-                                    <th class="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center w-12">#</th>
-                                    <th class="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Số HSBT</th>
-                                    <th class="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Ngày TN</th>
-                                    <th class="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Nguyên nhân / Bệnh viện</th>
-                                    <th class="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Số tiền</th>
-                                    <th class="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Trạng thái</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                ${rowsHtml}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="mt-4 overflow-hidden border border-slate-200 rounded-2xl">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200">
+                                <th class="px-4 py-3 text-[10px] font-black text-slate-400 uppercase text-center">#</th>
+                                <th class="px-4 py-3 text-[10px] font-black text-slate-400 uppercase">Số HSBT</th>
+                                <th class="px-4 py-3 text-[10px] font-black text-slate-400 uppercase">Ngày tai nạn</th>
+                                <th class="px-4 py-3 text-[10px] font-black text-slate-400 uppercase">Nguyên nhân</th>
+                                <th class="px-4 py-3 text-[10px] font-black text-slate-400 uppercase text-right">Số tiền duyệt</th>
+                                <th class="px-4 py-3 text-[10px] font-black text-slate-400 uppercase text-center">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
                 </div>
-                <div class="mt-6 flex items-center gap-3 p-4 bg-indigo-50 rounded-2xl border border-indigo-100 shadow-inner">
-                    <div class="w-8 h-8 bg-indigo-600 text-white rounded-lg flex items-center justify-center shadow-lg shadow-indigo-200">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div class="mt-6 p-4 bg-rose-50 rounded-xl border border-rose-100">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-black text-rose-800 uppercase">Tổng cộng bồi thường:</span>
+                        <span class="text-lg font-black text-rose-600">${history.reduce((sum, r) => sum + (parseInt(r.totalAmount) || 0), 0).toLocaleString('vi-VN')} đ</span>
                     </div>
-                    <p class="text-[11px] font-bold text-indigo-700 leading-tight">Dữ liệu trên bao gồm <span class="font-black underline">${history.length} vụ</span> bồi thường đã được ghi nhận cho khách hàng này trên toàn hệ thống.</p>
                 </div>
             `,
-            width: 900,
+            width: 800,
             showCloseButton: true,
             showConfirmButton: false,
-            customClass: { popup: 'rnd overflow-hidden' },
-            background: '#f8fafc'
+            customClass: { popup: 'rnd' }
         });
     },
 
@@ -15499,7 +15459,7 @@ const HumanClaims = {
         const targetGCN = normGCN(gcn);
 
         const history = (this._data || []).filter(r => {
-            return targetGCN && normGCN(r.gcn) === targetGCN;
+            return targetGCN && normGCN(r.gcn) === targetGCN && r.id !== this._currentId;
         });
         
         if (history.length === 0) {
@@ -15551,17 +15511,13 @@ const HumanClaims = {
 
         if (!history || history.length === 0) {
             listEl.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-20 text-slate-300 col-span-2">
-                  <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6 border border-slate-100 shadow-inner">
-                    <svg class="w-12 h-12 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                  </div>
-                  <p class="text-lg font-black text-slate-400">Không có lịch sử bồi thường</p>
-                  <p class="text-xs font-bold text-slate-300 mt-2">GCN này chưa phát sinh vụ bồi thường nào trước đây.</p>
+                <div class="flex flex-col items-center justify-center py-20 text-slate-300">
+                  <svg class="w-16 h-16 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <p class="text-sm font-bold">Chưa có dữ liệu lịch sử</p>
                 </div>`;
             totalAmountEl.textContent = '0 đ';
             totalCountEl.textContent = '0 vụ';
             badgeEl.classList.add('hidden');
-            if (document.getElementById('hc-risk-level')) document.getElementById('hc-risk-level').textContent = 'An toàn';
             return;
         }
 
@@ -15570,93 +15526,75 @@ const HumanClaims = {
         totalCountEl.textContent = `${history.length} vụ`;
         
         let totalSum = 0;
-        history.forEach(r => totalSum += (parseInt(r.totalAmount) || 0));
+        history.forEach(r => totalSum += (r.totalAmount || 0));
         totalAmountEl.textContent = `${totalSum.toLocaleString('vi-VN')} đ`;
 
-        // Tính toán mức độ rủi ro (Nâng cấp logic chuyên nghiệp hơn)
-        const riskLevelEl = document.getElementById('hc-risk-level');
-        const riskBoxEl = document.getElementById('hc-risk-box');
-        if (riskLevelEl && riskBoxEl) {
-            riskBoxEl.classList.remove('bg-indigo-600', 'bg-rose-600', 'bg-amber-500', 'bg-emerald-600');
-            if (history.length >= 5 || totalSum > 20000000) {
-                riskLevelEl.textContent = 'Rủi ro rất cao';
-                riskBoxEl.classList.add('bg-rose-600');
-            } else if (history.length >= 3 || totalSum > 10000000) {
-                riskLevelEl.textContent = 'Rủi ro trung bình';
-                riskBoxEl.classList.add('bg-amber-500');
-            } else if (history.length > 0) {
-                riskLevelEl.textContent = 'Rủi ro thấp';
-                riskBoxEl.classList.add('bg-indigo-600');
-            } else {
-                riskLevelEl.textContent = 'An toàn';
-                riskBoxEl.classList.add('bg-emerald-600');
-            }
-        }
-
-        listEl.innerHTML = history.map(r => {
-            const isCurrent = r.id === this._currentId;
-            return `
-            <div class="group relative bg-white border ${isCurrent ? 'border-indigo-400 ring-2 ring-indigo-50' : 'border-slate-200'} rounded-2xl p-5 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all duration-300 overflow-hidden">
-                ${isCurrent ? '<div class="absolute top-0 right-0 bg-indigo-600 text-white text-[8px] font-black px-3 py-1 rounded-bl-xl uppercase tracking-widest z-20">Hồ sơ hiện tại</div>' : ''}
+        listEl.innerHTML = history.map(r => `
+            <div class="group bg-white border border-slate-200 rounded-[1.5rem] p-6 shadow-sm hover:shadow-xl hover:border-indigo-200 transition-all duration-300 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-50/30 rounded-full -mr-16 -mt-16 transition-all group-hover:scale-150"></div>
                 
                 <div class="relative z-10">
-                    <div class="flex items-start justify-between mb-5">
+                    <div class="flex items-start justify-between mb-6">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 ${isCurrent ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500'} rounded-2xl flex items-center justify-center shadow-inner transition-colors group-hover:bg-indigo-600 group-hover:text-white">
-                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <div class="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             </div>
                             <div>
-                                <h4 class="text-sm font-black text-slate-800 uppercase tracking-tight mb-1">${r.claimNo || 'CHƯA CÓ SỐ'}</h4>
+                                <h4 class="text-base font-black text-slate-800 uppercase tracking-tight leading-none mb-1.5">${r.claimNo || 'CHƯA CÓ SỐ HSBT'}</h4>
                                 <div class="flex items-center gap-2">
-                                    <span class="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border border-slate-200 bg-slate-50 text-slate-500">
-                                        ${r.createdAt ? moment(r.createdAt).format('DD/MM/YYYY') : '—'}
-                                    </span>
+                                    <span class="px-2.5 py-0.5 bg-slate-100 text-slate-500 rounded-md text-[9px] font-black uppercase tracking-wider border border-slate-200/50">ID: ${r.id.substring(r.id.length - 6)}</span>
+                                    <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+                                    <span class="text-[10px] font-bold text-slate-400">${moment(r.createdAt).format('DD/MM/YYYY')}</span>
                                 </div>
                             </div>
                         </div>
                         <div class="text-right">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-2 shadow-sm border" 
-                                  style="background:${this.STATUS_LABELS[r.status]?.bg || '#f1f5f9'}; color:${this.STATUS_LABELS[r.status]?.color || '#64748b'}; border-color:${this.STATUS_LABELS[r.status]?.border || '#e2e8f0'}">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 shadow-sm border border-white/20" 
+                                  style="background:${this.STATUS_LABELS[r.status]?.color}; color:#fff">
+                                <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
                                 ${this.STATUS_LABELS[r.status]?.text || 'Mới'}
                             </span>
-                            <p class="text-xl font-black text-slate-900 tracking-tighter">${Number(r.totalAmount || 0).toLocaleString('vi-VN')}<span class="text-[11px] text-slate-400 ml-1 font-bold">đ</span></p>
+                            <p class="text-2xl font-black text-slate-900 tracking-tighter">${Number(r.totalAmount || 0).toLocaleString('vi-VN')}<span class="text-xs text-slate-400 ml-1">VND</span></p>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 mb-5">
-                        <div class="p-3 bg-slate-50/80 rounded-xl border border-slate-100 transition-colors group-hover:bg-indigo-50/30">
-                            <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> Ngày tai nạn
-                            </p>
-                            <p class="text-xs font-black text-slate-700">${r.accDate ? moment(r.accDate).format('DD/MM/YYYY') : '—'}</p>
+                    <div class="grid grid-cols-4 gap-6 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <div class="space-y-1">
+                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">Ngày tai nạn</p>
+                            <div class="flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                <span class="text-xs font-black text-slate-700">${r.accDate ? moment(r.accDate).format('DD/MM/YYYY') : '—'}</span>
+                            </div>
                         </div>
-                        <div class="p-3 bg-slate-50/80 rounded-xl border border-slate-100 transition-colors group-hover:bg-indigo-50/30">
-                            <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Loại tổn thất
-                            </p>
-                            <p class="text-xs font-black text-rose-600 truncate">${r.lossType || '—'}</p>
+                        <div class="space-y-1">
+                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">Loại tổn thất</p>
+                            <div class="flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                <span class="text-xs font-black text-slate-700">${r.lossType || '—'}</span>
+                            </div>
+                        </div>
+                        <div class="col-span-2 space-y-1 border-l border-slate-200 pl-6">
+                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">Nơi điều trị</p>
+                            <div class="flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5"/></svg>
+                                <span class="text-xs font-black text-slate-700 truncate" title="${r.hospitalName || ''}">${r.hospitalName || '—'}</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-                        <div class="flex flex-col gap-1 overflow-hidden pr-4">
-                            <div class="flex items-center gap-1.5">
-                                <svg class="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                                <span class="text-[10px] font-bold text-slate-600 truncate" title="${r.hospitalName || ''}">${r.hospitalName || 'Nơi điều trị: —'}</span>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <svg class="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <span class="text-[10px] font-medium text-slate-500 italic truncate" title="${r.injuryDesc || ''}">${r.injuryDesc || '—'}</span>
-                            </div>
+                    <div class="mt-4 flex items-center justify-between px-1">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <span class="text-[11px] font-bold text-slate-500 italic truncate max-w-[400px]" title="${r.injuryDesc || ''}">${r.injuryDesc || '—'}</span>
                         </div>
                         <button onclick="event.stopPropagation(); HumanClaims.showHistoryDetail('${r.id}')" 
-                                class="shrink-0 h-10 px-4 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-lg active:scale-95 flex items-center justify-center">
-                            Chi tiết
+                                class="flex items-center gap-1.5 px-4 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-md active:scale-95">
+                            Chi tiết <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M9 5l7 7-7 7"/></svg>
                         </button>
                     </div>
                 </div>
-            </div>`;
-        }).join('');
+            </div>
+        `).join('');
     },
 
     showHistoryDetail(id) {
