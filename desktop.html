@@ -15454,8 +15454,13 @@ const HumanClaims = {
         if (!container || !listEl) return;
 
         // Lọc các vụ bồi thường có cùng GCN (trừ vụ hiện tại nếu đang sửa)
-        // Chỉ lọc nếu gcn không rỗng để tránh trùng lặp dữ liệu rác
-        const history = (this._data || []).filter(r => gcn && r.gcn === gcn && r.id !== this._currentId);
+        // Chuẩn hóa GCN để so sánh chính xác hơn
+        const normGCN = (s) => String(s || '').trim().toUpperCase();
+        const targetGCN = normGCN(gcn);
+
+        const history = (this._data || []).filter(r => {
+            return targetGCN && normGCN(r.gcn) === targetGCN && r.id !== this._currentId;
+        });
         
         if (history.length === 0) {
             container.classList.add('hidden');
@@ -15916,6 +15921,9 @@ const HumanClaims = {
 
         this._updateUIStatus(r.status || 'new');
         this.renderImages(r.images || []);
+
+        // Nạp lịch sử tổn thất nếu có GCN
+        if (r.gcn) this.renderInsuredHistory(r.gcn);
     },
 
     /* ── VietQR Payment ── */
