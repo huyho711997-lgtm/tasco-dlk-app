@@ -15539,7 +15539,6 @@ const HumanClaims = {
         const actionButtons = [
             document.getElementById('btn-hc-ocr-medical'),
             document.getElementById('btn-hc-ocr-cccd'),
-            document.getElementById('btn-hc-upload-imgs'),
             document.getElementById('btn-hc-save'),
             document.getElementById('btn-hc-save-close'),
             document.getElementById('btn-hc-manual-select'),
@@ -15550,16 +15549,28 @@ const HumanClaims = {
 
         actionButtons.forEach(btn => {
             if (btn) {
-                btn.disabled = isLocked;
-                if (isLocked) {
-                    btn.style.opacity = '0.5';
-                    btn.style.pointerEvents = 'none';
-                } else {
-                    btn.style.opacity = '1';
-                    btn.style.pointerEvents = 'auto';
-                }
+                if (isLocked) btn.classList.add('hidden');
+                else btn.classList.remove('hidden');
             }
         });
+        
+        const saveCloseBtn = document.getElementById('btn-hc-save-close');
+        if (saveCloseBtn) {
+            saveCloseBtn.classList.remove('hidden');
+            if (isLocked) {
+                saveCloseBtn.innerHTML = `
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    ĐÓNG (HS ĐÃ KHÓA)
+                `;
+                saveCloseBtn.classList.replace('bg-indigo-600', 'bg-slate-600');
+            } else {
+                saveCloseBtn.innerHTML = `
+                    <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    LƯU & THOÁT
+                `;
+                saveCloseBtn.classList.replace('bg-slate-600', 'bg-indigo-600');
+            }
+        }
 
         // Hiện nút Email khi ở các trạng thái cần gửi mail (đến bước Đang xin nguồn)
         const btnEmail = document.getElementById('btn-hc-email');
@@ -15605,6 +15616,8 @@ const HumanClaims = {
 
     /* ── Lưu Dữ liệu ── */
     async saveData() {
+        if (this._isLocked) return;
+        
         const getVal = id => { 
             const el = document.getElementById(id); 
             if (!el) return '';
