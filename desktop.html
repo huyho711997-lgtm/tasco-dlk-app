@@ -20547,7 +20547,7 @@ var Contracts = {
                 var workbook = XLSX.read(data, {type: 'array'});
                 var firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 
-                // Đọc dưới dạng mảng 2 chiều để lấy đúng thứ tự cột, bỏ qua dòng tiêu đề
+                // Đọc dưới dạng mảng 2 chiều để xử lý logic đa dòng
                 var rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: "" });
                 var dataRows = rows.slice(1); 
 
@@ -20557,56 +20557,97 @@ var Contracts = {
 
                 var parseMoney = (val) => {
                     if (!val) return null;
-                    var num = parseInt(String(val).replace(/[^\d]/g, ''));
-                    return isNaN(num) ? null : num;
+                    // Xử lý định dạng VN: 8.000.000,00 -> 8000000
+                    var s = String(val).replace(/\./g, '').replace(',', '.');
+                    var num = parseFloat(s);
+                    return isNaN(num) ? null : Math.round(num);
                 };
 
-                dataRows.forEach((r, i) => {
-                    var hdNo = String(r[0] || '').trim();
-                    if (!hdNo) return; // Bỏ qua dòng trống
+                var people = [];
+                var currentPerson = null;
+                var lastHdNo = "";
 
+                // Giai đoạn 1: Gom nhóm dữ liệu đa dòng thành danh sách đối tượng người ĐBH
+                dataRows.forEach(r => {
+                    var hdNo = String(r[0] || '').trim();
                     var gcn = String(r[1] || '').trim();
                     var rawName = String(r[2] || '').trim();
-                    
-                    // Tách tên từ định dạng "[Mã] Tên", ví dụ: "[1925146] Phạm Thị Tuyết" -> "Phạm Thị Tuyết"
-                    var name = rawName;
-                    var nameMatch = rawName.match(/\]\s*(.*)/);
-                    if (nameMatch && nameMatch[1]) {
-                        name = nameMatch[1].trim();
-                    }
+                    var limitVal = parseMoney(r[3]);
+                    var scopeText = String(r[4] || '').toLowerCase();
 
-                    var limitA = parseMoney(r[3]);
-                    var limitB = parseMoney(r[4]);
-                    var limitC = parseMoney(r[5]);
-                    var limitD = parseMoney(r[6]);
-
-                    // Tìm hợp đồng trong hệ thống dựa vào số HĐ
-                    var contract = this._data.find(c => c.no === hdNo);
-                    
-                    if (contract) {
-                        // Tạo ID ngẫu nhiên cho học sinh/người ĐBH
-                        var stuKey = 's_' + Date.now() + '_' + i + '_' + Math.random().toString(36).substr(2, 4);
-                        var path = `Contracts/${contract._id}/students/${stuKey}`;
+                    // Nếu có Tên mới hoặc GCN mới -> Bắt đầu một người mới
+                    if (rawName || gcn) {
+                        if (hdNo) lastHdNo = hdNo;
                         
-                        updates[path] = {
-                            name: name,
+                        var name = rawName;
+                        var nameMatch = rawName.match(/\]\s*(.*)/);
+                        if (nameMatch && nameMatch[1]) name = nameMatch[1].trim();
+
+                        currentPerson = {
+                            hdNo: lastHdNo,
                             gcn: gcn,
-                            rawInfo: rawName, // Lưu lại mã cũ phòng trường hợp cần tra cứu
-                            lvlA: limitA,
-                            lvlB: limitB,
-                            lvlC: limitC,
-                            lvlD: limitD
+                            name: name,
+                            rawInfo: rawName,
+                            lvlA: null, lvlB: null, lvlC: null, lvlD: null
                         };
-                        countSuccess++;
-                    } else {
-                        notFoundContracts.add(hdNo);
+                        people.push(currentPerson);
+                    }
+                    
+                    if (currentPerson) {
+                        if (scopeText.includes('phạm vi bảo hiểm a')) currentPerson.lvlA = limitVal;
+                        else if (scopeText.includes('phạm vi bảo hiểm b')) currentPerson.lvlB = limitVal;
+                        else if (scopeText.includes('phạm vi bảo hiểm c')) currentPerson.lvlC = limitVal;
+                        else if (scopeText.includes('phạm vi bảo hiểm d')) currentPerson.lvlD = limitVal;
                     }
                 });
 
+                // Giai đoạn 2: Ánh xạ vào Hợp đồng và chuẩn bị lệnh update Firebase
+                var contractLimitUpdates = {}; // Dùng để cập nhật mức TN chung của Hợp đồng
+
+                people.forEach(p => {
+                    if (!p.hdNo) return;
+                    var contract = this._data.find(c => c.no === p.hdNo);
+                    
+                    if (contract) {
+                        // Cập nhật mức TN cho Hợp đồng (lấy từ dữ liệu của người đầu tiên trong file)
+                        if (!contractLimitUpdates[contract._id]) {
+                            contractLimitUpdates[contract._id] = {
+                                lvlA: p.lvlA, lvlB: p.lvlB, lvlC: p.lvlC, lvlD: p.lvlD
+                            };
+                        }
+
+                        // Tạo Key duy nhất cho học sinh dựa trên GCN để tránh trùng lặp
+                        var stuKey = p.gcn ? p.gcn.replace(/[\.\#\$\/\[\]]/g, '_') : ('s_' + Math.random().toString(36).substr(2, 5));
+                        var path = `Contracts/${contract._id}/students/${stuKey}`;
+                        
+                        updates[path] = {
+                            name: p.name,
+                            gcn: p.gcn,
+                            rawInfo: p.rawInfo,
+                            lvlA: p.lvlA,
+                            lvlB: p.lvlB,
+                            lvlC: p.lvlC,
+                            lvlD: p.lvlD
+                        };
+                        countSuccess++;
+                    } else {
+                        notFoundContracts.add(p.hdNo);
+                    }
+                });
+
+                // Bổ sung các lệnh cập nhật mức TN vào Hợp đồng
+                for (let cid in contractLimitUpdates) {
+                    const l = contractLimitUpdates[cid];
+                    updates[`Contracts/${cid}/lvlA`] = l.lvlA;
+                    updates[`Contracts/${cid}/lvlB`] = l.lvlB;
+                    updates[`Contracts/${cid}/lvlC`] = l.lvlC;
+                    updates[`Contracts/${cid}/lvlD`] = l.lvlD;
+                }
+
                 if (countSuccess === 0) {
                     var errorMsg = notFoundContracts.size > 0 
-                        ? `Hệ thống không tìm thấy các Số Hợp đồng này trong cơ sở dữ liệu: <br><b class="text-rose-500">${Array.from(notFoundContracts).slice(0, 3).join(', ')}...</b>`
-                        : `File Excel trống hoặc sai cấu trúc cột (Cột A phải là Số HĐBH).`;
+                        ? `Hệ thống không tìm thấy các Số Hợp đồng này: <br><b class="text-rose-500">${Array.from(notFoundContracts).slice(0, 3).join(', ')}...</b>`
+                        : `File Excel trống hoặc sai cấu trúc cột.`;
                         
                     Swal.fire({icon: 'error', title: 'Không nạp được dữ liệu', html: errorMsg, customClass: {popup:'rnd'}});
                     return;
@@ -20616,14 +20657,15 @@ var Contracts = {
                 
                 await db.ref().update(updates);
                 
-                var successMsg = `Đã import thành công <b>${countSuccess}</b> người vào các hợp đồng.`;
+                var successMsg = `Đã import thành công <b>${countSuccess}</b> người và cập nhật mức trách nhiệm cho <b>${Object.keys(contractLimitUpdates).length}</b> hợp đồng.`;
                 if (notFoundContracts.size > 0) {
-                    successMsg += `<br><br><span class="text-amber-600 text-xs">⚠️ Bỏ qua ${notFoundContracts.size} Số HĐ không tồn tại trong hệ thống.</span>`;
+                    successMsg += `<br><br><span class="text-amber-600 text-xs">⚠️ Bỏ qua ${notFoundContracts.size} Số HĐ không tồn tại.</span>`;
                 }
 
                 Swal.fire({icon: 'success', title: 'Hoàn tất!', html: successMsg, customClass: {popup:'rnd'}});
 
             } catch (err) {
+                console.error(err);
                 Swal.fire({icon: 'error', title: 'Lỗi xử lý file', text: err.message, customClass: {popup:'rnd'}});
             }
         };
