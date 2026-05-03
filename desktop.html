@@ -2126,15 +2126,31 @@ textarea.inp { resize:vertical; }
         </div>
       </div>
 
-        <!-- Tab Navigation -->
-        <div class="px-6 py-2 bg-slate-50 border-b border-slate-200 flex items-center gap-6 shrink-0">
-          <button id="hc-btn-tab-form" onclick="HumanClaims.switchTab('form')" class="pb-2 border-b-2 border-indigo-600 text-indigo-600 text-xs font-black uppercase tracking-widest transition-all">
-            Thông tin hồ sơ
-          </button>
-          <button id="hc-btn-tab-history" onclick="HumanClaims.switchTab('history')" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-600 text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2">
-            Lịch sử tổn thất
-            <span id="hc-tab-history-badge" class="bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded-full text-[9px] hidden">0</span>
-          </button>
+        <!-- Modern Segmented Tab Navigation -->
+        <div class="px-6 py-4 bg-white border-b border-slate-100 flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-2xl w-fit border border-slate-200/50 shadow-inner">
+            <button id="hc-btn-tab-form" onclick="HumanClaims.switchTab('form')" 
+                    class="flex items-center gap-2.5 px-6 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300
+                           bg-white text-indigo-600 shadow-sm border border-slate-200/50">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              Hồ sơ bồi thường
+            </button>
+            <button id="hc-btn-tab-history" onclick="HumanClaims.switchTab('history')" 
+                    class="flex items-center gap-2.5 px-6 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300
+                           text-slate-500 hover:text-slate-700 hover:bg-white/50">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Lịch sử tổn thất
+              <span id="hc-tab-history-badge" class="bg-rose-500 text-white px-2 py-0.5 rounded-full text-[9px] font-black hidden shadow-sm shadow-rose-200 ring-2 ring-white">0</span>
+            </button>
+          </div>
+          
+          <div class="flex items-center gap-3">
+             <div id="hc-m-ai-status" class="hidden flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-100 animate__pulse">
+                <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                <span class="text-[10px] font-black uppercase tracking-tighter">AI Processing</span>
+             </div>
+             <span id="hc-m-status-badge" class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-lg">Mới tạo</span>
+          </div>
         </div>
 
         <div class="flex-1 overflow-y-auto p-6" id="hc-m-body">
@@ -15400,12 +15416,14 @@ const HumanClaims = {
             const btn = document.getElementById(`hc-btn-tab-${t}`);
             const content = document.getElementById(`hc-tab-${t}`);
             if (t === tabId) {
-                btn.classList.replace('border-transparent', 'border-indigo-600');
-                btn.classList.replace('text-slate-400', 'text-indigo-600');
+                // Active classes
+                btn.classList.add('bg-white', 'text-indigo-600', 'shadow-sm', 'border', 'border-slate-200/50');
+                btn.classList.remove('text-slate-500', 'hover:text-slate-700', 'hover:bg-white/50');
                 content.classList.remove('hidden');
             } else {
-                btn.classList.replace('border-indigo-600', 'border-transparent');
-                btn.classList.replace('text-indigo-600', 'text-slate-400');
+                // Inactive classes
+                btn.classList.remove('bg-white', 'text-indigo-600', 'shadow-sm', 'border', 'border-slate-200/50');
+                btn.classList.add('text-slate-500', 'hover:text-slate-700', 'hover:bg-white/50');
                 content.classList.add('hidden');
             }
         });
@@ -15514,43 +15532,67 @@ const HumanClaims = {
         totalAmountEl.textContent = `${totalSum.toLocaleString('vi-VN')} đ`;
 
         listEl.innerHTML = history.map(r => `
-            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border-l-4 border-l-rose-500">
-                <div class="flex items-start justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600 shrink-0">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div class="group bg-white border border-slate-200 rounded-[1.5rem] p-6 shadow-sm hover:shadow-xl hover:border-indigo-200 transition-all duration-300 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-50/30 rounded-full -mr-16 -mt-16 transition-all group-hover:scale-150"></div>
+                
+                <div class="relative z-10">
+                    <div class="flex items-start justify-between mb-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-base font-black text-slate-800 uppercase tracking-tight leading-none mb-1.5">${r.claimNo || 'CHƯA CÓ SỐ HSBT'}</h4>
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2.5 py-0.5 bg-slate-100 text-slate-500 rounded-md text-[9px] font-black uppercase tracking-wider border border-slate-200/50">ID: ${r.id.substring(r.id.length - 6)}</span>
+                                    <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+                                    <span class="text-[10px] font-bold text-slate-400">${moment(r.createdAt).format('DD/MM/YYYY')}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="text-sm font-black text-slate-800 uppercase tracking-tight">${r.claimNo || 'CHƯA CÓ SỐ HSBT'}</h4>
-                            <div class="flex items-center gap-2 mt-0.5">
-                                <span class="text-[10px] font-bold text-slate-400">Ngày tai nạn:</span>
-                                <span class="text-[10px] font-black text-slate-600">${r.accDate ? moment(r.accDate).format('DD/MM/YYYY') : '—'}</span>
-                                <span class="text-slate-200 mx-1">|</span>
-                                <span class="text-[10px] font-bold text-slate-400">Loại:</span>
-                                <span class="text-[10px] font-black text-rose-600 uppercase">${r.lossType || '—'}</span>
+                        <div class="text-right">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 shadow-sm border border-white/20" 
+                                  style="background:${this.STATUS_LABELS[r.status]?.color}; color:#fff">
+                                <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                                ${this.STATUS_LABELS[r.status]?.text || 'Mới'}
+                            </span>
+                            <p class="text-2xl font-black text-slate-900 tracking-tighter">${Number(r.totalAmount || 0).toLocaleString('vi-VN')}<span class="text-xs text-slate-400 ml-1">VND</span></p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-6 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <div class="space-y-1">
+                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">Ngày tai nạn</p>
+                            <div class="flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                <span class="text-xs font-black text-slate-700">${r.accDate ? moment(r.accDate).format('DD/MM/YYYY') : '—'}</span>
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">Loại tổn thất</p>
+                            <div class="flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                <span class="text-xs font-black text-slate-700">${r.lossType || '—'}</span>
+                            </div>
+                        </div>
+                        <div class="col-span-2 space-y-1 border-l border-slate-200 pl-6">
+                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">Nơi điều trị</p>
+                            <div class="flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5"/></svg>
+                                <span class="text-xs font-black text-slate-700 truncate" title="${r.hospitalName || ''}">${r.hospitalName || '—'}</span>
                             </div>
                         </div>
                     </div>
-                    <div class="text-right">
-                        <span class="inline-block px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider mb-2" 
-                              style="background:${this.STATUS_LABELS[r.status]?.color}20; color:${this.STATUS_LABELS[r.status]?.color}">
-                            ${this.STATUS_LABELS[r.status]?.text || 'Mới'}
-                        </span>
-                        <p class="text-lg font-black text-slate-800">${Number(r.totalAmount || 0).toLocaleString('vi-VN')} <span class="text-xs text-slate-400">VND</span></p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-50">
-                    <div class="flex flex-col">
-                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Nơi điều trị</span>
-                        <span class="text-[11px] font-bold text-slate-700 truncate" title="${r.hospitalName || ''}">${r.hospitalName || '—'}</span>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Chẩn đoán / Thương tật</span>
-                        <span class="text-[11px] font-bold text-slate-700 truncate" title="${r.injuryDesc || ''}">${r.injuryDesc || '—'}</span>
-                    </div>
-                    <div class="flex flex-col text-right">
-                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Số ngày nằm viện</span>
-                        <span class="text-[11px] font-black text-indigo-600">${r.days || 0} ngày</span>
+
+                    <div class="mt-4 flex items-center justify-between px-1">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <span class="text-[11px] font-bold text-slate-500 italic truncate max-w-[400px]" title="${r.injuryDesc || ''}">${r.injuryDesc || '—'}</span>
+                        </div>
+                        <button onclick="event.stopPropagation(); HumanClaims.openModal('${r.id}')" 
+                                class="flex items-center gap-1.5 px-4 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-md active:scale-95">
+                            Chi tiết <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M9 5l7 7-7 7"/></svg>
+                        </button>
                     </div>
                 </div>
             </div>
