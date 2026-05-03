@@ -20558,29 +20558,46 @@ var Contracts = {
 
                 for (let i = 0; i < Math.min(rows.length, 50); i++) {
                     let r = rows[i];
+                    if (!r || r.length === 0) continue;
+                    
                     r.forEach((cell, cellIdx) => {
                         let c = norm(cell);
-                        if (c.includes('hợpđồng')) idx.hd = cellIdx;
-                        else if (c.includes('sốgcn') || (c.includes('gcn') && idx.gcn === -1)) idx.gcn = cellIdx;
+                        if (!c) return;
+                        
+                        // Ưu tiên Số HĐ
+                        if (c.includes('hợpđồng') || c === 'sốhđ' || c === 'hđ' || c.includes('mãhđ')) {
+                            idx.hd = cellIdx;
+                        }
+                        // Số GCN
+                        else if (c.includes('sốgcn') || c.includes('gcn') || c.includes('giấychứngnhận')) {
+                            idx.gcn = cellIdx;
+                        }
+                        // Phạm vi & Mức tiền
                         else if (c.includes('phạmvi')) {
-                            // Cột chứa từ "phạm vi" có thể là cột mức tiền hoặc tên phạm vi
-                            if (c.includes('mứctn') || c.includes('tiềnbh')) idx.limit = cellIdx;
+                            if (c.includes('mứctn') || c.includes('tiềnbh') || c.includes('quyđổi')) idx.limit = cellIdx;
                             else idx.scope = cellIdx;
                         }
-                        else if (c.includes('bảohiểm') || c.includes('họtên') || c.includes('đốituợng')) {
-                            // Nếu đã là cột phạm vi thì không gán vào tên
+                        // Tên người được BH
+                        else if (c.includes('bảohiểm') || c.includes('họtên') || c.includes('đốituợng') || c.includes('ngườithụhưởng')) {
                             if (idx.name === -1) idx.name = cellIdx;
                         }
                     });
                     
-                    if (idx.hd !== -1 && idx.name !== -1 && idx.scope !== -1) {
+                    // Chỉ cần tìm thấy 3 cột quan trọng nhất là chấp nhận dòng này là Header
+                    if (idx.hd !== -1 && (idx.name !== -1 || idx.gcn !== -1)) {
                         headerIdx = i;
                         break;
                     }
                 }
 
                 if (headerIdx === -1) {
-                    throw new Error("Không tìm thấy các cột cần thiết (Hợp đồng, GCN, Bảo hiểm).");
+                    let found = [];
+                    if (idx.hd !== -1) found.push("Hợp đồng");
+                    if (idx.gcn !== -1) found.push("GCN");
+                    if (idx.name !== -1) found.push("Tên");
+                    if (idx.limit !== -1) found.push("Mức TN");
+                    if (idx.scope !== -1) found.push("Phạm vi");
+                    throw new Error(`Thiếu cột tiêu đề. Đã tìm thấy: <b>${found.join(', ') || 'Trống'}</b>.<br>Cần có ít nhất: Hợp đồng, GCN/Tên.`);
                 }
 
                 var dataRows = rows.slice(headerIdx + 1);
