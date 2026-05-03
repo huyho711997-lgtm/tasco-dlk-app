@@ -20549,32 +20549,35 @@ var Contracts = {
                 
                 var rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: "" });
                 
-                // 1. Tìm dòng tiêu đề và xác định vị trí các cột
-                var headerIdx = -1;
-                var idx = { hd: 0, gcn: 1, name: 2, limit: 3, scope: 4 }; // Mặc định theo file mẫu
+                // Hàm chuẩn hóa chuỗi để so sánh
+                var norm = (t) => String(t || '').normalize('NFC').toLowerCase().replace(/\s/g, '');
 
-                for (let i = 0; i < Math.min(rows.length, 20); i++) {
+                // 1. Tìm dòng tiêu đề
+                var headerIdx = -1;
+                var idx = { hd: -1, gcn: -1, name: -1, limit: -1, scope: -1 };
+
+                for (let i = 0; i < Math.min(rows.length, 50); i++) {
                     let r = rows[i];
-                    let isHeader = r.some(cell => {
-                        let c = String(cell).toLowerCase();
-                        return c.includes('hợp đồng') || c.includes('gcn') || c.includes('đối tượng bảo hiểm');
+                    r.forEach((cell, cellIdx) => {
+                        let c = norm(cell);
+                        if (c.includes('hợpđồng')) idx.hd = cellIdx;
+                        if (c.includes('sốgcn') || (c.includes('gcn') && idx.gcn === -1)) idx.gcn = cellIdx;
+                        if (c.includes('bảohiểm') || c.includes('họtên')) idx.name = cellIdx;
+                        if (c.includes('mứctn') || c.includes('tiềnbh')) idx.limit = cellIdx;
+                        if (c.includes('phạmvi')) idx.scope = cellIdx;
                     });
-                    if (isHeader) {
+                    
+                    if (idx.hd !== -1 && (idx.name !== -1 || idx.gcn !== -1)) {
                         headerIdx = i;
-                        // Cố gắng bắt chính xác index dựa trên từ khóa
-                        r.forEach((cell, cellIdx) => {
-                            let c = String(cell).toLowerCase();
-                            if (c.includes('hợp đồng')) idx.hd = cellIdx;
-                            else if (c.includes('gcn')) idx.gcn = cellIdx;
-                            else if (c.includes('đối tượng bảo hiểm')) idx.name = cellIdx;
-                            else if (c.includes('mức tn') || c.includes('số tiền bh')) idx.limit = cellIdx;
-                            else if (c.includes('phạm vi')) idx.scope = cellIdx;
-                        });
                         break;
                     }
                 }
 
-                var dataRows = headerIdx !== -1 ? rows.slice(headerIdx + 1) : rows;
+                if (headerIdx === -1) {
+                    throw new Error("Không tìm thấy các cột cần thiết (Hợp đồng, GCN, Bảo hiểm).");
+                }
+
+                var dataRows = rows.slice(headerIdx + 1);
                 dataRows = dataRows.filter(r => r.some(cell => String(cell).trim() !== ""));
 
                 var parseMoney = (val) => {
@@ -20589,16 +20592,14 @@ var Contracts = {
                 var currentPerson = null;
                 var lastHdNo = "";
 
-                // Giai đoạn 1: Gom nhóm dữ liệu đa dòng
                 dataRows.forEach(r => {
-                    var hdNo = String(r[idx.hd] || '').trim();
-                    var gcn = String(r[idx.gcn] || '').trim();
-                    var rawName = String(r[idx.name] || '').trim();
-                    var limitVal = parseMoney(r[idx.limit]);
-                    var scopeText = String(r[idx.scope] || '').toLowerCase();
+                    var hdNo = idx.hd !== -1 ? String(r[idx.hd] || '').trim() : "";
+                    var gcn = idx.gcn !== -1 ? String(r[idx.gcn] || '').trim() : "";
+                    var rawName = idx.name !== -1 ? String(r[idx.name] || '').trim() : "";
+                    var limitVal = idx.limit !== -1 ? parseMoney(r[idx.limit]) : null;
+                    var scopeText = idx.scope !== -1 ? norm(r[idx.scope]) : "";
 
-                    // Nếu có Tên mới hoặc GCN mới hoặc Số HĐ mới -> Coi như người mới
-                    // Lưu ý: Trong file mẫu đa dòng, các dòng phụ sẽ có Name và GCN trống
+                    // Nếu có thông tin chính mới -> Người mới
                     if (rawName || gcn || (hdNo && hdNo !== lastHdNo)) {
                         if (hdNo) lastHdNo = hdNo;
                         
@@ -20607,24 +20608,20 @@ var Contracts = {
                         if (nameMatch && nameMatch[1]) name = nameMatch[1].trim();
 
                         currentPerson = {
-                            hdNo: lastHdNo,
-                            gcn: gcn,
-                            name: name,
-                            rawInfo: rawName,
+                            hdNo: lastHdNo, gcn: gcn, name: name, rawInfo: rawName,
                             lvlA: null, lvlB: null, lvlC: null, lvlD: null
                         };
                         people.push(currentPerson);
                     }
                     
                     if (currentPerson) {
-                        if (scopeText.includes('phạm vi bảo hiểm a')) currentPerson.lvlA = limitVal;
-                        else if (scopeText.includes('phạm vi bảo hiểm b')) currentPerson.lvlB = limitVal;
-                        else if (scopeText.includes('phạm vi bảo hiểm c')) currentPerson.lvlC = limitVal;
-                        else if (scopeText.includes('phạm vi bảo hiểm d')) currentPerson.lvlD = limitVal;
+                        if (scopeText.includes('phạmvia')) currentPerson.lvlA = limitVal;
+                        else if (scopeText.includes('phạmvib')) currentPerson.lvlB = limitVal;
+                        else if (scopeText.includes('phạmvic')) currentPerson.lvlC = limitVal;
+                        else if (scopeText.includes('phạmvid')) currentPerson.lvlD = limitVal;
                     }
                 });
 
-                // Giai đoạn 2: Ánh xạ và Update
                 var updates = {};
                 var countSuccess = 0;
                 var notFoundContracts = new Set();
@@ -20632,18 +20629,14 @@ var Contracts = {
 
                 people.forEach(p => {
                     if (!p.hdNo) return;
-                    var contract = this._data.find(c => 
-                        String(c.no || '').trim().toLowerCase() === String(p.hdNo).toLowerCase()
-                    );
+                    var contract = this._data.find(c => norm(c.no) === norm(p.hdNo));
                     
                     if (contract) {
                         if (!contractLimitUpdates[contract._id]) {
                             contractLimitUpdates[contract._id] = { lvlA: p.lvlA, lvlB: p.lvlB, lvlC: p.lvlC, lvlD: p.lvlD };
                         }
-
                         var stuKey = p.gcn ? p.gcn.replace(/[\.\#\$\/\[\]]/g, '_') : ('s_' + Math.random().toString(36).substr(2, 5));
                         var path = `Contracts/${contract._id}/students/${stuKey}`;
-                        
                         updates[path] = {
                             name: p.name, gcn: p.gcn, rawInfo: p.rawInfo,
                             lvlA: p.lvlA, lvlB: p.lvlB, lvlC: p.lvlC, lvlD: p.lvlD
@@ -20665,7 +20658,8 @@ var Contracts = {
                 if (countSuccess === 0) {
                     var detailErr = notFoundContracts.size > 0 
                         ? `Không tìm thấy ${notFoundContracts.size} Số HĐ trong hệ thống (Ví dụ: ${Array.from(notFoundContracts)[0]})`
-                        : `Không tìm thấy dữ liệu hợp lệ trong file (Số HĐ hoặc Tên trống).`;
+                        : `Không tìm thấy dữ liệu hợp lệ (Dòng dữ liệu trống hoặc không khớp cột).`;
+                    detailErr += `<br><small style='color:#94a3b8'>Cột phát hiện: HĐ:${idx.hd}, GCN:${idx.gcn}, Tên:${idx.name}</small>`;
                     throw new Error(detailErr);
                 }
 
@@ -20680,12 +20674,11 @@ var Contracts = {
 
             } catch (err) {
                 console.error("Lỗi Import:", err);
-                Swal.fire({icon: 'error', title: 'Không nạp được dữ liệu', html: `<p style="font-size:13px;">${err.message}</p>`, customClass: {popup:'rnd'}});
+                Swal.fire({icon: 'error', title: 'Lỗi nạp dữ liệu', html: `<p style="font-size:13px;text-align:left;"><b>Chi tiết:</b> ${err.message}</p>`, customClass: {popup:'rnd'}});
             }
         };
         reader.readAsArrayBuffer(file);
     }
-
 };
 
 </script>
