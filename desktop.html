@@ -15613,6 +15613,13 @@ const HumanClaims = {
                 db.ref('HumanClaims/' + this._currentId).update({ status: newStatus, updatedAt: new Date().toISOString() }).then(() => {
                     Toast.fire({icon:'success', title:'Đã chuyển trạng thái!'});
                     this._updateUIStatus(newStatus);
+                    
+                    // Cập nhật local data và render lại ảnh để ẩn/hiện nút xóa đồng bộ
+                    const rec = this._data.find(r => r.id === this._currentId);
+                    if (rec) {
+                        rec.status = newStatus;
+                        this.renderImages(rec.images || []);
+                    }
                 });
             }
         });
