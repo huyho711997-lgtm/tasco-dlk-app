@@ -2397,6 +2397,7 @@ textarea.inp { resize:vertical; }
                 <div class="flex items-center gap-2 mb-5 relative z-10">
                     <div class="w-1.5 h-4 bg-emerald-500 rounded-full shadow-sm shadow-emerald-500/40"></div>
                     <p class="text-[11px] font-black text-emerald-800 uppercase tracking-widest">Giá trị chi trả</p>
+                    <span id="hc-calc-muc" class="ml-auto px-2 py-0.5 bg-white/60 text-emerald-700 rounded-lg text-[10px] font-black border border-emerald-200/50 shadow-sm hidden"></span>
                 </div>
 
                 <div class="space-y-3.5 mb-5 relative z-10">
@@ -15156,7 +15157,7 @@ const HumanClaims = {
                 to: 'banxcg@tasco.com.vn',
                 cc: '',
                 subjectTemplate: '[TASCO ĐẮK LẮK] Xin cấp số HSBT - NĐBH: {{NDBH}} - HĐ: {{HD}}',
-                bodyTemplate: 'Kính gửi Ban XCG & Con Người,\n\nĐơn vị Tasco Đắk Lắk xin cấp số HSBT cho trường hợp phát sinh trong năm {{YEAR}}:\n\n- Người được bảo hiểm: {{NDBH}}\n- Số hợp đồng/GCN: {{HD}}\n- Ước tính bồi thường: {{TOTAL}}\n\nKính mong Quý Ban xem xét và cấp số để đơn vị tiếp tục thụ lý.\n\nTrân trọng cảm ơn.'
+                bodyTemplate: 'Kính gửi Ban XCG & Con Người,\n\nĐơn vị Tasco Đắk Lắk xin cấp số HSBT cho trường hợp phát sinh trong năm {{YEAR}}:\n\n- Người được bảo hiểm: {{NDBH}}\n- Số hợp đồng/GCN: {{HD}}\n- Điều kiện bồi thường: {{MUC}}\n- Ước tính bồi thường: {{TOTAL}}\n\nKính mong Quý Ban xem xét và cấp số để đơn vị tiếp tục thụ lý.\n\nTrân trọng cảm ơn.'
             };
         });
 
@@ -15257,6 +15258,10 @@ const HumanClaims = {
                             <div class="flex items-center justify-between border-b border-indigo-100/30 pb-1">
                                 <span class="text-[11px] text-slate-500 font-bold">Người gửi (Bạn)</span>
                                 <code class="text-[10px] bg-white px-1.5 py-0.5 rounded border border-indigo-200 text-indigo-600 font-black">{{SENDER}}</code>
+                            </div>
+                            <div class="flex items-center justify-between border-b border-indigo-100/30 pb-1">
+                                <span class="text-[11px] text-slate-500 font-bold">Mức bồi thường</span>
+                                <code class="text-[10px] bg-white px-1.5 py-0.5 rounded border border-indigo-200 text-indigo-600 font-black">{{MUC}}</code>
                             </div>
                         </div>
                     </div>
@@ -16322,6 +16327,7 @@ const HumanClaims = {
 
     calculateTotal() {
         // Lấy các mức trách nhiệm
+        const limitA = parseInt(document.getElementById('hc-limitA').value.replace(/[^\d]/g, '')) || 0;
         const limitB = parseInt(document.getElementById('hc-limitB').value.replace(/[^\d]/g, '')) || 0;
         const limitC = parseInt(document.getElementById('hc-limitC').value.replace(/[^\d]/g, '')) || 0;
         const limitD = parseInt(document.getElementById('hc-limitD').value.replace(/[^\d]/g, '')) || 0;
@@ -16332,21 +16338,33 @@ const HumanClaims = {
         const days = parseInt(document.getElementById('hc-days').value) || 0;
         const method = document.getElementById('hc-treatmentMethod').value;
 
-        // 1. Tính tiền Thương tật hoặc Phẫu thuật
+        // Xử lý xác định các Mức (A, B, C, D)
+        let mucs = [];
+
+        // 1. Tính tiền Thương tật hoặc Phẫu thuật hoặc Tử vong
         let valInjuryOrSurgery = 0;
         if (lossType === 'Thương tật') {
             valInjuryOrSurgery = Math.round(limitB * (pct / 100));
+            mucs.push('B');
         } else if (lossType === 'Phẫu thuật') {
             valInjuryOrSurgery = Math.round(limitC * (pct / 100));
+            mucs.push('C');
         } else if (lossType === 'Tử vong') {
-            // Nếu có mức A cho tử vong thì tính mức A, ở đây tạm tính theo mức B hoặc C tùy quy tắc của anh
-            valInjuryOrSurgery = limitB; 
+            const accDate = document.getElementById('hc-accDate').value;
+            if (accDate) {
+                valInjuryOrSurgery = limitB; 
+                mucs.push('B');
+            } else {
+                valInjuryOrSurgery = limitA;
+                mucs.push('A');
+            }
         }
 
         // 2. Tính trợ cấp nằm viện (Mức D)
         // Tây y: 0.5% , Đông y: 0.3%
         const rateHospital = (method === 'Tây y') ? 0.005 : 0.003;
         const valHospital = Math.round(limitD * rateHospital * days);
+        if (days > 0) mucs.push('D');
 
         // 3. Tổng cộng
         const total = valInjuryOrSurgery + valHospital;
@@ -16355,6 +16373,17 @@ const HumanClaims = {
         document.getElementById('hc-calc-injury').textContent = valInjuryOrSurgery.toLocaleString('vi-VN') + ' đ';
         document.getElementById('hc-calc-hospital').textContent = valHospital.toLocaleString('vi-VN') + ' đ';
         document.getElementById('hc-calc-total').innerHTML = total.toLocaleString('vi-VN') + '<span class="text-lg text-emerald-400 ml-1">đ</span>';
+        
+        // Hiển thị Mức
+        const mucEl = document.getElementById('hc-calc-muc');
+        if (mucEl) {
+            if (mucs.length > 0) {
+                mucEl.textContent = 'Mức ' + mucs.join(', ');
+                mucEl.classList.remove('hidden');
+            } else {
+                mucEl.classList.add('hidden');
+            }
+        }
     },
 
     showCoverageInfo() {
@@ -17541,17 +17570,20 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             bodyTemplate: '...'
         };
 
+        const mucText = document.getElementById('hc-calc-muc').textContent || '___';
         const senderName = s.senderName || (currentUser?.name || 'Cán bộ Bồi thường');
 
         let subject = s.subjectTemplate
             .replace(/{{NDBH}}/g, victim)
             .replace(/{{HD}}/g, hdog)
+            .replace(/{{MUC}}/g, mucText)
             .replace(/{{YEAR}}/g, currentYear)
             .replace(/{{SENDER}}/g, senderName);
 
         let body = s.bodyTemplate
             .replace(/{{NDBH}}/g, victim)
             .replace(/{{HD}}/g, hdog)
+            .replace(/{{MUC}}/g, mucText)
             .replace(/{{TOTAL}}/g, total)
             .replace(/{{YEAR}}/g, currentYear)
             .replace(/{{SENDER}}/g, senderName);
