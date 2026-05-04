@@ -190,6 +190,16 @@ function exportThongBaoBT(data) {
       '{{MUC_BT}}': data.mucBT || '—',
       '{{TIEN_TU_VONG}}': data.tienTuVong ? formatNumber(data.tienTuVong) : '0',
       '{{TIEN_PHAU_THUAT}}': data.tienPhauThuat ? formatNumber(data.tienPhauThuat) : '0',
+      '{{TONG_CHI_PHI_BANG_CHU}}': data.tongTienBT ? (numberToVietnamese(data.tongTienBT) + ' đồng') : '—',
+      '{{ĐƠN BẢO HIỂM SỐ:}}':     data.soHopDong || '—',
+      '{{LOẠI HÌNH BẢO HIỂM:}}':   data.loaiHinhBH || '—',
+      '{{ĐƠN VỊ THAM GIA BẢO HIỂM:}}': data.donViBH || '—',
+      '{{PHÍ BẢO HIỂM:}}':        data.phiBH ? formatNumber(data.phiBH) : '0',
+      '{{NGÀY NỘP PHÍ:}}':        data.ngayNopPhi || '—',
+      '{{TỶ LỆ CHỌN:}}':          data.tyLeThucTe ? (data.tyLeThucTe + '%') : '0%',
+      '{{STT THƯƠNG TẬT:}}':      data.sttThuongTat || '—',
+      '{{TỶ LỆ THẤP NHẤT:}}':     _parseRange(data.tyLeRange).min,
+      '{{TỶ LỆ CAO NHẤT:}}':      _parseRange(data.tyLeRange).max,
       '{{MUC_A}}': data.lvlA ? formatNumber(data.lvlA) : '0',
       '{{MUC_B}}': data.lvlB ? formatNumber(data.lvlB) : '0',
       '{{MUC_C}}': data.lvlC ? formatNumber(data.lvlC) : '0',
@@ -298,6 +308,18 @@ function exportToiNhanBT(data) {
       '{{MUC_B}}':              data.lvlB           ? formatNumber(data.lvlB)           : '0',
       '{{MUC_C}}':              data.lvlC           ? formatNumber(data.lvlC)           : '0',
       '{{MUC_D}}':              data.lvlD           ? formatNumber(data.lvlD)           : '0',
+      
+      // Các trường bổ sung theo yêu cầu mới
+      '{{ĐƠN BẢO HIỂM SỐ:}}':     data.soHopDong || '—',
+      '{{LOẠI HÌNH BẢO HIỂM:}}':   data.loaiHinhBH || '—',
+      '{{ĐƠN VỊ THAM GIA BẢO HIỂM:}}': data.donViBH || '—',
+      '{{PHÍ BẢO HIỂM:}}':        data.phiBH ? formatNumber(data.phiBH) : '0',
+      '{{NGÀY NỘP PHÍ:}}':        data.ngayNopPhi || '—',
+      '{{TỶ LỆ CHỌN:}}':          data.tyLeThucTe ? (data.tyLeThucTe + '%') : '0%',
+      '{{STT THƯƠNG TẬT:}}':      data.sttThuongTat || '—',
+      '{{TONG_CHI_PHI_BANG_CHU}}': data.tongTienBT ? (numberToVietnamese(data.tongTienBT) + ' đồng') : '—',
+      '{{TỶ LỆ THẤP NHẤT:}}':     _parseRange(data.tyLeRange).min,
+      '{{TỶ LỆ CAO NHẤT:}}':      _parseRange(data.tyLeRange).max,
       
       // Aliases cho "Loại A, B, C, D" như user mô tả
       '{{LOAI_A}}':             data.lvlA           ? formatNumber(data.lvlA)           : '0',
@@ -479,7 +501,17 @@ function exportXacMinhBT(data) {
       '{{LOAI_D}}': data.lvlD ? formatNumber(data.lvlD) : '0',
       '{{MUC_BT}}': data.mucBT || '—',
       '{{TIEN_TU_VONG}}': data.tienTuVong ? formatNumber(data.tienTuVong) : '0',
-      '{{TIEN_PHAU_THUAT}}': data.tienPhauThuat ? formatNumber(data.tienPhauThuat) : '0'
+      '{{TIEN_PHAU_THUAT}}': data.tienPhauThuat ? formatNumber(data.tienPhauThuat) : '0',
+      '{{TONG_CHI_PHI_BANG_CHU}}': data.tongTienBT ? (numberToVietnamese(data.tongTienBT) + ' đồng') : '—',
+      '{{ĐƠN BẢO HIỂM SỐ:}}':     data.soHopDong || '—',
+      '{{LOẠI HÌNH BẢO HIỂM:}}':   data.loaiHinhBH || '—',
+      '{{ĐƠN VỊ THAM GIA BẢO HIỂM:}}': data.donViBH || '—',
+      '{{PHÍ BẢO HIỂM:}}':        data.phiBH ? formatNumber(data.phiBH) : '0',
+      '{{NGÀY NỘP PHÍ:}}':        data.ngayNopPhi || '—',
+      '{{TỶ LỆ CHỌN:}}':          data.tyLeThucTe ? (data.tyLeThucTe + '%') : '0%',
+      '{{STT THƯƠNG TẬT:}}':      data.sttThuongTat || '—',
+      '{{TỶ LỆ THẤP NHẤT:}}':     _parseRange(data.tyLeRange).min,
+      '{{TỶ LỆ CAO NHẤT:}}':      _parseRange(data.tyLeRange).max
     };
 
     // Thực hiện thay thế văn bản trong Body
@@ -527,15 +559,61 @@ function formatNumber(num) {
   return Number(num).toLocaleString('vi-VN');
 }
 
+/**
+ * Phân tách chuỗi tỷ lệ (Ví dụ: "10-20%" hoặc "15%") thành min/max
+ */
+function _parseRange(rangeStr) {
+  if (!rangeStr) return { min: '—', max: '—' };
+  var s = String(rangeStr).replace(/%/g, '').trim();
+  if (s.indexOf('-') > -1) {
+    var parts = s.split('-');
+    return { min: parts[0].trim() + '%', max: parts[1].trim() + '%' };
+  }
+  return { min: s + '%', max: s + '%' };
+}
+
 // ════════════════════════════════════════════════════════════════════
 // HỖ TRỢ: Chuyển số thành chữ Việt (tùy chọn)
 // ════════════════════════════════════════════════════════════════════
 function numberToVietnamese(num) {
-  // Hàm đơn giản - có thể mở rộng nếu cần
-  num = Number(num);
-  if (num === 0) return 'Không đồng';
-  if (num < 1000000) return Math.round(num / 1000) + ' nghìn đồng';
-  return Math.round(num / 1000000) + ' triệu đồng';
+  if (!num || isNaN(num)) return "Không đồng";
+  var chuSo = ["không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"];
+  
+  function doc3So(n) {
+    var tram = Math.floor(n / 100);
+    var chuc = Math.floor((n % 100) / 10);
+    var donVi = n % 10;
+    var res = "";
+    if (tram > 0) res += chuSo[tram] + " trăm ";
+    else if (res !== "") res += "không trăm ";
+
+    if (chuc > 1) res += chuSo[chuc] + " mươi ";
+    else if (chuc === 1) res += "mười ";
+    else if (tram > 0 && donVi > 0) res += "lẻ ";
+
+    if (donVi === 5 && chuc > 0) res += "lăm";
+    else if (donVi === 1 && chuc > 1) res += "mốt";
+    else if (donVi > 0 || (tram === 0 && chuc === 0)) res += chuSo[donVi];
+    return res;
+  }
+
+  var s = String(Math.floor(num));
+  while (s.length % 3 !== 0) s = "0" + s;
+  var groups = [];
+  for (var i = 0; i < s.length; i += 3) groups.push(parseInt(s.substr(i, 3)));
+  
+  var units = ["", " nghìn", " triệu", " tỷ", " nghìn tỷ", " triệu tỷ"];
+  var res = "";
+  for (var i = 0; i < groups.length; i++) {
+    var g = groups[i];
+    if (g > 0) {
+      var doc = doc3So(g);
+      res += doc + units[groups.length - 1 - i] + " ";
+    }
+  }
+  res = res.trim();
+  if (res === "") return "Không đồng";
+  return res.charAt(0).toUpperCase() + res.slice(1);
 }
 
 function deleteCloudinaryImage(publicId) {

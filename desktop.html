@@ -18270,7 +18270,14 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             mucBT: document.getElementById('hc-calc-muc')?.textContent || '',
             tienPhauThuat: rec.lossType === 'Phẫu thuật' ? (rec.injuryAmount || 0) : 0,
             tienTuVong: rec.lossType === 'Tử vong' ? (rec.injuryAmount || 0) : 0,
-            tienThuongTat: rec.lossType === 'Thương tật' ? (rec.injuryAmount || 0) : 0
+            tienThuongTat: rec.lossType === 'Thương tật' ? (rec.injuryAmount || 0) : 0,
+            loaiHinhBH: rec.insType || '',
+            donViBH: rec.companyName || '',
+            phiBH: rec.premium || '0',
+            ngayNopPhi: rec.feeDate || '',
+            tyLeThucTe: rec.injuryRealPct || '0',
+            sttThuongTat: rec.injuryCode || '',
+            tyLeRange: rec.injuryRange || ''
         };
     },
 
@@ -18408,7 +18415,14 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             mucBT: document.getElementById('hc-calc-muc')?.textContent || '',
             tienPhauThuat: rec.lossType === 'Phẫu thuật' ? (rec.injuryAmount || 0) : 0,
             tienTuVong: rec.lossType === 'Tử vong' ? (rec.injuryAmount || 0) : 0,
-            tienThuongTat: rec.lossType === 'Thương tật' ? (rec.injuryAmount || 0) : 0
+            tienThuongTat: rec.lossType === 'Thương tật' ? (rec.injuryAmount || 0) : 0,
+            loaiHinhBH: rec.insType || '',
+            donViBH: rec.companyName || '',
+            phiBH: rec.premium || '0',
+            ngayNopPhi: rec.feeDate || '',
+            tyLeThucTe: rec.injuryRealPct || '0',
+            sttThuongTat: rec.injuryCode || '',
+            tyLeRange: rec.injuryRange || ''
         };
 
         const callWordAPI = async (action) => {
