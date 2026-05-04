@@ -18266,7 +18266,11 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             lvlA: rec.limitA || '0',
             lvlB: rec.limitB || '0',
             lvlC: rec.limitC || '0',
-            lvlD: rec.limitD || '0'
+            lvlD: rec.limitD || '0',
+            mucBT: document.getElementById('hc-calc-muc')?.textContent || '',
+            tienPhauThuat: rec.lossType === 'Phẫu thuật' ? (rec.injuryAmount || 0) : 0,
+            tienTuVong: rec.lossType === 'Tử vong' ? (rec.injuryAmount || 0) : 0,
+            tienThuongTat: rec.lossType === 'Thương tật' ? (rec.injuryAmount || 0) : 0
         };
     },
 
@@ -18400,7 +18404,11 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             lvlA: rec.limitA || '0',
             lvlB: rec.limitB || '0',
             lvlC: rec.limitC || '0',
-            lvlD: rec.limitD || '0'
+            lvlD: rec.limitD || '0',
+            mucBT: document.getElementById('hc-calc-muc')?.textContent || '',
+            tienPhauThuat: rec.lossType === 'Phẫu thuật' ? (rec.injuryAmount || 0) : 0,
+            tienTuVong: rec.lossType === 'Tử vong' ? (rec.injuryAmount || 0) : 0,
+            tienThuongTat: rec.lossType === 'Thương tật' ? (rec.injuryAmount || 0) : 0
         };
 
         const callWordAPI = async (action) => {

@@ -184,7 +184,20 @@ function exportThongBaoBT(data) {
       '{{TIEN_NOI_VIEN}}': data.tienNoiVien ? formatNumber(data.tienNoiVien) : '0',
       '{{TEN_NGUOI_NHAN}}': data.tenNguoiNhan || '—',
       '{{STK}}': data.stk || '—',
-      '{{NGAN_HANG}}': data.nganHang || '—'
+      '{{NGAN_HANG}}': data.nganHang || '—',
+      
+      // Bổ sung các mức trách nhiệm và phân loại
+      '{{MUC_BT}}': data.mucBT || '—',
+      '{{TIEN_TU_VONG}}': data.tienTuVong ? formatNumber(data.tienTuVong) : '0',
+      '{{TIEN_PHAU_THUAT}}': data.tienPhauThuat ? formatNumber(data.tienPhauThuat) : '0',
+      '{{MUC_A}}': data.lvlA ? formatNumber(data.lvlA) : '0',
+      '{{MUC_B}}': data.lvlB ? formatNumber(data.lvlB) : '0',
+      '{{MUC_C}}': data.lvlC ? formatNumber(data.lvlC) : '0',
+      '{{MUC_D}}': data.lvlD ? formatNumber(data.lvlD) : '0',
+      '{{LOAI_A}}': data.lvlA ? formatNumber(data.lvlA) : '0',
+      '{{LOAI_B}}': data.lvlB ? formatNumber(data.lvlB) : '0',
+      '{{LOAI_C}}': data.lvlC ? formatNumber(data.lvlC) : '0',
+      '{{LOAI_D}}': data.lvlD ? formatNumber(data.lvlD) : '0'
     };
 
     for (var key in replacements) {
@@ -285,7 +298,16 @@ function exportToiNhanBT(data) {
       '{{MUC_B}}':              data.lvlB           ? formatNumber(data.lvlB)           : '0',
       '{{MUC_C}}':              data.lvlC           ? formatNumber(data.lvlC)           : '0',
       '{{MUC_D}}':              data.lvlD           ? formatNumber(data.lvlD)           : '0',
+      
+      // Aliases cho "Loại A, B, C, D" như user mô tả
+      '{{LOAI_A}}':             data.lvlA           ? formatNumber(data.lvlA)           : '0',
+      '{{LOAI_B}}':             data.lvlB           ? formatNumber(data.lvlB)           : '0',
+      '{{LOAI_C}}':             data.lvlC           ? formatNumber(data.lvlC)           : '0',
+      '{{LOAI_D}}':             data.lvlD           ? formatNumber(data.lvlD)           : '0',
+      '{{MUC_BT}}':             data.mucBT          || '—',
+      '{{TIEN_TU_VONG}}':       data.tienTuVong     ? formatNumber(data.tienTuVong)     : '0',
 
+      // Thông tin tờ trình / GĐV
       // Thông tin tờ trình / GĐV
       '{{NGAY_LAP_TO_TRINH}}':  data.ngayLapToTrinh       || _today(),
       '{{TEN_GDV}}':            data.tenGDV               || '—',
@@ -444,7 +466,20 @@ function exportXacMinhBT(data) {
       '{{NGAY_CAP}}': formatDt(data.ngayTao) || '—',
       '{{DON_VI_BH}}': donViBH, // ✅ SỬA: Hỗ trợ nhiều tên property
       '{{NGAY_TAI_NAN}}': formatDt(data.ngayThatThat) || '—',
-      '{{NGAY_LAP_HS}}': formatNgayThangNam(data.ngayTao) // ✅ SỬA: Format ngày dd tháng mm năm yyyy
+      '{{NGAY_LAP_HS}}': formatNgayThangNam(data.ngayTao), // ✅ SỬA: Format ngày dd tháng mm năm yyyy
+
+      // Bổ sung các mức trách nhiệm
+      '{{MUC_A}}': data.lvlA ? formatNumber(data.lvlA) : '0',
+      '{{MUC_B}}': data.lvlB ? formatNumber(data.lvlB) : '0',
+      '{{MUC_C}}': data.lvlC ? formatNumber(data.lvlC) : '0',
+      '{{MUC_D}}': data.lvlD ? formatNumber(data.lvlD) : '0',
+      '{{LOAI_A}}': data.lvlA ? formatNumber(data.lvlA) : '0',
+      '{{LOAI_B}}': data.lvlB ? formatNumber(data.lvlB) : '0',
+      '{{LOAI_C}}': data.lvlC ? formatNumber(data.lvlC) : '0',
+      '{{LOAI_D}}': data.lvlD ? formatNumber(data.lvlD) : '0',
+      '{{MUC_BT}}': data.mucBT || '—',
+      '{{TIEN_TU_VONG}}': data.tienTuVong ? formatNumber(data.tienTuVong) : '0',
+      '{{TIEN_PHAU_THUAT}}': data.tienPhauThuat ? formatNumber(data.tienPhauThuat) : '0'
     };
 
     // Thực hiện thay thế văn bản trong Body
