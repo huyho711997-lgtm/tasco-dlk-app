@@ -280,6 +280,12 @@ function exportToiNhanBT(data) {
       '{{TIEN_CHU_DONG_CHIU}}': data.tienChuDongChiu? formatNumber(data.tienChuDongChiu): '0',
       '{{TIEN_THUC_CHI}}':      data.tienThucChi    ? formatNumber(data.tienThucChi)    : '0',
 
+      // Mức trách nhiệm
+      '{{MUC_A}}':              data.lvlA           ? formatNumber(data.lvlA)           : '0',
+      '{{MUC_B}}':              data.lvlB           ? formatNumber(data.lvlB)           : '0',
+      '{{MUC_C}}':              data.lvlC           ? formatNumber(data.lvlC)           : '0',
+      '{{MUC_D}}':              data.lvlD           ? formatNumber(data.lvlD)           : '0',
+
       // Thông tin tờ trình / GĐV
       '{{NGAY_LAP_TO_TRINH}}':  data.ngayLapToTrinh       || _today(),
       '{{TEN_GDV}}':            data.tenGDV               || '—',
