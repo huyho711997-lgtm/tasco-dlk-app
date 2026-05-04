@@ -331,7 +331,7 @@ function exportToiNhanBT(data) {
 
       // Thông tin tờ trình / GĐV
       // Thông tin tờ trình / GĐV
-      '{{NGAY_LAP_TO_TRINH}}':  data.ngayLapToTrinh       || _today(),
+      '{{NGAY_LAP_TO_TRINH}}':  data.ngayLapToTrinh ? formatNgayThangNam(data.ngayLapToTrinh) : _todayFull(),
       '{{TEN_GDV}}':            data.tenGDV               || '—',
       '{{MA_GDV}}':             data.maGDV                || '—',
       '{{MA_HO_SO}}':           data.maHoSo               || '—',
@@ -414,6 +414,56 @@ function _today() {
   return Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd/MM/yyyy');
 }
 
+/**
+ * Lấy ngày hôm nay định dạng: ngày dd tháng mm năm yyyy
+ */
+function _todayFull() {
+  var d = new Date();
+  var day = ('0' + d.getDate()).slice(-2);
+  var month = ('0' + (d.getMonth() + 1)).slice(-2);
+  var year = d.getFullYear();
+  return 'ngày ' + day + ' tháng ' + month + ' năm ' + year;
+}
+
+// Hàm phụ để định dạng ngày tháng nếu cần (DD/MM/YYYY)
+function formatDt(str) {
+  if (!str) return '—';
+  // Xử lý nhiều format ngày khác nhau
+  if (str.includes('T')) {
+    return str.split('T')[0].split('-').reverse().join('/');
+  } else if (str.includes('-')) {
+    return str.split('-').reverse().join('/');
+  }
+  return str;
+}
+
+// Hàm phụ để định dạng ngày tháng dạng chữ (ngày dd tháng mm năm yyyy)
+function formatNgayThangNam(str) {
+  if (!str) return '—';
+  
+  var parts;
+  // Xử lý format ISO (YYYY-MM-DD hoặc YYYY-MM-DDTHH:mm:ss)
+  if (str.includes('T')) {
+    parts = str.split('T')[0].split('-');
+  } else if (str.includes('-')) {
+    parts = str.split('-');
+  } else if (str.indexOf('/') > -1) {
+    // Xử lý format DD/MM/YYYY
+    parts = str.split('/').reverse();
+  } else {
+    return str;
+  }
+  
+  // parts = [YYYY, MM, DD]
+  if (parts && parts.length === 3) {
+    var ngay = parts[2].padStart(2, '0');
+    var thang = parts[1].padStart(2, '0');
+    var nam = parts[0];
+    return 'ngày ' + ngay + ' tháng ' + thang + ' năm ' + nam;
+  }
+  return str;
+}
+
 // ════════════════════════════════════════════════════════════════════
 // EXPORT XÁC MINH PHÍ BẢO HIỂM
 // ════════════════════════════════════════════════════════════════════
@@ -427,42 +477,6 @@ function exportXacMinhBT(data) {
     var tempFileId = tempFile.getId();
     var doc = DocumentApp.openById(tempFileId);
     var body = doc.getBody();
-
-    // Hàm phụ để định dạng ngày tháng nếu cần (DD/MM/YYYY)
-    var formatDt = function(str) {
-      if (!str) return '—';
-      // Xử lý nhiều format ngày khác nhau
-      if (str.includes('T')) {
-        return str.split('T')[0].split('-').reverse().join('/');
-      } else if (str.includes('-')) {
-        return str.split('-').reverse().join('/');
-      }
-      return str;
-    };
-
-    // Hàm phụ để định dạng ngày tháng dạng chữ (ngày dd tháng mm năm yyyy)
-    var formatNgayThangNam = function(str) {
-      if (!str) return '—';
-      
-      var parts;
-      // Xử lý format ISO (YYYY-MM-DD hoặc YYYY-MM-DDTHH:mm:ss)
-      if (str.includes('T')) {
-        parts = str.split('T')[0].split('-');
-      } else if (str.includes('-')) {
-        parts = str.split('-');
-      } else {
-        return str;
-      }
-      
-      // parts = [YYYY, MM, DD]
-      if (parts && parts.length === 3) {
-        var ngay = parts[2].padStart(2, '0');  // Đảm bảo 2 chữ số
-        var thang = parts[1].padStart(2, '0'); // Đảm bảo 2 chữ số
-        var nam = parts[0];
-        return 'ngày ' + ngay + ' tháng ' + thang + ' năm ' + nam;
-      }
-      return str;
-    };
 
     // ⚠️ HỖ TRỢ NHIỀU TÊN PROPERTY - NẾU FRONTEND GỬIA KHÁC TÊN
     var loaiHinhBH = data.loaiHinhBH || data.loai_hinh_bh || data.loaiHinh || '—';
