@@ -14124,7 +14124,7 @@ const UsersMgmt = {
         const { value: formValues } = await Swal.fire({
             title: null, // Tự định nghĩa header trong html để đẹp hơn
             html: `
-                <div class="flex h-[80vh] max-h-[800px] overflow-hidden text-left font-sans bg-white rounded-3xl shadow-2xl border border-slate-200">
+                <div class="flex h-[80vh] max-h-[800px] overflow-hidden text-left font-sans bg-white rounded-3xl shadow-2xl border border-slate-200" style="font-family: 'Inter', system-ui, -apple-system, sans-serif;">
                     <!-- SIDEBAR (LEFT) -->
                     <div class="w-[300px] bg-slate-50 flex flex-col shrink-0 border-r border-slate-200">
                         <div class="p-8 border-b border-slate-200 bg-white">
@@ -14145,25 +14145,25 @@ const UsersMgmt = {
                                 <div id="u-preview-avatar" class="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-black text-white shadow-md mb-4 border-4 border-white" style="background: ${user ? user.color || '#2563eb' : '#2563eb'}">
                                     ${user ? (user.avatar || user.name.charAt(0)) : 'A'}
                                 </div>
-                                <h3 id="u-preview-name" class="text-base font-black text-slate-800 text-center truncate w-full">${user ? user.name : 'Họ và tên'}</h3>
-                                <p id="u-preview-username" class="text-xs font-bold text-slate-400 mt-1">@${user ? user.username : 'username'}</p>
-                                <div id="u-preview-role-tag" class="mt-4 px-3 py-1 rounded-full bg-slate-200 text-slate-600 text-[9px] font-black uppercase tracking-widest border border-slate-300">
-                                    <span id="u-preview-role">${user ? (RolePermissions[user.role] ? 'Cán bộ' : 'Chưa set') : 'Giám định'}</span>
+                                <h3 id="u-preview-name" class="text-[15px] font-black text-slate-900 text-center truncate w-full">${user ? user.name : 'Họ và tên'}</h3>
+                                <p id="u-preview-username" class="text-xs font-bold text-slate-500 mt-1">@${user ? user.username : 'username'}</p>
+                                <div id="u-preview-role-tag" class="mt-4 px-3 py-1 rounded-full bg-slate-200 text-slate-700 text-[10px] font-black uppercase tracking-widest border border-slate-300">
+                                    <span id="u-preview-role">${user ? (roleLabels[user.role] || 'Cán bộ') : 'Giám định'}</span>
                                 </div>
                             </div>
 
                             <div class="space-y-4 pt-2">
                                 <div class="space-y-1.5">
-                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Họ tên</label>
-                                    <input id="u-name" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:border-blue-600 outline-none transition-all placeholder:text-slate-300" value="${user ? (user.name || '') : ''}" placeholder="Nguyễn Văn A" oninput="document.getElementById('u-preview-name').textContent = this.value || 'Họ và tên'; document.getElementById('u-preview-avatar').textContent = this.value ? this.value.charAt(0).toUpperCase() : 'A'">
+                                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Họ tên</label>
+                                    <input id="u-name" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:border-blue-600 outline-none transition-all placeholder:text-slate-400" value="${user ? (user.name || '') : ''}" placeholder="Nguyễn Văn A" oninput="document.getElementById('u-preview-name').textContent = this.value || 'Họ và tên'; document.getElementById('u-preview-avatar').textContent = this.value ? this.value.charAt(0).toUpperCase() : 'A'">
                                 </div>
                                 <div class="space-y-1.5">
-                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tên đăng nhập</label>
-                                    <input id="u-username" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:border-blue-600 outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400 placeholder:text-slate-300" value="${user ? (user.username || '') : ''}" placeholder="username" ${user ? 'disabled' : ''} oninput="document.getElementById('u-preview-username').textContent = '@' + (this.value || 'username')">
+                                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Tên đăng nhập</label>
+                                    <input id="u-username" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:border-blue-600 outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400 placeholder:text-slate-400" value="${user ? (user.username || '') : ''}" placeholder="username" ${user ? 'disabled' : ''} oninput="document.getElementById('u-preview-username').textContent = '@' + (this.value || 'username')">
                                 </div>
                                 <div class="space-y-1.5">
-                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Mật khẩu</label>
-                                    <input id="u-password" type="password" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:border-blue-600 outline-none transition-all placeholder:text-slate-300" placeholder="${user ? '••••••••' : 'Nhập mới...'}">
+                                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Mật khẩu</label>
+                                    <input id="u-password" type="password" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:border-blue-600 outline-none transition-all placeholder:text-slate-400" placeholder="${user ? '••••••••' : 'Nhập mới...'}">
                                 </div>
                                 
                                 <div class="pt-4 flex items-center justify-between">
@@ -14171,7 +14171,7 @@ const UsersMgmt = {
                                         <div id="u-color-preview" class="w-8 h-8 rounded-lg shadow-sm border border-slate-200" style="background: ${user ? user.color || '#2563eb' : '#2563eb'}"></div>
                                         <input id="u-color" type="color" class="w-8 h-8 p-0 bg-transparent border-none cursor-pointer" value="${user ? user.color || '#2563eb' : '#2563eb'}" oninput="document.getElementById('u-color-preview').style.background = this.value; document.getElementById('u-preview-avatar').style.background = this.value">
                                     </div>
-                                    <select id="u-active" class="bg-white border border-slate-200 rounded-lg text-[10px] font-black text-slate-600 px-3 py-2 outline-none cursor-pointer hover:bg-slate-50 transition-all">
+                                    <select id="u-active" class="bg-white border border-slate-300 rounded-lg text-[10px] font-black text-slate-700 px-3 py-2 outline-none cursor-pointer hover:bg-slate-50 transition-all">
                                         <option value="true" ${user?.active !== false ? 'selected' : ''}>HOẠT ĐỘNG</option>
                                         <option value="false" ${user?.active === false ? 'selected' : ''}>TẠM KHÓA</option>
                                     </select>
@@ -14184,58 +14184,58 @@ const UsersMgmt = {
                     <div class="flex-1 bg-white flex flex-col overflow-hidden">
                         <div class="px-10 py-6 border-b border-slate-100 flex items-center justify-between">
                             <div>
-                                <h3 class="text-base font-black text-slate-800 uppercase tracking-tight">Thiết lập Quyền hạn</h3>
+                                <h3 class="text-base font-black text-slate-900 uppercase tracking-tight">Thiết lập Quyền hạn</h3>
                                 <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Phân quyền chi tiết theo vai trò</p>
                             </div>
                             <input type="hidden" id="u-role" value="${user ? user.role : 'user'}">
                             <div id="u-role-status" class="px-4 py-2 rounded-xl bg-blue-50 text-blue-700 text-[10px] font-black uppercase tracking-widest border border-blue-200">
-                                ${user ? (user.role === 'admin' ? 'Quản trị viên' : 'Nhân sự Hệ thống') : 'Giám định viên'}
+                                ${user ? (roleLabels[user.role] || 'Nhân sự Hệ thống') : 'Giám định viên'}
                             </div>
                         </div>
 
                         <div class="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar">
                             <!-- Roles -->
                             <div class="space-y-4">
-                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[3px]">1. Lựa chọn vai trò chủ chốt</p>
+                                <p class="text-[10px] font-black text-slate-500 uppercase tracking-[3px]">1. Lựa chọn vai trò chủ chốt</p>
                                 <div class="grid grid-cols-4 gap-4">
-                                    <div id="role-card-user" onclick="UsersMgmt.selectRoleCard('user')" class="role-card group p-5 rounded-2xl border-2 cursor-pointer transition-all ${user?.role === 'user' || (!user) ? 'border-blue-600 bg-blue-50' : 'border-slate-100 bg-slate-50/50 hover:border-slate-200'}" data-role="user">
-                                        <p class="text-[11px] font-black text-slate-800 group-hover:text-blue-700">Giám định viên</p>
-                                        <p class="text-[9px] font-bold text-slate-400 mt-1 group-hover:text-blue-500">Mặc định</p>
+                                    <div id="role-card-user" onclick="UsersMgmt.selectRoleCard('user')" class="role-card group p-5 rounded-2xl border-2 cursor-pointer transition-all ${user?.role === 'user' || (!user) ? 'border-blue-600 bg-blue-50' : 'border-slate-100 bg-slate-50 hover:border-slate-300'}" data-role="user">
+                                        <p class="text-[12px] font-black text-slate-900 group-hover:text-blue-700">Giám định viên</p>
+                                        <p class="text-[9px] font-bold text-slate-500 mt-1 group-hover:text-blue-500 uppercase">Mặc định</p>
                                     </div>
-                                    <div id="role-card-admin_bt" onclick="UsersMgmt.selectRoleCard('admin_bt')" class="role-card group p-5 rounded-2xl border-2 cursor-pointer transition-all ${user?.role === 'admin_bt' ? 'border-blue-600 bg-blue-50' : 'border-slate-100 bg-slate-50/50 hover:border-slate-200'}" data-role="admin_bt">
-                                        <p class="text-[11px] font-black text-slate-800 group-hover:text-blue-700">Admin Bồi thường</p>
-                                        <p class="text-[9px] font-bold text-slate-400 mt-1 group-hover:text-blue-500">Quản lý</p>
+                                    <div id="role-card-admin_bt" onclick="UsersMgmt.selectRoleCard('admin_bt')" class="role-card group p-5 rounded-2xl border-2 cursor-pointer transition-all ${user?.role === 'admin_bt' ? 'border-blue-600 bg-blue-50' : 'border-slate-100 bg-slate-50 hover:border-slate-300'}" data-role="admin_bt">
+                                        <p class="text-[12px] font-black text-slate-900 group-hover:text-blue-700">Admin Bồi thường</p>
+                                        <p class="text-[9px] font-bold text-slate-500 mt-1 group-hover:text-blue-500 uppercase">Quản lý</p>
                                     </div>
-                                    <div id="role-card-user_hs" onclick="UsersMgmt.selectRoleCard('user_hs')" class="role-card group p-5 rounded-2xl border-2 cursor-pointer transition-all ${user?.role === 'user_hs' ? 'border-blue-600 bg-blue-50' : 'border-slate-100 bg-slate-50/50 hover:border-slate-200'}" data-role="user_hs">
-                                        <p class="text-[11px] font-black text-slate-800 group-hover:text-blue-700">BH Học sinh</p>
-                                        <p class="text-[9px] font-bold text-slate-400 mt-1 group-hover:text-blue-500">Chuyên viên</p>
+                                    <div id="role-card-user_hs" onclick="UsersMgmt.selectRoleCard('user_hs')" class="role-card group p-5 rounded-2xl border-2 cursor-pointer transition-all ${user?.role === 'user_hs' ? 'border-blue-600 bg-blue-50' : 'border-slate-100 bg-slate-50 hover:border-slate-300'}" data-role="user_hs">
+                                        <p class="text-[12px] font-black text-slate-900 group-hover:text-blue-700">BH Học sinh</p>
+                                        <p class="text-[9px] font-bold text-slate-500 mt-1 group-hover:text-blue-500 uppercase">Chuyên viên</p>
                                     </div>
-                                    <div id="role-card-admin" onclick="UsersMgmt.selectRoleCard('admin')" class="role-card group p-5 rounded-2xl border-2 cursor-pointer transition-all ${user?.role === 'admin' ? 'border-blue-600 bg-blue-50' : 'border-slate-100 bg-slate-50/50 hover:border-slate-200'}" data-role="admin">
-                                        <p class="text-[11px] font-black text-slate-800 group-hover:text-blue-700">Administrator</p>
-                                        <p class="text-[9px] font-bold text-slate-400 mt-1 group-hover:text-blue-500">Full Access</p>
+                                    <div id="role-card-admin" onclick="UsersMgmt.selectRoleCard('admin')" class="role-card group p-5 rounded-2xl border-2 cursor-pointer transition-all ${user?.role === 'admin' ? 'border-blue-600 bg-blue-50' : 'border-slate-100 bg-slate-50 hover:border-slate-300'}" data-role="admin">
+                                        <p class="text-[12px] font-black text-slate-900 group-hover:text-blue-700">Administrator</p>
+                                        <p class="text-[9px] font-bold text-slate-500 mt-1 group-hover:text-blue-500 uppercase">Full Access</p>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Permissions -->
                             <div class="space-y-10 pb-6">
-                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[3px]">2. Phạm vi dữ liệu chi tiết</p>
+                                <p class="text-[10px] font-black text-slate-500 uppercase tracking-[3px]">2. Phạm vi dữ liệu chi tiết</p>
                                 ${groups.map(g => `
                                     <div class="space-y-4">
                                         <div class="flex items-center justify-between px-2">
-                                            <p class="text-[11px] font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                                            <p class="text-[11px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                                                <span class="w-2 h-2 rounded-full bg-blue-600"></span>
                                                 ${g.title}
                                             </p>
-                                            <button onclick="UsersMgmt.toggleGroupPerms(this, true)" class="text-[10px] font-black text-blue-600 hover:bg-blue-50 px-3 py-1 rounded-lg transition-colors border border-blue-100">Chọn nhanh</button>
+                                            <button onclick="UsersMgmt.toggleGroupPerms(this, true)" class="text-[10px] font-black text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors border border-blue-200">Chọn nhanh</button>
                                         </div>
                                         <div class="grid grid-cols-2 gap-4">
                                             ${g.items.map(s => `
-                                                <label class="flex items-center justify-between p-4 bg-slate-50/50 border border-slate-100 rounded-2xl group cursor-pointer hover:bg-blue-50 hover:border-blue-100 transition-all">
-                                                    <span class="text-xs font-bold text-slate-600 group-hover:text-blue-700 transition-colors">${s.label}</span>
-                                                    <div class="relative inline-flex items-center">
+                                                <label class="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-2xl group cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-all shadow-sm">
+                                                    <span class="text-[13px] font-bold text-slate-700 group-hover:text-blue-800 transition-colors">${s.label}</span>
+                                                    <div class="relative inline-flex items-center cursor-pointer">
                                                         <input type="checkbox" class="u-perm-cb peer sr-only" value="${s.id}" ${userPerms.includes(s.id) || userPerms.includes('*') ? 'checked' : ''}>
-                                                        <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4.5 after:transition-all peer-checked:bg-blue-600"></div>
+                                                        <div class="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 shadow-inner"></div>
                                                     </div>
                                                 </label>
                                             `).join('')}
