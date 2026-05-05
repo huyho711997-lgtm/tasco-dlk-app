@@ -14124,141 +14124,139 @@ const UsersMgmt = {
         const { value: formValues } = await Swal.fire({
             title: null, // Tự định nghĩa header trong html để đẹp hơn
             html: `
-                <div class="flex h-[85vh] max-h-[850px] overflow-hidden text-left font-sans bg-white rounded-[2.5rem]">
-                    <!-- SIDEBAR (LEFT): PROFILE & BASIC INFO -->
-                    <div class="w-[340px] bg-slate-900 flex flex-col shrink-0 border-r border-white/5 relative">
-                        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none"></div>
+                <div class="flex h-[82vh] max-h-[820px] overflow-hidden text-left font-sans bg-white rounded-[2.5rem] shadow-2xl border border-slate-100">
+                    <!-- SIDEBAR (LEFT): IDENTITY & PREVIEW -->
+                    <div class="w-[320px] bg-slate-950 flex flex-col shrink-0 relative overflow-hidden">
+                        <!-- Decorative background element -->
+                        <div class="absolute -top-24 -left-24 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl"></div>
+                        <div class="absolute -bottom-24 -right-24 w-64 h-64 bg-indigo-600/5 rounded-full blur-3xl"></div>
                         
-                        <!-- Header inside Sidebar (Compact) -->
                         <div class="p-8 pb-4 relative z-10">
-                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center shadow-lg shadow-blue-900/50 mb-4">
-                                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            <div class="flex items-center gap-3 mb-8">
+                                <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-900/40">
+                                    <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                </div>
+                                <div>
+                                    <h2 class="text-base font-black text-white leading-none tracking-tight">${user ? 'Hồ sơ Nhân sự' : 'Thêm Nhân viên'}</h2>
+                                    <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">Identity Management</p>
+                                </div>
                             </div>
-                            <h2 class="text-xl font-black text-white leading-tight">${user ? 'Hồ sơ Nhân sự' : 'Tài khoản Mới'}</h2>
-                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[2px] mt-2">Hệ thống Tasco Access</p>
-                        </div>
 
-                        <!-- Live Preview (Compact) -->
-                        <div class="px-8 py-2 relative z-10">
-                            <div class="bg-white/5 backdrop-blur-md rounded-3xl p-5 border border-white/10 shadow-xl">
-                                <div class="flex items-center gap-4 mb-4">
-                                    <div id="u-preview-avatar" class="w-12 h-12 rounded-xl flex items-center justify-center text-xl font-black text-white shadow-lg" style="background: ${user ? user.color || '#2563eb' : '#2563eb'}">
+                            <!-- Modern Preview Card -->
+                            <div class="bg-white/[0.03] border border-white/10 rounded-3xl p-6 backdrop-blur-sm mb-8 shadow-2xl shadow-black/20">
+                                <div class="flex flex-col items-center text-center">
+                                    <div id="u-preview-avatar" class="w-20 h-20 rounded-[2rem] flex items-center justify-center text-3xl font-black text-white shadow-xl mb-4 transition-all duration-500" style="background: ${user ? user.color || '#2563eb' : '#2563eb'}">
                                         ${user ? (user.avatar || user.name.charAt(0)) : 'A'}
                                     </div>
-                                    <div class="overflow-hidden">
-                                        <p id="u-preview-name" class="text-sm font-black text-white truncate">${user ? user.name : 'Họ và tên'}</p>
-                                        <p id="u-preview-username" class="text-[10px] font-bold text-slate-400 mt-0.5">@${user ? user.username : 'username'}</p>
+                                    <h3 id="u-preview-name" class="text-base font-black text-white leading-tight truncate w-full">${user ? user.name : 'Họ và tên'}</h3>
+                                    <p id="u-preview-username" class="text-xs font-bold text-slate-500 mt-1">@${user ? user.username : 'username'}</p>
+                                    
+                                    <div id="u-preview-role-tag" class="mt-4 px-4 py-1.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
+                                        <span id="u-preview-role">${user ? (RolePermissions[user.role] ? 'Nhân sự' : 'N/A') : 'Giám định viên'}</span>
                                     </div>
-                                </div>
-                                <div id="u-preview-role-tag" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[9px] font-black uppercase tracking-wider">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-                                    <span id="u-preview-role">${user ? (RolePermissions[user.role] ? 'Nhân sự Hệ thống' : 'Chưa xác định') : 'Giám định viên'}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Basic Inputs (Scrollable if needed) -->
-                        <div class="px-8 py-6 space-y-5 overflow-y-auto custom-scrollbar flex-1 relative z-10">
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Họ tên nhân viên</label>
-                                <input id="u-name" class="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-white focus:border-blue-500 outline-none transition-all placeholder:text-slate-700 shadow-inner" value="${user ? (user.name || '') : ''}" placeholder="Nguyễn Văn A" oninput="document.getElementById('u-preview-name').textContent = this.value || 'Họ và tên'; document.getElementById('u-preview-avatar').textContent = this.value ? this.value.charAt(0).toUpperCase() : 'A'">
+                        <!-- Form Fields (Scrollable) -->
+                        <div class="px-8 flex-1 overflow-y-auto custom-scrollbar-dark space-y-6 relative z-10 pb-8">
+                            <div class="space-y-2">
+                                <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Họ tên nhân viên</label>
+                                <input id="u-name" class="w-full px-5 py-3 bg-white/5 border border-white/5 rounded-2xl text-sm font-bold text-white focus:bg-white/10 focus:border-blue-500/50 outline-none transition-all placeholder:text-slate-700" value="${user ? (user.name || '') : ''}" placeholder="Nguyễn Văn A" oninput="document.getElementById('u-preview-name').textContent = this.value || 'Họ và tên'; document.getElementById('u-preview-avatar').textContent = this.value ? this.value.charAt(0).toUpperCase() : 'A'">
                             </div>
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Tên đăng nhập</label>
-                                <input id="u-username" class="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-white focus:border-blue-500 outline-none transition-all disabled:bg-slate-800 disabled:text-slate-600 placeholder:text-slate-700 shadow-inner" value="${user ? (user.username || '') : ''}" placeholder="username" ${user ? 'disabled' : ''} oninput="document.getElementById('u-preview-username').textContent = '@' + (this.value || 'username')">
+                            <div class="space-y-2">
+                                <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Tên đăng nhập</label>
+                                <input id="u-username" class="w-full px-5 py-3 bg-white/5 border border-white/5 rounded-2xl text-sm font-bold text-white focus:bg-white/10 focus:border-blue-500/50 outline-none transition-all disabled:opacity-30 placeholder:text-slate-700" value="${user ? (user.username || '') : ''}" placeholder="username" ${user ? 'disabled' : ''} oninput="document.getElementById('u-preview-username').textContent = '@' + (this.value || 'username')">
                             </div>
-                            <div class="space-y-1.5">
-                                <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Mật khẩu</label>
-                                <input id="u-password" type="password" class="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-white focus:border-blue-500 outline-none transition-all placeholder:text-slate-700 shadow-inner" placeholder="${user ? '••••••••' : 'Nhập mật khẩu...'}">
+                            <div class="space-y-2">
+                                <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Mật khẩu hệ thống</label>
+                                <input id="u-password" type="password" class="w-full px-5 py-3 bg-white/5 border border-white/5 rounded-2xl text-sm font-bold text-white focus:bg-white/10 focus:border-blue-500/50 outline-none transition-all placeholder:text-slate-700" placeholder="${user ? '••••••••' : 'Nhập mật khẩu...'}">
                             </div>
                             
-                            <div class="pt-4 flex items-center justify-between border-t border-white/10">
-                                <div class="flex items-center gap-2">
-                                    <div id="u-color-preview" class="w-8 h-8 rounded-xl shadow-lg border border-white/10" style="background: ${user ? user.color || '#2563eb' : '#2563eb'}"></div>
-                                    <input id="u-color" type="color" class="w-8 h-8 p-0 bg-transparent border-none cursor-pointer" value="${user ? user.color || '#2563eb' : '#2563eb'}" oninput="document.getElementById('u-color-preview').style.background = this.value; document.getElementById('u-preview-avatar').style.background = this.value">
+                            <div class="pt-6 border-t border-white/5 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div id="u-color-preview" class="w-10 h-10 rounded-2xl shadow-lg border border-white/10" style="background: ${user ? user.color || '#2563eb' : '#2563eb'}"></div>
+                                    <input id="u-color" type="color" class="w-10 h-10 p-0 bg-transparent border-none cursor-pointer" value="${user ? user.color || '#2563eb' : '#2563eb'}" oninput="document.getElementById('u-color-preview').style.background = this.value; document.getElementById('u-preview-avatar').style.background = this.value">
                                 </div>
-                                <select id="u-active" class="bg-white/5 border border-white/10 rounded-lg text-[10px] font-black text-white px-2 py-1.5 outline-none cursor-pointer hover:bg-white/10 transition-colors">
-                                    <option value="true" class="bg-slate-900" ${user?.active !== false ? 'selected' : ''}>ACTIVE</option>
-                                    <option value="false" class="bg-slate-900" ${user?.active === false ? 'selected' : ''}>LOCKED</option>
+                                <select id="u-active" class="bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold text-white px-3 py-2 outline-none cursor-pointer hover:bg-white/10 transition-all">
+                                    <option value="true" class="bg-slate-950" ${user?.active !== false ? 'selected' : ''}>Active</option>
+                                    <option value="false" class="bg-slate-950" ${user?.active === false ? 'selected' : ''}>Locked</option>
                                 </select>
                             </div>
                         </div>
                     </div>
 
-                    <!-- MAIN CONTENT (RIGHT): ROLES & PERMISSIONS -->
-                    <div class="flex-1 bg-white flex flex-col overflow-hidden">
-                        <!-- Content Header (Compact) -->
-                        <div class="px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                    <!-- MAIN CONTENT (RIGHT): SETTINGS -->
+                    <div class="flex-1 bg-slate-50 flex flex-col overflow-hidden">
+                        <!-- Toolbar -->
+                        <div class="px-10 py-6 bg-white border-b border-slate-200 flex items-center justify-between">
                             <div>
-                                <h3 class="text-base font-black text-slate-800 leading-none">Thiết lập Hệ thống</h3>
-                                <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">Cấu hình vai trò và phạm vi hoạt động</p>
+                                <h3 class="text-sm font-black text-slate-800 leading-none">Phân quyền Truy cập</h3>
+                                <p class="text-[10px] font-bold text-slate-400 mt-1.5 uppercase tracking-wider">Cấu hình vai trò và phạm vi dữ liệu</p>
                             </div>
                             <input type="hidden" id="u-role" value="${user ? user.role : 'user'}">
-                            <div id="u-role-status" class="px-4 py-1.5 rounded-xl bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest border border-blue-100 shadow-sm">
-                                ${user ? (user.role === 'admin' ? 'Quản trị viên' : 'Nhân sự Hệ thống') : 'Giám định viên'}
+                            <div id="u-role-status" class="px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest border border-blue-100">
+                                ${user ? (user.role === 'admin' ? 'Administrator' : 'Nhân sự') : 'Giám định viên'}
                             </div>
                         </div>
 
-                        <div class="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
-                            <!-- Role Selection Cards -->
-                            <div class="space-y-4">
-                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] mb-4">1. PHÂN CẤP VAI TRÒ CHỦ CHỐT</p>
+                        <div class="flex-1 overflow-y-auto p-10 space-y-12 custom-scrollbar">
+                            <!-- Role Selection -->
+                            <div class="space-y-6">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-1 h-4 bg-blue-600 rounded-full"></span>
+                                    <p class="text-[11px] font-black text-slate-800 uppercase tracking-widest">1. Chọn vai trò chính</p>
+                                </div>
                                 <div class="grid grid-cols-4 gap-4">
-                                    <div onclick="UsersMgmt.selectRoleCard('user')" class="role-card group p-5 rounded-3xl border-2 cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1 ${user?.role === 'user' || (!user) ? 'border-blue-600 bg-blue-50/30' : 'border-slate-50 bg-slate-50/50 hover:border-slate-200'}" data-role="user">
-                                        <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm">
+                                    <div onclick="UsersMgmt.selectRoleCard('user')" class="role-card group bg-white p-5 rounded-3xl border border-slate-200 cursor-pointer transition-all hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/5 ${user?.role === 'user' || (!user) ? 'ring-2 ring-blue-600 border-transparent' : ''}" data-role="user">
+                                        <div class="w-10 h-10 rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 flex items-center justify-center mb-4 transition-colors">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                         </div>
-                                        <p class="text-[11px] font-black text-slate-800">Giám định viên</p>
-                                        <p class="text-[9px] text-slate-400 font-bold mt-1.5 leading-relaxed truncate">Tiếp nhận & tạo hồ sơ xe</p>
+                                        <p class="text-[11px] font-black text-slate-800 group-hover:text-blue-700">Giám định viên</p>
                                     </div>
-                                    <div onclick="UsersMgmt.selectRoleCard('admin_bt')" class="role-card group p-5 rounded-3xl border-2 cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1 ${user?.role === 'admin_bt' ? 'border-emerald-600 bg-emerald-50/30' : 'border-slate-50 bg-slate-50/50 hover:border-slate-200'}" data-role="admin_bt">
-                                        <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm">
+                                    <div onclick="UsersMgmt.selectRoleCard('admin_bt')" class="role-card group bg-white p-5 rounded-3xl border border-slate-200 cursor-pointer transition-all hover:border-emerald-500 hover:shadow-xl hover:shadow-emerald-500/5 ${user?.role === 'admin_bt' ? 'ring-2 ring-emerald-600 border-transparent' : ''}" data-role="admin_bt">
+                                        <div class="w-10 h-10 rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 flex items-center justify-center mb-4 transition-colors">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                                         </div>
-                                        <p class="text-[11px] font-black text-slate-800">Admin BT</p>
-                                        <p class="text-[9px] text-slate-400 font-bold mt-1.5 leading-relaxed truncate">Kiểm soát & phê duyệt</p>
+                                        <p class="text-[11px] font-black text-slate-800 group-hover:text-emerald-700">Admin Bồi thường</p>
                                     </div>
-                                    <div onclick="UsersMgmt.selectRoleCard('user_hs')" class="role-card group p-5 rounded-3xl border-2 cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1 ${user?.role === 'user_hs' ? 'border-amber-600 bg-amber-50/30' : 'border-slate-50 bg-slate-50/50 hover:border-slate-200'}" data-role="user_hs">
-                                        <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm">
+                                    <div onclick="UsersMgmt.selectRoleCard('user_hs')" class="role-card group bg-white p-5 rounded-3xl border border-slate-200 cursor-pointer transition-all hover:border-amber-500 hover:shadow-xl hover:shadow-amber-500/5 ${user?.role === 'user_hs' ? 'ring-2 ring-amber-600 border-transparent' : ''}" data-role="user_hs">
+                                        <div class="w-10 h-10 rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-amber-50 group-hover:text-amber-600 flex items-center justify-center mb-4 transition-colors">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5S19.832 5.477 21 6.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                                         </div>
-                                        <p class="text-[11px] font-black text-slate-800">BH Học sinh</p>
-                                        <p class="text-[9px] text-slate-400 font-bold mt-1.5 leading-relaxed truncate">Xử lý hồ sơ con người</p>
+                                        <p class="text-[11px] font-black text-slate-800 group-hover:text-amber-700">BH Học sinh</p>
                                     </div>
-                                    <div onclick="UsersMgmt.selectRoleCard('admin')" class="role-card group p-5 rounded-3xl border-2 cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1 ${user?.role === 'admin' ? 'border-rose-600 bg-rose-50/30' : 'border-slate-50 bg-slate-50/50 hover:border-slate-200'}" data-role="admin">
-                                        <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm">
+                                    <div onclick="UsersMgmt.selectRoleCard('admin')" class="role-card group bg-white p-5 rounded-3xl border-2 cursor-pointer transition-all hover:border-rose-500 hover:shadow-xl hover:shadow-rose-500/5 ${user?.role === 'admin' ? 'ring-2 ring-rose-600 border-transparent' : 'border-slate-200'}" data-role="admin">
+                                        <div class="w-10 h-10 rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-rose-50 group-hover:text-rose-600 flex items-center justify-center mb-4 transition-colors">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
                                         </div>
-                                        <p class="text-[11px] font-black text-slate-800">Quản trị viên</p>
-                                        <p class="text-[9px] text-slate-400 font-bold mt-1.5 leading-relaxed truncate">Toàn quyền hệ thống</p>
+                                        <p class="text-[11px] font-black text-slate-800 group-hover:text-rose-700">Administrator</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Permissions Switches -->
-                            <div class="space-y-8">
-                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] mb-4 flex items-center gap-3">
-                                    <span>2. PHẠM VI TRUY CẬP CHI TIẾT</span>
-                                    <span class="flex-1 h-px bg-slate-100"></span>
-                                </p>
+                            <!-- Detailed Permissions -->
+                            <div class="space-y-10 pb-10">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-1 h-4 bg-blue-600 rounded-full"></span>
+                                    <p class="text-[11px] font-black text-slate-800 uppercase tracking-widest">2. Phạm vi dữ liệu chi tiết</p>
+                                </div>
                                 ${groups.map(g => `
-                                    <div class="bg-slate-50/80 rounded-[2rem] p-6 border border-slate-100 shadow-sm">
-                                        <div class="flex items-center justify-between mb-6">
-                                            <p class="text-[10px] font-black text-slate-800 uppercase tracking-[2px] flex items-center gap-2">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
-                                                ${g.title}
-                                            </p>
-                                            <button onclick="UsersMgmt.toggleGroupPerms(this, true)" class="text-[9px] font-black text-blue-600 hover:text-indigo-600 transition-all bg-white px-4 py-1.5 rounded-xl shadow-md border border-slate-100 active:scale-95">CHỌN NHANH</button>
+                                    <div class="space-y-4">
+                                        <div class="flex items-center justify-between px-2">
+                                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${g.title}</p>
+                                            <button onclick="UsersMgmt.toggleGroupPerms(this, true)" class="text-[9px] font-black text-blue-600 hover:underline">Chọn nhanh nhóm</button>
                                         </div>
-                                        <div class="grid grid-cols-3 gap-x-10 gap-y-5">
+                                        <div class="grid grid-cols-2 gap-4">
                                             ${g.items.map(s => `
-                                                <label class="flex items-center justify-between group cursor-pointer hover:bg-white/50 p-2 -m-2 rounded-xl transition-colors">
-                                                    <span class="text-[11px] font-extrabold text-slate-600 group-hover:text-slate-900 transition-colors">${s.label}</span>
+                                                <div class="bg-white p-4 rounded-2xl border border-slate-200 flex items-center justify-between group hover:border-blue-200 transition-all">
+                                                    <span class="text-[11px] font-bold text-slate-600 group-hover:text-slate-900">${s.label}</span>
                                                     <div class="relative inline-flex items-center">
                                                         <input type="checkbox" class="u-perm-cb peer sr-only" value="${s.id}" ${userPerms.includes(s.id) || userPerms.includes('*') ? 'checked' : ''}>
-                                                        <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4.5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-blue-600 peer-checked:to-indigo-600 shadow-inner"></div>
+                                                        <div class="w-8 h-4.5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-blue-600"></div>
                                                     </div>
-                                                </label>
+                                                </div>
                                             `).join('')}
                                         </div>
                                     </div>
@@ -14269,9 +14267,9 @@ const UsersMgmt = {
                 </div>
             `,
             showCancelButton: true,
-            confirmButtonText: '<div class="flex items-center gap-2 px-8 py-1"><span>Lưu thay đổi</span><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>',
+            confirmButtonText: '<div class="flex items-center gap-2 px-8 py-1"><span>Lưu thay đổi</span></div>',
             cancelButtonText: 'Hủy bỏ',
-            customClass: { popup: 'rnd !w-[95%] !max-w-[1300px] !p-0 overflow-hidden shadow-2xl border-none' },
+            customClass: { popup: 'rnd !w-[90%] !max-w-[1200px] !p-0 overflow-hidden shadow-2xl border-none' },
             preConfirm: () => {
                 const name = document.getElementById('u-name').value.trim();
                 const username = document.getElementById('u-username').value.trim();
@@ -14340,49 +14338,42 @@ const UsersMgmt = {
         if (!input) return;
         input.value = role;
         
-        const roleColors = {
-            user: { border: 'border-blue-600', bg: 'bg-blue-50/30', text: 'text-blue-600' },
-            admin_bt: { border: 'border-emerald-600', bg: 'bg-emerald-50/30', text: 'text-emerald-600' },
-            user_hs: { border: 'border-amber-600', bg: 'bg-amber-50/30', text: 'text-amber-600' },
-            admin: { border: 'border-rose-600', bg: 'bg-rose-50/30', text: 'text-rose-600' }
+        const roleConfig = {
+            user: { label: 'Giám định viên', badge: 'Nhân sự', color: 'blue' },
+            admin_bt: { label: 'Admin Bồi thường', badge: 'Quản lý', color: 'emerald' },
+            user_hs: { label: 'Bồi thường Học sinh', badge: 'Chuyên viên', color: 'amber' },
+            admin: { label: 'Administrator', badge: 'Quản trị viên', color: 'rose' }
         };
 
         document.querySelectorAll('.role-card').forEach(card => {
             const r = card.getAttribute('data-role');
             const isSelected = r === role;
-            const colors = roleColors[r] || roleColors.user;
-
+            const config = roleConfig[r];
+            
             if (isSelected) {
-                card.className = `role-card group p-5 rounded-3xl border-2 cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1 ${colors.border} ${colors.bg}`;
+                card.className = `role-card group bg-white p-5 rounded-3xl border-transparent ring-2 ring-${config.color}-600 cursor-pointer transition-all shadow-xl shadow-${config.color}-500/10 scale-[1.02]`;
             } else {
-                card.className = `role-card group p-5 rounded-3xl border-2 border-slate-50 bg-slate-50/50 cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1 hover:border-slate-200`;
+                card.className = `role-card group bg-white p-5 rounded-3xl border border-slate-200 cursor-pointer transition-all hover:border-slate-300`;
             }
         });
 
         // Update UI Status & Tags
-        const roleLabels = { 
-            user: 'Giám định viên', 
-            admin_bt: 'Admin Bồi thường', 
-            user_hs: 'Bồi thường Học sinh', 
-            admin: 'Quản trị viên' 
-        };
+        const conf = roleConfig[role] || roleConfig.user;
         
         const statusEl = document.getElementById('u-role-status');
         if (statusEl) {
-            statusEl.textContent = roleLabels[role] || 'Nhân sự';
-            const c = roleColors[role] || roleColors.user;
-            statusEl.className = `px-3 py-1.5 rounded-xl ${c.bg.replace('/30','')} ${c.text} text-[10px] font-black uppercase tracking-wider border ${c.border.replace('600','100')}`;
+            statusEl.textContent = conf.badge;
+            statusEl.className = `px-4 py-1.5 rounded-full bg-${conf.color}-50 text-${conf.color}-600 text-[10px] font-black uppercase tracking-widest border border-${conf.color}-100`;
         }
 
         const previewRole = document.getElementById('u-preview-role');
-        if (previewRole) previewRole.textContent = roleLabels[role] || 'Nhân sự';
+        if (previewRole) previewRole.textContent = conf.badge;
 
         const tagEl = document.getElementById('u-preview-role-tag');
         if (tagEl) {
-            const c = roleColors[role] || roleColors.user;
-            tagEl.className = `inline-flex items-center gap-2 px-2.5 py-1 rounded-full ${c.bg.replace('/30','')} ${c.text} border ${c.border.replace('600','300')} text-[9px] font-black uppercase tracking-wider`;
+            tagEl.className = `mt-4 px-4 py-1.5 rounded-full bg-${conf.color}-500/10 text-${conf.color}-400 border border-${conf.color}-500/20 text-[9px] font-black uppercase tracking-widest flex items-center gap-2`;
             const dot = tagEl.querySelector('span');
-            if (dot) dot.className = `w-1.5 h-1.5 rounded-full ${c.bg.replace('50/30','600').replace('bg-','')}`;
+            if (dot) dot.className = `w-1.5 h-1.5 rounded-full bg-${conf.color}-400 animate-pulse`;
         }
 
         this.updatePermCheckboxes(role);
