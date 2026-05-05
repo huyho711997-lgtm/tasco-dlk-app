@@ -14083,25 +14083,40 @@ const UsersMgmt = {
     },
 
     async showModal(user = null) {
-        const sections = [
-            { id: 'dashboard', label: 'Dashboard' },
-            { id: 'kanban', label: 'Kanban Hồ sơ' },
-            { id: 'import', label: 'Tiếp nhận AI' },
-            { id: 'manage', label: 'Quản lý Hồ sơ' },
-            { id: 'overdue', label: 'Hồ sơ trễ hẹn' },
-            { id: 'handover', label: 'Bàn giao hồ sơ' },
-            { id: 'human_claims', label: 'Bồi thường Con người' },
-            { id: 'contracts', label: 'Quản lý Hợp đồng' },
-            { id: 'injury_rates', label: 'Tỷ lệ thương tật' },
-            { id: 'garages', label: 'Danh sách Gara' },
-            { id: 'partsprices', label: 'Kho giá phụ tùng' },
-            { id: 'calendar', label: 'Lịch giám định' },
-            { id: 'stats', label: 'Thống kê & Báo cáo' },
-            { id: 'cloud', label: 'Cloud cá nhân' },
-            { id: 'manage_users', label: 'Quản lý người dùng' },
-            { id: 'view_all_records', label: 'Xem toàn bộ hồ sơ' },
-            { id: 'import_records', label: 'Quyền Import dữ liệu' },
-            { id: 'config_system', label: 'Quyền Cấu hình hệ thống' }
+        const groups = [
+            {
+                title: 'Hệ thống Xe cơ giới',
+                items: [
+                    { id: 'dashboard', label: 'Bảng điều khiển' },
+                    { id: 'kanban', label: 'Kanban Hồ sơ' },
+                    { id: 'import', label: 'Tiếp nhận AI' },
+                    { id: 'manage', label: 'Quản lý Hồ sơ' },
+                    { id: 'overdue', label: 'Hồ sơ trễ hẹn' },
+                    { id: 'handover', label: 'Bàn giao hồ sơ' }
+                ]
+            },
+            {
+                title: 'Hồ sơ Bồi thường Con người',
+                items: [
+                    { id: 'human_claims', label: 'Hồ sơ Con người' },
+                    { id: 'contracts', label: 'Quản lý Hợp đồng' },
+                    { id: 'injury_rates', label: 'Tỷ lệ thương tật' },
+                    { id: 'view_all_records', label: 'Quyền xem toàn bộ hồ sơ' },
+                    { id: 'import_records', label: 'Quyền Import (AI/Excel)' },
+                    { id: 'config_system', label: 'Cấu hình hệ thống (Email/Giao diện)' }
+                ]
+            },
+            {
+                title: 'Tiện ích & Quản trị',
+                items: [
+                    { id: 'garages', label: 'Danh sách Gara' },
+                    { id: 'partsprices', label: 'Kho giá phụ tùng' },
+                    { id: 'calendar', label: 'Lịch giám định' },
+                    { id: 'stats', label: 'Thống kê & Báo cáo' },
+                    { id: 'cloud', label: 'Cloud cá nhân' },
+                    { id: 'manage_users', label: 'Quản lý người dùng' }
+                ]
+            }
         ];
 
         const userPerms = user ? (user.permissions || RolePermissions[user.role] || []) : RolePermissions['user'];
@@ -14144,13 +14159,23 @@ const UsersMgmt = {
                     </div>
                     
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                        <label class="lbl mb-3">Tùy chỉnh quyền truy cập chi tiết</label>
-                        <div class="grid grid-cols-2 gap-2" id="perms-grid">
-                            ${sections.map(s => `
-                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded-lg cursor-pointer transition-all border border-transparent hover:border-slate-200">
-                                    <input type="checkbox" class="u-perm-cb w-4 h-4 rounded text-blue-600" value="${s.id}" ${userPerms.includes(s.id) || userPerms.includes('*') ? 'checked' : ''}>
-                                    <span class="text-xs font-bold text-slate-600">${s.label}</span>
-                                </label>
+                        <label class="lbl mb-4 !text-blue-600 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            Phân quyền truy cập chi tiết
+                        </label>
+                        <div class="space-y-6" id="perms-grid">
+                            ${groups.map(g => `
+                                <div>
+                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">${g.title}</p>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        ${g.items.map(s => `
+                                            <label class="flex items-center gap-2 p-2 hover:bg-white rounded-lg cursor-pointer transition-all border border-transparent hover:border-slate-200 group">
+                                                <input type="checkbox" class="u-perm-cb w-4 h-4 rounded text-blue-600" value="${s.id}" ${userPerms.includes(s.id) || userPerms.includes('*') ? 'checked' : ''}>
+                                                <span class="text-xs font-bold text-slate-600 group-hover:text-blue-600 transition-colors">${s.label}</span>
+                                            </label>
+                                        `).join('')}
+                                    </div>
+                                </div>
                             `).join('')}
                         </div>
                     </div>
