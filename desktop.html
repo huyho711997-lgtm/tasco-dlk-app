@@ -14120,6 +14120,7 @@ const UsersMgmt = {
         ];
 
         const userPerms = user ? (user.permissions || RolePermissions[user.role] || []) : RolePermissions['user'];
+        const roleLabels = { user: 'Giám định viên', admin_bt: 'Admin Bồi thường', user_hs: 'BH Học sinh', admin: 'Administrator' };
 
         const { value: formValues } = await Swal.fire({
             title: null, // Tự định nghĩa header trong html để đẹp hơn
