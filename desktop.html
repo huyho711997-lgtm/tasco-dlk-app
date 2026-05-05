@@ -17672,14 +17672,21 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
 
             if (!parsed) throw new Error('Không bóc tách được dữ liệu từ ảnh này.');
 
-            Swal.close();
-            // Tự động lưu ảnh chứng từ y tế vào danh sách
+            // KHÔNG dùng Swal.close() ở đây để tránh xung đột animation với modal kết quả
+            // Tự động lưu ảnh chứng từ y tế vào danh sách (chạy ngầm)
             this._autoUploadOcr([file]);
             
             this.showMedicalOcrResult(parsed);
 
         } catch (e) {
-            Swal.fire({ icon: 'error', title: 'Lỗi OCR Y tế', text: e.message, customClass: { popup: 'rnd' } });
+            console.error("OCR Final Error:", e);
+            Swal.fire({ 
+                icon: 'error', 
+                title: 'Lỗi xử lý OCR', 
+                text: e.message,
+                confirmButtonColor: '#0d9488',
+                customClass: { popup: 'rnd' } 
+            });
         }
     },
 
@@ -17801,6 +17808,7 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             cancelButtonText: 'Hủy bỏ',
             confirmButtonColor: '#0891b2', // màu cyan-600
             cancelButtonColor: '#64748b',
+            allowOutsideClick: false, // Ngăn chặn tự ý đóng làm mất kết quả AI
             customClass: { popup: 'rnd' },
             preConfirm: () => {
                 return {
@@ -17823,31 +17831,43 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
     },
 
     applyMedicalOcr(data) {
-        if (data.hospitalName) document.getElementById('hc-hospitalName').value = data.hospitalName;
-        if (data.victimName) document.getElementById('hc-victimName').value = data.victimName.toUpperCase();
-        
-        // SỬA TẠI ĐÂY: Đổi data.tuoi thành data.victimAge cho khớp với kết quả trả về từ bảng thông báo
-        if (data.victimAge) document.getElementById('hc-victimAge').value = data.victimAge;
-        
-        if (data.victimAddress) document.getElementById('hc-victimAddress').value = data.victimAddress;
-        
-        // Chuyển đổi định dạng YYYY-MM-DD sang DD/MM/YYYY cho các input text
-        const toVN = (d) => d ? moment(d, 'YYYY-MM-DD').format('DD/MM/YYYY') : '';
-        
-        if (data.inDate) document.getElementById('hc-inDate').value = toVN(data.inDate);
-        if (data.outDate) document.getElementById('hc-outDate').value = toVN(data.outDate);
-        if (data.accDate) document.getElementById('hc-accDate').value = toVN(data.accDate);
-        if (data.feeDate) document.getElementById('hc-feeDate').value = toVN(data.feeDate);
-        
-        const descEl = document.getElementById('hc-injuryDesc');
-        if (data.desc) {
-            descEl.value = descEl.value ? (descEl.value + '\n' + data.desc) : data.desc;
+        try {
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.value = val;
+                return !!el;
+            };
+
+            if (data.hospitalName) setVal('hc-hospitalName', data.hospitalName);
+            if (data.victimName) setVal('hc-victimName', data.victimName.toUpperCase());
+            if (data.victimAge) setVal('hc-victimAge', data.victimAge);
+            if (data.victimAddress) setVal('hc-victimAddress', data.victimAddress);
+            
+            // Chuyển đổi định dạng YYYY-MM-DD sang DD/MM/YYYY cho các input text
+            const toVN = (d) => d ? moment(d, 'YYYY-MM-DD').format('DD/MM/YYYY') : '';
+            
+            if (data.inDate) setVal('hc-inDate', toVN(data.inDate));
+            if (data.outDate) setVal('hc-outDate', toVN(data.outDate));
+            if (data.accDate) setVal('hc-accDate', toVN(data.accDate));
+            if (data.feeDate) setVal('hc-feeDate', toVN(data.feeDate));
+            
+            if (data.desc) {
+                const descEl = document.getElementById('hc-injuryDesc');
+                if (descEl) {
+                    descEl.value = descEl.value ? (descEl.value + '\n' + data.desc) : data.desc;
+                }
+            }
+
+            // Trigger tính toán lại
+            if (typeof this.calculateDays === 'function') this.calculateDays(); 
+            if (typeof this.calculateTotal === 'function') this.calculateTotal(); 
+            if (typeof this.checkWarnings === 'function') this.checkWarnings(); 
+
+            Toast.fire({ icon: 'success', title: 'Đã điền thông tin y tế vào form!' });
+        } catch (err) {
+            console.error("Apply OCR Error:", err);
+            Toast.fire({ icon: 'error', title: 'Lỗi khi áp dụng dữ liệu vào form!' });
         }
-
-        this.calculateDays(); 
-        this.checkWarnings(); 
-
-        Toast.fire({ icon: 'success', title: 'Đã điền thông tin y tế vào form!' });
     },
     generateEmail() {
         const victim = (document.getElementById('hc-victimName').value || '___').toUpperCase();
