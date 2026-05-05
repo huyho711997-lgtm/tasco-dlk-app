@@ -1432,6 +1432,7 @@ textarea.inp { resize:vertical; }
 }
 .nav-sub-btn:hover::before { background-color: #3b82f6; transform: translateY(-50%) scale(1.5); }
 .nav-sub-btn.sidebar-active::before { background-color: #3b82f6; transform: translateY(-50%) scale(1.5); }
+.hide-nav { display: none !important; }
 </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -13880,28 +13881,18 @@ const Auth = {
         // 1. Duyệt tất cả các nút nav-btn
         document.querySelectorAll('.nav-btn').forEach(btn => {
             const viewId = btn.id.replace('nav-', '');
-            // Một số nút đặc biệt không theo format nav-viewId
-            if (btn.id === 'nav-manage-users') {
-                btn.style.display = isAdmin ? 'flex' : 'none';
-                return;
-            }
+            let hasAccess = isAdmin || userPerms.includes(viewId);
+            
+            if (btn.id === 'nav-manage-users') hasAccess = isAdmin;
 
-            const hasAccess = isAdmin || userPerms.includes(viewId);
-            btn.style.display = hasAccess ? 'flex' : 'none';
+            btn.classList.toggle('hide-nav', !hasAccess);
         });
 
         // 2. Xử lý các nhóm (nav-group)
-        // Nếu tất cả các nút con trong nhóm bị ẩn, thì ẩn cả nhóm (bao gồm tiêu đề và nút toggle)
         document.querySelectorAll('.nav-group').forEach(group => {
-            const subBtns = group.querySelectorAll('.nav-sub-btn');
-            if (subBtns.length > 0) {
-                const visibleSubBtns = Array.from(subBtns).filter(b => b.style.display !== 'none');
-                group.style.display = visibleSubBtns.length > 0 ? 'block' : 'none';
-            } else {
-                // Nhóm không có sub-btn (có thể là nhóm chứa nút đơn)
-                const mainBtn = group.querySelector('.nav-btn');
-                if (mainBtn) group.style.display = mainBtn.style.display;
-            }
+            const btns = group.querySelectorAll('.nav-btn');
+            const hasVisibleBtn = Array.from(btns).some(b => !b.classList.contains('hide-nav'));
+            group.classList.toggle('hide-nav', !hasVisibleBtn);
         });
 
         // 3. Kiểm tra xem user có đang ở view bị cấm không
