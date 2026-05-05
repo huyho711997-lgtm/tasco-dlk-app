@@ -4711,6 +4711,11 @@ viewTitles['human_claims'] = 'Hồ sơ Bồi thường Con người';
 viewTitles['manage_users'] = 'Quản lý Người dùng';
 
 function goView(v) {
+  if (!Auth.hasPermission(v)) {
+      Toast.fire({ icon: 'error', title: 'Bạn không có quyền truy cập phần này!' });
+      return;
+  }
+  
   document.querySelectorAll('.view').forEach(function(el){ 
     el.classList.add('hidden'); 
     el.classList.remove('flex'); 
@@ -13774,6 +13779,13 @@ const MyCloud = {
 /* ═══════════════════════════════════════
    AUTH - QUẢN LÝ ĐĂNG NHẬP
 ═══════════════════════════════════════ */
+const RolePermissions = {
+    admin: ['*'],
+    user: ['dashboard', 'kanban', 'import', 'manage', 'overdue', 'handover', 'human_claims', 'contracts', 'injury_rates', 'garages', 'partsprices', 'calendar', 'notif', 'stats', 'cloud'],
+    admin_bt: ['dashboard', 'manage', 'handover', 'human_claims', 'contracts', 'stats', 'calendar', 'notif', 'cloud'],
+    user_hs: ['dashboard', 'human_claims', 'contracts', 'injury_rates', 'calendar', 'notif', 'cloud']
+};
+
 const Auth = {
     _KEY_SESSION: 'tasco_desktop_session',
     _usersList: [],
@@ -13848,7 +13860,12 @@ const Auth = {
     _applyUserUI(user) {
         document.getElementById('desk-user-name').textContent = user.name;
         
-        const roleMap = { admin: 'Quản trị viên', user: 'Giám định viên', viewer: 'Xem báo cáo' };
+        const roleMap = { 
+            admin: 'Quản trị viên', 
+            user: 'Giám định viên', 
+            admin_bt: 'Admin Bồi thường', 
+            user_hs: 'Bồi thường Học sinh' 
+        };
         document.getElementById('desk-user-role').textContent = roleMap[user.role] || 'Người dùng';
         
         const avatar = document.getElementById('desk-user-avatar');
@@ -13856,11 +13873,50 @@ const Auth = {
         avatar.style.background = `linear-gradient(135deg, ${user.color || '#2563eb'}, ${user.color ? user.color + 'cc' : '#1d4ed8'})`;
         avatar.style.color = '#fff';
 
-        // Phân quyền hiển thị Menu bên trái (Sidebar)
-        const navManageUsers = document.getElementById('nav-manage-users'); // Nếu sau này bạn làm trang Quản lý User
-        if (navManageUsers) {
-            navManageUsers.style.display = user.role === 'admin' ? 'flex' : 'none';
+        // --- PHÂN QUYỀN HIỂN THỊ MENU SIDEBAR ---
+        const userPerms = user.permissions || RolePermissions[user.role] || [];
+        const isAdmin = user.role === 'admin' || userPerms.includes('*');
+
+        // 1. Duyệt tất cả các nút nav-btn
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            const viewId = btn.id.replace('nav-', '');
+            // Một số nút đặc biệt không theo format nav-viewId
+            if (btn.id === 'nav-manage-users') {
+                btn.style.display = isAdmin ? 'flex' : 'none';
+                return;
+            }
+
+            const hasAccess = isAdmin || userPerms.includes(viewId);
+            btn.style.display = hasAccess ? 'flex' : 'none';
+        });
+
+        // 2. Xử lý các nhóm (nav-group)
+        // Nếu tất cả các nút con trong nhóm bị ẩn, thì ẩn cả nhóm (bao gồm tiêu đề và nút toggle)
+        document.querySelectorAll('.nav-group').forEach(group => {
+            const subBtns = group.querySelectorAll('.nav-sub-btn');
+            if (subBtns.length > 0) {
+                const visibleSubBtns = Array.from(subBtns).filter(b => b.style.display !== 'none');
+                group.style.display = visibleSubBtns.length > 0 ? 'block' : 'none';
+            } else {
+                // Nhóm không có sub-btn (có thể là nhóm chứa nút đơn)
+                const mainBtn = group.querySelector('.nav-btn');
+                if (mainBtn) group.style.display = mainBtn.style.display;
+            }
+        });
+
+        // 3. Kiểm tra xem user có đang ở view bị cấm không
+        const currentView = document.querySelector('.view:not(.hidden)')?.id?.replace('view-', '');
+        if (currentView && currentView !== 'dashboard' && !isAdmin && !userPerms.includes(currentView)) {
+            goView('dashboard');
         }
+    },
+
+    hasPermission(v) {
+        const user = this.getCurrentUser();
+        if (!user) return false;
+        if (user.role === 'admin') return true;
+        const perms = user.permissions || RolePermissions[user.role] || [];
+        return perms.includes('*') || perms.includes(v);
     },
 
     async logout() {
@@ -13959,8 +14015,18 @@ const UsersMgmt = {
                     </div>
                 </td>
                 <td class="px-6 py-4">
-                    <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${u.role === 'admin' ? 'bg-rose-50 text-rose-600 border border-rose-100' : (u.role === 'viewer' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-blue-50 text-blue-600 border border-blue-100')}">
-                        ${u.role === 'admin' ? 'Quản trị viên' : (u.role === 'viewer' ? 'Xem báo cáo' : 'Giám định viên')}
+                    <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                        u.role === 'admin' ? 'bg-rose-50 text-rose-600 border border-rose-100' : 
+                        u.role === 'admin_bt' ? 'bg-purple-50 text-purple-600 border border-purple-100' : 
+                        u.role === 'user_hs' ? 'bg-pink-50 text-pink-600 border border-pink-100' : 
+                        'bg-blue-50 text-blue-600 border border-blue-100'
+                    }">
+                        ${
+                            u.role === 'admin' ? 'Quản trị viên' : 
+                            u.role === 'admin_bt' ? 'Admin Bồi thường' : 
+                            u.role === 'user_hs' ? 'Bồi thường Học sinh' : 
+                            'Giám định viên'
+                        }
                     </span>
                 </td>
                 <td class="px-6 py-4">
@@ -13997,17 +14063,39 @@ const UsersMgmt = {
     },
 
     async showModal(user = null) {
+        const sections = [
+            { id: 'dashboard', label: 'Dashboard' },
+            { id: 'kanban', label: 'Kanban Hồ sơ' },
+            { id: 'import', label: 'Tiếp nhận AI' },
+            { id: 'manage', label: 'Quản lý Hồ sơ' },
+            { id: 'overdue', label: 'Hồ sơ trễ hẹn' },
+            { id: 'handover', label: 'Bàn giao hồ sơ' },
+            { id: 'human_claims', label: 'Bồi thường Con người' },
+            { id: 'contracts', label: 'Quản lý Hợp đồng' },
+            { id: 'injury_rates', label: 'Tỷ lệ thương tật' },
+            { id: 'garages', label: 'Danh sách Gara' },
+            { id: 'partsprices', label: 'Kho giá phụ tùng' },
+            { id: 'calendar', label: 'Lịch giám định' },
+            { id: 'stats', label: 'Thống kê & Báo cáo' },
+            { id: 'cloud', label: 'Cloud cá nhân' },
+            { id: 'manage_users', label: 'Quản lý người dùng' }
+        ];
+
+        const userPerms = user ? (user.permissions || RolePermissions[user.role] || []) : RolePermissions['user'];
+
         const { value: formValues } = await Swal.fire({
             title: user ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới',
             html: `
-                <div class="text-left space-y-4 p-2">
-                    <div>
-                        <label class="lbl">Họ tên người dùng</label>
-                        <input id="u-name" class="inp" value="${user ? (user.name || '') : ''}" placeholder="Nhập họ tên...">
-                    </div>
-                    <div>
-                        <label class="lbl">Tên đăng nhập</label>
-                        <input id="u-username" class="inp" value="${user ? (user.username || '') : ''}" placeholder="Nhập username..." ${user ? 'disabled' : ''}>
+                <div class="text-left space-y-4 p-2 custom-scrollbar" style="max-height: 70vh; overflow-y: auto;">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="lbl">Họ tên người dùng</label>
+                            <input id="u-name" class="inp" value="${user ? (user.name || '') : ''}" placeholder="Nhập họ tên...">
+                        </div>
+                        <div>
+                            <label class="lbl">Tên đăng nhập</label>
+                            <input id="u-username" class="inp" value="${user ? (user.username || '') : ''}" placeholder="Nhập username..." ${user ? 'disabled' : ''}>
+                        </div>
                     </div>
                     <div>
                         <label class="lbl">Mật khẩu</label>
@@ -14015,11 +14103,12 @@ const UsersMgmt = {
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="lbl">Quyền hạn</label>
-                            <select id="u-role" class="inp">
+                            <label class="lbl">Quyền hạn (Mặc định)</label>
+                            <select id="u-role" class="inp" onchange="UsersMgmt.updatePermCheckboxes(this.value)">
                                 <option value="user" ${user?.role === 'user' ? 'selected' : ''}>Giám định viên</option>
+                                <option value="admin_bt" ${user?.role === 'admin_bt' ? 'selected' : ''}>Admin Bồi thường</option>
+                                <option value="user_hs" ${user?.role === 'user_hs' ? 'selected' : ''}>Bồi thường Học sinh</option>
                                 <option value="admin" ${user?.role === 'admin' ? 'selected' : ''}>Quản trị viên</option>
-                                <option value="viewer" ${user?.role === 'viewer' ? 'selected' : ''}>Xem báo cáo</option>
                             </select>
                         </div>
                         <div>
@@ -14030,6 +14119,19 @@ const UsersMgmt = {
                             </select>
                         </div>
                     </div>
+                    
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <label class="lbl mb-3">Tùy chỉnh quyền truy cập chi tiết</label>
+                        <div class="grid grid-cols-2 gap-2" id="perms-grid">
+                            ${sections.map(s => `
+                                <label class="flex items-center gap-2 p-2 hover:bg-white rounded-lg cursor-pointer transition-all border border-transparent hover:border-slate-200">
+                                    <input type="checkbox" class="u-perm-cb w-4 h-4 rounded text-blue-600" value="${s.id}" ${userPerms.includes(s.id) || userPerms.includes('*') ? 'checked' : ''}>
+                                    <span class="text-xs font-bold text-slate-600">${s.label}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+
                     <div>
                         <label class="lbl">Màu sắc định danh</label>
                         <input id="u-color" type="color" class="w-full h-10 rounded-lg cursor-pointer border-none" value="${user ? user.color || '#2563eb' : '#2563eb'}">
@@ -14039,7 +14141,7 @@ const UsersMgmt = {
             showCancelButton: true,
             confirmButtonText: 'Lưu thông tin',
             cancelButtonText: 'Hủy bỏ',
-            customClass: { popup: 'rnd' },
+            customClass: { popup: 'rnd !w-[550px]' },
             preConfirm: () => {
                 const name = document.getElementById('u-name').value.trim();
                 const username = document.getElementById('u-username').value.trim();
@@ -14047,12 +14149,14 @@ const UsersMgmt = {
                 const role = document.getElementById('u-role').value;
                 const active = document.getElementById('u-active').value === 'true';
                 const color = document.getElementById('u-color').value;
+                
+                const permissions = Array.from(document.querySelectorAll('.u-perm-cb:checked')).map(cb => cb.value);
 
                 if (!name || !username || (!user && !password)) {
                     Swal.showValidationMessage('Vui lòng nhập đầy đủ thông tin bắt buộc');
                     return false;
                 }
-                return { name, username, password, role, active, color };
+                return { name, username, password, role, active, color, permissions };
             }
         });
 
@@ -14092,6 +14196,13 @@ const UsersMgmt = {
             await db.ref('Users/' + id).remove();
             Toast.fire({ icon: 'success', title: 'Đã xóa người dùng!' });
         }
+    },
+
+    updatePermCheckboxes(role) {
+        const perms = RolePermissions[role] || [];
+        document.querySelectorAll('.u-perm-cb').forEach(cb => {
+            cb.checked = perms.includes('*') || perms.includes(cb.value);
+        });
     }
 };
 
