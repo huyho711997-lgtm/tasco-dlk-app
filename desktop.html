@@ -2506,25 +2506,25 @@ textarea.inp { resize:vertical; }
             </div>
             <div style="display:flex;align-items:center;gap:8px;position:relative;z-index:1;">
               
-              <button onclick="Contracts.downloadContractTemplate()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.1);color:#f1f5f9;border:1px solid rgba(255,255,255,.15);transition:all .15s;" onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+              <button id="btn-ct-download-hd" onclick="Contracts.downloadContractTemplate()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.1);color:#f1f5f9;border:1px solid rgba(255,255,255,.15);transition:all .15s;" onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Tải mẫu HĐ
               </button>
-              <label style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.1);color:#f1f5f9;border:1px solid rgba(255,255,255,.15);transition:all .15s;margin-bottom:0;" onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+              <label id="btn-ct-import-hd" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.1);color:#f1f5f9;border:1px solid rgba(255,255,255,.15);transition:all .15s;margin-bottom:0;" onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Import HĐ
                 <input type="file" class="hidden" accept=".xlsx, .xls, .csv" onchange="Contracts.importContractExcel(event)">
               </label>
-              <label style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.1);color:#fcd34d;border:1px solid rgba(251,191,36,.3);transition:all .15s;margin-bottom:0;" onmouseover="this.style.background='rgba(251,191,36,.15)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+              <label id="btn-ct-import-ndbh" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.1);color:#fcd34d;border:1px solid rgba(251,191,36,.3);transition:all .15s;margin-bottom:0;" onmouseover="this.style.background='rgba(251,191,36,.15)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 Import DS NĐBH
                 <input type="file" class="hidden" accept=".xlsx, .xls, .csv" onchange="Contracts.importGlobalInsuredExcel(event)">
               </label>
-              <button onclick="Contracts.downloadInsuredTemplate()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.1);color:#fcd34d;border:1px solid rgba(251,191,36,.3);transition:all .15s;" onmouseover="this.style.background='rgba(251,191,36,.15)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+              <button id="btn-ct-download-ndbh" onclick="Contracts.downloadInsuredTemplate()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.1);color:#fcd34d;border:1px solid rgba(251,191,36,.3);transition:all .15s;" onmouseover="this.style.background='rgba(251,191,36,.15)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Tải mẫu NĐBH
               </button>
-              <button onclick="Contracts.openImportExcel()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.1);color:#f1f5f9;border:1px solid rgba(255,255,255,.15);transition:all .15s;" onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+              <button id="btn-ct-import-excel-hs" onclick="Contracts.openImportExcel()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(255,255,255,.1);color:#f1f5f9;border:1px solid rgba(255,255,255,.15);transition:all .15s;" onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Import Excel HS
               </button>
@@ -2834,11 +2834,11 @@ textarea.inp { resize:vertical; }
               </div>
             </div>
             <div class="mn-actions">
-              <button class="mn-btn mn-btn-ghost" onclick="InjuryRates.downloadTemplate()">
+              <button id="btn-ir-download-template" class="mn-btn mn-btn-ghost" onclick="InjuryRates.downloadTemplate()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Tải file mẫu Excel
               </button>
-              <label class="mn-btn mn-btn-primary cursor-pointer" style="background: linear-gradient(135deg,#c026d3,#9333ea); border:none; box-shadow: 0 4px 14px rgba(192,38,211,.4);">
+              <label id="btn-ir-import-excel" class="mn-btn mn-btn-primary cursor-pointer" style="background: linear-gradient(135deg,#c026d3,#9333ea); border:none; box-shadow: 0 4px 14px rgba(192,38,211,.4);">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Nhập từ Excel (Import)
                 <input type="file" id="ir-excel-file" class="hidden" accept=".xlsx, .xls, .csv" onchange="InjuryRates.importExcel(event)">
@@ -13919,6 +13919,12 @@ const Auth = {
 
         const btnHCImport = document.getElementById('btn-hc-import-excel');
         if (btnHCImport) btnHCImport.classList.toggle('hide-nav', !canImport);
+
+        // Import Buttons in Contracts & Injury Rates
+        ['btn-ct-import-hd', 'btn-ct-import-ndbh', 'btn-ct-import-excel-hs', 'btn-ct-download-hd', 'btn-ct-download-ndbh', 'btn-ir-import-excel', 'btn-ir-download-template'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('hide-nav', !canImport);
+        });
 
         const btnHCConfig = document.getElementById('btn-hc-email-settings');
         if (btnHCConfig) btnHCConfig.classList.toggle('hide-nav', !canConfig);
