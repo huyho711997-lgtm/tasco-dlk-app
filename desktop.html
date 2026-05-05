@@ -1856,7 +1856,7 @@ textarea.inp { resize:vertical; }
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Excel
               </button>
-              <button class="mn-btn" onclick="goView('import')">
+              <button id="btn-import-ai" class="mn-btn" onclick="goView('import')">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
                 Tiếp nhận mới
               </button>
@@ -1965,7 +1965,7 @@ textarea.inp { resize:vertical; }
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                 <span class="text-[11px] font-black uppercase tracking-wider">Cấu hình</span>
               </button>
-              <button onclick="HumanClaims.openImportGCN()" class="h-10 px-4 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm">
+              <button id="btn-hc-import-excel" onclick="HumanClaims.openImportGCN()" class="h-10 px-4 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Import NĐBH
               </button>
@@ -4630,6 +4630,18 @@ function listenData() {
     var raw=snap.val()||{};
     allData=Object.keys(raw).map(function(k){ return Object.assign({id:k},raw[k]); });
     
+    // PHÂN QUYỀN XEM DỮ LIỆU
+    const user = Auth.getCurrentUser();
+    if (user && user.role !== 'admin') {
+      const perms = user.permissions || RolePermissions[user.role] || [];
+      if (!perms.includes('*') && !perms.includes('view_all_records')) {
+        allData = allData.filter(function(r) { 
+          // Chỉ xem hồ sơ do mình tạo (so sánh theo username hoặc name)
+          return r.createdBy === user.username || r.createdBy === user.name;
+        });
+      }
+    }
+
     // Sắp xếp ưu tiên theo Ngày báo (mới nhất xếp trên)
     allData.sort(function(a, b) {
       // Hàm convert chuỗi ngày báo thành timestamp
@@ -7597,7 +7609,8 @@ function aiImport() {
     garaName:garaRaw?garaRaw.trim().toUpperCase():'',
     step:1,
     stepUpdatedAt:new Date().toISOString(),
-    receivedAt:new Date().toISOString()
+    receivedAt:new Date().toISOString(),
+    createdBy: Auth.getCurrentUser() ? Auth.getCurrentUser().name : 'Unknown'
   };
   
   if(/tử vong|chết người|gấp|vip|nghiêm trọng/i.test(text)) rec.urgent=true;
@@ -13782,9 +13795,9 @@ const MyCloud = {
 ═══════════════════════════════════════ */
 const RolePermissions = {
     admin: ['*'],
-    user: ['dashboard', 'kanban', 'import', 'manage', 'overdue', 'handover', 'human_claims', 'contracts', 'injury_rates', 'garages', 'partsprices', 'calendar', 'notif', 'stats', 'cloud'],
-    admin_bt: ['dashboard', 'manage', 'handover', 'human_claims', 'contracts', 'stats', 'calendar', 'notif', 'cloud'],
-    user_hs: ['dashboard', 'human_claims', 'contracts', 'injury_rates', 'calendar', 'notif', 'cloud']
+    user: ['dashboard', 'kanban', 'import', 'manage', 'overdue', 'handover', 'human_claims', 'contracts', 'injury_rates', 'garages', 'partsprices', 'calendar', 'notif', 'stats', 'cloud', 'import_records'],
+    admin_bt: ['dashboard', 'manage', 'handover', 'human_claims', 'contracts', 'stats', 'calendar', 'notif', 'cloud', 'view_all_records', 'import_records', 'config_system'],
+    user_hs: ['dashboard', 'human_claims', 'contracts', 'injury_rates', 'calendar', 'notif', 'cloud', 'import_records']
 };
 
 const Auth = {
@@ -13885,6 +13898,7 @@ const Auth = {
             let hasAccess = isAdmin || userPerms.includes(viewId);
             
             if (viewId === 'manage_users') hasAccess = isAdmin || userPerms.includes('manage_users');
+            if (viewId === 'import') hasAccess = isAdmin || userPerms.includes('import_records');
 
             btn.classList.toggle('hide-nav', !hasAccess);
         });
@@ -13896,7 +13910,20 @@ const Auth = {
             group.classList.toggle('hide-nav', !hasVisibleBtn);
         });
 
-        // 3. Kiểm tra xem user có đang ở view bị cấm không
+        // 3. Xử lý các nút chức năng đặc biệt
+        const canImport = isAdmin || userPerms.includes('import_records');
+        const canConfig = isAdmin || userPerms.includes('config_system');
+
+        const btnImportAI = document.getElementById('btn-import-ai');
+        if (btnImportAI) btnImportAI.classList.toggle('hide-nav', !canImport);
+
+        const btnHCImport = document.getElementById('btn-hc-import-excel');
+        if (btnHCImport) btnHCImport.classList.toggle('hide-nav', !canImport);
+
+        const btnHCConfig = document.getElementById('btn-hc-email-settings');
+        if (btnHCConfig) btnHCConfig.classList.toggle('hide-nav', !canConfig);
+
+        // 4. Kiểm tra xem user có đang ở view bị cấm không
         const currentView = document.querySelector('.view:not(.hidden)')?.id?.replace('view-', '');
         if (currentView && currentView !== 'dashboard' && !isAdmin && !userPerms.includes(currentView)) {
             goView('dashboard');
@@ -13908,6 +13935,7 @@ const Auth = {
         if (!user) return false;
         if (user.role === 'admin') return true;
         const perms = user.permissions || RolePermissions[user.role] || [];
+        if (v === 'import') return perms.includes('*') || perms.includes('import_records');
         return perms.includes('*') || perms.includes(v);
     },
 
@@ -14070,7 +14098,10 @@ const UsersMgmt = {
             { id: 'calendar', label: 'Lịch giám định' },
             { id: 'stats', label: 'Thống kê & Báo cáo' },
             { id: 'cloud', label: 'Cloud cá nhân' },
-            { id: 'manage_users', label: 'Quản lý người dùng' }
+            { id: 'manage_users', label: 'Quản lý người dùng' },
+            { id: 'view_all_records', label: 'Xem toàn bộ hồ sơ' },
+            { id: 'import_records', label: 'Quyền Import dữ liệu' },
+            { id: 'config_system', label: 'Quyền Cấu hình hệ thống' }
         ];
 
         const userPerms = user ? (user.permissions || RolePermissions[user.role] || []) : RolePermissions['user'];
@@ -15406,6 +15437,16 @@ const HumanClaims = {
         
         let filtered = (this._data || []).filter(r => {
             if (!r) return false;
+            
+            // KIỂM TRA QUYỀN XEM TOÀN BỘ
+            const user = Auth.getCurrentUser();
+            if (user && user.role !== 'admin') {
+                const perms = user.permissions || RolePermissions[user.role] || [];
+                if (!perms.includes('*') && !perms.includes('view_all_records')) {
+                    if (r.createdBy !== user.username && r.createdBy !== user.name) return false;
+                }
+            }
+
             const text = [r.claimNo, r.victimName, r.hospitalName, r.gcn].join(' ').toLowerCase();
             return text.includes(q) && (!stt || r.status === stt);
         });
