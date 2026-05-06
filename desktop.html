@@ -14474,18 +14474,8 @@ const BaoLanh = {
                         ]}],
                         generationConfig: { 
                             temperature: 0.1, 
-                            maxOutputTokens: 512,
-                            response_mime_type: "application/json",
-                            response_schema: {
-                                type: "object",
-                                properties: {
-                                    chiPhiSuaChua: { type: "number" },
-                                    khachHangTuTra: { type: "number" },
-                                    giamGia: { type: "number" },
-                                    baoHiemBaoLanh: { type: "number" }
-                                },
-                                required: ["chiPhiSuaChua", "khachHangTuTra", "giamGia", "baoHiemBaoLanh"]
-                            }
+                            maxOutputTokens: 1024,
+                            response_mime_type: "application/json"
                         },
                         safetySettings: [
                             { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
@@ -14506,15 +14496,19 @@ const BaoLanh = {
                 dataResponse = await Promise.any(MODELS_TO_TRY.map((m, idx) => callAi(m, idx)));
             } catch (err) {
                 try {
-                    dataResponse = await callAi('gemini-2.5-pro', 1);
+                    dataResponse = await callAi('gemini-2.5-flash', 1);
                 } catch (e) {
                     console.error("AI Analysis Error:", e);
-                    throw new Error('Máy chủ AI hiện đang bận hoặc từ chối xử lý ảnh này. Anh hãy thử lại sau nhé.');
+                    throw new Error(`AI lỗi: ${e.message}`);
                 }
             }
 
-            if (!dataResponse || !dataResponse.candidates || dataResponse.candidates.length === 0)
-                throw new Error('Gemini không phản hồi hoặc nội dung bị chặn do chính sách an toàn.');
+            if (!dataResponse || !dataResponse.candidates || dataResponse.candidates.length === 0) {
+                if (dataResponse?.promptFeedback?.blockReason) {
+                    throw new Error(`AI chặn nội dung: ${dataResponse.promptFeedback.blockReason}`);
+                }
+                throw new Error('Gemini không phản hồi hoặc nội dung bị chặn.');
+            }
 
             let parsed = null;
             try {
@@ -14522,7 +14516,7 @@ const BaoLanh = {
                 parsed = JSON.parse(raw);
             } catch(e) {
                 console.error("Parse Error. Raw response:", dataResponse);
-                throw new Error('Lỗi xử lý dữ liệu từ AI. Anh hãy thử lại nhé.');
+                throw new Error('Lỗi xử lý dữ liệu JSON từ AI.');
             }
 
             // 4. Điền vào các input

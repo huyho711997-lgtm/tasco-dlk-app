@@ -15790,18 +15790,8 @@ QUAN TRỌNG:
                                 ]}],
                                 generationConfig: { 
                                     temperature: 0.1, 
-                                    maxOutputTokens: 512,
-                                    response_mime_type: "application/json",
-                                    response_schema: {
-                                        type: "object",
-                                        properties: {
-                                            chiPhiSuaChua: { type: "number" },
-                                            khachHangTuTra: { type: "number" },
-                                            giamGia: { type: "number" },
-                                            baoHiemBaoLanh: { type: "number" }
-                                        },
-                                        required: ["chiPhiSuaChua", "khachHangTuTra", "giamGia", "baoHiemBaoLanh"]
-                                    }
+                                    maxOutputTokens: 1024,
+                                    response_mime_type: "application/json"
                                 },
                                 safetySettings: [
                                     { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
@@ -15818,8 +15808,12 @@ QUAN TRỌNG:
                     await new Promise(res => setTimeout(res, Math.min(1000 * Math.pow(2, attempt), 8000)));
                 }
 
-                if (!dataResponse || !dataResponse.candidates || dataResponse.candidates.length === 0)
-                    throw new Error(dataResponse?.error?.message || 'Gemini không phản hồi hoặc nội dung bị chặn.');
+                if (!dataResponse || !dataResponse.candidates || dataResponse.candidates.length === 0) {
+                    if (dataResponse?.promptFeedback?.blockReason) {
+                        throw new Error(`AI chặn nội dung: ${dataResponse.promptFeedback.blockReason}`);
+                    }
+                    throw new Error('Gemini không phản hồi hoặc nội dung bị chặn.');
+                }
 
                 let parsed = null;
                 try {
@@ -15827,7 +15821,7 @@ QUAN TRỌNG:
                     parsed = JSON.parse(raw);
                 } catch(e) {
                     console.error("Parse Error. Raw response:", dataResponse);
-                    throw new Error('Lỗi xử lý dữ liệu từ AI. Anh hãy thử lại nhé.');
+                    throw new Error('Lỗi xử lý dữ liệu JSON từ AI.');
                 }
 
                 // Bước 4: điền vào các input (format số có dấu chấm kiểu Việt)
@@ -16114,29 +16108,7 @@ QUAN TRỌNG:
                         generationConfig: { 
                             temperature: 0.1, 
                             maxOutputTokens: 8192,
-                            response_mime_type: "application/json",
-                            response_schema: {
-                                type: "array",
-                                items: {
-                                    type: "object",
-                                    properties: {
-                                        stt: { type: "number" },
-                                        candidates: {
-                                            type: "array",
-                                            items: {
-                                                type: "object",
-                                                properties: {
-                                                    id: { type: "string" },
-                                                    score: { type: "number" },
-                                                    reason: { type: "string" }
-                                                },
-                                                required: ["id", "score", "reason"]
-                                            }
-                                        }
-                                    },
-                                    required: ["stt", "candidates"]
-                                }
-                            }
+                            response_mime_type: "application/json"
                         }
                     })
                 });
