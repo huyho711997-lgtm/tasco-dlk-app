@@ -3760,23 +3760,25 @@ textarea.inp { resize:vertical; }
                 </div>
               </div>
               
-              <button type="button" id="btn-gemini-analyze" onclick="BaoLanh.analyzeWithGemini()" class="w-full flex items-center justify-center gap-2 py-2.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-colors">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/></svg> 
-                AI Phân tích File Bảo Lãnh
-              </button>
-              <p id="bl-analyze-status" class="hidden text-[11px] font-bold text-center text-violet-600 animate-pulse"></p>
+              <p id="bl-analyze-status" class="hidden text-[11px] font-bold text-center text-violet-600 animate-pulse mt-1"></p>
 
-              <div class="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-100">
+              <div class="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-100 mt-2">
                 <div><label class="lbl">Chi phí sửa chữa</label><input id="f-blChiPhiSuaChua" class="inp font-mono text-right text-blue-700" oninput="BaoLanh.formatNumber(this); BaoLanh.updateSummary()"></div>
                 <div><label class="lbl">Khách hàng tự trả</label><input id="f-blKhachHangTuTra" class="inp font-mono text-right text-rose-600" oninput="BaoLanh.formatNumber(this)"></div>
                 <div><label class="lbl">Giảm giá</label><input id="f-blGiamGia" class="inp font-mono text-right text-amber-600" oninput="BaoLanh.formatNumber(this)"></div>
                 <div><label class="lbl">BH Bảo lãnh</label><input id="f-blBaoHiemBaoLanh" class="inp font-mono text-right text-emerald-600" oninput="BaoLanh.formatNumber(this); BaoLanh.updateSummary()"></div>
               </div>
 
-              <button type="button" onclick="BaoLanh.sendMessage(curId)" class="w-full mt-2 py-2.5 bg-blue-600 text-white rounded-xl text-[13px] font-bold hover:bg-blue-700 flex items-center justify-center gap-2 shadow-md shadow-blue-200 transition-all active:scale-95">
-                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> 
-                  Gửi PASC & BL qua Zalo
-              </button>
+              <div class="flex gap-2.5 mt-4">
+                <button type="button" id="btn-gemini-analyze" onclick="BaoLanh.analyzeWithGemini()" class="flex-1 flex items-center justify-center gap-2 py-2.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-[11px] font-black hover:bg-indigo-100 transition-all active:scale-95">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/></svg> 
+                  AI PHÂN TÍCH
+                </button>
+                <button type="button" onclick="BaoLanh.sendMessage(curId)" class="flex-[1.4] flex items-center justify-center gap-2 py-2.5 bg-[#0068ff] text-white rounded-xl text-[11px] font-black hover:bg-[#005ae0] shadow-lg shadow-blue-200/50 transition-all active:scale-95">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2C6.5 2 2 6.052 2 11.05c0 2.5 1.121 4.747 2.947 6.313l-.496 2.303c-.125.578.44.973.9.72l2.585-1.422a10.878 10.878 0 0 0 4.076.786c5.512 0 10.012-4.052 10.012-9.048C22.024 6.052 17.524 2 12.012 2zm3.353 13.03l-3.07.001c-.327 0-.6-.215-.682-.517l-.567-2.115L8.52 15.03c-.167.3-.48.47-.813.47-.534 0-.967-.433-.967-.967V9.437c0-.534.433-.967.967-.967.333 0 .646.171.813.471l2.527 4.547.567-2.115c.082-.302.355-.517.682-.517h3.07c.534 0 .967.433.967.967 0 .534-.433.967-.967.967z"/></svg>
+                  GỬI PASC & BL QUA ZALO
+                </button>
+              </div>
             </div>
           </div>
           <!-- Cà vẹt -->
