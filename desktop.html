@@ -14736,28 +14736,15 @@ const BaoLanh = {
 
         if (phone) {
             let cleanPhone = phone.replace(/\D/g,'');
-            // Chuyển sang định dạng 84 cho protocol qr/p/
-            let intlPhone = cleanPhone;
-            if (intlPhone.startsWith('0')) intlPhone = '84' + intlPhone.substring(1);
-            
-            Toast.fire({icon:'success', title:'Đã copy! Đang mở cuộc trò chuyện: ' + cleanPhone});
+            Toast.fire({
+                icon:'success', 
+                title:'Đã copy! Đang kết nối Zalo...',
+                html: `<div class="mt-2 text-slate-600 text-[13px]">Vui lòng nhấn nút <b class="text-teal-600">"Nhắn tin"</b> trên trang Zalo vừa mở để vào cuộc trò chuyện với <b>${cleanPhone}</b>.</div>`,
+                timer: 4000
+            });
             
             setTimeout(() => { 
-                // Thử protocol qr/p/ thường mạnh hơn chat?phone
-                const zaloUri = `zalo://qr/p/${intlPhone}`;
-                
-                const ifr = document.createElement('iframe');
-                ifr.style.display = 'none';
-                ifr.src = zaloUri;
-                document.body.appendChild(ifr);
-                setTimeout(() => { document.body.removeChild(ifr); }, 3000);
-
-                // Fallback sau 1.5 giây
-                setTimeout(() => {
-                    if (document.hasFocus()) {
-                        window.open(`https://zalo.me/${cleanPhone}`, '_blank');
-                    }
-                }, 1500);
+                window.open(`https://zalo.me/${cleanPhone}`, '_blank');
             }, 300);
         } else {
             Toast.fire({icon:'info', title:'Đã copy tin nhắn (Chưa có SĐT)!'});
