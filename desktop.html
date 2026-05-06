@@ -3675,6 +3675,10 @@ textarea.inp { resize:vertical; }
                 <div><label class="lbl">SĐT Gara</label><input id="f-garaphone" class="inp" placeholder="0909..."></div>
                 <div><label class="lbl">Mã số thuế</label><input id="f-garatax" class="inp font-mono" placeholder="MST..."></div>
               </div>
+              <div class="grid grid-cols-2 gap-2.5">
+                <div><label class="lbl">Cố vấn dịch vụ</label><input id="f-garaAdvisorName" class="inp" placeholder="Họ tên cố vấn..."></div>
+                <div><label class="lbl">SĐT Cố vấn (Zalo)</label><input id="f-garaAdvisorPhone" class="inp font-mono" placeholder="0909..."></div>
+              </div>
               <div><label class="lbl">Địa chỉ Gara</label><input id="f-garaaddr" class="inp"></div>
               <div class="grid grid-cols-3 gap-2.5 pt-2 border-t border-slate-100">
                 <div><label class="lbl">Số tài khoản</label><input id="f-garabankno" class="inp font-mono" placeholder="0123456789..."></div>
@@ -5440,6 +5444,8 @@ function openRecord(id) {
   fv('f-garabankno',    rec.garaBankNo);
   fv('f-garabankname',  rec.garaBankName);
   fv('f-garabankowner', rec.garaBankOwner);
+  fv('f-garaAdvisorName', rec.garaAdvisorName);
+  fv('f-garaAdvisorPhone', rec.garaAdvisorPhone);
   fv('f-namsanxuat', rec.namSanXuat);
   fv('f-sochongoi',  rec.soChoNgoi);
   fv('f-hieuxe',     rec.loaiXe);
@@ -5531,6 +5537,7 @@ function saveModal() {
     soGPLX:gv('f-sogplx'),hangGPLX:gv('f-hanggplx'),ngayCapGPLX:gv('f-capgplx'),hetHanGPLX:gv('f-hetgplx'),
     soDangKiem:gv('f-sodk'),ngayCapDK:gv('f-capdk'),hetHanDK:gv('f-hetdk'),
     garaName:gv('f-garaname'),garaPhone:gv('f-garaphone'),garaTax:gv('f-garatax'),garaAddress:gv('f-garaaddr'),
+    garaAdvisorName:gv('f-garaAdvisorName'),garaAdvisorPhone:gv('f-garaAdvisorPhone'),
     note:gv('f-note'),appointmentTime:iso,stepUpdatedAt:new Date().toISOString(),
     // Owner
     ownerType:gv('f-ownerType')||'personal',
@@ -5559,7 +5566,14 @@ function saveModal() {
       upd.invoiceWaitAt = new Date().toISOString();
   }
 
-  if(gv('f-garaname'))garaSaveNew({name:gv('f-garaname'),phone:gv('f-garaphone'),tax:gv('f-garatax'),address:gv('f-garaaddr')});
+  if(gv('f-garaname'))garaSaveNew({
+    name:gv('f-garaname'),
+    phone:gv('f-garaphone'),
+    tax:gv('f-garatax'),
+    address:gv('f-garaaddr'),
+    advisorName:gv('f-garaAdvisorName'),
+    advisorPhone:gv('f-garaAdvisorPhone')
+  });
 
   var fmap={bsx:'Biển số',customer:'Người báo',driverName:'Lái xe',phone:'SĐT',accidentDate:'Ngày VTT',notifyDate:'Ngày báo',location:'Địa điểm',cause:'Nguyên nhân',garaName:'Gara',appointmentTime:'Lịch hẹn',note:'Ghi chú',ownerName:'Chủ xe',ownerCccd:'CCCD',ownerCompany:'Công ty'};
   var diffs=[];
@@ -14559,7 +14573,10 @@ const BaoLanh = {
 
     sendMessage(id) {
         const item = allData.find(r => r.id === id) || {};
-        const phone = document.getElementById('f-garaphone')?.value.trim() || item.garaPhone || '';
+        const advisorPhone = document.getElementById('f-garaAdvisorPhone')?.value.trim() || item.garaAdvisorPhone || '';
+        const garaPhone    = document.getElementById('f-garaphone')?.value.trim()        || item.garaPhone        || '';
+        const phone        = advisorPhone || garaPhone;
+
         const pascUrl    = document.getElementById('f-pascUrl')?.value.trim()    || item.pascUrl    || '';
         const baoLanhUrl = document.getElementById('f-baoLanhUrl')?.value.trim() || item.baoLanhUrl || '';
         const bsx        = document.getElementById('f-bsx')?.value.trim()        || item.bsx        || '';
