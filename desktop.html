@@ -14707,14 +14707,19 @@ const BaoLanh = {
             return;
         }
 
-        // Logic danh xưng: 
-        // - Nếu gọi họ là Anh/Chị/Chú/Bác/Cô -> Mình là "Em"
-        // - Nếu gọi họ là Em/Bạn -> Mình là "Anh"
-        let sender = 'Em';
-        if (['Em', 'Bạn'].includes(prefix)) sender = 'Anh';
+        // Logic danh xưng mới:
+        let greeting = "";
+        if (prefix === "Bạn") {
+            greeting = `Mình gửi PASC và bảo lãnh xe ${bsx} nhé!`;
+        } else {
+            let sender = "Em";
+            if (prefix === "Em") sender = "Anh";
+            greeting = name 
+                ? `${sender} gửi ${prefix.toLowerCase()} ${name} phương án sửa chữa và bảo lãnh xe ${bsx}`
+                : `${sender} gửi ${prefix.toLowerCase()} phương án sửa chữa và bảo lãnh xe ${bsx}`;
+        }
 
-        const greeting = name ? `${sender} gửi ${prefix.toLowerCase()} ${name} ` : '';
-        const msg = `${greeting}Phương án sửa chữa\n${pascUrl || '(chưa có)'}\n\nBảo lãnh \n${baoLanhUrl || '(chưa có)'}\n\nPhương án sửa chữa và bảo lãnh sửa chữa xe ${bsx}`;
+        const msg = `${greeting}\n\n👉 PASC: ${pascUrl || '(chưa có)'}\n👉 Bảo lãnh: ${baoLanhUrl || '(chưa có)'}`;
 
         if (navigator.clipboard && window.isSecureContext) {
             navigator.clipboard.writeText(msg).catch(() => {});
