@@ -14588,43 +14588,26 @@ const BaoLanh = {
 
         const msg = `Phương án sửa chữa\n${pascUrl || '(chưa có)'}\n\nBảo lãnh \n${baoLanhUrl || '(chưa có)'}\n\nPhương án sửa chữa và bảo lãnh sửa chữa xe ${bsx}`;
 
-        Swal.fire({
-            title: `<div class="text-left font-black text-base text-violet-700 flex items-center gap-2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg> Gửi PASC & Bảo lãnh</div>`,
-            html: `
-                <div class="text-left mt-2">
-                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-3 max-h-[40vh] overflow-y-auto">
-                        <pre class="text-[12px] text-slate-700 font-mono whitespace-pre-wrap break-all leading-relaxed">${msg}</pre>
-                    </div>
-                    ${phone
-                        ? `<p class="text-[11px] text-slate-500 font-semibold flex items-center gap-1.5">Gửi đến Gara: <span class="font-black text-blue-700 font-mono">${phone}</span></p>`
-                        : `<p class="text-[11px] text-rose-500 font-bold flex items-center gap-1.5">⚠️ Chưa có SĐT Gara — sẽ chỉ copy!</p>`
-                    }
-                </div>`,
-            showCancelButton: true,
-            confirmButtonText: phone ? '📋 Copy & Mở Zalo' : '📋 Copy tin nhắn',
-            cancelButtonText: 'Hủy',
-            confirmButtonColor: '#7c3aed',
-            customClass: { popup: 'rnd' }
-        }).then(res => {
-            if (!res.isConfirmed) return;
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(msg).catch(() => {});
-            } else {
-                const ta = document.createElement('textarea');
-                ta.value = msg;
-                ta.style.cssText = `position:absolute;opacity:0;top:${window.scrollY}px;left:0;`;
-                document.body.appendChild(ta);
-                ta.focus({ preventScroll: true });
-                ta.select();
-                try { document.execCommand('copy'); } catch(e) {}
-                document.body.removeChild(ta);
-            }
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(msg).catch(() => {});
+        } else {
+            const ta = document.createElement('textarea');
+            ta.value = msg;
+            ta.style.cssText = `position:absolute;opacity:0;top:${window.scrollY}px;left:0;`;
+            document.body.appendChild(ta);
+            ta.focus({ preventScroll: true });
+            ta.select();
+            try { document.execCommand('copy'); } catch(e) {}
+            document.body.removeChild(ta);
+        }
+
+        if (phone) {
             Toast.fire({icon:'success', title:'Đã copy! Đang mở Zalo...'});
-            if (phone) {
-                const cleanPhone = phone.replace(/\D/g,'');
-                setTimeout(() => { window.open(`https://zalo.me/${cleanPhone}`, '_blank'); }, 300);
-            }
-        });
+            const cleanPhone = phone.replace(/\D/g,'');
+            setTimeout(() => { window.open(`https://zalo.me/${cleanPhone}`, '_blank'); }, 300);
+        } else {
+            Toast.fire({icon:'info', title:'Đã copy tin nhắn (Chưa có SĐT)!'});
+        }
     }
 };
 
