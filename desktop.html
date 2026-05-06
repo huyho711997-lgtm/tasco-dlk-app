@@ -14736,31 +14736,15 @@ const BaoLanh = {
 
         if (phone) {
             let cleanPhone = phone.replace(/\D/g,'');
-            let intlPhone = cleanPhone;
-            if (intlPhone.startsWith('0')) intlPhone = '84' + intlPhone.substring(1);
-
             Toast.fire({
                 icon:'success', 
-                title:'Đã copy! Đang mở cuộc trò chuyện...',
-                html: `<div class="mt-2 text-slate-600 text-[13px]">Đang thử mở thẳng <b>Zalo App</b>. Nếu không thấy cửa sổ chat, vui lòng kiểm tra trình duyệt.</div>`,
-                timer: 3000
+                title:'Đã copy tin nhắn!',
+                html: `<div class="mt-2 text-slate-600 text-[13px]">Nhấn <b class="text-teal-600">"Nhắn tin"</b> trên trang Zalo vừa mở, sau đó nhấn <b>Ctrl + V</b> để gửi.</div>`,
+                timer: 4000
             });
             
             setTimeout(() => { 
-                // Thử giao thức msg?phone (biến thể khác của chat?phone)
-                const zaloAppUri = `zalo://msg?phone=${intlPhone}`;
-                
-                // Trigger app
-                const ifr = document.createElement('iframe');
-                ifr.style.display = 'none';
-                ifr.src = zaloAppUri;
-                document.body.appendChild(ifr);
-                setTimeout(() => { if (ifr.parentNode) document.body.removeChild(ifr); }, 3000);
-
-                // Mở thêm Zalo Web sau 1 giây nếu App không dẫn vào đúng chỗ
-                setTimeout(() => {
-                    window.open(`https://chat.zalo.me/?phone=${intlPhone}`, '_blank');
-                }, 1200);
+                window.open(`https://zalo.me/${cleanPhone}`, '_blank');
             }, 300);
         } else {
             Toast.fire({icon:'info', title:'Đã copy tin nhắn (Chưa có SĐT)!'});
