@@ -14736,6 +14736,10 @@ const BaoLanh = {
 
         if (phone) {
             let cleanPhone = phone.replace(/\D/g,'');
+            // Thử dùng đầu số 84 để Zalo Web nhận diện tốt hơn và vào thẳng chat
+            let phoneForWeb = cleanPhone;
+            if (phoneForWeb.startsWith('0')) phoneForWeb = '84' + phoneForWeb.substring(1);
+
             Toast.fire({
                 icon:'success', 
                 title:'Đã copy! Đang mở Zalo Web...',
@@ -14744,8 +14748,7 @@ const BaoLanh = {
             });
             
             setTimeout(() => { 
-                // Sử dụng Zalo Web với tham số phone để vào thẳng chat mà không qua nút trung gian
-                window.open(`https://chat.zalo.me/?phone=${cleanPhone}`, '_blank');
+                window.open(`https://chat.zalo.me/?phone=${phoneForWeb}`, '_blank');
             }, 300);
         } else {
             Toast.fire({icon:'info', title:'Đã copy tin nhắn (Chưa có SĐT)!'});
