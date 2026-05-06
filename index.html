@@ -4824,29 +4824,13 @@
                 return;
             }
 
-            // Lưu session đăng nhập vào máy cá nhân (giữ nguyên để không bắt đăng nhập lại)
             const session = { ...user, loginAt: new Date().toISOString() };
             delete session.password;
             localStorage.setItem(this._KEY_SESSION, JSON.stringify(session));
             this._sessionStart = Date.now();
 
-            document.getElementById('login-screen').classList.add('hide');
-            setTimeout(() => {
-                document.getElementById('login-screen').style.display = 'none';
-            }, 400);
-
-            this._applyUserUI(session);
-            document.getElementById('login-screen').classList.add('hide');
-            setTimeout(() => {
-                document.getElementById('login-screen').style.display = 'none';
-            }, 400);
-
-            this._applyUserUI(session);
-            
-            // THÊM DÒNG NÀY ĐỂ ĐỒNG BỘ UI NGAY KHI ĐĂNG NHẬP XONG
-            Nav.switchView('home', document.getElementById('nav-home-btn')); 
-
-            Toast.fire({ icon: 'success', title: `Xin chào, ${user.name}!` });
+            // Tải lại trang để áp dụng session mới sạch sẽ
+            location.reload();
         },
 
         _applyUserUI(user) {
@@ -4879,15 +4863,7 @@
 
             UserMenu.close();
             localStorage.removeItem(this._KEY_SESSION);
-
-            const ls = document.getElementById('login-screen');
-            ls.style.display = 'flex';
-            ls.classList.remove('hide');
-            document.getElementById('login-username').value = '';
-            document.getElementById('login-password').value = '';
-            document.getElementById('login-error').classList.add('hidden');
-            document.getElementById('login-btn').disabled = false;
-            document.getElementById('login-btn').textContent = 'Đăng nhập';
+            location.reload();
         },
 
         init() {
