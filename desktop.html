@@ -14736,21 +14736,23 @@ const BaoLanh = {
 
         if (phone) {
             let cleanPhone = phone.replace(/\D/g,'');
-            Toast.fire({icon:'success', title:'Đã copy! Đang mở Zalo: ' + cleanPhone});
+            // Chuyển sang định dạng 84 cho protocol qr/p/
+            let intlPhone = cleanPhone;
+            if (intlPhone.startsWith('0')) intlPhone = '84' + intlPhone.substring(1);
             
-            // Thử mở trực tiếp app Zalo qua protocol zalo://
+            Toast.fire({icon:'success', title:'Đã copy! Đang mở cuộc trò chuyện: ' + cleanPhone});
+            
             setTimeout(() => { 
-                // Sử dụng định dạng 0xxx truyền thống cho Zalo PC
-                const zaloUri = `zalo://chat?phone=${cleanPhone}`;
+                // Thử protocol qr/p/ thường mạnh hơn chat?phone
+                const zaloUri = `zalo://qr/p/${intlPhone}`;
                 
-                // Sử dụng iframe hoặc window.open để trigger protocol tránh bị chặn
                 const ifr = document.createElement('iframe');
                 ifr.style.display = 'none';
                 ifr.src = zaloUri;
                 document.body.appendChild(ifr);
                 setTimeout(() => { document.body.removeChild(ifr); }, 3000);
 
-                // Fallback sau 1.5 giây nếu không mở được app
+                // Fallback sau 1.5 giây
                 setTimeout(() => {
                     if (document.hasFocus()) {
                         window.open(`https://zalo.me/${cleanPhone}`, '_blank');
