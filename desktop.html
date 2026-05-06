@@ -5936,10 +5936,14 @@ function advisorSearch(inp) {
   if (!hits.length) { drop.classList.add('hidden'); return; }
   
   drop.innerHTML = hits.map(function(a) {
-    return '<div class="gdrop-item" onclick="advisorSelect('+JSON.stringify(a).replace(/"/g,'&quot;')+')">'+
+    return '<div class="gdrop-item group flex items-center justify-between" onclick="advisorSelect('+JSON.stringify(a).replace(/"/g,'&quot;')+')">'+
+           '<div class="flex items-center">'+
            '<span class="text-teal-600 mr-2"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg></span>'+
            '<div><p class="font-bold text-slate-800">'+a.name+'</p>'+
-           (a.phone ? '<p class="text-[10px] text-slate-400 font-mono">'+a.phone+'</p>' : '') + '</div></div>';
+           (a.phone ? '<p class="text-[10px] text-slate-400 font-mono">'+a.phone+'</p>' : '') + '</div></div>'+
+           '<button onclick="event.stopPropagation(); deleteAdvisor('+JSON.stringify(a).replace(/"/g,'&quot;')+')" class="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all" title="Xóa cố vấn này">'+
+           '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>'+
+           '</div>';
   }).join('');
   drop.classList.remove('hidden');
 }
@@ -5954,6 +5958,32 @@ function advisorSelect(a) {
 function advisorHide() {
   var drop = document.getElementById('advisor-drop');
   if (drop) drop.classList.add('hidden');
+}
+
+function deleteAdvisor(a) {
+  var currentGaraName = document.getElementById('f-garaname')?.value.trim().toLowerCase();
+  var gara = garaList.find(function(g){ return g.name && g.name.toLowerCase() === currentGaraName; });
+  if (!gara || !gara._key || !gara.advisors) return;
+
+  Swal.fire({
+    title: 'Xóa cố vấn?',
+    text: 'Bạn có chắc muốn xóa "' + a.name + '" khỏi danh sách gợi ý của Gara này?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#e11d48',
+    confirmButtonText: 'Xóa ngay',
+    cancelButtonText: 'Hủy'
+  }).then(function(res) {
+    if (res.isConfirmed) {
+      var newList = gara.advisors.filter(function(adv) {
+        return adv.name !== a.name;
+      });
+      db.ref('Garages/' + gara._key).update({ advisors: newList }).then(function() {
+        Toast.fire({ icon: 'success', title: ' Đã xóa cố vấn!' });
+        advisorHide();
+      });
+    }
+  });
 }
 
 /* ═══════════════════════════════════════
