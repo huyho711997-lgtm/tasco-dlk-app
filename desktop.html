@@ -14738,13 +14738,14 @@ const BaoLanh = {
             let cleanPhone = phone.replace(/\D/g,'');
             Toast.fire({
                 icon:'success', 
-                title:'Đã copy! Đang kết nối Zalo...',
-                html: `<div class="mt-2 text-slate-600 text-[13px]">Vui lòng nhấn nút <b class="text-teal-600">"Nhắn tin"</b> trên trang Zalo vừa mở để vào cuộc trò chuyện với <b>${cleanPhone}</b>.</div>`,
-                timer: 4000
+                title:'Đã copy! Đang mở Zalo Web...',
+                html: `<div class="mt-2 text-slate-600 text-[13px]">Hệ thống đang mở <b>Zalo Web</b> để vào thẳng cuộc trò chuyện với <b>${cleanPhone}</b>.</div>`,
+                timer: 3000
             });
             
             setTimeout(() => { 
-                window.open(`https://zalo.me/${cleanPhone}`, '_blank');
+                // Sử dụng Zalo Web với tham số phone để vào thẳng chat mà không qua nút trung gian
+                window.open(`https://chat.zalo.me/?phone=${cleanPhone}`, '_blank');
             }, 300);
         } else {
             Toast.fire({icon:'info', title:'Đã copy tin nhắn (Chưa có SĐT)!'});
