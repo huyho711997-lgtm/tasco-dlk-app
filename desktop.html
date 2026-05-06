@@ -14602,9 +14602,18 @@ const BaoLanh = {
         }
 
         if (phone) {
-            Toast.fire({icon:'success', title:'Đã copy! Đang mở Zalo...'});
+            Toast.fire({icon:'success', title:'Đã copy! Đang mở Zalo App...'});
             const cleanPhone = phone.replace(/\D/g,'');
-            setTimeout(() => { window.open(`https://zalo.me/${cleanPhone}`, '_blank'); }, 300);
+            // Thử mở trực tiếp app Zalo qua protocol zalo://
+            setTimeout(() => { 
+                window.location.href = `zalo://chat?phone=${cleanPhone}`;
+                // Fallback sau 1 giây nếu không mở được app thì mở web (tùy chọn, nhưng thường zalo:// là đủ cho desktop)
+                setTimeout(() => {
+                    if (document.hasFocus()) { // Nếu vẫn ở trình duyệt nghĩa là có thể chưa mở được app
+                        window.open(`https://zalo.me/${cleanPhone}`, '_blank');
+                    }
+                }, 1000);
+            }, 300);
         } else {
             Toast.fire({icon:'info', title:'Đã copy tin nhắn (Chưa có SĐT)!'});
         }
