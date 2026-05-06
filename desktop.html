@@ -14472,10 +14472,33 @@ const BaoLanh = {
                             { text: PROMPT },
                             { inline_data: { mime_type: 'image/jpeg', data: base64 } }
                         ]}],
-                        generationConfig: { temperature: 0.0, maxOutputTokens: 256 }
+                        generationConfig: { 
+                            temperature: 0.1, 
+                            maxOutputTokens: 512,
+                            response_mime_type: "application/json",
+                            response_schema: {
+                                type: "object",
+                                properties: {
+                                    chiPhiSuaChua: { type: "number" },
+                                    khachHangTuTra: { type: "number" },
+                                    giamGia: { type: "number" },
+                                    baoHiemBaoLanh: { type: "number" }
+                                },
+                                required: ["chiPhiSuaChua", "khachHangTuTra", "giamGia", "baoHiemBaoLanh"]
+                            }
+                        },
+                        safetySettings: [
+                            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                        ]
                     })
                 });
-                if (!res.ok) throw new Error(`Model ${model} failed`);
+                if (!res.ok) {
+                    const errJson = await res.json().catch(() => ({}));
+                    throw new Error(errJson.error?.message || `Model ${model} failed with status ${res.status}`);
+                }
                 return await res.json();
             };
 
@@ -14485,19 +14508,22 @@ const BaoLanh = {
                 try {
                     dataResponse = await callAi('gemini-2.5-pro', 1);
                 } catch (e) {
-                    throw new Error('Máy chủ AI hiện đang bận. Anh hãy thử lại sau ít giây nhé.');
+                    console.error("AI Analysis Error:", e);
+                    throw new Error('Máy chủ AI hiện đang bận hoặc từ chối xử lý ảnh này. Anh hãy thử lại sau nhé.');
                 }
             }
 
-            if (!dataResponse || dataResponse.error)
-                throw new Error(dataResponse?.error?.message || 'Gemini không phản hồi');
+            if (!dataResponse || !dataResponse.candidates || dataResponse.candidates.length === 0)
+                throw new Error('Gemini không phản hồi hoặc nội dung bị chặn do chính sách an toàn.');
 
-            let raw = '';
-            try { raw = dataResponse.candidates[0].content.parts[0].text || ''; } catch(e) {}
-            const cleanJson = raw.replace(/```json|```/gi,'').trim();
-            const si = cleanJson.indexOf('{'), ei = cleanJson.lastIndexOf('}');
-            if (si === -1 || ei === -1) throw new Error('Gemini không trả về JSON hợp lệ');
-            const parsed = JSON.parse(cleanJson.substring(si, ei + 1));
+            let parsed = null;
+            try {
+                const raw = dataResponse.candidates[0].content.parts[0].text;
+                parsed = JSON.parse(raw);
+            } catch(e) {
+                console.error("Parse Error. Raw response:", dataResponse);
+                throw new Error('Lỗi xử lý dữ liệu từ AI. Anh hãy thử lại nhé.');
+            }
 
             // 4. Điền vào các input
             const fmt = v => v && v > 0 ? parseInt(v).toLocaleString('vi-VN') : '';

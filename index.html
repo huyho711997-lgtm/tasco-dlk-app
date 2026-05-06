@@ -15788,25 +15788,47 @@ QUAN TRỌNG:
                                     { text: PROMPT },
                                     { inline_data: { mime_type: 'image/jpeg', data: base64 } }
                                 ]}],
-                                generationConfig: { temperature: 0.0, maxOutputTokens: 256 }
+                                generationConfig: { 
+                                    temperature: 0.1, 
+                                    maxOutputTokens: 512,
+                                    response_mime_type: "application/json",
+                                    response_schema: {
+                                        type: "object",
+                                        properties: {
+                                            chiPhiSuaChua: { type: "number" },
+                                            khachHangTuTra: { type: "number" },
+                                            giamGia: { type: "number" },
+                                            baoHiemBaoLanh: { type: "number" }
+                                        },
+                                        required: ["chiPhiSuaChua", "khachHangTuTra", "giamGia", "baoHiemBaoLanh"]
+                                    }
+                                },
+                                safetySettings: [
+                                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                                    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                                ]
                             })
                         }
                     );
                     dataResponse = await r.json();
-                    if (r.ok && !dataResponse.error) break;
+                    if (r.ok && dataResponse.candidates && dataResponse.candidates.length > 0) break;
                     // Exponential backoff: 1s, 2s, 4s...
                     await new Promise(res => setTimeout(res, Math.min(1000 * Math.pow(2, attempt), 8000)));
                 }
 
-                if (!dataResponse || dataResponse.error)
-                    throw new Error(dataResponse?.error?.message || 'Gemini không phản hồi');
+                if (!dataResponse || !dataResponse.candidates || dataResponse.candidates.length === 0)
+                    throw new Error(dataResponse?.error?.message || 'Gemini không phản hồi hoặc nội dung bị chặn.');
 
-                let raw = '';
-                try { raw = dataResponse.candidates[0].content.parts[0].text || ''; } catch(e) {}
-                const cleanJson = raw.replace(/```json|```/gi,'').trim();
-                const si = cleanJson.indexOf('{'), ei = cleanJson.lastIndexOf('}');
-                if (si === -1 || ei === -1) throw new Error('Gemini không trả về JSON hợp lệ');
-                const parsed = JSON.parse(cleanJson.substring(si, ei + 1));
+                let parsed = null;
+                try {
+                    const raw = dataResponse.candidates[0].content.parts[0].text;
+                    parsed = JSON.parse(raw);
+                } catch(e) {
+                    console.error("Parse Error. Raw response:", dataResponse);
+                    throw new Error('Lỗi xử lý dữ liệu từ AI. Anh hãy thử lại nhé.');
+                }
 
                 // Bước 4: điền vào các input (format số có dấu chấm kiểu Việt)
                 const fmt = v => v && v > 0 ? parseInt(v).toLocaleString('vi-VN') : '';
@@ -16089,19 +16111,46 @@ QUAN TRỌNG:
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         contents: [{ parts: [{ text: matchPrompt }] }],
-                        generationConfig: { temperature: 0.1, maxOutputTokens: 8192 }
+                        generationConfig: { 
+                            temperature: 0.1, 
+                            maxOutputTokens: 8192,
+                            response_mime_type: "application/json",
+                            response_schema: {
+                                type: "array",
+                                items: {
+                                    type: "object",
+                                    properties: {
+                                        stt: { type: "number" },
+                                        candidates: {
+                                            type: "array",
+                                            items: {
+                                                type: "object",
+                                                properties: {
+                                                    id: { type: "string" },
+                                                    score: { type: "number" },
+                                                    reason: { type: "string" }
+                                                },
+                                                required: ["id", "score", "reason"]
+                                            }
+                                        }
+                                    },
+                                    required: ["stt", "candidates"]
+                                }
+                            }
+                        }
                     })
                 });
 
                 const respData = await resp.json();
                 if (respData.error) throw new Error(respData.error.message);
 
-                const raw = ((respData.candidates||[])[0]||{}).content?.parts?.[0]?.text || '';
-                const cleaned = raw.replace(/```json|```/gi, '').trim();
                 let matchResults = [];
-                try { matchResults = JSON.parse(cleaned); } catch(_) {
-                    const mm = cleaned.match(/\[[\s\S]*\]/);
-                    if (mm) matchResults = JSON.parse(mm[0]);
+                try {
+                    const raw = respData.candidates[0].content.parts[0].text;
+                    matchResults = JSON.parse(raw);
+                } catch(e) {
+                    console.error("PriceCompare Parse Error:", respData);
+                    throw new Error('Lỗi phân tích kết quả tra giá từ AI.');
                 }
                 if (!Array.isArray(matchResults)) matchResults = [];
 
