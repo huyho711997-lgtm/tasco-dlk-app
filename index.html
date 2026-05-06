@@ -15766,51 +15766,59 @@ QUAN TRỌNG:
                 }
                 Nếu không tìm thấy một giá trị nào, để 0. Chỉ trả về JSON thuần, không giải thích.`;
 
-                const MODELS_TO_TRY = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash', CONFIG.gemini.model];
+                const MODELS_TO_TRY = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash', 'gemini-2.0-pro'];
                 let dataResponse = null;
                 let lastError = '';
 
-                for (let modelName of MODELS_TO_TRY) {
-                    try {
-                        const key = GeminiKeys.next();
-                        if (status) status.textContent = `✨ Đang thử bằng ${modelName}...`;
-                        
-                        const r = await fetch(
-                            `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${key}`,
-                            {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    contents: [{ parts: [
-                                        { text: PROMPT },
-                                        { inline_data: { mime_type: 'image/jpeg', data: base64 } }
-                                    ]}],
-                                    generationConfig: { 
-                                        temperature: 0.1, 
-                                        maxOutputTokens: 1024,
-                                        response_mime_type: "application/json"
-                                    },
-                                    safetySettings: [
-                                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                                    ]
-                                })
+                outerLoop: for (let modelName of MODELS_TO_TRY) {
+                    // Thử tối đa 3 key ngẫu nhiên cho mỗi model
+                    const allKeys = CONFIG.gemini.keys;
+                    const keysToTry = [...allKeys].sort(() => Math.random() - 0.5).slice(0, 3);
+
+                    for (let key of keysToTry) {
+                        try {
+                            if (status) status.textContent = `✨ Đang thử bằng ${modelName}...`;
+                            
+                            const r = await fetch(
+                                `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${key}`,
+                                {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        contents: [{ parts: [
+                                            { text: PROMPT },
+                                            { inline_data: { mime_type: 'image/jpeg', data: base64 } }
+                                        ]}],
+                                        generationConfig: { 
+                                            temperature: 0.1, 
+                                            maxOutputTokens: 1024,
+                                            response_mime_type: "application/json"
+                                        },
+                                        safetySettings: [
+                                            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                                            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                                        ]
+                                    })
+                                }
+                            );
+                            dataResponse = await r.json();
+                            if (r.ok && dataResponse.candidates && dataResponse.candidates.length > 0) break outerLoop;
+                            
+                            if (dataResponse.error) {
+                                lastError = dataResponse.error.message;
+                                if (lastError.toLowerCase().includes('quota')) continue; // Thử key khác ngay
                             }
-                        );
-                        dataResponse = await r.json();
-                        if (r.ok && dataResponse.candidates && dataResponse.candidates.length > 0) break;
-                        
-                        if (dataResponse.error) lastError = dataResponse.error.message;
-                        await new Promise(res => setTimeout(res, 300));
-                    } catch (e) {
-                        lastError = e.message;
+                            await new Promise(res => setTimeout(res, 200));
+                        } catch (e) {
+                            lastError = e.message;
+                        }
                     }
                 }
 
                 if (!dataResponse || !dataResponse.candidates || dataResponse.candidates.length === 0) {
-                    throw new Error(lastError || 'Tất cả các máy chủ AI đều đang bận.');
+                    throw new Error(lastError || 'Tất cả các máy chủ và API Key đều đang bận.');
                 }
 
                 let parsed = null;

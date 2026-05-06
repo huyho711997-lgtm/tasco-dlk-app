@@ -14458,12 +14458,11 @@ const BaoLanh = {
             }
             Nếu không tìm thấy một giá trị nào, để 0. Chỉ trả về JSON thuần, không giải thích.`;
 
-            const MODELS_TO_TRY = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash'];
+            const MODELS_TO_TRY = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash', 'gemini-2.0-pro'];
             let dataResponse = null;
             let lastError = '';
             
-            const callAi = async (model, keyIdx) => {
-                const key = GEM_KEYS[keyIdx % GEM_KEYS.length];
+            const callAi = async (model, key) => {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -14487,26 +14486,36 @@ const BaoLanh = {
                 });
                 if (!res.ok) {
                     const errJson = await res.json().catch(() => ({}));
-                    throw new Error(errJson.error?.message || `Status ${res.status}`);
+                    const msg = errJson.error?.message || `Status ${res.status}`;
+                    throw new Error(msg);
                 }
                 return await res.json();
             };
 
-            // Thử tuần tự từng model để tránh bận server
-            for (let m of MODELS_TO_TRY) {
-                try {
-                    if (status) status.textContent = `✨ AI đang thử bằng ${m}...`;
-                    dataResponse = await callAi(m, Math.floor(Math.random() * GEM_KEYS.length));
-                    if (dataResponse && dataResponse.candidates && dataResponse.candidates.length > 0) break;
-                } catch (e) {
-                    lastError = e.message;
-                    console.warn(`Model ${m} failed:`, e.message);
-                    await new Promise(r => setTimeout(r, 300)); // Nghỉ ngắn rồi thử model tiếp theo
+            // Vòng lặp thử từng Model
+            outerLoop: for (let m of MODELS_TO_TRY) {
+                // Với mỗi Model, thử tối đa 3 Key khác nhau (hoặc tất cả nếu có ít hơn)
+                const keysToTry = [...GEM_KEYS].sort(() => Math.random() - 0.5).slice(0, 3);
+                
+                for (let k of keysToTry) {
+                    try {
+                        if (status) status.textContent = `✨ AI đang thử bằng ${m}...`;
+                        dataResponse = await callAi(m, k);
+                        if (dataResponse && dataResponse.candidates && dataResponse.candidates.length > 0) break outerLoop;
+                    } catch (e) {
+                        lastError = e.message;
+                        console.warn(`Model ${m} with key ${k.substring(0,6)}... failed:`, e.message);
+                        // Nếu lỗi Quota hoặc bận, thử ngay Key tiếp theo của cùng model đó
+                        if (e.message.includes('quota') || e.message.includes('demand')) {
+                            continue; 
+                        }
+                    }
                 }
+                await new Promise(r => setTimeout(r, 200)); 
             }
 
             if (!dataResponse || !dataResponse.candidates || dataResponse.candidates.length === 0)
-                throw new Error(lastError || 'Tất cả các máy chủ AI đều đang bận. Anh thử lại sau ít giây nhé.');
+                throw new Error(lastError || 'Tất cả các máy chủ và API Key đều đang bận hoặc hết hạn.');
 
             let parsed = null;
             try {
