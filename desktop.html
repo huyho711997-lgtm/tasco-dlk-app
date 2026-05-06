@@ -3675,7 +3675,6 @@ textarea.inp { resize:vertical; }
                 <div><label class="lbl">SĐT Gara</label><input id="f-garaphone" class="inp" placeholder="0909..."></div>
                 <div><label class="lbl">Mã số thuế</label><input id="f-garatax" class="inp font-mono" placeholder="MST..."></div>
               </div>
-              <div class="grid grid-cols-4 gap-2.5">
                 <div class="col-span-1">
                   <label class="lbl">Danh xưng</label>
                   <select id="f-garaAdvisorPrefix" class="inp">
@@ -3687,7 +3686,11 @@ textarea.inp { resize:vertical; }
                     <option value="Cô">Cô</option>
                   </select>
                 </div>
-                <div class="col-span-1"><label class="lbl">Tên Cố vấn</label><input id="f-garaAdvisorName" class="inp" placeholder="Tên..."></div>
+                <div class="col-span-1 relative">
+                  <label class="lbl">Tên Cố vấn</label>
+                  <input id="f-garaAdvisorName" class="inp" placeholder="Tên..." autocomplete="off" oninput="advisorSearch(this)" onblur="setTimeout(advisorHide, 200)">
+                  <div id="advisor-drop" class="gdrop hidden"></div>
+                </div>
                 <div class="col-span-2"><label class="lbl">SĐT Cố vấn (Zalo)</label><input id="f-garaAdvisorPhone" class="inp font-mono" placeholder="0909..."></div>
               </div>
               <div><label class="lbl">Địa chỉ Gara</label><input id="f-garaaddr" class="inp"></div>
@@ -5384,16 +5387,51 @@ function dtpGaraSelect(g){
 function dtpGaraHide(){var d=document.getElementById('dtp-gdrop');if(d)d.classList.add('hidden');}
 function garaSaveNew(g) {
   if(!g || !g.name) return;
-  var exists = garaList.some(function(x){ return x.name && x.name.toLowerCase() === g.name.toLowerCase(); });
-  if(!exists) {
-    db.ref('Garages/' + Date.now()).set(Object.assign({}, g, { createdAt: new Date().toISOString() }));
+  var existing = garaList.find(function(x){ return x.name && x.name.toLowerCase() === g.name.toLowerCase(); });
+  
+  if(!existing) {
+    // Thêm mới Gara
+    var newGara = Object.assign({}, g, { createdAt: new Date().toISOString() });
+    if (g.advisorName) {
+      newGara.advisors = [{ name: g.advisorName, phone: g.advisorPhone || '', prefix: g.advisorPrefix || 'Anh' }];
+    }
+    db.ref('Garages/' + Date.now()).set(newGara);
   } else {
-    // Cập nhật nếu đã tồn tại
-    db.ref('Garages').orderByChild('name').equalTo(g.name).once('value', function(snap) {
-      var raw = snap.val(); if(!raw) return;
-      var key = Object.keys(raw)[0];
-      db.ref('Garages/' + key).update(g);
-    });
+    // Cập nhật Gara hiện tại
+    var updates = {
+      phone: g.phone || existing.phone || '',
+      tax: g.tax || existing.tax || '',
+      address: g.address || existing.address || ''
+    };
+    var needUpdate = false;
+    
+    // Xử lý danh sách Cố vấn
+    if (g.advisorName) {
+      var advisors = existing.advisors || [];
+      var idx = advisors.findIndex(function(a){ return a.name && a.name.toLowerCase() === g.advisorName.toLowerCase(); });
+      var advData = { name: g.advisorName, phone: g.advisorPhone || '', prefix: g.advisorPrefix || 'Anh' };
+      
+      if (idx === -1) {
+        advisors.push(advData);
+        updates.advisors = advisors;
+        needUpdate = true;
+      } else {
+        // Cập nhật thông tin nếu có thay đổi
+        if (advisors[idx].phone !== advData.phone || advisors[idx].prefix !== advData.prefix) {
+          advisors[idx] = advData;
+          updates.advisors = advisors;
+          needUpdate = true;
+        }
+      }
+    }
+    
+    // Kiểm tra xem các thông tin khác có cần cập nhật không (chỉ cập nhật nếu field hiện tại đang trống)
+    if (g.tax && !existing.tax) { updates.tax = g.tax; needUpdate = true; }
+    if (g.address && !existing.address) { updates.address = g.address; needUpdate = true; }
+
+    if (needUpdate && existing._key) {
+      db.ref('Garages/' + existing._key).update(updates);
+    }
   }
 }
 
@@ -5877,11 +5915,45 @@ function garaSelect(g) {
   document.getElementById('f-garabankowner').value = g.bankOwner || '';   
   document.getElementById('gara-drop').classList.add('hidden');
   
-  // Thêm dòng này:
   const summaryGara = document.getElementById('summary-garaname');
   if(summaryGara) summaryGara.textContent = g.name || 'Chưa chọn Gara';
 }
 function garaHide(){document.getElementById('gara-drop')&&document.getElementById('gara-drop').classList.add('hidden');}
+
+function advisorSearch(inp) {
+  var q = inp.value.trim().toLowerCase();
+  var drop = document.getElementById('advisor-drop');
+  if (!drop) return;
+  if (!q) { drop.classList.add('hidden'); return; }
+  
+  var currentGaraName = document.getElementById('f-garaname')?.value.trim().toLowerCase();
+  var gara = garaList.find(function(g){ return g.name && g.name.toLowerCase() === currentGaraName; });
+  
+  if (!gara || !gara.advisors || !gara.advisors.length) { drop.classList.add('hidden'); return; }
+  
+  var hits = gara.advisors.filter(function(a){ return a.name && a.name.toLowerCase().includes(q); }).slice(0, 5);
+  if (!hits.length) { drop.classList.add('hidden'); return; }
+  
+  drop.innerHTML = hits.map(function(a) {
+    return '<div class="gdrop-item" onclick="advisorSelect('+JSON.stringify(a).replace(/"/g,'&quot;')+')">'+
+           '<span class="text-teal-600 mr-2"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg></span>'+
+           '<div><p class="font-bold text-slate-800">'+a.name+'</p>'+
+           (a.phone ? '<p class="text-[10px] text-slate-400 font-mono">'+a.phone+'</p>' : '') + '</div></div>';
+  }).join('');
+  drop.classList.remove('hidden');
+}
+
+function advisorSelect(a) {
+  document.getElementById('f-garaAdvisorName').value = a.name || '';
+  document.getElementById('f-garaAdvisorPhone').value = a.phone || '';
+  document.getElementById('f-garaAdvisorPrefix').value = a.prefix || 'Anh';
+  advisorHide();
+}
+
+function advisorHide() {
+  var drop = document.getElementById('advisor-drop');
+  if (drop) drop.classList.add('hidden');
+}
 
 /* ═══════════════════════════════════════
    IMAGES (với phân loại)
