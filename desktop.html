@@ -14736,16 +14736,23 @@ const BaoLanh = {
 
         if (phone) {
             Toast.fire({icon:'success', title:'Đã copy! Đang mở Zalo App...'});
-            const cleanPhone = phone.replace(/\D/g,'');
+            let cleanPhone = phone.replace(/\D/g,'');
+            // Chuyển đầu số 0 thành 84 để tương thích tốt hơn với protocol zalo://
+            if (cleanPhone.startsWith('0')) {
+                cleanPhone = '84' + cleanPhone.substring(1);
+            }
+            
             // Thử mở trực tiếp app Zalo qua protocol zalo://
             setTimeout(() => { 
-                window.location.href = `zalo://chat?phone=${cleanPhone}`;
-                // Fallback sau 1 giây nếu không mở được app thì mở web (tùy chọn, nhưng thường zalo:// là đủ cho desktop)
+                const zaloUri = `zalo://chat?phone=${cleanPhone}`;
+                window.location.assign(zaloUri);
+                
+                // Fallback sau 1.2 giây nếu không mở được app (hoặc người dùng vẫn ở trình duyệt)
                 setTimeout(() => {
-                    if (document.hasFocus()) { // Nếu vẫn ở trình duyệt nghĩa là có thể chưa mở được app
+                    if (document.hasFocus()) {
                         window.open(`https://zalo.me/${cleanPhone}`, '_blank');
                     }
-                }, 1000);
+                }, 1200);
             }, 300);
         } else {
             Toast.fire({icon:'info', title:'Đã copy tin nhắn (Chưa có SĐT)!'});
