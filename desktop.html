@@ -14437,14 +14437,14 @@ const BaoLanh = {
 
             if (status) status.textContent = '✨ Đang vẽ PDF thành ảnh...';
 
-            // 2. Render trang 1 ra canvas (scale 1.1 để vừa đủ nét mà lại cực nhẹ)
+            // 2. Render trang 1 ra canvas (nén mạnh để upload cực nhanh)
             const page = await pdf.getPage(1);
-            const viewport = page.getViewport({ scale: 1.1 });
+            const viewport = page.getViewport({ scale: 1.0 }); // Giảm scale xuống 1.0
             const canvas = document.createElement('canvas');
             canvas.width  = viewport.width;
             canvas.height = viewport.height;
             await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-            const base64 = canvas.toDataURL('image/jpeg', 0.75).split(',')[1];
+            const base64 = canvas.toDataURL('image/jpeg', 0.6).split(',')[1]; // Nén 60% cho cực nhẹ
 
             if (status) status.textContent = '✨ AI đang đọc nội dung bảo lãnh...';
 
@@ -14458,7 +14458,12 @@ const BaoLanh = {
             }
             Nếu không tìm thấy một giá trị nào, để 0. Chỉ trả về JSON thuần, không giải thích.`;
 
-            const MODELS_TO_TRY = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash', 'gemini-2.0-pro'];
+            const MODELS_TO_TRY = [
+                'gemini-2.5-flash', 
+                'gemini-2.0-flash', 
+                'gemini-2.0-flash-lite',
+                'gemini-2.5-pro'
+            ];
             let dataResponse = null;
             let lastError = '';
             
@@ -14486,36 +14491,34 @@ const BaoLanh = {
                 });
                 if (!res.ok) {
                     const errJson = await res.json().catch(() => ({}));
-                    const msg = errJson.error?.message || `Status ${res.status}`;
-                    throw new Error(msg);
+                    throw new Error(errJson.error?.message || `Status ${res.status}`);
                 }
                 return await res.json();
             };
 
-            // Vòng lặp thử từng Model
-            outerLoop: for (let m of MODELS_TO_TRY) {
-                // Với mỗi Model, thử tối đa 3 Key khác nhau (hoặc tất cả nếu có ít hơn)
-                const keysToTry = [...GEM_KEYS].sort(() => Math.random() - 0.5).slice(0, 3);
-                
-                for (let k of keysToTry) {
+            // THỬ TOÀN BỘ KEY CHO ĐẾN KHI THÀNH CÔNG
+            let success = false;
+            for (let m of MODELS_TO_TRY) {
+                if (success) break;
+                for (let k of GEM_KEYS) {
                     try {
                         if (status) status.textContent = `✨ AI đang thử bằng ${m}...`;
                         dataResponse = await callAi(m, k);
-                        if (dataResponse && dataResponse.candidates && dataResponse.candidates.length > 0) break outerLoop;
+                        if (dataResponse && dataResponse.candidates && dataResponse.candidates.length > 0) {
+                            success = true;
+                            break;
+                        }
                     } catch (e) {
                         lastError = e.message;
-                        console.warn(`Model ${m} with key ${k.substring(0,6)}... failed:`, e.message);
-                        // Nếu lỗi Quota hoặc bận, thử ngay Key tiếp theo của cùng model đó
-                        if (e.message.includes('quota') || e.message.includes('demand')) {
-                            continue; 
-                        }
+                        console.warn(`Model ${m} key ${k.substring(0,5)} failed:`, e.message);
+                        // Nếu không phải lỗi Quota/Busy thì có thể do model không tồn tại, chuyển model khác
+                        if (!e.message.includes('quota') && !e.message.includes('demand')) break;
                     }
                 }
-                await new Promise(r => setTimeout(r, 200)); 
             }
 
-            if (!dataResponse || !dataResponse.candidates || dataResponse.candidates.length === 0)
-                throw new Error(lastError || 'Tất cả các máy chủ và API Key đều đang bận hoặc hết hạn.');
+            if (!success)
+                throw new Error('Tất cả API Key và Model đều bận hoặc hết hạn. Anh vui lòng thử lại sau 1-2 phút nhé.');
 
             let parsed = null;
             try {
