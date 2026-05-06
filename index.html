@@ -15768,8 +15768,9 @@ QUAN TRỌNG:
 
                 // Dùng model nhẹ hơn để tránh overload, fallback sang model chính nếu cần
                 const MODELS_TO_TRY = [
-                    'gemini-2.5-flash-lite',
-                    'gemini-2.0-flash',
+                    'gemini-2.5-flash',
+                    'gemini-2.5-pro',
+                    'gemini-1.5-flash',
                     CONFIG.gemini.model
                 ];
                 const maxRetries = CONFIG.gemini.keys.length * MODELS_TO_TRY.length;
