@@ -3675,9 +3675,20 @@ textarea.inp { resize:vertical; }
                 <div><label class="lbl">SĐT Gara</label><input id="f-garaphone" class="inp" placeholder="0909..."></div>
                 <div><label class="lbl">Mã số thuế</label><input id="f-garatax" class="inp font-mono" placeholder="MST..."></div>
               </div>
-              <div class="grid grid-cols-2 gap-2.5">
-                <div><label class="lbl">Cố vấn dịch vụ</label><input id="f-garaAdvisorName" class="inp" placeholder="Họ tên cố vấn..."></div>
-                <div><label class="lbl">SĐT Cố vấn (Zalo)</label><input id="f-garaAdvisorPhone" class="inp font-mono" placeholder="0909..."></div>
+              <div class="grid grid-cols-4 gap-2.5">
+                <div class="col-span-1">
+                  <label class="lbl">Danh xưng</label>
+                  <select id="f-garaAdvisorPrefix" class="inp">
+                    <option value="Anh">Anh</option>
+                    <option value="Chị">Chị</option>
+                    <option value="Em">Em</option>
+                    <option value="Bạn">Bạn</option>
+                    <option value="Chú">Chú</option>
+                    <option value="Cô">Cô</option>
+                  </select>
+                </div>
+                <div class="col-span-1"><label class="lbl">Tên Cố vấn</label><input id="f-garaAdvisorName" class="inp" placeholder="Tên..."></div>
+                <div class="col-span-2"><label class="lbl">SĐT Cố vấn (Zalo)</label><input id="f-garaAdvisorPhone" class="inp font-mono" placeholder="0909..."></div>
               </div>
               <div><label class="lbl">Địa chỉ Gara</label><input id="f-garaaddr" class="inp"></div>
               <div class="grid grid-cols-3 gap-2.5 pt-2 border-t border-slate-100">
@@ -5448,6 +5459,7 @@ function openRecord(id) {
   fv('f-garabankowner', rec.garaBankOwner);
   fv('f-garaAdvisorName', rec.garaAdvisorName);
   fv('f-garaAdvisorPhone', rec.garaAdvisorPhone);
+  fv('f-garaAdvisorPrefix', rec.garaAdvisorPrefix || 'Anh');
   fv('f-namsanxuat', rec.namSanXuat);
   fv('f-sochongoi',  rec.soChoNgoi);
   fv('f-hieuxe',     rec.loaiXe);
@@ -5540,6 +5552,7 @@ function saveModal() {
     soDangKiem:gv('f-sodk'),ngayCapDK:gv('f-capdk'),hetHanDK:gv('f-hetdk'),
     garaName:gv('f-garaname'),garaPhone:gv('f-garaphone'),garaTax:gv('f-garatax'),garaAddress:gv('f-garaaddr'),
     garaAdvisorName:gv('f-garaAdvisorName'),garaAdvisorPhone:gv('f-garaAdvisorPhone'),
+    garaAdvisorPrefix:gv('f-garaAdvisorPrefix'),
     note:gv('f-note'),appointmentTime:iso,stepUpdatedAt:new Date().toISOString(),
     // Owner
     ownerType:gv('f-ownerType')||'personal',
@@ -5574,7 +5587,8 @@ function saveModal() {
     tax:gv('f-garatax'),
     address:gv('f-garaaddr'),
     advisorName:gv('f-garaAdvisorName'),
-    advisorPhone:gv('f-garaAdvisorPhone')
+    advisorPhone:gv('f-garaAdvisorPhone'),
+    advisorPrefix:gv('f-garaAdvisorPrefix')
   });
 
   var fmap={bsx:'Biển số',customer:'Người báo',driverName:'Lái xe',phone:'SĐT',accidentDate:'Ngày VTT',notifyDate:'Ngày báo',location:'Địa điểm',cause:'Nguyên nhân',garaName:'Gara',appointmentTime:'Lịch hẹn',note:'Ghi chú',ownerName:'Chủ xe',ownerCccd:'CCCD',ownerCompany:'Công ty'};
@@ -14582,13 +14596,22 @@ const BaoLanh = {
         const pascUrl    = document.getElementById('f-pascUrl')?.value.trim()    || item.pascUrl    || '';
         const baoLanhUrl = document.getElementById('f-baoLanhUrl')?.value.trim() || item.baoLanhUrl || '';
         const bsx        = document.getElementById('f-bsx')?.value.trim()        || item.bsx        || '';
+        const prefix     = document.getElementById('f-garaAdvisorPrefix')?.value || 'Anh';
+        const name       = document.getElementById('f-garaAdvisorName')?.value.trim() || '';
 
         if (!pascUrl && !baoLanhUrl) {
             Toast.fire({icon:'warning', title:'Chưa nhập đường dẫn PASC hoặc Bảo lãnh!'});
             return;
         }
 
-        const msg = `Phương án sửa chữa\n${pascUrl || '(chưa có)'}\n\nBảo lãnh \n${baoLanhUrl || '(chưa có)'}\n\nPhương án sửa chữa và bảo lãnh sửa chữa xe ${bsx}`;
+        // Logic danh xưng: 
+        // - Nếu gọi họ là Anh/Chị/Chú/Bác/Cô -> Mình là "Em"
+        // - Nếu gọi họ là Em/Bạn -> Mình là "Anh"
+        let sender = 'Em';
+        if (['Em', 'Bạn'].includes(prefix)) sender = 'Anh';
+
+        const greeting = name ? `${sender} gửi ${prefix.toLowerCase()} ${name} ` : '';
+        const msg = `${greeting}Phương án sửa chữa\n${pascUrl || '(chưa có)'}\n\nBảo lãnh \n${baoLanhUrl || '(chưa có)'}\n\nPhương án sửa chữa và bảo lãnh sửa chữa xe ${bsx}`;
 
         if (navigator.clipboard && window.isSecureContext) {
             navigator.clipboard.writeText(msg).catch(() => {});
