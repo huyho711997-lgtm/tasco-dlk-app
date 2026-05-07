@@ -14711,9 +14711,10 @@ const BaoLanh = {
         let greeting = "";
         if (prefix === "Bạn") {
             greeting = `Mình gửi PASC và bảo lãnh xe ${bsx} nhé!`;
+        } else if (prefix === "Em" || prefix === "Anh") {
+            greeting = `Anh gửi phương án sửa chữa và bảo lãnh xe ${bsx}`;
         } else {
             let sender = "Em";
-            if (prefix === "Em") sender = "Anh";
             greeting = name 
                 ? `${sender} gửi ${prefix.toLowerCase()} ${name} phương án sửa chữa và bảo lãnh xe ${bsx}`
                 : `${sender} gửi ${prefix.toLowerCase()} phương án sửa chữa và bảo lãnh xe ${bsx}`;
