@@ -3597,56 +3597,55 @@ textarea.inp { resize:vertical; }
 
   <!-- Premium Header -->
   <div class="premium-header shrink-0">
-    <!-- Top row -->
-    <div class="flex items-center justify-between px-8 py-6 relative z-10">
-      <div class="flex items-center gap-5">
-        <!-- Icon with Animation -->
-        <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-[0_8px_25px_rgba(79,70,229,0.4)] relative group overflow-hidden">
+    <!-- Top row (Compact) -->
+    <div class="flex items-center justify-between px-8 py-4 relative z-10 border-b border-white/5">
+      <div class="flex items-center gap-4">
+        <!-- Icon with Animation (Compact) -->
+        <div class="w-11 h-11 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-[0_5px_15px_rgba(79,70,229,0.3)] relative group overflow-hidden">
           <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-          <svg class="w-7 h-7 text-white relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5"/><polyline points="14 2 14 8 20 8"/><path d="M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44z"/></svg>
+          <svg class="w-5 h-5 text-white relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5"/><polyline points="14 2 14 8 20 8"/><path d="M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44z"/></svg>
         </div>
         
         <div>
-          <div class="flex items-center gap-3 mb-1">
-            <h2 id="m-bsx" class="text-3xl font-black text-white tracking-tight">—</h2>
-            <div id="m-status-btn" onclick="openStatusModal()" class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest cursor-pointer hover:scale-105 transition-transform flex items-center gap-2 border border-white/10 backdrop-blur-md bg-white/5">
+          <div class="flex items-center gap-3 mb-0.5">
+            <h2 id="m-bsx" class="text-2xl font-black text-white tracking-tight">—</h2>
+            <div id="m-status-btn" onclick="openStatusModal()" class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest cursor-pointer hover:scale-105 transition-all flex items-center gap-2 border backdrop-blur-md">
               <!-- Content injected by JS -->
             </div>
-            <button id="m-urgent-btn" onclick="toggleUrgent()" class="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90">
+            <button id="m-urgent-btn" onclick="toggleUrgent()" class="w-7 h-7 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90">
                 <!-- Icon injected by JS -->
             </button>
           </div>
-          <p class="text-[11px] font-bold text-indigo-300/60 uppercase tracking-[0.2em]">Mã hồ sơ: <span id="m-code" class="text-indigo-200 font-mono">—</span></p>
+          <p class="text-[10px] font-bold text-indigo-300/50 uppercase tracking-[0.15em]">Hồ sơ: <span id="m-code" class="text-indigo-200 font-mono">—</span></p>
         </div>
       </div>
 
-      <!-- Actions Area -->
-      <div class="flex items-center gap-3">
+      <!-- Actions Area (Compact) -->
+      <div class="flex items-center gap-2.5">
         <!-- Main Actions -->
-        <div class="flex bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-1 gap-1">
-            <button onclick="openOCRModal()" class="flex items-center gap-2 px-4 py-2 hover:bg-white/10 rounded-xl transition-all group">
-                <svg class="w-4 h-4 text-indigo-400 group-hover:animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-                <span class="text-[10px] font-black text-white uppercase tracking-wider">AI Phân tích</span>
+        <div class="flex bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-0.5 gap-0.5">
+            <button onclick="openOCRModal()" class="flex items-center gap-1.5 px-3 py-1.5 hover:bg-white/10 rounded-lg transition-all group">
+                <svg class="w-3.5 h-3.5 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+                <span class="text-[9px] font-black text-white uppercase tracking-wider">AI Scan</span>
             </button>
-            <button onclick="openExportMultiModal()" class="flex items-center gap-2 px-4 py-2 hover:bg-white/10 rounded-xl transition-all group">
-                <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                <span class="text-[10px] font-black text-white uppercase tracking-wider">Xuất hồ sơ</span>
+            <button onclick="openExportMultiModal()" class="flex items-center gap-1.5 px-3 py-1.5 hover:bg-white/10 rounded-lg transition-all group">
+                <svg class="w-3.5 h-3.5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span class="text-[9px] font-black text-white uppercase tracking-wider">Xuất</span>
             </button>
-            <button onclick="openPartsOCRFromRecord()" class="flex items-center gap-2 px-4 py-2 hover:bg-white/10 rounded-xl transition-all group" title="Lưu bảng giá vào kho">
-                <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                <span class="text-[10px] font-black text-white uppercase tracking-wider">Kho BG</span>
+            <button onclick="openPartsOCRFromRecord()" class="flex items-center gap-1.5 px-3 py-1.5 hover:bg-white/10 rounded-lg transition-all group">
+                <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/></svg>
+                <span class="text-[9px] font-black text-white uppercase tracking-wider">Kho BG</span>
             </button>
         </div>
 
-        <div class="h-8 w-px bg-white/10 mx-1"></div>
+        <div class="h-6 w-px bg-white/10 mx-0.5"></div>
 
-        <!-- Danger Zone -->
-        <button onclick="deleteRecord()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-rose-500/20 text-rose-400/60 hover:text-rose-400 border border-white/5 transition-all" title="Xóa hồ sơ">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+        <button onclick="deleteRecord()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-rose-500/20 text-rose-400/50 hover:text-rose-400 border border-white/5 transition-all">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
         </button>
 
-        <button onclick="closeModal()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white border border-white/5 transition-all">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white border border-white/5 transition-all">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
       </div>
     </div>
@@ -3685,13 +3684,13 @@ textarea.inp { resize:vertical; }
         <!-- ═══ CỘT TRÁI (Nghiệp vụ & Hồ sơ) ═══ -->
         <div class="col-span-12 lg:col-span-5 space-y-8">
 
-          <!-- 1. Thông tin Vụ việc & Lịch hẹn -->
+          <!-- 1. Thông tin Vụ việc & Lái xe -->
           <div class="glass-card overflow-hidden">
             <div class="premium-section-title bg-indigo-50/30">
               <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               </div>
-              <span class="text-xs font-black uppercase tracking-widest text-slate-700">Thông tin Vụ việc & Lịch hẹn</span>
+              <span class="text-xs font-black uppercase tracking-widest text-slate-700">Thông tin Vụ việc & Lái xe</span>
               <div id="warn-notify" class="hidden ml-auto premium-badge premium-badge-rose">Báo trễ >5n</div>
             </div>
             <div class="p-6 space-y-4">
@@ -3713,7 +3712,7 @@ textarea.inp { resize:vertical; }
                 </div>
                 <div>
                   <label class="premium-label">SĐT liên hệ</label>
-                  <input id="f-phone" class="premium-input font-mono" placeholder="0909...">
+                  <input id="f-phone" class="premium-input font-mono" placeholder="SĐT chính...">
                 </div>
               </div>
               
@@ -3747,52 +3746,97 @@ textarea.inp { resize:vertical; }
                 <label class="premium-label">Lịch hẹn giám định</label>
                 <button type="button" onclick="openDTP('appt')" id="f-appt-btn" class="premium-input text-left flex items-center justify-between group">
                   <span id="f-appt-label" class="text-slate-400 font-medium truncate">Chưa chọn lịch hẹn...</span>
-                  <svg class="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <svg class="w-4 h-4 text-slate-300 group-hover:text-indigo-400 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 </button>
                 <input type="hidden" id="f-appt-iso">
+              </div>
+
+              <!-- Driver & GPLX Info (Consolidated) -->
+              <div class="pt-4 border-t border-slate-100/60 space-y-3">
+                <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center gap-2">
+                        <div class="w-1 h-3 bg-indigo-400 rounded-full"></div>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Người điều khiển (Lái xe)</span>
+                    </div>
+                    <div id="warn-gplx" class="hidden premium-badge premium-badge-rose">GPLX Hết hạn</div>
+                </div>
+                <div>
+                    <label class="premium-label">Họ tên lái xe</label>
+                    <input id="f-driver" class="premium-input font-bold" placeholder="Tên lái xe...">
+                </div>
+                <div class="grid grid-cols-12 gap-3">
+                  <div class="col-span-9">
+                    <label class="premium-label">Số GPLX</label>
+                    <input id="f-sogplx" class="premium-input font-mono" placeholder="Số bằng lái...">
+                  </div>
+                  <div class="col-span-3">
+                    <label class="premium-label">Hạng</label>
+                    <input id="f-hanggplx" class="premium-input text-center font-bold" placeholder="B2">
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="premium-label">Ngày cấp</label>
+                    <input id="f-capgplx" class="premium-input" placeholder="DD/MM/YYYY">
+                  </div>
+                  <div>
+                    <label class="premium-label">Hết hạn GPLX</label>
+                    <input id="f-hetgplx" class="premium-input" placeholder="DD/MM/YYYY" oninput="checkWarnings()">
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- 2. Thông tin Lái xe -->
+          <!-- 2. Thông tin Phương tiện -->
           <div class="glass-card overflow-hidden">
-            <div class="premium-section-title bg-emerald-50/30">
-              <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <div class="premium-section-title bg-orange-50/30">
+              <div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-1.1 0-2 .9-2 2v7c0 1.1.9 2 2 2h10"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
               </div>
-              <span class="text-xs font-black uppercase tracking-widest text-slate-700">Thông tin Lái xe & GPLX</span>
-              <div id="warn-gplx" class="hidden ml-auto premium-badge premium-badge-rose">GPLX Hết hạn</div>
+              <span class="text-xs font-black uppercase tracking-widest text-slate-700">Thông tin Phương tiện & Đăng kiểm</span>
+              <div id="warn-dk" class="hidden ml-auto premium-badge premium-badge-rose">ĐK Hết hạn</div>
             </div>
             <div class="p-6 space-y-4">
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="premium-label">Họ tên lái xe</label>
-                  <input id="f-driver" class="premium-input" placeholder="Tên người lái...">
+                  <label class="premium-label">Hãng xe</label>
+                  <input id="f-hangxe" class="premium-input" placeholder="Toyota, Mazda...">
                 </div>
                 <div>
-                  <label class="premium-label">Số điện thoại</label>
-                  <input id="f-phone" class="premium-input font-mono" placeholder="0909...">
-                </div>
-              </div>
-              <div class="grid grid-cols-4 gap-4">
-                <div class="col-span-3">
-                  <label class="premium-label">Số GPLX</label>
-                  <input id="f-sogplx" class="premium-input font-mono" placeholder="47000...">
-                </div>
-                <div class="col-span-1">
-                  <label class="premium-label">Hạng</label>
-                  <input id="f-hanggplx" class="premium-input text-center font-bold" placeholder="B2">
+                  <label class="premium-label">Loại xe / Hiệu xe</label>
+                  <input id="f-loaixe" class="premium-input" placeholder="Vios, CX-5...">
                 </div>
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="premium-label">Ngày cấp</label>
-                  <input id="f-capgplx" class="premium-input" placeholder="DD/MM/YYYY">
+                  <label class="premium-label">Số khung</label>
+                  <input id="f-sokhung" class="premium-input font-mono text-orange-800" placeholder="VIN...">
                 </div>
                 <div>
-                  <label class="premium-label">Hết hạn GPLX</label>
-                  <input id="f-hetgplx" class="premium-input" placeholder="DD/MM/YYYY" oninput="checkWarnings()">
+                  <label class="premium-label">Số máy</label>
+                  <input id="f-somay" class="premium-input font-mono text-orange-800" placeholder="Engine No...">
                 </div>
+              </div>
+              <div class="grid grid-cols-12 gap-4 pt-4 border-t border-slate-100/60">
+                  <div class="col-span-8">
+                    <label class="premium-label">Số Đăng kiểm</label>
+                    <input id="f-sodk" class="premium-input" placeholder="KĐ-...">
+                  </div>
+                  <div class="col-span-4">
+                    <label class="premium-label">Chỗ ngồi</label>
+                    <input id="f-sochongoi" class="premium-input text-center" placeholder="5">
+                  </div>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="premium-label">Năm sản xuất</label>
+                    <input id="f-namsanxuat" class="premium-input text-center" placeholder="2024">
+                  </div>
+                  <div>
+                    <label class="premium-label">Hết hạn ĐK</label>
+                    <input id="f-hetdk" class="premium-input" placeholder="DD/MM/YYYY" oninput="checkWarnings()">
+                  </div>
               </div>
             </div>
           </div>
@@ -3821,78 +3865,10 @@ textarea.inp { resize:vertical; }
         </div><!-- /CỘT TRÁI -->
 
 
-        <!-- ═══ CỘT PHẢI (Xe & Chủ xe & Gara) ═══ -->
+        <!-- ═══ CỘT PHẢI (Chủ xe & Gara & PASC) ═══ -->
         <div class="col-span-12 lg:col-span-7 space-y-8">
 
-          <!-- 4. Thông tin Phương tiện -->
-          <div class="glass-card overflow-hidden">
-            <div class="premium-section-title bg-orange-50/30">
-              <div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-1.1 0-2 .9-2 2v7c0 1.1.9 2 2 2h10"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
-              </div>
-              <span class="text-xs font-black uppercase tracking-widest text-slate-700">Thông tin Phương tiện & Đăng kiểm</span>
-              <div id="warn-dk" class="hidden ml-auto premium-badge premium-badge-rose">ĐK Hết hạn</div>
-            </div>
-            <div class="p-6">
-              <div class="grid grid-cols-3 gap-6">
-                <!-- Group Cà vẹt -->
-                <div class="col-span-3 lg:col-span-2 space-y-4">
-                  <div>
-                    <label class="premium-label">Chủ xe trên cà vẹt</label>
-                    <input id="f-chuxe" class="premium-input font-bold" placeholder="Tên chủ sở hữu..." oninput="checkOwnerMismatch()">
-                  </div>
-                  <div>
-                    <label class="premium-label">Địa chỉ đăng ký</label>
-                    <input id="f-diachi" class="premium-input" placeholder="Địa chỉ ghi trên cà vẹt...">
-                  </div>
-                  <div class="grid grid-cols-2 gap-4">
-                    <div>
-                      <label class="premium-label">Hãng xe</label>
-                      <input id="f-hangxe" class="premium-input" placeholder="Toyota, Mazda...">
-                    </div>
-                    <div>
-                      <label class="premium-label">Loại xe / Hiệu xe</label>
-                      <input id="f-loaixe" class="premium-input" placeholder="Vios, CX-5...">
-                    </div>
-                  </div>
-                  <div class="grid grid-cols-2 gap-4">
-                    <div>
-                      <label class="premium-label">Số khung</label>
-                      <input id="f-sokhung" class="premium-input font-mono text-orange-800" placeholder="VIN...">
-                    </div>
-                    <div>
-                      <label class="premium-label">Số máy</label>
-                      <input id="f-somay" class="premium-input font-mono text-orange-800" placeholder="Engine No...">
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- Group Đăng kiểm side panel -->
-                <div class="col-span-3 lg:col-span-1 bg-slate-50/50 rounded-2xl p-4 border border-slate-100 space-y-4">
-                  <div>
-                    <label class="premium-label">Số Đăng kiểm</label>
-                    <input id="f-sodk" class="premium-input bg-white" placeholder="KĐ-...">
-                  </div>
-                  <div>
-                    <label class="premium-label">Ngày hết hạn ĐK</label>
-                    <input id="f-hetdk" class="premium-input bg-white" placeholder="DD/MM/YYYY" oninput="checkWarnings()">
-                  </div>
-                  <div class="grid grid-cols-1 gap-4">
-                    <div>
-                      <label class="premium-label">Năm sản xuất</label>
-                      <input id="f-namsanxuat" class="premium-input bg-white text-center" placeholder="2024">
-                    </div>
-                    <div>
-                      <label class="premium-label">Số chỗ ngồi</label>
-                      <input id="f-sochongoi" class="premium-input bg-white text-center" placeholder="5">
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 5. Thông tin Khách hàng (Chủ xe thực tế) -->
+          <!-- 4. Thông tin Chủ xe (Khách hàng) -->
           <div class="glass-card overflow-hidden">
             <div class="premium-section-title bg-pink-50/30">
               <div class="w-8 h-8 rounded-lg bg-pink-100 text-pink-600 flex items-center justify-center">
@@ -3905,6 +3881,7 @@ textarea.inp { resize:vertical; }
               </div>
             </div>
             <div class="p-6">
+              <!-- Panel: Cá nhân -->
               <div id="owner-panel-personal" class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                   <div>
@@ -3945,7 +3922,7 @@ textarea.inp { resize:vertical; }
                 <div id="cccd-ocr-status" class="hidden text-center text-[11px] font-bold text-blue-600 animate-pulse">Đang nhận dạng...</div>
               </div>
 
-              <!-- Doanh nghiệp panel (Hidden by default) -->
+              <!-- Panel: Doanh nghiệp -->
               <div id="owner-panel-business" class="hidden space-y-4 animate__animated animate__fadeIn">
                 <div class="grid grid-cols-2 gap-4">
                   <div class="relative">
@@ -3976,14 +3953,14 @@ textarea.inp { resize:vertical; }
                 </div>
               </div>
 
-              <!-- Bank Info Section -->
+              <!-- Bank Info Section (Common) -->
               <div class="mt-6 pt-6 border-t border-slate-100 grid grid-cols-3 gap-4">
                 <div class="col-span-3">
                     <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 block">Thông tin thụ hưởng</span>
                 </div>
                 <div>
                   <label class="premium-label">Số tài khoản</label>
-                  <input id="f-ownerBankNo" class="premium-input font-mono" placeholder="0123456...">
+                  <input id="f-ownerBankNo" class="premium-input font-mono" placeholder="Số tài khoản...">
                 </div>
                 <div>
                   <label class="premium-label">Ngân hàng</label>
@@ -3991,145 +3968,103 @@ textarea.inp { resize:vertical; }
                 </div>
                 <div>
                   <label class="premium-label">Chủ tài khoản</label>
-                  <input id="f-ownerBankOwner" class="premium-input uppercase font-bold" placeholder="TEN CHU TK">
+                  <input id="f-ownerBankOwner" class="premium-input uppercase font-bold" placeholder="Tên chủ TK">
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- 6. Gara & PASC & Bảo lãnh -->
-          <div class="grid grid-cols-1 gap-8">
+          <!-- 5. Gara Sửa chữa & PASC -->
+          <div class="glass-card overflow-hidden">
+            <div class="premium-section-title bg-teal-50/30">
+              <div class="w-8 h-8 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              </div>
+              <span class="text-xs font-black uppercase tracking-widest text-slate-700">Gara Sửa chữa & Cố vấn</span>
+              <div id="summary-garaname" class="ml-auto text-[10px] font-bold text-teal-600 truncate max-w-[200px]">Chưa chọn Gara</div>
+            </div>
+            <div class="p-6 space-y-4">
+              <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-8 relative">
+                  <label class="premium-label">Tên Gara sửa chữa</label>
+                  <input id="f-garaname" class="premium-input font-bold text-teal-900" placeholder="Tìm hoặc nhập tên gara..." autocomplete="off" oninput="garaSearch(this)" onblur="setTimeout(garaHide,200)">
+                  <div id="gara-drop" class="gdrop hidden shadow-xl border-slate-200"></div>
+                </div>
+                <div class="col-span-4">
+                  <label class="premium-label">SĐT Gara</label>
+                  <input id="f-garaphone" class="premium-input font-mono" placeholder="SĐT...">
+                </div>
+              </div>
+              <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-9">
+                  <label class="premium-label">Địa chỉ Gara</label>
+                  <input id="f-garaaddr" class="premium-input" placeholder="Địa chỉ cụ thể...">
+                </div>
+                <div class="col-span-3">
+                  <label class="premium-label">MST</label>
+                  <input id="f-garatax" class="premium-input font-mono" placeholder="MST...">
+                </div>
+              </div>
+              <div class="grid grid-cols-4 gap-4">
+                <div>
+                  <label class="premium-label">Danh xưng</label>
+                  <select id="f-garaAdvisorPrefix" class="premium-input">
+                    <option value="Anh">Anh</option><option value="Chị">Chị</option><option value="Em">Em</option><option value="Bạn">Bạn</option><option value="Chú">Chú</option><option value="Cô">Cô</option>
+                  </select>
+                </div>
+                <div class="col-span-1 relative">
+                  <label class="premium-label">Tên Cố vấn</label>
+                  <input id="f-garaAdvisorName" class="premium-input" placeholder="Tên..." autocomplete="off" oninput="advisorSearch(this)" onblur="setTimeout(advisorHide, 200)">
+                  <div id="advisor-drop" class="gdrop hidden shadow-xl"></div>
+                </div>
+                <div class="col-span-2">
+                  <label class="premium-label">SĐT Cố vấn (Zalo)</label>
+                  <input id="f-garaAdvisorPhone" class="premium-input font-mono text-blue-600" placeholder="0909...">
+                </div>
+              </div>
               
-              <!-- Gara Card -->
-              <div class="glass-card overflow-hidden">
-                <div class="premium-section-title bg-teal-50/30">
-                  <div class="w-8 h-8 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                  </div>
-                  <span class="text-xs font-black uppercase tracking-widest text-slate-700">Gara Sửa chữa & Cố vấn</span>
-                  <div id="summary-garaname" class="ml-auto text-[10px] font-bold text-teal-600 truncate max-w-[200px]">Chưa chọn Gara</div>
-                </div>
-                <div class="p-6 space-y-4">
-                  <div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-8 relative">
-                      <label class="premium-label">Tên Gara sửa chữa</label>
-                      <input id="f-garaname" class="premium-input font-bold text-teal-900" placeholder="Tìm hoặc nhập tên gara..." autocomplete="off" oninput="garaSearch(this)" onblur="setTimeout(garaHide,200)">
-                      <div id="gara-drop" class="gdrop hidden shadow-xl border-slate-200"></div>
+              <!-- PASC & Guarantee Section (Integrated) -->
+              <div class="pt-4 border-t border-slate-100 space-y-4">
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="premium-label">Link PASC</label>
+                      <input id="f-pascUrl" class="premium-input text-[10px]" placeholder="https://..." oninput="BaoLanh.updateSummary()">
                     </div>
-                    <div class="col-span-4">
-                      <label class="premium-label">Số điện thoại Gara</label>
-                      <input id="f-garaphone" class="premium-input font-mono" placeholder="SĐT Gara...">
+                    <div>
+                      <label class="premium-label">Link Bảo lãnh</label>
+                      <input id="f-baoLanhUrl" class="premium-input text-[10px]" placeholder="https://..." oninput="BaoLanh.updateSummary()">
                     </div>
                   </div>
-                  <div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-9">
-                      <label class="premium-label">Địa chỉ Gara</label>
-                      <input id="f-garaaddr" class="premium-input" placeholder="Địa chỉ cụ thể của gara...">
+                  <div class="grid grid-cols-4 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <div>
+                      <label class="text-[9px] font-bold text-slate-400 uppercase">Tổng SC</label>
+                      <input id="f-blChiPhiSuaChua" class="w-full bg-transparent font-black text-indigo-700 text-xs" oninput="BaoLanh.formatNumber(this); BaoLanh.updateSummary()">
                     </div>
-                    <div class="col-span-3">
-                      <label class="premium-label">Mã số thuế</label>
-                      <input id="f-garatax" class="premium-input font-mono" placeholder="MST...">
+                    <div>
+                      <label class="text-[9px] font-bold text-slate-400 uppercase">KH trả</label>
+                      <input id="f-blKhachHangTuTra" class="w-full bg-transparent font-black text-rose-600 text-xs" oninput="BaoLanh.formatNumber(this)">
+                    </div>
+                    <div>
+                      <label class="text-[9px] font-bold text-slate-400 uppercase">Giảm giá</label>
+                      <input id="f-blGiamGia" class="w-full bg-transparent font-black text-amber-600 text-xs" oninput="BaoLanh.formatNumber(this)">
+                    </div>
+                    <div>
+                      <label class="text-[9px] font-bold text-emerald-600 uppercase">BH BL</label>
+                      <input id="f-blBaoHiemBaoLanh" class="w-full bg-transparent font-black text-emerald-600 text-xs" oninput="BaoLanh.formatNumber(this); BaoLanh.updateSummary()">
                     </div>
                   </div>
-                  <div class="grid grid-cols-4 gap-4">
-                    <div>
-                      <label class="premium-label">Danh xưng</label>
-                      <select id="f-garaAdvisorPrefix" class="premium-input">
-                        <option value="Anh">Anh</option>
-                        <option value="Chị">Chị</option>
-                        <option value="Em">Em</option>
-                        <option value="Bạn">Bạn</option>
-                        <option value="Chú">Chú</option>
-                        <option value="Cô">Cô</option>
-                      </select>
-                    </div>
-                    <div class="col-span-1 relative">
-                      <label class="premium-label">Tên Cố vấn</label>
-                      <input id="f-garaAdvisorName" class="premium-input" placeholder="Tên..." autocomplete="off" oninput="advisorSearch(this)" onblur="setTimeout(advisorHide, 200)">
-                      <div id="advisor-drop" class="gdrop hidden shadow-xl"></div>
-                    </div>
-                    <div class="col-span-2">
-                      <label class="premium-label">SĐT Cố vấn (Zalo)</label>
-                      <input id="f-garaAdvisorPhone" class="premium-input font-mono text-blue-600" placeholder="0909...">
-                    </div>
-                  </div>
-                  <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-100">
-                    <div>
-                        <label class="premium-label text-slate-400">Tài khoản Gara</label>
-                        <input id="f-garabankno" class="premium-input bg-white" placeholder="Số TK...">
-                    </div>
-                    <div>
-                        <label class="premium-label text-slate-400">Ngân hàng</label>
-                        <input id="f-garabankname" class="premium-input bg-white" placeholder="Bank...">
-                    </div>
-                    <div>
-                        <label class="premium-label text-slate-400">Chủ tài khoản</label>
-                        <input id="f-garabankowner" class="premium-input bg-white uppercase" placeholder="CHỦ TK">
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- PASC & Guarantee Card -->
-              <div class="glass-card overflow-hidden">
-                <div class="premium-section-title bg-indigo-50/30">
-                  <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
-                  </div>
-                  <span class="text-xs font-black uppercase tracking-widest text-slate-700">PASC & Bảo lãnh thanh toán</span>
-                </div>
-                <div class="p-6 space-y-6">
-                  <div class="grid grid-cols-2 gap-6">
-                    <div>
-                      <label class="premium-label">Link Phương án sửa chữa (PASC)</label>
-                      <div class="flex gap-2">
-                        <input id="f-pascUrl" class="premium-input flex-1" placeholder="https://..." oninput="BaoLanh.updateSummary()">
-                        <button onclick="BaoLanh.openUrl('f-pascUrl')" class="px-4 bg-slate-100 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all">Mở</button>
-                      </div>
-                    </div>
-                    <div>
-                      <label class="premium-label">Link Thông báo Bảo lãnh</label>
-                      <div class="flex gap-2">
-                        <input id="f-baoLanhUrl" class="premium-input flex-1" placeholder="https://..." oninput="BaoLanh.updateSummary()">
-                        <button onclick="BaoLanh.openUrl('f-baoLanhUrl')" class="px-4 bg-slate-100 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all">Mở</button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="grid grid-cols-4 gap-4 bg-indigo-50/30 p-5 rounded-2xl border border-indigo-100 relative">
-                    <div class="absolute -top-3 left-6 px-3 bg-indigo-600 text-white rounded-full text-[9px] font-black uppercase tracking-widest py-1 shadow-sm">Bảng tính toán chi phí</div>
-                    <div>
-                      <label class="premium-label">Tổng sửa chữa</label>
-                      <input id="f-blChiPhiSuaChua" class="premium-input bg-white text-right font-black text-indigo-700" oninput="BaoLanh.formatNumber(this); BaoLanh.updateSummary()">
-                    </div>
-                    <div>
-                      <label class="premium-label">KH tự trả</label>
-                      <input id="f-blKhachHangTuTra" class="premium-input bg-white text-right font-black text-rose-600" oninput="BaoLanh.formatNumber(this)">
-                    </div>
-                    <div>
-                      <label class="premium-label">Giảm giá</label>
-                      <input id="f-blGiamGia" class="premium-input bg-white text-right font-black text-amber-600" oninput="BaoLanh.formatNumber(this)">
-                    </div>
-                    <div>
-                      <label class="premium-label text-emerald-600">BH Bảo lãnh</label>
-                      <input id="f-blBaoHiemBaoLanh" class="premium-input bg-white text-right font-black text-emerald-600 border-emerald-200 focus:border-emerald-500" oninput="BaoLanh.formatNumber(this); BaoLanh.updateSummary()">
-                    </div>
-                  </div>
-
-                  <div class="flex gap-4">
-                    <button type="button" id="btn-gemini-analyze" onclick="BaoLanh.analyzeWithGemini()" class="flex-1 h-12 flex items-center justify-center gap-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-lg shadow-indigo-200 hover:scale-[1.02] active:scale-95 transition-all">
-                      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/></svg>
-                      AI Phân tích PASC & Bảo lãnh
+                  <div class="flex gap-2">
+                    <button type="button" onclick="BaoLanh.analyzeWithGemini()" class="flex-1 h-10 flex items-center justify-center gap-2 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-md hover:bg-indigo-700 transition-all">
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/></svg>
+                      AI PASC
                     </button>
-                    <button type="button" onclick="BaoLanh.sendMessage(curId)" class="flex-1 h-12 flex items-center justify-center gap-3 bg-[#0068ff] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-lg shadow-blue-200 hover:scale-[1.02] active:scale-95 transition-all">
-                      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2C6.5 2 2 6.052 2 11.05c0 2.5 1.121 4.747 2.947 6.313l-.496 2.303c-.125.578.44.973.9.72l2.585-1.422a10.878 10.878 0 0 0 4.076.786c5.512 0 10.012-4.052 10.012-9.048C22.024 6.052 17.524 2 12.012 2zm3.353 13.03l-3.07.001c-.327 0-.6-.215-.682-.517l-.567-2.115L8.52 15.03c-.167.3-.48.47-.813.47-.534 0-.967-.433-.967-.967V9.437c0-.534.433-.967.967-.967.333 0 .646.171.813.471l2.527 4.547.567-2.115c.082-.302.355-.517.682-.517h3.07c.534 0 .967.433.967.967 0 .534-.433.967-.967.967z"/></svg>
-                      Gửi Zalo cho Cố vấn
+                    <button type="button" onclick="BaoLanh.sendMessage(curId)" class="flex-1 h-10 flex items-center justify-center gap-2 bg-[#0068ff] text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-md hover:bg-blue-700 transition-all">
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2C6.5 2 2 6.052 2 11.05c0 2.5 1.121 4.747 2.947 6.313l-.496 2.303c-.125.578.44.973.9.72l2.585-1.422a10.878 10.878 0 0 0 4.076.786c5.512 0 10.012-4.052 10.012-9.048C22.024 6.052 17.524 2 12.012 2z"/></svg>
+                      Zalo
                     </button>
                   </div>
-                  <p id="bl-analyze-status" class="hidden text-[11px] font-bold text-center text-indigo-600 animate-pulse"></p>
-                </div>
               </div>
-
+            </div>
           </div>
 
         </div><!-- /CỘT PHẢI -->
