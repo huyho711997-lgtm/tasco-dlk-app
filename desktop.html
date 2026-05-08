@@ -254,156 +254,6 @@ textarea.inp { resize:vertical; }
   backdrop-filter: blur(2px);
 }
 
-/* ── PREMIUM CAR CLAIM FORM REDESIGN ── */
-.premium-modal {
-  background: #fdfdfd;
-  border: 1px solid rgba(0,0,0,0.05);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
-.premium-header {
-  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-  position: relative;
-  overflow: hidden;
-}
-
-.premium-header::before {
-  content: ''; position: absolute; top: -50%; left: -20%;
-  width: 150%; height: 200%;
-  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.premium-tab {
-  padding: 1rem 1.5rem;
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: rgba(255,255,255,0.5);
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  border-bottom: 3px solid transparent;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.premium-tab.active {
-  color: #fff;
-  border-bottom-color: #6366f1;
-  background: rgba(99, 102, 241, 0.1);
-}
-
-.premium-tab:hover:not(.active) {
-  color: rgba(255,255,255,0.8);
-  background: rgba(255,255,255,0.05);
-}
-
-.glass-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 1.25rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  transition: all 0.3s ease;
-}
-
-.glass-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-.premium-label {
-  font-size: 0.65rem;
-  font-weight: 800;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.375rem;
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-}
-
-.premium-input {
-  width: 100%;
-  background: #f8fafc;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 0.75rem;
-  padding: 0.625rem 0.875rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #1e293b;
-  outline: none;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.premium-input:focus {
-  background: #fff;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-}
-
-.premium-input::placeholder {
-  color: #94a3b8;
-  font-weight: 500;
-}
-
-.premium-section-title {
-  font-size: 0.75rem;
-  font-weight: 900;
-  color: #1e293b;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid rgba(0,0,0,0.03);
-}
-
-.premium-badge {
-  padding: 0.25rem 0.625rem;
-  border-radius: 9999px;
-  font-size: 0.65rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.premium-badge-blue { background: #eff6ff; color: #1d4ed8; }
-.premium-badge-rose { background: #fff1f2; color: #e11d48; }
-.premium-badge-emerald { background: #ecfeff; color: #047857; }
-
-/* ── ANIMATIONS ── */
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
-}
-
-.animate-float { animation: float 6s ease-in-out infinite; }
-
-.owner-tab-btn {
-  padding: 0.375rem 0.875rem;
-  font-size: 0.65rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-radius: 0.5rem;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  color: #64748b;
-  cursor: pointer;
-}
-
-.owner-tab-btn.active {
-  background: #fff;
-  color: #db2777;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.owner-tab-btn:hover:not(.active) {
-  color: #1e293b;
-  background: rgba(0,0,0,0.02);
-}
-
 /* ── NEW PROFESSIONAL GALLERY STYLES ── */
 .hc-gallery-item {
   position: relative;
@@ -3593,78 +3443,89 @@ textarea.inp { resize:vertical; }
 
 <!-- ══════════ EDIT MODAL ══════════ -->
 <div id="modal-wrap" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity duration-300">
-<div id="modal-box" class="premium-modal w-[98vw] h-[95vh] rounded-[2rem] flex flex-col overflow-hidden transform scale-95 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+<div id="modal-box" class="bg-white w-[98vw] h-[95vh] rounded-lg shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-300">
 
-  <!-- Premium Header -->
-  <div class="premium-header shrink-0">
-    <!-- Top row (Compact) -->
-    <div class="flex items-center justify-between px-8 py-4 relative z-10 border-b border-white/5">
-      <div class="flex items-center gap-4">
-        <!-- Icon with Animation (Compact) -->
-        <div class="w-11 h-11 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-[0_5px_15px_rgba(79,70,229,0.3)] relative group overflow-hidden">
-          <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-          <svg class="w-5 h-5 text-white relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5"/><polyline points="14 2 14 8 20 8"/><path d="M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44z"/></svg>
+  <!-- Modal Header -->
+  <!-- Modal Header -->
+  <div class="modal-dark-hdr">
+    <!-- Top row: BSX + actions -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px 10px;position:relative;z-index:1;">
+      <div style="display:flex;align-items:center;gap:12px">
+        <!-- Icon -->
+        <div style="width:38px;height:38px;background:linear-gradient(135deg,#2563eb,#1d4ed8);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(37,99,235,.4)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5"/><polyline points="14 2 14 8 20 8"/><path d="M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44z"/></svg>
         </div>
-        
+        <!-- Biển số + mã -->
         <div>
-          <div class="flex items-center gap-3 mb-0.5">
-            <h2 id="m-bsx" class="text-2xl font-black text-white tracking-tight">—</h2>
-            <div id="m-status-btn" onclick="openStatusModal()" class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest cursor-pointer hover:scale-105 transition-all flex items-center gap-2 border backdrop-blur-md">
-              <!-- Content injected by JS -->
-            </div>
-            <button id="m-urgent-btn" onclick="toggleUrgent()" class="w-7 h-7 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90">
-                <!-- Icon injected by JS -->
-            </button>
-          </div>
-          <p class="text-[10px] font-bold text-indigo-300/50 uppercase tracking-[0.15em]">Hồ sơ: <span id="m-code" class="text-indigo-200 font-mono">—</span></p>
+          <p id="m-bsx" style="color:#f1f5f9;font-size:18px;font-weight:900;margin:0;letter-spacing:-.3px;line-height:1">—</p>
+          <p style="color:rgba(255,255,255,.4);font-size:11px;margin:2px 0 0;font-weight:500">Mã vụ: <span id="m-code" style="color:rgba(255,255,255,.65);font-family:monospace;font-weight:700">—</span></p>
         </div>
+        <!-- Status chip -->
+        <div style="width:1px;height:28px;background:rgba(255,255,255,.12);flex-shrink:0;margin:0 4px"></div>
+        <button id="m-status-btn" onclick="openStatusModal()"
+          style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:800;text-transform:uppercase;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#f1f5f9;cursor:pointer;transition:all .15s;font-family:inherit"
+          onmouseover="this.style.background='rgba(255,255,255,.15)'"
+          onmouseout="this.style.background='rgba(255,255,255,.08)'">
+          — <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
       </div>
 
-      <!-- Actions Area (Compact) -->
-      <div class="flex items-center gap-2.5">
-        <!-- Main Actions -->
-        <div class="flex bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-0.5 gap-0.5">
-            <button onclick="openOCRModal()" class="flex items-center gap-1.5 px-3 py-1.5 hover:bg-white/10 rounded-lg transition-all group">
-                <svg class="w-3.5 h-3.5 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-                <span class="text-[9px] font-black text-white uppercase tracking-wider">AI Scan</span>
-            </button>
-            <button onclick="openExportMultiModal()" class="flex items-center gap-1.5 px-3 py-1.5 hover:bg-white/10 rounded-lg transition-all group">
-                <svg class="w-3.5 h-3.5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                <span class="text-[9px] font-black text-white uppercase tracking-wider">Xuất</span>
-            </button>
-            <button onclick="openPartsOCRFromRecord()" class="flex items-center gap-1.5 px-3 py-1.5 hover:bg-white/10 rounded-lg transition-all group">
-                <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/></svg>
-                <span class="text-[9px] font-black text-white uppercase tracking-wider">Kho BG</span>
-            </button>
-        </div>
-
-        <div class="h-6 w-px bg-white/10 mx-0.5"></div>
-
-        <button onclick="deleteRecord()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-rose-500/20 text-rose-400/50 hover:text-rose-400 border border-white/5 transition-all">
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+      <!-- Action buttons -->
+      <div style="display:flex;align-items:center;gap:6px">
+        <button onclick="openPartsOCRFromRecord()"
+          style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;font-size:11px;font-weight:700;background:rgba(16,185,129,.15);color:#6ee7b7;border:1px solid rgba(16,185,129,.25);cursor:pointer;font-family:inherit;transition:all .15s"
+          onmouseover="this.style.background='rgba(16,185,129,.25)'" onmouseout="this.style.background='rgba(16,185,129,.15)'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          Lưu BG vào kho
+        </button>        
+        <button onclick="openOCRModal()"
+          style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;font-size:11px;font-weight:700;background:linear-gradient(135deg,rgba(37,99,235,.7),rgba(99,102,241,.7));color:#fff;border:1px solid rgba(255,255,255,.15);cursor:pointer;font-family:inherit;transition:opacity .15s"
+          onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 15h.01M16 15h.01"/></svg> AI Quét
         </button>
-
-        <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-white/40 hover:text-white border border-white/5 transition-all">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        <button onclick="openExportMultiModal()"
+          style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;font-size:11px;font-weight:700;background:rgba(251,191,36,.15);color:#fcd34d;border:1px solid rgba(251,191,36,.25);cursor:pointer;font-family:inherit;transition:all .15s"
+          onmouseover="this.style.background='rgba(251,191,36,.25)'" onmouseout="this.style.background='rgba(251,191,36,.15)'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Xuất Word
+        </button>
+        <button id="m-urgent-btn" onclick="toggleUrgent()"
+          style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;font-size:11px;font-weight:700;background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.25);cursor:pointer;font-family:inherit;transition:all .15s"
+          onmouseover="this.style.background='rgba(245,158,11,.25)'" onmouseout="this.style.background='rgba(245,158,11,.15)'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Xử lý gấp
+        </button>
+        <button onclick="deleteRecord()"
+          style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;font-size:11px;font-weight:700;background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.25);cursor:pointer;font-family:inherit;transition:all .15s"
+          onmouseover="this.style.background='rgba(239,68,68,.25)'" onmouseout="this.style.background='rgba(239,68,68,.15)'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg> Xóa
+        </button>
+        <div style="width:1px;height:20px;background:rgba(255,255,255,.12);margin:0 2px"></div>
+        <button onclick="closeModal()"
+          style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.5);transition:all .15s"
+          onmouseover="this.style.background='rgba(239,68,68,.3)';this.style.color='#fca5a5';this.style.borderColor='rgba(239,68,68,.4)'"
+          onmouseout="this.style.background='rgba(255,255,255,.08)';this.style.color='rgba(255,255,255,.5)';this.style.borderColor='rgba(255,255,255,.12)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
       </div>
     </div>
 
-    <!-- Premium Tab Bar -->
-    <div class="flex items-end px-8 gap-1 border-t border-white/5">
-      <div class="premium-tab active" onclick="switchModalTab('info',this)">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        <span>Thông tin chi tiết</span>
+    <!-- Tab bar -->
+    <div style="display:flex;align-items:flex-end;padding:0 12px;gap:2px;border-top:1px solid rgba(255,255,255,.06)">
+      <div class="m-tab active" onclick="switchModalTab('info',this)"
+        style="color:rgba(255,255,255,.9);border-bottom-color:#3b82f6;background:rgba(59,130,246,.15);border-radius:8px 8px 0 0;border-bottom:2.5px solid #3b82f6;padding:.65rem 1.1rem">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:5px;margin-top:-2px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Hồ sơ
       </div>
-      <div class="premium-tab" onclick="switchModalTab('damage',this)">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 3l10 10M8 3h5v5M3 8v5h5"/></svg>
-        <span>Hạng mục giám định</span>
-        <span id="dm-count-badge" class="hidden px-2 py-0.5 bg-rose-500 text-white text-[9px] font-black rounded-full">0</span>
+      <div class="m-tab" onclick="switchModalTab('damage',this)"
+        style="color:rgba(255,255,255,.45);border-radius:8px 8px 0 0;padding:.65rem 1.1rem">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:5px;margin-top:-2px"><path d="M3 3l10 10M8 3h5v5M3 8v5h5"/></svg>
+        Hạng mục GĐ
+        <span id="dm-count-badge" class="hidden ml-1 px-1.5 py-0.5 bg-rose-500 text-white text-[9px] font-black rounded-full leading-none"></span>
       </div>
-      <div class="premium-tab" onclick="switchModalTab('images',this)">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <span>Ảnh & Chứng từ</span>
-        <span id="img-count-badge" class="hidden px-2 py-0.5 bg-blue-500 text-white text-[9px] font-black rounded-full">0</span>
+      <div class="m-tab" onclick="switchModalTab('images',this)"
+        style="color:rgba(255,255,255,.45);border-radius:8px 8px 0 0;padding:.65rem 1.1rem">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:5px;margin-top:-2px"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+        Ảnh chứng từ
+        <span id="img-count-badge" class="hidden ml-1 px-1.5 py-0.5 bg-blue-500 text-white text-[9px] font-black rounded-full leading-none"></span>
       </div>
     </div>
   </div>
@@ -3672,405 +3533,399 @@ textarea.inp { resize:vertical; }
   <!-- Modal Body -->
   <div class="flex-1 overflow-hidden flex flex-col">
 
-    <!-- TAB: HỒ SƠ (PREMIUM REDESIGN) -->
-    <div id="tab-info" class="m-tab-panel active flex-1 overflow-y-auto p-8 custom-scrollbar bg-[#f8fafc]">
+    <!-- TAB: HỒ SƠ -->
+    <div id="tab-info" class="m-tab-panel active flex-1 overflow-y-auto p-5">
 
-      <!-- Case Warnings (Enhanced) -->
-      <div id="modal-warn-panel" class="hidden rounded-2xl border-2 border-rose-100 bg-rose-50/50 p-4 mb-6 animate__animated animate__shakeX"></div>
+      <!-- Case Warnings -->
+      <div id="modal-warn-panel" class="hidden rounded-xl border overflow-hidden mb-4"></div>
 
-      <!-- GRID 2 CỘT RỘNG -->
-      <div class="grid grid-cols-12 gap-8">
+      <!-- GRID 2 CỘT -->
+      <div class="grid grid-cols-2 gap-4">
 
-        <!-- ═══ CỘT TRÁI (Nghiệp vụ & Hồ sơ) ═══ -->
-        <div class="col-span-12 lg:col-span-5 space-y-8">
+        <!-- ═══ CỘT TRÁI: Nghiệp vụ ═══ -->
+        <div class="space-y-3">
 
-          <!-- 1. Thông tin Vụ việc & Lái xe -->
-          <div class="glass-card overflow-hidden">
-            <div class="premium-section-title bg-indigo-50/30">
-              <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <!-- Vụ việc -->
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-header-title text-blue-700">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Thông tin Vụ việc & Lịch hẹn
               </div>
-              <span class="text-xs font-black uppercase tracking-widest text-slate-700">Thông tin Vụ việc & Lái xe</span>
-              <div id="warn-notify" class="hidden ml-auto premium-badge premium-badge-rose">Báo trễ >5n</div>
+              <div id="warn-notify" class="hidden text-[10px] font-black px-2.5 py-1 rounded-full bg-rose-100 text-rose-600">⚠ Thông báo trễ &gt;5 ngày</div>
             </div>
-            <div class="p-6 space-y-4">
-              <div class="grid grid-cols-2 gap-4">
-                <div class="col-span-1">
-                  <label class="premium-label">Mã hồ sơ</label>
-                  <input id="f-code" class="premium-input font-mono text-indigo-600" placeholder="HS-001...">
-                </div>
-                <div class="col-span-1">
-                  <label class="premium-label">Biển số xe</label>
-                  <input id="f-bsx" class="premium-input uppercase font-black text-indigo-900 text-center" placeholder="47A-123.45">
-                </div>
+            <div class="section-body space-y-2.5">
+              <div class="grid grid-cols-3 gap-2.5">
+                <div><label class="lbl">Mã hồ sơ</label><input id="f-code" class="inp font-mono text-blue-700"></div>
+                <div><label class="lbl">Biển số</label><input id="f-bsx" class="inp uppercase font-black text-blue-900 text-center"></div>
+                <div><label class="lbl">SĐT</label><input id="f-phone" class="inp"></div>
               </div>
-
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="premium-label">Người thông báo</label>
-                  <input id="f-cus" class="premium-input" placeholder="Tên khách báo...">
-                </div>
-                <div>
-                  <label class="premium-label">SĐT liên hệ</label>
-                  <input id="f-phone" class="premium-input font-mono" placeholder="SĐT chính...">
-                </div>
+              <div class="grid grid-cols-2 gap-2.5">
+                <div><label class="lbl">Người thông báo</label><input id="f-cus" class="inp" placeholder="Tên khách hàng..."></div>
+                <div><label class="lbl">Người lái xe</label><input id="f-driver" class="inp" placeholder="Tên người điều khiển xe..."></div>
               </div>
-              
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="premium-label">Ngày xảy ra VTT</label>
-                  <input id="f-acc" class="premium-input" placeholder="DD/MM/YYYY" oninput="checkWarnings()">
-                </div>
-                <div>
-                  <label class="premium-label">Ngày báo hồ sơ</label>
-                  <input id="f-notify" class="premium-input" placeholder="DD/MM/YYYY" oninput="checkWarnings()">
-                </div>
+              <div class="grid grid-cols-2 gap-2.5">
+                <div><label class="lbl">Ngày VTT</label><input id="f-acc" class="inp" placeholder="DD/MM/YYYY" oninput="checkWarnings()"></div>
+                <div><label class="lbl">Ngày báo</label><input id="f-notify" class="inp" placeholder="DD/MM/YYYY" oninput="checkWarnings()"></div>
               </div>
-
+              <div><label class="lbl">Địa điểm tổn thất</label><input id="f-loc" class="inp"></div>
+              <div><label class="lbl">Nguyên nhân</label><input id="f-cause" class="inp"></div>
+              <div><label class="lbl">Mô tả tổn thất</label><input id="f-desc" class="inp"></div>
               <div>
-                <label class="premium-label">Địa điểm tổn thất</label>
-                <input id="f-loc" class="premium-input" placeholder="Nhập địa chỉ cụ thể...">
-              </div>
-
-              <div>
-                <label class="premium-label">Nguyên nhân tai nạn</label>
-                <input id="f-cause" class="premium-input" placeholder="Mô tả ngắn gọn nguyên nhân...">
-              </div>
-
-              <div>
-                <label class="premium-label">Mô tả tổn thất</label>
-                <input id="f-desc" class="premium-input" placeholder="Các hạng mục hư hỏng sơ bộ...">
-              </div>
-
-              <div>
-                <label class="premium-label">Lịch hẹn giám định</label>
-                <button type="button" onclick="openDTP('appt')" id="f-appt-btn" class="premium-input text-left flex items-center justify-between group">
-                  <span id="f-appt-label" class="text-slate-400 font-medium truncate">Chưa chọn lịch hẹn...</span>
-                  <svg class="w-4 h-4 text-slate-300 group-hover:text-indigo-400 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <label class="lbl">Lịch hẹn GĐ</label>
+                <button type="button" onclick="openDTP('appt')" id="f-appt-btn" class="inp text-left flex items-center justify-between cursor-pointer hover:border-blue-400 hover:bg-white">
+                  <span id="f-appt-label" class="text-slate-400 font-medium text-sm flex-1">Nhấn để chọn...</span>
+                  <svg class="w-3.5 h-3.5 text-blue-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4M8 2v4M3 10h5"/><circle cx="17.5" cy="17.5" r="5.5"/><path d="M17.5 15v2.5l2 1"/></svg>
                 </button>
                 <input type="hidden" id="f-appt-iso">
-              </div>
-
-              <!-- Driver & GPLX Info (Consolidated) -->
-              <div class="pt-4 border-t border-slate-100/60 space-y-3">
-                <div class="flex items-center justify-between mb-1">
-                    <div class="flex items-center gap-2">
-                        <div class="w-1 h-3 bg-indigo-400 rounded-full"></div>
-                        <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Người điều khiển (Lái xe)</span>
-                    </div>
-                    <div id="warn-gplx" class="hidden premium-badge premium-badge-rose">GPLX Hết hạn</div>
-                </div>
-                <div>
-                    <label class="premium-label">Họ tên lái xe</label>
-                    <input id="f-driver" class="premium-input font-bold" placeholder="Tên lái xe...">
-                </div>
-                <div class="grid grid-cols-12 gap-3">
-                  <div class="col-span-9">
-                    <label class="premium-label">Số GPLX</label>
-                    <input id="f-sogplx" class="premium-input font-mono" placeholder="Số bằng lái...">
-                  </div>
-                  <div class="col-span-3">
-                    <label class="premium-label">Hạng</label>
-                    <input id="f-hanggplx" class="premium-input text-center font-bold" placeholder="B2">
-                  </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="premium-label">Ngày cấp</label>
-                    <input id="f-capgplx" class="premium-input" placeholder="DD/MM/YYYY">
-                  </div>
-                  <div>
-                    <label class="premium-label">Hết hạn GPLX</label>
-                    <input id="f-hetgplx" class="premium-input" placeholder="DD/MM/YYYY" oninput="checkWarnings()">
-                  </div>
-                </div>
-              </div>
+              </div>              
             </div>
           </div>
 
-          <!-- 2. Thông tin Phương tiện -->
-          <div class="glass-card overflow-hidden">
-            <div class="premium-section-title bg-orange-50/30">
-              <div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-1.1 0-2 .9-2 2v7c0 1.1.9 2 2 2h10"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+          <!-- Ghi chú -->
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-header-title text-slate-500">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                Ghi chú
               </div>
-              <span class="text-xs font-black uppercase tracking-widest text-slate-700">Thông tin Phương tiện & Đăng kiểm</span>
-              <div id="warn-dk" class="hidden ml-auto premium-badge premium-badge-rose">ĐK Hết hạn</div>
             </div>
-            <div class="p-6 space-y-4">
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="premium-label">Hãng xe</label>
-                  <input id="f-hangxe" class="premium-input" placeholder="Toyota, Mazda...">
-                </div>
-                <div>
-                  <label class="premium-label">Loại xe / Hiệu xe</label>
-                  <input id="f-loaixe" class="premium-input" placeholder="Vios, CX-5...">
-                </div>
-              </div>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="premium-label">Số khung</label>
-                  <input id="f-sokhung" class="premium-input font-mono text-orange-800" placeholder="VIN...">
-                </div>
-                <div>
-                  <label class="premium-label">Số máy</label>
-                  <input id="f-somay" class="premium-input font-mono text-orange-800" placeholder="Engine No...">
-                </div>
-              </div>
-              <div class="grid grid-cols-12 gap-4 pt-4 border-t border-slate-100/60">
-                  <div class="col-span-8">
-                    <label class="premium-label">Số Đăng kiểm</label>
-                    <input id="f-sodk" class="premium-input" placeholder="KĐ-...">
-                  </div>
-                  <div class="col-span-4">
-                    <label class="premium-label">Chỗ ngồi</label>
-                    <input id="f-sochongoi" class="premium-input text-center" placeholder="5">
-                  </div>
-              </div>
-              <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="premium-label">Năm sản xuất</label>
-                    <input id="f-namsanxuat" class="premium-input text-center" placeholder="2024">
-                  </div>
-                  <div>
-                    <label class="premium-label">Hết hạn ĐK</label>
-                    <input id="f-hetdk" class="premium-input" placeholder="DD/MM/YYYY" oninput="checkWarnings()">
-                  </div>
-              </div>
+            <div class="section-body">
+              <textarea id="f-note" rows="2" class="inp resize-none" placeholder="Ghi chú / yêu cầu đặc biệt..."></textarea>
             </div>
           </div>
 
-          <!-- 3. Ghi chú & Lịch sử -->
-          <div class="glass-card overflow-hidden">
-            <div class="premium-section-title bg-slate-50/30">
-              <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-header-title text-indigo-700">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                Sơ đồ hiện trường
               </div>
-              <span class="text-xs font-black uppercase tracking-widest text-slate-700">Ghi chú & Công việc</span>
+              <button onclick="SceneCanvas.open(curId)" class="px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-[11px] font-bold hover:bg-indigo-100 flex items-center gap-1.5 border border-indigo-200 transition-colors">
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg> Vẽ sơ đồ
+              </button>
             </div>
-            <div class="p-6 space-y-4">
-              <textarea id="f-note" rows="3" class="premium-input resize-none leading-relaxed" placeholder="Nhập ghi chú quan trọng cho hồ sơ này..."></textarea>
-              
-              <div class="pt-4 border-t border-slate-100">
-                <div class="flex items-center justify-between mb-3">
-                  <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider">Danh sách công việc</span>
-                  <button onclick="openAddTask()" class="text-indigo-600 text-[10px] font-black uppercase tracking-widest hover:underline">+ Thêm việc</button>
-                </div>
-                <div id="m-tasks" class="space-y-2"></div>
+            <div class="section-body">
+              <div id="scene-diagram-preview" class="hidden relative w-full h-40 bg-slate-50 rounded-xl border border-indigo-200 overflow-hidden cursor-pointer group" onclick="if(window.refreshFsLightbox) { this.querySelector('a').click(); }">
+                  <a id="scene-diagram-link" data-fslightbox="scene-preview" href="#" class="hidden"></a>
+                  <img id="scene-diagram-img" src="" class="w-full h-full object-contain">
+                  <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span class="text-white text-xs font-bold">Xem phóng to</span>
+                  </div>
+                  <button onclick="event.stopPropagation(); SceneCanvas.delete(curId)" class="absolute top-2 right-2 w-7 h-7 bg-rose-500 text-white rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-600" title="Xóa sơ đồ này">
+                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                  </button>
               </div>
+              <p id="scene-diagram-empty" class="text-[11px] text-indigo-400 italic text-center py-4">Chưa có sơ đồ, nhấn "Vẽ sơ đồ" để phác thảo.</p>
+            </div>
+          </div>
+
+          <!-- Lịch công việc -->
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-header-title text-amber-700">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4M8 2v4M3 10h5"/><circle cx="17.5" cy="17.5" r="5.5"/><path d="M17.5 15v2.5l2 1"/></svg>
+                Lịch công việc
+              </div>
+              <button onclick="openAddTask()" class="px-3 py-1.5 bg-amber-500 text-white rounded-lg text-[11px] font-bold hover:bg-amber-600 flex items-center gap-1.5">
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> Thêm
+              </button>
+            </div>
+            <div class="section-body">
+              <div id="m-tasks" class="space-y-2"></div>
+            </div>
+          </div>
+
+          <!-- Lịch sử thay đổi -->
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-header-title text-slate-500">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Lịch sử thay đổi
+              </div>
+              <span id="audit-count" class="text-[10px] text-slate-400 font-semibold"></span>
+            </div>
+            <div class="section-body">
+              <div id="m-audit" class="space-y-2 max-h-36 overflow-y-auto"></div>
             </div>
           </div>
 
         </div><!-- /CỘT TRÁI -->
 
-
-        <!-- ═══ CỘT PHẢI (Chủ xe & Gara & PASC) ═══ -->
-        <div class="col-span-12 lg:col-span-7 space-y-8">
-
-          <!-- 4. Thông tin Chủ xe (Khách hàng) -->
-          <div class="glass-card overflow-hidden">
-            <div class="premium-section-title bg-pink-50/30">
-              <div class="w-8 h-8 rounded-lg bg-pink-100 text-pink-600 flex items-center justify-center">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <!-- ═══ CỘT PHẢI: Giấy tờ ═══ -->
+        <div class="space-y-3">
+          <div class="section-card" style="border-left:3px solid #0d9488">
+            <div class="section-header cursor-pointer hover:bg-slate-100 transition-colors select-none" onclick="const body = this.nextElementSibling; body.classList.toggle('hidden'); const icon = this.querySelector('.chevron-icon'); if(icon) icon.style.transform = body.classList.contains('hidden') ? 'rotate(180deg)' : 'rotate(0deg)';">
+              <div class="flex flex-col">
+                  <div class="section-header-title text-teal-700">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                    Gara sửa chữa
+                  </div>
+                  <span id="summary-garaname" class="text-[10px] text-slate-500 font-medium mt-0.5 ml-5">Chưa chọn Gara</span>
               </div>
-              <span class="text-xs font-black uppercase tracking-widest text-slate-700">Thông tin Chủ xe (Khách hàng)</span>
-              <div class="ml-auto flex bg-white/50 backdrop-blur-sm rounded-lg p-1 border border-pink-100 shadow-sm">
-                <button id="owner-tab-personal" onclick="switchOwnerType('personal')" class="owner-tab-btn active">Cá nhân</button>
-                <button id="owner-tab-business" onclick="switchOwnerType('business')" class="owner-tab-btn">Doanh nghiệp</button>
-              </div>
+              <svg class="chevron-icon w-4 h-4 text-slate-400 transition-transform duration-200" style="transform: rotate(180deg);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
             </div>
-            <div class="p-6">
-              <!-- Panel: Cá nhân -->
-              <div id="owner-panel-personal" class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="premium-label">Họ và tên chủ xe</label>
-                    <input id="f-ownerName" class="premium-input" placeholder="Tên khách hàng..." oninput="checkOwnerMismatch()">
-                  </div>
-                  <div>
-                    <label class="premium-label">Số CCCD / CMND</label>
-                    <input id="f-ownerCccd" class="premium-input font-mono" placeholder="0123...">
-                  </div>
+            <div class="section-body space-y-2.5 hidden">
+              <div class="grid grid-cols-3 gap-2.5">
+                <div class="relative">
+                  <label class="lbl">Tên Gara</label>
+                  <input id="f-garaname" class="inp text-teal-900" placeholder="Nhập tên gara..." autocomplete="off" oninput="garaSearch(this)" onkeyup="document.getElementById('summary-garaname').textContent = this.value || 'Chưa chọn Gara';" onblur="setTimeout(garaHide,200)">
+                  <div id="gara-drop" class="gdrop hidden"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="premium-label">Ngày sinh</label>
-                    <input id="f-ownerDob" class="premium-input" placeholder="DD/MM/YYYY">
-                  </div>
-                  <div>
-                    <label class="premium-label">Địa chỉ hiện tại</label>
-                    <input id="f-ownerAddress" class="premium-input" placeholder="Nơi ở hiện nay...">
-                  </div>
-                </div>
-                <!-- AI Scan Row -->
-                <div class="bg-gradient-to-r from-pink-50 to-indigo-50 rounded-2xl p-4 border border-pink-100 flex items-center justify-between group cursor-pointer hover:shadow-md transition-all">
-                  <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-pink-500 shadow-sm group-hover:scale-110 transition-transform">
-                      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M7 15h.01"/><path d="M11 15h.01"/></svg>
-                    </div>
-                    <div>
-                      <p class="text-[11px] font-black text-pink-600 uppercase tracking-wider">Trợ lý AI Quét CCCD</p>
-                      <p class="text-[10px] text-slate-500">Tự động nhận diện Họ tên, Ngày sinh, Địa chỉ</p>
-                    </div>
-                  </div>
-                  <label class="px-4 py-2 bg-white text-pink-600 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-sm hover:bg-pink-600 hover:text-white transition-all cursor-pointer">
-                    Chọn ảnh quét
-                    <input type="file" accept="image/*" class="hidden" onchange="ocrCccd(event)">
-                  </label>
-                </div>
-                <div id="cccd-ocr-status" class="hidden text-center text-[11px] font-bold text-blue-600 animate-pulse">Đang nhận dạng...</div>
+                <div><label class="lbl">SĐT Gara</label><input id="f-garaphone" class="inp" placeholder="0909..."></div>
+                <div><label class="lbl">Mã số thuế</label><input id="f-garatax" class="inp font-mono" placeholder="MST..."></div>
               </div>
-
-              <!-- Panel: Doanh nghiệp -->
-              <div id="owner-panel-business" class="hidden space-y-4 animate__animated animate__fadeIn">
-                <div class="grid grid-cols-2 gap-4">
-                  <div class="relative">
-                    <label class="premium-label">Mã số thuế</label>
-                    <div class="flex gap-2">
-                      <input id="f-ownerMst" class="premium-input font-mono" placeholder="0123...">
-                      <button onclick="lookupMst()" class="px-4 bg-indigo-600 text-white rounded-xl text-[11px] font-black uppercase hover:bg-indigo-700 transition-colors">Tra</button>
-                    </div>
-                  </div>
-                  <div>
-                    <label class="premium-label">Tên công ty</label>
-                    <input id="f-ownerCompany" class="premium-input font-bold" placeholder="Tên doanh nghiệp..." oninput="checkOwnerMismatch()">
-                  </div>
-                </div>
-                <div>
-                  <label class="premium-label">Địa chỉ trụ sở</label>
-                  <input id="f-ownerCompanyAddress" class="premium-input" placeholder="Địa chỉ ĐKKD...">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="premium-label">Người đại diện</label>
-                    <input id="f-ownerRep" class="premium-input" placeholder="Họ tên người ký...">
-                  </div>
-                  <div>
-                    <label class="premium-label">Email / Liên hệ</label>
-                    <input id="f-ownerCompanyEmail" class="premium-input" placeholder="email@company.com">
-                  </div>
-                </div>
-              </div>
-
-              <!-- Bank Info Section (Common) -->
-              <div class="mt-6 pt-6 border-t border-slate-100 grid grid-cols-3 gap-4">
-                <div class="col-span-3">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 block">Thông tin thụ hưởng</span>
-                </div>
-                <div>
-                  <label class="premium-label">Số tài khoản</label>
-                  <input id="f-ownerBankNo" class="premium-input font-mono" placeholder="Số tài khoản...">
-                </div>
-                <div>
-                  <label class="premium-label">Ngân hàng</label>
-                  <input id="f-ownerBankName" class="premium-input" placeholder="Vietcombank...">
-                </div>
-                <div>
-                  <label class="premium-label">Chủ tài khoản</label>
-                  <input id="f-ownerBankOwner" class="premium-input uppercase font-bold" placeholder="Tên chủ TK">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 5. Gara Sửa chữa & PASC -->
-          <div class="glass-card overflow-hidden">
-            <div class="premium-section-title bg-teal-50/30">
-              <div class="w-8 h-8 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-              </div>
-              <span class="text-xs font-black uppercase tracking-widest text-slate-700">Gara Sửa chữa & Cố vấn</span>
-              <div id="summary-garaname" class="ml-auto text-[10px] font-bold text-teal-600 truncate max-w-[200px]">Chưa chọn Gara</div>
-            </div>
-            <div class="p-6 space-y-4">
-              <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-8 relative">
-                  <label class="premium-label">Tên Gara sửa chữa</label>
-                  <input id="f-garaname" class="premium-input font-bold text-teal-900" placeholder="Tìm hoặc nhập tên gara..." autocomplete="off" oninput="garaSearch(this)" onblur="setTimeout(garaHide,200)">
-                  <div id="gara-drop" class="gdrop hidden shadow-xl border-slate-200"></div>
-                </div>
-                <div class="col-span-4">
-                  <label class="premium-label">SĐT Gara</label>
-                  <input id="f-garaphone" class="premium-input font-mono" placeholder="SĐT...">
-                </div>
-              </div>
-              <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-9">
-                  <label class="premium-label">Địa chỉ Gara</label>
-                  <input id="f-garaaddr" class="premium-input" placeholder="Địa chỉ cụ thể...">
-                </div>
-                <div class="col-span-3">
-                  <label class="premium-label">MST</label>
-                  <input id="f-garatax" class="premium-input font-mono" placeholder="MST...">
-                </div>
-              </div>
-              <div class="grid grid-cols-4 gap-4">
-                <div>
-                  <label class="premium-label">Danh xưng</label>
-                  <select id="f-garaAdvisorPrefix" class="premium-input">
-                    <option value="Anh">Anh</option><option value="Chị">Chị</option><option value="Em">Em</option><option value="Bạn">Bạn</option><option value="Chú">Chú</option><option value="Cô">Cô</option>
+              <div class="grid grid-cols-4 gap-2.5">
+                <div class="col-span-1">
+                  <label class="lbl">Danh xưng</label>
+                  <select id="f-garaAdvisorPrefix" class="inp">
+                    <option value="Anh">Anh</option>
+                    <option value="Chị">Chị</option>
+                    <option value="Em">Em</option>
+                    <option value="Bạn">Bạn</option>
+                    <option value="Chú">Chú</option>
+                    <option value="Cô">Cô</option>
                   </select>
                 </div>
                 <div class="col-span-1 relative">
-                  <label class="premium-label">Tên Cố vấn</label>
-                  <input id="f-garaAdvisorName" class="premium-input" placeholder="Tên..." autocomplete="off" oninput="advisorSearch(this)" onblur="setTimeout(advisorHide, 200)">
-                  <div id="advisor-drop" class="gdrop hidden shadow-xl"></div>
+                  <label class="lbl">Tên Cố vấn</label>
+                  <input id="f-garaAdvisorName" class="inp" placeholder="Tên..." autocomplete="off" oninput="advisorSearch(this)" onblur="setTimeout(advisorHide, 200)">
+                  <div id="advisor-drop" class="gdrop hidden"></div>
                 </div>
-                <div class="col-span-2">
-                  <label class="premium-label">SĐT Cố vấn (Zalo)</label>
-                  <input id="f-garaAdvisorPhone" class="premium-input font-mono text-blue-600" placeholder="0909...">
+                <div class="col-span-2"><label class="lbl">SĐT Cố vấn (Zalo)</label><input id="f-garaAdvisorPhone" class="inp font-mono" placeholder="0909..."></div>
+              </div>
+              <div><label class="lbl">Địa chỉ Gara</label><input id="f-garaaddr" class="inp"></div>
+              <div class="grid grid-cols-3 gap-2.5 pt-2 border-t border-slate-100">
+                <div><label class="lbl">Số tài khoản</label><input id="f-garabankno" class="inp font-mono" placeholder="0123456789..."></div>
+                <div><label class="lbl">Ngân hàng</label><input id="f-garabankname" class="inp" placeholder="VD: Vietcombank..."></div>
+                <div><label class="lbl">Chủ tài khoản</label><input id="f-garabankowner" class="inp uppercase" placeholder="Tên chủ TK..."></div>
+              </div>
+            </div>
+          </div>
+          <!-- Người thụ hưởng bồi thường -->
+          <div class="section-card" style="border-left:3px solid #0d9488">
+            <div class="section-header cursor-pointer hover:bg-slate-100 transition-colors select-none" onclick="const body = this.nextElementSibling; body.classList.toggle('hidden'); const icon = this.querySelector('.chevron-icon'); if(icon) icon.style.transform = body.classList.contains('hidden') ? 'rotate(180deg)' : 'rotate(0deg)';">
+              <div class="flex flex-col">
+                  <div class="section-header-title text-teal-700">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                    Người thụ hưởng bồi thường
+                  </div>
+                  <span id="summary-xnbtRecv" class="text-[10px] text-slate-500 font-medium mt-0.5 ml-5">Gara sửa chữa</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="hidden" id="f-xnbtRecv" value="gara">
+                <svg class="chevron-icon w-4 h-4 text-slate-400 transition-transform duration-200" style="transform: rotate(180deg);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+              </div>
+            </div>
+            <div class="section-body space-y-2.5 hidden">
+              <div class="grid grid-cols-2 gap-2.5">
+                <button type="button" id="recv-tab-gara" onclick="switchRecvType('gara')"
+                  class="recv-card flex items-center gap-3 p-3 rounded-xl border-2 border-teal-400 bg-teal-50 text-left transition-all hover:shadow-sm">
+                  <div class="w-9 h-9 rounded-lg bg-teal-100 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4 text-teal-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-xs font-black text-slate-800">Gara sửa chữa</p>
+                    <p class="text-[10px] text-slate-500 mt-0.5">Thanh toán trực tiếp gara</p>
+                  </div>
+                  <svg id="recv-check-gara" class="w-4 h-4 text-teal-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </button>
+                <button type="button" id="recv-tab-owner" onclick="switchRecvType('owner')"
+                  class="recv-card flex items-center gap-3 p-3 rounded-xl border-2 border-slate-200 bg-white text-left transition-all hover:shadow-sm hover:border-slate-300">
+                  <div class="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-xs font-black text-slate-800">Chủ xe</p>
+                    <p class="text-[10px] text-slate-500 mt-0.5">Thanh toán cho chủ xe</p>
+                  </div>
+                  <svg id="recv-check-owner" class="w-4 h-4 text-teal-600 shrink-0 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </button>
+              </div>
+              <div id="recv-preview" class="flex items-center gap-3 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg">
+                <svg class="w-4 h-4 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                <span class="text-[11px] text-slate-400 font-semibold">Chưa có thông tin ngân hàng</span>
+              </div>
+            </div>
+          </div>
+          <div class="section-card" style="border-left:3px solid #3b82f6">
+            <div class="section-header cursor-pointer hover:bg-slate-100 transition-colors select-none" onclick="const body = this.nextElementSibling; body.classList.toggle('hidden'); const icon = this.querySelector('.chevron-icon'); if(icon) icon.style.transform = body.classList.contains('hidden') ? 'rotate(180deg)' : 'rotate(0deg)';">
+              <div class="flex flex-col">
+                  <div class="section-header-title text-blue-700">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    PASC & BẢO LÃNH
+                  </div>
+                  <span id="summary-pasc-baolanh" class="text-[10px] text-slate-500 font-medium mt-0.5 ml-5">Chưa có thông tin</span>
+              </div>
+              <svg class="chevron-icon w-4 h-4 text-slate-400 transition-transform duration-200" style="transform: rotate(180deg);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+            </div>
+            <div class="section-body space-y-3 hidden">
+              <div>
+                <label class="lbl">Link Phương án sửa chữa (PASC)</label>
+                <div class="flex gap-2">
+                  <input id="f-pascUrl" class="inp flex-1" placeholder="https://..." oninput="BaoLanh.updateSummary()">
+                  <button type="button" onclick="BaoLanh.openUrl('f-pascUrl')" class="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-200 transition-colors">Mở</button>
+                </div>
+              </div>
+              <div>
+                <label class="lbl">Link Thông báo Bảo lãnh</label>
+                <div class="flex gap-2">
+                  <input id="f-baoLanhUrl" class="inp flex-1" placeholder="https://..." oninput="BaoLanh.updateSummary()">
+                  <button type="button" onclick="BaoLanh.openUrl('f-baoLanhUrl')" class="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-200 transition-colors">Mở</button>
                 </div>
               </div>
               
-              <!-- PASC & Guarantee Section (Integrated) -->
-              <div class="pt-4 border-t border-slate-100 space-y-4">
-                  <div class="grid grid-cols-2 gap-4">
-                    <div>
-                      <label class="premium-label">Link PASC</label>
-                      <input id="f-pascUrl" class="premium-input text-[10px]" placeholder="https://..." oninput="BaoLanh.updateSummary()">
-                    </div>
-                    <div>
-                      <label class="premium-label">Link Bảo lãnh</label>
-                      <input id="f-baoLanhUrl" class="premium-input text-[10px]" placeholder="https://..." oninput="BaoLanh.updateSummary()">
-                    </div>
-                  </div>
-                  <div class="grid grid-cols-4 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <div>
-                      <label class="text-[9px] font-bold text-slate-400 uppercase">Tổng SC</label>
-                      <input id="f-blChiPhiSuaChua" class="w-full bg-transparent font-black text-indigo-700 text-xs" oninput="BaoLanh.formatNumber(this); BaoLanh.updateSummary()">
-                    </div>
-                    <div>
-                      <label class="text-[9px] font-bold text-slate-400 uppercase">KH trả</label>
-                      <input id="f-blKhachHangTuTra" class="w-full bg-transparent font-black text-rose-600 text-xs" oninput="BaoLanh.formatNumber(this)">
-                    </div>
-                    <div>
-                      <label class="text-[9px] font-bold text-slate-400 uppercase">Giảm giá</label>
-                      <input id="f-blGiamGia" class="w-full bg-transparent font-black text-amber-600 text-xs" oninput="BaoLanh.formatNumber(this)">
-                    </div>
-                    <div>
-                      <label class="text-[9px] font-bold text-emerald-600 uppercase">BH BL</label>
-                      <input id="f-blBaoHiemBaoLanh" class="w-full bg-transparent font-black text-emerald-600 text-xs" oninput="BaoLanh.formatNumber(this); BaoLanh.updateSummary()">
-                    </div>
-                  </div>
-                  <div class="flex gap-2">
-                    <button type="button" onclick="BaoLanh.analyzeWithGemini()" class="flex-1 h-10 flex items-center justify-center gap-2 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-md hover:bg-indigo-700 transition-all">
-                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/></svg>
-                      AI PASC
-                    </button>
-                    <button type="button" onclick="BaoLanh.sendMessage(curId)" class="flex-1 h-10 flex items-center justify-center gap-2 bg-[#0068ff] text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-md hover:bg-blue-700 transition-all">
-                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2C6.5 2 2 6.052 2 11.05c0 2.5 1.121 4.747 2.947 6.313l-.496 2.303c-.125.578.44.973.9.72l2.585-1.422a10.878 10.878 0 0 0 4.076.786c5.512 0 10.012-4.052 10.012-9.048C22.024 6.052 17.524 2 12.012 2z"/></svg>
-                      Zalo
-                    </button>
-                  </div>
+              <p id="bl-analyze-status" class="hidden text-[11px] font-bold text-center text-violet-600 animate-pulse mt-1"></p>
+
+              <div class="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-100 mt-2">
+                <div><label class="lbl">Chi phí sửa chữa</label><input id="f-blChiPhiSuaChua" class="inp font-mono text-right text-blue-700" oninput="BaoLanh.formatNumber(this); BaoLanh.updateSummary()"></div>
+                <div><label class="lbl">Khách hàng tự trả</label><input id="f-blKhachHangTuTra" class="inp font-mono text-right text-rose-600" oninput="BaoLanh.formatNumber(this)"></div>
+                <div><label class="lbl">Giảm giá</label><input id="f-blGiamGia" class="inp font-mono text-right text-amber-600" oninput="BaoLanh.formatNumber(this)"></div>
+                <div><label class="lbl">BH Bảo lãnh</label><input id="f-blBaoHiemBaoLanh" class="inp font-mono text-right text-emerald-600" oninput="BaoLanh.formatNumber(this); BaoLanh.updateSummary()"></div>
+              </div>
+
+              <div class="flex gap-2.5 mt-4">
+                <button type="button" id="btn-gemini-analyze" onclick="BaoLanh.analyzeWithGemini()" class="flex-1 flex items-center justify-center gap-2 py-2.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-[11px] font-black hover:bg-indigo-100 transition-all active:scale-95">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/></svg> 
+                  AI PHÂN TÍCH
+                </button>
+                <button type="button" onclick="BaoLanh.sendMessage(curId)" class="flex-[1.4] flex items-center justify-center gap-2 py-2.5 bg-[#0068ff] text-white rounded-xl text-[11px] font-black hover:bg-[#005ae0] shadow-lg shadow-blue-200/50 transition-all active:scale-95">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2C6.5 2 2 6.052 2 11.05c0 2.5 1.121 4.747 2.947 6.313l-.496 2.303c-.125.578.44.973.9.72l2.585-1.422a10.878 10.878 0 0 0 4.076.786c5.512 0 10.012-4.052 10.012-9.048C22.024 6.052 17.524 2 12.012 2zm3.353 13.03l-3.07.001c-.327 0-.6-.215-.682-.517l-.567-2.115L8.52 15.03c-.167.3-.48.47-.813.47-.534 0-.967-.433-.967-.967V9.437c0-.534.433-.967.967-.967.333 0 .646.171.813.471l2.527 4.547.567-2.115c.082-.302.355-.517.682-.517h3.07c.534 0 .967.433.967.967 0 .534-.433.967-.967.967z"/></svg>
+                  GỬI PASC & BL QUA ZALO
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- Cà vẹt -->
+          <div class="section-card" style="border-left:3px solid #ea580c">
+            <div class="section-header">
+              <div class="section-header-title text-orange-700">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11v12H5z"/><path d="M14 17h1a3 3 0 0 0 3-3v-2h2.5a1 1 0 0 1 .87.5l1.63 2.82A1 1 0 0 1 23 16v1h-2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+                Cà vẹt xe
+              </div>
+              <div id="warn-owner-mismatch" class="hidden text-[10px] font-black px-2.5 py-1 rounded-full bg-amber-100 text-amber-700">⚠ Chủ xe không khớp</div>
+            </div>
+            <div class="section-body space-y-2.5">
+              <div class="grid grid-cols-2 gap-2.5">
+                <div><label class="lbl">Chủ sở hữu (trên cà vẹt)</label><input id="f-chuxe" class="inp" oninput="checkOwnerMismatch()"></div>
+                <div><label class="lbl">Địa chỉ ĐK</label><input id="f-diachi" class="inp"></div>
+              </div>
+              <div class="grid grid-cols-4 gap-2.5">
+                <div><label class="lbl">Hãng xe</label><input id="f-hangxe" class="inp text-center"></div>
+                <div><label class="lbl">Loại xe</label><input id="f-loaixe" class="inp text-center"></div>
+                <div><label class="lbl">Số khung</label><input id="f-sokhung" class="inp font-mono text-orange-800"></div>
+                <div><label class="lbl">Số máy</label><input id="f-somay" class="inp font-mono text-orange-800"></div>
               </div>
             </div>
           </div>
 
+          <!-- GPLX + Đăng kiểm -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="section-card" style="border-left:3px solid #059669">
+              <div class="section-header">
+                <div class="section-header-title text-emerald-700">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                  GPLX
+                </div>
+                <div id="warn-gplx" class="hidden text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-100 text-rose-600">Hết hạn</div>
+              </div>
+              <div class="section-body space-y-2">
+                <div class="grid grid-cols-2 gap-2">
+                  <div><label class="lbl">Số GPLX</label><input id="f-sogplx" class="inp font-mono text-emerald-900"></div>
+                  <div><label class="lbl">Hạng</label><input id="f-hanggplx" class="inp text-center font-bold"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div><label class="lbl">Ngày cấp</label><input id="f-capgplx" class="inp" placeholder="DD/MM/YYYY"></div>
+                  <div><label class="lbl">Hết hạn</label><input id="f-hetgplx" class="inp" placeholder="DD/MM/YYYY" oninput="checkWarnings()"></div>
+                </div>
+              </div>
+            </div>
+            <div class="section-card" style="border-left:3px solid #7c3aed">
+              <div class="section-header">
+                <div class="section-header-title text-purple-700">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                  Đăng kiểm
+                </div>
+                <div id="warn-dk" class="hidden text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-100 text-rose-600">Hết hạn</div>
+              </div>
+              <div class="section-body space-y-2">
+                <div><label class="lbl">Số ĐK</label><input id="f-sodk" class="inp font-mono text-purple-900"></div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div><label class="lbl">Ngày cấp</label><input id="f-capdk" class="inp" placeholder="DD/MM/YYYY"></div>
+                  <div><label class="lbl">Hết hạn</label><input id="f-hetdk" class="inp" placeholder="DD/MM/YYYY" oninput="checkWarnings()"></div>
+                </div>
+                <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100">
+                  <div><label class="lbl">Năm SX</label><input id="f-namsanxuat" class="inp text-center" placeholder="2020"></div>
+                  <div><label class="lbl">Số chỗ ngồi</label><input id="f-sochongoi" class="inp text-center" placeholder="5"></div>
+                  <div><label class="lbl">Hiệu xe (ĐK)</label><input id="f-hieuxe" class="inp" placeholder="Vios, CRV..."></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Chủ xe -->
+          <div class="section-card" style="border-left:3px solid #db2777">
+            <div class="section-header">
+              <div class="section-header-title text-pink-700">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Thông tin Chủ xe
+              </div>
+              <div class="flex bg-slate-100 rounded-lg p-0.5 gap-0.5">
+                <button id="owner-tab-personal" onclick="switchOwnerType('personal')" class="owner-tab active">Cá nhân</button>
+                <button id="owner-tab-business" onclick="switchOwnerType('business')" class="owner-tab">Doanh nghiệp</button>
+              </div>
+            </div>
+            <div class="section-body">
+              <!-- Cá nhân -->
+              <div id="owner-panel-personal" class="space-y-2.5">
+                <div class="grid grid-cols-2 gap-2.5">
+                  <div><label class="lbl">Họ và tên</label><input id="f-ownerName" class="inp" oninput="checkOwnerMismatch()"></div>
+                  <div><label class="lbl">Số CCCD</label><input id="f-ownerCccd" class="inp font-mono" placeholder="0123..."></div>
+                </div>
+                <div class="grid grid-cols-2 gap-2.5">
+                  <div><label class="lbl">Ngày sinh</label><input id="f-ownerDob" class="inp" placeholder="DD/MM/YYYY"></div>
+                  <div><label class="lbl">Địa chỉ thường trú</label><input id="f-ownerAddress" class="inp"></div>
+                </div>
+                <label class="flex items-center gap-3 p-2.5 bg-slate-50 border border-dashed border-pink-200 rounded-xl cursor-pointer hover:bg-pink-50 transition-colors">
+                  <svg class="w-5 h-5 text-pink-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+                  <div><span class="text-xs font-bold text-pink-600 block">Quét CCCD bằng AI</span><span class="text-[10px] text-slate-400">Tự động điền họ tên, ngày sinh, địa chỉ</span></div>
+                  <input type="file" accept="image/*" class="hidden" onchange="ocrCccd(event)">
+                </label>
+                <div id="cccd-ocr-status" class="hidden text-center text-[11px] font-bold text-blue-600 animate-pulse">Đang nhận dạng...</div>
+                <div class="grid grid-cols-3 gap-2.5 pt-2 border-t border-slate-100">
+                  <div><label class="lbl">Số tài khoản</label><input id="f-ownerBankNo" class="inp font-mono" placeholder="0123456789..."></div>
+                  <div><label class="lbl">Ngân hàng</label><input id="f-ownerBankName" class="inp" placeholder="Vietcombank..."></div>
+                  <div><label class="lbl">Chủ tài khoản</label><input id="f-ownerBankOwner" class="inp uppercase" placeholder="Tên chủ TK..."></div>
+                </div>
+              </div>
+              <!-- Doanh nghiệp -->
+              <div id="owner-panel-business" class="hidden space-y-2.5">
+                <div class="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label class="lbl">Mã số thuế</label>
+                    <div class="flex gap-1.5">
+                      <input type="text" id="f-ownerMst" class="inp font-mono flex-1" placeholder="0123456789">
+                      <button onclick="lookupMst()" class="shrink-0 px-2.5 py-1.5 bg-blue-600 text-white rounded-lg text-[11px] font-bold hover:bg-blue-700">Tra</button>
+                    </div>
+                    <div id="mst-lookup-status" class="hidden mt-1 text-[10px] font-bold text-blue-600 animate-pulse">Đang tra cứu...</div>
+                  </div>
+                  <div><label class="lbl">Tên công ty</label><input type="text" id="f-ownerCompany" class="inp font-bold" oninput="checkOwnerMismatch()"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-2.5">
+                  <div><label class="lbl">Người đại diện</label><input type="text" id="f-ownerRep" class="inp"></div>
+                  <div><label class="lbl">Địa chỉ công ty</label><input type="text" id="f-ownerCompanyAddress" class="inp"></div>
+                </div>
+                <div><label class="lbl">Email / Website</label><input type="text" id="f-ownerCompanyEmail" class="inp" placeholder="email@company.com"></div>
+                <div class="grid grid-cols-3 gap-2.5 pt-2 border-t border-slate-100">
+                  <div><label class="lbl">Số tài khoản</label><input id="f-ownerBankNo" class="inp font-mono" placeholder="0123456789..."></div>
+                  <div><label class="lbl">Ngân hàng</label><input id="f-ownerBankName" class="inp" placeholder="Vietcombank..."></div>
+                  <div><label class="lbl">Chủ tài khoản</label><input id="f-ownerBankOwner" class="inp uppercase" placeholder="Tên chủ TK..."></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div><!-- /CỘT PHẢI -->
-
-      </div><!-- /GRID -->
-    </div><!-- /tab-info (PREMIUM) -->
+      </div><!-- /GRID 2 CỘT -->
+    </div><!-- /tab-info -->
 
     <!-- TAB: HẠNG MỤC GĐ -->
     <div id="tab-damage" class="m-tab-panel flex-1 overflow-hidden p-5">
@@ -5585,23 +5440,23 @@ function garaSaveNew(g) {
    MODAL TABS
 ═══════════════════════════════════════ */
 function switchModalTab(panelId, tabEl) {
-  // Reset all tabs
-  document.querySelectorAll('.premium-tab').forEach(function(t) {
+  // Reset tất cả tab về trạng thái tối (trong header tối)
+  document.querySelectorAll('.m-tab').forEach(function(t) {
     t.classList.remove('active');
+    t.style.color = 'rgba(255,255,255,.45)';
+    t.style.borderBottomColor = 'transparent';
+    t.style.background = 'transparent';
   });
   document.querySelectorAll('.m-tab-panel').forEach(function(p) {
     p.classList.remove('active');
   });
 
-  // Active current tab
+  // Active tab hiện tại
   if(tabEl) {
     tabEl.classList.add('active');
-  } else {
-    // If no tabEl provided (e.g. initial load), try to find the matching tab
-    const tabs = document.querySelectorAll('.premium-tab');
-    if (panelId === 'info' && tabs[0]) tabs[0].classList.add('active');
-    if (panelId === 'damage' && tabs[1]) tabs[1].classList.add('active');
-    if (panelId === 'images' && tabs[2]) tabs[2].classList.add('active');
+    tabEl.style.color = 'rgba(255,255,255,.9)';
+    tabEl.style.borderBottomColor = '#3b82f6';
+    tabEl.style.background = 'rgba(59,130,246,.15)';
   }
 
   var panel = document.getElementById('tab-' + panelId);
@@ -5617,26 +5472,15 @@ function openRecord(id) {
   window._dmSelected.clear();
   window._dmLastIdx = null;
   // Reset to first tab
-  document.querySelectorAll('.premium-tab').forEach(function(t,i){t.classList.toggle('active',i===0);});
+  document.querySelectorAll('.m-tab').forEach(function(t,i){t.classList.toggle('active',i===0);});
   document.querySelectorAll('.m-tab-panel').forEach(function(p,i){p.classList.toggle('active',i===0);});
 
   document.getElementById('m-bsx').textContent=rec.bsx||'—';
   document.getElementById('m-code').textContent=rec.claimCode||'—';
 
   var sb=document.getElementById('m-status-btn');
-  const statusColors = {
-    1: 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5',
-    2: 'text-blue-400 border-blue-500/20 bg-blue-500/5',
-    3: 'text-amber-400 border-amber-500/20 bg-amber-500/5',
-    4: 'text-cyan-400 border-cyan-500/20 bg-cyan-500/5',
-    5: 'text-indigo-400 border-indigo-500/20 bg-indigo-500/5',
-    6: 'text-purple-400 border-purple-500/20 bg-purple-500/5',
-    7: 'text-rose-400 border-rose-500/20 bg-rose-500/5',
-    8: 'text-slate-400 border-slate-500/20 bg-slate-500/5'
-  };
-  const statusColor = statusColors[rec.step] || statusColors[8];
-  sb.className = 'px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest cursor-pointer hover:scale-105 transition-all flex items-center gap-2 border backdrop-blur-md ' + statusColor;
-  sb.innerHTML = `<span class="w-1.5 h-1.5 rounded-full animate-pulse bg-current"></span><span>${stepLabel(rec.step)}</span><svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>`;
+  sb.className='px-3 py-1.5 rounded-lg text-[11px] font-black uppercase border flex items-center gap-1.5 hover:shadow-md transition-all '+chipClass(rec.step);
+  sb.innerHTML=stepLabel(rec.step)+' <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
 
   var fv=function(id,val){var e=document.getElementById(id);if(e)e.value=val||'';};
   fv('f-code',rec.claimCode); fv('f-bsx',rec.bsx); 
@@ -5695,11 +5539,11 @@ function openRecord(id) {
   // Urgent button
   var ub=document.getElementById('m-urgent-btn');
   if (rec.urgent) {
-    ub.className = 'w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90 bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.5)]';
-    ub.innerHTML = '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>';
+    ub.className = 'px-3 py-1.5 bg-amber-600 text-white border border-amber-600 rounded text-[11px] font-bold flex items-center gap-1.5 hover:bg-amber-700';
+    ub.innerHTML = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Đang gấp';
   } else {
-    ub.className = 'w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90 bg-white/5 text-white/20 hover:text-amber-400 border border-white/5';
-    ub.innerHTML = '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>';
+    ub.className = 'px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded text-[11px] font-bold flex items-center gap-1.5 hover:bg-amber-100';
+    ub.innerHTML = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Xử lý gấp';
   }
 
   renderTasks(rec.tasks||[],id);
@@ -5831,12 +5675,12 @@ function saveModal() {
 ═══════════════════════════════════════ */
 function switchOwnerType(type, silent) {
   var isP=(type==='personal');
-  var btnP=document.getElementById('owner-tab-personal'), btnB=document.getElementById('owner-tab-business');
-  if(btnP) btnP.classList.toggle('active', isP);
-  if(btnB) btnB.classList.toggle('active', !isP);
-  var panelP=document.getElementById('owner-panel-personal'), panelB=document.getElementById('owner-panel-business');
-  if(panelP) panelP.classList.toggle('hidden', !isP);
-  if(panelB) panelB.classList.toggle('hidden', isP);
+  var btnP=document.getElementById('owner-tab-personal'),btnB=document.getElementById('owner-tab-business');
+  if(btnP){btnP.className='owner-tab'+(isP?' active':'');}
+  if(btnB){btnB.className='owner-tab'+(!isP?' active':'');}
+  var panelP=document.getElementById('owner-panel-personal'),panelB=document.getElementById('owner-panel-business');
+  if(panelP)panelP.classList.toggle('hidden',!isP);
+  if(panelB)panelB.classList.toggle('hidden',isP);
   // Store ownerType in hidden field
   var h=document.getElementById('f-ownerType');
   if(!h){h=document.createElement('input');h.type='hidden';h.id='f-ownerType';document.body.appendChild(h);}
