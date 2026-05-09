@@ -3588,6 +3588,10 @@ textarea.inp { resize:vertical; }
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/></svg>
           AI QUÉT
         </button>
+        <button id="m-urgent-btn" onclick="toggleUrgent()"
+          class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-bold transition-all active:scale-95 border">
+          <!-- Content handled by JS -->
+        </button>
         <div class="w-[1px] h-6 bg-slate-700 mx-1"></div>
         <button onclick="closeModal()"
           class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800/50 text-slate-400 border border-slate-700 hover:bg-rose-500 hover:text-white hover:border-rose-400 transition-all active:scale-90">
@@ -3912,6 +3916,13 @@ textarea.inp { resize:vertical; }
                 <div><label class="lbl">Loại xe</label><input id="f-loaixe" class="inp text-center font-bold" placeholder="Vios..."></div>
                 <div><label class="lbl">Số khung</label><input id="f-sokhung" class="inp font-mono text-orange-800 font-bold" placeholder="VIN..."></div>
                 <div><label class="lbl">Số máy</label><input id="f-somay" class="inp font-mono text-orange-800 font-bold" placeholder="Engine No..."></div>
+                <div><label class="lbl">Số chỗ / Năm SX</label>
+                  <div class="flex gap-1">
+                    <input id="f-sochongoi" class="inp text-center px-1" placeholder="Chỗ">
+                    <input id="f-namsanxuat" class="inp text-center px-1" placeholder="Năm">
+                  </div>
+                </div>
+                <div><label class="lbl">Hiệu xe</label><input id="f-hieuxe" class="inp text-center font-bold" placeholder="..."></div>
               </div>
               <div class="grid grid-cols-2 gap-4 pt-3 border-t border-slate-100">
                 <div class="space-y-3">
@@ -3921,6 +3932,7 @@ textarea.inp { resize:vertical; }
                   </div>
                   <div class="grid grid-cols-2 gap-2">
                     <input id="f-sogplx" class="inp font-mono font-bold" placeholder="Số GPLX...">
+                    <input id="f-capgplx" class="hidden">
                     <input id="f-hetgplx" class="inp text-center" placeholder="Hết hạn (DD/MM/YYYY)" oninput="checkWarnings()">
                   </div>
                 </div>
@@ -3931,6 +3943,7 @@ textarea.inp { resize:vertical; }
                   </div>
                   <div class="grid grid-cols-2 gap-2">
                     <input id="f-sodk" class="inp font-mono font-bold" placeholder="Số Đăng kiểm...">
+                    <input id="f-capdk" class="hidden">
                     <input id="f-hetdk" class="inp text-center" placeholder="Hết hạn (DD/MM/YYYY)" oninput="checkWarnings()">
                   </div>
                 </div>
@@ -4225,7 +4238,6 @@ textarea.inp { resize:vertical; }
                 </button>
               </div>
             </div>
-          </div>
           </div>
         </div><!-- /CỘT PHẢI -->
       </div><!-- /GRID -->
@@ -5671,7 +5683,9 @@ function saveModal() {
     ownerName:gv('f-ownerName'),ownerCccd:gv('f-ownerCccd'),ownerDob:gv('f-ownerDob'),ownerAddress:gv('f-ownerAddress'),
     ownerMst:gv('f-ownerMst'),ownerCompany:gv('f-ownerCompany'),ownerRep:gv('f-ownerRep'),
     ownerCompanyAddress:gv('f-ownerCompanyAddress'),ownerCompanyEmail:gv('f-ownerCompanyEmail'),
-    ownerBankNo:gv('f-ownerBankNo'),ownerBankName:gv('f-ownerBankName'),ownerBankOwner:gv('f-ownerBankOwner').toUpperCase(),
+    ownerBankNo:    gv('f-ownerType') === 'business' ? gv('f-ownerBizBankNo')    : gv('f-ownerBankNo'),
+    ownerBankName:  gv('f-ownerType') === 'business' ? gv('f-ownerBizBankName')  : gv('f-ownerBankName'),
+    ownerBankOwner: (gv('f-ownerType') === 'business' ? gv('f-ownerBizBankOwner') : gv('f-ownerBankOwner')).toUpperCase(),
     garaBankNo:    gv('f-garabankno'),
     garaBankName:  gv('f-garabankname'),
     garaBankOwner: gv('f-garabankowner'),
@@ -5749,8 +5763,8 @@ function saveModal() {
 function switchOwnerType(type, silent) {
   var isP=(type==='personal');
   var btnP=document.getElementById('owner-tab-personal'),btnB=document.getElementById('owner-tab-business');
-  if(btnP){btnP.className='owner-tab'+(isP?' active':'');}
-  if(btnB){btnB.className='owner-tab'+(!isP?' active':'');}
+  if(btnP){btnP.classList.toggle('active',isP);}
+  if(btnB){btnB.classList.toggle('active',!isP);}
   var panelP=document.getElementById('owner-panel-personal'),panelB=document.getElementById('owner-panel-business');
   if(panelP)panelP.classList.toggle('hidden',!isP);
   if(panelB)panelB.classList.toggle('hidden',isP);
