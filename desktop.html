@@ -7855,13 +7855,103 @@ function aiImport() {
   };
   
   if(/tử vong|chết người|gấp|vip|nghiêm trọng/i.test(text)) rec.urgent=true;
-  if(rec.garaName) garaSaveNew({name:rec.garaName});
-  
-  db.ref('Workstation/'+rec.id).set(rec).then(function(){
-    document.getElementById('ai-inp').value='';
-    Toast.fire({icon:'success',title:'Đã tiếp nhận hồ sơ!'});
-    goView('manage');
-  }).catch(function(){Toast.fire({icon:'error',title:'Lỗi lưu dữ liệu!'});});
+
+  // ── KIỂM TRA TRÙNG LẶP ──
+  const norm = s => String(s || '').toUpperCase().replace(/[\s.\-]/g, '');
+
+  // 1. Trùng mã hồ sơ (claimCode) - Không check trùng nếu là mã tự sinh bắt đầu bằng HS-
+  const dupCode = rec.claimCode && rec.claimCode.startsWith('HS-') === false
+    ? allData.find(i => i.claimCode && norm(i.claimCode) === norm(rec.claimCode))
+    : null;
+
+  // 2. Trùng biển số + ngày VTT (cùng xe, cùng ngày tai nạn = trùng vụ)
+  const dupBsxDate = rec.bsx && rec.accidentDate
+    ? allData.find(i =>
+        norm(i.bsx) === norm(rec.bsx) &&
+        i.accidentDate &&
+        norm(i.accidentDate.substring(0, 10)) === norm(rec.accidentDate.substring(0, 10))
+      )
+    : null;
+
+  // 3. Trùng BSX đang xử lý (chưa hoàn thành)
+  const dupBsxActive = rec.bsx
+    ? allData.find(i => norm(i.bsx) === norm(rec.bsx) && parseInt(i.step) < 7)
+    : null;
+
+  const duplicates = [];
+  if (dupCode) duplicates.push({ type: 'Trùng mã số vụ tổn thất', item: dupCode, color: '#dc2626', bg: '#fee2e2', border: '#fca5a5' });
+  if (dupBsxDate) duplicates.push({ type: 'Trùng biển số + Ngày VTT', item: dupBsxDate, color: '#b45309', bg: '#fef3c7', border: '#fcd34d' });
+  else if (dupBsxActive) duplicates.push({ type: 'Xe đang có hồ sơ xử lý', item: dupBsxActive, color: '#7c3aed', bg: '#f5f3ff', border: '#c4b5fd' });
+
+  function doSave(newItem) {
+    if(newItem.garaName) garaSaveNew({name:newItem.garaName});
+    db.ref('Workstation/'+newItem.id).set(newItem).then(function(){
+      document.getElementById('ai-inp').value='';
+      Toast.fire({icon:'success',title:'Đã tiếp nhận hồ sơ!'});
+      goView('manage');
+    }).catch(function(){Toast.fire({icon:'error',title:'Lỗi lưu dữ liệu!'});});
+  }
+
+  if (duplicates.length > 0) {
+    // Có trùng lặp — hiển thị cảnh báo
+    const dupRows = duplicates.map(d => `
+      <div style="background:${d.bg}; border:1px solid ${d.border}; border-radius:12px; padding:12px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; gap:10px; text-align:left;">
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+            <span style="font-size:10px; font-weight:800; color:${d.color}; text-transform:uppercase; letter-spacing:0.05em;">⚠️ ${d.type}</span>
+            <span style="font-size:10px; font-weight:700; color:#64748b; background:rgba(100,116,139,0.1); padding:2px 6px; border-radius:4px;">${stepLabel(d.item.step)}</span>
+          </div>
+          <p style="font-size:13px; font-weight:900; color:#1e293b; text-transform:uppercase; margin:0;">${d.item.bsx || '—'}</p>
+          <p style="font-size:11px; color:#64748b; margin:2px 0 0 0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Mã vụ: <b>${d.item.claimCode || '—'}</b> · KH: ${d.item.customer || 'Chưa rõ'}</p>
+          <p style="font-size:10px; color:#94a3b8; margin:1px 0 0 0;">Ngày VTT: ${d.item.accidentDate || '—'}</p>
+        </div>
+        <button onclick="Swal.close(); setTimeout(function(){ openRecord('${d.item.id}'); }, 200)"
+          style="padding:8px 12px; background:white; border:1px solid #cbd5e1; border-radius:8px; font-size:11px; font-weight:800; color:#2563eb; cursor:pointer; white-space:nowrap; transition:all 0.15s;"
+          class="hover:bg-blue-50 active:scale-95">
+          Mở hồ sơ
+        </button>
+      </div>
+    `).join('');
+
+    Swal.fire({
+      title: '<span class="text-[16px] font-black text-slate-800 uppercase tracking-wide flex items-center justify-center gap-2">⚠️ Phát hiện trùng lặp</span>',
+      html: `
+        <div style="text-align:left;" class="mt-2">
+          <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Hệ thống tìm thấy hồ sơ có thể trùng với thông tin AI vừa phân tích:</p>
+          ${dupRows}
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px; margin-top:10px;">
+            <p style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; margin-bottom:4px; letter-spacing:0.05em;">Hồ sơ mới nhập qua AI</p>
+            <p style="font-size:13px; font-weight:900; color:#475569; text-transform:uppercase; margin:0;">${rec.bsx || '—'}</p>
+            <p style="font-size:11px; color:#64748b; margin:2px 0 0 0;">Mã vụ: <b>${rec.claimCode}</b> · KH: ${rec.customer || '—'}</p>
+            <p style="font-size:10px; color:#94a3b8; margin:1px 0 0 0;">Ngày VTT: ${rec.accidentDate || '—'}</p>
+          </div>
+          <p style="font-size:11px; color:#ef4444; margin-top:12px; font-weight:700; text-align:center;">* Bạn có muốn mở xem hồ sơ trùng hay vẫn muốn tạo hồ sơ mới?</p>
+        </div>
+      `,
+      showCancelButton: true,
+      showDenyButton: true,
+      confirmButtonText: 'Đóng lại',
+      denyButtonText: 'Vẫn tạo hồ sơ mới',
+      cancelButtonText: 'Hủy bỏ',
+      confirmButtonColor: '#64748b',
+      denyButtonColor: '#dc2626',
+      cancelButtonColor: '#94a3b8',
+      customClass: { popup: 'rnd w-[550px]' },
+      didOpen: () => {
+        // Ẩn nút cancel (chỉ dùng confirm và deny cho rõ nghĩa)
+        const cancelBtn = Swal.getCancelButton();
+        if (cancelBtn) cancelBtn.style.display = 'none';
+      }
+    }).then(function(res) {
+      if (res.isDenied) {
+        doSave(rec);
+      }
+    });
+    return;
+  }
+
+  // Không trùng — lưu thẳng
+  doSave(rec);
 }
 
 /* ═══════════════════════════════════════
