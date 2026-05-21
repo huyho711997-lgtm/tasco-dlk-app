@@ -4822,7 +4822,17 @@
             }
 
             const users = this.getUsers();
-            const targetUser = users.find(u => u.username === username);
+            const matchedUsers = users.filter(u => u.username === username);
+            let targetUser = null;
+            if (matchedUsers.length > 0) {
+                targetUser = matchedUsers.find(u => u.active !== false && u.password === password);
+                if (!targetUser) {
+                    targetUser = matchedUsers.find(u => u.active !== false);
+                }
+                if (!targetUser) {
+                    targetUser = matchedUsers[0];
+                }
+            }
 
             const showError = (msg) => {
                 errEl.textContent = msg;
@@ -4934,6 +4944,27 @@
                     db.ref('Users').set(defaultAdmin);
                     this._usersList = [{ id: 'u_admin_master', ...defaultAdmin.u_admin_master }];
                 } else {
+                    // Tự động phát hiện và sửa đổi nếu database có các key dạng số do lưu mảng trước đây
+                    let hasNumericKeys = false;
+                    const updates = {};
+                    Object.keys(data).forEach(k => {
+                        const u = data[k];
+                        if (u && /^\d+$/.test(k)) {
+                            hasNumericKeys = true;
+                            const realId = u.id || u.username || ('u' + Date.now());
+                            const userCopy = { ...u };
+                            delete userCopy.id;
+                            if (!data[realId]) {
+                                updates[realId] = userCopy;
+                            }
+                            updates[k] = null;
+                        }
+                    });
+                    if (hasNumericKeys) {
+                        db.ref('Users').update(updates);
+                        return;
+                    }
+
                     // Cập nhật danh sách local để các hàm khác gọi không bị lỗi đồng bộ
                     this._usersList = Object.keys(data).map(k => {
                         const u = data[k];
@@ -5201,7 +5232,7 @@
                     if (!name || !username || !pw) { Swal.showValidationMessage('Vui lòng điền đủ các trường bắt buộc!'); return false; }
                     if (pw.length < 6) { Swal.showValidationMessage('Mật khẩu ít nhất 6 ký tự!'); return false; }
                     const users = Auth.getUsers();
-                    if (users.find(u => u.username === username)) { Swal.showValidationMessage('Tên đăng nhập đã tồn tại!'); return false; }
+                    if (users.some(u => u.username && u.username.toLowerCase() === username.toLowerCase())) { Swal.showValidationMessage('Tên đăng nhập đã tồn tại!'); return false; }
                     return {
                         name, username, pw,
                         position: document.getElementById('au-pos').value.trim(),

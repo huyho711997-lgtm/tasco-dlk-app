@@ -14098,7 +14098,17 @@ const Auth = {
             return;
         }
 
-        const targetUser = this._usersList.find(u => u.username === username);
+        const matchedUsers = this._usersList.filter(u => u.username === username);
+        let targetUser = null;
+        if (matchedUsers.length > 0) {
+            targetUser = matchedUsers.find(u => u.active !== false && u.password === password);
+            if (!targetUser) {
+                targetUser = matchedUsers.find(u => u.active !== false);
+            }
+            if (!targetUser) {
+                targetUser = matchedUsers[0];
+            }
+        }
 
         const showError = (msg) => {
             errEl.querySelector('p').textContent = msg;
@@ -14306,6 +14316,28 @@ const Auth = {
         // Đồng bộ dữ liệu User từ Firebase
         db.ref('Users').on('value', snapshot => {
             const data = snapshot.val() || {};
+            
+            // Tự động phát hiện và sửa đổi nếu database có các key dạng số do lưu mảng trước đây
+            let hasNumericKeys = false;
+            const updates = {};
+            Object.keys(data).forEach(k => {
+                const u = data[k];
+                if (u && /^\d+$/.test(k)) {
+                    hasNumericKeys = true;
+                    const realId = u.id || u.username || ('u' + Date.now());
+                    const userCopy = { ...u };
+                    delete userCopy.id;
+                    if (!data[realId]) {
+                        updates[realId] = userCopy;
+                    }
+                    updates[k] = null;
+                }
+            });
+            if (hasNumericKeys) {
+                db.ref('Users').update(updates);
+                return;
+            }
+
             this._usersList = Object.keys(data).map(k => {
                 const u = data[k];
                 let role = u.role;
@@ -14602,6 +14634,13 @@ const UsersMgmt = {
                 if (!name || !username || (!user && !password)) {
                     Swal.showValidationMessage('Vui lòng nhập đầy đủ thông tin bắt buộc');
                     return false;
+                }
+                if (!user) {
+                    const isDup = UsersMgmt._data.some(u => u.username && u.username.toLowerCase() === username.toLowerCase());
+                    if (isDup) {
+                        Swal.showValidationMessage('Tên đăng nhập đã tồn tại trong hệ thống!');
+                        return false;
+                    }
                 }
                 return { name, username, password, role, active, color, permissions };
             }
