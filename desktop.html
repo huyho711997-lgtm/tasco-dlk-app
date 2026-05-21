@@ -18311,17 +18311,53 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
             .replace(/{{YEAR}}/g, currentYear)
             .replace(/{{SENDER}}/g, senderName);
 
-        // Chuẩn hóa danh sách email (Outlook Web thích dùng dấu ;)
+        // Chuẩn hóa danh sách email
         const normalize = (str) => (str || '').replace(/[,;\s\n]+/g, ';').replace(/^;|;$/g, '');
         const toList = normalize(s.to);
         const ccList = normalize(s.cc);
 
-        // Làm sạch dữ liệu để tránh crash bộ phân tích OWA (Outlook Web App)
-        const cleanBody = body.replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/&/g, 'và');
-        const cleanSubject = subject.replace(/&/g, 'và');
+        // Làm sạch dữ liệu tránh lỗi cú pháp URL OWA (đặc biệt là &, #, ?)
+        const cleanForUrl = (str) => {
+            if (!str) return '';
+            return str
+                .replace(/&/g, 'và')
+                .replace(/#/g, 'số')
+                .replace(/\?/g, '')
+                .replace(/\r\n/g, '\n')
+                .replace(/\r/g, '\n');
+        };
 
-        this._tempMailtoUrl = `mailto:${encodeURIComponent(toList)}?cc=${encodeURIComponent(ccList)}&subject=${encodeURIComponent(cleanSubject)}&body=${encodeURIComponent(cleanBody)}`;
-        this._tempOfficeUrl = `https://outlook.office365.com/?path=/mail/action/compose&to=${encodeURIComponent(toList)}&subject=${encodeURIComponent(cleanSubject)}&body=${encodeURIComponent(cleanBody)}`;
+        const cleanSubject = cleanForUrl(subject);
+        const cleanBody = cleanForUrl(body);
+
+        // Chuẩn hóa danh sách email cho Outlook Web (dùng dấu phẩy phân tách tốt hơn dấu chấm phẩy)
+        const toListForWeb = toList.replace(/;/g, ',');
+
+        // 1. Tạo URL cho Outlook Web App (Office 365 Enterprise) - deeplink compose chuẩn mới
+        let officeUrl = `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(toListForWeb)}&subject=${encodeURIComponent(cleanSubject)}`;
+        const officeBodyParam = `&body=${encodeURIComponent(cleanBody)}`;
+        
+        // Kiểm tra giới hạn độ dài URL (~2048 ký tự). Đặt ngưỡng an toàn là 1800 ký tự
+        if ((officeUrl + officeBodyParam).length > 1800) {
+            const shortBody = `[Nội dung email xin nguồn bồi thường rất dài và đã được hệ thống tự động copy vào Clipboard của bạn. Vui lòng nhấn Ctrl + V (hoặc chuột phải chọn Paste) vào phần soạn thảo này để dán toàn bộ thư].`;
+            officeUrl += `&body=${encodeURIComponent(shortBody)}`;
+            this._isOfficeBodyTruncated = true;
+        } else {
+            officeUrl += officeBodyParam;
+            this._isOfficeBodyTruncated = false;
+        }
+        this._tempOfficeUrl = officeUrl;
+
+        // 2. Tạo URL cho Outlook App (mailto protocol)
+        let mailtoUrl = `mailto:${encodeURIComponent(toList)}?cc=${encodeURIComponent(ccList)}&subject=${encodeURIComponent(cleanSubject)}`;
+        const mailtoBodyParam = `&body=${encodeURIComponent(cleanBody)}`;
+        if ((mailtoUrl + mailtoBodyParam).length > 2000) {
+            const shortBody = `[Nội dung email yêu cầu rất dài và đã được tự động copy vào Clipboard. Vui lòng nhấn Ctrl + V để dán].`;
+            mailtoUrl += `&body=${encodeURIComponent(shortBody)}`;
+        } else {
+            mailtoUrl += mailtoBodyParam;
+        }
+        this._tempMailtoUrl = mailtoUrl;
 
         Swal.fire({
             html: `
@@ -18396,23 +18432,71 @@ Nếu chẩn đoán là "đứt ngón tay cái", bạn tìm thấy "19.1: Mất 
         });
     },
 
+    safeCopyToClipboard(text) {
+        try {
+            // Cách 1: Sử dụng textarea ẩn đồng bộ (hoạt động tốt trên mọi môi trường HTTP, file://, HTTPS và đồng bộ 100%)
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.top = '0';
+            textarea.style.left = '0';
+            textarea.style.width = '2em';
+            textarea.style.height = '2em';
+            textarea.style.padding = '0';
+            textarea.style.border = 'none';
+            textarea.style.outline = 'none';
+            textarea.style.boxShadow = 'none';
+            textarea.style.background = 'transparent';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            const success = document.execCommand('copy');
+            document.body.removeChild(textarea);
+            if (success) return true;
+        } catch (e) {
+            console.error("Fallback clipboard copy failed:", e);
+        }
+
+        // Cách 2: Sử dụng Modern Clipboard API (nếu được hỗ trợ và được cấp quyền)
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            navigator.clipboard.writeText(text).catch(err => console.error("Modern clipboard copy failed:", err));
+            return true;
+        }
+        return false;
+    },
+
     openOutlook(type) {
-        if (type === 'office' && this._tempOfficeUrl) {
-            // Tự động copy nội dung email vào clipboard để dự phòng trường hợp redirect
+        if (type === 'office') {
             const bodyVal = document.getElementById('email-body').value;
-            navigator.clipboard.writeText(bodyVal).then(() => {
-                Toast.fire({ icon: 'success', title: 'Đã copy nội dung soạn thảo dự phòng!' });
-            }).catch(e => console.error(e));
-            window.open(this._tempOfficeUrl, '_blank');
+            // Thực hiện copy đồng bộ trước
+            this.safeCopyToClipboard(bodyVal);
+            
+            if (this._isOfficeBodyTruncated) {
+                Toast.fire({ 
+                    icon: 'success', 
+                    title: 'Đã copy nội dung thư đầy đủ!',
+                    text: 'Nội dung thư quá dài, vui lòng nhấn Ctrl+V để dán vào Outlook Web.'
+                });
+            } else {
+                Toast.fire({ icon: 'success', title: 'Đã tự động copy nội dung soạn thảo dự phòng!' });
+            }
+            
+            if (this._tempOfficeUrl) {
+                window.open(this._tempOfficeUrl, '_blank');
+            }
         } else if (type === 'app' && this._tempMailtoUrl) {
+            const bodyVal = document.getElementById('email-body').value;
+            this.safeCopyToClipboard(bodyVal);
             window.location.href = this._tempMailtoUrl;
         }
     },
 
     copyText(id) {
         const el = document.getElementById(id);
+        if (!el) return;
         el.select();
-        navigator.clipboard.writeText(el.value);
+        this.safeCopyToClipboard(el.value);
         Toast.fire({ icon: 'success', title: 'Đã copy vào bộ nhớ tạm!' });
     },
 
