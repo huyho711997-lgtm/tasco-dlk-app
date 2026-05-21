@@ -4769,7 +4769,13 @@
 
         getCurrentUser() {
             const s = localStorage.getItem(this._KEY_SESSION);
-            return s ? JSON.parse(s) : null;
+            if (!s) return null;
+            const user = JSON.parse(s);
+            if (user && user.role === 'adminbt') user.role = 'admin_bt';
+            if (user && !user.id && user.username) {
+                user.id = user.username.replace(/[\.\#\$\[\]]/g, '_');
+            }
+            return user;
         },
 
         togglePw() {
@@ -4871,24 +4877,30 @@
                 const data = snapshot.val();
                 if (!data) {
                     // Tạo 1 tài khoản Admin mặc định lần đầu tiên đẩy lên Firebase
-                    const defaultAdmin = [{
-                        id: 'u_admin_master',
-                        username: 'admin',
-                        password: 'tasco2026',
-                        name: 'Quản trị viên',
-                        role: 'admin',
-                        phone: '0901234567',
-                        position: 'Giám đốc chi nhánh',
-                        avatar: 'AD',
-                        color: '#7c3aed',
-                        active: true,
-                        createdAt: new Date().toISOString()
-                    }];
+                    const defaultAdmin = {
+                        'u_admin_master': {
+                            username: 'admin',
+                            password: 'tasco2026',
+                            name: 'Quản trị viên',
+                            role: 'admin',
+                            phone: '0901234567',
+                            position: 'Giám đốc chi nhánh',
+                            avatar: 'AD',
+                            color: '#7c3aed',
+                            active: true,
+                            createdAt: new Date().toISOString()
+                        }
+                    };
                     db.ref('Users').set(defaultAdmin);
-                    this._usersList = defaultAdmin;
+                    this._usersList = [{ id: 'u_admin_master', ...defaultAdmin.u_admin_master }];
                 } else {
                     // Cập nhật danh sách local để các hàm khác gọi không bị lỗi đồng bộ
-                    this._usersList = Array.isArray(data) ? data : Object.values(data);
+                    this._usersList = Object.keys(data).map(k => {
+                        const u = data[k];
+                        let role = u.role;
+                        if (role === 'adminbt') role = 'admin_bt';
+                        return { id: k, ...u, role };
+                    });
                 }
             });
 
@@ -17053,7 +17065,12 @@ QUAN TRỌNG:
             const user = Auth.getCurrentUser();
             if (!user) return;
 
-            db.ref(`Users/${user.id}/myCloud`).on('value', snap => {
+            let userId = user.id || user.username;
+            if (!userId) return;
+            userId = userId.replace(/[\.\#\$\[\]]/g, '_');
+            this.userId = userId;
+
+            db.ref(`Users/${this.userId}/myCloud`).on('value', snap => {
                 const data = snap.val() || {};
                 this.items = Object.keys(data).map(k => ({ key: k, ...data[k] })).sort((a,b) => b.timestamp - a.timestamp);
                 
@@ -17332,7 +17349,7 @@ QUAN TRỌNG:
                             if (!finalUrl.toLowerCase().endsWith('.pdf')) finalUrl += '.pdf';
                         }
 
-                        await db.ref(`Users/${user.id}/myCloud/${newKey}`).set({
+                        await db.ref(`Users/${this.userId}/myCloud/${newKey}`).set({
                             url: finalUrl,
                             fileName: file.name,
                             fileType: isPdfUpload ? 'pdf' : (file.type || 'other'),
@@ -17441,7 +17458,7 @@ QUAN TRỌNG:
                         const ext = isVideo ? (processedFile.name.endsWith('.mp4') ? 'mp4' : 'webm') : 'jpg';
                         const prefix = isVideo ? 'TascoVid' : 'TascoCloud';
                         const newKey = 'file_' + Date.now() + '_' + i + '_' + Math.random().toString(36).substr(2,5);
-                        await db.ref(`Users/${user.id}/myCloud/${newKey}`).set({
+                        await db.ref(`Users/${this.userId}/myCloud/${newKey}`).set({
                             url: data.secure_url,
                             fileName: `${prefix}_${moment().format('YYMMDD_HHmmss')}_${i+1}.${ext}`,
                             fileType: isVideo ? processedFile.type : 'image/jpeg',
@@ -17526,7 +17543,7 @@ QUAN TRỌNG:
                     const updates = {};
                     keysToDelete.forEach(key => updates[key] = null);
                     
-                    db.ref(`Users/${user.id}/myCloud`).update(updates).then(() => {
+                    db.ref(`Users/${this.userId}/myCloud`).update(updates).then(() => {
                         Swal.close();
                         Toast.fire({ icon: 'success', title: 'Đã xóa file sạch sẽ khỏi hệ thống!' });
                         this._selectMode = false;

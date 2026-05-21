@@ -13178,11 +13178,16 @@ const MyCloud = {
         if (this._isInit) return;
         
         const user = Auth.getCurrentUser();
-        const userId = user ? (user.id || user.username) : null; 
+        let userId = user ? (user.id || user.username) : null; 
 
         if (!userId) {
             document.getElementById('desk-mycloud-count').textContent = 'Vui lòng đăng nhập';
             return;
+        }
+
+        // Đảm bảo không chứa ký tự cấm của Firebase
+        if (userId.includes('.') || userId.includes('#') || userId.includes('$') || userId.includes('[') || userId.includes(']')) {
+            userId = userId.replace(/[\.\#\$\[\]]/g, '_');
         }
 
         const viewCloud = document.getElementById('view-cloud');
@@ -14046,7 +14051,13 @@ const Auth = {
 
     getCurrentUser() {
         const s = localStorage.getItem(this._KEY_SESSION);
-        return s ? JSON.parse(s) : null;
+        if (!s) return null;
+        const user = JSON.parse(s);
+        if (user && user.role === 'adminbt') user.role = 'admin_bt';
+        if (user && !user.id && user.username) {
+            user.id = user.username.replace(/[\.\#\$\[\]]/g, '_');
+        }
+        return user;
     },
 
     togglePw() {
@@ -14207,10 +14218,13 @@ const Auth = {
     init() {
         // Đồng bộ dữ liệu User từ Firebase
         db.ref('Users').on('value', snapshot => {
-            const data = snapshot.val();
-            if (data) {
-                this._usersList = Array.isArray(data) ? data : Object.values(data);
-            }
+            const data = snapshot.val() || {};
+            this._usersList = Object.keys(data).map(k => {
+                const u = data[k];
+                let role = u.role;
+                if (role === 'adminbt') role = 'admin_bt';
+                return { id: k, ...u, role };
+            });
         });
 
         // Kiểm tra xem đã đăng nhập chưa
