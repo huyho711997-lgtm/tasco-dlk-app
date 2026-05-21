@@ -1616,6 +1616,9 @@ textarea.inp { resize:vertical; }
         ?
       </div>
       <div class="w-px h-8 bg-slate-200 mx-1"></div>
+      <button onclick="Auth.changePasswordModal()" class="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 flex items-center justify-center hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm" title="Đổi mật khẩu">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </button>
       <button onclick="Auth.logout()" class="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 flex items-center justify-center hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-all shadow-sm" title="Đăng xuất">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
@@ -14095,26 +14098,110 @@ const Auth = {
             return;
         }
 
-        const user = this._usersList.find(u => u.username === username && u.password === password && u.active);
+        const targetUser = this._usersList.find(u => u.username === username);
 
-        if (!user) {
-            errEl.querySelector('p').textContent = 'Tên đăng nhập hoặc mật khẩu không đúng!';
+        const showError = (msg) => {
+            errEl.querySelector('p').textContent = msg;
             errEl.classList.remove('hidden');
             btn.disabled = false;
             btn.innerHTML = 'Đăng nhập <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>';
-            
             const card = document.querySelector('.login-card');
-            card.style.transform = 'translateX(-8px)';
-            setTimeout(() => card.style.transform = '', 100);
+            if (card) {
+                card.style.transform = 'translateX(-8px)';
+                setTimeout(() => card.style.transform = '', 100);
+            }
+        };
+
+        if (!targetUser) {
+            showError('Tên đăng nhập không tồn tại!');
             return;
         }
 
-        const session = { ...user, loginAt: new Date().toISOString() };
+        if (targetUser.active === false) {
+            showError('Tài khoản này đã bị khóa. Vui lòng liên hệ Admin!');
+            return;
+        }
+
+        if (targetUser.password !== password) {
+            const failedCount = (targetUser.failedLogins || 0) + 1;
+            try {
+                if (failedCount >= 5) {
+                    await db.ref('Users/' + targetUser.id).update({ active: false, failedLogins: 0 });
+                    showError('Tài khoản đã bị khóa do nhập sai mật khẩu quá 5 lần!');
+                } else {
+                    await db.ref('Users/' + targetUser.id + '/failedLogins').set(failedCount);
+                    showError(`Mật khẩu không chính xác! (Nhập sai ${failedCount}/5 lần)`);
+                }
+            } catch (err) {
+                showError('Mật khẩu không chính xác!');
+            }
+            return;
+        }
+
+        // Đăng nhập thành công
+        if (targetUser.failedLogins) {
+            try {
+                await db.ref('Users/' + targetUser.id + '/failedLogins').set(0);
+            } catch (err) {}
+        }
+
+        const session = { ...targetUser, loginAt: new Date().toISOString() };
         delete session.password;
         localStorage.setItem(this._KEY_SESSION, JSON.stringify(session));
 
         // Tải lại trang để áp dụng session mới sạch sẽ và xóa toàn bộ state cũ
         location.reload();
+    },
+
+    async changePasswordModal() {
+        const user = this.getCurrentUser();
+        if (!user) return;
+
+        const { value: formValues } = await Swal.fire({
+            title: '<span style="font-size:15px;font-weight:900;">Đổi mật khẩu</span>',
+            html: `
+                <div style="text-align:left;display:flex;flex-direction:column;gap:12px;margin-top:8px;">
+                    <div>
+                        <label style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Mật khẩu hiện tại</label>
+                        <input id="cp-old" type="password" class="w-full px-4 py-2.5 mt-1 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:border-blue-600 outline-none transition-all placeholder:text-slate-400" placeholder="Nhập mật khẩu hiện tại">
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Mật khẩu mới</label>
+                        <input id="cp-new" type="password" class="w-full px-4 py-2.5 mt-1 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:border-blue-600 outline-none transition-all placeholder:text-slate-400" placeholder="Tối thiểu 6 ký tự">
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Xác nhận mật khẩu mới</label>
+                        <input id="cp-confirm" type="password" class="w-full px-4 py-2.5 mt-1 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:border-blue-600 outline-none transition-all placeholder:text-slate-400" placeholder="Nhập lại mật khẩu mới">
+                    </div>
+                </div>`,
+            showCancelButton: true,
+            confirmButtonText: 'Đổi mật khẩu',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#2563eb',
+            customClass: { popup: 'rnd' },
+            preConfirm: () => {
+                const oldPw = document.getElementById('cp-old').value;
+                const newPw = document.getElementById('cp-new').value;
+                const confirmPw = document.getElementById('cp-confirm').value;
+                const users = this.getUsers();
+                const u = users.find(x => x.id === user.id);
+                
+                if (!u) { Swal.showValidationMessage('Không tìm thấy tài khoản hợp lệ!'); return false; }
+                if (u.password !== oldPw) { Swal.showValidationMessage('Mật khẩu hiện tại không đúng!'); return false; }
+                if (newPw.length < 6) { Swal.showValidationMessage('Mật khẩu mới phải từ 6 ký tự!'); return false; }
+                if (newPw !== confirmPw) { Swal.showValidationMessage('Mật khẩu xác nhận không khớp!'); return false; }
+                return { newPw };
+            }
+        });
+
+        if (formValues) {
+            try {
+                await db.ref('Users/' + user.id + '/password').set(formValues.newPw);
+                Toast.fire({ icon: 'success', title: 'Đổi mật khẩu thành công!' });
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không thể đổi mật khẩu: ' + err.message, customClass: { popup: 'rnd' } });
+            }
+        }
     },
 
     _applyUserUI(user) {

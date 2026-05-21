@@ -4763,8 +4763,14 @@
         },
 
         saveUsers(users) {
-            // Lưu trực tiếp mảng users lên Firebase thay vì localStorage
-            db.ref('Users').set(users);
+            const updates = {};
+            users.forEach(u => {
+                const userId = u.id || u.username;
+                const userCopy = { ...u };
+                delete userCopy.id;
+                updates[userId] = userCopy;
+            });
+            db.ref('Users').set(updates);
         },
 
         getCurrentUser() {
@@ -4816,21 +4822,55 @@
             }
 
             const users = this.getUsers();
-            const user = users.find(u => u.username === username && u.password === password && u.active);
+            const targetUser = users.find(u => u.username === username);
 
-            if (!user) {
-                errEl.textContent = 'Tên đăng nhập hoặc mật khẩu không đúng!';
+            const showError = (msg) => {
+                errEl.textContent = msg;
                 errEl.classList.remove('hidden');
                 btn.disabled = false;
                 btn.textContent = 'Đăng nhập';
                 const card = document.querySelector('.login-card');
-                card.style.animation = 'none';
-                card.style.transform = 'translateX(-8px)';
-                setTimeout(() => { card.style.transition = 'transform 0.4s'; card.style.transform = ''; }, 50);
+                if (card) {
+                    card.style.animation = 'none';
+                    card.style.transform = 'translateX(-8px)';
+                    setTimeout(() => { card.style.transition = 'transform 0.4s'; card.style.transform = ''; }, 50);
+                }
+            };
+
+            if (!targetUser) {
+                showError('Tên đăng nhập không tồn tại!');
                 return;
             }
 
-            const session = { ...user, loginAt: new Date().toISOString() };
+            if (targetUser.active === false) {
+                showError('Tài khoản này đã bị khóa. Vui lòng liên hệ Admin!');
+                return;
+            }
+
+            if (targetUser.password !== password) {
+                const failedCount = (targetUser.failedLogins || 0) + 1;
+                try {
+                    if (failedCount >= 5) {
+                        await db.ref('Users/' + targetUser.id).update({ active: false, failedLogins: 0 });
+                        showError('Tài khoản đã bị khóa do nhập sai mật khẩu quá 5 lần!');
+                    } else {
+                        await db.ref('Users/' + targetUser.id + '/failedLogins').set(failedCount);
+                        showError(`Mật khẩu không chính xác! (Nhập sai ${failedCount}/5 lần)`);
+                    }
+                } catch (err) {
+                    showError('Mật khẩu không chính xác!');
+                }
+                return;
+            }
+
+            // Đăng nhập thành công
+            if (targetUser.failedLogins) {
+                try {
+                    await db.ref('Users/' + targetUser.id + '/failedLogins').set(0);
+                } catch (err) {}
+            }
+
+            const session = { ...targetUser, loginAt: new Date().toISOString() };
             delete session.password;
             localStorage.setItem(this._KEY_SESSION, JSON.stringify(session));
             this._sessionStart = Date.now();
@@ -5054,6 +5094,7 @@
                     const confirmPw = document.getElementById('cp-confirm').value;
                     const users = Auth.getUsers();
                     const u = users.find(x => x.id === user.id);
+                    if (!u) { Swal.showValidationMessage('Không tìm thấy thông tin tài khoản!'); return false; }
                     if (u.password !== oldPw) { Swal.showValidationMessage('Mật khẩu hiện tại không đúng!'); return false; }
                     if (newPw.length < 6) { Swal.showValidationMessage('Mật khẩu mới phải từ 6 ký tự!'); return false; }
                     if (newPw !== confirmPw) { Swal.showValidationMessage('Mật khẩu xác nhận không khớp!'); return false; }
@@ -5062,12 +5103,11 @@
             });
 
             if (formValues) {
-                const users = Auth.getUsers();
-                const idx = users.findIndex(u => u.id === user.id);
-                if (idx >= 0) {
-                    users[idx].password = formValues.newPw;
-                    Auth.saveUsers(users);
+                try {
+                    await db.ref('Users/' + user.id + '/password').set(formValues.newPw);
                     Toast.fire({ icon: 'success', title: 'Đổi mật khẩu thành công!' });
+                } catch (err) {
+                    Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không thể đổi mật khẩu: ' + err.message, customClass: { popup: 'custom-rounded' } });
                 }
             }
         }
