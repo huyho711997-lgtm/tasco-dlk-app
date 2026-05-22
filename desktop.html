@@ -1896,9 +1896,9 @@ textarea.inp { resize:vertical; }
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
               <input id="mn-search-inp" oninput="doSearch()" type="text"
                 placeholder="Tìm biển số, mã hồ sơ, khách hàng, gara..."
-                class="mn-search-inp" style="padding-right: 36px;">
-              <button id="mn-search-clear" onclick="clearSearch()" class="hidden text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-all focus:outline-none" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 26px; height: 26px;">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                class="mn-search-inp" style="padding-right: 44px;">
+              <button id="mn-search-clear" onclick="clearSearch()" class="text-white/70 hover:text-white hover:bg-white/20 transition-all focus:outline-none" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); border: none; background: rgba(255, 255, 255, 0.12); cursor: pointer; display: none; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%;">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
               </button>
             </div>
             <div class="mn-divider"></div>
@@ -1989,9 +1989,9 @@ textarea.inp { resize:vertical; }
           <div class="mn-toolbar">
             <div class="mn-search-wrap">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <input id="hc-search-inp" oninput="HumanClaims.renderTable()" type="text" placeholder="Tìm tên, GCN, bệnh viện..." class="mn-search-inp focus:!border-pink-400 focus:!ring-pink-500/20" style="padding-right: 36px;">
-              <button id="hc-search-clear" onclick="HumanClaims.clearSearch()" class="hidden text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-all focus:outline-none" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 26px; height: 26px;">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+              <input id="hc-search-inp" oninput="HumanClaims.renderTable()" type="text" placeholder="Tìm tên, GCN, bệnh viện..." class="mn-search-inp focus:!border-pink-400 focus:!ring-pink-500/20" style="padding-right: 44px;">
+              <button id="hc-search-clear" onclick="HumanClaims.clearSearch()" class="text-white/70 hover:text-white hover:bg-white/20 transition-all focus:outline-none" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); border: none; background: rgba(255, 255, 255, 0.12); cursor: pointer; display: none; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%;">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
               </button>
             </div>
             <div class="mn-divider"></div>
@@ -5058,8 +5058,7 @@ function doSearch() {
 
   var btnClear = document.getElementById('mn-search-clear');
   if (btnClear) {
-    if (q) btnClear.classList.remove('hidden');
-    else btnClear.classList.add('hidden');
+    btnClear.style.display = q ? 'flex' : 'none';
   }
 
   var steps = Array.from(fpActive);
@@ -16143,8 +16142,7 @@ const HumanClaims = {
 
         const btnClear = document.getElementById('hc-search-clear');
         if (btnClear) {
-            if (q) btnClear.classList.remove('hidden');
-            else btnClear.classList.add('hidden');
+            btnClear.style.display = q ? 'flex' : 'none';
         }
         
         let filtered = (this._data || []).filter(r => {
