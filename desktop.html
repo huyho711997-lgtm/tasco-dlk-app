@@ -2150,6 +2150,13 @@ textarea.inp { resize:vertical; }
               Lịch sử tổn thất
               <span id="hc-tab-history-badge" class="bg-rose-500 text-white px-1.5 py-0.5 rounded-full text-[8px] font-black hidden shadow-sm ring-1 ring-white">0</span>
             </button>
+            <button id="hc-btn-tab-logs" onclick="HumanClaims.switchTab('logs')" 
+                    class="flex items-center gap-2 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300
+                           text-slate-500 hover:text-slate-700 hover:bg-white/50">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+              Lịch sử chỉnh sửa
+              <span id="hc-tab-logs-badge" class="bg-indigo-500 text-white px-1.5 py-0.5 rounded-full text-[8px] font-black hidden shadow-sm ring-1 ring-white">0</span>
+            </button>
           </div>
         </div>
 
@@ -2458,6 +2465,30 @@ textarea.inp { resize:vertical; }
                 <div class="flex flex-col items-center justify-center py-20 text-slate-300">
                   <svg class="w-16 h-16 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                   <p class="text-sm font-bold">Chưa có dữ liệu lịch sử</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: LOGS (Audit History log) -->
+          <div id="hc-tab-logs" class="hidden animate__animated animate__fadeIn animate__faster">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
+              <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-black text-slate-800">Lịch sử tác động hồ sơ</h3>
+                  <p class="text-xs font-bold text-slate-400 mt-0.5">Nhật ký chi tiết các lần tạo mới, chỉnh sửa thông tin hoặc chuyển trạng thái</p>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="text-right">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Số lần sửa</p>
+                    <p id="hc-logs-total-count" class="text-xl font-black text-slate-700">0 lần</p>
+                  </div>
+                </div>
+              </div>
+              <div id="hc-logs-full-list" class="p-6 space-y-4 max-h-[500px] overflow-y-auto custom-scrollbar">
+                <div class="flex flex-col items-center justify-center py-20 text-slate-300">
+                  <svg class="w-16 h-16 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <p class="text-sm font-bold">Chưa có nhật ký chỉnh sửa</p>
                 </div>
               </div>
             </div>
@@ -16175,9 +16206,15 @@ const HumanClaims = {
             if (rec) {
                 this._fillForm(rec);
                 document.getElementById('hc-m-title').textContent = rec.claimNo || 'Chi tiết hồ sơ';
+                
+                // Cập nhật phụ đề Ngày tạo / Người tạo
+                const createdDateStr = rec.createdAt ? moment(rec.createdAt).format('DD/MM/YYYY HH:mm') : 'N/A';
+                const updatedDateStr = rec.updatedAt ? moment(rec.updatedAt).format('DD/MM/YYYY HH:mm') : 'N/A';
+                document.getElementById('hc-m-subtitle').innerHTML = `Tạo bởi <span class="text-slate-700 font-bold">${rec.createdBy || 'Không rõ'}</span> vào <span class="text-slate-700 font-bold">${createdDateStr}</span> | Cập nhật cuối: <span class="text-slate-700 font-bold">${updatedDateStr}</span>`;
             }
         } else {
             document.getElementById('hc-m-title').textContent = 'Thêm hồ sơ mới';
+            document.getElementById('hc-m-subtitle').textContent = 'Điền thông tin chi tiết bên dưới';
             this._updateUIStatus('new');
             // Mặc định cho hồ sơ mới
             document.getElementById('hc-treatmentMethod').value = 'Tây y';
@@ -16192,7 +16229,7 @@ const HumanClaims = {
     },
 
     switchTab(tabId) {
-        const tabs = ['form', 'history'];
+        const tabs = ['form', 'history', 'logs'];
         tabs.forEach(t => {
             const btn = document.getElementById(`hc-btn-tab-${t}`);
             const content = document.getElementById(`hc-tab-${t}`);
@@ -16351,6 +16388,70 @@ const HumanClaims = {
                 </div>
             </div>
         `).join('');
+    },
+
+    renderEditLogs(logs) {
+        const listEl = document.getElementById('hc-logs-full-list');
+        const countEl = document.getElementById('hc-logs-total-count');
+        const badgeEl = document.getElementById('hc-tab-logs-badge');
+
+        if (!listEl) return;
+
+        if (!logs || logs.length === 0) {
+            listEl.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-20 text-slate-300">
+                  <svg class="w-16 h-16 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <p class="text-sm font-bold">Chưa có nhật ký chỉnh sửa</p>
+                </div>`;
+            countEl.textContent = '0 lần';
+            badgeEl.classList.add('hidden');
+            return;
+        }
+
+        badgeEl.textContent = logs.length;
+        badgeEl.classList.remove('hidden');
+        countEl.textContent = `${logs.length} lần`;
+
+        let html = '<div class="relative pl-2 border-l border-slate-200 space-y-6 ml-4 py-2">';
+        const sortedLogs = [...logs].reverse();
+        sortedLogs.forEach(entry => {
+            const timeStr = entry.timestamp ? moment(entry.timestamp).format('DD/MM/YYYY HH:mm:ss') : 'N/A';
+            let changesHtml = '';
+            if (entry.changes && entry.changes.length > 0) {
+                changesHtml = '<ul class="list-disc pl-4 mt-2 space-y-1 text-slate-500 text-[11px] font-medium">';
+                entry.changes.forEach(ch => {
+                    changesHtml += `<li>${ch}</li>`;
+                });
+                changesHtml += '</ul>';
+            }
+            
+            let dotColor = 'bg-slate-400';
+            if (entry.action.includes('Tạo')) dotColor = 'bg-emerald-500 ring-4 ring-emerald-100';
+            else if (entry.action.includes('trạng thái')) dotColor = 'bg-amber-500 ring-4 ring-amber-100';
+            else if (entry.action.includes('Cập nhật')) dotColor = 'bg-indigo-500 ring-4 ring-indigo-100';
+
+            html += `
+                <div class="relative pl-8">
+                  <div class="absolute -left-[37px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm ${dotColor}"></div>
+                  
+                  <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 shadow-sm hover:border-slate-300 transition-colors">
+                    <div class="flex items-center justify-between mb-1.5">
+                      <span class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        ${entry.user || 'Unknown'}
+                      </span>
+                      <span class="text-[10px] font-mono font-bold text-slate-400">${timeStr}</span>
+                    </div>
+                    <div class="text-[11px] font-black text-slate-600 flex items-center gap-1.5">
+                      <span class="px-2 py-0.5 bg-slate-200/60 rounded text-[9px] font-bold text-slate-700">${entry.action}</span>
+                    </div>
+                    ${changesHtml}
+                  </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        listEl.innerHTML = html;
     },
 
     showHistoryDetail(id) {
@@ -16591,6 +16692,7 @@ const HumanClaims = {
 
         this._tempImages = [];
         this.renderImages([]);
+        this.renderEditLogs([]);
     },
 
     /* ── Helper xử lý Ngày tháng Thông minh ── */
@@ -16700,6 +16802,7 @@ const HumanClaims = {
 
         // Nạp lịch sử tổn thất nếu có GCN
         if (r.gcn) this.renderInsuredHistory(r.gcn);
+        this.renderEditLogs(r.logs || []);
     },
 
     /* ── VietQR Payment ── */
@@ -16965,14 +17068,40 @@ const HumanClaims = {
             showCancelButton: true, confirmButtonText: 'Xác nhận', cancelButtonText: 'Hủy', customClass: {popup: 'rnd'}
         }).then(r => {
             if (r.isConfirmed) {
-                db.ref('HumanClaims/' + this._currentId).update({ status: newStatus, updatedAt: new Date().toISOString() }).then(() => {
+                const rec = this._data.find(r => r.id === this._currentId);
+                let updatedLogs = [];
+                if (rec) {
+                    const oldStatusLabel = this.STATUS_LABELS[rec.status || 'new']?.text || rec.status || 'Không rõ';
+                    const newStatusLabel = stObj.text || newStatus || 'Không rõ';
+                    const user = Auth.getCurrentUser();
+                    const logEntry = {
+                        timestamp: new Date().toISOString(),
+                        user: user ? user.name : 'Unknown',
+                        action: 'Chuyển trạng thái',
+                        changes: [`Chuyển trạng thái từ '<span class="text-rose-600 font-semibold">${oldStatusLabel}</span>' sang '<span class="text-emerald-600 font-semibold">${newStatusLabel}</span>'`]
+                    };
+                    updatedLogs = [...(rec.logs || []), logEntry];
+                }
+
+                const updatePayload = {
+                    status: newStatus,
+                    updatedAt: new Date().toISOString()
+                };
+                if (updatedLogs.length > 0) {
+                    updatePayload.logs = updatedLogs;
+                }
+
+                db.ref('HumanClaims/' + this._currentId).update(updatePayload).then(() => {
                     Toast.fire({icon:'success', title:'Đã chuyển trạng thái!'});
                     this._updateUIStatus(newStatus);
                     
                     // Cập nhật local data và render lại ảnh để ẩn/hiện nút xóa đồng bộ
-                    const rec = this._data.find(r => r.id === this._currentId);
                     if (rec) {
                         rec.status = newStatus;
+                        if (updatedLogs.length > 0) {
+                            rec.logs = updatedLogs;
+                            this.renderEditLogs(updatedLogs);
+                        }
                         this.renderImages(rec.images || []);
                     }
                 });
@@ -17002,6 +17131,9 @@ const HumanClaims = {
         const victimName = getVal('hc-victimName');
         if (!victimName) { Toast.fire({icon:'warning', title:'Vui lòng nhập Tên người được bảo hiểm!'}); return; }
 
+        const user = Auth.getCurrentUser();
+        const oldRec = this._currentId ? (this._data || []).find(r => r.id === this._currentId) : null;
+
         const payload = {
             claimNo: getVal('hc-claimNo'), // LƯU DỮ LIỆU SỐ HSBT VÀO PAYLOAD
             contractNo: getVal('hc-contractNo'), 
@@ -17026,12 +17158,120 @@ const HumanClaims = {
             payeeIssueDate: getVal('hc-payeeIssueDate'), payeeIssuePlace: getVal('hc-payeeIssuePlace'),
             payeeBankNo: getVal('hc-payeeBankNo'), payeeBankName: getVal('hc-payeeBankName'),
             totalAmount: parseInt(document.getElementById('hc-calc-total').textContent.replace(/[^\d]/g, '')) || 0,
-            images: this._currentId ? (this._data.find(r => r.id === this._currentId)?.images || []) : (this._tempImages || []),
+            images: this._currentId ? (oldRec?.images || []) : (this._tempImages || []),
             treatmentMethod: getVal('hc-treatmentMethod'),
             updatedAt: new Date().toISOString()
         };
 
-        const user = Auth.getCurrentUser();
+        // Gán fallback cho Ngày tạo / Người tạo đối với hồ sơ cũ
+        if (this._currentId && oldRec) {
+            payload.createdAt = oldRec.createdAt || new Date().toISOString();
+            payload.createdBy = oldRec.createdBy || (user ? user.name : 'Unknown');
+        }
+
+        // Thực hiện so sánh các trường để ghi logs thay đổi
+        const FIELD_LABELS = {
+            claimNo: 'Số HSBT',
+            contractNo: 'Số HĐ gốc',
+            contractDate: 'Ngày hợp đồng',
+            companyName: 'Tên đơn vị tham gia BH',
+            companyAddress: 'Địa chỉ đơn vị tham gia BH',
+            gcn: 'Số GCN',
+            insType: 'Loại hình BH',
+            feeStatus: 'Tình trạng phí',
+            premium: 'Mức phí',
+            feeDate: 'Ngày nộp phí',
+            effFrom: 'Hiệu lực từ',
+            effTo: 'Hiệu lực đến',
+            limitA: 'Mức trách nhiệm Loại A',
+            limitB: 'Mức trách nhiệm Loại B',
+            limitC: 'Mức trách nhiệm Loại C',
+            limitD: 'Mức trách nhiệm Loại D',
+            victimName: 'Người được bảo hiểm',
+            victimAge: 'Tuổi',
+            lossType: 'Loại tổn thất',
+            treatmentMethod: 'Phương thức điều trị',
+            victimAddress: 'Địa chỉ người được BH',
+            accDate: 'Ngày bị tai nạn',
+            inDate: 'Ngày nhập viện',
+            outDate: 'Ngày ra viện',
+            days: 'Số ngày nằm viện',
+            accLocation: 'Địa điểm bị tai nạn',
+            hospitalName: 'Nơi điều trị',
+            accCause: 'Nguyên nhân tai nạn',
+            injuryDesc: 'Chẩn đoán / Thương tật',
+            injuryCode: 'Mục theo Bảng TLTT',
+            injuryRange: 'Tỷ lệ quy định',
+            injuryRealPct: 'Tỷ lệ thực tế',
+            payeeName: 'Họ tên người nhận',
+            payeeRelation: 'Quan hệ với người được BH',
+            payeeCccd: 'Số CCCD',
+            payeeIssueDate: 'Ngày cấp CCCD',
+            payeeIssuePlace: 'Nơi cấp CCCD',
+            payeeBankNo: 'Số tài khoản ngân hàng',
+            payeeBankName: 'Ngân hàng',
+            totalAmount: 'Tổng số tiền chi trả'
+        };
+
+        const changes = [];
+        if (this._currentId && oldRec) {
+            for (let key in FIELD_LABELS) {
+                let oldVal = oldRec[key];
+                let newVal = payload[key];
+                
+                if (oldVal === undefined || oldVal === null) oldVal = '';
+                if (newVal === undefined || newVal === null) newVal = '';
+                
+                const isAmountKey = ['premium', 'limitA', 'limitB', 'limitC', 'limitD', 'totalAmount'].includes(key);
+                
+                if (String(oldVal).trim() !== String(newVal).trim()) {
+                    let displayOld = oldVal;
+                    let displayNew = newVal;
+                    
+                    if (isAmountKey) {
+                        displayOld = oldVal ? Number(oldVal).toLocaleString('vi-VN') + ' đ' : '0 đ';
+                        displayNew = newVal ? Number(newVal).toLocaleString('vi-VN') + ' đ' : '0 đ';
+                    } else if (key === 'injuryRealPct') {
+                        displayOld = oldVal + '%';
+                        displayNew = newVal + '%';
+                    }
+                    
+                    changes.push(`Thay đổi <b>${FIELD_LABELS[key]}</b> từ '<span class="text-rose-600 font-semibold">${displayOld || "trống"}</span>' thành '<span class="text-emerald-600 font-semibold">${displayNew || "trống"}</span>'`);
+                }
+            }
+            
+            const oldImgs = oldRec.images || [];
+            const newImgs = payload.images || [];
+            if (oldImgs.length !== newImgs.length) {
+                changes.push(`Cập nhật danh sách ảnh chứng từ: từ <b>${oldImgs.length} ảnh</b> thành <b>${newImgs.length} ảnh</b>`);
+            }
+        }
+
+        // Tạo mảng logs mới
+        if (this._currentId) {
+            const oldLogs = oldRec ? (oldRec.logs || []) : [];
+            if (changes.length > 0) {
+                const logEntry = {
+                    timestamp: new Date().toISOString(),
+                    user: user ? user.name : 'Unknown',
+                    action: 'Cập nhật hồ sơ',
+                    changes: changes
+                };
+                payload.logs = [...oldLogs, logEntry];
+            } else {
+                payload.logs = oldLogs;
+            }
+        } else {
+            payload.logs = [
+                {
+                    timestamp: new Date().toISOString(),
+                    user: user ? user.name : 'Unknown',
+                    action: 'Tạo mới hồ sơ',
+                    changes: ['Khởi tạo hồ sơ bồi thường con người mới']
+                }
+            ];
+        }
+
         const saveStatus = document.getElementById('hc-m-save-status');
         saveStatus.textContent = 'Đang lưu...';
 
@@ -17042,16 +17282,26 @@ const HumanClaims = {
                 payload.status = 'new';
                 payload.createdAt = new Date().toISOString();
                 payload.createdBy = user ? user.name : 'Unknown';
+                // Đảm bảo log đầu tiên chuẩn
+                payload.logs[0].timestamp = payload.createdAt;
+                payload.logs[0].user = payload.createdBy;
                 
-                // Tạo ID mới trước thay vì lấy từ kết quả của hàm set()
                 const newId = Date.now().toString();
                 await db.ref('HumanClaims/' + newId).set(payload);
                 
                 this._currentId = newId; // Cập nhật lại ID hiện tại
                 this._updateUIStatus('new');
             }
+            
             saveStatus.textContent = 'Đã lưu lúc ' + moment().format('HH:mm:ss');
             this._isModified = false; // Đã lưu thành công, reset cờ
+            
+            // Cập nhật phụ đề và vẽ lại logs ngay tại chỗ
+            const createdDateStr = payload.createdAt ? moment(payload.createdAt).format('DD/MM/YYYY HH:mm') : 'N/A';
+            const updatedDateStr = payload.updatedAt ? moment(payload.updatedAt).format('DD/MM/YYYY HH:mm') : 'N/A';
+            document.getElementById('hc-m-subtitle').innerHTML = `Tạo bởi <span class="text-slate-700 font-bold">${payload.createdBy || 'Không rõ'}</span> vào <span class="text-slate-700 font-bold">${createdDateStr}</span> | Cập nhật cuối: <span class="text-slate-700 font-bold">${updatedDateStr}</span>`;
+            this.renderEditLogs(payload.logs || []);
+            
             Toast.fire({icon:'success', title:'Lưu hồ sơ thành công!'});
         } catch (e) {
             saveStatus.textContent = 'Lỗi lưu dữ liệu!';
