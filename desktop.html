@@ -4485,7 +4485,7 @@ textarea.inp { resize:vertical; }
     </div>
 
     <!-- Cột phải: Hồ sơ đã chọn + Thông tin phiếu -->
-    <div class="w-72 flex flex-col border-l border-slate-100 min-h-0 shrink-0">
+    <div class="w-[420px] flex flex-col border-l border-slate-100 min-h-0 shrink-0" style="width: 420px;">
       <div class="px-4 py-3 bg-slate-50 border-b border-slate-100 shrink-0">
         <p class="text-xs font-black text-slate-700 uppercase tracking-wide">Đã chọn <span id="ho-sel-count" class="text-blue-600">0</span> hồ sơ</p>
       </div>
@@ -15137,8 +15137,21 @@ const BaoLanh = {
 const HandOver = {
     _allVouchers: [],
     _selectedIds: new Set(),
+    _selectedDocs: {},
     _editingId: null,
     _printTimeout: null,
+
+    toggleDoc(id, doc) {
+        if (!this._selectedDocs[id]) {
+            this._selectedDocs[id] = [];
+        }
+        const idx = this._selectedDocs[id].indexOf(doc);
+        if (idx > -1) {
+            this._selectedDocs[id].splice(idx, 1);
+        } else {
+            this._selectedDocs[id].push(doc);
+        }
+    },
 
     /* ── Firebase listener ── */
     init() {
@@ -15233,6 +15246,7 @@ const HandOver = {
 
         if (this._selectedIds) this._selectedIds.clear();
         this._editingId = null;
+        this._selectedDocs = {};
 
         const titleEl = document.getElementById('ho-modal-title');
         if (titleEl) titleEl.textContent = 'Tạo phiếu bàn giao hồ sơ';
@@ -15273,6 +15287,10 @@ const HandOver = {
         // Lưu ID đang sửa và nạp danh sách hồ sơ đã chọn
         this._editingId = key;
         this._selectedIds = new Set((v.records || []).map(r => r.id));
+        this._selectedDocs = {};
+        (v.records || []).forEach(r => {
+            this._selectedDocs[r.id] = r.documents || [];
+        });
 
         const titleEl = document.getElementById('ho-modal-title');
         if (titleEl) titleEl.textContent = 'Sửa phiếu bàn giao ' + (v.voucherNo || '');
@@ -15350,8 +15368,13 @@ const HandOver = {
     filterRecords() { this._renderRecordList(); },
 
     _toggleRecord(id) {
-        if (this._selectedIds.has(id)) this._selectedIds.delete(id);
-        else this._selectedIds.add(id);
+        if (this._selectedIds.has(id)) {
+            this._selectedIds.delete(id);
+            delete this._selectedDocs[id];
+        } else {
+            this._selectedIds.add(id);
+            this._selectedDocs[id] = [];
+        }
         this._renderRecordList();
         this._renderSelectedList();
     },
@@ -15369,17 +15392,50 @@ const HandOver = {
                 el.innerHTML = '<p class="px-3 py-4 text-center text-xs text-slate-400">Chưa chọn hồ sơ nào</p>';
                 return;
             }
+            
+            const docOptions = [
+                'Thông báo tai nạn',
+                'Biên bản giám định',
+                'Báo giá',
+                'Giấy xác nhận bồi thường',
+                'Giấy uỷ quyền sửa chữa',
+                'Nghiệm thu sửa chữa',
+                'Hợp đồng sửa chữa'
+            ];
+
             el.innerHTML = Array.from(this._selectedIds).map(id => {
                 const r = allData.find(x => x && x.id === id);
                 if (!r) return '';
-                return `<div class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 border-b border-slate-50">
-                  <div class="flex-1 min-w-0">
-                    <p class="text-xs font-black text-slate-700 truncate">${r.bsx || '—'}</p>
-                    <p class="text-[10px] text-slate-400 truncate">${r.garaName || '—'}</p>
+                const currentDocs = this._selectedDocs[id] || [];
+                
+                const checkboxesHtml = docOptions.map(doc => {
+                    const checked = currentDocs.includes(doc) ? 'checked' : '';
+                    return `
+                    <label class="flex items-center gap-1.5 cursor-pointer text-[11px] text-slate-600 hover:text-slate-900 select-none">
+                      <input type="checkbox" ${checked} onchange="HandOver.toggleDoc('${id}', '${doc}')" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5">
+                      <span class="truncate">${doc}</span>
+                    </label>
+                    `;
+                }).join('');
+
+                return `
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl mb-2.5 flex flex-col gap-2">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-xs font-black text-slate-800">${r.bsx || '—'}</p>
+                      <p class="text-[10px] text-slate-400">${r.garaName || '—'}</p>
+                    </div>
+                    <button onclick="HandOver._toggleRecord('${id}')" class="p-1 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-all flex-shrink-0">
+                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
                   </div>
-                  <button onclick="HandOver._toggleRecord('${id}')" class="p-1 rounded hover:bg-rose-100 text-slate-300 hover:text-rose-500 transition-all flex-shrink-0">
-                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-                  </button>
+                  <div class="border-t border-slate-200/60 my-0.5"></div>
+                  <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Chứng từ kèm theo:</p>
+                    <div class="grid grid-cols-2 gap-x-2 gap-y-1.5">
+                      ${checkboxesHtml}
+                    </div>
+                  </div>
                 </div>`;
             }).join('');
         }
@@ -15398,7 +15454,16 @@ const HandOver = {
 
         const records = Array.from(this._selectedIds).map(id => {
             const r = allData.find(x => x.id === id);
-            return r ? { id, bsx: r.bsx, claimCode: r.claimCode, customer: r.customer, garaName: r.garaName, step: r.step, notifyDate: r.notifyDate } : null;
+            return r ? { 
+                id, 
+                bsx: r.bsx, 
+                claimCode: r.claimCode, 
+                customer: r.customer, 
+                garaName: r.garaName, 
+                step: r.step, 
+                notifyDate: r.notifyDate,
+                documents: this._selectedDocs[id] || []
+            } : null;
         }).filter(Boolean);
 
         if (this._editingId) {
@@ -15514,6 +15579,7 @@ const HandOver = {
                 <th class="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase">Khách hàng</th>
                 <th class="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase">Gara</th>
                 <th class="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase">Ngày báo</th>
+                <th class="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase">Chứng từ kèm theo</th>
                 <th class="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase">Trạng thái</th>
               </tr></thead>
               <tbody class="divide-y divide-slate-50">
@@ -15524,6 +15590,12 @@ const HandOver = {
                     <td class="px-4 py-3 text-slate-600 text-xs">${r.customer || '—'}</td>
                     <td class="px-4 py-3 text-teal-600 text-xs font-bold">${r.garaName || '—'}</td>
                     <td class="px-4 py-3 text-slate-500 text-xs">${r.notifyDate || '—'}</td>
+                    <td class="px-4 py-3 text-slate-500 text-xs">
+                      ${r.documents && r.documents.length 
+                        ? `<div class="flex flex-wrap gap-1 max-w-[220px]">${r.documents.map(d => `<span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-100 whitespace-nowrap">${d}</span>`).join('')}</div>`
+                        : '<span class="text-slate-400 italic text-[11px]">Không có chứng từ</span>'
+                      }
+                    </td>
                     <td class="px-4 py-3"><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">${stepLabel(r.step || 1)}</span></td>
                   </tr>`).join('')}
               </tbody>
@@ -15579,6 +15651,11 @@ const HandOver = {
             <td><b>${r.bsx || '—'}</b><br><span style="font-size:13px;">${r.claimCode || ''}</span></td>
             <td class="editable" contenteditable="true" spellcheck="false">${r.customer || '—'}</td>
             <td class="editable" contenteditable="true" spellcheck="false">${r.garaName || '—'}</td>
+            <td style="font-size:12px; line-height:1.3;">
+              ${r.documents && r.documents.length 
+                ? `<ul style="margin:0; padding-left:14px; text-align:left;">${r.documents.map(d => `<li>${d}</li>`).join('')}</ul>` 
+                : '<span style="color:#777; font-style:italic;">Không kèm chứng từ</span>'}
+            </td>
             <td class="center editable" contenteditable="true" spellcheck="false">${r.notifyDate || '—'}</td>
             <td class="center editable" contenteditable="true" spellcheck="false">${stepLabel(r.step || 1)}</td>
           </tr>`).join('');
@@ -15679,11 +15756,12 @@ const HandOver = {
           <table>
             <thead><tr>
               <th style="width:5%">STT</th>
-              <th style="width:20%">Biển số / Mã vụ</th>
-              <th style="width:25%">Khách hàng</th>
-              <th style="width:25%">Gara sửa chữa</th>
-              <th style="width:15%">Ngày báo</th>
-              <th style="width:10%">Tiến độ</th>
+              <th style="width:15%">Biển số / Mã vụ</th>
+              <th style="width:20%">Khách hàng</th>
+              <th style="width:20%">Gara sửa chữa</th>
+              <th style="width:22%">Chứng từ bàn giao</th>
+              <th style="width:10%">Ngày báo</th>
+              <th style="width:8%">Tiến độ</th>
             </tr></thead>
             <tbody>${tableRows}</tbody>
           </table>
@@ -15728,6 +15806,7 @@ HandOver.openCreateModal = function() {
     
     this._selectedIds = new Set();
     this._editingId = null;
+    this._selectedDocs = {};
     
     ['ho-modal-title','ho-receiver','ho-note','ho-rec-search'].forEach(id => {
         const el = document.getElementById(id);
