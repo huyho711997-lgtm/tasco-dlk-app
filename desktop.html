@@ -4473,13 +4473,31 @@ textarea.inp { resize:vertical; }
 
     <!-- Cột trái: Chọn hồ sơ -->
     <div class="flex-1 flex flex-col border-r border-slate-100 min-h-0">
-      <div class="px-5 py-3 bg-slate-50 border-b border-slate-100 flex items-center gap-3 shrink-0">
-        <p class="text-xs font-black text-slate-700 uppercase tracking-wide flex-1">Chọn hồ sơ bàn giao</p>
-        <div class="relative">
-          <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input type="text" id="ho-rec-search" oninput="HandOver.filterRecords()" placeholder="Tìm biển số..." class="pl-8 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg outline-none focus:border-blue-400 w-44">
+      <div class="px-5 py-3 bg-slate-50 border-b border-slate-100 flex flex-col gap-2 shrink-0">
+        <div class="flex items-center gap-3">
+          <p class="text-xs font-black text-slate-700 uppercase tracking-wide flex-1">Chọn hồ sơ bàn giao</p>
+          <div class="flex items-center gap-2">
+            <!-- Bộ lọc Gara -->
+            <select id="ho-rec-gara-filter" onchange="HandOver.filterRecords()" class="px-2 py-1.5 text-[11px] bg-white border border-slate-200 rounded-lg outline-none focus:border-blue-400 max-w-[140px] font-medium text-slate-600">
+              <option value="">Tất cả Gara</option>
+            </select>
+            <!-- Tìm kiếm -->
+            <div class="relative">
+              <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input type="text" id="ho-rec-search" oninput="HandOver.filterRecords()" placeholder="Tìm biển số, tên..." class="pl-8 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg outline-none focus:border-blue-400 w-36">
+            </div>
+          </div>
+          <span id="ho-rec-count" class="text-xs text-slate-400 font-semibold shrink-0"></span>
         </div>
-        <span id="ho-rec-count" class="text-xs text-slate-400 font-semibold shrink-0"></span>
+        
+        <!-- Thanh Chọn tất cả -->
+        <div class="flex items-center justify-between bg-white border border-slate-100 rounded-lg px-3 py-1.5 text-xs text-slate-500">
+          <label class="flex items-center gap-2 cursor-pointer select-none font-medium">
+            <input type="checkbox" id="ho-rec-select-all" onchange="HandOver.toggleSelectAll(this.checked)" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5">
+            <span>Chọn tất cả hồ sơ đang lọc</span>
+          </label>
+          <span class="text-[10px] text-slate-400 italic">Chọn nhanh để bàn giao hàng loạt</span>
+        </div>
       </div>
       <div class="flex-1 overflow-y-auto" id="ho-rec-list"></div>
     </div>
@@ -4490,7 +4508,7 @@ textarea.inp { resize:vertical; }
         <p class="text-xs font-black text-slate-700 uppercase tracking-wide">Đã chọn <span id="ho-sel-count" class="text-blue-600">0</span> hồ sơ</p>
       </div>
       <!-- Danh sách đã chọn -->
-      <div id="ho-sel-list" class="flex-1 overflow-y-auto min-h-0 max-h-52 border-b border-slate-100 px-1 py-2"></div>
+      <div id="ho-sel-list" class="flex-1 overflow-y-auto min-h-0 border-b border-slate-100 px-3 py-2"></div>
       <!-- Thông tin phiếu -->
       <div class="p-4 flex flex-col gap-3 shrink-0">
         <div>
@@ -15138,8 +15156,35 @@ const HandOver = {
     _allVouchers: [],
     _selectedIds: new Set(),
     _selectedDocs: {},
+    _expandedClaimIds: new Set(),
     _editingId: null,
     _printTimeout: null,
+
+    toggleExpandClaim(id) {
+        if (this._expandedClaimIds.has(id)) {
+            this._expandedClaimIds.delete(id);
+        } else {
+            this._expandedClaimIds.add(id);
+        }
+        this._renderSelectedList();
+    },
+
+    toggleSelectAll(checked) {
+        if (!this._currentFilteredIds) return;
+        this._currentFilteredIds.forEach(id => {
+            if (checked) {
+                this._selectedIds.add(id);
+                if (!this._selectedDocs[id]) {
+                    this._selectedDocs[id] = [];
+                }
+            } else {
+                this._selectedIds.delete(id);
+                delete this._selectedDocs[id];
+            }
+        });
+        this._renderRecordList();
+        this._renderSelectedList();
+    },
 
     toggleDoc(id, doc) {
         if (!this._selectedDocs[id]) {
@@ -15232,6 +15277,20 @@ const HandOver = {
         }).join('') : '<tr><td colspan="6" class="px-5 py-16 text-center text-slate-400 text-sm font-bold">Chưa có phiếu bàn giao nào</td></tr>';
     },
 
+    _populateGaraFilter() {
+        const select = document.getElementById('ho-rec-gara-filter');
+        if (!select) return;
+        
+        // Trích xuất các Gara không trùng lặp từ các hồ sơ chưa bàn giao (step < 7)
+        const garas = Array.from(new Set(
+            allData.filter(r => r && r.step < 7 && r.garaName)
+                   .map(r => r.garaName)
+        )).sort();
+        
+        select.innerHTML = '<option value="">Tất cả Gara</option>' + 
+            garas.map(g => `<option value="${g.replace(/"/g, '&quot;')}">${g}</option>`).join('');
+    },
+
     /* ── Mở modal tạo ── */
     openCreateModal() {
         const w = document.getElementById('ho-create-modal');
@@ -15248,6 +15307,7 @@ const HandOver = {
         if (this._selectedIds) this._selectedIds.clear();
         this._editingId = null;
         this._selectedDocs = {};
+        if (this._expandedClaimIds) this._expandedClaimIds.clear();
 
         const titleEl = document.getElementById('ho-modal-title');
         if (titleEl) titleEl.textContent = 'Tạo phiếu bàn giao hồ sơ';
@@ -15260,6 +15320,10 @@ const HandOver = {
 
         const searchEl = document.getElementById('ho-rec-search');
         if (searchEl) searchEl.value = '';
+
+        this._populateGaraFilter();
+        const garaFilterEl = document.getElementById('ho-rec-gara-filter');
+        if (garaFilterEl) garaFilterEl.value = '';
 
         this._renderRecordList();
         this._renderSelectedList();
@@ -15292,6 +15356,7 @@ const HandOver = {
         (v.records || []).forEach(r => {
             this._selectedDocs[r.id] = r.documents || [];
         });
+        if (this._expandedClaimIds) this._expandedClaimIds.clear();
 
         const titleEl = document.getElementById('ho-modal-title');
         if (titleEl) titleEl.textContent = 'Sửa phiếu bàn giao ' + (v.voucherNo || '');
@@ -15304,6 +15369,10 @@ const HandOver = {
 
         const searchEl = document.getElementById('ho-rec-search');
         if (searchEl) searchEl.value = '';
+
+        this._populateGaraFilter();
+        const garaFilterEl = document.getElementById('ho-rec-gara-filter');
+        if (garaFilterEl) garaFilterEl.value = '';
 
         this._renderRecordList();
         this._renderSelectedList();
@@ -15319,11 +15388,18 @@ const HandOver = {
     _renderRecordList() {
         const searchEl = document.getElementById('ho-rec-search');
         const q = (searchEl ? searchEl.value : '').toLowerCase();
+        const garaFilter = document.getElementById('ho-rec-gara-filter')?.value || '';
         
         let list = allData.filter(r => r && r.step < 7);
+        if (garaFilter) {
+            list = list.filter(r => r.garaName === garaFilter);
+        }
         if (q) {
             list = list.filter(r => [r.bsx, r.claimCode, r.customer, r.garaName].join(' ').toLowerCase().includes(q));
         }
+        
+        // Lưu trữ danh sách ID đang hiển thị sau khi lọc
+        this._currentFilteredIds = list.map(r => r.id);
         
         // Sắp xếp an toàn, tránh lỗi NaN khi ngày bị rỗng
         list.sort((a, b) => {
@@ -15338,6 +15414,12 @@ const HandOver = {
         const countEl = document.getElementById('ho-rec-count');
         
         if (countEl) countEl.textContent = list.length + ' hồ sơ';
+        
+        // Cập nhật trạng thái checkbox "Chọn tất cả"
+        const selectAllEl = document.getElementById('ho-rec-select-all');
+        if (selectAllEl) {
+            selectAllEl.checked = list.length > 0 && list.every(r => this._selectedIds.has(r.id));
+        }
         
         if (el) {
             el.innerHTML = list.length ? list.map(r => {
@@ -15390,7 +15472,7 @@ const HandOver = {
         
         if (el) {
             if (!this._selectedIds || !this._selectedIds.size) {
-                el.innerHTML = '<p class="px-3 py-4 text-center text-xs text-slate-400">Chưa chọn hồ sơ nào</p>';
+                el.innerHTML = '<p class="px-3 py-10 text-center text-xs text-slate-400 font-medium">Chưa chọn hồ sơ nào</p>';
                 return;
             }
             
@@ -15408,7 +15490,18 @@ const HandOver = {
                 const r = allData.find(x => x && x.id === id);
                 if (!r) return '';
                 const currentDocs = this._selectedDocs[id] || [];
+                const expanded = this._expandedClaimIds.has(id);
                 
+                // Tạo badge hiển thị tiến trình chọn tài liệu
+                let progressBadge = '';
+                if (currentDocs.length === 0) {
+                    progressBadge = `<span class="px-2 py-0.5 text-[9px] font-bold text-slate-400 bg-slate-100 rounded-full border border-slate-200 shrink-0 select-none">0/7 chứng từ</span>`;
+                } else if (currentDocs.length === docOptions.length) {
+                    progressBadge = `<span class="px-2 py-0.5 text-[9px] font-bold text-teal-600 bg-teal-50 rounded-full border border-teal-200 shrink-0 select-none">Đủ 7/7</span>`;
+                } else {
+                    progressBadge = `<span class="px-2 py-0.5 text-[9px] font-bold text-blue-600 bg-blue-50 rounded-full border border-blue-200 shrink-0 select-none">Đã chọn ${currentDocs.length}/7</span>`;
+                }
+
                 const checkboxesHtml = docOptions.map((doc, docIdx) => {
                     const checked = currentDocs.includes(doc) ? 'checked' : '';
                     const checkboxId = `doc-chk-${id}-${docIdx}`;
@@ -15421,19 +15514,30 @@ const HandOver = {
                 }).join('');
 
                 return `
-                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl mb-2.5 flex flex-col gap-2">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <p class="text-xs font-black text-slate-800">${r.bsx || '—'}</p>
-                      <p class="text-[10px] text-slate-400">${r.garaName || '—'}</p>
+                <div class="border border-slate-200 rounded-xl mb-2.5 flex flex-col bg-white overflow-hidden shadow-sm transition-all duration-200 hover:shadow-md">
+                  <!-- Header Card: Click để thu gọn / mở rộng -->
+                  <div onclick="HandOver.toggleExpandClaim('${id}')" class="p-3 bg-slate-50 hover:bg-slate-100/70 transition-colors flex items-center justify-between cursor-pointer gap-2 select-none">
+                    <div class="min-w-0 flex-1">
+                      <p class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                        <span>${r.bsx || '—'}</span>
+                      </p>
+                      <p class="text-[10px] text-slate-400 truncate mt-0.5">${r.garaName || '—'}</p>
                     </div>
-                    <button onclick="HandOver._toggleRecord('${id}')" class="p-1 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-all flex-shrink-0">
-                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-                    </button>
+                    
+                    <div class="flex items-center gap-2 shrink-0">
+                      ${progressBadge}
+                      <!-- Icon Chevron chỉ hướng -->
+                      <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+                      <!-- Nút Xóa nhanh khỏi danh sách -->
+                      <button onclick="event.stopPropagation(); HandOver._toggleRecord('${id}')" class="p-1 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-all">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                      </button>
+                    </div>
                   </div>
-                  <div class="border-t border-slate-200/60 my-0.5"></div>
-                  <div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Chứng từ kèm theo:</p>
+                  
+                  <!-- Body Checklist: Hiển thị nếu expanded là true -->
+                  <div class="transition-all duration-200 ${expanded ? 'border-t border-slate-150 p-3 block bg-white' : 'hidden'}">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Chứng từ bàn giao:</p>
                     <div class="grid grid-cols-2 gap-x-2 gap-y-1.5">
                       ${checkboxesHtml}
                     </div>
