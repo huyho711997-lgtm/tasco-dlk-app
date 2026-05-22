@@ -1894,9 +1894,12 @@ textarea.inp { resize:vertical; }
           <div class="mn-toolbar">
             <div class="mn-search-wrap">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input id="mn-search-inp" oninput="doSearch()" type="text"
-              placeholder="Tìm biển số, mã hồ sơ, khách hàng, gara..."
-              class="mn-search-inp">
+              <input id="mn-search-inp" oninput="doSearch()" type="text"
+                placeholder="Tìm biển số, mã hồ sơ, khách hàng, gara..."
+                class="mn-search-inp" style="padding-right: 32px;">
+              <button id="mn-search-clear" onclick="clearSearch()" class="hidden text-white/40 hover:text-white/80 transition-colors focus:outline-none" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
             </div>
             <div class="mn-divider"></div>
             <button class="mn-fp active" data-step="0" onclick="fpToggle(0,this)">Tất cả</button>
@@ -1986,7 +1989,10 @@ textarea.inp { resize:vertical; }
           <div class="mn-toolbar">
             <div class="mn-search-wrap">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <input id="hc-search-inp" oninput="HumanClaims.renderTable()" type="text" placeholder="Tìm tên, GCN, bệnh viện..." class="mn-search-inp focus:!border-pink-400 focus:!ring-pink-500/20">
+              <input id="hc-search-inp" oninput="HumanClaims.renderTable()" type="text" placeholder="Tìm tên, GCN, bệnh viện..." class="mn-search-inp focus:!border-pink-400 focus:!ring-pink-500/20" style="padding-right: 32px;">
+              <button id="hc-search-clear" onclick="HumanClaims.clearSearch()" class="hidden text-white/40 hover:text-white/80 transition-colors focus:outline-none" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
             </div>
             <div class="mn-divider"></div>
             <select id="hc-filter-status" onchange="HumanClaims.renderTable()" class="pp-filter-sel" style="min-width:140px">
@@ -5049,6 +5055,13 @@ var _pgFiltered = [];
 function doSearch() {
   var el = document.getElementById('mn-search-inp') || document.getElementById('search-inp');
   var q  = (el ? el.value : '').toLowerCase();
+
+  var btnClear = document.getElementById('mn-search-clear');
+  if (btnClear) {
+    if (q) btnClear.classList.remove('hidden');
+    else btnClear.classList.add('hidden');
+  }
+
   var steps = Array.from(fpActive);
 
   _pgFiltered = allData.filter(function(r) {
@@ -5058,6 +5071,14 @@ function doSearch() {
 
   _pgCur = 1;
   renderTable(_pgFiltered);
+}
+
+function clearSearch() {
+  var el = document.getElementById('mn-search-inp');
+  if (el) {
+    el.value = '';
+    doSearch();
+  }
 }
 
 function pgChangeSize() {
@@ -16107,10 +16128,24 @@ const HumanClaims = {
     },
 
 
+    clearSearch() {
+        const el = document.getElementById('hc-search-inp');
+        if (el) {
+            el.value = '';
+            this.renderTable();
+        }
+    },
+
     /* ── Render Bảng Danh sách ── */
     renderTable() {
         const q = (document.getElementById('hc-search-inp')?.value || '').toLowerCase();
         const stt = document.getElementById('hc-filter-status')?.value || '';
+
+        const btnClear = document.getElementById('hc-search-clear');
+        if (btnClear) {
+            if (q) btnClear.classList.remove('hidden');
+            else btnClear.classList.add('hidden');
+        }
         
         let filtered = (this._data || []).filter(r => {
             if (!r) return false;
