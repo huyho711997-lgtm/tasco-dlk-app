@@ -1155,7 +1155,7 @@ textarea.inp { resize:vertical; }
 }
 
 .mn-search-wrap { position: relative; flex: 1; min-width: 200px; }
-.mn-search-wrap svg {
+.mn-search-wrap > svg {
   position: absolute; left: 11px; top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
@@ -1898,7 +1898,7 @@ textarea.inp { resize:vertical; }
                 placeholder="Tìm biển số, mã hồ sơ, khách hàng, gara..."
                 class="mn-search-inp" style="padding-right: 48px;">
               <button id="mn-search-clear" onclick="clearSearch()" class="text-white/70 hover:text-white hover:bg-white/20 transition-all focus:outline-none" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); border: none; background: rgba(255, 255, 255, 0.12); cursor: pointer; display: none; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; padding: 0; line-height: 0;">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="position: static !important; transform: none !important; margin: 0 !important; display: block !important;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
               </button>
             </div>
             <div class="mn-divider"></div>
@@ -1991,7 +1991,7 @@ textarea.inp { resize:vertical; }
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
               <input id="hc-search-inp" oninput="HumanClaims.renderTable()" type="text" placeholder="Tìm tên, GCN, bệnh viện..." class="mn-search-inp focus:!border-pink-400 focus:!ring-pink-500/20" style="padding-right: 48px;">
               <button id="hc-search-clear" onclick="HumanClaims.clearSearch()" class="text-white/70 hover:text-white hover:bg-white/20 transition-all focus:outline-none" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); border: none; background: rgba(255, 255, 255, 0.12); cursor: pointer; display: none; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; padding: 0; line-height: 0;">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="position: static !important; transform: none !important; margin: 0 !important; display: block !important;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
               </button>
             </div>
             <div class="mn-divider"></div>
