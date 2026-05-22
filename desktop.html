@@ -1155,7 +1155,7 @@ textarea.inp { resize:vertical; }
 }
 
 .mn-search-wrap { position: relative; flex: 1; min-width: 200px; }
-.mn-search-wrap svg {
+.mn-search-wrap > svg {
   position: absolute; left: 11px; top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
@@ -1894,9 +1894,12 @@ textarea.inp { resize:vertical; }
           <div class="mn-toolbar">
             <div class="mn-search-wrap">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input id="mn-search-inp" oninput="doSearch()" type="text"
-              placeholder="Tìm biển số, mã hồ sơ, khách hàng, gara..."
-              class="mn-search-inp">
+              <input id="mn-search-inp" oninput="doSearch()" type="text"
+                placeholder="Tìm biển số, mã hồ sơ, khách hàng, gara..."
+                class="mn-search-inp" style="padding-right: 48px;">
+              <button id="mn-search-clear" onclick="clearSearch()" class="text-white/70 hover:text-white hover:bg-white/20 transition-all focus:outline-none" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); border: none; background: rgba(255, 255, 255, 0.12); cursor: pointer; display: none; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; padding: 0; line-height: 0;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="position: static !important; transform: none !important; margin: 0 !important; display: block !important;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
             </div>
             <div class="mn-divider"></div>
             <button class="mn-fp active" data-step="0" onclick="fpToggle(0,this)">Tất cả</button>
@@ -1986,7 +1989,10 @@ textarea.inp { resize:vertical; }
           <div class="mn-toolbar">
             <div class="mn-search-wrap">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <input id="hc-search-inp" oninput="HumanClaims.renderTable()" type="text" placeholder="Tìm tên, GCN, bệnh viện..." class="mn-search-inp focus:!border-pink-400 focus:!ring-pink-500/20">
+              <input id="hc-search-inp" oninput="HumanClaims.renderTable()" type="text" placeholder="Tìm tên, GCN, bệnh viện..." class="mn-search-inp focus:!border-pink-400 focus:!ring-pink-500/20" style="padding-right: 48px;">
+              <button id="hc-search-clear" onclick="HumanClaims.clearSearch()" class="text-white/70 hover:text-white hover:bg-white/20 transition-all focus:outline-none" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); border: none; background: rgba(255, 255, 255, 0.12); cursor: pointer; display: none; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; padding: 0; line-height: 0;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="position: static !important; transform: none !important; margin: 0 !important; display: block !important;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
             </div>
             <div class="mn-divider"></div>
             <select id="hc-filter-status" onchange="HumanClaims.renderTable()" class="pp-filter-sel" style="min-width:140px">
@@ -2149,6 +2155,12 @@ textarea.inp { resize:vertical; }
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               Lịch sử tổn thất
               <span id="hc-tab-history-badge" class="bg-rose-500 text-white px-1.5 py-0.5 rounded-full text-[8px] font-black hidden shadow-sm ring-1 ring-white">0</span>
+            </button>
+            <button id="hc-btn-tab-logs" onclick="HumanClaims.switchTab('logs')" 
+                    class="flex items-center gap-2 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300
+                           text-slate-500 hover:text-slate-700 hover:bg-white/50">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+              Lịch sử chỉnh sửa
             </button>
           </div>
         </div>
@@ -2458,6 +2470,30 @@ textarea.inp { resize:vertical; }
                 <div class="flex flex-col items-center justify-center py-20 text-slate-300">
                   <svg class="w-16 h-16 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                   <p class="text-sm font-bold">Chưa có dữ liệu lịch sử</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: LOGS (Audit History log) -->
+          <div id="hc-tab-logs" class="hidden animate__animated animate__fadeIn animate__faster">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
+              <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-black text-slate-800">Lịch sử tác động hồ sơ</h3>
+                  <p class="text-xs font-bold text-slate-400 mt-0.5">Nhật ký chi tiết các lần tạo mới, chỉnh sửa thông tin hoặc chuyển trạng thái</p>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="text-right">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Số lần sửa</p>
+                    <p id="hc-logs-total-count" class="text-xl font-black text-slate-700">0 lần</p>
+                  </div>
+                </div>
+              </div>
+              <div id="hc-logs-full-list" class="p-6 space-y-4 max-h-[500px] overflow-y-auto custom-scrollbar">
+                <div class="flex flex-col items-center justify-center py-20 text-slate-300">
+                  <svg class="w-16 h-16 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <p class="text-sm font-bold">Chưa có nhật ký chỉnh sửa</p>
                 </div>
               </div>
             </div>
@@ -4641,24 +4677,42 @@ textarea.inp { resize:vertical; }
 
     <!-- Cột trái: Chọn hồ sơ -->
     <div class="flex-1 flex flex-col border-r border-slate-100 min-h-0">
-      <div class="px-5 py-3 bg-slate-50 border-b border-slate-100 flex items-center gap-3 shrink-0">
-        <p class="text-xs font-black text-slate-700 uppercase tracking-wide flex-1">Chọn hồ sơ bàn giao</p>
-        <div class="relative">
-          <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input type="text" id="ho-rec-search" oninput="HandOver.filterRecords()" placeholder="Tìm biển số..." class="pl-8 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg outline-none focus:border-blue-400 w-44">
+      <div class="px-5 py-3 bg-slate-50 border-b border-slate-100 flex flex-col gap-2 shrink-0">
+        <div class="flex items-center gap-3">
+          <p class="text-xs font-black text-slate-700 uppercase tracking-wide flex-1">Chọn hồ sơ bàn giao</p>
+          <div class="flex items-center gap-2">
+            <!-- Bộ lọc Gara -->
+            <select id="ho-rec-gara-filter" onchange="HandOver.filterRecords()" class="px-2 py-1.5 text-[11px] bg-white border border-slate-200 rounded-lg outline-none focus:border-blue-400 max-w-[140px] font-medium text-slate-600">
+              <option value="">Tất cả Gara</option>
+            </select>
+            <!-- Tìm kiếm -->
+            <div class="relative">
+              <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input type="text" id="ho-rec-search" oninput="HandOver.filterRecords()" placeholder="Tìm biển số, tên..." class="pl-8 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg outline-none focus:border-blue-400 w-36">
+            </div>
+          </div>
+          <span id="ho-rec-count" class="text-xs text-slate-400 font-semibold shrink-0"></span>
         </div>
-        <span id="ho-rec-count" class="text-xs text-slate-400 font-semibold shrink-0"></span>
+        
+        <!-- Thanh Chọn tất cả -->
+        <div class="flex items-center justify-between bg-white border border-slate-100 rounded-lg px-3 py-1.5 text-xs text-slate-500">
+          <label class="flex items-center gap-2 cursor-pointer select-none font-medium">
+            <input type="checkbox" id="ho-rec-select-all" onchange="HandOver.toggleSelectAll(this.checked)" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5">
+            <span>Chọn tất cả hồ sơ đang lọc</span>
+          </label>
+          <span class="text-[10px] text-slate-400 italic">Chọn nhanh để bàn giao hàng loạt</span>
+        </div>
       </div>
       <div class="flex-1 overflow-y-auto" id="ho-rec-list"></div>
     </div>
 
     <!-- Cột phải: Hồ sơ đã chọn + Thông tin phiếu -->
-    <div class="w-72 flex flex-col border-l border-slate-100 min-h-0 shrink-0">
+    <div class="w-[420px] flex flex-col border-l border-slate-100 min-h-0 shrink-0" style="width: 420px;">
       <div class="px-4 py-3 bg-slate-50 border-b border-slate-100 shrink-0">
         <p class="text-xs font-black text-slate-700 uppercase tracking-wide">Đã chọn <span id="ho-sel-count" class="text-blue-600">0</span> hồ sơ</p>
       </div>
       <!-- Danh sách đã chọn -->
-      <div id="ho-sel-list" class="flex-1 overflow-y-auto min-h-0 max-h-52 border-b border-slate-100 px-1 py-2"></div>
+      <div id="ho-sel-list" class="flex-1 overflow-y-auto min-h-0 border-b border-slate-100 px-3 py-2"></div>
       <!-- Thông tin phiếu -->
       <div class="p-4 flex flex-col gap-3 shrink-0">
         <div>
@@ -5223,6 +5277,12 @@ var _pgFiltered = [];
 function doSearch() {
   var el = document.getElementById('mn-search-inp') || document.getElementById('search-inp');
   var q  = (el ? el.value : '').toLowerCase();
+
+  var btnClear = document.getElementById('mn-search-clear');
+  if (btnClear) {
+    btnClear.style.display = q ? 'flex' : 'none';
+  }
+
   var steps = Array.from(fpActive);
 
   _pgFiltered = allData.filter(function(r) {
@@ -5232,6 +5292,14 @@ function doSearch() {
 
   _pgCur = 1;
   renderTable(_pgFiltered);
+}
+
+function clearSearch() {
+  var el = document.getElementById('mn-search-inp');
+  if (el) {
+    el.value = '';
+    doSearch();
+  }
 }
 
 function pgChangeSize() {
@@ -15309,8 +15377,49 @@ const BaoLanh = {
 const HandOver = {
     _allVouchers: [],
     _selectedIds: new Set(),
+    _selectedDocs: {},
+    _expandedClaimIds: new Set(),
     _editingId: null,
     _printTimeout: null,
+
+    toggleExpandClaim(id) {
+        if (this._expandedClaimIds.has(id)) {
+            this._expandedClaimIds.delete(id);
+        } else {
+            this._expandedClaimIds.add(id);
+        }
+        this._renderSelectedList();
+    },
+
+    toggleSelectAll(checked) {
+        if (!this._currentFilteredIds) return;
+        this._currentFilteredIds.forEach(id => {
+            if (checked) {
+                this._selectedIds.add(id);
+                if (!this._selectedDocs[id]) {
+                    this._selectedDocs[id] = [];
+                }
+            } else {
+                this._selectedIds.delete(id);
+                delete this._selectedDocs[id];
+            }
+        });
+        this._renderRecordList();
+        this._renderSelectedList();
+    },
+
+    toggleDoc(id, doc) {
+        if (!this._selectedDocs[id]) {
+            this._selectedDocs[id] = [];
+        }
+        const idx = this._selectedDocs[id].indexOf(doc);
+        if (idx > -1) {
+            this._selectedDocs[id].splice(idx, 1);
+        } else {
+            this._selectedDocs[id].push(doc);
+        }
+        this._renderSelectedList();
+    },
 
     /* ── Firebase listener ── */
     init() {
@@ -15390,6 +15499,20 @@ const HandOver = {
         }).join('') : '<tr><td colspan="6" class="px-5 py-16 text-center text-slate-400 text-sm font-bold">Chưa có phiếu bàn giao nào</td></tr>';
     },
 
+    _populateGaraFilter() {
+        const select = document.getElementById('ho-rec-gara-filter');
+        if (!select) return;
+        
+        // Trích xuất các Gara không trùng lặp từ các hồ sơ chưa bàn giao (step < 7)
+        const garas = Array.from(new Set(
+            allData.filter(r => r && r.step < 7 && r.garaName)
+                   .map(r => r.garaName)
+        )).sort();
+        
+        select.innerHTML = '<option value="">Tất cả Gara</option>' + 
+            garas.map(g => `<option value="${g.replace(/"/g, '&quot;')}">${g}</option>`).join('');
+    },
+
     /* ── Mở modal tạo ── */
     openCreateModal() {
         const w = document.getElementById('ho-create-modal');
@@ -15405,6 +15528,8 @@ const HandOver = {
 
         if (this._selectedIds) this._selectedIds.clear();
         this._editingId = null;
+        this._selectedDocs = {};
+        if (this._expandedClaimIds) this._expandedClaimIds.clear();
 
         const titleEl = document.getElementById('ho-modal-title');
         if (titleEl) titleEl.textContent = 'Tạo phiếu bàn giao hồ sơ';
@@ -15417,6 +15542,10 @@ const HandOver = {
 
         const searchEl = document.getElementById('ho-rec-search');
         if (searchEl) searchEl.value = '';
+
+        this._populateGaraFilter();
+        const garaFilterEl = document.getElementById('ho-rec-gara-filter');
+        if (garaFilterEl) garaFilterEl.value = '';
 
         this._renderRecordList();
         this._renderSelectedList();
@@ -15445,6 +15574,11 @@ const HandOver = {
         // Lưu ID đang sửa và nạp danh sách hồ sơ đã chọn
         this._editingId = key;
         this._selectedIds = new Set((v.records || []).map(r => r.id));
+        this._selectedDocs = {};
+        (v.records || []).forEach(r => {
+            this._selectedDocs[r.id] = r.documents || [];
+        });
+        if (this._expandedClaimIds) this._expandedClaimIds.clear();
 
         const titleEl = document.getElementById('ho-modal-title');
         if (titleEl) titleEl.textContent = 'Sửa phiếu bàn giao ' + (v.voucherNo || '');
@@ -15457,6 +15591,10 @@ const HandOver = {
 
         const searchEl = document.getElementById('ho-rec-search');
         if (searchEl) searchEl.value = '';
+
+        this._populateGaraFilter();
+        const garaFilterEl = document.getElementById('ho-rec-gara-filter');
+        if (garaFilterEl) garaFilterEl.value = '';
 
         this._renderRecordList();
         this._renderSelectedList();
@@ -15472,11 +15610,18 @@ const HandOver = {
     _renderRecordList() {
         const searchEl = document.getElementById('ho-rec-search');
         const q = (searchEl ? searchEl.value : '').toLowerCase();
+        const garaFilter = document.getElementById('ho-rec-gara-filter')?.value || '';
         
         let list = allData.filter(r => r && r.step < 7);
+        if (garaFilter) {
+            list = list.filter(r => r.garaName === garaFilter);
+        }
         if (q) {
             list = list.filter(r => [r.bsx, r.claimCode, r.customer, r.garaName].join(' ').toLowerCase().includes(q));
         }
+        
+        // Lưu trữ danh sách ID đang hiển thị sau khi lọc
+        this._currentFilteredIds = list.map(r => r.id);
         
         // Sắp xếp an toàn, tránh lỗi NaN khi ngày bị rỗng
         list.sort((a, b) => {
@@ -15492,6 +15637,12 @@ const HandOver = {
         
         if (countEl) countEl.textContent = list.length + ' hồ sơ';
         
+        // Cập nhật trạng thái checkbox "Chọn tất cả"
+        const selectAllEl = document.getElementById('ho-rec-select-all');
+        if (selectAllEl) {
+            selectAllEl.checked = list.length > 0 && list.every(r => this._selectedIds.has(r.id));
+        }
+        
         if (el) {
             el.innerHTML = list.length ? list.map(r => {
                 const sel = this._selectedIds && this._selectedIds.has(r.id);
@@ -15499,7 +15650,7 @@ const HandOver = {
                 const sc = stepColors[r.step] || '#475569';
                 const sl = typeof stepLabel === 'function' ? stepLabel(r.step || 1) : ('B' + (r.step || 1));
                 
-                return `<label class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-blue-50/60 border-b border-slate-50 transition-colors ${sel ? 'bg-blue-50' : ''}" onclick="HandOver._toggleRecord('${r.id}')">
+                return `<div class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-blue-50/60 border-b border-slate-50 transition-colors ${sel ? 'bg-blue-50' : ''}" onclick="HandOver._toggleRecord('${r.id}')">
                   <div class="w-5 h-5 rounded flex items-center justify-center border-2 transition-all flex-shrink-0 ${sel ? 'bg-blue-600 border-blue-600' : 'border-slate-300 bg-white'}">
                     ${sel ? '<svg class="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>' : ''}
                   </div>
@@ -15514,7 +15665,7 @@ const HandOver = {
                     <p class="text-xs font-bold text-teal-600">${r.garaName || '—'}</p>
                     <p class="text-[10px] text-slate-400 mt-0.5">${r.notifyDate || '—'}</p>
                   </div>
-                </label>`;
+                </div>`;
             }).join('') : '<p class="px-5 py-10 text-center text-slate-400 text-sm">Không có hồ sơ phù hợp</p>';
         }
     },
@@ -15522,8 +15673,13 @@ const HandOver = {
     filterRecords() { this._renderRecordList(); },
 
     _toggleRecord(id) {
-        if (this._selectedIds.has(id)) this._selectedIds.delete(id);
-        else this._selectedIds.add(id);
+        if (this._selectedIds.has(id)) {
+            this._selectedIds.delete(id);
+            delete this._selectedDocs[id];
+        } else {
+            this._selectedIds.add(id);
+            this._selectedDocs[id] = [];
+        }
         this._renderRecordList();
         this._renderSelectedList();
     },
@@ -15538,20 +15694,76 @@ const HandOver = {
         
         if (el) {
             if (!this._selectedIds || !this._selectedIds.size) {
-                el.innerHTML = '<p class="px-3 py-4 text-center text-xs text-slate-400">Chưa chọn hồ sơ nào</p>';
+                el.innerHTML = '<p class="px-3 py-10 text-center text-xs text-slate-400 font-medium">Chưa chọn hồ sơ nào</p>';
                 return;
             }
+            
+            const docOptions = [
+                'Thông báo tai nạn',
+                'Biên bản giám định',
+                'Báo giá',
+                'Giấy xác nhận bồi thường',
+                'Giấy uỷ quyền sửa chữa',
+                'Nghiệm thu sửa chữa',
+                'Hợp đồng sửa chữa'
+            ];
+
             el.innerHTML = Array.from(this._selectedIds).map(id => {
                 const r = allData.find(x => x && x.id === id);
                 if (!r) return '';
-                return `<div class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 border-b border-slate-50">
-                  <div class="flex-1 min-w-0">
-                    <p class="text-xs font-black text-slate-700 truncate">${r.bsx || '—'}</p>
-                    <p class="text-[10px] text-slate-400 truncate">${r.garaName || '—'}</p>
+                const currentDocs = this._selectedDocs[id] || [];
+                const expanded = this._expandedClaimIds.has(id);
+                
+                // Tạo badge hiển thị tiến trình chọn tài liệu
+                let progressBadge = '';
+                if (currentDocs.length === 0) {
+                    progressBadge = `<span class="px-2 py-0.5 text-[9px] font-bold text-slate-400 bg-slate-100 rounded-full border border-slate-200 shrink-0 select-none">0/7 chứng từ</span>`;
+                } else if (currentDocs.length === docOptions.length) {
+                    progressBadge = `<span class="px-2 py-0.5 text-[9px] font-bold text-teal-600 bg-teal-50 rounded-full border border-teal-200 shrink-0 select-none">Đủ 7/7</span>`;
+                } else {
+                    progressBadge = `<span class="px-2 py-0.5 text-[9px] font-bold text-blue-600 bg-blue-50 rounded-full border border-blue-200 shrink-0 select-none">Đã chọn ${currentDocs.length}/7</span>`;
+                }
+
+                const checkboxesHtml = docOptions.map((doc, docIdx) => {
+                    const checked = currentDocs.includes(doc) ? 'checked' : '';
+                    const checkboxId = `doc-chk-${id}-${docIdx}`;
+                    return `
+                    <label for="${checkboxId}" class="flex items-center gap-1.5 cursor-pointer text-[11px] text-slate-600 hover:text-slate-900 select-none">
+                      <input type="checkbox" id="${checkboxId}" ${checked} onchange="HandOver.toggleDoc('${id}', '${doc}')" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5">
+                      <span class="truncate">${doc}</span>
+                    </label>
+                    `;
+                }).join('');
+
+                return `
+                <div class="border border-slate-200 rounded-xl mb-2.5 flex flex-col bg-white overflow-hidden shadow-sm transition-all duration-200 hover:shadow-md">
+                  <!-- Header Card: Click để thu gọn / mở rộng -->
+                  <div onclick="HandOver.toggleExpandClaim('${id}')" class="p-3 bg-slate-50 hover:bg-slate-100/70 transition-colors flex items-center justify-between cursor-pointer gap-2 select-none">
+                    <div class="min-w-0 flex-1">
+                      <p class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                        <span>${r.bsx || '—'}</span>
+                      </p>
+                      <p class="text-[10px] text-slate-400 truncate mt-0.5">${r.garaName || '—'}</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 shrink-0">
+                      ${progressBadge}
+                      <!-- Icon Chevron chỉ hướng -->
+                      <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+                      <!-- Nút Xóa nhanh khỏi danh sách -->
+                      <button onclick="event.stopPropagation(); HandOver._toggleRecord('${id}')" class="p-1 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-all">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                      </button>
+                    </div>
                   </div>
-                  <button onclick="HandOver._toggleRecord('${id}')" class="p-1 rounded hover:bg-rose-100 text-slate-300 hover:text-rose-500 transition-all flex-shrink-0">
-                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-                  </button>
+                  
+                  <!-- Body Checklist: Hiển thị nếu expanded là true -->
+                  <div class="transition-all duration-200 ${expanded ? 'border-t border-slate-150 p-3 block bg-white' : 'hidden'}">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Chứng từ bàn giao:</p>
+                    <div class="grid grid-cols-2 gap-x-2 gap-y-1.5">
+                      ${checkboxesHtml}
+                    </div>
+                  </div>
                 </div>`;
             }).join('');
         }
@@ -15570,7 +15782,16 @@ const HandOver = {
 
         const records = Array.from(this._selectedIds).map(id => {
             const r = allData.find(x => x.id === id);
-            return r ? { id, bsx: r.bsx, claimCode: r.claimCode, customer: r.customer, garaName: r.garaName, step: r.step, notifyDate: r.notifyDate } : null;
+            return r ? { 
+                id, 
+                bsx: r.bsx, 
+                claimCode: r.claimCode, 
+                customer: r.customer, 
+                garaName: r.garaName, 
+                step: r.step, 
+                notifyDate: r.notifyDate,
+                documents: this._selectedDocs[id] || []
+            } : null;
         }).filter(Boolean);
 
         if (this._editingId) {
@@ -15686,6 +15907,7 @@ const HandOver = {
                 <th class="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase">Khách hàng</th>
                 <th class="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase">Gara</th>
                 <th class="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase">Ngày báo</th>
+                <th class="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase">Chứng từ kèm theo</th>
                 <th class="px-4 py-2.5 text-left text-[10px] font-bold text-slate-400 uppercase">Trạng thái</th>
               </tr></thead>
               <tbody class="divide-y divide-slate-50">
@@ -15696,6 +15918,12 @@ const HandOver = {
                     <td class="px-4 py-3 text-slate-600 text-xs">${r.customer || '—'}</td>
                     <td class="px-4 py-3 text-teal-600 text-xs font-bold">${r.garaName || '—'}</td>
                     <td class="px-4 py-3 text-slate-500 text-xs">${r.notifyDate || '—'}</td>
+                    <td class="px-4 py-3 text-slate-500 text-xs">
+                      ${r.documents && r.documents.length 
+                        ? `<div class="flex flex-wrap gap-1 max-w-[220px]">${r.documents.map(d => `<span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-100 whitespace-nowrap">${d}</span>`).join('')}</div>`
+                        : '<span class="text-slate-400 italic text-[11px]">Không có chứng từ</span>'
+                      }
+                    </td>
                     <td class="px-4 py-3"><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">${stepLabel(r.step || 1)}</span></td>
                   </tr>`).join('')}
               </tbody>
@@ -15751,6 +15979,11 @@ const HandOver = {
             <td><b>${r.bsx || '—'}</b><br><span style="font-size:13px;">${r.claimCode || ''}</span></td>
             <td class="editable" contenteditable="true" spellcheck="false">${r.customer || '—'}</td>
             <td class="editable" contenteditable="true" spellcheck="false">${r.garaName || '—'}</td>
+            <td style="font-size:12px; line-height:1.3;">
+              ${r.documents && r.documents.length 
+                ? `<ul style="margin:0; padding-left:14px; text-align:left;">${r.documents.map(d => `<li>${d}</li>`).join('')}</ul>` 
+                : '<span style="color:#777; font-style:italic;">Không kèm chứng từ</span>'}
+            </td>
             <td class="center editable" contenteditable="true" spellcheck="false">${r.notifyDate || '—'}</td>
             <td class="center editable" contenteditable="true" spellcheck="false">${stepLabel(r.step || 1)}</td>
           </tr>`).join('');
@@ -15851,11 +16084,12 @@ const HandOver = {
           <table>
             <thead><tr>
               <th style="width:5%">STT</th>
-              <th style="width:20%">Biển số / Mã vụ</th>
-              <th style="width:25%">Khách hàng</th>
-              <th style="width:25%">Gara sửa chữa</th>
-              <th style="width:15%">Ngày báo</th>
-              <th style="width:10%">Tiến độ</th>
+              <th style="width:15%">Biển số / Mã vụ</th>
+              <th style="width:20%">Khách hàng</th>
+              <th style="width:20%">Gara sửa chữa</th>
+              <th style="width:22%">Chứng từ bàn giao</th>
+              <th style="width:10%">Ngày báo</th>
+              <th style="width:8%">Tiến độ</th>
             </tr></thead>
             <tbody>${tableRows}</tbody>
           </table>
@@ -15900,6 +16134,7 @@ HandOver.openCreateModal = function() {
     
     this._selectedIds = new Set();
     this._editingId = null;
+    this._selectedDocs = {};
     
     ['ho-modal-title','ho-receiver','ho-note','ho-rec-search'].forEach(id => {
         const el = document.getElementById(id);
@@ -16299,10 +16534,23 @@ const HumanClaims = {
     },
 
 
+    clearSearch() {
+        const el = document.getElementById('hc-search-inp');
+        if (el) {
+            el.value = '';
+            this.renderTable();
+        }
+    },
+
     /* ── Render Bảng Danh sách ── */
     renderTable() {
         const q = (document.getElementById('hc-search-inp')?.value || '').toLowerCase();
         const stt = document.getElementById('hc-filter-status')?.value || '';
+
+        const btnClear = document.getElementById('hc-search-clear');
+        if (btnClear) {
+            btnClear.style.display = q ? 'flex' : 'none';
+        }
         
         let filtered = (this._data || []).filter(r => {
             if (!r) return false;
@@ -16397,9 +16645,15 @@ const HumanClaims = {
             if (rec) {
                 this._fillForm(rec);
                 document.getElementById('hc-m-title').textContent = rec.claimNo || 'Chi tiết hồ sơ';
+                
+                // Cập nhật phụ đề Ngày tạo / Người tạo
+                const createdDateStr = rec.createdAt ? moment(rec.createdAt).format('DD/MM/YYYY HH:mm') : 'N/A';
+                const updatedDateStr = rec.updatedAt ? moment(rec.updatedAt).format('DD/MM/YYYY HH:mm') : 'N/A';
+                document.getElementById('hc-m-subtitle').innerHTML = `Tạo bởi <span class="text-slate-700 font-bold">${rec.createdBy || 'Không rõ'}</span> vào <span class="text-slate-700 font-bold">${createdDateStr}</span> | Cập nhật cuối: <span class="text-slate-700 font-bold">${updatedDateStr}</span>`;
             }
         } else {
             document.getElementById('hc-m-title').textContent = 'Thêm hồ sơ mới';
+            document.getElementById('hc-m-subtitle').textContent = 'Điền thông tin chi tiết bên dưới';
             this._updateUIStatus('new');
             // Mặc định cho hồ sơ mới
             document.getElementById('hc-treatmentMethod').value = 'Tây y';
@@ -16414,7 +16668,7 @@ const HumanClaims = {
     },
 
     switchTab(tabId) {
-        const tabs = ['form', 'history'];
+        const tabs = ['form', 'history', 'logs'];
         tabs.forEach(t => {
             const btn = document.getElementById(`hc-btn-tab-${t}`);
             const content = document.getElementById(`hc-tab-${t}`);
@@ -16573,6 +16827,66 @@ const HumanClaims = {
                 </div>
             </div>
         `).join('');
+    },
+
+    renderEditLogs(logs) {
+        const listEl = document.getElementById('hc-logs-full-list');
+        const countEl = document.getElementById('hc-logs-total-count');
+
+        if (!listEl) return;
+
+        if (!logs || logs.length === 0) {
+            listEl.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-20 text-slate-300">
+                  <svg class="w-16 h-16 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  <p class="text-sm font-bold">Chưa có nhật ký chỉnh sửa</p>
+                </div>`;
+            countEl.textContent = '0 lần';
+            return;
+        }
+
+        countEl.textContent = `${logs.length} lần`;
+
+        let html = '<div class="relative pl-2 border-l border-slate-200 space-y-6 ml-4 py-2">';
+        const sortedLogs = [...logs].reverse();
+        sortedLogs.forEach(entry => {
+            const timeStr = entry.timestamp ? moment(entry.timestamp).format('DD/MM/YYYY HH:mm:ss') : 'N/A';
+            let changesHtml = '';
+            if (entry.changes && entry.changes.length > 0) {
+                changesHtml = '<ul class="list-disc pl-4 mt-2 space-y-1 text-slate-500 text-[11px] font-medium">';
+                entry.changes.forEach(ch => {
+                    changesHtml += `<li>${ch}</li>`;
+                });
+                changesHtml += '</ul>';
+            }
+            
+            let dotColor = 'bg-slate-400';
+            if (entry.action.includes('Tạo')) dotColor = 'bg-emerald-500 ring-4 ring-emerald-100';
+            else if (entry.action.includes('trạng thái')) dotColor = 'bg-amber-500 ring-4 ring-amber-100';
+            else if (entry.action.includes('Cập nhật')) dotColor = 'bg-indigo-500 ring-4 ring-indigo-100';
+
+            html += `
+                <div class="relative pl-8">
+                  <div class="absolute -left-[37px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm ${dotColor}"></div>
+                  
+                  <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 shadow-sm hover:border-slate-300 transition-colors">
+                    <div class="flex items-center justify-between mb-1.5">
+                      <span class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        ${entry.user || 'Unknown'}
+                      </span>
+                      <span class="text-[10px] font-mono font-bold text-slate-400">${timeStr}</span>
+                    </div>
+                    <div class="text-[11px] font-black text-slate-600 flex items-center gap-1.5">
+                      <span class="px-2 py-0.5 bg-slate-200/60 rounded text-[9px] font-bold text-slate-700">${entry.action}</span>
+                    </div>
+                    ${changesHtml}
+                  </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        listEl.innerHTML = html;
     },
 
     showHistoryDetail(id) {
@@ -16813,6 +17127,7 @@ const HumanClaims = {
 
         this._tempImages = [];
         this.renderImages([]);
+        this.renderEditLogs([]);
     },
 
     /* ── Helper xử lý Ngày tháng Thông minh ── */
@@ -16922,6 +17237,7 @@ const HumanClaims = {
 
         // Nạp lịch sử tổn thất nếu có GCN
         if (r.gcn) this.renderInsuredHistory(r.gcn);
+        this.renderEditLogs(r.logs || []);
     },
 
     /* ── VietQR Payment ── */
@@ -17187,14 +17503,40 @@ const HumanClaims = {
             showCancelButton: true, confirmButtonText: 'Xác nhận', cancelButtonText: 'Hủy', customClass: {popup: 'rnd'}
         }).then(r => {
             if (r.isConfirmed) {
-                db.ref('HumanClaims/' + this._currentId).update({ status: newStatus, updatedAt: new Date().toISOString() }).then(() => {
+                const rec = this._data.find(r => r.id === this._currentId);
+                let updatedLogs = [];
+                if (rec) {
+                    const oldStatusLabel = this.STATUS_LABELS[rec.status || 'new']?.text || rec.status || 'Không rõ';
+                    const newStatusLabel = stObj.text || newStatus || 'Không rõ';
+                    const user = Auth.getCurrentUser();
+                    const logEntry = {
+                        timestamp: new Date().toISOString(),
+                        user: user ? user.name : 'Unknown',
+                        action: 'Chuyển trạng thái',
+                        changes: [`Chuyển trạng thái từ '<span class="text-rose-600 font-semibold">${oldStatusLabel}</span>' sang '<span class="text-emerald-600 font-semibold">${newStatusLabel}</span>'`]
+                    };
+                    updatedLogs = [...(rec.logs || []), logEntry];
+                }
+
+                const updatePayload = {
+                    status: newStatus,
+                    updatedAt: new Date().toISOString()
+                };
+                if (updatedLogs.length > 0) {
+                    updatePayload.logs = updatedLogs;
+                }
+
+                db.ref('HumanClaims/' + this._currentId).update(updatePayload).then(() => {
                     Toast.fire({icon:'success', title:'Đã chuyển trạng thái!'});
                     this._updateUIStatus(newStatus);
                     
                     // Cập nhật local data và render lại ảnh để ẩn/hiện nút xóa đồng bộ
-                    const rec = this._data.find(r => r.id === this._currentId);
                     if (rec) {
                         rec.status = newStatus;
+                        if (updatedLogs.length > 0) {
+                            rec.logs = updatedLogs;
+                            this.renderEditLogs(updatedLogs);
+                        }
                         this.renderImages(rec.images || []);
                     }
                 });
@@ -17224,6 +17566,9 @@ const HumanClaims = {
         const victimName = getVal('hc-victimName');
         if (!victimName) { Toast.fire({icon:'warning', title:'Vui lòng nhập Tên người được bảo hiểm!'}); return; }
 
+        const user = Auth.getCurrentUser();
+        const oldRec = this._currentId ? (this._data || []).find(r => r.id === this._currentId) : null;
+
         const payload = {
             claimNo: getVal('hc-claimNo'), // LƯU DỮ LIỆU SỐ HSBT VÀO PAYLOAD
             contractNo: getVal('hc-contractNo'), 
@@ -17248,12 +17593,120 @@ const HumanClaims = {
             payeeIssueDate: getVal('hc-payeeIssueDate'), payeeIssuePlace: getVal('hc-payeeIssuePlace'),
             payeeBankNo: getVal('hc-payeeBankNo'), payeeBankName: getVal('hc-payeeBankName'),
             totalAmount: parseInt(document.getElementById('hc-calc-total').textContent.replace(/[^\d]/g, '')) || 0,
-            images: this._currentId ? (this._data.find(r => r.id === this._currentId)?.images || []) : (this._tempImages || []),
+            images: this._currentId ? (oldRec?.images || []) : (this._tempImages || []),
             treatmentMethod: getVal('hc-treatmentMethod'),
             updatedAt: new Date().toISOString()
         };
 
-        const user = Auth.getCurrentUser();
+        // Gán fallback cho Ngày tạo / Người tạo đối với hồ sơ cũ
+        if (this._currentId && oldRec) {
+            payload.createdAt = oldRec.createdAt || new Date().toISOString();
+            payload.createdBy = oldRec.createdBy || (user ? user.name : 'Unknown');
+        }
+
+        // Thực hiện so sánh các trường để ghi logs thay đổi
+        const FIELD_LABELS = {
+            claimNo: 'Số HSBT',
+            contractNo: 'Số HĐ gốc',
+            contractDate: 'Ngày hợp đồng',
+            companyName: 'Tên đơn vị tham gia BH',
+            companyAddress: 'Địa chỉ đơn vị tham gia BH',
+            gcn: 'Số GCN',
+            insType: 'Loại hình BH',
+            feeStatus: 'Tình trạng phí',
+            premium: 'Mức phí',
+            feeDate: 'Ngày nộp phí',
+            effFrom: 'Hiệu lực từ',
+            effTo: 'Hiệu lực đến',
+            limitA: 'Mức trách nhiệm Loại A',
+            limitB: 'Mức trách nhiệm Loại B',
+            limitC: 'Mức trách nhiệm Loại C',
+            limitD: 'Mức trách nhiệm Loại D',
+            victimName: 'Người được bảo hiểm',
+            victimAge: 'Tuổi',
+            lossType: 'Loại tổn thất',
+            treatmentMethod: 'Phương thức điều trị',
+            victimAddress: 'Địa chỉ người được BH',
+            accDate: 'Ngày bị tai nạn',
+            inDate: 'Ngày nhập viện',
+            outDate: 'Ngày ra viện',
+            days: 'Số ngày nằm viện',
+            accLocation: 'Địa điểm bị tai nạn',
+            hospitalName: 'Nơi điều trị',
+            accCause: 'Nguyên nhân tai nạn',
+            injuryDesc: 'Chẩn đoán / Thương tật',
+            injuryCode: 'Mục theo Bảng TLTT',
+            injuryRange: 'Tỷ lệ quy định',
+            injuryRealPct: 'Tỷ lệ thực tế',
+            payeeName: 'Họ tên người nhận',
+            payeeRelation: 'Quan hệ với người được BH',
+            payeeCccd: 'Số CCCD',
+            payeeIssueDate: 'Ngày cấp CCCD',
+            payeeIssuePlace: 'Nơi cấp CCCD',
+            payeeBankNo: 'Số tài khoản ngân hàng',
+            payeeBankName: 'Ngân hàng',
+            totalAmount: 'Tổng số tiền chi trả'
+        };
+
+        const changes = [];
+        if (this._currentId && oldRec) {
+            for (let key in FIELD_LABELS) {
+                let oldVal = oldRec[key];
+                let newVal = payload[key];
+                
+                if (oldVal === undefined || oldVal === null) oldVal = '';
+                if (newVal === undefined || newVal === null) newVal = '';
+                
+                const isAmountKey = ['premium', 'limitA', 'limitB', 'limitC', 'limitD', 'totalAmount'].includes(key);
+                
+                if (String(oldVal).trim() !== String(newVal).trim()) {
+                    let displayOld = oldVal;
+                    let displayNew = newVal;
+                    
+                    if (isAmountKey) {
+                        displayOld = oldVal ? Number(oldVal).toLocaleString('vi-VN') + ' đ' : '0 đ';
+                        displayNew = newVal ? Number(newVal).toLocaleString('vi-VN') + ' đ' : '0 đ';
+                    } else if (key === 'injuryRealPct') {
+                        displayOld = oldVal + '%';
+                        displayNew = newVal + '%';
+                    }
+                    
+                    changes.push(`Thay đổi <b>${FIELD_LABELS[key]}</b> từ '<span class="text-rose-600 font-semibold">${displayOld || "trống"}</span>' thành '<span class="text-emerald-600 font-semibold">${displayNew || "trống"}</span>'`);
+                }
+            }
+            
+            const oldImgs = oldRec.images || [];
+            const newImgs = payload.images || [];
+            if (oldImgs.length !== newImgs.length) {
+                changes.push(`Cập nhật danh sách ảnh chứng từ: từ <b>${oldImgs.length} ảnh</b> thành <b>${newImgs.length} ảnh</b>`);
+            }
+        }
+
+        // Tạo mảng logs mới
+        if (this._currentId) {
+            const oldLogs = oldRec ? (oldRec.logs || []) : [];
+            if (changes.length > 0) {
+                const logEntry = {
+                    timestamp: new Date().toISOString(),
+                    user: user ? user.name : 'Unknown',
+                    action: 'Cập nhật hồ sơ',
+                    changes: changes
+                };
+                payload.logs = [...oldLogs, logEntry];
+            } else {
+                payload.logs = oldLogs;
+            }
+        } else {
+            payload.logs = [
+                {
+                    timestamp: new Date().toISOString(),
+                    user: user ? user.name : 'Unknown',
+                    action: 'Tạo mới hồ sơ',
+                    changes: ['Khởi tạo hồ sơ bồi thường con người mới']
+                }
+            ];
+        }
+
         const saveStatus = document.getElementById('hc-m-save-status');
         saveStatus.textContent = 'Đang lưu...';
 
@@ -17264,16 +17717,26 @@ const HumanClaims = {
                 payload.status = 'new';
                 payload.createdAt = new Date().toISOString();
                 payload.createdBy = user ? user.name : 'Unknown';
+                // Đảm bảo log đầu tiên chuẩn
+                payload.logs[0].timestamp = payload.createdAt;
+                payload.logs[0].user = payload.createdBy;
                 
-                // Tạo ID mới trước thay vì lấy từ kết quả của hàm set()
                 const newId = Date.now().toString();
                 await db.ref('HumanClaims/' + newId).set(payload);
                 
                 this._currentId = newId; // Cập nhật lại ID hiện tại
                 this._updateUIStatus('new');
             }
+            
             saveStatus.textContent = 'Đã lưu lúc ' + moment().format('HH:mm:ss');
             this._isModified = false; // Đã lưu thành công, reset cờ
+            
+            // Cập nhật phụ đề và vẽ lại logs ngay tại chỗ
+            const createdDateStr = payload.createdAt ? moment(payload.createdAt).format('DD/MM/YYYY HH:mm') : 'N/A';
+            const updatedDateStr = payload.updatedAt ? moment(payload.updatedAt).format('DD/MM/YYYY HH:mm') : 'N/A';
+            document.getElementById('hc-m-subtitle').innerHTML = `Tạo bởi <span class="text-slate-700 font-bold">${payload.createdBy || 'Không rõ'}</span> vào <span class="text-slate-700 font-bold">${createdDateStr}</span> | Cập nhật cuối: <span class="text-slate-700 font-bold">${updatedDateStr}</span>`;
+            this.renderEditLogs(payload.logs || []);
+            
             Toast.fire({icon:'success', title:'Lưu hồ sơ thành công!'});
         } catch (e) {
             saveStatus.textContent = 'Lỗi lưu dữ liệu!';
