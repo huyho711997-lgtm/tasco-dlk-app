@@ -3610,6 +3610,11 @@ textarea.inp { resize:vertical; }
         Ảnh chứng từ
         <span id="img-count-badge" class="hidden ml-1 px-1.5 py-0.5 bg-blue-500 text-white text-[9px] font-black rounded-full leading-none"></span>
       </div>
+      <div class="m-tab" onclick="switchModalTab('hientruong',this)"
+        style="color:rgba(255,255,255,.45);border-radius:8px 8px 0 0;padding:.65rem 1.1rem">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:5px;margin-top:-2px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Hiện trường
+      </div>
     </div>
   </div>
 
@@ -4240,6 +4245,205 @@ textarea.inp { resize:vertical; }
         </div><!-- /CỘT PHẢI -->
       </div><!-- /GRID -->
     </div><!-- /tab-images -->
+
+    <!-- TAB: HIỆN TRƯỜNG -->
+    <div id="tab-hientruong" class="m-tab-panel flex-1 overflow-y-auto p-5">
+      <div class="grid grid-cols-2 gap-4">
+        
+        <!-- CỘT TRÁI: Nhập liệu hiện trường -->
+        <div class="space-y-4">
+          
+          <!-- Thiết lập báo cáo -->
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-header-title text-slate-700">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                Thiết lập báo cáo
+              </div>
+            </div>
+            <div class="section-body space-y-3.5">
+              <div>
+                <label class="lbl mb-1.5">Loại tổn thất</label>
+                <div class="grid grid-cols-2 gap-2">
+                  <button type="button" id="ht-btn-vcx" onclick="HienTruong.toggleType('VCX')"
+                    class="py-2.5 rounded-lg text-xs font-bold border transition-all bg-blue-600 text-white border-blue-600 shadow-sm">
+                    VCX — Vật chất xe
+                  </button>
+                  <button type="button" id="ht-btn-tnds" onclick="HienTruong.toggleType('TNDS')"
+                    class="py-2.5 rounded-lg text-xs font-bold border transition-all bg-white text-slate-500 border-slate-200 hover:bg-slate-50">
+                    TNDS — Trách nhiệm DS
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label class="lbl mb-1.5">Gửi báo cáo đến</label>
+                <div class="flex gap-2 flex-wrap">
+                  <button type="button" onclick="HienTruong.setRecipient('@Nguyễn Toàn @Nguyễn Thanh Hùng', this)"
+                    class="ht-rcpt-btn px-3 py-1.5 rounded-lg text-[11px] font-bold border bg-blue-600 text-white border-blue-600 shadow-sm">
+                    Anh Toàn + Anh Hùng
+                  </button>
+                  <button type="button" onclick="HienTruong.setRecipient('@Nguyễn Toàn', this)"
+                    class="ht-rcpt-btn px-3 py-1.5 rounded-lg text-[11px] font-bold border bg-white text-slate-500 border-slate-200 hover:bg-slate-50">
+                    Chỉ anh Toàn
+                  </button>
+                  <button type="button" onclick="HienTruong.setRecipient('@Nguyễn Thanh Hùng', this)"
+                    class="ht-rcpt-btn px-3 py-1.5 rounded-lg text-[11px] font-bold border bg-white text-slate-500 border-slate-200 hover:bg-slate-50">
+                    Chỉ anh Hùng
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Diễn biến vụ việc -->
+          <div class="section-card">
+            <div class="section-header flex justify-between items-center" style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="section-header-title text-blue-700">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-2.12 2.12M12 12L9 21M12 12h9M12 12V3"/></svg>
+                Diễn biến vụ việc
+              </div>
+              <div class="flex gap-1.5" style="display: flex; gap: 6px;">
+                <button type="button" onclick="HienTruong.normalizeAI('edit-htDienBien')"
+                  class="px-2.5 py-1 bg-blue-600 text-white text-[11px] rounded font-bold hover:bg-blue-700 flex items-center gap-1">
+                  <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.886L4.202 9.07l4.786 3.652L7.076 18.6 12 14.947l4.924 3.657-1.912-5.881 4.786-3.652-5.886.184L12 3z"/></svg> AI chuẩn
+                </button>
+                <button type="button" id="mic-ht-dienbien" onclick="SpeechInput.toggle('edit-htDienBien','mic-ht-dienbien','st-ht-dienbien')"
+                  class="px-2.5 py-1 bg-white text-blue-600 border border-blue-200 text-[11px] rounded font-bold hover:bg-blue-50 flex items-center gap-1">
+                  <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg> Nói
+                </button>
+              </div>
+            </div>
+            <div class="section-body space-y-2.5">
+              <div class="flex flex-wrap gap-1.5" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;">
+                <button type="button" onclick="HienTruong.fillTemplate('luithu')" class="px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[10px] font-bold text-blue-600 hover:bg-blue-100 transition-colors">Lùi xe thiếu quan sát</button>
+                <button type="button" onclick="HienTruong.fillTemplate('vancan')" class="px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[10px] font-bold text-blue-600 hover:bg-blue-100 transition-colors">Va chạm phía trước</button>
+                <button type="button" onclick="HienTruong.fillTemplate('coicong')" class="px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[10px] font-bold text-blue-600 hover:bg-blue-100 transition-colors">Đụng cột/cổng</button>
+                <button type="button" onclick="HienTruong.fillTemplate('dongduong')" class="px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[10px] font-bold text-blue-600 hover:bg-blue-100 transition-colors">Đụng xe khác</button>
+              </div>
+              <div class="relative">
+                <textarea id="edit-htDienBien" rows="4" class="inp resize-none pb-7" placeholder="VD: Lái xe trong lúc lùi xe thiếu quan sát đã để xe va chạm..."></textarea>
+                <span id="st-ht-dienbien" class="absolute bottom-2 left-3 text-[10px] font-bold text-blue-500"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nhận định hiện trường -->
+          <div class="section-card">
+            <div class="section-header flex justify-between items-center" style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="section-header-title text-emerald-700">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg>
+                Nhận định hiện trường
+              </div>
+              <div class="flex gap-1.5" style="display: flex; gap: 6px;">
+                <button type="button" onclick="HienTruong.fillNhanDinh()"
+                  class="px-2.5 py-1 bg-white text-emerald-600 border border-emerald-200 text-[11px] rounded font-bold hover:bg-emerald-50">
+                  Mẫu nhanh
+                </button>
+                <button type="button" onclick="HienTruong.normalizeAI('edit-htNhanDinh')"
+                  class="px-2.5 py-1 bg-emerald-600 text-white text-[11px] rounded font-bold hover:bg-emerald-700 flex items-center gap-1">
+                  <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.886L4.202 9.07l4.786 3.652L7.076 18.6 12 14.947l4.924 3.657-1.912-5.881 4.786-3.652-5.886.184L12 3z"/></svg> AI chuẩn
+                </button>
+                <button type="button" id="mic-ht-nhandinh" onclick="SpeechInput.toggle('edit-htNhanDinh','mic-ht-nhandinh','st-ht-nhandinh')"
+                  class="px-2.5 py-1 bg-white text-emerald-600 border border-emerald-200 text-[11px] rounded font-bold hover:bg-emerald-50 flex items-center gap-1">
+                  <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg> Nói
+                </button>
+              </div>
+            </div>
+            <div class="section-body">
+              <div class="relative">
+                <textarea id="edit-htNhanDinh" rows="2" class="inp resize-none pb-7" placeholder="VD: Hiện trường phù hợp với diễn biến..."></textarea>
+                <span id="st-ht-nhandinh" class="absolute bottom-2 left-3 text-[10px] font-bold text-emerald-500"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Đề xuất & Ước tính -->
+          <div class="section-card">
+            <div class="section-header">
+              <div class="section-header-title text-amber-700">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h6"/></svg>
+                Đề xuất & Ước tính
+              </div>
+            </div>
+            <div class="section-body space-y-3">
+              <div>
+                <label class="lbl mb-1.5">Ước tổn thất</label>
+                <div class="flex gap-2" style="display: flex; gap: 8px;">
+                  <input type="text" id="edit-htUocTonThat" class="inp font-bold flex-1" placeholder="VD: 3.000.000" onkeyup="this.value = this.value.replace(/[^\d]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.')">
+                  <select id="edit-htDonVi" class="inp" style="width:90px; flex-shrink:0;">
+                    <option value="đồng">đồng</option>
+                    <option value="triệu" selected>triệu</option>
+                    <option value="tỷ">tỷ</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between items-center mb-1.5" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <label class="lbl mb-0">Phương án bồi thường</label>
+                  <div class="flex gap-1" style="display: flex; gap: 4px;">
+                    <button type="button" onclick="HienTruong.fillDeXuat('du')" class="px-2 py-0.5 bg-amber-50 border border-amber-200 rounded text-[9px] font-bold text-amber-700 hover:bg-amber-100">Đủ thực tế</button>
+                    <button type="button" onclick="HienTruong.fillDeXuat('tnds')" class="px-2 py-0.5 bg-amber-50 border border-amber-200 rounded text-[9px] font-bold text-amber-700 hover:bg-amber-100">TNDS tài sản</button>
+                    <button type="button" onclick="HienTruong.fillDeXuat('wait')" class="px-2 py-0.5 bg-amber-50 border border-amber-200 rounded text-[9px] font-bold text-amber-700 hover:bg-amber-100">Chờ báo giá</button>
+                  </div>
+                </div>
+                <textarea id="edit-htDeXuat" rows="2.5" class="inp resize-none" placeholder="VD: Đề xuất phương án bồi thường..."></textarea>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /CỘT TRÁI -->
+
+        <!-- CỘT PHẢI: Sơ đồ hiện trường & Báo cáo tổng hợp -->
+        <div class="space-y-4">
+          
+          <!-- Sơ đồ hiện trường (Được di chuyển từ tab Hồ sơ qua đây) -->
+          <div id="scene-diagram-section-container">
+            <!-- Sẽ được di chuyển động bằng JS hoặc để tĩnh ở đây -->
+          </div>
+
+          <!-- Báo cáo tổng hợp -->
+          <div class="section-card">
+            <div class="section-header flex justify-between items-center" style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="section-header-title text-indigo-700">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                Báo cáo tổng hợp (Gửi Zalo)
+              </div>
+              <span id="ht-output-badge" class="text-[10px] font-black text-slate-400"></span>
+            </div>
+            <div class="section-body space-y-3">
+              <div class="grid grid-cols-2 gap-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <button type="button" onclick="HienTruong.generateAI(curId)" class="py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.886L4.202 9.07l4.786 3.652L7.076 18.6 12 14.947l4.924 3.657-1.912-5.881 4.786-3.652-5.886.184L12 3z"/></svg>
+                  AI tạo báo cáo
+                </button>
+                <button type="button" onclick="HienTruong.buildQuick(curId)" class="py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                  Tạo nhanh
+                </button>
+              </div>
+
+              <div id="ht-status" class="text-[11px] text-slate-500 font-medium italic">Chưa tạo báo cáo. Chọn các nút trên để tổng hợp.</div>
+              
+              <div class="relative bg-slate-50 border border-slate-200 rounded-xl p-3.5">
+                <pre id="ht-output-area" class="text-xs text-slate-800 font-medium whitespace-pre-wrap font-sans min-h-[120px] select-all cursor-text" contenteditable="true" placeholder="Nội dung báo cáo sẽ hiển thị ở đây. Bạn có thể chỉnh sửa trực tiếp..."></pre>
+              </div>
+
+              <div id="ht-action-btns" class="grid grid-cols-2 gap-2" style="display: none; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <button type="button" onclick="HienTruong.copyReport()" class="py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  Copy gửi Zalo
+                </button>
+                <button type="button" onclick="saveModal()" class="py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                  Lưu hồ sơ
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /CỘT PHẢI -->
+
+      </div><!-- /GRID -->
+    </div><!-- /tab-hientruong -->
 
   </div><!-- /Modal Body -->
 
@@ -5573,8 +5777,13 @@ function openRecord(id) {
   window._dmSelected.clear();
   window._dmLastIdx = null;
   // Reset to first tab
-  document.querySelectorAll('.m-tab').forEach(function(t,i){t.classList.toggle('active',i===0);});
-  document.querySelectorAll('.m-tab-panel').forEach(function(p,i){p.classList.toggle('active',i===0);});
+  var firstTab = document.querySelector('.m-tab');
+  if(firstTab) {
+    switchModalTab('info', firstTab);
+  } else {
+    document.querySelectorAll('.m-tab').forEach(function(t,i){t.classList.toggle('active',i===0);});
+    document.querySelectorAll('.m-tab-panel').forEach(function(p,i){p.classList.toggle('active',i===0);});
+  }
 
   document.getElementById('m-bsx').textContent=rec.bsx||'—';
   document.getElementById('m-code').textContent=rec.claimCode||'—';
@@ -5666,6 +5875,11 @@ function openRecord(id) {
   // --- GỌI HÀM RENDER SƠ ĐỒ Ở ĐÂY ---
   if (typeof SceneCanvas !== 'undefined') SceneCanvas.renderPreview(id);
 
+  // Tải dữ liệu Hiện trường
+  if (typeof HienTruong !== 'undefined') {
+    HienTruong.loadFromItem(rec);
+  }
+
   var wrap=document.getElementById('modal-wrap'),box=document.getElementById('modal-box');
   wrap.classList.remove('hidden');
   setTimeout(function(){wrap.classList.remove('opacity-0');box.classList.remove('scale-95');},10);
@@ -5711,7 +5925,15 @@ function saveModal() {
     blChiPhiSuaChua: parseInt(gv('f-blChiPhiSuaChua').replace(/[^\d]/g, '')) || 0,
     blKhachHangTuTra: parseInt(gv('f-blKhachHangTuTra').replace(/[^\d]/g, '')) || 0,
     blGiamGia: parseInt(gv('f-blGiamGia').replace(/[^\d]/g, '')) || 0,
-    blBaoHiemBaoLanh: parseInt(gv('f-blBaoHiemBaoLanh').replace(/[^\d]/g, '')) || 0
+    blBaoHiemBaoLanh: parseInt(gv('f-blBaoHiemBaoLanh').replace(/[^\d]/g, '')) || 0,
+    // Hiện trường
+    htDienBien: gv('edit-htDienBien'),
+    htNhanDinh: gv('edit-htNhanDinh'),
+    htUocTonThat: gv('edit-htUocTonThat'),
+    htDeXuat: gv('edit-htDeXuat'),
+    htBaoCao: (function(){ var area=document.getElementById('ht-output-area'); return area ? (area.innerText || area.textContent || '') : (typeof HienTruong !== 'undefined' ? HienTruong._currentReport : ''); })(),
+    htType: (typeof HienTruong !== 'undefined' && HienTruong._types ? HienTruong._types.join(',') : 'VCX'),
+    htDonVi: gv('edit-htDonVi')
   };
   if(iso&&rec.step===1)upd.step=2;
 
@@ -22391,6 +22613,530 @@ const AiLookup = {
         `).join('');
     }
 };
+
+// ============================================================
+// SPEECH INPUT - WEB SPEECH API (TIẾNG VIỆT KHÔNG TRỄ)
+// ============================================================
+const SpeechInput = {
+  _recognition: null,
+  _activeTextareaId: null,
+  _activeBtnId: null,
+  _activeStatusId: null,
+  _isListening: false,
+  _originalVal: '',
+
+  init() {
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      console.warn("SpeechRecognition not supported in this browser.");
+      return;
+    }
+    this._recognition = new SpeechRecognition();
+    this._recognition.continuous = true;
+    this._recognition.interimResults = true;
+    this._recognition.lang = 'vi-VN';
+
+    this._recognition.onstart = () => {
+      this._isListening = true;
+      this._updateUI(true);
+    };
+
+    this._recognition.onerror = (event) => {
+      console.error("Speech recognition error", event.error);
+      if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        Toast.fire({ icon: 'error', title: 'Lỗi nhận dạng giọng nói: ' + event.error });
+      }
+      this._updateUI(false);
+    };
+
+    this._recognition.onend = () => {
+      this._isListening = false;
+      this._updateUI(false);
+    };
+
+    this._recognition.onresult = (event) => {
+      var finalTranscript = '';
+      var interimTranscript = '';
+
+      for (var i = 0; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+
+      var textarea = document.getElementById(this._activeTextareaId);
+      if (textarea) {
+        var baseText = this._originalVal || '';
+        var fullText = baseText;
+        if (finalTranscript) {
+          fullText += (fullText ? ' ' : '') + finalTranscript.trim();
+        }
+        var displayHtmlText = fullText;
+        if (interimTranscript) {
+          displayHtmlText += (displayHtmlText ? ' ' : '') + interimTranscript.trim();
+        }
+        
+        textarea.value = displayHtmlText;
+        
+        var statusEl = document.getElementById(this._activeStatusId);
+        if (statusEl) {
+          statusEl.textContent = interimTranscript ? '🎙️ Đang nghe: ' + interimTranscript.trim() : '🎙️ Đang lắng nghe...';
+          statusEl.style.color = '#3b82f6';
+        }
+        
+        textarea.scrollTop = textarea.scrollHeight;
+      }
+    };
+  },
+
+  toggle(textareaId, btnId, statusId) {
+    if (!this._recognition) {
+      this.init();
+    }
+    if (!this._recognition) {
+      Toast.fire({ icon: 'warning', title: 'Trình duyệt không hỗ trợ nhận diện giọng nói!' });
+      return;
+    }
+
+    if (this._isListening) {
+      if (this._activeTextareaId === textareaId) {
+        this.stop();
+      } else {
+        this.stop();
+        setTimeout(() => {
+          this.start(textareaId, btnId, statusId);
+        }, 300);
+      }
+    } else {
+      this.start(textareaId, btnId, statusId);
+    }
+  },
+
+  start(textareaId, btnId, statusId) {
+    this._activeTextareaId = textareaId;
+    this._activeBtnId = btnId;
+    this._activeStatusId = statusId;
+    var textarea = document.getElementById(textareaId);
+    this._originalVal = textarea ? textarea.value : '';
+
+    try {
+      this._recognition.start();
+    } catch(e) {
+      console.error(e);
+    }
+  },
+
+  stop() {
+    if (this._recognition && this._isListening) {
+      this._recognition.stop();
+    }
+  },
+
+  _updateUI(listening) {
+    var btn = document.getElementById(this._activeBtnId);
+    var statusEl = document.getElementById(this._activeStatusId);
+    if (btn) {
+      if (listening) {
+        btn.classList.add('bg-red-50', 'text-red-600', 'border-red-200');
+        btn.classList.remove('bg-white', 'text-blue-600', 'border-blue-200', 'text-emerald-600', 'border-emerald-200');
+        btn.innerHTML = `<svg class="w-3 h-3 animate-pulse" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="display:inline-block;vertical-align:middle;margin-right:4px;"><circle cx="12" cy="12" r="10"/></svg> Dừng`;
+      } else {
+        btn.classList.remove('bg-red-50', 'text-red-600', 'border-red-200');
+        if (this._activeBtnId === 'mic-ht-dienbien') {
+          btn.classList.add('bg-white', 'text-blue-600', 'border-blue-200');
+          btn.innerHTML = `<svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px;"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg> Nói`;
+        } else {
+          btn.classList.add('bg-white', 'text-emerald-600', 'border-emerald-200');
+          btn.innerHTML = `<svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px;"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg> Nói`;
+        }
+      }
+    }
+    if (statusEl) {
+      if (listening) {
+        statusEl.textContent = '🎙️ Đang nghe...';
+        statusEl.style.color = '#3b82f6';
+      } else {
+        statusEl.textContent = '';
+      }
+    }
+  }
+};
+window.SpeechInput = SpeechInput;
+
+// ============================================================
+// HIỆN TRƯỜNG MODULE (BÁO CÁO ZALO & AI)
+// ============================================================
+const HienTruong = {
+  _types: ['VCX'],
+  _recipient: '@Nguyễn Toàn @Nguyễn Thanh Hùng',
+  _currentReport: '',
+  _savedId: null,
+
+  toggleType(t) {
+    if (this._types.includes(t)) {
+      if (this._types.length > 1) {
+        this._types = this._types.filter(type => type !== t);
+      }
+    } else {
+      this._types.push(t);
+    }
+    this._updateTypeButtons();
+  },
+
+  _updateTypeButtons() {
+    const btnVcx  = document.getElementById('ht-btn-vcx');
+    const btnTnds = document.getElementById('ht-btn-tnds');
+    if (btnVcx) {
+      if (this._types.includes('VCX')) {
+        btnVcx.className = 'py-2.5 rounded-lg text-xs font-bold border transition-all bg-blue-600 text-white border-blue-600 shadow-sm';
+      } else {
+        btnVcx.className = 'py-2.5 rounded-lg text-xs font-bold border transition-all bg-white text-slate-500 border-slate-200 hover:bg-slate-50';
+      }
+    }
+    if (btnTnds) {
+      if (this._types.includes('TNDS')) {
+        btnTnds.className = 'py-2.5 rounded-lg text-xs font-bold border transition-all bg-amber-500 text-white border-amber-500 shadow-sm';
+      } else {
+        btnTnds.className = 'py-2.5 rounded-lg text-xs font-bold border transition-all bg-white text-slate-500 border-slate-200 hover:bg-slate-50';
+      }
+    }
+  },
+
+  setRecipient(val, btn) {
+    this._recipient = val;
+    document.querySelectorAll('.ht-rcpt-btn').forEach(b => {
+      b.className = 'ht-rcpt-btn px-3 py-1.5 rounded-lg text-[11px] font-bold border bg-white text-slate-500 border-slate-200 hover:bg-slate-50';
+    });
+    if (btn) {
+      btn.className = 'ht-rcpt-btn px-3 py-1.5 rounded-lg text-[11px] font-bold border bg-blue-600 text-white border-blue-600 shadow-sm';
+    }
+  },
+
+  fillTemplate(key) {
+    if (!curId) return;
+    const item = allData.find(r => r.id === curId) || {};
+    const laixe = item.driverName || item.chuXe || item.customer || 'lái xe';
+    const bsx = item.bsx || '';
+    const bsxPart = bsx ? ' ' + bsx : '';
+
+    const templates = {
+      luithu: `Lái xe ${laixe} trong lúc lùi xe${bsxPart} thiếu chú ý quan sát đã để xe va chạm vào cột/tường làm hư hỏng xe.`,
+      vancan: `Lái xe ${laixe} điều khiển xe${bsxPart} trong lúc lưu thông do xe phía trước phanh gấp, do không giữ được khoảng cách an toàn nên đã để xe đâm vào đuôi xe phía trước gây tổn thất.`,
+      coicong: `Lái xe ${laixe} trong lúc đánh xe${bsxPart} vào sân/gara sơ ý thiếu quan sát đã để xe đụng phải cột/cổng nhà làm hư hỏng xe.`,
+      dongduong: `Lái xe ${laixe} điều khiển xe${bsxPart} trong lúc lưu thông trên đường thiếu chú ý quan sát đã để xe va chạm với xe khác gây tổn thất cho cả hai bên.`,
+    };
+
+    const el = document.getElementById('edit-htDienBien');
+    if (el) {
+      el.value = templates[key] || '';
+      el.dispatchEvent(new Event('input'));
+    }
+  },
+
+  fillNhanDinh() {
+    if (!curId) return;
+    const item = allData.find(r => r.id === curId) || {};
+    const laixe = item.driverName || item.chuXe || item.customer || 'lái xe';
+    const el = document.getElementById('edit-htNhanDinh');
+    if (el) {
+      el.value = `Hiện trường phù hợp với diễn biến ${laixe} khai báo, dấu vết tổn thất phù hợp, lái xe qua tiếp nhận tỉnh táo.`;
+      el.dispatchEvent(new Event('input'));
+    }
+  },
+
+  fillDeXuat(type) {
+    const map = {
+      du: 'Ghi nhận hiện trường, đề xuất phương án bồi thường đủ theo thực tế tổn thất.',
+      tnds: 'Ghi nhận hiện trường, đề xuất bồi thường TNDS về tài sản theo NĐ67, bồi thường theo chi phí sửa chữa hợp lý và khấu hao theo quy định.',
+      wait: 'Ghi nhận hiện trường, chờ gara bổ sung báo giá trước khi quyết định phương án bồi thường.'
+    };
+    const el = document.getElementById('edit-htDeXuat');
+    if (el) {
+      el.value = map[type] || '';
+      el.dispatchEvent(new Event('input'));
+    }
+  },
+
+  buildQuick(id) {
+    id = id || curId;
+    if (!id) return;
+    const item      = allData.find(r => r.id === id) || {};
+    const bsx       = item.bsx || '';
+    const dienBien  = document.getElementById('edit-htDienBien')?.value.trim() || '[Chưa nhập diễn biến]';
+    const nhanDinh  = document.getElementById('edit-htNhanDinh')?.value.trim() || 'Hiện trường phù hợp, lái xe tỉnh táo.';
+    const uoc       = document.getElementById('edit-htUocTonThat')?.value.trim() || '';
+    const donVi     = document.getElementById('edit-htDonVi')?.value || 'triệu';
+    const deXuat    = document.getElementById('edit-htDeXuat')?.value.trim() || 'Ghi nhận hiện trường, phương án bồi thường đủ.';
+
+    const bsxPart   = bsx ? ' xe ' + bsx : '';
+    const typeStr   = this._types.join(' + ');
+    const lines = [
+      `${this._recipient} báo cáo, em tiếp nhận vụ tổn thất ${typeStr}${bsxPart}.`,
+      `- Diễn biến: ${dienBien.charAt(0).toUpperCase() + dienBien.slice(1)}`,
+      `- Nhận định: ${nhanDinh.charAt(0).toUpperCase() + nhanDinh.slice(1)}`,
+    ];
+    if (uoc) lines.push(`- Ước tổn thất khoảng ${uoc} ${donVi}.`);
+    lines.push(`- Đề xuất: ${deXuat.charAt(0).toUpperCase() + deXuat.slice(1)}`);
+    lines.push('Xin ý kiến về đề xuất.');
+
+    this._showReport(lines.join('\n'), id);
+    const statusEl = document.getElementById('ht-status');
+    if (statusEl) statusEl.textContent = '✅ Đã tạo báo cáo tổng hợp nhanh';
+  },
+
+  async generateAI(id) {
+    id = id || curId;
+    if (!id) return;
+    const item      = allData.find(r => r.id === id) || {};
+    const bsx       = item.bsx || '';
+    const laixe     = item.driverName || item.chuXe || item.customer || '';
+    const dienBien  = document.getElementById('edit-htDienBien')?.value.trim() || '';
+    const nhanDinh  = document.getElementById('edit-htNhanDinh')?.value.trim() || '';
+    const uoc       = document.getElementById('edit-htUocTonThat')?.value.trim() || '';
+    const donVi     = document.getElementById('edit-htDonVi')?.value || 'triệu';
+    const deXuat    = document.getElementById('edit-htDeXuat')?.value.trim() || '';
+    
+    const causeText = item.cause || 'Chưa cập nhật';
+    const location  = item.location || 'Chưa cập nhật';
+    const damageList = (item.damageItems || []).map(d => d.chiTiet).join(', ') || 'Chưa có dữ liệu';
+    
+    const typeStr = Array.isArray(this._types) ? this._types.join(' và ') : 'VCX';
+
+    if (!dienBien && causeText === 'Chưa cập nhật') {
+      Toast.fire({ icon: 'warning', title: 'Vui lòng nhập Nguyên nhân hoặc Diễn biến!' });
+      return;
+    }
+
+    const statusEl = document.getElementById('ht-status');
+    const outputEl = document.getElementById('ht-output-area');
+    const btns     = document.getElementById('ht-action-btns');
+
+    if (statusEl) statusEl.textContent = '⏳ Tasco AI đang tổng hợp toàn bộ dữ liệu...';
+    if (outputEl) outputEl.textContent = '';
+    if (btns)    btns.style.display = 'none';
+
+    const PROMPT = `Bạn là giám định viên bảo hiểm. Hãy soạn tin nhắn báo cáo hiện trường gửi qua Zalo cho sếp.
+    
+    THÔNG TIN ĐẦU VÀO:
+    - Kính gửi: ${this._recipient}
+    - Loại tổn thất: ${typeStr}
+    - Biển số: ${bsx || 'chưa rõ'}
+    - Lái xe: ${laixe || 'chưa rõ'}
+    - Nơi xảy ra: ${location}
+    - Nguyên nhân KH khai báo: ${causeText}
+    - Diễn biến tại hiện trường: ${dienBien}
+    - Hư hỏng sơ bộ: ${damageList}
+    - Nhận định: ${nhanDinh || 'Hiện trường phù hợp, tài xế tỉnh táo'}
+    - Ước tính: ${uoc ? uoc + ' ' + donVi : 'Chưa rõ'}
+    - Đề xuất: ${deXuat || 'Ghi nhận hiện trường, bồi thường đủ'}
+
+    CẤU TRÚC BÁO CÁO BẮT BUỘC (Tuyệt đối tuân thủ đúng form này, KHÔNG tự ý thêm dòng thừa):
+    Kính gửi ${this._recipient} báo cáo, em tiếp nhận vụ tổn thất ${typeStr} xe ${bsx || 'chưa rõ'}.
+    - Diễn biến: [Gom Nguyên nhân, Địa điểm, Lái xe và Diễn biến thành 1-2 câu mạch lạc]
+    - Hư hỏng sơ bộ: [Thông tin hư hỏng]
+    - Nhận định: [Nhận định hiện trường]
+    - Ước tổn thất: [Số tiền ước tính]
+    - Đề xuất: [Phương án đề xuất]
+    Xin ý kiến chỉ đạo của sếp.
+
+    LƯU Ý QUAN TRỌNG:
+    - KHÔNG ĐƯỢC tạo thêm các gạch đầu dòng dư thừa như "- Lái xe:", "- Nơi xảy ra:". Mọi thông tin này phải được gộp khéo léo vào mục "- Diễn biến:".
+    - TUYỆT ĐỐI KHÔNG dùng ký tự markdown in đậm (**) hay in nghiêng (*). CHỈ XUẤT PLAIN TEXT.`;
+
+    try {
+      const res = await fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent?key=' + nextGemKey(),
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: PROMPT }] }],
+            safetySettings: [
+              { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+            ],
+            generationConfig: { temperature: 0.1, maxOutputTokens: 1000 }
+          })
+        }
+      );
+      const data = await res.json();
+      
+      if (data.error) throw new Error(data.error.message);
+      
+      const candidate = data.candidates?.[0];
+      if (candidate?.finishReason === 'SAFETY') throw new Error('Bị chặn bởi bộ lọc an toàn AI');
+      
+      const text = (candidate?.content?.parts?.[0]?.text || '').trim().replace(/\*\*/g, '');
+      if (!text) throw new Error('AI trả về văn bản rỗng');
+      
+      this._showReport(text, id);
+      if (statusEl) statusEl.textContent = '✅ Tasco AI đã tạo xong báo cáo tổng hợp';
+    } catch (e) {
+      if (statusEl) statusEl.textContent = '⚠️ AI lỗi — dùng mẫu nhanh: ' + e.message;
+      this.buildQuick(id);
+    }
+  },
+
+  async normalizeAI(fieldId) {
+    if (!curId) return;
+    const input   = document.getElementById(fieldId);
+    const rawText = (input?.value || '').trim();
+    const item    = allData.find(r => r.id === curId) || {};
+
+    let PROMPT = '';
+    let originalVal = input.value;
+
+    if (fieldId === 'edit-htDienBien') {
+      const causeText = item.cause || '';
+      if (!rawText && !causeText) return Toast.fire({ icon: 'warning', title: 'Vui lòng nhập Nguyên nhân (tab Hồ sơ) hoặc Diễn biến trước!' });
+
+      PROMPT = `Bạn là giám định viên bảo hiểm. Hãy viết lại Diễn biến hiện trường sau thành 1 đoạn văn duy nhất, mạch lạc.
+      - Nguyên nhân KH khai báo: "${causeText || 'Không có'}"
+      - Diễn biến thô: "${rawText || 'Dựa vào nguyên nhân KH khai báo để viết'}"
+      
+      YÊU CẦU BẮT BUỘC: 
+      1. Kết hợp 2 thông tin trên thành 1 đoạn văn hoàn chỉnh.
+      2. Sửa lỗi chính tả do nhận diện giọng nói (ví dụ: "tiêu chí quan sát" -> "thiếu chú ý quan sát").
+      3. TUYỆT ĐỐI KHÔNG BỎ DỞ CÂU GIỮA CHỪNG. Đảm bảo câu văn kết thúc bằng dấu chấm (.).
+      4. Trả về văn bản thuần (plain text), KHÔNG dùng ký tự markdown như ** hay *. KHÔNG giải thích thêm.`;
+    } else {
+      if (!rawText) return Toast.fire({ icon: 'warning', title: 'Vui lòng nhập hoặc đọc nội dung trước!' });
+      PROMPT = `Bạn là giám định viên bảo hiểm. Hãy chuẩn hóa đoạn văn nhận định hiện trường tai nạn xe cơ giới sau.
+      - Nội dung thô: "${rawText}"
+      
+      YÊU CẦU BẮT BUỘC:
+      1. Viết lại cho mạch lạc, chuyên nghiệp, GIỮ NGUYÊN TOÀN BỘ Ý CHÍNH.
+      2. TUYỆT ĐỐI KHÔNG BỎ DỞ CÂU GIỮA CHỪNG. Đảm bảo câu văn kết thúc bằng dấu chấm (.).
+      3. Trả về văn bản thuần (plain text), KHÔNG dùng ký tự markdown như ** hay *. KHÔNG giải thích thêm.`;
+    }
+
+    input.value = '⏳ Tasco AI đang phân tích...';
+    input.disabled = true;
+
+    try {
+      const res = await fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/' + GEM_MODEL + ':generateContent?key=' + nextGemKey(),
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: PROMPT }] }],
+            safetySettings: [
+              { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+            ],
+            generationConfig: { temperature: 0.4, maxOutputTokens: 800 }
+          })
+        }
+      );
+      
+      const data = await res.json();
+      
+      if (data.error) throw new Error(data.error.message);
+      
+      const candidate = data.candidates?.[0];
+      if (candidate?.finishReason === 'SAFETY') throw new Error('Bị chặn bởi bộ lọc an toàn AI');
+      
+      const text = (candidate?.content?.parts?.[0]?.text || '').trim().replace(/\*\*/g, '');
+      if (!text) throw new Error('AI trả về văn bản rỗng');
+      
+      input.value = text;
+      Toast.fire({ icon: 'success', title: 'Đã chuẩn hóa!' });
+    } catch (e) {
+      input.value = originalVal;
+      Toast.fire({ icon: 'error', title: 'AI lỗi: ' + e.message });
+    } finally {
+      input.disabled = false;
+    }
+  },
+
+  _showReport(text, id) {
+    this._currentReport = text;
+    this._savedId = id;
+
+    const outputEl = document.getElementById('ht-output-area');
+    const badge    = document.getElementById('ht-output-badge');
+    const btns     = document.getElementById('ht-action-btns');
+
+    if (outputEl) outputEl.textContent = text;
+    if (badge)    { badge.textContent = text.length + ' ký tự'; badge.className = 'text-[10px] font-black text-blue-600'; }
+    if (btns)     { btns.style.removeProperty('display'); btns.style.display = 'grid'; }
+  },
+
+  copyReport() {
+    var outputEl = document.getElementById('ht-output-area');
+    var text = outputEl ? (outputEl.innerText || outputEl.textContent) : this._currentReport;
+    if (!text || !text.trim()) return Toast.fire({ icon: 'warning', title: 'Chưa có báo cáo để copy!' });
+    
+    navigator.clipboard?.writeText(text).then(() => {
+      Toast.fire({ icon: 'success', title: '✅ Đã copy! Mở Zalo và dán vào' });
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      Toast.fire({ icon: 'success', title: '✅ Đã copy! Dán vào Zalo' });
+    });
+  },
+
+  loadFromItem(item) {
+    if (!item) return;
+    const fields = ['htDienBien','htNhanDinh','htUocTonThat','htDeXuat','htDonVi'];
+    fields.forEach(f => {
+      const el = document.getElementById('edit-' + f);
+      if (el) el.value = item[f] || '';
+    });
+    
+    if (item.htType) {
+      this._types = item.htType.split(',').map(s => s.trim());
+    } else {
+      this._types = ['VCX'];
+    }
+    this._updateTypeButtons();
+
+    if (item.htBaoCao) {
+      this._currentReport = item.htBaoCao;
+      const outputEl = document.getElementById('ht-output-area');
+      const badge    = document.getElementById('ht-output-badge');
+      const btns     = document.getElementById('ht-action-btns');
+      if (outputEl) outputEl.textContent = item.htBaoCao;
+      if (badge)    { badge.textContent = item.htBaoCao.length + ' ký tự'; badge.className = 'text-[10px] font-black text-blue-600'; }
+      if (btns)     { btns.style.removeProperty('display'); btns.style.display = 'grid'; }
+    } else {
+      this._currentReport = '';
+      const outputEl = document.getElementById('ht-output-area');
+      const badge    = document.getElementById('ht-output-badge');
+      const btns     = document.getElementById('ht-action-btns');
+      const statusEl = document.getElementById('ht-status');
+      if (outputEl) outputEl.textContent = '';
+      if (badge)    { badge.textContent = ''; }
+      if (btns)     { btns.style.display = 'none'; }
+      if (statusEl) statusEl.textContent = 'Chưa tạo báo cáo. Chọn các nút trên để tổng hợp.';
+    }
+  }
+};
+window.HienTruong = HienTruong;
+
+// Tự động chuyển sơ đồ hiện trường sang tab Hiện trường mới
+document.addEventListener("DOMContentLoaded", function() {
+  var previewEl = document.getElementById("scene-diagram-preview");
+  if (previewEl) {
+    var card = previewEl.closest(".section-card");
+    var targetContainer = document.getElementById("scene-diagram-section-container");
+    if (card && targetContainer) {
+      targetContainer.appendChild(card);
+    }
+  }
+});
 
 </script>
 </body>
