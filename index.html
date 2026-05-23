@@ -7004,38 +7004,56 @@
                             </div>
                         </div>
 
-                        <div id="row-thuHoi" onclick="const cb = document.getElementById('dm-f-thuHoi'); if(!cb.disabled) { cb.checked = !cb.checked; window._dmSync(); }" style="display:flex; align-items:center; padding:12px 14px; border-radius:14px; transition:all 0.2s; cursor:pointer; border:1.5px solid transparent;">
+                        <div id="row-thuHoi" onclick="const cb = document.getElementById('dm-f-thuHoi'); if(!cb.disabled) { cb.checked = !cb.checked; window._dmSync(); }" style="display:flex; align-items:center; padding:12px 14px; border-radius:14px; transition:all 0.2s; cursor:pointer; border:1.5px solid transparent; margin-bottom: 4px;">
                             <input type="checkbox" id="dm-f-thuHoi" ${defThuHoi ? 'checked' : ''} ${isTT ? '' : 'disabled'} style="width:17px; height:17px; accent-color:#9333ea; border-radius:4px; pointer-events:none;">
                             <span style="font-size:13px; font-weight:800; flex:1; margin-left:10px;" id="lbl-text-thu">Thu hồi phụ tùng</span>
                             <span id="dm-thu-hint" style="font-size:10px; font-weight:700; letter-spacing:0.2px;"></span>
                         </div>
                     </div>
+
+                    <!-- Spacious Non-Crammed Footer Buttons -->
+                    <div style="display:flex; flex-direction:column; gap:9px; margin-top:14px; border-top:1px solid var(--border-light, rgba(255,255,255,0.06)); padding-top:14px;">
+                        <div style="display:flex; gap:9px; width:100%;">
+                            <!-- Button: Thêm & Đóng / Lưu thay đổi -->
+                            <button onclick="Swal.clickConfirm()" class="flex-1 py-3 px-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-black text-xs active:scale-95 transition-all shadow-md shadow-blue-900/10 flex items-center justify-center gap-1.5 cursor-pointer">
+                                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                                <span>${isNew ? 'Thêm & Đóng' : 'Lưu Thay Đổi'}</span>
+                            </button>
+                            
+                            <!-- Button: Lưu & Tạo tiếp (Only when creating new) -->
+                            ${isNew ? `
+                            <button onclick="Swal.clickDeny()" class="flex-1 py-3 px-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl font-black text-xs active:scale-95 transition-all shadow-md shadow-emerald-900/10 flex items-center justify-center gap-1.5 cursor-pointer">
+                                <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                                <span>Lưu & Tạo tiếp</span>
+                            </button>
+                            ` : ''}
+                        </div>
+                        
+                        <!-- Button: Hủy bỏ (Full width at bottom) -->
+                        <button onclick="Swal.close()" class="w-full py-2.5 px-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-2xl font-black text-xs active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                            <span>Hủy bỏ</span>
+                        </button>
+                    </div>
                 </div>`;
 
             Swal.fire({
                 title: `
-                    <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:8px;">
-                        <span style="background:rgba(59,130,246,0.12); width:36px; height:36px; border-radius:12px; display:flex; align-items:center; justify-content:center;">
-                            <i data-lucide="${isNew ? 'plus-circle' : 'edit-3'}" class="w-5 h-5 text-blue-500"></i>
+                    <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:4px;">
+                        <span style="background:rgba(59,130,246,0.1); width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                            <i data-lucide="${isNew ? 'plus-circle' : 'edit-3'}" style="width:14px; height:14px; color:#3b82f6;"></i>
                         </span>
-                        <span style="font-size:16px; font-weight:900; color:var(--text-primary, #1e293b); letter-spacing:0.3px;">
+                        <span style="font-size:14px; font-weight:900; color:var(--text-primary, #1e293b); letter-spacing:0.2px;">
                             ${isNew ? 'Thêm Hạng Mục Tổn Thất' : 'Cập Nhật Hạng Mục'}
                         </span>
                     </div>
                 `,
                 html: html,
-                showCancelButton: true,
-                showDenyButton: isNew,
-                confirmButtonText: isNew ? '<i data-lucide="plus-circle" class="w-4 h-4"></i> Thêm & Đóng' : '<i data-lucide="check" class="w-4 h-4"></i> Lưu thay đổi',
-                denyButtonText: '<i data-lucide="save" class="w-4 h-4"></i> Lưu & Tạo tiếp',
-                cancelButtonText: 'Hủy',
-                buttonsStyling: false,
+                showConfirmButton: false,
+                showDenyButton: false,
+                showCancelButton: false,
                 customClass: {
-                    popup: 'custom-rounded border border-slate-200 dark:border-slate-700 shadow-2xl bg-white dark:bg-slate-900',
-                    actions: 'flex w-full justify-between items-center gap-2.5 mt-5 px-1',
-                    confirmButton: 'flex-1 py-3.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-black text-xs active:scale-95 transition-all shadow-md shadow-blue-200 dark:shadow-none flex items-center justify-center gap-1.5 cursor-pointer',
-                    denyButton: 'flex-1 py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl font-black text-xs active:scale-95 transition-all shadow-md shadow-emerald-200 dark:shadow-none flex items-center justify-center gap-1.5 cursor-pointer',
-                    cancelButton: 'flex-1 py-3.5 px-4 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-2xl font-black text-xs active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer'
+                    popup: 'custom-rounded border border-slate-200 dark:border-slate-700 shadow-2xl bg-white dark:bg-slate-900'
                 },
                 didOpen: function() {
                     if (window.lucide) window.lucide.createIcons();
