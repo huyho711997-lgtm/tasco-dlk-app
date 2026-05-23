@@ -149,15 +149,13 @@
             padding-right: 2.25rem !important;
         }
 
-        /* Synchronized clear buttons in textarea wrappers */
-        .absolute.right-3\.5.top-3\.5.bg-white\/80 {
+        /* Synchronized clear buttons globally */
+        button[onclick*="clearField"] {
             background-color: transparent !important;
             box-shadow: none !important;
-            padding: 4px !important;
-            border-radius: 9999px !important;
             color: #94a3b8 !important;
         }
-        .absolute.right-3\.5.top-3\.5.bg-white\/80:hover {
+        button[onclick*="clearField"]:hover {
             background-color: #fee2e2 !important;
             color: #ef4444 !important;
         }
@@ -431,10 +429,11 @@
         [data-theme="dark"] .border-slate-100 {
             border-color: rgba(255, 255, 255, 0.08) !important;
         }
-        [data-theme="dark"] #accident-report-modal {
+        [data-theme="dark"] #accident-report-modal,
+        [data-theme="dark"] #scene-report-modal {
             background-color: var(--bg-app) !important;
         }
-        [data-theme="dark"] .absolute.right-3\.5.top-3\.5.bg-white\/80:hover {
+        [data-theme="dark"] button[onclick*="clearField"]:hover {
             background-color: rgba(239, 68, 68, 0.15) !important;
             color: #f87171 !important;
         }
