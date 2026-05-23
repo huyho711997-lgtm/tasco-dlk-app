@@ -7039,7 +7039,12 @@
 
             Swal.fire({
                 title: `
-                    <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:4px;">
+                    <style>
+                        .compact-modal.swal2-popup { padding: 18px 20px 22px 20px !important; }
+                        .compact-modal .swal2-title { padding: 0 !important; margin: 0 !important; font-size: 14px; }
+                        .compact-modal .swal2-html-container { margin-top: 10px !important; padding: 0 !important; }
+                    </style>
+                    <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
                         <span style="background:rgba(59,130,246,0.1); width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center;">
                             <i data-lucide="${isNew ? 'plus-circle' : 'edit-3'}" style="width:14px; height:14px; color:#3b82f6;"></i>
                         </span>
@@ -7053,7 +7058,7 @@
                 showDenyButton: false,
                 showCancelButton: false,
                 customClass: {
-                    popup: 'custom-rounded border border-slate-200 dark:border-slate-700 shadow-2xl bg-white dark:bg-slate-900'
+                    popup: 'custom-rounded compact-modal border border-slate-200 dark:border-slate-700 shadow-2xl bg-white dark:bg-slate-900'
                 },
                 didOpen: function() {
                     if (window.lucide) window.lucide.createIcons();
