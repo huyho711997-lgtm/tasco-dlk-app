@@ -48,6 +48,40 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; color:
 
 .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 0.5rem; }
 .inp { width:100%; background:#f8fafc; border:1px solid #e2e8f0; border-radius:.625rem; padding:.5rem .75rem; font-size:.8125rem; font-weight:600; color:#0f172a; outline:none; transition:border .2s,box-shadow .2s,background .2s; }
+.ar-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.ar-input-wrapper .ar-clear-btn {
+  position: absolute;
+  right: 0.5rem;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: transparent;
+  border: none;
+  padding: 0;
+  outline: none;
+  z-index: 10;
+}
+.ar-input-wrapper .ar-clear-btn:hover {
+  color: #ef4444;
+  background-color: #fee2e2;
+}
+.ar-input-wrapper input:not(:placeholder-shown) ~ .ar-clear-btn {
+  display: flex;
+}
+.ar-input-wrapper input {
+  padding-right: 2rem !important;
+}
 .inp:focus { background:#fff; border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.12); }
 .inp-error { border-color: #ef4444 !important; background-color: #fef2f2 !important; color: #b91c1c !important; }
 .inp::placeholder { color:#94a3b8; font-weight:500; }
@@ -4467,13 +4501,23 @@ textarea.inp { resize:vertical; }
               <div class="border border-slate-100 rounded-xl p-3 bg-slate-50/50 space-y-2">
                 <div class="text-[11px] font-black text-slate-500 uppercase">1. Thông tin lập biên bản</div>
                 <div class="grid grid-cols-2 gap-2">
-                  <div>
-                    <label class="lbl text-[11px] mb-1">Thời gian lập</label>
-                    <input type="text" id="ar-bbTime" class="inp text-xs" placeholder="Ví dụ: 10:30 12/05/2026">
+                  <div class="space-y-1">
+                    <label class="lbl text-[11px] mb-0">Thời gian lập</label>
+                    <div class="ar-input-wrapper">
+                      <input type="text" id="ar-bbTime" class="inp text-xs" placeholder="Ví dụ: 10:30 12/05/2026">
+                      <button onclick="AccidentReport.clearField('ar-bbTime')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
                   </div>
-                  <div>
-                    <label class="lbl text-[11px] mb-1">Địa điểm lập</label>
-                    <input type="text" id="ar-bbLoc" class="inp text-xs" placeholder="Địa điểm lập biên bản">
+                  <div class="space-y-1">
+                    <label class="lbl text-[11px] mb-0">Địa điểm lập</label>
+                    <div class="ar-input-wrapper">
+                      <input type="text" id="ar-bbLoc" class="inp text-xs" placeholder="Địa điểm lập biên bản">
+                      <button onclick="AccidentReport.clearField('ar-bbLoc')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -4482,27 +4526,67 @@ textarea.inp { resize:vertical; }
               <div class="border border-slate-100 rounded-xl p-3 bg-slate-50/50 space-y-2">
                 <div class="text-[11px] font-black text-slate-500 uppercase">2. Thành phần tham gia</div>
                 <div class="grid grid-cols-2 gap-2">
-                  <div>
-                    <label class="lbl text-[11px] mb-1">Đại diện 1 (Lái/Chủ xe)</label>
-                    <input type="text" id="ar-rep1Name" class="inp text-xs mb-1" placeholder="Họ tên">
-                    <input type="text" id="ar-rep1Role" class="inp text-[10px] text-slate-400" placeholder="Vai trò (VD: Lái xe)">
+                  <div class="space-y-1">
+                    <label class="lbl text-[11px] mb-0">Đại diện 1 (Lái/Chủ xe)</label>
+                    <div class="ar-input-wrapper mb-1">
+                      <input type="text" id="ar-rep1Name" class="inp text-xs" placeholder="Họ tên">
+                      <button onclick="AccidentReport.clearField('ar-rep1Name')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                    <div class="ar-input-wrapper">
+                      <input type="text" id="ar-rep1Role" class="inp text-[10px] text-slate-400" placeholder="Vai trò (VD: Lái xe)">
+                      <button onclick="AccidentReport.clearField('ar-rep1Role')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
                   </div>
-                  <div>
-                    <label class="lbl text-[11px] mb-1">Đại diện 2 (Bảo hiểm)</label>
-                    <input type="text" id="ar-rep2Name" class="inp text-xs mb-1" placeholder="Họ tên">
-                    <input type="text" id="ar-rep2Role" class="inp text-[10px] text-slate-400" placeholder="Chức danh (VD: Giám định viên)">
+                  <div class="space-y-1">
+                    <label class="lbl text-[11px] mb-0">Đại diện 2 (Bảo hiểm)</label>
+                    <div class="ar-input-wrapper mb-1">
+                      <input type="text" id="ar-rep2Name" class="inp text-xs" placeholder="Họ tên">
+                      <button onclick="AccidentReport.clearField('ar-rep2Name')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                    <div class="ar-input-wrapper">
+                      <input type="text" id="ar-rep2Role" class="inp text-[10px] text-slate-400" placeholder="Chức danh (VD: Giám định viên)">
+                      <button onclick="AccidentReport.clearField('ar-rep2Role')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
-                  <div>
-                    <label class="lbl text-[11px] mb-1">Đại diện 3 (Bên thứ ba/Khác)</label>
-                    <input type="text" id="ar-rep3Name" class="inp text-xs mb-1" placeholder="Họ tên">
-                    <input type="text" id="ar-rep3Role" class="inp text-[10px] text-slate-400" placeholder="Chức danh/Nhiệm vụ">
+                  <div class="space-y-1">
+                    <label class="lbl text-[11px] mb-0">Đại diện 3 (Bên thứ ba/Khác)</label>
+                    <div class="ar-input-wrapper mb-1">
+                      <input type="text" id="ar-rep3Name" class="inp text-xs" placeholder="Họ tên">
+                      <button onclick="AccidentReport.clearField('ar-rep3Name')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                    <div class="ar-input-wrapper">
+                      <input type="text" id="ar-rep3Role" class="inp text-[10px] text-slate-400" placeholder="Chức danh/Nhiệm vụ">
+                      <button onclick="AccidentReport.clearField('ar-rep3Role')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
                   </div>
-                  <div>
-                    <label class="lbl text-[11px] mb-1">Đại diện 4 (Khác)</label>
-                    <input type="text" id="ar-rep4Name" class="inp text-xs mb-1" placeholder="Họ tên">
-                    <input type="text" id="ar-rep4Role" class="inp text-[10px] text-slate-400" placeholder="Chức danh/Nhiệm vụ">
+                  <div class="space-y-1">
+                    <label class="lbl text-[11px] mb-0">Đại diện 4 (Khác)</label>
+                    <div class="ar-input-wrapper mb-1">
+                      <input type="text" id="ar-rep4Name" class="inp text-xs" placeholder="Họ tên">
+                      <button onclick="AccidentReport.clearField('ar-rep4Name')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                    <div class="ar-input-wrapper">
+                      <input type="text" id="ar-rep4Role" class="inp text-[10px] text-slate-400" placeholder="Chức danh/Nhiệm vụ">
+                      <button onclick="AccidentReport.clearField('ar-rep4Role')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -4511,23 +4595,43 @@ textarea.inp { resize:vertical; }
               <div class="border border-slate-100 rounded-xl p-3 bg-slate-50/50 space-y-2">
                 <div class="text-[11px] font-black text-slate-500 uppercase">3. Phương tiện & Vụ tai nạn</div>
                 <div class="grid grid-cols-2 gap-2">
-                  <div>
-                    <label class="lbl text-[11px] mb-1">Xe bảo hiểm (Xe 1)</label>
-                    <input type="text" id="ar-vehicle1" class="inp text-xs" placeholder="Biển số xe 1">
+                  <div class="space-y-1">
+                    <label class="lbl text-[11px] mb-0">Xe bảo hiểm (Xe 1)</label>
+                    <div class="ar-input-wrapper">
+                      <input type="text" id="ar-vehicle1" class="inp text-xs" placeholder="Biển số xe 1">
+                      <button onclick="AccidentReport.clearField('ar-vehicle1')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
                   </div>
-                  <div>
-                    <label class="lbl text-[11px] mb-1">Xe đối ứng (Xe 2)</label>
-                    <input type="text" id="ar-vehicle2" class="inp text-xs" placeholder="BSX hoặc mô tả xe va chạm">
+                  <div class="space-y-1">
+                    <label class="lbl text-[11px] mb-0">Xe đối ứng (Xe 2)</label>
+                    <div class="ar-input-wrapper">
+                      <input type="text" id="ar-vehicle2" class="inp text-xs" placeholder="BSX hoặc mô tả xe va chạm">
+                      <button onclick="AccidentReport.clearField('ar-vehicle2')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
-                  <div>
-                    <label class="lbl text-[11px] mb-1">Thời gian tai nạn</label>
-                    <input type="text" id="ar-accTime" class="inp text-xs" placeholder="Ví dụ: 22:00 11/05/2026">
+                  <div class="space-y-1">
+                    <label class="lbl text-[11px] mb-0">Thời gian tai nạn</label>
+                    <div class="ar-input-wrapper">
+                      <input type="text" id="ar-accTime" class="inp text-xs" placeholder="Ví dụ: 22:00 11/05/2026">
+                      <button onclick="AccidentReport.clearField('ar-accTime')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
                   </div>
-                  <div>
-                    <label class="lbl text-[11px] mb-1">Địa điểm tai nạn</label>
-                    <input type="text" id="ar-accLoc" class="inp text-xs" placeholder="Nơi xảy ra tai nạn">
+                  <div class="space-y-1">
+                    <label class="lbl text-[11px] mb-0">Địa điểm tai nạn</label>
+                    <div class="ar-input-wrapper">
+                      <input type="text" id="ar-accLoc" class="inp text-xs" placeholder="Nơi xảy ra tai nạn">
+                      <button onclick="AccidentReport.clearField('ar-accLoc')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -4546,7 +4650,10 @@ textarea.inp { resize:vertical; }
                     </div>
                   </div>
                   <div class="relative">
-                    <textarea id="ar-dienBien" rows="3" class="inp text-xs resize-none pb-5" placeholder="Diễn biến sự việc..."></textarea>
+                    <textarea id="ar-dienBien" rows="3" class="inp text-xs resize-none pb-7 pr-7 text-slate-800 font-semibold" placeholder="Diễn biến sự việc..."></textarea>
+                    <button onclick="AccidentReport.clearField('ar-dienBien')" class="absolute top-2 right-2 text-slate-400 hover:text-rose-500 transition-colors" style="background:transparent; border:none; outline:none; cursor:pointer;">
+                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
                     <span id="st-ar-dienbien" class="absolute bottom-1 right-2 text-[9px] font-bold text-blue-500"></span>
                   </div>
                 </div>
@@ -4561,7 +4668,10 @@ textarea.inp { resize:vertical; }
                     </div>
                   </div>
                   <div class="relative">
-                    <textarea id="ar-nguyenNhan" rows="2" class="inp text-xs resize-none pb-5" placeholder="Nguyên nhân tai nạn..."></textarea>
+                    <textarea id="ar-nguyenNhan" rows="2" class="inp text-xs resize-none pb-7 pr-7 text-slate-800 font-semibold" placeholder="Nguyên nhân tai nạn..."></textarea>
+                    <button onclick="AccidentReport.clearField('ar-nguyenNhan')" class="absolute top-2 right-2 text-slate-400 hover:text-rose-500 transition-colors" style="background:transparent; border:none; outline:none; cursor:pointer;">
+                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
                     <span id="st-ar-nguyennhan" class="absolute bottom-1 right-2 text-[9px] font-bold text-blue-500"></span>
                   </div>
                 </div>
@@ -4576,7 +4686,10 @@ textarea.inp { resize:vertical; }
                     </div>
                   </div>
                   <div class="relative">
-                    <textarea id="ar-loi" rows="2" class="inp text-xs resize-none pb-5" placeholder="Lỗi của các bên..."></textarea>
+                    <textarea id="ar-loi" rows="2" class="inp text-xs resize-none pb-7 pr-7 text-slate-800 font-semibold" placeholder="Lỗi của các bên..."></textarea>
+                    <button onclick="AccidentReport.clearField('ar-loi')" class="absolute top-2 right-2 text-slate-400 hover:text-rose-500 transition-colors" style="background:transparent; border:none; outline:none; cursor:pointer;">
+                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
                     <span id="st-ar-loi" class="absolute bottom-1 right-2 text-[9px] font-bold text-blue-500"></span>
                   </div>
                 </div>
@@ -4596,7 +4709,10 @@ textarea.inp { resize:vertical; }
                     </div>
                   </div>
                   <div class="relative">
-                    <textarea id="ar-hauQua" rows="2" class="inp text-xs resize-none pb-5" placeholder="Mô tả thiệt hại về người & tài sản..."></textarea>
+                    <textarea id="ar-hauQua" rows="2" class="inp text-xs resize-none pb-7 pr-7 text-slate-800 font-semibold" placeholder="Mô tả thiệt hại về người & tài sản..."></textarea>
+                    <button onclick="AccidentReport.clearField('ar-hauQua')" class="absolute top-2 right-2 text-slate-400 hover:text-rose-500 transition-colors" style="background:transparent; border:none; outline:none; cursor:pointer;">
+                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
                     <span id="st-ar-hauqua" class="absolute bottom-1 right-2 text-[9px] font-bold text-blue-500"></span>
                   </div>
                 </div>
@@ -4612,7 +4728,10 @@ textarea.inp { resize:vertical; }
                     </div>
                   </div>
                   <div class="relative">
-                    <textarea id="ar-thoaThuan" rows="3" class="inp text-xs resize-none pb-5" placeholder="Nội dung thỏa thuận..."></textarea>
+                    <textarea id="ar-thoaThuan" rows="3" class="inp text-xs resize-none pb-7 pr-7 text-slate-800 font-semibold" placeholder="Nội dung thỏa thuận..."></textarea>
+                    <button onclick="AccidentReport.clearField('ar-thoaThuan')" class="absolute top-2 right-2 text-slate-400 hover:text-rose-500 transition-colors" style="background:transparent; border:none; outline:none; cursor:pointer;">
+                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
                     <span id="st-ar-thoathuan" class="absolute bottom-1 right-2 text-[9px] font-bold text-blue-500"></span>
                   </div>
                 </div>
@@ -23944,6 +24063,15 @@ const AccidentReport = {
             newCanvas.addEventListener('mouseup', stopDrawing);
             newCanvas.addEventListener('mouseleave', stopDrawing);
         });
+    },
+
+    clearField(fieldId) {
+        const el = document.getElementById(fieldId);
+        if (el) {
+            el.value = '';
+            el.dispatchEvent(new Event('input'));
+            el.focus();
+        }
     },
 
     clearSignature(role) {
