@@ -15886,200 +15886,368 @@ QUAN TRỌNG:
             ar.sigDriver = sigDriver;
             ar.sigAssessor = sigAssessor;
 
-            const w = window.open('', '_blank');
-            if (!w) { Toast.fire({ icon: 'error', title: 'Trình duyệt chặn popup!' }); return; }
+            // Create print container
+            let printContainer = document.getElementById('ar-print-container');
+            if (!printContainer) {
+                printContainer = document.createElement('div');
+                printContainer.id = 'ar-print-container';
+                printContainer.className = 'print-container';
+                document.body.appendChild(printContainer);
+            }
 
-            const html = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Biên bản tai nạn - ${item.bsx || ''}</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: "Times New Roman", Times, serif; font-size: 14px; color: #000; background: #525659; line-height: 1.5; padding: 40px 20px; display: flex; justify-content: center; }
-    .page { background: #fff; width: 210mm; max-width: 100%; min-height: 297mm; padding: 20mm; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; }
-    
-    .btn-print { position: fixed; top: 20px; right: 20px; z-index: 999; background: #2563eb; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-    .btn-print:hover { background: #1d4ed8; }
-    
-    .header { display: flex; justify-content: space-between; margin-bottom: 25px; align-items: flex-start; }
-    .header-left { width: 45%; }
-    .header-right { width: 50%; text-align: center; font-weight: bold; font-size: 13px; }
-    .company-name { font-size: 11px; font-weight: bold; text-transform: uppercase; }
-    .logo-img { height: 42px; margin-bottom: 4px; }
-    
-    .title-area { text-align: center; margin-bottom: 25px; }
-    .title-main { font-size: 19px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
-    .title-sub { font-size: 12px; font-style: italic; margin-top: 5px; }
-    
-    .info-row { display: flex; margin-bottom: 8px; text-align: justify; line-height: 1.6; }
-    .info-label { font-weight: bold; white-space: nowrap; margin-right: 4px; }
-    .info-val { flex-grow: 1; border-bottom: 1px dotted #000; min-height: 20px; word-break: break-word; }
-    .editable { outline: none; transition: background 0.2s; }
-    .editable:hover { background: #f0f7ff; cursor: text; }
-    .editable:focus { background: #e0f2fe; border-bottom: 1.5px solid #0284c7; }
-    
-    .signatures-grid { display: flex; justify-content: space-between; text-align: center; margin-top: 40px; }
-    .sig-col { display: flex; flex-direction: column; align-items: center; width: 30%; }
-    .sig-title { font-size: 13px; font-weight: bold; }
-    .sig-sub { font-size: 11px; font-style: italic; margin-bottom: 10px; }
-    .sig-canvas-img { max-height: 65px; max-width: 140px; object-fit: contain; margin: 5px 0; }
-    .sig-space { height: 75px; }
-    .sig-name { font-weight: bold; font-size: 13px; margin-top: auto; }
-    
-    @media print {
-      body { background: transparent; padding: 0; display: block; margin: 0; }
-      .page { box-shadow: none; padding: 15mm; margin: 0; min-height: auto; width: 100%; border: none; }
-      .btn-print { display: none !important; }
-      .editable:hover { background: transparent; }
-      .editable:focus { background: transparent; border-bottom: 1px dotted #000; }
-    }
-  </style>
-</head>
-<body>
-  <button class="btn-print" onclick="window.print()">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-    In Biên Bản
-  </button>
-  
-  <div class="page">
-    <div class="header">
-      <div class="header-left">
-        <img src="https://lh3.googleusercontent.com/d/1bpOB60B7o1NDwahpZsVxct9PbfdwvKmK" class="logo-img">
-        <div class="company-name">TỔNG CÔNG TY CP BẢO HIỂM TASCO</div>
-        <div style="font-size:10px; color:#555;">ĐƠN VỊ: TASCO ĐẮK LẮK</div>
-      </div>
-      <div class="header-right">
-        CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>
-        Độc lập - Tự do - Hạnh phúc<br>
-        <span style="font-weight:normal; font-size:11px;">---------------</span>
-      </div>
-    </div>
-    
-    <div class="title-area">
-      <h1 class="title-main">BIÊN BẢN TAI NẠN</h1>
-      <p class="title-sub">(Hiện trường vụ tai nạn xe cơ giới)</p>
-    </div>
-    
-    <div class="info-row">
-      <span class="info-label">Hồi:</span>
-      <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.bbTime || '...................................................'}</span>
-      <span style="margin: 0 4px;">tại:</span>
-      <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.bbLoc || '.......................................................................................................................'}</span>
-    </div>
-    
-    <div style="margin-top: 15px; margin-bottom: 5px; font-weight: bold;">Chúng tôi gồm:</div>
-    
-    <div class="info-row">
-      <span class="info-label">1. Đại diện chủ xe / Lái xe (Ông/Bà):</span>
-      <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep1Name || '..................................................................'}</span>
-      <span class="info-label" style="margin-left:10px;">Chức danh:</span>
-      <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep1Role || '................................................'}</span>
-    </div>
-    
-    <div class="info-row">
-      <span class="info-label">2. Đại diện Bảo hiểm Tasco (Ông/Bà):</span>
-      <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep2Name || '..................................................................'}</span>
-      <span class="info-label" style="margin-left:10px;">Chức danh:</span>
-      <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep2Role || '................................................'}</span>
-    </div>
-    
-    ${(ar.rep3Name || ar.rep3Role) ? `
-    <div class="info-row">
-      <span class="info-label">3. Đại diện bên liên quan / Khác (Ông/Bà):</span>
-      <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep3Name || ''}</span>
-      <span class="info-label" style="margin-left:10px;">Chức danh:</span>
-      <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep3Role || ''}</span>
-    </div>
-    ` : ''}
-    
-    ${(ar.rep4Name || ar.rep4Role) ? `
-    <div class="info-row">
-      <span class="info-label">4. Đại diện khác (Ông/Bà):</span>
-      <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep4Name || ''}</span>
-      <span class="info-label" style="margin-left:10px;">Chức danh:</span>
-      <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep4Role || ''}</span>
-    </div>
-    ` : ''}
-    
-    <div style="margin-top: 15px; margin-bottom: 5px;">Tiến hành lập biên bản vụ tai nạn xe cơ giới:</div>
-    
-    <div class="info-row">
-      <span class="info-label">Xe ô tô mang BKS (Xe 1):</span>
-      <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.vehicle1 || '...................................................'}</span>
-      ${ar.vehicle2 ? `
-      <span class="info-label" style="margin-left:15px;">với phương tiện đối ứng:</span>
-      <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.vehicle2}</span>
-      ` : `
-      <span class="info-label" style="margin-left:15px;">(Tự gây tai nạn, không va chạm phương tiện khác)</span>
-      `}
-    </div>
-    
-    <div class="info-row">
-      <span class="info-label">Thời gian xảy ra tai nạn: Hồi</span>
-      <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.accTime || '...................................................'}</span>
-    </div>
-    
-    <div class="info-row">
-      <span class="info-label">Địa điểm xảy ra tai nạn:</span>
-      <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.accLoc || '......................................................................................................................................................'}</span>
-    </div>
-    
-    <div class="info-row" style="flex-direction: column; margin-top: 10px;">
-      <span class="info-label" style="margin-bottom: 4px;">Nội dung diễn biến tai nạn:</span>
-      <span class="info-val editable" contenteditable="true" spellcheck="false" style="text-align: justify; line-height: 1.7; min-height: 60px;">${ar.dienBien || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
-    </div>
-    
-    <div class="info-row" style="flex-direction: column; margin-top: 10px;">
-      <span class="info-label" style="margin-bottom: 4px;">Nguyên nhân tai nạn:</span>
-      <span class="info-val editable" contenteditable="true" spellcheck="false" style="text-align: justify; line-height: 1.7; min-height: 40px;">${ar.nguyenNhan || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
-    </div>
-    
-    <div class="info-row" style="flex-direction: column; margin-top: 10px;">
-      <span class="info-label" style="margin-bottom: 4px;">Lỗi các bên liên quan:</span>
-      <span class="info-val editable" contenteditable="true" spellcheck="false" style="text-align: justify; line-height: 1.7; min-height: 40px;">${ar.loi || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
-    </div>
-    
-    <div class="info-row" style="flex-direction: column; margin-top: 10px;">
-      <span class="info-label" style="margin-bottom: 4px;">Hậu quả (Thiệt hại):</span>
-      <span class="info-val editable" contenteditable="true" spellcheck="false" style="text-align: justify; line-height: 1.7; min-height: 40px;">${ar.hauQua || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
-    </div>
-    
-    <div class="info-row" style="flex-direction: column; margin-top: 10px;">
-      <span class="info-label" style="margin-bottom: 4px;">Các bên thỏa thuận thống nhất:</span>
-      <span class="info-val editable" contenteditable="true" spellcheck="false" style="text-align: justify; line-height: 1.7; min-height: 60px;">${ar.thoaThuan || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
-    </div>
-    
-    <div style="margin-top: auto; padding-top: 30px;">
-      <div class="signatures-grid">
-        <div class="sig-col">
-          <span class="sig-title">ĐẠI DIỆN CHỦ XE / LÁI XE</span>
-          <span class="sig-sub">(Ký, ghi rõ họ tên)</span>
-          ${ar.sigDriver ? `<img src="${ar.sigDriver}" class="sig-canvas-img">` : `<div class="sig-space"></div>`}
-          <span class="sig-name">${ar.rep1Name || ''}</span>
-        </div>
-        
-        <div class="sig-col">
-          <span class="sig-title">ĐẠI DIỆN BÊN LIÊN QUAN / NHÂN CHỨNG</span>
-          <span class="sig-sub">(Ký, ghi rõ họ tên)</span>
-          <div class="sig-space"></div>
-          <span class="sig-name">${ar.rep3Name || ''}</span>
-        </div>
-        
-        <div class="sig-col">
-          <span class="sig-title">ĐẠI DIỆN BẢO HIỂM TASCO</span>
-          <span class="sig-sub">(Ký, ghi rõ họ tên)</span>
-          ${ar.sigAssessor ? `<img src="${ar.sigAssessor}" class="sig-canvas-img">` : `<div class="sig-space"></div>`}
-          <span class="sig-name">${ar.rep2Name || ''}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</body>
-</html>`;
+            // Create style element for print styles if it doesn't exist
+            let printStyle = document.getElementById('ar-print-styles');
+            if (!printStyle) {
+                printStyle = document.createElement('style');
+                printStyle.id = 'ar-print-styles';
+                printStyle.innerHTML = `
+                    @media print {
+                        body.printing-mode > *:not(#ar-print-container) {
+                            display: none !important;
+                        }
+                        #ar-print-container {
+                            display: block !important;
+                            position: static !important;
+                            box-shadow: none !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                        }
+                        .btn-print-controls {
+                            display: none !important;
+                        }
+                    }
+                    body.printing-mode {
+                        background: #525659 !important;
+                        overflow: auto !important;
+                        position: absolute;
+                        width: 100%;
+                        height: 100%;
+                        top: 0;
+                        left: 0;
+                        z-index: 999998;
+                    }
+                    body.printing-mode > *:not(#ar-print-container) {
+                        display: none !important;
+                    }
+                    #ar-print-container {
+                        background: #fff;
+                        width: 210mm;
+                        max-width: 100%;
+                        min-height: 297mm;
+                        padding: 20mm;
+                        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+                        position: relative;
+                        margin: 40px auto;
+                        box-sizing: border-box;
+                        display: flex;
+                        flex-direction: column;
+                        font-family: "Times New Roman", Times, serif;
+                        font-size: 14px;
+                        color: #000;
+                        line-height: 1.5;
+                        text-align: left;
+                    }
+                    .btn-print-controls {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        z-index: 1000000;
+                        display: flex;
+                        gap: 10px;
+                    }
+                    .btn-print-action {
+                        background: #2563eb;
+                        color: #fff;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 8px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        font-size: 14px;
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+                    }
+                    .btn-print-action:hover {
+                        background: #1d4ed8;
+                    }
+                    .btn-print-close {
+                        background: #dc2626;
+                        color: #fff;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 8px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        font-size: 14px;
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+                    }
+                    .btn-print-close:hover {
+                        background: #b91c1c;
+                    }
+                    #ar-print-container * {
+                        box-sizing: border-box;
+                    }
+                    #ar-print-container .header {
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 25px;
+                        align-items: flex-start;
+                    }
+                    #ar-print-container .header-left {
+                        width: 45%;
+                    }
+                    #ar-print-container .header-right {
+                        width: 50%;
+                        text-align: center;
+                        font-weight: bold;
+                        font-size: 13px;
+                    }
+                    #ar-print-container .company-name {
+                        font-size: 11px;
+                        font-weight: bold;
+                        text-transform: uppercase;
+                    }
+                    #ar-print-container .logo-img {
+                        height: 42px;
+                        margin-bottom: 4px;
+                    }
+                    #ar-print-container .title-area {
+                        text-align: center;
+                        margin-bottom: 25px;
+                    }
+                    #ar-print-container .title-main {
+                        font-size: 19px;
+                        font-weight: bold;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                        margin: 0;
+                    }
+                    #ar-print-container .title-sub {
+                        font-size: 12px;
+                        font-style: italic;
+                        margin-top: 5px;
+                        margin-bottom: 0;
+                    }
+                    #ar-print-container .info-row {
+                        display: flex;
+                        margin-bottom: 8px;
+                        text-align: justify;
+                        line-height: 1.6;
+                    }
+                    #ar-print-container .info-label {
+                        font-weight: bold;
+                        white-space: nowrap;
+                        margin-right: 4px;
+                    }
+                    #ar-print-container .info-val {
+                        flex-grow: 1;
+                        border-bottom: 1px dotted #000;
+                        min-height: 20px;
+                        word-break: break-word;
+                    }
+                    #ar-print-container .editable {
+                        outline: none;
+                        transition: background 0.2s;
+                    }
+                    #ar-print-container .editable:hover {
+                        background: #f0f7ff;
+                        cursor: text;
+                    }
+                    #ar-print-container .editable:focus {
+                        background: #e0f2fe;
+                        border-bottom: 1.5px solid #0284c7;
+                    }
+                    #ar-print-container .signatures-grid {
+                        display: flex;
+                        justify-content: space-between;
+                        text-align: center;
+                        margin-top: 40px;
+                    }
+                    #ar-print-container .sig-col {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        width: 30%;
+                    }
+                    #ar-print-container .sig-title {
+                        font-size: 13px;
+                        font-weight: bold;
+                    }
+                    #ar-print-container .sig-sub {
+                        font-size: 11px;
+                        font-style: italic;
+                        margin-bottom: 10px;
+                    }
+                    #ar-print-container .sig-canvas-img {
+                        max-height: 65px;
+                        max-width: 140px;
+                        object-fit: contain;
+                        margin: 5px 0;
+                    }
+                    #ar-print-container .sig-space {
+                        height: 75px;
+                    }
+                    #ar-print-container .sig-name {
+                        font-weight: bold;
+                        font-size: 13px;
+                        margin-top: auto;
+                    }
+                `;
+                document.head.appendChild(printStyle);
+            }
 
-            w.document.write(html);
-            w.document.close();
+            // Fill print container HTML
+            const templateHtml = `
+              <div class="btn-print-controls">
+                <button class="btn-print-action" onclick="window.print()">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                  In Biên Bản
+                </button>
+                <button class="btn-print-close" onclick="document.body.classList.remove('printing-mode'); document.getElementById('ar-print-container').remove();">
+                  Đóng / Quay lại
+                </button>
+              </div>
+              
+              <div class="header">
+                <div class="header-left">
+                  <img src="https://lh3.googleusercontent.com/d/1bpOB60B7o1NDwahpZsVxct9PbfdwvKmK" class="logo-img">
+                  <div class="company-name">TỔNG CÔNG TY CP BẢO HIỂM TASCO</div>
+                  <div style="font-size:10px; color:#555;">ĐƠN VỊ: TASCO ĐẮK LẮK</div>
+                </div>
+                <div class="header-right">
+                  CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>
+                  Độc lập - Tự do - Hạnh phúc<br>
+                  <span style="font-weight:normal; font-size:11px;">---------------</span>
+                </div>
+              </div>
+              
+              <div class="title-area">
+                <h1 class="title-main">BIÊN BẢN TAI NẠN</h1>
+                <p class="title-sub">(Hiện trường vụ tai nạn xe cơ giới)</p>
+              </div>
+              
+              <div class="info-row">
+                <span class="info-label">Hồi:</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.bbTime || '...................................................'}</span>
+                <span style="margin: 0 4px;">tại:</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.bbLoc || '.......................................................................................................................'}</span>
+              </div>
+              
+              <div style="margin-top: 15px; margin-bottom: 5px; font-weight: bold;">Chúng tôi gồm:</div>
+              
+              <div class="info-row">
+                <span class="info-label">1. Đại diện chủ xe / Lái xe (Ông/Bà):</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep1Name || '..................................................................'}</span>
+                <span class="info-label" style="margin-left:10px;">Chức danh:</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep1Role || '................................................'}</span>
+              </div>
+              
+              <div class="info-row">
+                <span class="info-label">2. Đại diện Bảo hiểm Tasco (Ông/Bà):</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep2Name || '..................................................................'}</span>
+                <span class="info-label" style="margin-left:10px;">Chức danh:</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep2Role || '................................................'}</span>
+              </div>
+              
+              ${(ar.rep3Name || ar.rep3Role) ? `
+              <div class="info-row">
+                <span class="info-label">3. Đại diện bên liên quan / Khác (Ông/Bà):</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep3Name || ''}</span>
+                <span class="info-label" style="margin-left:10px;">Chức danh:</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep3Role || ''}</span>
+              </div>
+              ` : ''}
+              
+              ${(ar.rep4Name || ar.rep4Role) ? `
+              <div class="info-row">
+                <span class="info-label">4. Đại diện khác (Ông/Bà):</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep4Name || ''}</span>
+                <span class="info-label" style="margin-left:10px;">Chức danh:</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep4Role || ''}</span>
+              </div>
+              ` : ''}
+              
+              <div style="margin-top: 15px; margin-bottom: 5px;">Tiến hành lập biên bản vụ tai nạn xe cơ giới:</div>
+              
+              <div class="info-row">
+                <span class="info-label">Xe ô tô mang BKS (Xe 1):</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.vehicle1 || '...................................................'}</span>
+                ${ar.vehicle2 ? `
+                <span class="info-label" style="margin-left:15px;">với phương tiện đối ứng:</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.vehicle2}</span>
+                ` : `
+                <span class="info-label" style="margin-left:15px;">(Tự gây tai nạn, không va chạm phương tiện khác)</span>
+                `}
+              </div>
+              
+              <div class="info-row">
+                <span class="info-label">Thời gian xảy ra tai nạn: Hồi</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.accTime || '...................................................'}</span>
+              </div>
+              
+              <div class="info-row">
+                <span class="info-label">Địa điểm xảy ra tai nạn:</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.accLoc || '......................................................................................................................................................'}</span>
+              </div>
+              
+              <div class="info-row" style="flex-direction: column; margin-top: 10px;">
+                <span class="info-label" style="margin-bottom: 4px;">Nội dung diễn biến tai nạn:</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false" style="text-align: justify; line-height: 1.7; min-height: 60px;">${ar.dienBien || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
+              </div>
+              
+              <div class="info-row" style="flex-direction: column; margin-top: 10px;">
+                <span class="info-label" style="margin-bottom: 4px;">Nguyên nhân tai nạn:</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false" style="text-align: justify; line-height: 1.7; min-height: 40px;">${ar.nguyenNhan || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
+              </div>
+              
+              <div class="info-row" style="flex-direction: column; margin-top: 10px;">
+                <span class="info-label" style="margin-bottom: 4px;">Lỗi các bên liên quan:</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false" style="text-align: justify; line-height: 1.7; min-height: 40px;">${ar.loi || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
+              </div>
+              
+              <div class="info-row" style="flex-direction: column; margin-top: 10px;">
+                <span class="info-label" style="margin-bottom: 4px;">Hậu quả (Thiệt hại):</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false" style="text-align: justify; line-height: 1.7; min-height: 40px;">${ar.hauQua || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
+              </div>
+              
+              <div class="info-row" style="flex-direction: column; margin-top: 10px;">
+                <span class="info-label" style="margin-bottom: 4px;">Các bên thỏa thuận thống nhất:</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false" style="text-align: justify; line-height: 1.7; min-height: 60px;">${ar.thoaThuan || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
+              </div>
+              
+              <div style="margin-top: auto; padding-top: 30px;">
+                <div class="signatures-grid">
+                  <div class="sig-col">
+                    <span class="sig-title">ĐẠI DIỆN CHỦ XE / LÁI XE</span>
+                    <span class="sig-sub">(Ký, ghi rõ họ tên)</span>
+                    ${ar.sigDriver ? `<img src="${ar.sigDriver}" class="sig-canvas-img">` : `<div class="sig-space"></div>`}
+                    <span class="sig-name">${ar.rep1Name || ''}</span>
+                  </div>
+                  
+                  <div class="sig-col">
+                    <span class="sig-title">ĐẠI DIỆN BÊN LIÊN QUAN / NHÂN CHỨNG</span>
+                    <span class="sig-sub">(Ký, ghi rõ họ tên)</span>
+                    <div class="sig-space"></div>
+                    <span class="sig-name">${ar.rep3Name || ''}</span>
+                  </div>
+                  
+                  <div class="sig-col">
+                    <span class="sig-title">ĐẠI DIỆN BẢO HIỂM TASCO</span>
+                    <span class="sig-sub">(Ký, ghi rõ họ tên)</span>
+                    ${ar.sigAssessor ? `<img src="${ar.sigAssessor}" class="sig-canvas-img">` : `<div class="sig-space"></div>`}
+                    <span class="sig-name">${ar.rep2Name || ''}</span>
+                  </div>
+                </div>
+              </div>
+            `;
+
+            printContainer.innerHTML = templateHtml;
+            document.body.classList.add('printing-mode');
         }
     };
     window.AccidentReport = AccidentReport;
