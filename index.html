@@ -15380,6 +15380,8 @@ QUAN TRỌNG:
                 modal.classList.remove('translate-y-full');
             }, 10);
             
+            this.initAutoGrowTextareas();
+            this.adjustTextareasHeight();
             lucide.createIcons();
         },
 
@@ -15390,6 +15392,47 @@ QUAN TRỌNG:
                 el.dispatchEvent(new Event('input'));
                 el.focus();
             }
+        },
+
+        initAutoGrowTextareas() {
+            const textareas = [
+                'ar-dienBien',
+                'ar-nguyenNhan',
+                'ar-loi',
+                'ar-hauQua',
+                'ar-thoaThuan'
+            ];
+            textareas.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && !el.dataset.autogrowInitialized) {
+                    el.dataset.autogrowInitialized = 'true';
+                    el.style.overflowY = 'hidden';
+                    el.style.boxSizing = 'border-box';
+                    
+                    const adjustHeight = () => {
+                        el.style.height = 'auto';
+                        el.style.height = el.scrollHeight + 'px';
+                    };
+                    el.addEventListener('input', adjustHeight);
+                    el.adjustHeight = adjustHeight;
+                }
+            });
+        },
+
+        adjustTextareasHeight() {
+            const textareas = [
+                'ar-dienBien',
+                'ar-nguyenNhan',
+                'ar-loi',
+                'ar-hauQua',
+                'ar-thoaThuan'
+            ];
+            textareas.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el.adjustHeight) {
+                    el.adjustHeight();
+                }
+            });
         },
 
         closeMobileModal() {
@@ -15698,9 +15741,11 @@ QUAN TRỌNG:
                 if (!text) throw new Error('AI trả về rỗng');
 
                 input.value = text;
+                input.dispatchEvent(new Event('input'));
                 Toast.fire({ icon: 'success', title: 'Đã chuẩn hóa!' });
             } catch (e) {
                 input.value = originalVal;
+                input.dispatchEvent(new Event('input'));
                 Toast.fire({ icon: 'error', title: 'Lỗi AI: ' + e.message });
             } finally {
                 input.disabled = false;
