@@ -6999,9 +6999,12 @@
                 title: '<span style="font-size:14px;font-weight:800;color:var(--text-primary);">' + (isNew ? 'Thêm hạng mục tổn thất' : 'Sửa hạng mục') + '</span>',
                 html: html,
                 showCancelButton: true,
-                confirmButtonText: isNew ? '+ Thêm hạng mục' : '✓ Lưu thay đổi',
+                showDenyButton: isNew,
+                confirmButtonText: isNew ? '+ Thêm & Đóng' : '✓ Lưu thay đổi',
+                denyButtonText: 'Lưu & Tạo tiếp',
                 cancelButtonText: 'Hủy',
                 confirmButtonColor: '#2563eb',
+                denyButtonColor: '#10b981',
                 customClass: { popup: 'custom-rounded' },
                 didOpen: function() {
                     window._dmSync = function() {
@@ -7082,9 +7085,28 @@
                         thayThe: isTT,
                         thuHoi:  document.getElementById('dm-f-thuHoi').checked
                     };
+                },
+                preDeny: function() {
+                    const chiTiet = document.getElementById('dm-f-chiTiet').value.trim();
+                    if (!chiTiet) return Swal.showValidationMessage('Vui lòng nhập tên bộ phận!');
+                    
+                    const action = document.querySelector('input[name="dm-action"]:checked');
+                    if (!action) return Swal.showValidationMessage('Vui lòng chọn Hướng xử lý!');
+                    
+                    const isSC = action.value === 'sc';
+                    const isTT = action.value === 'tt';
+
+                    return {
+                        chiTiet,
+                        moTa:    document.getElementById('dm-f-moTa').value.trim(),
+                        mucDo:   document.getElementById('dm-f-mucDo').value,
+                        suaChua: isSC,
+                        thayThe: isTT,
+                        thuHoi:  document.getElementById('dm-f-thuHoi').checked
+                    };
                 }
             }).then(res => {
-                if (!res.isConfirmed) return;
+                if (!res.isConfirmed && !res.isDenied) return;
                 const item = App.find(id);
                 const list = [...(item.damageItems || [])];
                 const newRow = Object.assign({}, res.value, { stt: isNew ? list.length + 1 : (existing ? existing.stt : idx + 1) });
@@ -7094,6 +7116,11 @@
                 db.ref('Workstation/' + id + '/damageItems').set(list).then(() => {
                     Toast.fire({ icon: 'success', title: isNew ? 'Đã thêm hạng mục!' : 'Đã cập nhật!' });
                     DamageItems.render(id);
+                    if (res.isDenied) {
+                        setTimeout(() => {
+                            DamageItems._openSheet(id, null, null);
+                        }, 400);
+                    }
                 });
             });
         },
