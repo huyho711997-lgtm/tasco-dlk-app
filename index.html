@@ -15886,13 +15886,19 @@ QUAN TRỌNG:
             ar.sigDriver = sigDriver;
             ar.sigAssessor = sigAssessor;
 
-            // Create print container
+            // Create print wrapper
+            let printWrapper = document.getElementById('ar-print-wrapper');
+            if (!printWrapper) {
+                printWrapper = document.createElement('div');
+                printWrapper.id = 'ar-print-wrapper';
+                document.body.appendChild(printWrapper);
+            }
+
             let printContainer = document.getElementById('ar-print-container');
             if (!printContainer) {
                 printContainer = document.createElement('div');
                 printContainer.id = 'ar-print-container';
-                printContainer.className = 'print-container';
-                document.body.appendChild(printContainer);
+                printWrapper.appendChild(printContainer);
             }
 
             // Create style element for print styles if it doesn't exist
@@ -15902,15 +15908,25 @@ QUAN TRỌNG:
                 printStyle.id = 'ar-print-styles';
                 printStyle.innerHTML = `
                     @media print {
-                        body.printing-mode > *:not(#ar-print-container) {
+                        body.printing-mode > *:not(#ar-print-wrapper) {
                             display: none !important;
+                        }
+                        #ar-print-wrapper {
+                            padding: 0 !important;
+                            margin: 0 !important;
+                            display: block !important;
+                            width: 100% !important;
+                            min-height: auto !important;
                         }
                         #ar-print-container {
                             display: block !important;
                             position: static !important;
                             box-shadow: none !important;
                             margin: 0 !important;
-                            padding: 0 !important;
+                            padding: 15mm !important;
+                            zoom: 1 !important;
+                            transform: none !important;
+                            width: 100% !important;
                         }
                         .btn-print-controls {
                             display: none !important;
@@ -15926,18 +15942,25 @@ QUAN TRỌNG:
                         left: 0;
                         z-index: 999998;
                     }
-                    body.printing-mode > *:not(#ar-print-container) {
+                    body.printing-mode > *:not(#ar-print-wrapper) {
                         display: none !important;
+                    }
+                    #ar-print-wrapper {
+                        display: flex;
+                        justify-content: center;
+                        align-items: flex-start;
+                        width: 100%;
+                        min-height: 100%;
+                        padding: 60px 10px 20px 10px;
+                        box-sizing: border-box;
                     }
                     #ar-print-container {
                         background: #fff;
                         width: 210mm;
-                        max-width: 100%;
                         min-height: 297mm;
                         padding: 20mm;
                         box-shadow: 0 10px 25px rgba(0,0,0,0.5);
                         position: relative;
-                        margin: 40px auto;
                         box-sizing: border-box;
                         display: flex;
                         flex-direction: column;
@@ -16108,7 +16131,7 @@ QUAN TRỌNG:
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                   In Biên Bản
                 </button>
-                <button class="btn-print-close" onclick="document.body.classList.remove('printing-mode'); document.getElementById('ar-print-container').remove();">
+                <button class="btn-print-close" onclick="AccidentReport.closePrintPreview()">
                   Đóng / Quay lại
                 </button>
               </div>
@@ -16248,6 +16271,43 @@ QUAN TRỌNG:
 
             printContainer.innerHTML = templateHtml;
             document.body.classList.add('printing-mode');
+
+            const adjustPrintScale = () => {
+                const container = document.getElementById('ar-print-container');
+                if (!container) return;
+                const screenWidth = window.innerWidth;
+                const targetWidth = 794; // 210mm in pixels at 96dpi
+                
+                if (screenWidth < targetWidth + 20) {
+                    const scale = (screenWidth - 20) / targetWidth;
+                    container.style.transform = `scale(${scale})`;
+                    container.style.transformOrigin = 'top center';
+                    const targetHeight = container.offsetHeight || 1123;
+                    container.style.marginBottom = `-${targetHeight * (1 - scale)}px`;
+                } else {
+                    container.style.transform = '';
+                    container.style.transformOrigin = '';
+                    container.style.marginBottom = '';
+                }
+            };
+            
+            AccidentReport.adjustPrintScale = adjustPrintScale;
+            
+            // Trigger scaling immediately
+            setTimeout(adjustPrintScale, 50);
+            
+            // Add listeners
+            window.removeEventListener('resize', AccidentReport.adjustPrintScale);
+            window.addEventListener('resize', AccidentReport.adjustPrintScale);
+        },
+
+        closePrintPreview() {
+            document.body.classList.remove('printing-mode');
+            const wrapper = document.getElementById('ar-print-wrapper');
+            if (wrapper) wrapper.remove();
+            if (AccidentReport.adjustPrintScale) {
+                window.removeEventListener('resize', AccidentReport.adjustPrintScale);
+            }
         }
     };
     window.AccidentReport = AccidentReport;
