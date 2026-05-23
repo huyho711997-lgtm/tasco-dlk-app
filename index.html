@@ -16271,13 +16271,14 @@ QUAN TRỌNG:
                 const screenWidth = window.innerWidth;
                 const targetWidth = 794; // 210mm in pixels at 96dpi
                 
-                if (screenWidth < targetWidth + 20) {
-                    const scale = (screenWidth - 20) / targetWidth;
-                    container.style.transform = `scale(${scale})`;
-                    container.style.transformOrigin = 'top center';
-                    const targetHeight = container.offsetHeight || 1123;
-                    container.style.marginBottom = `-${targetHeight * (1 - scale)}px`;
+                if (screenWidth < targetWidth + 40) {
+                    const scale = (screenWidth - 40) / targetWidth;
+                    container.style.zoom = scale;
+                    container.style.transform = '';
+                    container.style.transformOrigin = '';
+                    container.style.marginBottom = '';
                 } else {
+                    container.style.zoom = '';
                     container.style.transform = '';
                     container.style.transformOrigin = '';
                     container.style.marginBottom = '';
