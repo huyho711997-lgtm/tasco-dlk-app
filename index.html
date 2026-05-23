@@ -6971,18 +6971,18 @@
                     <div>
                         <label class="input-label" style="font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">Mức độ hư hỏng</label>
                         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
-                            <label id="btn-md-nhe" style="display:flex; align-items:center; justify-content:center; gap:4px; padding:11px 6px; border-radius:14px; border:1.5px solid transparent; cursor:pointer; transition:all 0.2s;">
-                                <input type="radio" name="dm-mucDo" value="Nhẹ" ${mucDo === 'Nhẹ' ? 'checked' : ''} onchange="window._dmSync()" class="hidden">
+                            <label id="btn-md-nhe" onclick="document.getElementById('radio-md-nhe').checked = true; window._dmSync();" style="display:flex; align-items:center; justify-content:center; gap:4px; padding:11px 6px; border-radius:14px; border:1.5px solid transparent; cursor:pointer; transition:all 0.2s;">
+                                <input type="radio" id="radio-md-nhe" name="dm-mucDo" value="Nhẹ" ${mucDo === 'Nhẹ' ? 'checked' : ''} style="opacity:0; position:absolute; width:0; height:0; pointer-events:none;">
                                 <span style="font-weight:800; font-size:12.5px;">Nhẹ</span>
                             </label>
                             
-                            <label id="btn-md-tb" style="display:flex; align-items:center; justify-content:center; gap:4px; padding:11px 6px; border-radius:14px; border:1.5px solid transparent; cursor:pointer; transition:all 0.2s;">
-                                <input type="radio" name="dm-mucDo" value="Trung bình" ${mucDo === 'Trung bình' ? 'checked' : ''} onchange="window._dmSync()" class="hidden">
+                            <label id="btn-md-tb" onclick="document.getElementById('radio-md-tb').checked = true; window._dmSync();" style="display:flex; align-items:center; justify-content:center; gap:4px; padding:11px 6px; border-radius:14px; border:1.5px solid transparent; cursor:pointer; transition:all 0.2s;">
+                                <input type="radio" id="radio-md-tb" name="dm-mucDo" value="Trung bình" ${mucDo === 'Trung bình' ? 'checked' : ''} style="opacity:0; position:absolute; width:0; height:0; pointer-events:none;">
                                 <span style="font-weight:800; font-size:12.5px;">Vừa</span>
                             </label>
 
-                            <label id="btn-md-nang" style="display:flex; align-items:center; justify-content:center; gap:4px; padding:11px 6px; border-radius:14px; border:1.5px solid transparent; cursor:pointer; transition:all 0.2s;">
-                                <input type="radio" name="dm-mucDo" value="Nặng" ${mucDo === 'Nặng' ? 'checked' : ''} onchange="window._dmSync()" class="hidden">
+                            <label id="btn-md-nang" onclick="document.getElementById('radio-md-nang').checked = true; window._dmSync();" style="display:flex; align-items:center; justify-content:center; gap:4px; padding:11px 6px; border-radius:14px; border:1.5px solid transparent; cursor:pointer; transition:all 0.2s;">
+                                <input type="radio" id="radio-md-nang" name="dm-mucDo" value="Nặng" ${mucDo === 'Nặng' ? 'checked' : ''} style="opacity:0; position:absolute; width:0; height:0; pointer-events:none;">
                                 <span style="font-weight:800; font-size:12.5px;">Nặng</span>
                             </label>
                         </div>
@@ -6991,14 +6991,14 @@
                         <label class="input-label" style="font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">Hướng xử lý</label>
                         
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                            <label id="btn-wrap-sc" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:12px 10px; border-radius:16px; border:1.5px solid transparent; cursor:pointer; transition:all 0.2s;">
-                                <input type="radio" name="dm-action" value="sc" ${isSC ? 'checked' : ''} onchange="window._dmSync()" class="hidden">
+                            <label id="btn-wrap-sc" onclick="document.getElementById('radio-act-sc').checked = true; window._dmSync();" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:12px 10px; border-radius:16px; border:1.5px solid transparent; cursor:pointer; transition:all 0.2s;">
+                                <input type="radio" id="radio-act-sc" name="dm-action" value="sc" ${isSC ? 'checked' : ''} style="opacity:0; position:absolute; width:0; height:0; pointer-events:none;">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
                                 <span style="font-weight:900; font-size:13px; letter-spacing:0.3px;">Sửa chữa</span>
                             </label>
                             
-                            <label id="btn-wrap-tt" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:12px 10px; border-radius:16px; border:1.5px solid transparent; cursor:pointer; transition:all 0.2s;">
-                                <input type="radio" name="dm-action" value="tt" ${isTT ? 'checked' : ''} onchange="window._dmSync()" class="hidden">
+                            <label id="btn-wrap-tt" onclick="document.getElementById('radio-act-tt').checked = true; window._dmSync();" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:12px 10px; border-radius:16px; border:1.5px solid transparent; cursor:pointer; transition:all 0.2s;">
+                                <input type="radio" id="radio-act-tt" name="dm-action" value="tt" ${isTT ? 'checked' : ''} style="opacity:0; position:absolute; width:0; height:0; pointer-events:none;">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 3l10 10M8 3h5v5M3 8v5h5"/></svg>
                                 <span style="font-weight:900; font-size:13px; letter-spacing:0.3px;">Thay thế</span>
                             </label>
@@ -7149,10 +7149,13 @@
                     const isSC = action.value === 'sc';
                     const isTT = action.value === 'tt';
 
+                    const mucDoEl = document.querySelector('input[name="dm-mucDo"]:checked');
+                    const finalMucDo = mucDoEl ? mucDoEl.value : 'Nhẹ';
+
                     return {
                         chiTiet,
                         moTa:    document.getElementById('dm-f-moTa').value.trim(),
-                        mucDo:   document.querySelector('input[name="dm-mucDo"]:checked').value,
+                        mucDo:   finalMucDo,
                         suaChua: isSC,
                         thayThe: isTT,
                         thuHoi:  document.getElementById('dm-f-thuHoi').checked
@@ -7168,10 +7171,13 @@
                     const isSC = action.value === 'sc';
                     const isTT = action.value === 'tt';
 
+                    const mucDoEl = document.querySelector('input[name="dm-mucDo"]:checked');
+                    const finalMucDo = mucDoEl ? mucDoEl.value : 'Nhẹ';
+
                     return {
                         chiTiet,
                         moTa:    document.getElementById('dm-f-moTa').value.trim(),
-                        mucDo:   document.querySelector('input[name="dm-mucDo"]:checked').value,
+                        mucDo:   finalMucDo,
                         suaChua: isSC,
                         thayThe: isTT,
                         thuHoi:  document.getElementById('dm-f-thuHoi').checked
