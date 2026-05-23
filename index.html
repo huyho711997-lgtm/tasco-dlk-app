@@ -16057,20 +16057,15 @@ QUAN TRỌNG:
                         margin-bottom: 0;
                     }
                     #ar-print-container .info-row {
-                        display: flex;
                         margin-bottom: 8px;
                         text-align: justify;
                         line-height: 1.6;
                     }
                     #ar-print-container .info-label {
                         font-weight: bold;
-                        white-space: nowrap;
-                        margin-right: 4px;
                     }
                     #ar-print-container .info-val {
-                        flex-grow: 1;
-                        border-bottom: none;
-                        min-height: 20px;
+                        display: inline;
                         word-break: break-word;
                     }
                     #ar-print-container .editable {
@@ -16218,29 +16213,29 @@ QUAN TRỌNG:
                 <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.accLoc || '......................................................................................................................................................'}</span>
               </div>
               
-              <div class="info-row" style="flex-direction: column; margin-top: 10px;">
-                <span class="info-label" style="margin-bottom: 4px;">Nội dung diễn biến tai nạn:</span>
-                <span class="info-val editable" contenteditable="true" spellcheck="false" style="text-align: justify; line-height: 1.7; min-height: 60px;">${ar.dienBien || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
+              <div class="info-row" style="margin-top: 10px;">
+                <span class="info-label" style="display: block; margin-bottom: 4px;">Nội dung diễn biến tai nạn:</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false" style="display: block; text-align: justify; line-height: 1.7;">${ar.dienBien || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
               </div>
               
-              <div class="info-row" style="flex-direction: column; margin-top: 10px;">
-                <span class="info-label" style="margin-bottom: 4px;">Nguyên nhân tai nạn:</span>
-                <span class="info-val editable" contenteditable="true" spellcheck="false" style="text-align: justify; line-height: 1.7; min-height: 40px;">${ar.nguyenNhan || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
+              <div class="info-row" style="margin-top: 10px;">
+                <span class="info-label" style="display: block; margin-bottom: 4px;">Nguyên nhân tai nạn:</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false" style="display: block; text-align: justify; line-height: 1.7;">${ar.nguyenNhan || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
               </div>
               
-              <div class="info-row" style="flex-direction: column; margin-top: 10px;">
-                <span class="info-label" style="margin-bottom: 4px;">Lỗi các bên liên quan:</span>
-                <span class="info-val editable" contenteditable="true" spellcheck="false" style="text-align: justify; line-height: 1.7; min-height: 40px;">${ar.loi || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
+              <div class="info-row" style="margin-top: 10px;">
+                <span class="info-label" style="display: block; margin-bottom: 4px;">Lỗi các bên liên quan:</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false" style="display: block; text-align: justify; line-height: 1.7;">${ar.loi || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
               </div>
               
-              <div class="info-row" style="flex-direction: column; margin-top: 10px;">
-                <span class="info-label" style="margin-bottom: 4px;">Hậu quả (Thiệt hại):</span>
-                <span class="info-val editable" contenteditable="true" spellcheck="false" style="text-align: justify; line-height: 1.7; min-height: 40px;">${ar.hauQua || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
+              <div class="info-row" style="margin-top: 10px;">
+                <span class="info-label" style="display: block; margin-bottom: 4px;">Hậu quả (Thiệt hại):</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false" style="display: block; text-align: justify; line-height: 1.7;">${ar.hauQua || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
               </div>
               
-              <div class="info-row" style="flex-direction: column; margin-top: 10px;">
-                <span class="info-label" style="margin-bottom: 4px;">Các bên thỏa thuận thống nhất:</span>
-                <span class="info-val editable" contenteditable="true" spellcheck="false" style="text-align: justify; line-height: 1.7; min-height: 60px;">${ar.thoaThuan || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
+              <div class="info-row" style="margin-top: 10px;">
+                <span class="info-label" style="display: block; margin-bottom: 4px;">Các bên thỏa thuận thống nhất:</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false" style="display: block; text-align: justify; line-height: 1.7;">${ar.thoaThuan || '..........................................................................................................................................................................................................................................................................................................................................................................................................'}</span>
               </div>
               
               <div style="margin-top: auto; padding-top: 30px;">
