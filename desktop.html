@@ -24206,11 +24206,17 @@ const AccidentReport = {
         input.value = '⏳ AI đang chuẩn hóa...';
         input.disabled = true;
 
-        const PROMPT = `Bạn là chuyên gia giám định bồi thường xe cơ giới. Hãy chỉnh sửa và chuẩn hóa đoạn văn văn bản sau về văn phong chuyên nghiệp, đúng thuật ngữ kỹ thuật bảo hiểm xe, sửa toàn bộ lỗi chính tả và ngọng do nhận dạng giọng nói (ví dụ: cảng -> cản, lường -> lườn, dè -> vè, mốp -> móp).
-        Nội dung gốc: "${rawText}"
-        YÊU CẦU BẮT BUỘC:
-        1. Trả về đúng 1 đoạn văn duy nhất, mạch lạc, kết thúc bằng dấu chấm (.).
-        2. Trả về văn bản thuần (plain text), KHÔNG dùng ký tự markdown như ** hay *. KHÔNG giải thích gì thêm.`;
+        const PROMPT = `Nhiệm vụ: Chỉnh sửa và chuẩn hóa văn bản mô tả tai nạn dưới đây theo các quy tắc nghiêm ngặt sau:
+1. Sửa lỗi chính tả, ngữ pháp và lỗi phát âm/ngọng do nhận diện giọng nói (Ví dụ: cảng -> cản, lường -> lườn, dè -> vè, mốp -> móp, kiến -> kính).
+2. Chuẩn hóa địa chỉ xuất hiện trong văn bản về đúng định dạng địa chỉ hành chính Việt Nam.
+3. Chỉnh biển số xe (nếu có) về đúng định dạng chuẩn (Ví dụ: 47B-123.45, 47C1-234.56).
+4. TUYỆT ĐỐI KHÔNG tự ý chỉnh sửa, thêm bớt, suy diễn hay viết lại các phần thông tin khác. Giữ nguyên toàn bộ các chi tiết cốt lõi, tên riêng, loại xe, tình trạng thiệt hại và diễn biến sự việc như nội dung gốc.
+
+Nội dung gốc: "${rawText}"
+
+YÊU CẦU ĐẦU RA:
+- Trả về duy nhất văn bản đã chuẩn hóa dưới dạng plain text (KHÔNG dùng markdown như ** hay *).
+- KHÔNG giải thích gì thêm, KHÔNG thêm bất kỳ lời thoại nào khác.`;
 
         try {
             const MODELS = ['gemini-2.5-flash-lite', 'gemini-2.0-flash', GEM_MODEL];
