@@ -24084,17 +24084,40 @@ const AccidentReport = {
         2. Trả về văn bản thuần (plain text), KHÔNG dùng ký tự markdown như ** hay *. KHÔNG giải thích gì thêm.`;
 
         try {
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEM_MODEL}:generateContent?key=${nextGemKey()}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: PROMPT }] }],
-                    generationConfig: { temperature: 0.2, maxOutputTokens: 800 }
-                })
-            });
-            const data = await res.json();
-            if (data.error) throw new Error(data.error.message);
-            const text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+            const MODELS = ['gemini-2.5-flash-lite', 'gemini-2.0-flash', GEM_MODEL];
+            const maxRetries = GEM_KEYS.length * MODELS.length;
+            let lastError = null;
+            let text = '';
+            
+            for (let i = 0; i < maxRetries; i++) {
+                const key = nextGemKey();
+                const model = MODELS[Math.floor(i / GEM_KEYS.length) % MODELS.length];
+                try {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: PROMPT }] }],
+                            generationConfig: { temperature: 0.2, maxOutputTokens: 800 }
+                        })
+                    });
+
+                    const data = await res.json();
+                    if (res.ok && !data.error) {
+                        text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+                        lastError = null;
+                        break;
+                    }
+                    lastError = data?.error?.message || 'Lỗi không xác định';
+                } catch (err) {
+                    lastError = err.message;
+                }
+                if (i < maxRetries - 1) {
+                    await new Promise(resolve => setTimeout(resolve, Math.min(500 * Math.pow(2, i), 3000)));
+                }
+            }
+
+            if (lastError) throw new Error(lastError);
             if (!text) throw new Error('AI trả về rỗng');
 
             input.value = text;
@@ -24179,23 +24202,45 @@ const AccidentReport = {
         Lưu ý: Chỉ trả về JSON thô (raw JSON text), không đặt trong thẻ code block tam giác ngược (markdown), không giải thích gì thêm.`;
 
         try {
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEM_MODEL}:generateContent?key=${nextGemKey()}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [
-                            { text: PROMPT },
-                            { inline_data: { mime_type: 'image/jpeg', data: base64Image } }
-                        ]
-                    }],
-                    generationConfig: { temperature: 0.1 }
-                })
-            });
-            const data = await res.json();
-            if (data.error) throw new Error(data.error.message);
+            const MODELS = ['gemini-2.5-flash-lite', 'gemini-2.0-flash', GEM_MODEL];
+            const maxRetries = GEM_KEYS.length * MODELS.length;
+            let lastError = null;
+            let text = '';
+            
+            for (let i = 0; i < maxRetries; i++) {
+                const key = nextGemKey();
+                const model = MODELS[Math.floor(i / GEM_KEYS.length) % MODELS.length];
+                try {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [
+                                    { text: PROMPT },
+                                    { inline_data: { mime_type: 'image/jpeg', data: base64Image } }
+                                ]
+                            }],
+                            generationConfig: { temperature: 0.1 }
+                        })
+                    });
 
-            const text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+                    const data = await res.json();
+                    if (res.ok && !data.error) {
+                        text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+                        lastError = null;
+                        break;
+                    }
+                    lastError = data?.error?.message || 'Lỗi không xác định';
+                } catch (err) {
+                    lastError = err.message;
+                }
+                if (i < maxRetries - 1) {
+                    await new Promise(resolve => setTimeout(resolve, Math.min(500 * Math.pow(2, i), 3000)));
+                }
+            }
+
+            if (lastError) throw new Error(lastError);
             let cleanJson = text;
             if (cleanJson.startsWith('```')) {
                 cleanJson = cleanJson.replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
