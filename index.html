@@ -6959,60 +6959,87 @@
             const isSC = isNew ? true : !!e.suaChua;
 
             const html = `
-                <div style="text-align:left;display:flex;flex-direction:column;gap:12px;margin-top:10px;">
+                <div style="text-align:left;display:flex;flex-direction:column;gap:14px;margin-top:10px;">
                     <div>
-                        <label class="input-label">Bộ phận / Chi tiết *</label>
-                        <input id="dm-f-chiTiet" type="text" class="input-field" placeholder="VD: Cản trước bên trái, đèn pha phải..." value="${e.chiTiet || ''}">
+                        <label class="input-label" style="font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:6px;">Bộ phận / Chi tiết *</label>
+                        <input id="dm-f-chiTiet" type="text" class="input-field" style="border-radius:14px; padding:11px 13px;" placeholder="VD: Cản trước bên trái, đèn pha phải..." value="${e.chiTiet || ''}">
                     </div>
                     <div>
-                        <label class="input-label">Mô tả tình trạng hư hỏng</label>
-                        <textarea id="dm-f-moTa" rows="2" class="input-field resize-none" placeholder="VD: trầy xước, móp méo, rách thủng...">${e.moTa || ''}</textarea>
+                        <label class="input-label" style="font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:6px;">Mô tả tình trạng hư hỏng</label>
+                        <textarea id="dm-f-moTa" rows="2" class="input-field resize-none" style="border-radius:14px; padding:11px 13px;" placeholder="VD: trầy xước, móp méo, rách thủng...">${e.moTa || ''}</textarea>
                     </div>
                     <div>
-                        <label class="input-label">Mức độ hư hỏng</label>
-                        <select id="dm-f-mucDo" class="input-field" style="appearance:auto;">
-                            <option value="Nhẹ" ${mucDo === 'Nhẹ' ? 'selected' : ''}>Nhẹ</option>
-                            <option value="Trung bình" ${mucDo === 'Trung bình' ? 'selected' : ''}>Trung bình</option>
-                            <option value="Nặng" ${mucDo === 'Nặng' ? 'selected' : ''}>Nặng</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="input-label" style="margin-bottom:8px;">Hướng xử lý</label>
-                        
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-                            <label id="btn-wrap-sc" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:10px 8px; border-radius:12px; border:1.5px solid transparent; cursor:pointer; transition:all 0.2s;">
-                                <input type="radio" name="dm-action" value="sc" ${isSC ? 'checked' : ''} onchange="window._dmSync()" class="hidden">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
-                                <span style="font-weight:800; font-size:13px;">Sửa chữa</span>
+                        <label class="input-label" style="font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">Mức độ hư hỏng</label>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                            <label id="btn-md-nhe" style="display:flex; align-items:center; justify-content:center; gap:4px; padding:11px 6px; border-radius:14px; border:1.5px solid transparent; cursor:pointer; transition:all 0.2s;">
+                                <input type="radio" name="dm-mucDo" value="Nhẹ" ${mucDo === 'Nhẹ' ? 'checked' : ''} onchange="window._dmSync()" class="hidden">
+                                <span style="font-weight:800; font-size:12.5px;">Nhẹ</span>
                             </label>
                             
-                            <label id="btn-wrap-tt" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:10px 8px; border-radius:12px; border:1.5px solid transparent; cursor:pointer; transition:all 0.2s;">
+                            <label id="btn-md-tb" style="display:flex; align-items:center; justify-content:center; gap:4px; padding:11px 6px; border-radius:14px; border:1.5px solid transparent; cursor:pointer; transition:all 0.2s;">
+                                <input type="radio" name="dm-mucDo" value="Trung bình" ${mucDo === 'Trung bình' ? 'checked' : ''} onchange="window._dmSync()" class="hidden">
+                                <span style="font-weight:800; font-size:12.5px;">Vừa</span>
+                            </label>
+
+                            <label id="btn-md-nang" style="display:flex; align-items:center; justify-content:center; gap:4px; padding:11px 6px; border-radius:14px; border:1.5px solid transparent; cursor:pointer; transition:all 0.2s;">
+                                <input type="radio" name="dm-mucDo" value="Nặng" ${mucDo === 'Nặng' ? 'checked' : ''} onchange="window._dmSync()" class="hidden">
+                                <span style="font-weight:800; font-size:12.5px;">Nặng</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="input-label" style="font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:8px;">Hướng xử lý</label>
+                        
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <label id="btn-wrap-sc" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:12px 10px; border-radius:16px; border:1.5px solid transparent; cursor:pointer; transition:all 0.2s;">
+                                <input type="radio" name="dm-action" value="sc" ${isSC ? 'checked' : ''} onchange="window._dmSync()" class="hidden">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+                                <span style="font-weight:900; font-size:13px; letter-spacing:0.3px;">Sửa chữa</span>
+                            </label>
+                            
+                            <label id="btn-wrap-tt" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:12px 10px; border-radius:16px; border:1.5px solid transparent; cursor:pointer; transition:all 0.2s;">
                                 <input type="radio" name="dm-action" value="tt" ${isTT ? 'checked' : ''} onchange="window._dmSync()" class="hidden">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 3l10 10M8 3h5v5M3 8v5h5"/></svg>
-                                <span style="font-weight:800; font-size:13px;">Thay thế</span>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 3l10 10M8 3h5v5M3 8v5h5"/></svg>
+                                <span style="font-weight:900; font-size:13px; letter-spacing:0.3px;">Thay thế</span>
                             </label>
                         </div>
 
-                        <label id="row-thuHoi" style="display:flex; align-items:center; padding:10px 12px; border-radius:10px; transition:all 0.2s; cursor:pointer; border:1.5px solid transparent;">
-                            <input type="checkbox" id="dm-f-thuHoi" ${defThuHoi ? 'checked' : ''} ${isTT ? '' : 'disabled'} style="width:16px; height:16px; accent-color:#9333ea;">
-                            <span style="font-size:13px; font-weight:800; flex:1; margin-left:8px;" id="lbl-text-thu">Thu hồi phụ tùng</span>
-                            <span id="dm-thu-hint" style="font-size:10px; font-weight:600;"></span>
+                        <label id="row-thuHoi" style="display:flex; align-items:center; padding:12px 14px; border-radius:14px; transition:all 0.2s; cursor:pointer; border:1.5px solid transparent;">
+                            <input type="checkbox" id="dm-f-thuHoi" ${defThuHoi ? 'checked' : ''} ${isTT ? '' : 'disabled'} style="width:17px; height:17px; accent-color:#9333ea; border-radius:4px; cursor:pointer;">
+                            <span style="font-size:13px; font-weight:800; flex:1; margin-left:10px;" id="lbl-text-thu">Thu hồi phụ tùng</span>
+                            <span id="dm-thu-hint" style="font-size:10px; font-weight:700; letter-spacing:0.2px;"></span>
                         </label>
                     </div>
                 </div>`;
 
             Swal.fire({
-                title: '<span style="font-size:14px;font-weight:800;color:var(--text-primary);">' + (isNew ? 'Thêm hạng mục tổn thất' : 'Sửa hạng mục') + '</span>',
+                title: `
+                    <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:8px;">
+                        <span style="background:rgba(59,130,246,0.12); width:36px; height:36px; border-radius:12px; display:flex; align-items:center; justify-content:center;">
+                            <i data-lucide="${isNew ? 'plus-circle' : 'edit-3'}" class="w-5 h-5 text-blue-500"></i>
+                        </span>
+                        <span style="font-size:16px; font-weight:900; color:var(--text-primary, #1e293b); letter-spacing:0.3px;">
+                            ${isNew ? 'Thêm Hạng Mục Tổn Thất' : 'Cập Nhật Hạng Mục'}
+                        </span>
+                    </div>
+                `,
                 html: html,
                 showCancelButton: true,
                 showDenyButton: isNew,
-                confirmButtonText: isNew ? '+ Thêm & Đóng' : '✓ Lưu thay đổi',
-                denyButtonText: 'Lưu & Tạo tiếp',
+                confirmButtonText: isNew ? '<i data-lucide="plus-circle" class="w-4 h-4"></i> Thêm & Đóng' : '<i data-lucide="check" class="w-4 h-4"></i> Lưu thay đổi',
+                denyButtonText: '<i data-lucide="save" class="w-4 h-4"></i> Lưu & Tạo tiếp',
                 cancelButtonText: 'Hủy',
-                confirmButtonColor: '#2563eb',
-                denyButtonColor: '#10b981',
-                customClass: { popup: 'custom-rounded' },
+                buttonsStyling: false,
+                customClass: {
+                    popup: 'custom-rounded border border-slate-200 dark:border-slate-700 shadow-2xl bg-white dark:bg-slate-900',
+                    actions: 'flex w-full justify-between items-center gap-2.5 mt-5 px-1',
+                    confirmButton: 'flex-1 py-3.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-black text-xs active:scale-95 transition-all shadow-md shadow-blue-200 dark:shadow-none flex items-center justify-center gap-1.5 cursor-pointer',
+                    denyButton: 'flex-1 py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl font-black text-xs active:scale-95 transition-all shadow-md shadow-emerald-200 dark:shadow-none flex items-center justify-center gap-1.5 cursor-pointer',
+                    cancelButton: 'flex-1 py-3.5 px-4 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-2xl font-black text-xs active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer'
+                },
                 didOpen: function() {
+                    if (window.lucide) window.lucide.createIcons();
+
                     window._dmSync = function() {
                         const radioSC = document.querySelector('input[name="dm-action"][value="sc"]');
                         const radioTT = document.querySelector('input[name="dm-action"][value="tt"]');
@@ -7026,48 +7053,87 @@
 
                         // Cập nhật UI nút Sửa Chữa (Màu xanh)
                         if (radioSC && radioSC.checked) {
-                            btnSC.style.background = 'var(--bg-blue-50, #eff6ff)';
-                            btnSC.style.borderColor = 'var(--border-blue-200, #bfdbfe)';
-                            btnSC.style.color = '#2563eb';
+                            btnSC.style.background = 'rgba(59, 130, 246, 0.12)';
+                            btnSC.style.borderColor = '#3b82f6';
+                            btnSC.style.color = '#3b82f6';
                         } else {
-                            btnSC.style.background = 'var(--bg-surface, #f1f5f9)';
-                            btnSC.style.borderColor = 'var(--border-light, #e2e8f0)';
-                            btnSC.style.color = 'var(--text-secondary, #64748b)';
+                            btnSC.style.background = 'rgba(255, 255, 255, 0.02)';
+                            btnSC.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                            btnSC.style.color = 'var(--text-secondary, #94a3b8)';
                         }
 
                         // Cập nhật UI nút Thay Thế (Màu cam)
                         if (radioTT && radioTT.checked) {
-                            btnTT.style.background = 'var(--bg-amber-50, #fef3c7)';
-                            btnTT.style.borderColor = 'var(--border-amber-200, #fde68a)';
-                            btnTT.style.color = '#d97706';
+                            btnTT.style.background = 'rgba(245, 158, 11, 0.12)';
+                            btnTT.style.borderColor = '#f59e0b';
+                            btnTT.style.color = '#f59e0b';
                             
                             // Logic kích hoạt Thu hồi
                             if (thuHoiCb) {
                                 thuHoiCb.checked = true; 
                                 thuHoiCb.disabled = false;
                             }
-                            rowThuHoi.style.background = 'var(--bg-purple-50, #faf5ff)';
-                            rowThuHoi.style.borderColor = 'var(--border-purple-200, #e9d5ff)';
+                            rowThuHoi.style.background = 'rgba(147, 51, 234, 0.08)';
+                            rowThuHoi.style.borderColor = 'rgba(147, 51, 234, 0.3)';
                             rowThuHoi.style.opacity = '1';
-                            textThuHoi.style.color = '#9333ea';
+                            textThuHoi.style.color = '#a855f7';
                             hintThuHoi.textContent = '(Bắt buộc thu hồi)';
                             hintThuHoi.style.color = '#a855f7';
                         } else {
-                            btnTT.style.background = 'var(--bg-surface, #f1f5f9)';
-                            btnTT.style.borderColor = 'var(--border-light, #e2e8f0)';
-                            btnTT.style.color = 'var(--text-secondary, #64748b)';
+                            btnTT.style.background = 'rgba(255, 255, 255, 0.02)';
+                            btnTT.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                            btnTT.style.color = 'var(--text-secondary, #94a3b8)';
                             
                             // Logic vô hiệu hóa Thu hồi
                             if (thuHoiCb) {
                                 thuHoiCb.checked = false; 
                                 thuHoiCb.disabled = true;
                             }
-                            rowThuHoi.style.background = 'var(--bg-surface, #f8fafc)';
+                            rowThuHoi.style.background = 'rgba(255, 255, 255, 0.01)';
                             rowThuHoi.style.borderColor = 'transparent';
-                            rowThuHoi.style.opacity = '0.5';
-                            textThuHoi.style.color = 'var(--text-muted, #94a3b8)';
+                            rowThuHoi.style.opacity = '0.4';
+                            textThuHoi.style.color = 'var(--text-muted, #64748b)';
                             hintThuHoi.textContent = '(Chỉ dùng khi thay thế)';
-                            hintThuHoi.style.color = 'var(--text-muted, #94a3b8)';
+                            hintThuHoi.style.color = 'var(--text-muted, #64748b)';
+                        }
+
+                        // Đồng bộ Mức độ hư hỏng
+                        const radioNhe = document.querySelector('input[name="dm-mucDo"][value="Nhẹ"]');
+                        const radioTB = document.querySelector('input[name="dm-mucDo"][value="Trung bình"]');
+                        const radioNang = document.querySelector('input[name="dm-mucDo"][value="Nặng"]');
+                        
+                        const btnNhe = document.getElementById('btn-md-nhe');
+                        const btnTB = document.getElementById('btn-md-tb');
+                        const btnNang = document.getElementById('btn-md-nang');
+
+                        if (radioNhe && radioNhe.checked) {
+                            btnNhe.style.background = 'rgba(16, 185, 129, 0.15)';
+                            btnNhe.style.borderColor = '#10b981';
+                            btnNhe.style.color = '#10b981';
+                        } else {
+                            btnNhe.style.background = 'rgba(255, 255, 255, 0.02)';
+                            btnNhe.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                            btnNhe.style.color = 'var(--text-secondary, #94a3b8)';
+                        }
+
+                        if (radioTB && radioTB.checked) {
+                            btnTB.style.background = 'rgba(245, 158, 11, 0.15)';
+                            btnTB.style.borderColor = '#f59e0b';
+                            btnTB.style.color = '#f59e0b';
+                        } else {
+                            btnTB.style.background = 'rgba(255, 255, 255, 0.02)';
+                            btnTB.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                            btnTB.style.color = 'var(--text-secondary, #94a3b8)';
+                        }
+
+                        if (radioNang && radioNang.checked) {
+                            btnNang.style.background = 'rgba(239, 68, 68, 0.15)';
+                            btnNang.style.borderColor = '#ef4444';
+                            btnNang.style.color = '#ef4444';
+                        } else {
+                            btnNang.style.background = 'rgba(255, 255, 255, 0.02)';
+                            btnNang.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                            btnNang.style.color = 'var(--text-secondary, #94a3b8)';
                         }
                     };
                     // Chạy ngay lần đầu để đồng bộ UI
@@ -7086,7 +7152,7 @@
                     return {
                         chiTiet,
                         moTa:    document.getElementById('dm-f-moTa').value.trim(),
-                        mucDo:   document.getElementById('dm-f-mucDo').value,
+                        mucDo:   document.querySelector('input[name="dm-mucDo"]:checked').value,
                         suaChua: isSC,
                         thayThe: isTT,
                         thuHoi:  document.getElementById('dm-f-thuHoi').checked
@@ -7105,7 +7171,7 @@
                     return {
                         chiTiet,
                         moTa:    document.getElementById('dm-f-moTa').value.trim(),
-                        mucDo:   document.getElementById('dm-f-mucDo').value,
+                        mucDo:   document.querySelector('input[name="dm-mucDo"]:checked').value,
                         suaChua: isSC,
                         thayThe: isTT,
                         thuHoi:  document.getElementById('dm-f-thuHoi').checked
