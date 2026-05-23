@@ -4618,32 +4618,7 @@ textarea.inp { resize:vertical; }
                 </div>
               </div>
 
-              <!-- Nhóm 6: Chữ ký số -->
-              <div class="border border-slate-100 rounded-xl p-3 bg-slate-50/50 space-y-2">
-                <div class="text-[11px] font-black text-slate-500 uppercase">6. Chữ ký xác nhận trực tiếp</div>
-                <div class="grid grid-cols-2 gap-3">
-                  <!-- Lái xe -->
-                  <div class="space-y-1">
-                    <div class="flex justify-between items-center" style="display: flex; justify-content: space-between; align-items: center;">
-                      <span class="text-xs font-bold text-slate-600">Lái xe / Chủ xe</span>
-                      <button type="button" onclick="AccidentReport.clearSignature('Driver')" class="text-[10px] font-bold text-rose-500 hover:text-rose-700">Xóa</button>
-                    </div>
-                    <div class="border border-slate-200 rounded-lg bg-white overflow-hidden relative" style="height:70px">
-                      <canvas id="ar-canvas-Driver" class="w-full h-full block cursor-crosshair touch-none"></canvas>
-                    </div>
-                  </div>
-                  <!-- Giám định viên -->
-                  <div class="space-y-1">
-                    <div class="flex justify-between items-center" style="display: flex; justify-content: space-between; align-items: center;">
-                      <span class="text-xs font-bold text-slate-600">Giám định viên</span>
-                      <button type="button" onclick="AccidentReport.clearSignature('Assessor')" class="text-[10px] font-bold text-rose-500 hover:text-rose-700">Xóa</button>
-                    </div>
-                    <div class="border border-slate-200 rounded-lg bg-white overflow-hidden relative" style="height:70px">
-                      <canvas id="ar-canvas-Assessor" class="w-full h-full block cursor-crosshair touch-none"></canvas>
-                    </div>
-                  </div>
-                </div>
-              </div>
+
 
               <div class="flex justify-end pt-1">
                 <button type="button" onclick="AccidentReport.save()" class="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1 hover:bg-blue-700 transition-all shadow-sm">
@@ -23872,8 +23847,8 @@ const AccidentReport = {
         document.getElementById('ar-thoaThuan').value = ar.thoaThuan || '';
 
         // Store current signatures in memory
-        this._sigDriver = ar.sigDriver || '';
-        this._sigAssessor = ar.sigAssessor || '';
+        this._sigDriver = '';
+        this._sigAssessor = '';
         this._initializedId = null; // force setup when tab becomes active
 
         // If the tab is already active, initialize canvases immediately
@@ -23886,7 +23861,6 @@ const AccidentReport = {
     onTabActive() {
         if (this._initializedId === curId) return; // already initialized for current record
         this._initializedId = curId;
-        this.setupCanvases(this._sigDriver, this._sigAssessor);
     },
 
     setupCanvases(existingDriverSig, existingAssessorSig) {
@@ -23989,24 +23963,6 @@ const AccidentReport = {
     },
 
     getPayload() {
-        const existingReport = (curId && allData.find(r => r.id === curId)?.accidentReport) || {};
-
-        let sigDriver = this._sigDriver || existingReport.sigDriver || '';
-        if (this._isSignedDriver) {
-            const canvas = document.getElementById('ar-canvas-Driver');
-            sigDriver = canvas ? canvas.toDataURL('image/png') : '';
-        } else if (!this._hasExistingDriverSig) {
-            sigDriver = '';
-        }
-
-        let sigAssessor = this._sigAssessor || existingReport.sigAssessor || '';
-        if (this._isSignedAssessor) {
-            const canvas = document.getElementById('ar-canvas-Assessor');
-            sigAssessor = canvas ? canvas.toDataURL('image/png') : '';
-        } else if (!this._hasExistingAssessorSig) {
-            sigAssessor = '';
-        }
-
         return {
             bbTime: document.getElementById('ar-bbTime')?.value.trim() || '',
             bbLoc: document.getElementById('ar-bbLoc')?.value.trim() || '',
@@ -24027,8 +23983,8 @@ const AccidentReport = {
             loi: document.getElementById('ar-loi')?.value.trim() || '',
             hauQua: document.getElementById('ar-hauQua')?.value.trim() || '',
             thoaThuan: document.getElementById('ar-thoaThuan')?.value.trim() || '',
-            sigDriver: sigDriver,
-            sigAssessor: sigAssessor
+            sigDriver: '',
+            sigAssessor: ''
         };
     },
 

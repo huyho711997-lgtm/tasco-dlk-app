@@ -15340,12 +15340,10 @@ QUAN TRỌNG:
             }
             this.renderVehiclesListMobile();
 
-            // Setup canvases
             const modal = document.getElementById('accident-report-modal');
             modal.classList.remove('hidden');
             setTimeout(() => {
                 modal.classList.remove('translate-y-full');
-                this.setupCanvases(ar.sigDriver, ar.sigAssessor);
             }, 10);
             
             lucide.createIcons();
@@ -15549,22 +15547,6 @@ QUAN TRỌNG:
 
             const existingReport = item.accidentReport || {};
 
-            let sigDriver = existingReport.sigDriver || '';
-            if (this._isSignedDriver) {
-                const canvas = document.getElementById('ar-canvas-Driver');
-                sigDriver = canvas ? canvas.toDataURL('image/png') : '';
-            } else if (!this._hasExistingDriverSig) {
-                sigDriver = '';
-            }
-
-            let sigAssessor = existingReport.sigAssessor || '';
-            if (this._isSignedAssessor) {
-                const canvas = document.getElementById('ar-canvas-Assessor');
-                sigAssessor = canvas ? canvas.toDataURL('image/png') : '';
-            } else if (!this._hasExistingAssessorSig) {
-                sigAssessor = '';
-            }
-
             const arPayload = {
                 bbTime: document.getElementById('ar-bbTime').value.trim(),
                 bbLoc: document.getElementById('ar-bbLoc').value.trim(),
@@ -15585,8 +15567,8 @@ QUAN TRỌNG:
                 loi: document.getElementById('ar-loi').value.trim(),
                 hauQua: document.getElementById('ar-hauQua').value.trim(),
                 thoaThuan: document.getElementById('ar-thoaThuan').value.trim(),
-                sigDriver: sigDriver,
-                sigAssessor: sigAssessor
+                sigDriver: '',
+                sigAssessor: ''
             };
 
             db.ref(`Workstation/${id}/accidentReport`).set(arPayload).then(() => {
@@ -16241,7 +16223,7 @@ QUAN TRỌNG:
                   <div class="sig-col">
                     <span class="sig-title">ĐẠI DIỆN CHỦ XE / LÁI XE</span>
                     <span class="sig-sub">(Ký, ghi rõ họ tên)</span>
-                    ${ar.sigDriver ? `<img src="${ar.sigDriver}" class="sig-canvas-img">` : `<div class="sig-space"></div>`}
+                    <div class="sig-space"></div>
                     <span class="sig-name">${ar.rep1Name || ''}</span>
                   </div>
                   
@@ -16255,7 +16237,7 @@ QUAN TRỌNG:
                   <div class="sig-col">
                     <span class="sig-title">ĐẠI DIỆN BẢO HIỂM TASCO</span>
                     <span class="sig-sub">(Ký, ghi rõ họ tên)</span>
-                    ${ar.sigAssessor ? `<img src="${ar.sigAssessor}" class="sig-canvas-img">` : `<div class="sig-space"></div>`}
+                    <div class="sig-space"></div>
                     <span class="sig-name">${ar.rep2Name || ''}</span>
                   </div>
                 </div>
@@ -19870,36 +19852,6 @@ QUAN TRỌNG:
                 </div>
             </div>
 
-            <!-- NHÓM 6: CHỮ KÝ ĐIỆN TỬ -->
-            <div class="p-4 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4">
-                <h3 class="text-xs font-black text-slate-800 uppercase flex items-center gap-1.5 border-b border-slate-100 pb-2">
-                    <i data-lucide="pen-tool" class="w-4.5 h-4.5 text-blue-500"></i> Chữ ký xác nhận trực tiếp
-                </h3>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <!-- Ký Lái xe -->
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-bold text-slate-700">Chủ xe / Lái xe</span>
-                            <button onclick="AccidentReport.clearSignature('Driver')" class="text-[10px] font-bold text-rose-500 active:text-rose-700">Xóa ký</button>
-                        </div>
-                        <div class="border border-slate-200 rounded-xl bg-slate-50 overflow-hidden relative" style="height:110px">
-                            <canvas id="ar-canvas-Driver" class="w-full h-full block cursor-crosshair touch-none"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Ký Assessor -->
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-bold text-slate-700">Giám định viên</span>
-                            <button onclick="AccidentReport.clearSignature('Assessor')" class="text-[10px] font-bold text-rose-500 active:text-rose-700">Xóa ký</button>
-                        </div>
-                        <div class="border border-slate-200 rounded-xl bg-slate-50 overflow-hidden relative" style="height:110px">
-                            <canvas id="ar-canvas-Assessor" class="w-full h-full block cursor-crosshair touch-none"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Footer -->
