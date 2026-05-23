@@ -3511,241 +3511,47 @@
             <!-- THAY THẾ TOÀN BỘ div id="tab-panel-hientruong" bằng đoạn này -->
             <div id="tab-panel-hientruong" class="modal-tab-panel">
                 <div class="p-4 space-y-4">
+                    
+                    <div class="text-center space-y-1.5 pb-2">
+                        <h4 class="text-sm font-black text-slate-800 dark:text-slate-100 flex items-center justify-center gap-2">
+                            <i data-lucide="clipboard-text" class="w-5 h-5 text-blue-600"></i> Lập Hồ Sơ Hiện Trường
+                        </h4>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Chọn tác vụ biên bản hoặc soạn thảo báo cáo nhanh Zalo</p>
+                    </div>
 
                     <!-- Lập Biên Bản Tai Nạn (Mẫu A4) -->
                     <button onclick="AccidentReport.openMobileModal()"
-                        class="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-md shadow-blue-200">
-                        <i data-lucide="file-text" class="w-4.5 h-4.5"></i>
+                        class="w-full py-4.5 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all shadow-md shadow-blue-200 dark:shadow-none">
+                        <i data-lucide="file-text" class="w-5 h-5"></i>
                         Lập Biên Bản Tai Nạn (Mẫu A4)
                     </button>
 
-                    <!-- NHÓM 1: THIẾT LẬP BÁO CÁO -->
-                    <div class="p-4 rounded-2xl border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(148,163,184,0.12)] space-y-4 hover:shadow-md transition-shadow">
-                        <h3 class="text-xs font-black text-slate-800 uppercase flex items-center gap-2 border-b border-slate-100 pb-2.5">
-                            <div class="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                                <i data-lucide="sliders-horizontal" class="w-4 h-4 text-blue-600"></i>
-                            </div>
-                            Thiết lập báo cáo
+                    <!-- Soạn Báo Cáo Hiện Trường (Zalo) -->
+                    <button onclick="HienTruong.openMobileModal()"
+                        class="w-full py-4.5 bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all shadow-md shadow-purple-200 dark:shadow-none">
+                        <i data-lucide="send" class="w-5 h-5"></i>
+                        Soạn Báo Cáo Hiện Trường (Zalo)
+                    </button>
+
+                    <!-- Tóm tắt thông tin đã lập -->
+                    <div class="p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_4px_20px_-4px_rgba(148,163,184,0.06)] space-y-3.5 hover:shadow-md transition-shadow">
+                        <h3 class="text-xs font-black text-slate-800 dark:text-slate-200 uppercase flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                            <i data-lucide="activity" class="w-4 h-4 text-blue-500"></i>
+                            Tóm tắt nội dung báo cáo
                         </h3>
-                        
-                        <div class="space-y-4">
-                            <div>
-                                <label class="input-label">Loại tổn thất</label>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <button id="ht-btn-vcx" onclick="HienTruong.toggleType('VCX')"
-                                        class="py-2.5 rounded-xl text-xs font-black border transition-all bg-blue-600 text-white border-blue-600 shadow-sm">
-                                        VCX — Vật chất xe
-                                    </button>
-                                    <button id="ht-btn-tnds" onclick="HienTruong.toggleType('TNDS')"
-                                        class="py-2.5 rounded-xl text-xs font-black border transition-all bg-white text-slate-500 border-slate-200 hover:bg-slate-50">
-                                        TNDS — Trách nhiệm DS
-                                    </button>
-                                </div>
+                        <div class="space-y-3 text-[11px] leading-relaxed">
+                            <div class="flex justify-between items-start gap-4">
+                                <span class="text-slate-400 dark:text-slate-500 shrink-0">Diễn biến:</span>
+                                <span id="summary-htDienBien" class="font-bold text-slate-700 dark:text-slate-300 text-right line-clamp-2">Chưa nhập diễn biến</span>
                             </div>
-
-                            <div>
-                                <label class="input-label">Gửi báo cáo đến</label>
-                                <div class="flex gap-2 flex-wrap">
-                                    <button onclick="HienTruong.setRecipient('@Nguyễn Toàn @Nguyễn Thanh Hùng', this)"
-                                        class="ht-rcpt-btn px-3 py-1.5 rounded-xl text-[11px] font-black border bg-blue-600 text-white border-blue-600 shadow-sm">
-                                        Anh Toàn + Anh Hùng
-                                    </button>
-                                    <button onclick="HienTruong.setRecipient('@Nguyễn Toàn', this)"
-                                        class="ht-rcpt-btn px-3 py-1.5 rounded-xl text-[11px] font-black border bg-white text-slate-500 border-slate-200 hover:bg-slate-50">
-                                        Chỉ anh Toàn
-                                    </button>
-                                    <button onclick="HienTruong.setRecipient('@Nguyễn Thanh Hùng', this)"
-                                        class="ht-rcpt-btn px-3 py-1.5 rounded-xl text-[11px] font-black border bg-white text-slate-500 border-slate-200 hover:bg-slate-50">
-                                        Chỉ anh Hùng
-                                    </button>
-                                </div>
+                            <div class="flex justify-between items-start gap-4">
+                                <span class="text-slate-400 dark:text-slate-500 shrink-0">Nhận định:</span>
+                                <span id="summary-htNhanDinh" class="font-bold text-slate-700 dark:text-slate-300 text-right line-clamp-2">Chưa nhập nhận định</span>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- NHÓM 2: GHI NHẬN TẠI HIỆN TRƯỜNG -->
-                    <div class="p-4 rounded-2xl border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(148,163,184,0.12)] space-y-4 hover:shadow-md transition-shadow">
-                        <h3 class="text-xs font-black text-slate-800 uppercase flex items-center gap-2 border-b border-slate-100 pb-2.5">
-                            <div class="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                                <i data-lucide="camera" class="w-4 h-4 text-blue-600"></i>
+                            <div class="flex justify-between items-start gap-4">
+                                <span class="text-slate-400 dark:text-slate-500 shrink-0">Ước tính:</span>
+                                <span id="summary-htUoc" class="font-bold text-slate-700 dark:text-slate-300 text-right">Chưa có ước tính</span>
                             </div>
-                            Ghi nhận tại Hiện trường
-                        </h3>
-
-                        <!-- Diễn biến -->
-                        <div class="space-y-1.5">
-                            <label class="input-label">Diễn biến vụ việc</label>
-                            <div class="relative border border-slate-100 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 rounded-2xl bg-slate-50/70 p-3 transition-all">
-                                <textarea id="edit-htDienBien" rows="3" class="w-full bg-transparent border-0 outline-none resize-none pr-8 text-xs text-slate-800 font-bold leading-relaxed" placeholder="Nhập diễn biến vụ việc..."></textarea>
-                                <button onclick="HienTruong.clearField('edit-htDienBien')" class="absolute right-3.5 top-3.5 text-slate-400 hover:text-rose-500 transition-colors bg-white/80 p-1 rounded-full shadow-sm">
-                                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                                </button>
-                                
-                                <!-- Mẫu diễn biến nhanh -->
-                                <div class="flex flex-wrap gap-1.5 mb-2 mt-1">
-                                    <button onclick="HienTruong.fillTemplate('luithu')" class="px-2 py-0.5 bg-white border border-slate-200 rounded-lg text-[9px] font-bold text-slate-600 active:bg-slate-100 transition-colors shadow-sm">Lùi xe thiếu quan sát</button>
-                                    <button onclick="HienTruong.fillTemplate('vancan')" class="px-2 py-0.5 bg-white border border-slate-200 rounded-lg text-[9px] font-bold text-slate-600 active:bg-slate-100 transition-colors shadow-sm">Va chạm phía trước</button>
-                                    <button onclick="HienTruong.fillTemplate('coicong')" class="px-2 py-0.5 bg-white border border-slate-200 rounded-lg text-[9px] font-bold text-slate-600 active:bg-slate-100 transition-colors shadow-sm">Đụng cột/cổng</button>
-                                    <button onclick="HienTruong.fillTemplate('dongduong')" class="px-2 py-0.5 bg-white border border-slate-200 rounded-lg text-[9px] font-bold text-slate-600 active:bg-slate-100 transition-colors shadow-sm">Đụng xe khác</button>
-                                </div>
-
-                                <div class="flex items-center justify-between border-t border-slate-200/50 pt-2 mt-1.5">
-                                    <div class="flex gap-2">
-                                        <button onclick="SpeechInput.toggle('edit-htDienBien','mic-ht-dienbien','st-ht-dienbien')" id="mic-ht-dienbien" class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100/80 active:scale-95 text-blue-600 rounded-lg text-[10px] font-black transition-all border border-blue-100/50 shadow-sm">
-                                            <i data-lucide="mic" class="w-3.5 h-3.5"></i> Ghi âm
-                                        </button>
-                                        <button onclick="HienTruong.normalizeAI('edit-htDienBien')" class="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100/80 active:scale-95 text-purple-600 rounded-lg text-[10px] font-black transition-all border border-purple-100/50 shadow-sm">
-                                            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI Tinh chỉnh
-                                        </button>
-                                    </div>
-                                    <div id="st-ht-dienbien" class="text-[9px] font-bold text-blue-500 animate-pulse"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Nhận định -->
-                        <div class="space-y-1.5">
-                            <label class="input-label">Nhận định hiện trường</label>
-                            <div class="relative border border-slate-100 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 rounded-2xl bg-slate-50/70 p-3 transition-all">
-                                <textarea id="edit-htNhanDinh" rows="2" class="w-full bg-transparent border-0 outline-none resize-none pr-8 text-xs text-slate-800 font-bold leading-relaxed" placeholder="Nhận định hiện trường vụ việc..."></textarea>
-                                <button onclick="HienTruong.clearField('edit-htNhanDinh')" class="absolute right-3.5 top-3.5 text-slate-400 hover:text-rose-500 transition-colors bg-white/80 p-1 rounded-full shadow-sm">
-                                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                                </button>
-                                
-                                <div class="flex items-center justify-between border-t border-slate-200/50 pt-2.5 mt-2">
-                                    <div class="flex gap-2">
-                                        <button onclick="HienTruong.fillNhanDinh()" class="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100/80 active:scale-95 text-indigo-600 rounded-lg text-[10px] font-black transition-all border border-indigo-100/50 shadow-sm">
-                                            Mẫu nhanh
-                                        </button>
-                                        <button onclick="SpeechInput.toggle('edit-htNhanDinh','mic-ht-nhandinh','st-ht-nhandinh')" id="mic-ht-nhandinh" class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100/80 active:scale-95 text-blue-600 rounded-lg text-[10px] font-black transition-all border border-blue-100/50 shadow-sm">
-                                            <i data-lucide="mic" class="w-3.5 h-3.5"></i> Ghi âm
-                                        </button>
-                                        <button onclick="HienTruong.normalizeAI('edit-htNhanDinh')" class="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100/80 active:scale-95 text-purple-600 rounded-lg text-[10px] font-black transition-all border border-purple-100/50 shadow-sm">
-                                            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI Tinh chỉnh
-                                        </button>
-                                    </div>
-                                    <div id="st-ht-nhandinh" class="text-[9px] font-bold text-emerald-500 animate-pulse"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Sơ đồ hiện trường -->
-                        <div class="space-y-1.5 pt-2 border-t border-slate-100">
-                            <div class="flex justify-between items-center mb-1">
-                                <label class="input-label mb-0">Sơ đồ hiện trường</label>
-                                <button onclick="SceneCanvas.open(App.currentEditId)"
-                                    class="text-[10px] bg-blue-600 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-bold active:scale-95 transition-all shadow-sm">
-                                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Vẽ sơ đồ
-                                </button>
-                            </div>
-                            
-                            <div id="scene-diagram-preview" class="hidden relative w-full h-32 bg-white rounded-xl border border-slate-200 overflow-hidden cursor-pointer" onclick="ImageViewer.openScene()">
-                                <img id="scene-diagram-img" src="" class="w-full h-full object-contain">
-                                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                                    <span class="text-white text-xs font-bold">Xem toàn màn hình</span>
-                                </div>
-                                <button onclick="event.stopPropagation(); SceneCanvas.delete(App.currentEditId)" class="absolute top-2 right-2 w-7 h-7 bg-rose-500 text-white rounded-lg flex items-center justify-center active:scale-90">
-                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                </button>
-                            </div>
-                            <p id="scene-diagram-empty" class="text-[10px] text-slate-400 italic text-center py-2">Chưa có sơ đồ, nhấn "Vẽ sơ đồ" để phác thảo.</p>
-                        </div>
-                    </div>
-
-                    <!-- NHÓM 3: ĐỀ XUẤT & ƯỚC TÍNH BỒI THƯỜNG -->
-                    <div class="p-4 rounded-2xl border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(148,163,184,0.12)] space-y-4 hover:shadow-md transition-shadow">
-                        <h3 class="text-xs font-black text-slate-800 uppercase flex items-center gap-2 border-b border-slate-100 pb-2.5">
-                            <div class="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                                <i data-lucide="calculator" class="w-4 h-4 text-blue-600"></i>
-                            </div>
-                            Đề xuất & Ước tính bồi thường
-                        </h3>
-                        
-                        <div class="grid grid-cols-3 gap-3">
-                            <div class="col-span-2 space-y-1">
-                                <label class="input-label">Ước tổn thất</label>
-                                <div class="ar-input-wrapper">
-                                    <input type="text" id="edit-htUocTonThat" class="input-field font-bold text-slate-800" placeholder="Ví dụ: 3">
-                                    <button onclick="HienTruong.clearField('edit-htUocTonThat')" class="ar-clear-btn" title="Xóa">
-                                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="space-y-1">
-                                <label class="input-label">Đơn vị</label>
-                                <select id="edit-htDonVi" class="input-field font-bold text-slate-700 bg-white">
-                                    <option value="đồng">đồng</option>
-                                    <option value="triệu" selected>triệu</option>
-                                    <option value="tỷ">tỷ</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="space-y-1.5">
-                            <div class="flex justify-between items-center mb-1">
-                                <label class="input-label mb-0">Phương án bồi thường</label>
-                                <div class="flex gap-1.5">
-                                    <button onclick="HienTruong.fillDeXuat('du')"
-                                        class="text-[9px] font-black px-2.5 py-1 bg-white text-slate-600 border border-slate-200 rounded-lg active:bg-slate-50 transition-colors shadow-sm">
-                                        Đủ
-                                    </button>
-                                    <button onclick="HienTruong.fillDeXuat('tnds')"
-                                        class="text-[9px] font-black px-2.5 py-1 bg-blue-600 text-white rounded-lg active:bg-blue-700 transition-colors shadow-sm">
-                                        NĐ67
-                                    </button>
-                                    <button onclick="HienTruong.fillDeXuat('wait')"
-                                        class="text-[9px] font-black px-2.5 py-1 bg-white text-slate-600 border border-slate-200 rounded-lg active:bg-slate-50 transition-colors shadow-sm">
-                                        Chờ BG
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="relative border border-slate-100 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 rounded-2xl bg-slate-50/70 p-3 transition-all">
-                                <textarea id="edit-htDeXuat" rows="2" class="w-full bg-transparent border-0 outline-none resize-none pr-8 text-xs text-slate-800 font-bold leading-relaxed" placeholder="Nhập đề xuất phương án bồi thường..."></textarea>
-                                <button onclick="HienTruong.clearField('edit-htDeXuat')" class="absolute right-3.5 top-3.5 text-slate-400 hover:text-rose-500 transition-colors bg-white/80 p-1 rounded-full shadow-sm">
-                                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- NHÓM 4: BÁO CÁO TỔNG HỢP -->
-                    <div class="p-4 rounded-2xl border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(148,163,184,0.12)] space-y-4 hover:shadow-md transition-shadow">
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                            <h3 class="text-xs font-black text-slate-800 uppercase flex items-center gap-2">
-                                <div class="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                                    <i data-lucide="bot" class="w-4 h-4 text-blue-600"></i>
-                                </div>
-                                Báo cáo tổng hợp
-                            </h3>
-                            <span id="ht-output-badge" class="text-[10px] font-black text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200 shadow-sm">Chưa tạo</span>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="HienTruong.generateAI(App.currentEditId)"
-                                class="py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md shadow-blue-200">
-                                <i data-lucide="sparkles" class="w-4 h-4"></i> AI Tạo báo cáo
-                            </button>
-                            <button onclick="HienTruong.buildQuick(App.currentEditId)"
-                                class="py-3.5 bg-white text-slate-700 border border-slate-200 rounded-2xl font-black text-xs flex items-center justify-center gap-2 active:bg-slate-50 transition-all shadow-sm">
-                                <i data-lucide="zap" class="w-4 h-4"></i> Tạo nhanh
-                            </button>
-                        </div>
-                        
-                        <p id="ht-status" class="text-[10px] text-blue-500 font-bold min-h-[16px] text-center animate-pulse"></p>
-                        
-                        <div id="ht-output-area"
-                            class="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 text-[12px] text-slate-800 font-bold leading-relaxed whitespace-pre-wrap min-h-[80px] shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
-                            style="font-family: inherit;">Điền thông tin và nhấn "Tạo báo cáo"...</div>
-                            
-                        <div class="grid grid-cols-2 gap-2 mt-1" id="ht-action-btns" style="display:none!important;">
-                            <button onclick="HienTruong.copyReport()"
-                                class="py-3.5 bg-emerald-600 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md shadow-emerald-200">
-                                <i data-lucide="copy" class="w-4 h-4"></i> Copy gửi Zalo
-                            </button>
-                            <button onclick="HienTruong.saveAndReset(App.currentEditId)"
-                                class="py-3.5 bg-white text-slate-700 border border-slate-200 rounded-2xl font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm">
-                                <i data-lucide="save" class="w-4 h-4"></i> Lưu hồ sơ
-                            </button>
                         </div>
                     </div>
 
@@ -7464,6 +7270,7 @@
             App.switchRecvType(item.xnbtRecv || 'gara');
             // GỌI HÀM LOAD SƠ ĐỒ HIỆN TRƯỜNG TẠI ĐÂY
             if(typeof SceneCanvas !== 'undefined') SceneCanvas.renderPreview(id);
+            if(typeof HienTruong !== 'undefined') HienTruong.loadFromItem(item);
             lucide.createIcons();
             if (typeof refreshFsLightbox==='function') refreshFsLightbox();
             setTimeout(()=>Warnings.check(), 100);
@@ -15041,6 +14848,87 @@ QUAN TRỌNG:
             }
         },
 
+        // ── Sub-modal Controls ──────────────────────────────────
+        openMobileModal() {
+            const id = App.currentEditId;
+            if (!id) return;
+            const item = App.find(id);
+            if (!item) return;
+
+            const titleBsx = document.getElementById('sr-title-bsx');
+            if (titleBsx) titleBsx.textContent = item.bsx || 'CHƯA CÓ BSX';
+
+            // Load data
+            this.loadFromItem(item);
+
+            const modal = document.getElementById('scene-report-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('translate-y-full');
+            }, 10);
+            
+            // Auto grow textareas
+            this.initAutoGrowTextareas();
+            this.adjustTextareasHeight();
+            lucide.createIcons();
+        },
+
+        closeMobileModal() {
+            const modal = document.getElementById('scene-report-modal');
+            modal.classList.add('translate-y-full');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+            
+            // Sync summary values immediately when closing
+            const id = App.currentEditId;
+            if (id) {
+                const updatedItem = {
+                    htDienBien: document.getElementById('edit-htDienBien')?.value || '',
+                    htNhanDinh: document.getElementById('edit-htNhanDinh')?.value || '',
+                    htUocTonThat: document.getElementById('edit-htUocTonThat')?.value || '',
+                    htDonVi: document.getElementById('edit-htDonVi')?.value || 'triệu'
+                };
+                const summaryDienBien = document.getElementById('summary-htDienBien');
+                if (summaryDienBien) summaryDienBien.textContent = updatedItem.htDienBien || 'Chưa nhập diễn biến';
+                const summaryNhanDinh = document.getElementById('summary-htNhanDinh');
+                if (summaryNhanDinh) summaryNhanDinh.textContent = updatedItem.htNhanDinh || 'Chưa nhập nhận định';
+                const summaryUoc = document.getElementById('summary-htUoc');
+                if (summaryUoc) {
+                    summaryUoc.textContent = updatedItem.htUocTonThat ? `${updatedItem.htUocTonThat} ${updatedItem.htDonVi}` : 'Chưa có ước tính';
+                }
+            }
+        },
+
+        initAutoGrowTextareas() {
+            const textareas = ['edit-htDienBien', 'edit-htNhanDinh', 'edit-htDeXuat'];
+            textareas.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && !el.dataset.autogrowInitialized) {
+                    el.dataset.autogrowInitialized = 'true';
+                    el.style.overflowY = 'hidden';
+                    el.style.boxSizing = 'border-box';
+                    
+                    const adjustHeight = () => {
+                        el.style.height = 'auto';
+                        el.style.height = el.scrollHeight + 'px';
+                    };
+                    el.addEventListener('input', adjustHeight);
+                    el.adjustHeight = adjustHeight;
+                }
+            });
+        },
+
+        adjustTextareasHeight() {
+            const textareas = ['edit-htDienBien', 'edit-htNhanDinh', 'edit-htDeXuat'];
+            textareas.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el.adjustHeight) {
+                    el.adjustHeight();
+                }
+            });
+        },
+
         // ── Loại tổn thất ──────────────────────────────────────
         toggleType(t) {
             if (this._types.includes(t)) {
@@ -15363,6 +15251,19 @@ QUAN TRỌNG:
                 if (el) el.value = item[f] || '';
             });
             
+            const donViEl = document.getElementById('edit-htDonVi');
+            if (donViEl) donViEl.value = item.htDonVi || 'triệu';
+
+            // Cập nhật thẻ tóm tắt nhanh ngoài màn hình chính của Tab
+            const summaryDienBien = document.getElementById('summary-htDienBien');
+            if (summaryDienBien) summaryDienBien.textContent = item.htDienBien || 'Chưa nhập diễn biến';
+            const summaryNhanDinh = document.getElementById('summary-htNhanDinh');
+            if (summaryNhanDinh) summaryNhanDinh.textContent = item.htNhanDinh || 'Chưa nhập nhận định';
+            const summaryUoc = document.getElementById('summary-htUoc');
+            if (summaryUoc) {
+                summaryUoc.textContent = item.htUocTonThat ? `${item.htUocTonThat} ${item.htDonVi || 'triệu'}` : 'Chưa có ước tính';
+            }
+            
             if (item.htType) {
                 this._types = item.htType.split(',').map(s => s.trim());
                 const btnVcx  = document.getElementById('ht-btn-vcx');
@@ -15385,6 +15286,15 @@ QUAN TRỌNG:
                 if (outputEl) outputEl.textContent = item.htBaoCao;
                 if (badge)    { badge.textContent = item.htBaoCao.length + ' ký tự'; badge.className = 'text-[10px] font-black text-blue-600'; }
                 if (btns)     { btns.style.removeProperty('display'); btns.style.display = 'grid'; }
+            } else {
+                // Đảm bảo xóa sạch báo cáo cũ nếu hồ sơ mới chưa có
+                this._currentReport = '';
+                const outputEl = document.getElementById('ht-output-area');
+                const badge    = document.getElementById('ht-output-badge');
+                const btns     = document.getElementById('ht-action-btns');
+                if (outputEl) outputEl.textContent = 'Điền thông tin và nhấn "Tạo báo cáo"...';
+                if (badge)    { badge.textContent = 'Chưa tạo'; badge.className = 'text-[10px] font-black text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200 shadow-sm'; }
+                if (btns)     btns.style.display = 'none';
             }
         },
 
@@ -20173,6 +20083,267 @@ YÊU CẦU ĐẦU RA:
             </button>
             <button onclick="AccidentReport.saveMobileModal()" class="flex-1 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-black text-xs active:scale-95 hover:shadow-lg transition-all flex items-center justify-center gap-1.5 shadow-md shadow-blue-200">
                 <i data-lucide="save" class="w-4 h-4"></i> Lưu biên bản
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SUB-MODAL: BÁO CÁO HIỆN TRƯỜNG                              -->
+    <!-- ============================================================ -->
+    <div id="scene-report-modal" class="fixed inset-0 z-50 hidden bg-[#f8fafc] flex flex-col transition-transform duration-300 transform translate-y-full">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-950 text-white px-4 py-4 flex justify-between items-center shrink-0 shadow-xl z-20 border-b border-slate-800">
+            <div class="flex items-center gap-3 min-w-0">
+                <button onclick="HienTruong.closeMobileModal()" 
+                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 text-white active:scale-95 hover:bg-white/15 transition-all shrink-0">
+                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                </button>
+                <div class="min-w-0">
+                    <h2 class="text-sm font-extrabold tracking-wide uppercase text-slate-100 leading-none mb-1">Báo Cáo Hiện Trường (Zalo)</h2>
+                    <p class="text-[10px] text-blue-400 font-bold font-mono truncate" id="sr-title-bsx">...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body (Scrollable form) -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+
+            <!-- NHÓM 1: THIẾT LẬP BÁO CÁO -->
+            <div class="p-4 rounded-2xl border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(148,163,184,0.12)] space-y-4 hover:shadow-md transition-shadow">
+                <h3 class="text-xs font-black text-slate-800 uppercase flex items-center gap-2 border-b border-slate-100 pb-2.5">
+                    <div class="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                        <i data-lucide="sliders-horizontal" class="w-4 h-4 text-blue-600"></i>
+                    </div>
+                    Thiết lập báo cáo
+                </h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="input-label">Loại tổn thất</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="ht-btn-vcx" onclick="HienTruong.toggleType('VCX')"
+                                class="py-2.5 rounded-xl text-xs font-black border transition-all bg-blue-600 text-white border-blue-600 shadow-sm">
+                                VCX — Vật chất xe
+                            </button>
+                            <button id="ht-btn-tnds" onclick="HienTruong.toggleType('TNDS')"
+                                class="py-2.5 rounded-xl text-xs font-black border transition-all bg-white text-slate-500 border-slate-200 hover:bg-slate-50">
+                                TNDS — Trách nhiệm DS
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="input-label">Gửi báo cáo đến</label>
+                        <div class="flex gap-2 flex-wrap">
+                            <button onclick="HienTruong.setRecipient('@Nguyễn Toàn @Nguyễn Thanh Hùng', this)"
+                                class="ht-rcpt-btn px-3 py-1.5 rounded-xl text-[11px] font-black border bg-blue-600 text-white border-blue-600 shadow-sm">
+                                Anh Toàn + Anh Hùng
+                            </button>
+                            <button onclick="HienTruong.setRecipient('@Nguyễn Toàn', this)"
+                                class="ht-rcpt-btn px-3 py-1.5 rounded-xl text-[11px] font-black border bg-white text-slate-500 border-slate-200 hover:bg-slate-50">
+                                Chỉ anh Toàn
+                            </button>
+                            <button onclick="HienTruong.setRecipient('@Nguyễn Thanh Hùng', this)"
+                                class="ht-rcpt-btn px-3 py-1.5 rounded-xl text-[11px] font-black border bg-white text-slate-500 border-slate-200 hover:bg-slate-50">
+                                Chỉ anh Hùng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NHÓM 2: GHI NHẬN TẠI HIỆN TRƯỜNG -->
+            <div class="p-4 rounded-2xl border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(148,163,184,0.12)] space-y-4 hover:shadow-md transition-shadow">
+                <h3 class="text-xs font-black text-slate-800 uppercase flex items-center gap-2 border-b border-slate-100 pb-2.5">
+                    <div class="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                        <i data-lucide="camera" class="w-4 h-4 text-blue-600"></i>
+                    </div>
+                    Ghi nhận tại Hiện trường
+                </h3>
+
+                <!-- Diễn biến -->
+                <div class="space-y-1.5">
+                    <label class="input-label">Diễn biến vụ việc</label>
+                    <div class="relative border border-slate-100 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 rounded-2xl bg-slate-50/70 p-3 transition-all">
+                        <textarea id="edit-htDienBien" rows="3" class="w-full bg-transparent border-0 outline-none resize-none pr-8 text-xs text-slate-800 font-bold leading-relaxed" placeholder="Nhập diễn biến vụ việc..."></textarea>
+                        <button onclick="HienTruong.clearField('edit-htDienBien')" class="absolute right-3.5 top-3.5 text-slate-400 hover:text-rose-500 transition-colors bg-white/80 p-1 rounded-full shadow-sm">
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                        </button>
+                        
+                        <!-- Mẫu diễn biến nhanh -->
+                        <div class="flex flex-wrap gap-1.5 mb-2 mt-1">
+                            <button onclick="HienTruong.fillTemplate('luithu')" class="px-2 py-0.5 bg-white border border-slate-200 rounded-lg text-[9px] font-bold text-slate-600 active:bg-slate-100 transition-colors shadow-sm">Lùi xe thiếu quan sát</button>
+                            <button onclick="HienTruong.fillTemplate('vancan')" class="px-2 py-0.5 bg-white border border-slate-200 rounded-lg text-[9px] font-bold text-slate-600 active:bg-slate-100 transition-colors shadow-sm">Va chạm phía trước</button>
+                            <button onclick="HienTruong.fillTemplate('coicong')" class="px-2 py-0.5 bg-white border border-slate-200 rounded-lg text-[9px] font-bold text-slate-600 active:bg-slate-100 transition-colors shadow-sm">Đụng cột/cổng</button>
+                            <button onclick="HienTruong.fillTemplate('dongduong')" class="px-2 py-0.5 bg-white border border-slate-200 rounded-lg text-[9px] font-bold text-slate-600 active:bg-slate-100 transition-colors shadow-sm">Đụng xe khác</button>
+                        </div>
+
+                        <div class="flex items-center justify-between border-t border-slate-200/50 pt-2 mt-1.5">
+                            <div class="flex gap-2">
+                                <button onclick="SpeechInput.toggle('edit-htDienBien','mic-ht-dienbien','st-ht-dienbien')" id="mic-ht-dienbien" class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100/80 active:scale-95 text-blue-600 rounded-lg text-[10px] font-black transition-all border border-blue-100/50 shadow-sm">
+                                    <i data-lucide="mic" class="w-3.5 h-3.5"></i> Ghi âm
+                                </button>
+                                <button onclick="HienTruong.normalizeAI('edit-htDienBien')" class="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100/80 active:scale-95 text-purple-600 rounded-lg text-[10px] font-black transition-all border border-purple-100/50 shadow-sm">
+                                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI Tinh chỉnh
+                                </button>
+                            </div>
+                            <div id="st-ht-dienbien" class="text-[9px] font-bold text-blue-500 animate-pulse"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nhận định -->
+                <div class="space-y-1.5">
+                    <label class="input-label">Nhận định hiện trường</label>
+                    <div class="relative border border-slate-100 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 rounded-2xl bg-slate-50/70 p-3 transition-all">
+                        <textarea id="edit-htNhanDinh" rows="2" class="w-full bg-transparent border-0 outline-none resize-none pr-8 text-xs text-slate-800 font-bold leading-relaxed" placeholder="Nhận định hiện trường vụ việc..."></textarea>
+                        <button onclick="HienTruong.clearField('edit-htNhanDinh')" class="absolute right-3.5 top-3.5 text-slate-400 hover:text-rose-500 transition-colors bg-white/80 p-1 rounded-full shadow-sm">
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                        </button>
+                        
+                        <div class="flex items-center justify-between border-t border-slate-200/50 pt-2.5 mt-2">
+                            <div class="flex gap-2">
+                                <button onclick="HienTruong.fillNhanDinh()" class="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100/80 active:scale-95 text-indigo-600 rounded-lg text-[10px] font-black transition-all border border-indigo-100/50 shadow-sm">
+                                    Mẫu nhanh
+                                </button>
+                                <button onclick="SpeechInput.toggle('edit-htNhanDinh','mic-ht-nhandinh','st-ht-nhandinh')" id="mic-ht-nhandinh" class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100/80 active:scale-95 text-blue-600 rounded-lg text-[10px] font-black transition-all border border-blue-100/50 shadow-sm">
+                                    <i data-lucide="mic" class="w-3.5 h-3.5"></i> Ghi âm
+                                </button>
+                                <button onclick="HienTruong.normalizeAI('edit-htNhanDinh')" class="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100/80 active:scale-95 text-purple-600 rounded-lg text-[10px] font-black transition-all border border-purple-100/50 shadow-sm">
+                                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI Tinh chỉnh
+                                </button>
+                            </div>
+                            <div id="st-ht-nhandinh" class="text-[9px] font-bold text-emerald-500 animate-pulse"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sơ đồ hiện trường -->
+                <div class="space-y-1.5 pt-2 border-t border-slate-100">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="input-label mb-0">Sơ đồ hiện trường</label>
+                        <button onclick="SceneCanvas.open(App.currentEditId)"
+                            class="text-[10px] bg-blue-600 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-bold active:scale-95 transition-all shadow-sm">
+                            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Vẽ sơ đồ
+                        </button>
+                    </div>
+                    
+                    <div id="scene-diagram-preview" class="hidden relative w-full h-32 bg-white rounded-xl border border-slate-200 overflow-hidden cursor-pointer" onclick="ImageViewer.openScene()">
+                        <img id="scene-diagram-img" src="" class="w-full h-full object-contain">
+                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                            <span class="text-white text-xs font-bold">Xem toàn màn hình</span>
+                        </div>
+                        <button onclick="event.stopPropagation(); SceneCanvas.delete(App.currentEditId)" class="absolute top-2 right-2 w-7 h-7 bg-rose-500 text-white rounded-lg flex items-center justify-center active:scale-90">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                    <p id="scene-diagram-empty" class="text-[10px] text-slate-400 italic text-center py-2">Chưa có sơ đồ, nhấn "Vẽ sơ đồ" để phác thảo.</p>
+                </div>
+            </div>
+
+            <!-- NHÓM 3: ĐỀ XUẤT & ƯỚC TÍNH BỒI THƯỜNG -->
+            <div class="p-4 rounded-2xl border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(148,163,184,0.12)] space-y-4 hover:shadow-md transition-shadow">
+                <h3 class="text-xs font-black text-slate-800 uppercase flex items-center gap-2 border-b border-slate-100 pb-2.5">
+                    <div class="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                        <i data-lucide="calculator" class="w-4 h-4 text-blue-600"></i>
+                    </div>
+                    Đề xuất & Ước tính bồi thường
+                </h3>
+                
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-2 space-y-1">
+                        <label class="input-label">Ước tổn thất</label>
+                        <div class="ar-input-wrapper">
+                            <input type="text" id="edit-htUocTonThat" class="input-field font-bold text-slate-800" placeholder="Ví dụ: 3">
+                            <button onclick="HienTruong.clearField('edit-htUocTonThat')" class="ar-clear-btn" title="Xóa">
+                                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="input-label">Đơn vị</label>
+                        <select id="edit-htDonVi" class="input-field font-bold text-slate-700 bg-white">
+                            <option value="đồng">đồng</option>
+                            <option value="triệu" selected>triệu</option>
+                            <option value="tỷ">tỷ</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="input-label mb-0">Phương án bồi thường</label>
+                        <div class="flex gap-1.5">
+                            <button onclick="HienTruong.fillDeXuat('du')"
+                                class="text-[9px] font-black px-2.5 py-1 bg-white text-slate-600 border border-slate-200 rounded-lg active:bg-slate-50 transition-colors shadow-sm">
+                                Đủ
+                            </button>
+                            <button onclick="HienTruong.fillDeXuat('tnds')"
+                                class="text-[9px] font-black px-2.5 py-1 bg-blue-600 text-white rounded-lg active:bg-blue-700 transition-colors shadow-sm">
+                                NĐ67
+                            </button>
+                            <button onclick="HienTruong.fillDeXuat('wait')"
+                                class="text-[9px] font-black px-2.5 py-1 bg-white text-slate-600 border border-slate-200 rounded-lg active:bg-slate-50 transition-colors shadow-sm">
+                                Chờ BG
+                            </button>
+                        </div>
+                    </div>
+                    <div class="relative border border-slate-100 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 rounded-2xl bg-slate-50/70 p-3 transition-all">
+                        <textarea id="edit-htDeXuat" rows="2" class="w-full bg-transparent border-0 outline-none resize-none pr-8 text-xs text-slate-800 font-bold leading-relaxed" placeholder="Nhập đề xuất phương án bồi thường..."></textarea>
+                        <button onclick="HienTruong.clearField('edit-htDeXuat')" class="absolute right-3.5 top-3.5 text-slate-400 hover:text-rose-500 transition-colors bg-white/80 p-1 rounded-full shadow-sm">
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NHÓM 4: BÁO CÁO TỔNG HỢP -->
+            <div class="p-4 rounded-2xl border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(148,163,184,0.12)] space-y-4 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                    <h3 class="text-xs font-black text-slate-800 uppercase flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                            <i data-lucide="bot" class="w-4 h-4 text-blue-600"></i>
+                        </div>
+                        Báo cáo tổng hợp
+                    </h3>
+                    <span id="ht-output-badge" class="text-[10px] font-black text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200 shadow-sm">Chưa tạo</span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="HienTruong.generateAI(App.currentEditId)"
+                        class="py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md shadow-blue-200">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i> AI Tạo báo cáo
+                    </button>
+                    <button onclick="HienTruong.buildQuick(App.currentEditId)"
+                        class="py-3.5 bg-white text-slate-700 border border-slate-200 rounded-2xl font-black text-xs flex items-center justify-center gap-2 active:bg-slate-50 transition-all shadow-sm">
+                        <i data-lucide="zap" class="w-4 h-4"></i> Tạo nhanh
+                    </button>
+                </div>
+                
+                <p id="ht-status" class="text-[10px] text-blue-500 font-bold min-h-[16px] text-center animate-pulse"></p>
+                
+                <div id="ht-output-area"
+                    class="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 text-[12px] text-slate-800 font-bold leading-relaxed whitespace-pre-wrap min-h-[80px] shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
+                    style="font-family: inherit;">Điền thông tin và nhấn "Tạo báo cáo"...</div>
+                    
+                <div class="grid grid-cols-2 gap-2 mt-1" id="ht-action-btns" style="display:none!important;">
+                    <button onclick="HienTruong.copyReport()"
+                        class="py-3.5 bg-emerald-600 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md shadow-emerald-200">
+                        <i data-lucide="copy" class="w-4 h-4"></i> Copy gửi Zalo
+                    </button>
+                    <button onclick="HienTruong.saveAndReset(App.currentEditId)"
+                        class="py-3.5 bg-white text-slate-700 border border-slate-200 rounded-2xl font-black text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm">
+                        <i data-lucide="save" class="w-4 h-4"></i> Lưu hồ sơ
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="p-4 border-t border-slate-200 bg-white flex justify-between items-center gap-3 shrink-0 shadow-lg">
+            <button onclick="HienTruong.closeMobileModal()" class="flex-1 py-3.5 border border-slate-200 text-slate-700 rounded-2xl font-black text-xs active:bg-slate-50 hover:bg-slate-50 active:scale-95 transition-all">
+                Đóng
             </button>
         </div>
     </div>
