@@ -11467,16 +11467,19 @@
                 </div>
                 `,
                 showCancelButton: true,
-                confirmButtonText: 'Xuất File',
-                cancelButtonText: 'Hủy',
+                confirmButtonText: '<i data-lucide="file-down" class="w-4 h-4 mr-1.5 flex-shrink-0"></i><span>Xuất File</span>',
+                cancelButtonText: '<i data-lucide="x-circle" class="w-4 h-4 mr-1.5 flex-shrink-0"></i><span>Hủy</span>',
                 customClass: { 
                     popup: 'custom-rounded w-full', 
                     actions: 'flex w-full gap-3 mt-4 px-1',
                     confirmButton: 'flex-1 py-3 px-4 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-2xl font-black text-xs active:scale-95 transition-all shadow-md shadow-cyan-100 dark:shadow-none !m-0 border border-transparent cursor-pointer flex items-center justify-center',
-                    cancelButton: 'flex-1 py-3 px-4 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-2xl font-black text-xs active:scale-95 transition-all !m-0 border border-slate-200/80 dark:border-slate-700 shadow-sm cursor-pointer flex items-center justify-center'
+                    cancelButton: 'flex-1 py-3 px-4 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 rounded-2xl font-black text-xs active:scale-95 active:bg-rose-100 dark:active:bg-rose-950/40 transition-all !m-0 border border-rose-200 dark:border-rose-900/30 cursor-pointer flex items-center justify-center'
                 },
                 showLoaderOnConfirm: false, // <-- Quan trọng: Tắt spinner mặc định của Swal ở nút Xác nhận
                 allowOutsideClick: () => !Swal.isLoading(),
+                didOpen: () => {
+                    if (window.lucide) window.lucide.createIcons();
+                },
                 preConfirm: async () => {
                     const isTBNT = document.getElementById('chk-tbnt').checked;
                     const isBBGD = document.getElementById('chk-bbgd').checked;
