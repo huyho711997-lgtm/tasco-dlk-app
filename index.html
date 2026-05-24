@@ -9801,7 +9801,10 @@
             let searchHtml = `
                 <div class="p-1">
                     <div class="relative mb-3">
-                        <input type="text" id="quick-garage-search" oninput="Garage._filterQuickList(this.value)" placeholder="🔍 Tìm kiếm nhanh gara..." class="w-full bg-slate-50 border border-slate-200 text-slate-700 px-3.5 py-2.5 rounded-xl text-xs font-bold outline-none focus:border-cyan-500 focus:bg-white transition-all">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
+                        </div>
+                        <input type="text" id="quick-garage-search" oninput="Garage._filterQuickList(this.value)" placeholder="Tìm kiếm nhanh gara..." class="w-full bg-slate-50 border border-slate-200 text-slate-700 pl-9 pr-3.5 py-2.5 rounded-xl text-xs font-bold outline-none focus:border-cyan-500 focus:bg-white transition-all">
                     </div>
                     <div id="quick-garage-list" class="max-h-[240px] overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
             `;
@@ -9828,7 +9831,12 @@
             `;
 
             Swal.fire({
-                title: '<span class="text-[15px] font-black text-slate-800">🔧 CHỌN NHANH GARA</span>',
+                title: `
+                    <div class="flex items-center justify-center gap-2">
+                        <i data-lucide="wrench" class="w-[18px] h-[18px] text-cyan-600"></i>
+                        <span class="text-[14.5px] font-black text-slate-800 tracking-wider">CHỌN NHANH GARA</span>
+                    </div>
+                `,
                 html: searchHtml,
                 showConfirmButton: false,
                 showCloseButton: true,
@@ -9865,9 +9873,12 @@
                 }
                 customItem.style.display = 'flex';
                 customItem.innerHTML = `
-                    <div class="text-left min-w-0 flex-1">
-                        <p class="text-[12px] font-black text-cyan-600 truncate">➕ Sử dụng gara mới: "${q.trim()}"</p>
-                        <p class="text-[10px] text-slate-400 font-bold truncate mt-0.5">Tạo mới và gán cho hồ sơ này</p>
+                    <div class="text-left min-w-0 flex-1 flex items-center gap-2">
+                        <i data-lucide="plus-circle" class="w-4 h-4 text-cyan-500 flex-shrink-0"></i>
+                        <div>
+                            <p class="text-[12px] font-black text-cyan-600 truncate">Sử dụng gara mới: "${q.trim()}"</p>
+                            <p class="text-[10px] text-slate-400 font-bold truncate mt-0.5">Tạo mới và gán cho hồ sơ này</p>
+                        </div>
                     </div>
                     <i data-lucide="plus" class="w-4 h-4 text-cyan-500 flex-shrink-0 ml-2"></i>
                 `;
