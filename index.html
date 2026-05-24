@@ -107,17 +107,9 @@
         /* Màu sắc biểu tượng và chữ tương ứng với từng tab khi active */
         #nav-home-btn.bottom-nav-active { color: #2563eb !important; }
         #nav-list-btn.bottom-nav-active { color: #059669 !important; }
+        #nav-ai-btn.bottom-nav-active { color: #4f46e5 !important; }
         #nav-overdue-btn.bottom-nav-active { color: #d97706 !important; }
         #nav-calendar-btn.bottom-nav-active { color: #7c3aed !important; }
-
-        .nav-btn-center {
-            width: 48px; height: 48px; background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            color: white; 
-            box-shadow: 0 8px 20px -4px rgba(79, 70, 229, 0.4), 0 0 0 3px rgba(79, 70, 229, 0.12);
-            transform: translateY(-12px); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); border: none; outline: none; cursor: pointer; flex-shrink: 0;
-        }
-        .nav-btn-center:active { transform: translateY(-8px) scale(0.92); box-shadow: 0 4px 12px -2px rgba(79, 70, 229, 0.4); }
 
         [data-theme="dark"] .bottom-nav-wrapper { 
             background: rgba(15, 23, 42, 0.65) !important; /* Trong suốt mờ ở dark mode */
@@ -2998,11 +2990,10 @@
             <span class="nav-text">Hồ sơ</span>
         </button>
         
-        <div class="relative">
-            <button onclick="AI.toggle()" class="nav-btn-center">
-                <i data-lucide="bot" class="w-6 h-6 relative z-10"></i>
-            </button>
-        </div>
+        <button id="nav-ai-btn" onclick="AI.toggle()" class="nav-btn">
+            <div class="nav-icon-wrap"><i data-lucide="bot" class="w-5 h-5"></i></div>
+            <span class="nav-text">Trợ lý</span>
+        </button>
 
         <button id="nav-overdue-btn" onclick="Nav.switchView('overdue', this)" class="nav-btn">
             <div class="nav-icon-wrap relative">
@@ -5640,6 +5631,11 @@
         calendarInit: false,
         viewTitles: { home: 'Trang chủ', list:'Hồ sơ bồi thường', overdue:'Tiến độ hồ sơ', import:'Tiếp nhận tự động', calendar:'Lịch làm việc', report:'Báo cáo tổng hợp', cloud: 'Cloud của tôi' },
         switchView(view, btn) {
+            if (AI._open && btn && btn.id !== 'nav-ai-btn') {
+                AI._open = false;
+                document.getElementById('ai-panel').classList.remove('open');
+                AI._prevActiveTabId = null;
+            }
             document.querySelectorAll('.view-section').forEach(s => { s.classList.add('hidden'); s.classList.remove('block'); });
             const target = document.getElementById('view-'+view);
             if (target) { target.classList.remove('hidden'); target.classList.add(view==='calendar'?'flex':'block'); }
@@ -14065,6 +14061,7 @@ QUAN TRỌNG:
     // ============================================================
     const AI = {
         _open: false,
+        _prevActiveTabId: null,
         _history: [],   // {role, content}
         _mic: null,
         _micActive: false,
@@ -14127,6 +14124,29 @@ QUAN TRỌNG:
         toggle() {
             this._open = !this._open;
             document.getElementById('ai-panel').classList.toggle('open', this._open);
+            
+            const aiBtn = document.getElementById('nav-ai-btn');
+            if (aiBtn) {
+                if (this._open) {
+                    if (!this._prevActiveTabId) {
+                        const activeBtn = document.querySelector('.nav-btn.bottom-nav-active');
+                        if (activeBtn && activeBtn.id !== 'nav-ai-btn') this._prevActiveTabId = activeBtn.id;
+                    }
+                    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bottom-nav-active'));
+                    aiBtn.classList.add('bottom-nav-active');
+                } else {
+                    aiBtn.classList.remove('bottom-nav-active');
+                    if (this._prevActiveTabId) {
+                        const prevBtn = document.getElementById(this._prevActiveTabId);
+                        if (prevBtn) prevBtn.classList.add('bottom-nav-active');
+                        this._prevActiveTabId = null;
+                    } else {
+                        const homeBtn = document.getElementById('nav-home-btn');
+                        if (homeBtn) homeBtn.classList.add('bottom-nav-active');
+                    }
+                }
+            }
+
             if (this._open && !this._history.length) this._welcome();
         },
 
