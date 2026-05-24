@@ -6183,7 +6183,7 @@
             const cleanGaraPhone = String(item.garaAdvisorPhone || item.garaPhone || '').replace(/\D/g,'');
             
             const btnCall = cleanPhone 
-                ? `<a href="tel:${cleanPhone}" onclick="event.stopPropagation()" class="ticket-btn bg-slate-50 text-slate-600 border border-slate-200 active:bg-slate-100"><i data-lucide="phone" class="w-3.5 h-3.5"></i> Gọi KH</a>` 
+                ? `<a href="tel:${cleanPhone}" onclick="event.stopPropagation()" class="ticket-btn bg-[#e6f4ea] text-[#137333] border border-[#c2e7cd] active:bg-[#d2ebd9] font-bold"><i data-lucide="phone" class="w-3.5 h-3.5"></i> Gọi KH</a>` 
                 : `<button disabled class="ticket-btn bg-slate-50 text-slate-400 border border-slate-100 opacity-50"><i data-lucide="phone-off" class="w-3.5 h-3.5"></i></button>`;
                 
             const btnZalo = cleanGaraPhone
@@ -6252,7 +6252,7 @@
                 <div class="flex gap-2">
                     ${btnCall}
                     ${btnZalo}
-                    <button onclick="event.stopPropagation(); Modal.openStatusSheet('${item.id}')" class="ticket-btn bg-slate-800 text-white shadow-sm active:scale-95">
+                    <button onclick="event.stopPropagation(); Modal.openStatusSheet('${item.id}')" class="ticket-btn bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-100 dark:shadow-none active:scale-95 border border-transparent font-bold">
                         Chuyển bước <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                     </button>
                 </div>
