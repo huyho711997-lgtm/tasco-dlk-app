@@ -3767,15 +3767,31 @@
                     <!-- Export bar -->
                     <div id="dm-export-bar" class="hidden mt-4 space-y-2 pt-4 border-t border-slate-100">
                         <!-- Thông tin bổ sung trước khi xuất -->
-                        <div class="bg-slate-50 rounded-2xl p-3 border border-slate-200 space-y-3">
-                            <p class="text-[10px] font-black text-slate-500 uppercase">Thông tin biên bản</p>
+                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-3 border border-slate-200 dark:border-slate-800 space-y-3">
+                            <p class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase">Thông tin biên bản</p>
                             <div>
-                                <label class="input-label">Nguyên nhân tai nạn</label>
-                                <input type="text" id="dm-nguyenNhan" class="input-field" placeholder="VD: Va chạm giao thông tại ngã tư...">
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="input-label mb-0">Nguyên nhân tai nạn</label>
+                                    <div id="st-dm-nguyenNhan" class="text-[9px] font-bold text-blue-500 animate-pulse"></div>
+                                </div>
+                                <div class="relative">
+                                    <input type="text" id="dm-nguyenNhan" class="input-field pr-10" style="border-radius:14px; padding:11px 13px;" placeholder="VD: Va chạm giao thông tại ngã tư...">
+                                    <button type="button" onclick="SpeechInput.toggle('dm-nguyenNhan', 'mic-dm-nguyenNhan', 'st-dm-nguyenNhan')" id="mic-dm-nguyenNhan" class="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-100 dark:bg-blue-900/30 dark:border-blue-900/40 dark:text-blue-400 transition-all active:scale-90 cursor-pointer shadow-sm">
+                                        <i data-lucide="mic" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div>
-                                <label class="input-label">Kiến nghị xử lý</label>
-                                <textarea id="dm-kienNghi" rows="3" class="input-field resize-none" placeholder="VD: Đồng ý bồi thường theo thực tế...">Giải quyết quyền lợi theo quy định</textarea>
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="input-label mb-0">Kiến nghị xử lý</label>
+                                    <div id="st-dm-kienNghi" class="text-[9px] font-bold text-blue-500 animate-pulse"></div>
+                                </div>
+                                <div class="relative">
+                                    <textarea id="dm-kienNghi" rows="3" class="input-field resize-none pr-10" style="border-radius:14px; padding:11px 13px;" placeholder="VD: Đồng ý bồi thường theo thực tế...">Giải quyết quyền lợi theo quy định</textarea>
+                                    <button type="button" onclick="SpeechInput.toggle('dm-kienNghi', 'mic-dm-kienNghi', 'st-dm-kienNghi')" id="mic-dm-kienNghi" class="absolute right-2.5 bottom-2.5 flex items-center justify-center w-8 h-8 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-100 dark:bg-blue-900/30 dark:border-blue-900/40 dark:text-blue-400 transition-all active:scale-90 cursor-pointer shadow-sm">
+                                        <i data-lucide="mic" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -10250,7 +10266,7 @@
 
                 // Chọn Prompt phù hợp: Bot trò chuyện hay Nhập liệu chuyên ngành
                 let PROMPT = 'Hãy chuyển đổi giọng nói trong file audio này thành văn bản tiếng Việt. CHỈ trả về nội dung văn bản đã nhận dạng, không thêm bất kỳ giải thích nào.';
-                if (['edit-htDienBien', 'edit-htNhanDinh', 'bbgd-input'].includes(this._targetTextarea) || (this._targetTextarea && this._targetTextarea.startsWith('ar-'))) {
+                if (['edit-htDienBien', 'edit-htNhanDinh', 'bbgd-input', 'dm-nguyenNhan', 'dm-kienNghi'].includes(this._targetTextarea) || (this._targetTextarea && this._targetTextarea.startsWith('ar-'))) {
                      PROMPT = 'Bạn là chuyên gia giám định bồi thường xe cơ giới. Hãy chuyển đổi giọng nói thành văn bản tiếng Việt. Tự động nắn lại các từ địa phương hoặc nói ngọng về đúng chính tả thuật ngữ kỹ thuật ô tô (Ví dụ: cảng -> cản, lường -> lườn, dè -> vè, mốp -> móp...). CHỈ trả về nội dung văn bản đã nhận dạng.';
                 }
 
