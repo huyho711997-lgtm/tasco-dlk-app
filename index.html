@@ -19580,203 +19580,7 @@ YÊU CẦU ĐẦU RA:
         }
     };
     // ============================================================
-    // SPEECH INPUT — Voice-to-Text for AI Auto-Fill
-    // ============================================================
-    const SpeechInput = {
-        _recognition: null,
-        _transcript: '',
-        _isActive: false,
-
-        init() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                console.warn("Speech Recognition not supported in this browser.");
-                return;
-            }
-            const rec = new SpeechRecognition();
-            rec.lang = 'vi-VN';
-            rec.continuous = true;
-            rec.interimResults = true;
-
-            rec.onstart = () => {
-                this._isActive = true;
-                this._transcript = '';
-                this._updateStatus('Đang lắng nghe giọng nói...');
-            };
-
-            rec.onerror = (e) => {
-                console.error("Speech error:", e);
-                this._updateStatus('Lỗi nhận diện: ' + e.error);
-            };
-
-            rec.onend = () => {
-                this._isActive = false;
-                if (document.getElementById('speech-mic-pulse')) {
-                    // Tự động khởi động lại nhận diện nếu popup Swal vẫn đang hiển thị
-                    if (Swal.isVisible() && document.getElementById('speech-mic-pulse')) {
-                        try { this._recognition.start(); } catch(err) {}
-                    }
-                }
-            };
-
-            rec.onresult = (e) => {
-                let interim = '';
-                let final = '';
-                for (let i = e.resultIndex; i < e.results.length; ++i) {
-                    if (e.results[i].isFinal) {
-                        final += e.results[i][0].transcript;
-                    } else {
-                        interim += e.results[i][0].transcript;
-                    }
-                }
-                if (final) this._transcript += (this._transcript ? ' ' : '') + final;
-                
-                const liveText = this._transcript + (interim ? ' ' + interim : '');
-                const previewEl = document.getElementById('speech-preview-text');
-                if (previewEl) {
-                    previewEl.innerHTML = liveText 
-                        ? `<span class="text-slate-800 dark:text-slate-100 font-semibold">${liveText}</span>` 
-                        : `<span class="text-slate-400 font-normal">Hãy nói: "Chủ xe là Nguyễn Đức Sang, biển số 47H06882, ngày tai nạn là 24 tháng 5 năm 2026, nguyên nhân do lùi xe va chạm vào cống..."</span>`;
-                    previewEl.scrollTop = previewEl.scrollHeight;
-                }
-            };
-
-            this._recognition = rec;
-        },
-
-        start() {
-            if (!this._recognition) this.init();
-            if (!this._recognition) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Không hỗ trợ',
-                    text: 'Trình duyệt của bạn chưa hỗ trợ tính năng Nhận diện Giọng nói. Vui lòng sử dụng Chrome hoặc Safari mới nhất!',
-                    customClass: { popup: 'custom-rounded' }
-                });
-                return;
-            }
-
-            this._transcript = '';
-            
-            const html = `
-                <style>
-                    .mic-pulse-container {
-                        display: flex; justify-content: center; align-items: center; margin: 24px 0 16px;
-                    }
-                    .mic-ring {
-                        position: relative; width: 64px; height: 64px; border-radius: 50%;
-                        background: rgba(168, 85, 247, 0.12); display: flex; align-items: center; justify-content: center;
-                    }
-                    .mic-pulse {
-                        position: absolute; width: 100%; height: 100%; border-radius: 50%;
-                        border: 2px solid rgba(168, 85, 247, 0.5); animation: pulse-ring 1.8s cubic-bezier(0.24, 0, 0.38, 1) infinite;
-                    }
-                    .mic-pulse-2 {
-                        position: absolute; width: 100%; height: 100%; border-radius: 50%;
-                        border: 2px solid rgba(236, 72, 153, 0.4); animation: pulse-ring 1.8s cubic-bezier(0.24, 0, 0.38, 1) 0.9s infinite;
-                    }
-                    @keyframes pulse-ring {
-                        0% { transform: scale(0.9); opacity: 1; }
-                        100% { transform: scale(1.6); opacity: 0; }
-                    }
-                    .speech-preview {
-                        background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 18px;
-                        padding: 16px; min-height: 120px; max-height: 180px; overflow-y: auto;
-                        text-align: left; font-size: 13px; line-height: 1.6; margin-bottom: 20px;
-                        display: flex; flex-direction: column; justify-content: flex-start;
-                    }
-                    [data-theme="dark"] .speech-preview {
-                        background: var(--bg-app); border-color: var(--border-light);
-                    }
-                    
-                    /* Button scoped styles */
-                    .swal2-popup.speech-modal .swal2-actions {
-                        display: flex !important; gap: 12px !important; width: 100% !important; margin-top: 0 !important;
-                    }
-                    .swal2-popup.speech-modal .swal2-confirm {
-                        flex: 2 !important; display: flex !important; align-items: center !important; justify-content: center !important;
-                        gap: 6px !important; height: 46px !important; border-radius: 16px !important; font-size: 13px !important;
-                        font-weight: 900 !important; background: linear-gradient(135deg, #8b5cf6, #ec4899) !important;
-                        color: #ffffff !important; border: none !important; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2) !important;
-                        cursor: pointer !important; margin: 0 !important;
-                    }
-                    .swal2-popup.speech-modal .swal2-cancel {
-                        flex: 1 !important; display: flex !important; align-items: center !important; justify-content: center !important;
-                        gap: 6px !important; height: 46px !important; border-radius: 16px !important; font-size: 13px !important;
-                        font-weight: 900 !important; background: #ef4444 !important;
-                        color: #ffffff !important; border: none !important; cursor: pointer !important; margin: 0 !important;
-                    }
-                </style>
-                <div class="text-center">
-                    <p class="text-xs text-slate-500 font-semibold mb-2">Đọc các thông tin cần điền (Họ tên, Biển số, Ngày xảy ra tai nạn, Nguyên nhân...)</p>
-                    
-                    <div class="mic-pulse-container">
-                        <div class="mic-ring" id="speech-mic-pulse">
-                            <div class="mic-pulse"></div>
-                            <div class="mic-pulse-2"></div>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="relative z-10"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-                        </div>
-                    </div>
-                    
-                    <p id="speech-status-text" class="text-[11px] text-fuchsia-600 dark:text-fuchsia-400 font-black tracking-wide uppercase mb-3">Đang kết nối Microphone...</p>
-                    
-                    <div class="speech-preview custom-scrollbar" id="speech-preview-text">
-                        <span class="text-slate-400 font-normal">Hãy nói: "Chủ xe là Nguyễn Đức Sang, biển số 47H06882, ngày tai nạn là 24 tháng 5 năm 2026, nguyên nhân do lùi xe va chạm vào cống..."</span>
-                    </div>
-                </div>
-            `;
-
-            Swal.fire({
-                title: '<div class="text-left font-black text-lg" style="color:var(--text-primary, #1e293b); display:flex; align-items:center; gap:8px;"><div style="width:32px;height:32px;background:rgba(168,85,247,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></div> Điền Giọng Nói AI</div>',
-                html: html,
-                showCancelButton: true,
-                confirmButtonText: '<i data-lucide="check" class="w-4 h-4 mr-1"></i>Hoàn tất & Điền',
-                cancelButtonText: 'Hủy bỏ',
-                allowOutsideClick: false,
-                customClass: {
-                    popup: 'custom-rounded speech-modal'
-                },
-                didOpen: () => {
-                    if (window.lucide) window.lucide.createIcons();
-                    try {
-                        this._recognition.start();
-                    } catch(err) {
-                        console.error("Start speech failed:", err);
-                    }
-                },
-                willClose: () => {
-                    try {
-                        this._recognition.stop();
-                    } catch(err) {}
-                },
-                preConfirm: () => {
-                    const text = this._transcript.trim();
-                    if (!text) {
-                        Swal.showValidationMessage('Vui lòng nói gì đó trước khi hoàn tất!');
-                        return false;
-                    }
-                    return text;
-                }
-            }).then(res => {
-                if (res.isConfirmed && res.value) {
-                    const inputEl = document.getElementById('ai-dz-input');
-                    if (inputEl) {
-                        inputEl.value = res.value;
-                        // Tự động phân tích!
-                        AIDropZone.analyze();
-                    }
-                }
-            });
-        },
-
-        _updateStatus(text) {
-            const el = document.getElementById('speech-status-text');
-            if (el) el.textContent = text;
-        }
-    };
-
-    // ============================================================
-    // AI DROP ZONE — Smart auto-fill from URL / image / text
+    // AI DROP ZONE — Smart auto-fill from URL / image
     // ============================================================
     const AIDropZone = (() => {
         let _pendingFiles = []; // [{type:'image', base64, name}, ...]
@@ -19986,33 +19790,6 @@ YÊU CẦU ĐẦU RA:
                     Chỉ trả về JSON thuần, bỏ qua trường không có dữ liệu.`;
                     const parsed = await callGemini(prompt, file.base64);
                     delete parsed.docType;
-                    Object.assign(allFields, Object.fromEntries(Object.entries(parsed).filter(([, v]) => v && v !== '0' && v !== 0)));
-                }
-
-                // ── Xử lý văn bản thô / giọng nói đọc ──
-                if (urls.length === 0 && _pendingFiles.length === 0 && urlRaw.length > 0) {
-                    setStatus('AI đang phân tích giọng nói / văn bản...', 'Trích xuất thông tin...');
-                    const prompt = `Dưới đây là nội dung ghi chú/lời thoại đọc giọng nói thông tin hồ sơ bồi thường xe cơ giới Việt Nam:
-                    "${urlRaw}"
-                    Hãy đóng vai trò chuyên gia bồi thường, phân tích và trích xuất tất cả các thông tin hữu ích có trong văn bản trên.
-                    Trả về kết quả dưới dạng JSON với đúng cấu trúc sau (chỉ điền các trường có thông tin rõ ràng, loại bỏ/không trả về các trường không có dữ liệu hoặc không được nhắc tới):
-                    {
-                    "ownerName": "họ tên chủ xe/người liên hệ",
-                    "ownerCccd": "số cccd/chứng minh nhân dân",
-                    "ownerDob": "ngày sinh chủ xe (định dạng DD/MM/YYYY)",
-                    "ownerAddress": "địa chỉ chủ xe/người liên hệ",
-                    "chuXe": "tên chủ xe đăng ký",
-                    "hangXe": "hãng xe/hiệu xe (VD: Vinfast, Toyota, Hyundai...)",
-                    "loaiXe": "loại xe/model (VD: Accent, VF3, Ranger...)",
-                    "soKhung": "số khung xe",
-                    "soMay": "số máy xe",
-                    "accidentDate": "ngày xảy ra tai nạn (định dạng DD/MM/YYYY hoặc DD/MM/YYYY HH:mm nếu có giờ)",
-                    "location": "địa điểm xảy ra tai nạn",
-                    "cause": "nguyên nhân xảy ra tai nạn",
-                    "description": "mô tả chi tiết tổn thất"
-                    }
-                    Chỉ trả về JSON thuần cực kỳ sạch sẽ, không kèm ký tự markdown (\`\`\`) hay bất kỳ văn bản nào khác.`;
-                    const parsed = await callGemini(prompt);
                     Object.assign(allFields, Object.fromEntries(Object.entries(parsed).filter(([, v]) => v && v !== '0' && v !== 0)));
                 }
 
@@ -21364,7 +21141,7 @@ YÊU CẦU ĐẦU RA:
                     class="relative rounded-2xl border-2 border-dashed border-fuchsia-200 bg-fuchsia-50/40 transition-all duration-200"
                     ondragover="AIDropZone.onDragOver(event)" ondragleave="AIDropZone.onDragLeave(event)" ondrop="AIDropZone.onDrop(event)">
                     <textarea id="ai-dz-input" rows="3"
-                        placeholder="📎 Dán URL bảo lãnh, PASC...&#10;🎙️ Đọc giọng nói (bấm nút Nói bên dưới)&#10;🖼️ Hoặc kéo thả / chọn ảnh giấy tờ"
+                        placeholder="📎 Dán URL bảo lãnh, PASC...&#10;🖼️ Hoặc kéo thả / chọn ảnh giấy tờ"
                         class="w-full bg-transparent px-4 pt-3 pb-2 text-[13px] font-semibold text-slate-700 outline-none resize-none placeholder:text-slate-400 placeholder:font-normal placeholder:text-[12px]"
                         oninput="AIDropZone.onTextInput(this)"></textarea>
                     <div class="flex items-center gap-2 px-4 pb-3">
@@ -21375,10 +21152,6 @@ YÊU CẦU ĐẦU RA:
                         <button onclick="AIDropZone.pasteClipboard()"
                             class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-[11px] font-bold text-slate-600 active:bg-slate-50 transition-colors shadow-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-fuchsia-500"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg> Dán
-                        </button>
-                        <button onclick="SpeechInput.start()"
-                            class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-[11px] font-bold text-slate-600 active:bg-slate-50 transition-colors shadow-sm animate-pulse">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-fuchsia-500"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg> Nói
                         </button>
                         <button onclick="AIDropZone.clearInput()"
                             class="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold text-slate-400 active:bg-slate-100 transition-colors">
