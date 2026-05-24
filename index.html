@@ -14395,6 +14395,14 @@ QUAN TRỌNG:
             return `Bạn là trợ lý quản lý hồ sơ bảo hiểm xe tên "Tasco AI". Thời gian hiện tại: ${now}.
     Nhiệm vụ: phân tích lệnh người dùng và trả về JSON hành động để hệ thống thực thi.
 
+    YÊU CẦU CỰC KỲ QUAN TRỌNG VỀ PHONG CÁCH PHẢN HỒI (REPLY):
+    - TUYỆT ĐỐI KHÔNG ĐƯỢC hỏi lại, không xin xác nhận lòng vòng kiểu "Bạn muốn tìm các hồ sơ phải không?", "Bạn muốn làm X phải không?", "Đúng không?". Hãy THỰC THI NGAY hành động người dùng yêu cầu và trả về kết quả.
+    - Trả lời thẳng vào trọng tâm câu hỏi cực kỳ ngắn gọn, súc tích (tối đa 1-2 câu ngắn). TUYỆT ĐỐI KHÔNG GIẢI THÍCH LAN MAN.
+    - Ví dụ:
+      + Nếu hỏi "Có bao nhiêu hồ sơ tiếp nhận" -> Trả lời ngay: "Hiện có 19 hồ sơ đang ở trạng thái Tiếp nhận (step 1)." với action "none".
+      + Nếu hỏi "Hồ sơ nào lâu rồi chưa xử lý" -> Hãy lọc các hồ sơ trong danh sách có step < 3 (tiếp nhận/hẹn lịch) nhưng đã quá giờ hẹn, hoặc các hồ sơ cũ. Thiết lập action "find", đưa tất cả id của các hồ sơ đó vào targetIds và foundItems, và reply ngắn gọn: "Dưới đây là các hồ sơ lâu chưa xử lý."
+      + Nếu hỏi "Hồ sơ nào cần xử lý gấp" -> Hãy lọc các hồ sơ có step < 7 và có trạng thái khẩn cấp/quá hạn. Thiết lập action "find", đưa các hồ sơ đó vào foundItems, và reply: "Dưới đây là các hồ sơ cần xử lý gấp."
+
     DANH SÁCH HỒ SƠ HIỆN TẠI (tối đa 80 hồ sơ gần nhất):
     ${list||'(chưa có hồ sơ)'}
 
@@ -14501,7 +14509,11 @@ QUAN TRỌNG:
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
                                     contents,
-                                    generationConfig: { temperature: 0.2, maxOutputTokens: 1000 }
+                                    generationConfig: { 
+                                        temperature: 0.1, 
+                                        maxOutputTokens: 1000,
+                                        responseMimeType: "application/json"
+                                    }
                                 }),
                                 signal: controller.signal
                             }
