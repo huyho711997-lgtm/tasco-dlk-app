@@ -3775,10 +3775,15 @@
                                     <div id="st-dm-nguyenNhan" class="text-[9px] font-bold text-blue-500 animate-pulse"></div>
                                 </div>
                                 <div class="relative">
-                                    <input type="text" id="dm-nguyenNhan" class="input-field pr-10" style="border-radius:14px; padding:11px 13px;" placeholder="VD: Va chạm giao thông tại ngã tư...">
-                                    <button type="button" onclick="SpeechInput.toggle('dm-nguyenNhan', 'mic-dm-nguyenNhan', 'st-dm-nguyenNhan')" id="mic-dm-nguyenNhan" class="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-100 dark:bg-blue-900/30 dark:border-blue-900/40 dark:text-blue-400 transition-all active:scale-90 cursor-pointer shadow-sm">
-                                        <i data-lucide="mic" class="w-4 h-4"></i>
-                                    </button>
+                                    <input type="text" id="dm-nguyenNhan" class="input-field pr-20" style="border-radius:14px; padding:11px 13px;" placeholder="VD: Va chạm giao thông tại ngã tư...">
+                                    <div class="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                                        <button type="button" onclick="const input = document.getElementById('dm-nguyenNhan'); input.value = ''; input.dispatchEvent(new Event('input'));" class="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-all active:scale-90 cursor-pointer">
+                                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                        <button type="button" onclick="SpeechInput.toggle('dm-nguyenNhan', 'mic-dm-nguyenNhan', 'st-dm-nguyenNhan')" id="mic-dm-nguyenNhan" class="flex items-center justify-center w-7 h-7 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-100 dark:bg-blue-900/30 dark:border-blue-900/40 dark:text-blue-400 transition-all active:scale-90 cursor-pointer shadow-sm">
+                                            <i data-lucide="mic" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <div>
@@ -3787,10 +3792,15 @@
                                     <div id="st-dm-kienNghi" class="text-[9px] font-bold text-blue-500 animate-pulse"></div>
                                 </div>
                                 <div class="relative">
-                                    <textarea id="dm-kienNghi" rows="3" class="input-field resize-none pr-10" style="border-radius:14px; padding:11px 13px;" placeholder="VD: Đồng ý bồi thường theo thực tế...">Giải quyết quyền lợi theo quy định</textarea>
-                                    <button type="button" onclick="SpeechInput.toggle('dm-kienNghi', 'mic-dm-kienNghi', 'st-dm-kienNghi')" id="mic-dm-kienNghi" class="absolute right-2.5 bottom-2.5 flex items-center justify-center w-8 h-8 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-100 dark:bg-blue-900/30 dark:border-blue-900/40 dark:text-blue-400 transition-all active:scale-90 cursor-pointer shadow-sm">
-                                        <i data-lucide="mic" class="w-4 h-4"></i>
-                                    </button>
+                                    <textarea id="dm-kienNghi" rows="3" class="input-field resize-none pr-20" style="border-radius:14px; padding:11px 13px;" placeholder="VD: Đồng ý bồi thường theo thực tế...">Giải quyết quyền lợi theo quy định</textarea>
+                                    <div class="absolute right-2.5 bottom-2.5 flex items-center gap-1.5">
+                                        <button type="button" onclick="const input = document.getElementById('dm-kienNghi'); input.value = ''; input.dispatchEvent(new Event('input'));" class="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-all active:scale-90 cursor-pointer">
+                                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                        <button type="button" onclick="SpeechInput.toggle('dm-kienNghi', 'mic-dm-kienNghi', 'st-dm-kienNghi')" id="mic-dm-kienNghi" class="flex items-center justify-center w-7 h-7 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-100 dark:bg-blue-900/30 dark:border-blue-900/40 dark:text-blue-400 transition-all active:scale-90 cursor-pointer shadow-sm">
+                                            <i data-lucide="mic" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
