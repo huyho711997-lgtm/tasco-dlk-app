@@ -51,7 +51,7 @@
             padding: 10px 14px; display: flex; justify-content: space-around; align-items: center;
             z-index: 40; 
             box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.6);
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
         }
         .nav-btn {
             display: flex;
@@ -62,7 +62,7 @@
             border-radius: 20px;
             background: transparent;
             color: #64748b; /* Màu icon chế độ sáng */
-            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: background-color 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), max-width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), padding 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
             max-width: 44px;
             overflow: hidden;
             white-space: nowrap;
@@ -5673,25 +5673,6 @@
                     b.classList.remove('bottom-nav-active'); 
                 });
                 btn.classList.add('bottom-nav-active');
-
-                // --- ĐOẠN MÃ MỚI: TÍNH TOÁN TỌA ĐỘ VÀ NÉM GIỌT NƯỚC ĐI ---
-                const indicator = document.getElementById('nav-liquid-indicator');
-                if (indicator) {
-                    const wrapperRect = btn.parentElement.getBoundingClientRect();
-                    const btnRect = btn.getBoundingClientRect();
-                    
-                    // Vị trí X mới = Mép trái của nút + (1/2 chiều rộng nút) - (1/2 chiều rộng giọt nước)
-                    const targetX = (btnRect.left - wrapperRect.left) + (btnRect.width / 2) - (indicator.offsetWidth / 2); 
-                    
-                    // Di chuyển giọt nước
-                    indicator.style.left = `${targetX}px`;
-                    
-                    // Kích hoạt hiệu ứng dãn nở (gooey)
-                    indicator.classList.remove('liquid-stretching');
-                    void indicator.offsetWidth; // Mẹo: Ép trình duyệt reset lại animation ngay lập tức
-                    indicator.classList.add('liquid-stretching');
-                }
-                // ---------------------------------------------------------
             }
 
             document.getElementById('header-subtitle').textContent = this.viewTitles[view]||'Mobile App';
