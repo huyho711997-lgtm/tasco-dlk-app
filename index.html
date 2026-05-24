@@ -11364,6 +11364,57 @@
 
                     /* Spinner Animation Custom */
                     @keyframes spin-slow { 100% { transform: rotate(360deg); } }
+
+                    /* Scoped overrides to ensure perfect button styling, gapless flex centering, and solid red background for Cancel */
+                    .swal2-popup.custom-rounded .swal2-actions {
+                        display: flex !important;
+                        gap: 12px !important;
+                        width: 100% !important;
+                        margin-top: 16px !important;
+                        padding: 0 4px !important;
+                    }
+                    .swal2-popup.custom-rounded .swal2-confirm {
+                        flex: 1 !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        gap: 6px !important;
+                        height: 46px !important;
+                        padding: 0 16px !important;
+                        border-radius: 16px !important;
+                        font-size: 13px !important;
+                        font-weight: 900 !important;
+                        background: linear-gradient(135deg, #06b6d4, #3b82f6) !important;
+                        color: #ffffff !important;
+                        border: none !important;
+                        box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2) !important;
+                        transition: all 0.2s !important;
+                        cursor: pointer !important;
+                    }
+                    .swal2-popup.custom-rounded .swal2-confirm:active {
+                        transform: scale(0.95) !important;
+                    }
+                    .swal2-popup.custom-rounded .swal2-cancel {
+                        flex: 1 !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        gap: 6px !important;
+                        height: 46px !important;
+                        padding: 0 16px !important;
+                        border-radius: 16px !important;
+                        font-size: 13px !important;
+                        font-weight: 900 !important;
+                        background: #ef4444 !important; /* Rich solid red background! */
+                        color: #ffffff !important; /* Crisp white text for contrast! */
+                        border: none !important;
+                        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2) !important;
+                        transition: all 0.2s !important;
+                        cursor: pointer !important;
+                    }
+                    .swal2-popup.custom-rounded .swal2-cancel:active {
+                        transform: scale(0.95) !important;
+                    }
                 </style>
             `;
 
