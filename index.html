@@ -4300,6 +4300,10 @@
                 "AIzaSy" + "AF3VuqNf8VoNnnyAZPEEkTUFnW8RC9FHE"
             ]
         },
+        groq: {
+            model: "llama-3.3-70b-versatile",
+            key: "org_01kschfqrzfs0b7zmvjg0zpkpz"
+        },
         exportWordUrl: "https://script.google.com/macros/s/AKfycbwQA00iOlnCsRwUkh9CN8w7fWONqw_-_EpCXCOJcwdBKoLe3RNuOatTzWQsmkjpHmUg/exec"
     };
 
@@ -14476,76 +14480,63 @@ QUAN TRỌNG:
             this._showTyping();
 
             try {
-                // Gộp system + history thành contents cho Gemini
                 const systemMsg = this._system();
                 
-                // Sử dụng lát cắt lẻ (slice(-9)) để đảm bảo tin nhắn đầu tiên của lịch sử luôn có role 'user' (vì tin nhắn cuối cùng luôn là 'user')
-                // Tránh lỗi consecutive roles (hai role model hoặc hai role user đứng liền nhau) khi gửi lên Gemini
+                // Chuẩn hóa lịch sử nhắn tin để tương thích với cấu trúc OpenAI/Groq API
+                // Groq hỗ trợ system role riêng biệt cực kỳ sạch sẽ
                 const slicedHistory = this._history.slice(-9);
-                const contents = [
-                    { role: 'user', parts: [{ text: systemMsg + '\n\n---\nLượt hội thoại bắt đầu từ đây.' }] },
-                    { role: 'model', parts: [{ text: '{"action":"none","reply":"Đã hiểu. Sẵn sàng nhận lệnh."}' }] },
+                const messages = [
+                    { role: 'system', content: systemMsg },
                     ...slicedHistory.map(m => ({
-                        role: m.role === 'user' ? 'user' : 'model',
-                        parts: [{ text: m.content }]
+                        role: m.role === 'user' ? 'user' : 'assistant',
+                        content: m.content
                     }))
                 ];
 
-                let dataResponse = null;
-                let lastError = '';
-                const maxRetries = CONFIG.gemini.keys.length;
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-                // Vòng lặp thử lại với các key khác nhau nếu gặp lỗi quá tải / hết hạn
-                for (let attempt = 0; attempt < maxRetries; attempt++) {
-                    try {
-                        const key = GeminiKeys.next();
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-                        const res = await fetch(
-                            `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.gemini.model}:generateContent?key=${key}`,
-                            {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    contents,
-                                    generationConfig: { 
-                                        temperature: 0.1, 
-                                        maxOutputTokens: 1000,
-                                        responseMimeType: "application/json"
-                                    }
-                                }),
-                                signal: controller.signal
-                            }
-                        );
-                        clearTimeout(timeoutId);
-
-                        dataResponse = await res.json();
-
-                        // Nếu gọi thành công và không bị Google trả về lỗi, thoát vòng lặp
-                        if (res.ok && !dataResponse.error) {
-                            break;
-                        } else if (dataResponse.error) {
-                            lastError = dataResponse.error.message || dataResponse.error.status;
-                            await new Promise(r => setTimeout(r, 800)); // Đợi một chút trước khi thử tiếp
-                        }
-                    } catch (fetchErr) {
-                        lastError = fetchErr.name === 'AbortError' ? 'Mạng chậm, Timeout 15s' : fetchErr.message;
+                const res = await fetch(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${CONFIG.groq.key}`
+                        },
+                        body: JSON.stringify({
+                            model: CONFIG.groq.model,
+                            messages,
+                            temperature: 0.1,
+                            max_tokens: 1000,
+                            response_format: { type: "json_object" }
+                        }),
+                        signal: controller.signal
                     }
+                );
+                clearTimeout(timeoutId);
+
+                const data = await res.json();
+                if (data.error) {
+                    throw new Error(data.error.message || JSON.stringify(data.error));
                 }
 
-                if (!dataResponse || dataResponse.error) {
-                    throw new Error(lastError || 'Không thể kết nối API Gemini sau nhiều lần thử');
-                }
-
-                const raw = (((dataResponse.candidates?.[0]?.content?.parts) || [{}])[0].text || '').trim();
+                const raw = (data.choices?.[0]?.message?.content || '').trim();
                 this._history.push({ role: 'assistant', content: raw });
                 this._hideTyping();
                 this._processResponse(raw);
             } catch (e) {
-                console.error("AI.send error:", e);
+                console.error("AI.send (Groq) error:", e);
                 this._hideTyping();
-                this._addBotMsg('❌ Lỗi kết nối. Vui lòng thử lại.');
+                
+                let errorMsg = '❌ Lỗi kết nối máy chủ Groq. Vui lòng thử lại.';
+                const errStr = String(e.message || '');
+                if (errStr.includes('401') || errStr.includes('Unauthorized') || errStr.includes('Invalid API') || errStr.includes('API key')) {
+                    errorMsg = '❌ Lỗi xác thực Groq. Vui lòng kiểm tra lại API Key (Key hợp lệ của Groq bắt đầu bằng <b>gsk_</b>, mã bạn cung cấp là Org ID).';
+                } else if (errStr.length > 0) {
+                    errorMsg = `❌ Lỗi Groq: ${errStr}`;
+                }
+                this._addBotMsg(errorMsg);
             }
         },
 
