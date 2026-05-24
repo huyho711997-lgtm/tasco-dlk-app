@@ -107,7 +107,6 @@
         /* Màu sắc biểu tượng và chữ tương ứng với từng tab khi active */
         #nav-home-btn.bottom-nav-active { color: #2563eb !important; }
         #nav-list-btn.bottom-nav-active { color: #059669 !important; }
-        #nav-ai-btn.bottom-nav-active { color: #4f46e5 !important; }
         #nav-overdue-btn.bottom-nav-active { color: #d97706 !important; }
         #nav-calendar-btn.bottom-nav-active { color: #7c3aed !important; }
 
@@ -122,6 +121,29 @@
 
         /* Ẩn indicator cũ để sử dụng cơ chế giãn nở CSS tự nhiên của nút */
         .liquid-indicator { display: none !important; }
+
+        /* ====== FLOATING AI BUTTON IN HOME PAGE ====== */
+        .ai-floating-btn {
+            position: relative;
+            animation: floatAI 3s ease-in-out infinite;
+        }
+        .ai-floating-btn::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid rgba(79, 70, 229, 0.4);
+            animation: pulseAI 2s infinite;
+            pointer-events: none;
+        }
+        @keyframes floatAI {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        @keyframes pulseAI {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.25); opacity: 0; }
+        }
         /* Đã xóa hiệu ứng dấu chấm ::after trong dark mode */
         .swal2-popup.custom-rounded { border-radius: 28px !important; padding: 1.5rem !important; }
         .swal2-popup.custom-rounded.compact-modal {
@@ -2657,6 +2679,13 @@
             </div>
             <div id="home-week-calendar" class="flex justify-between bg-white p-2 rounded-2xl border border-slate-100 shadow-sm mb-6 min-h-[85px]">
                 </div>
+
+            <!-- FLOATING AI WIDGET BUTTON -->
+            <div class="fixed bottom-32 right-6 z-30">
+                <button onclick="AI.toggle()" class="ai-floating-btn w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 dark:from-indigo-500 dark:to-violet-600 rounded-full flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 dark:shadow-indigo-500/40 hover:scale-105 active:scale-95 transition-all">
+                    <i data-lucide="bot" class="w-6 h-6"></i>
+                </button>
+            </div>
         </div>
 
         <div id="view-list" class="view-section p-4 hidden">
@@ -2990,11 +3019,6 @@
             <span class="nav-text">Hồ sơ</span>
         </button>
         
-        <button id="nav-ai-btn" onclick="AI.toggle()" class="nav-btn">
-            <div class="nav-icon-wrap"><i data-lucide="bot" class="w-5 h-5"></i></div>
-            <span class="nav-text">Trợ lý</span>
-        </button>
-
         <button id="nav-overdue-btn" onclick="Nav.switchView('overdue', this)" class="nav-btn">
             <div class="nav-icon-wrap relative">
                 <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
@@ -5631,10 +5655,9 @@
         calendarInit: false,
         viewTitles: { home: 'Trang chủ', list:'Hồ sơ bồi thường', overdue:'Tiến độ hồ sơ', import:'Tiếp nhận tự động', calendar:'Lịch làm việc', report:'Báo cáo tổng hợp', cloud: 'Cloud của tôi' },
         switchView(view, btn) {
-            if (AI._open && btn && btn.id !== 'nav-ai-btn') {
+            if (AI._open) {
                 AI._open = false;
                 document.getElementById('ai-panel').classList.remove('open');
-                AI._prevActiveTabId = null;
             }
             document.querySelectorAll('.view-section').forEach(s => { s.classList.add('hidden'); s.classList.remove('block'); });
             const target = document.getElementById('view-'+view);
@@ -14061,7 +14084,6 @@ QUAN TRỌNG:
     // ============================================================
     const AI = {
         _open: false,
-        _prevActiveTabId: null,
         _history: [],   // {role, content}
         _mic: null,
         _micActive: false,
@@ -14124,29 +14146,6 @@ QUAN TRỌNG:
         toggle() {
             this._open = !this._open;
             document.getElementById('ai-panel').classList.toggle('open', this._open);
-            
-            const aiBtn = document.getElementById('nav-ai-btn');
-            if (aiBtn) {
-                if (this._open) {
-                    if (!this._prevActiveTabId) {
-                        const activeBtn = document.querySelector('.nav-btn.bottom-nav-active');
-                        if (activeBtn && activeBtn.id !== 'nav-ai-btn') this._prevActiveTabId = activeBtn.id;
-                    }
-                    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bottom-nav-active'));
-                    aiBtn.classList.add('bottom-nav-active');
-                } else {
-                    aiBtn.classList.remove('bottom-nav-active');
-                    if (this._prevActiveTabId) {
-                        const prevBtn = document.getElementById(this._prevActiveTabId);
-                        if (prevBtn) prevBtn.classList.add('bottom-nav-active');
-                        this._prevActiveTabId = null;
-                    } else {
-                        const homeBtn = document.getElementById('nav-home-btn');
-                        if (homeBtn) homeBtn.classList.add('bottom-nav-active');
-                    }
-                }
-            }
-
             if (this._open && !this._history.length) this._welcome();
         },
 
