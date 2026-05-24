@@ -155,58 +155,73 @@
             display: block !important;
         }
         /* ====== GLOBAL SWEETALERT2 PREMIUM MOBILE STYLING ====== */
+        @keyframes spinPremium {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         body .swal2-popup {
-            border-radius: 28px !important;
-            font-family: 'Inter', sans-serif !important;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.08) !important;
-            border: 1px solid rgba(226, 232, 240, 0.8) !important;
-            background: #ffffff !important;
+            border-radius: 30px !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            background: rgba(255, 255, 255, 0.88) !important;
+            backdrop-filter: blur(20px) saturate(190%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(190%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.6) !important;
+            box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.1), 0 0 0 1px rgba(15, 23, 42, 0.02) !important;
         }
         body .swal2-popup:not(.w-full):not(.rounded-b-none):not(.compact-modal):not([style*="width"]) {
-            width: 320px !important;
-            max-width: 88vw !important;
-            padding: 24px 20px 20px 20px !important;
+            width: 310px !important;
+            max-width: 86vw !important;
+            padding: 28px 20px 22px 20px !important;
         }
         [data-theme="dark"] body .swal2-popup {
-            background: #1e293b !important;
+            background: rgba(30, 41, 59, 0.88) !important;
             border-color: rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.02) !important;
         }
         
         body .swal2-title {
-            font-size: 16px !important;
+            font-size: 17px !important;
             font-weight: 800 !important;
             color: #0f172a !important;
-            margin: 8px 0 12px 0 !important;
+            margin: 12px 0 6px 0 !important;
             padding: 0 !important;
             line-height: 1.4 !important;
+            letter-spacing: -0.025em !important;
         }
         [data-theme="dark"] body .swal2-title {
-            color: #f1f5f9 !important;
+            color: #f8fafc !important;
         }
 
         body .swal2-html-container {
-            font-size: 12.5px !important;
+            font-size: 12px !important;
+            font-weight: 550 !important;
             color: #64748b !important;
-            line-height: 1.5 !important;
+            line-height: 1.6 !important;
             margin: 0 0 16px 0 !important;
             padding: 0 !important;
+            letter-spacing: -0.01em !important;
         }
         [data-theme="dark"] body .swal2-html-container {
             color: #94a3b8 !important;
         }
 
-        /* Loading Spinner & Icons */
+        /* Premium Floating Liquid Spinner */
         body .swal2-loader {
-            border-color: #0891b2 transparent #0891b2 transparent !important;
-            margin: 12px auto !important;
-            width: 32px !important;
-            height: 32px !important;
-            border-width: 3px !important;
+            border: 3.5px solid rgba(8, 145, 178, 0.08) !important;
+            border-top: 3.5px solid #0891b2 !important;
+            border-right: 3.5px solid #06b6d4 !important;
+            border-radius: 50% !important;
+            margin: 16px auto 10px auto !important;
+            width: 44px !important;
+            height: 44px !important;
+            box-shadow: 0 0 15px rgba(8, 145, 178, 0.12) !important;
+            animation: spinPremium 0.72s cubic-bezier(0.45, 0.15, 0.3, 0.85) infinite !important;
         }
         
         body .swal2-icon {
-            transform: scale(0.75) !important;
-            margin: 8px auto 0 auto !important;
+            transform: scale(0.72) !important;
+            margin: 4px auto 0 auto !important;
         }
 
         body .swal2-actions {
