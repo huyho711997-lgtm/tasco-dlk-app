@@ -10576,6 +10576,12 @@
 
             try {
                 const blob = new Blob(this._chunks, { type: mimeType });
+                const base64 = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
 
                 // Chọn Prompt phù hợp: Bot trò chuyện hay Nhập liệu chuyên ngành
                 let PROMPT = 'Hãy chuyển đổi giọng nói trong file audio này thành văn bản tiếng Việt. CHỈ trả về nội dung văn bản đã nhận dạng, không thêm bất kỳ giải thích nào.';
@@ -10583,85 +10589,40 @@
                      PROMPT = 'Bạn là chuyên gia giám định bồi thường xe cơ giới. Hãy chuyển đổi giọng nói thành văn bản tiếng Việt. Tự động nắn lại các từ địa phương hoặc nói ngọng về đúng chính tả thuật ngữ kỹ thuật ô tô (Ví dụ: cảng -> cản, lường -> lườn, dè -> vè, mốp -> móp...). CHỈ trả về nội dung văn bản đã nhận dạng.';
                 }
 
+                const MODELS = ['gemini-2.5-flash-lite', 'gemini-2.0-flash', CONFIG.gemini.model];
+                const maxRetries = CONFIG.gemini.keys.length * MODELS.length;
+                let lastError = null;
                 let text = '';
-                let success = false;
-
-                // ── 1. THỬ DÙNG GROQ WHISPER (NHANH VÀ CHÍNH XÁC NHẤT) ──────────────────
-                if (CONFIG.groq && CONFIG.groq.key) {
+                
+                for (let i = 0; i < maxRetries; i++) {
+                    const key = GeminiKeys.next();
+                    const model = MODELS[Math.floor(i / CONFIG.gemini.keys.length) % MODELS.length];
                     try {
-                        const fileExtension = mimeType.includes('mp4') ? 'mp4' : 'webm';
-                        const file = new File([blob], `audio.${fileExtension}`, { type: mimeType });
-                        
-                        const formData = new FormData();
-                        formData.append('file', file);
-                        formData.append('model', 'whisper-large-v3-turbo');
-                        formData.append('language', 'vi');
-                        formData.append('prompt', PROMPT);
-
-                        const res = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
                             method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${CONFIG.groq.key}`
-                            },
-                            body: formData
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: mimeType, data: base64 } }] }],
+                                generationConfig: { temperature: 0.1 }
+                            })
                         });
 
                         const data = await res.json();
-                        if (res.ok && data.text) {
-                            text = data.text.trim();
-                            success = true;
-                            console.log("Speech recognition using Groq Whisper succeeded!");
-                        } else {
-                            console.warn("Groq Whisper failed, trying Gemini fallback...", data.error || '');
+                        if (res.ok && !data.error) {
+                            text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+                            lastError = null;
+                            break;
                         }
-                    } catch (groqErr) {
-                        console.error("Groq Whisper error, trying Gemini fallback...", groqErr);
+                        lastError = data?.error?.message || 'Lỗi không xác định';
+                    } catch (err) {
+                        lastError = err.message;
+                    }
+                    if (i < maxRetries - 1) {
+                        await new Promise(resolve => setTimeout(resolve, Math.min(500 * Math.pow(2, i), 3000)));
                     }
                 }
 
-                // ── 2. FALLBACK SANG GEMINI MULTIMODAL (NẾU GROQ LỖI HOẶC CHƯA CẤU HÌNH) ──
-                if (!success) {
-                    const base64 = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result.split(',')[1]);
-                        reader.onerror = reject;
-                        reader.readAsDataURL(blob);
-                    });
-
-                    const MODELS = ['gemini-2.5-flash-lite', 'gemini-2.0-flash', CONFIG.gemini.model];
-                    const maxRetries = CONFIG.gemini.keys.length * MODELS.length;
-                    let lastError = null;
-                    
-                    for (let i = 0; i < maxRetries; i++) {
-                        const key = GeminiKeys.next();
-                        const model = MODELS[Math.floor(i / CONFIG.gemini.keys.length) % MODELS.length];
-                        try {
-                            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: mimeType, data: base64 } }] }],
-                                    generationConfig: { temperature: 0.1 }
-                                })
-                            });
-
-                            const data = await res.json();
-                            if (res.ok && !data.error) {
-                                text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
-                                lastError = null;
-                                success = true;
-                                break;
-                            }
-                            lastError = data?.error?.message || 'Lỗi không xác định';
-                        } catch (err) {
-                            lastError = err.message;
-                        }
-                        if (i < maxRetries - 1) {
-                            await new Promise(resolve => setTimeout(resolve, Math.min(500 * Math.pow(2, i), 3000)));
-                        }
-                    }
-                    if (lastError && !success) throw new Error(lastError);
-                }
+                if (lastError) throw new Error(lastError);
                 
                 if (text) {
                     const ta = document.getElementById(this._targetTextarea);
