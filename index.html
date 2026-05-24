@@ -14564,8 +14564,8 @@ QUAN TRỌNG:
             // Hiển thị reply
             if (parsed.reply) this._addBotMsg(parsed.reply);
 
-            // Nếu tìm thấy nhiều hồ sơ → show list để chọn
-            if (parsed.foundItems?.length > 1) {
+            // Nếu tìm thấy hồ sơ (1 hoặc nhiều) -> Hiển thị danh sách thẻ hồ sơ
+            if (parsed.foundItems && parsed.foundItems.length > 0) {
                 this._showFoundList(parsed.foundItems, parsed.action, parsed.data);
                 return;
             }
