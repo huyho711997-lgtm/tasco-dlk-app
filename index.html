@@ -9750,40 +9750,44 @@
         },
 
         async saveIfNewData(garage, newAdvisor = null) {
-            if(!garage?.name) return;
-            const existingGara = this._list.find(g => g.name?.toLowerCase() === garage.name.toLowerCase());
-            
-            if(!existingGara) {
-                // Thêm Gara mới hoàn toàn
-                if (newAdvisor) garage.advisors = [newAdvisor];
-                await db.ref(`Garages/${Date.now()}`).set({...garage, createdAt: new Date().toISOString()});
-            } else {
-                // Cập nhật Gara hiện tại (nếu có thông tin mới)
-                let updates = {};
-                let needUpdate = false;
+            try {
+                if(!garage?.name) return;
+                const existingGara = this._list.find(g => g.name?.toLowerCase() === garage.name.toLowerCase());
                 
-                if (garage.bankNo && !existingGara.bankNo) { updates.bankNo = garage.bankNo; needUpdate = true; }
-                if (garage.bankName && !existingGara.bankName) { updates.bankName = garage.bankName; needUpdate = true; }
-                if (garage.bankOwner && !existingGara.bankOwner) { updates.bankOwner = garage.bankOwner; needUpdate = true; }
-
-                if (newAdvisor) {
-                    let currentAdvisors = existingGara.advisors || [];
-                    let advIdx = currentAdvisors.findIndex(a => a.name.toLowerCase() === newAdvisor.name.toLowerCase());
+                if(!existingGara) {
+                    // Thêm Gara mới hoàn toàn
+                    if (newAdvisor) garage.advisors = [newAdvisor];
+                    await db.ref(`Garages/${Date.now()}`).set({...garage, createdAt: new Date().toISOString()});
+                } else {
+                    // Cập nhật Gara hiện tại (nếu có thông tin mới)
+                    let updates = {};
+                    let needUpdate = false;
                     
-                    if (advIdx === -1) {
-                        currentAdvisors.push(newAdvisor);
-                        updates.advisors = currentAdvisors;
-                        needUpdate = true;
-                    } else if (newAdvisor.phone && currentAdvisors[advIdx].phone !== newAdvisor.phone) {
-                        currentAdvisors[advIdx].phone = newAdvisor.phone;
-                        updates.advisors = currentAdvisors;
-                        needUpdate = true;
+                    if (garage.bankNo && !existingGara.bankNo) { updates.bankNo = garage.bankNo; needUpdate = true; }
+                    if (garage.bankName && !existingGara.bankName) { updates.bankName = garage.bankName; needUpdate = true; }
+                    if (garage.bankOwner && !existingGara.bankOwner) { updates.bankOwner = garage.bankOwner; needUpdate = true; }
+
+                    if (newAdvisor) {
+                        let currentAdvisors = existingGara.advisors || [];
+                        let advIdx = currentAdvisors.findIndex(a => a.name.toLowerCase() === newAdvisor.name.toLowerCase());
+                        
+                        if (advIdx === -1) {
+                            currentAdvisors.push(newAdvisor);
+                            updates.advisors = currentAdvisors;
+                            needUpdate = true;
+                        } else if (newAdvisor.phone && currentAdvisors[advIdx].phone !== newAdvisor.phone) {
+                            currentAdvisors[advIdx].phone = newAdvisor.phone;
+                            updates.advisors = currentAdvisors;
+                            needUpdate = true;
+                        }
+                    }
+
+                    if (needUpdate && existingGara._key) {
+                        await db.ref(`Garages/${existingGara._key}`).update(updates);
                     }
                 }
-
-                if (needUpdate && existingGara._key) {
-                    await db.ref(`Garages/${existingGara._key}`).update(updates);
-                }
+            } catch (err) {
+                console.warn("Lỗi lưu danh mục Gara (có thể do phân quyền):", err);
             }
         },
 
@@ -9911,12 +9915,24 @@
                 garaBankOwner: garage.bankOwner || ''
             };
             
-            // Tự động lưu Gara mới vào danh mục hệ thống nếu chưa tồn tại
+            // Tự động lưu Gara mới vào danh mục hệ thống nếu chưa tồn tại (chạy background không gây chặn)
             this.saveIfNewData(garage);
             
             db.ref(`Workstation/${id}`).update(updates).then(() => {
+                Swal.close(); // Đóng vòng xoay tải "Đang gán Gara..." trước khi hiện Toast thông báo
                 Toast.fire({ icon: 'success', title: 'Đã gán Gara thành công!' });
                 if (App.currentEditId === id) App.open(id);
+            }).catch(err => {
+                Swal.close();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi gán Gara',
+                    text: 'Không thể cập nhật thông tin Gara lên hệ thống. Vui lòng kiểm tra kết nối mạng!',
+                    customClass: {
+                        popup: 'custom-rounded compact-modal'
+                    }
+                });
+                console.error(err);
             });
         }
     };
