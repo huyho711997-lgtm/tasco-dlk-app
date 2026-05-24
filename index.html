@@ -48,8 +48,8 @@
             bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); 
             left: 50%; transform: translateX(-50%);
             width: calc(100% - 32px); max-width: 480px;
-            background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(226, 232, 240, 0.5); border-radius: 30px;
+            background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border: 1.5px solid rgba(203, 213, 225, 0.85); border-radius: 30px;
             padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;
             z-index: 40; 
             /* Hiệu ứng bóng đổ đa tầng tạo độ nổi cực mạnh cho light mode */
@@ -59,10 +59,10 @@
 
         @keyframes navGlowLight {
             0% { 
-                box-shadow: 0 16px 36px -4px rgba(79, 70, 229, 0.08), 0 8px 16px -4px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.6); 
+                box-shadow: 0 16px 40px -6px rgba(0, 0, 0, 0.12), 0 8px 18px -4px rgba(0, 0, 0, 0.06), 0 0 20px rgba(79, 70, 229, 0.08), inset 0 1.5px 0 rgba(255, 255, 255, 0.95), inset 0 -1.5px 3px rgba(0, 0, 0, 0.02); 
             }
             100% { 
-                box-shadow: 0 22px 48px -4px rgba(79, 70, 229, 0.16), 0 10px 24px -4px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.7); 
+                box-shadow: 0 24px 50px -4px rgba(0, 0, 0, 0.18), 0 12px 28px -4px rgba(0, 0, 0, 0.08), 0 0 36px rgba(79, 70, 229, 0.25), inset 0 1.5px 0 rgba(255, 255, 255, 0.95), inset 0 -1.5px 3px rgba(0, 0, 0, 0.03); 
             }
         }
         .nav-btn {
@@ -84,18 +84,18 @@
         .nav-btn-center:active { transform: translateY(-12px) scale(0.92); box-shadow: 0 4px 12px -2px rgba(79, 70, 229, 0.4); }
 
         [data-theme="dark"] .bottom-nav-wrapper { 
-            background: rgba(30, 41, 59, 0.85); 
-            border-color: rgba(255, 255, 255, 0.08); 
+            background: rgba(30, 41, 59, 0.9); 
+            border-color: rgba(255, 255, 255, 0.15); 
             /* Hiệu ứng ánh sáng tỏa nhẹ màu xanh dương pastel cho dark mode */
             animation: navGlowDark 4s infinite alternate ease-in-out; 
         }
 
         @keyframes navGlowDark {
             0% { 
-                box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 8px 16px -4px rgba(0, 0, 0, 0.2), 0 0 20px -2px rgba(96, 165, 250, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05); 
+                box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.6), 0 8px 20px -4px rgba(0, 0, 0, 0.4), 0 0 20px -2px rgba(96, 165, 250, 0.12), inset 0 1.5px 0 rgba(255, 255, 255, 0.08), inset 0 -1.5px 3px rgba(0, 0, 0, 0.2); 
             }
             100% { 
-                box-shadow: 0 24px 48px -8px rgba(0, 0, 0, 0.5), 0 10px 20px -4px rgba(0, 0, 0, 0.3), 0 0 28px -2px rgba(96, 165, 250, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08); 
+                box-shadow: 0 28px 56px -6px rgba(0, 0, 0, 0.7), 0 12px 28px -4px rgba(0, 0, 0, 0.5), 0 0 32px -2px rgba(96, 165, 250, 0.25), inset 0 1.5px 0 rgba(255, 255, 255, 0.12), inset 0 -1.5px 3px rgba(0, 0, 0, 0.25); 
             }
         }
         [data-theme="dark"] .nav-btn { color: var(--text-muted); }
@@ -2116,15 +2116,15 @@
         /* Đảm bảo giọt nước luôn nằm dưới cùng */
         .liquid-indicator {
             position: absolute;
-            top: 8px; 
+            top: 6px; 
             left: 0;
-            width: 32px;
+            width: 56px;
             height: 32px;
-            background-color: #eff6ff; /* Màu nền giọt nước ở chế độ sáng */
-            border-radius: 50%;
+            background-color: rgba(79, 70, 229, 0.08); /* Màu nền viên nhộng ở chế độ sáng */
+            border-radius: 16px;
             z-index: 0; /* Đưa xuống lớp thấp nhất */
             pointer-events: none;
-            transition: left 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+            transition: left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         /* Đảm bảo Icon và chữ luôn nổi lên trên giọt nước */
@@ -2143,7 +2143,7 @@
 
         /* Fix màu cho giọt nước trong Dark Mode để không bị chói */
         [data-theme="dark"] .liquid-indicator {
-            background-color: rgba(59, 130, 246, 0.25);
+            background-color: rgba(96, 165, 250, 0.16);
         }
         
 
@@ -2152,13 +2152,13 @@
 
         /* Animation khi giọt nước lướt qua (bị ép dẹp lại theo chiều ngang) */
         .liquid-stretching {
-            animation: gooeyStretch 0.4s ease-in-out forwards;
+            animation: pillStretch 0.35s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
 
-        @keyframes gooeyStretch {
-            0% { transform: scaleX(1) scaleY(1); border-radius: 50%; }
-            50% { transform: scaleX(1.6) scaleY(0.7); border-radius: 40%; } /* Dãn chiều ngang, xẹp chiều dọc */
-            100% { transform: scaleX(1) scaleY(1); border-radius: 50%; }
+        @keyframes pillStretch {
+            0% { transform: scaleX(1) scaleY(1); }
+            50% { transform: scaleX(1.22) scaleY(0.9); } /* Co giãn nhẹ theo chiều ngang khi lướt */
+            100% { transform: scaleX(1) scaleY(1); }
         }
 
         /* ============================================================
@@ -5628,8 +5628,8 @@
                     const wrapperRect = btn.parentElement.getBoundingClientRect();
                     const btnRect = btn.getBoundingClientRect();
                     
-                    // Vị trí X mới = Mép trái của nút + (1/2 chiều rộng nút) - (1/2 chiều rộng giọt nước là 16px)
-                    const targetX = (btnRect.left - wrapperRect.left) + (btnRect.width / 2) - 16; 
+                    // Vị trí X mới = Mép trái của nút + (1/2 chiều rộng nút) - (1/2 chiều rộng giọt nước)
+                    const targetX = (btnRect.left - wrapperRect.left) + (btnRect.width / 2) - (indicator.offsetWidth / 2); 
                     
                     // Di chuyển giọt nước
                     indicator.style.left = `${targetX}px`;
