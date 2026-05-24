@@ -6232,7 +6232,7 @@
                         </div>
                     </div>
                     
-                    <div class="flex items-center gap-2.5">
+                    <div onclick="event.stopPropagation(); Garage.quickAssign('${item.id}')" class="flex items-center gap-2.5 cursor-pointer active:scale-95 transition-transform hover:bg-slate-50/80 p-1 -m-1 rounded-xl">
                         <div style="width:34px;height:34px;background:rgba(20,184,166,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(20,184,166,0.2);">
                             <i data-lucide="wrench" style="color:#0d9488" class="w-4 h-4"></i>
                         </div>
@@ -9785,6 +9785,128 @@
                     await db.ref(`Garages/${existingGara._key}`).update(updates);
                 }
             }
+        },
+
+        _activeIdForQuickAssign: null,
+
+        quickAssign(id) {
+            const item = App.find(id);
+            if (!item) return;
+
+            this._activeIdForQuickAssign = id;
+
+            // Lấy danh sách Gara đã lưu, sắp xếp theo tên
+            const sortedGarages = [...this._list].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            
+            let searchHtml = `
+                <div class="p-1">
+                    <div class="relative mb-3">
+                        <input type="text" id="quick-garage-search" oninput="Garage._filterQuickList(this.value)" placeholder="🔍 Tìm kiếm nhanh gara..." class="w-full bg-slate-50 border border-slate-200 text-slate-700 px-3.5 py-2.5 rounded-xl text-xs font-bold outline-none focus:border-cyan-500 focus:bg-white transition-all">
+                    </div>
+                    <div id="quick-garage-list" class="max-h-[240px] overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
+            `;
+            
+            if (sortedGarages.length === 0) {
+                searchHtml += `<p class="text-xs text-slate-400 text-center py-6 font-bold">Chưa có dữ liệu Gara trong danh sách</p>`;
+            } else {
+                searchHtml += sortedGarages.map((g, idx) => `
+                    <div class="quick-garage-item flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-white hover:border-cyan-200 hover:bg-cyan-50/30 active:scale-[0.98] transition-all cursor-pointer shadow-sm" 
+                         data-name="${g.name?.toLowerCase() || ''}"
+                         onclick="Garage._confirmQuickAssign('${id}', ${JSON.stringify(g).replace(/"/g,'&quot;')})">
+                        <div class="text-left min-w-0 flex-1">
+                            <p class="text-[12px] font-black text-slate-800 truncate">${g.name || '—'}</p>
+                            ${g.address ? `<p class="text-[10px] text-slate-400 font-bold truncate mt-0.5">${g.address}</p>` : ''}
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 flex-shrink-0 ml-2"></i>
+                    </div>
+                `).join('');
+            }
+            
+            searchHtml += `
+                    </div>
+                </div>
+            `;
+
+            Swal.fire({
+                title: '<span class="text-[15px] font-black text-slate-800">🔧 CHỌN NHANH GARA</span>',
+                html: searchHtml,
+                showConfirmButton: false,
+                showCloseButton: true,
+                customClass: {
+                    popup: 'custom-rounded compact-modal border border-slate-200 dark:border-slate-700 shadow-2xl bg-white dark:bg-slate-900'
+                },
+                didOpen: () => {
+                    lucide.createIcons();
+                }
+            });
+        },
+
+        _filterQuickList(q) {
+            const query = q.trim().toLowerCase();
+            const items = document.querySelectorAll('.quick-garage-item');
+            
+            items.forEach(el => {
+                const name = el.getAttribute('data-name') || '';
+                if (name.includes(query)) {
+                    el.style.display = 'flex';
+                } else {
+                    el.style.display = 'none';
+                }
+            });
+            
+            // Thêm tùy chọn gán Gara mới nếu người dùng nhập tìm kiếm
+            let customItem = document.getElementById('quick-gara-custom-add');
+            if (query.length > 0) {
+                if (!customItem) {
+                    customItem = document.createElement('div');
+                    customItem.id = 'quick-gara-custom-add';
+                    customItem.className = 'flex items-center justify-between p-3 rounded-xl border border-dashed border-cyan-300 bg-cyan-50/20 hover:bg-cyan-50/40 active:scale-[0.98] transition-all cursor-pointer shadow-sm';
+                    document.getElementById('quick-garage-list').appendChild(customItem);
+                }
+                customItem.style.display = 'flex';
+                customItem.innerHTML = `
+                    <div class="text-left min-w-0 flex-1">
+                        <p class="text-[12px] font-black text-cyan-600 truncate">➕ Sử dụng gara mới: "${q.trim()}"</p>
+                        <p class="text-[10px] text-slate-400 font-bold truncate mt-0.5">Tạo mới và gán cho hồ sơ này</p>
+                    </div>
+                    <i data-lucide="plus" class="w-4 h-4 text-cyan-500 flex-shrink-0 ml-2"></i>
+                `;
+                lucide.createIcons();
+                customItem.onclick = () => {
+                    this._confirmQuickAssign(this._activeIdForQuickAssign, { name: q.trim() });
+                };
+            } else if (customItem) {
+                customItem.style.display = 'none';
+            }
+        },
+
+        _confirmQuickAssign(id, garage) {
+            Swal.close();
+            if (!garage?.name) return;
+            
+            Swal.fire({ 
+                title: 'Đang gán Gara...', 
+                allowOutsideClick: false, 
+                didOpen: () => Swal.showLoading() 
+            });
+            
+            const updates = {
+                garaName: garage.name,
+                garaPhone: garage.phone || '',
+                garaAddress: garage.address || '',
+                garaTax: garage.tax || '',
+                garaBankNo: garage.bankNo || '',
+                garaBankName: garage.bankName || '',
+                garaBankOwner: garage.bankOwner || ''
+            };
+            
+            // Tự động lưu Gara mới vào danh mục hệ thống nếu chưa tồn tại
+            this.saveIfNewData(garage);
+            
+            db.ref(`Workstation/${id}`).update(updates).then(() => {
+                Toast.fire({ icon: 'success', title: 'Đã gán Gara thành công!' });
+                if (App.currentEditId === id) App.open(id);
+            });
         }
     };
 
