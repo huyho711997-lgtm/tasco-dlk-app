@@ -3046,16 +3046,17 @@
                         <p class="text-xs text-slate-500 font-medium mt-1" id="mycloud-count">Đang tải dữ liệu...</p>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button id="mycloud-select-btn" onclick="MyCloud.toggleSelectMode()" class="hidden px-3 py-2 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs transition-colors">
-                            Chọn
+                        <button id="mycloud-select-btn" onclick="MyCloud.toggleSelectMode()" class="hidden shrink-0 flex items-center gap-1.5 h-9 px-3 rounded-xl border border-slate-200 bg-white text-slate-700 active:scale-95 transition-all font-black text-[12px] shadow-sm">
+                            <i data-lucide="check-square" class="w-4 h-4 text-cyan-600"></i>
+                            <span>Chọn</span>
                         </button>
-                        <button onclick="MyCloud.openCamera()" class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 text-slate-700 active:scale-95 transition-all border border-slate-200">
-                            <i data-lucide="camera" class="w-4 h-4"></i>
-                            <span class="text-[12px] font-black">Chụp</span>
+                        <button onclick="MyCloud.openCamera()" class="shrink-0 flex items-center gap-1.5 h-9 px-3 rounded-xl border border-slate-200 bg-white text-slate-700 active:scale-95 transition-all font-black text-[12px] shadow-sm">
+                            <i data-lucide="camera" class="w-4 h-4 text-cyan-600"></i>
+                            <span>Chụp</span>
                         </button>
-                        <label class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white active:scale-95 transition-all shadow-md cursor-pointer">
+                        <label class="shrink-0 flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white active:scale-95 transition-all shadow-md shadow-cyan-200 dark:shadow-none cursor-pointer font-black text-[12px]">
                             <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-                            <span class="text-[12px] font-black">Tải lên</span>
+                            <span>Tải lên</span>
                             <input type="file" id="mycloud-upload-input" class="hidden" accept="image/*, .pdf, .doc, .docx, .xls, .xlsx" multiple onchange="MyCloud.uploadFiles(event)">
                         </label>
                     </div>
@@ -18812,9 +18813,19 @@ YÊU CẦU ĐẦU RA:
             
             if (filteredItems.length > 0) {
                 selectBtn.classList.remove('hidden');
-                selectBtn.textContent = this._selectMode ? 'Hủy chọn' : 'Chọn';
-                selectBtn.classList.toggle('bg-blue-100', this._selectMode);
-                selectBtn.classList.toggle('text-blue-700', this._selectMode);
+                selectBtn.innerHTML = this._selectMode 
+                    ? `<i data-lucide="x" class="w-4 h-4 text-rose-500"></i><span>Hủy</span>`
+                    : `<i data-lucide="check-square" class="w-4 h-4 text-cyan-600"></i><span>Chọn</span>`;
+                lucide.createIcons();
+                
+                // Toggle active style
+                if (this._selectMode) {
+                    selectBtn.classList.remove('bg-white', 'border-slate-200', 'text-slate-700');
+                    selectBtn.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-600');
+                } else {
+                    selectBtn.classList.remove('bg-rose-50', 'border-rose-200', 'text-rose-600');
+                    selectBtn.classList.add('bg-white', 'border-slate-200', 'text-slate-700');
+                }
             } else {
                 selectBtn.classList.add('hidden');
                 this._selectMode = false;
