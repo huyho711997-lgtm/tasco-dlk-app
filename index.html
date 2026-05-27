@@ -10482,6 +10482,7 @@
         _audioCtx: null,
         _analyser: null,
         _animFrame: null,
+        _wakeLock: null,
 
         toggle(textareaId, btnId, statusId) {
             if (this._isProcessing) return;
@@ -10507,8 +10508,32 @@
                 this._recorder.start(200); // Lấy data mỗi 200ms cho an toàn
                 this._openUI();
                 this._startVisualizer();
+                this._requestWakeLock();
             } catch (e) {
                 Toast.fire({ icon: 'error', title: 'Vui lòng cấp quyền Micro cho trình duyệt!' });
+            }
+        },
+
+        async _requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    this._wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Screen Wake Lock is active!');
+                }
+            } catch (err) {
+                console.warn('Wake Lock request failed:', err);
+            }
+        },
+
+        async _releaseWakeLock() {
+            try {
+                if (this._wakeLock) {
+                    await this._wakeLock.release();
+                    this._wakeLock = null;
+                    console.log('Screen Wake Lock released!');
+                }
+            } catch (err) {
+                console.warn('Wake Lock release failed:', err);
             }
         },
 
@@ -10629,6 +10654,9 @@
         },
 
         _stopMicrophoneTracks() {
+            // Giải phóng giữ sáng màn hình
+            this._releaseWakeLock();
+
             // Đóng AudioContext và dừng luồng mic ngay để tắt chấm đỏ của trình duyệt
             if (this._animFrame) {
                 cancelAnimationFrame(this._animFrame);
