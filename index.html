@@ -18432,30 +18432,43 @@ YÊU CẦU ĐẦU RA:
             printContainer.innerHTML = templateHtml;
             document.body.classList.add('printing-mode-ss');
             
-            this.adjustPrintScale();
-            window.removeEventListener('resize', this.adjustPrintScale);
-            window.addEventListener('resize', this.adjustPrintScale);
-        },
-
-        adjustPrintScale() {
-            const container = document.getElementById('ss-print-container');
-            if (!container) return;
-            const screenWidth = window.innerWidth;
-            if (screenWidth < 900) {
-                const designWidth = 210 * 3.7795; 
-                const scale = screenWidth / (designWidth + 40);
-                container.style.transform = `scale(${scale})`;
-                container.style.transformOrigin = 'top center';
-            } else {
-                container.style.transform = 'none';
-            }
+            const adjustPrintScale = () => {
+                const container = document.getElementById('ss-print-container');
+                if (!container) return;
+                const screenWidth = window.innerWidth;
+                const targetWidth = 794; // 210mm in pixels at 96dpi
+                
+                if (screenWidth < targetWidth + 40) {
+                    const scale = (screenWidth - 40) / targetWidth;
+                    container.style.zoom = scale;
+                    container.style.transform = '';
+                    container.style.transformOrigin = '';
+                    container.style.marginBottom = '';
+                } else {
+                    container.style.zoom = '';
+                    container.style.transform = '';
+                    container.style.transformOrigin = '';
+                    container.style.marginBottom = '';
+                }
+            };
+            
+            SceneSurvey.adjustPrintScale = adjustPrintScale;
+            
+            // Trigger scaling immediately
+            setTimeout(adjustPrintScale, 50);
+            
+            // Add listeners
+            window.removeEventListener('resize', SceneSurvey.adjustPrintScale);
+            window.addEventListener('resize', SceneSurvey.adjustPrintScale);
         },
 
         closePrintPreview() {
             document.body.classList.remove('printing-mode-ss');
             const wrapper = document.getElementById('ss-print-wrapper');
             if (wrapper) wrapper.remove();
-            window.removeEventListener('resize', this.adjustPrintScale);
+            if (SceneSurvey.adjustPrintScale) {
+                window.removeEventListener('resize', SceneSurvey.adjustPrintScale);
+            }
         }
     };
     window.SceneSurvey = SceneSurvey;
