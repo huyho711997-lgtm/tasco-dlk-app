@@ -4292,7 +4292,7 @@
             preset: "my_personal_cloud" 
         },
         gemini: {
-            model: "gemini-2.5-flash",
+            model: "gemini-2.5-flash-lite",
             keys: [
                 "AIzaSy" + "DWQ6fATzFmqDozABBEDiEwTwuuN2X_mHo",
                 "AIzaSy" + "AZ23wYEUgbF43IzdOu22morg2FyxMM5cg",
@@ -10578,9 +10578,16 @@
                 const blob = new Blob(this._chunks, { type: mimeType });
 
                 // Chọn Prompt phù hợp: Bot trò chuyện hay Nhập liệu chuyên ngành
-                let PROMPT = 'Hãy chuyển đổi giọng nói trong file audio này thành văn bản tiếng Việt. CHỈ trả về nội dung văn bản đã nhận dạng, không thêm bất kỳ giải thích nào.';
+                let PROMPT = 'Hãy chuyển đổi giọng nói trong file audio này thành văn bản tiếng Việt. ' +
+                    'Lưu ý địa bàn hoạt động là ở Đắk Lắk và Đắk Nông. Hãy nhận dạng đúng các địa danh địa phương như: ' +
+                    'Đắk Lắk, Đắk Nông, Buôn Ma Thuột, Buôn Hồ, Buôn Đôn, Cư M\'gar, Ea H\'leo, Ea Kar, Ea Súp, Krông Ana, Krông Bông, Krông Búk, Krông Năng, Krông Pắc, Lắk, M\'Drắk, Cư Kuin, ' +
+                    'Gia Nghĩa, Cư Jút, Đắk Glong, Đắk Mil, Đắk R\'lấp, Đắk Song, Krông Nô, Tuy Đức. ' +
+                    'CHỈ trả về nội dung văn bản đã nhận dạng, không thêm bất kỳ giải thích nào.';
                 if (['edit-htDienBien', 'edit-htNhanDinh', 'bbgd-input', 'dm-nguyenNhan', 'dm-kienNghi'].includes(this._targetTextarea) || (this._targetTextarea && this._targetTextarea.startsWith('ar-'))) {
-                     PROMPT = 'Bạn là chuyên gia giám định bồi thường xe cơ giới. Hãy chuyển đổi giọng nói thành văn bản tiếng Việt. Tự động nắn lại các từ địa phương hoặc nói ngọng về đúng chính tả thuật ngữ kỹ thuật ô tô (Ví dụ: cảng -> cản, lường -> lườn, dè -> vè, mốp -> móp...). CHỈ trả về nội dung văn bản đã nhận dạng.';
+                     PROMPT = 'Bạn là chuyên gia giám định bồi thường xe cơ giới tại địa bàn Đắk Lắk và Đắk Nông. ' +
+                         'Hãy chuyển đổi giọng nói thành văn bản tiếng Việt. Tự động nắn lại các từ địa phương hoặc nói ngọng về đúng chính tả thuật ngữ kỹ thuật ô tô (Ví dụ: cảng -> cản, lường -> lườn, dè -> vè, mốp -> móp...) ' +
+                         'và nhận dạng chuẩn xác các địa danh địa phương tại Đắk Lắk, Đắk Nông (Ví dụ: Buôn Ma Thuột, Buôn Hồ, Krông Pắc, Krông Nô, Gia Nghĩa, Cư Jút, Đắk Mil, Đắk R\'lấp, Cư M\'gar, Ea H\'leo, Ea Kar, Ea Súp, Buôn Đôn, Lắk, M\'Drắk, Cư Kuin, Đắk Glong, Đắk Song, Tuy Đức...). ' +
+                         'CHỈ trả về nội dung văn bản đã nhận dạng.';
                 }
 
                 let text = '';
@@ -10598,7 +10605,7 @@
 
                     const cleanMimeType = mimeType.split(';')[0];
                     // Đưa gemini-2.5-flash-lite lên đầu vì nó có độ trễ cực thấp và hiệu năng cao
-                    const MODELS = ['gemini-2.5-flash-lite', CONFIG.gemini.model];
+                    const MODELS = ['gemini-2.5-flash-lite', 'gemini-2.5-flash'];
                     const maxRetries = CONFIG.gemini.keys.length * MODELS.length;
 
                     for (let i = 0; i < maxRetries; i++) {
@@ -10653,7 +10660,7 @@
                         formData.append('language', 'vi');
                         
                         // Whisper prompt: dùng danh sách từ chuyên ngành thay vì câu lệnh instruction để tránh gây nhiễu
-                        const WHISPER_PROMPT = 'cản xe, lườn xe, vè xe, móp, xước, bể, nứt, trầy, va chạm, tai nạn xe cơ giới, giám định bồi thường bảo hiểm Tasco Đắk Lắk.';
+                        const WHISPER_PROMPT = 'cản xe, lườn xe, vè xe, móp, xước, bể, nứt, trầy, va chạm, tai nạn xe cơ giới, giám định bồi thường bảo hiểm Tasco, Đắk Lắk, Đắk Nông, Buôn Ma Thuột, Gia Nghĩa, Krông Nô, Cư Jút, Đắk Mil, Krông Pắc, Ea Kar, Cư M\'gar, Ea H\'leo, Đắk R\'lấp, Đắk Glong, Đắk Song, Tuy Đức, Buôn Hồ, Buôn Đôn, Ea Súp, Krông Ana, Krông Bông, Krông Búk, Krông Năng, Lắk, M\'Drắk, Cư Kuin.';
                         formData.append('prompt', WHISPER_PROMPT);
 
                         const res = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
@@ -16411,7 +16418,7 @@ YÊU CẦU ĐẦU RA:
 - KHÔNG giải thích gì thêm, KHÔNG thêm bất kỳ lời thoại nào khác.`;
 
             try {
-                const MODELS = ['gemini-2.5-flash-lite', CONFIG.gemini.model];
+                const MODELS = ['gemini-2.5-flash-lite', 'gemini-2.5-flash'];
                 const maxRetries = CONFIG.gemini.keys.length * MODELS.length;
                 let lastError = null;
                 let text = '';
@@ -16531,7 +16538,7 @@ YÊU CẦU ĐẦU RA:
             Lưu ý: Chỉ trả về JSON thô (raw JSON text), không đặt trong thẻ code block tam giác ngược (markdown), không giải thích gì thêm.`;
 
             try {
-                const MODELS = ['gemini-2.5-flash-lite', CONFIG.gemini.model];
+                const MODELS = ['gemini-2.5-flash-lite', 'gemini-2.5-flash'];
                 const maxRetries = CONFIG.gemini.keys.length * MODELS.length;
                 let lastError = null;
                 let text = '';
@@ -19756,7 +19763,7 @@ YÊU CẦU ĐẦU RA:
 
         // ── Call Gemini with retry ────────────────────────────────
         async function callGemini(promptText, base64Image = null) {
-            const MODELS = ['gemini-2.5-flash-lite', CONFIG.gemini.model];
+            const MODELS = ['gemini-2.5-flash-lite', 'gemini-2.5-flash'];
             const maxRetries = CONFIG.gemini.keys.length * MODELS.length;
             let lastErr = null;
             for (let i = 0; i < maxRetries; i++) {
