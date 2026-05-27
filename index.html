@@ -10479,6 +10479,9 @@
         _targetStatus: null,
         _isProcessing: false,
         _originalBtnHTML: null,
+        _audioCtx: null,
+        _analyser: null,
+        _animFrame: null,
 
         toggle(textareaId, btnId, statusId) {
             if (this._isProcessing) return;
@@ -10503,8 +10506,65 @@
                 
                 this._recorder.start(200); // Lấy data mỗi 200ms cho an toàn
                 this._openUI();
+                this._startVisualizer();
             } catch (e) {
                 Toast.fire({ icon: 'error', title: 'Vui lòng cấp quyền Micro cho trình duyệt!' });
+            }
+        },
+
+        _startVisualizer() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                this._audioCtx = new AudioContext();
+                const source = this._audioCtx.createMediaStreamSource(this._stream);
+                this._analyser = this._audioCtx.createAnalyser();
+                this._analyser.fftSize = 256;
+                source.connect(this._analyser);
+                
+                const bufferLength = this._analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                
+                const micCircle = document.getElementById('voice-mic-circle');
+                const ring1 = document.getElementById('voice-mic-ring-1');
+                const ring2 = document.getElementById('voice-mic-ring-2');
+                
+                const draw = () => {
+                    if (!this._analyser) return;
+                    this._animFrame = requestAnimationFrame(draw);
+                    this._analyser.getByteFrequencyData(dataArray);
+                    
+                    // Tính mức độ âm lượng trung bình
+                    let sum = 0;
+                    for (let i = 0; i < bufferLength; i++) {
+                        sum += dataArray[i];
+                    }
+                    const average = sum / bufferLength; // 0 -> 255
+                    const volumeFactor = Math.min(average / 100, 1); // Độ nhạy của mic
+                    
+                    // Scale vòng tròn mic trung tâm (phóng to tối đa 15%)
+                    const scaleCircle = 1 + volumeFactor * 0.15;
+                    if (micCircle) {
+                        micCircle.style.transform = `scale(${scaleCircle})`;
+                    }
+                    
+                    // Scale 2 vòng lan tỏa bên ngoài
+                    const scaleRing1 = 1 + volumeFactor * 0.4;
+                    const scaleRing2 = 1 + volumeFactor * 0.8;
+                    
+                    if (ring1) {
+                        ring1.style.transform = `scale(${scaleRing1})`;
+                        ring1.style.opacity = `${0.2 + volumeFactor * 0.15}`;
+                    }
+                    if (ring2) {
+                        ring2.style.transform = `scale(${scaleRing2})`;
+                        ring2.style.opacity = `${0.4 + volumeFactor * 0.25}`;
+                    }
+                };
+                
+                draw();
+            } catch (e) {
+                console.warn('Web Audio visualizer initialization failed:', e);
             }
         },
 
@@ -10546,6 +10606,7 @@
             if (this._recorder && this._recorder.state !== 'inactive') {
                 this._isProcessing = true;
                 this._recorder.stop(); // Kích hoạt sự kiện onstop -> gọi _processAudio
+                this._stopMicrophoneTracks();
                 this._closeUI();
                 this._setProcessingUI(true);
             }
@@ -10556,6 +10617,7 @@
                 this._recorder.stop();
                 this._chunks = []; // Xóa data để _processAudio hủy bỏ quá trình
             }
+            this._stopMicrophoneTracks();
             this._cleanup();
             this._closeUI();
             const sta = document.getElementById(this._targetStatus);
@@ -10566,7 +10628,30 @@
             }
         },
 
+        _stopMicrophoneTracks() {
+            // Đóng AudioContext và dừng luồng mic ngay để tắt chấm đỏ của trình duyệt
+            if (this._animFrame) {
+                cancelAnimationFrame(this._animFrame);
+                this._animFrame = null;
+            }
+            if (this._audioCtx) {
+                if (this._audioCtx.state !== 'closed') {
+                    this._audioCtx.close();
+                }
+                this._audioCtx = null;
+            }
+            this._analyser = null;
+            
+            if (this._stream) {
+                this._stream.getTracks().forEach(t => t.stop());
+                this._stream = null;
+            }
+        },
+
         async _processAudio(mimeType) {
+            // Đảm bảo micro đã được tắt hoàn toàn để giải phóng thiết bị
+            this._stopMicrophoneTracks();
+
             // Nếu bấm Hủy, mảng chunks sẽ rỗng -> không làm gì cả
             if (!this._chunks.length) {
                 this._cleanup();
@@ -10816,10 +10901,7 @@ Văn bản cần sửa: "${text}"`;
         },
 
         _cleanup() {
-            if (this._stream) {
-                this._stream.getTracks().forEach(t => t.stop());
-                this._stream = null;
-            }
+            this._stopMicrophoneTracks();
             this._recorder = null;
             this._isProcessing = false;
         },
@@ -21129,16 +21211,16 @@ YÊU CẦU ĐẦU RA:
         <div class="absolute bottom-0 left-0 right-0 bg-white w-full rounded-t-[32px] p-6 flex flex-col items-center transform translate-y-full transition-transform duration-300 pb-safe" id="voice-record-sheet" style="box-shadow: 0 -10px 40px rgba(0,0,0,0.1);">
             <div class="w-12 h-1.5 bg-slate-200 rounded-full mb-8"></div>
             
-            <div class="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mb-4 relative">
-                <div class="absolute inset-0 bg-indigo-400 rounded-full animate-ping opacity-20" style="animation-duration: 1.5s;"></div>
-                <div class="absolute inset-2 bg-indigo-400 rounded-full animate-ping opacity-40" style="animation-duration: 2s;"></div>
+            <div id="voice-mic-circle" class="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mb-4 relative transition-transform duration-75 ease-out" style="transform: scale(1);">
+                <div id="voice-mic-ring-1" class="absolute inset-0 bg-indigo-400 rounded-full opacity-20 transition-all duration-75 ease-out" style="transform: scale(1);"></div>
+                <div id="voice-mic-ring-2" class="absolute inset-2 bg-indigo-400 rounded-full opacity-40 transition-all duration-75 ease-out" style="transform: scale(1);"></div>
                 <i data-lucide="mic" class="w-10 h-10 text-indigo-600 relative z-10"></i>
             </div>
             
             <h3 class="text-xl font-black text-slate-800 mb-2 mt-2">Tasco AI đang nghe...</h3>
-            <p class="text-sm text-slate-400 font-bold mb-8 tracking-widest font-mono" id="voice-timer">00:00</p>
+            <p class="text-sm text-slate-400 font-bold mb-6 tracking-widest font-mono" id="voice-timer">00:00</p>
             
-            <div class="flex gap-3 w-full max-w-sm">
+            <div class="flex gap-3 w-full max-w-sm mb-4">
                 <button onclick="SpeechInput.cancel()" class="flex-1 py-4 bg-slate-100 text-slate-600 border border-slate-200 rounded-2xl font-bold text-[13px] active:bg-slate-200 transition-colors">
                     Hủy bỏ
                 </button>
@@ -21146,6 +21228,10 @@ YÊU CẦU ĐẦU RA:
                     <i data-lucide="send" class="w-4 h-4"></i> Gửi lệnh ngay
                 </button>
             </div>
+
+            <p class="text-[10px] text-slate-400 font-bold text-center max-w-xs leading-relaxed bg-slate-50 p-2.5 rounded-xl border border-slate-100 mb-2">
+                💡 Mẹo iOS: Sử dụng trình duyệt <b>Safari</b> để tự động nhớ quyền Micro vĩnh viễn, tránh bị hỏi lại mỗi khi tải lại trang.
+            </p>
         </div>
     </div>
 
