@@ -10589,9 +10589,7 @@
                      PROMPT = 'Bạn là chuyên gia giám định bồi thường xe cơ giới. Hãy chuyển đổi giọng nói thành văn bản tiếng Việt. Tự động nắn lại các từ địa phương hoặc nói ngọng về đúng chính tả thuật ngữ kỹ thuật ô tô (Ví dụ: cảng -> cản, lường -> lườn, dè -> vè, mốp -> móp...). CHỈ trả về nội dung văn bản đã nhận dạng.';
                 }
 
-                const cleanMimeType = mimeType.split(';')[0];
-
-                const MODELS = [CONFIG.gemini.model, 'gemini-1.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'];
+                const MODELS = ['gemini-2.5-flash-lite', 'gemini-2.0-flash', CONFIG.gemini.model];
                 const maxRetries = CONFIG.gemini.keys.length * MODELS.length;
                 let lastError = null;
                 let text = '';
@@ -10604,7 +10602,7 @@
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
-                                contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: cleanMimeType, data: base64 } }] }],
+                                contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: mimeType, data: base64 } }] }],
                                 generationConfig: { temperature: 0.1 }
                             })
                         });
@@ -14402,7 +14400,6 @@ QUAN TRỌNG:
     Nhiệm vụ: phân tích lệnh người dùng và trả về JSON hành động để hệ thống thực thi.
 
     YÊU CẦU CỰC KỲ QUAN TRỌNG VỀ PHONG CÁCH PHẢN HỒI (REPLY):
-    - NGÔN NGỮ PHẢN HỒI: Bắt buộc phải phản hồi bằng 100% tiếng Việt tự nhiên, chuẩn mực, thuần Việt, tuyệt đối không dùng từ ngữ tiếng Anh hay nửa Anh nửa Việt.
     - TUYỆT ĐỐI KHÔNG ĐƯỢC hỏi lại, không xin xác nhận lòng vòng kiểu "Bạn muốn tìm các hồ sơ phải không?", "Bạn muốn làm X phải không?", "Đúng không?". Hãy THỰC THI NGAY hành động người dùng yêu cầu và trả về kết quả.
     - Trả lời thẳng vào trọng tâm câu hỏi cực kỳ ngắn gọn, súc tích (tối đa 1-2 câu ngắn). TUYỆT ĐỐI KHÔNG GIẢI THÍCH LAN MAN.
     - Ví dụ:
@@ -14925,7 +14922,15 @@ QUAN TRỌNG:
                     return null;
                 }
             },
-
+            {
+                id: 'no_images',
+                level: 'info',
+                check(item) {
+                    if (!(item.documentImages||[]).length)
+                        return 'Chưa có <b>ảnh chứng từ</b> đính kèm';
+                    return null;
+                }
+            },
             {
                 id: 'no_damage_items',
                 level: 'info',
