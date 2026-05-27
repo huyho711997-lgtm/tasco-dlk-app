@@ -10576,12 +10576,6 @@
 
             try {
                 const blob = new Blob(this._chunks, { type: mimeType });
-                const base64 = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result.split(',')[1]);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blob);
-                });
 
                 // Chọn Prompt phù hợp: Bot trò chuyện hay Nhập liệu chuyên ngành
                 let PROMPT = 'Hãy chuyển đổi giọng nói trong file audio này thành văn bản tiếng Việt. CHỈ trả về nội dung văn bản đã nhận dạng, không thêm bất kỳ giải thích nào.';
@@ -10589,40 +10583,99 @@
                      PROMPT = 'Bạn là chuyên gia giám định bồi thường xe cơ giới. Hãy chuyển đổi giọng nói thành văn bản tiếng Việt. Tự động nắn lại các từ địa phương hoặc nói ngọng về đúng chính tả thuật ngữ kỹ thuật ô tô (Ví dụ: cảng -> cản, lường -> lườn, dè -> vè, mốp -> móp...). CHỈ trả về nội dung văn bản đã nhận dạng.';
                 }
 
-                const MODELS = ['gemini-2.5-flash-lite', 'gemini-2.0-flash', CONFIG.gemini.model];
-                const maxRetries = CONFIG.gemini.keys.length * MODELS.length;
-                let lastError = null;
                 let text = '';
-                
-                for (let i = 0; i < maxRetries; i++) {
-                    const key = GeminiKeys.next();
-                    const model = MODELS[Math.floor(i / CONFIG.gemini.keys.length) % MODELS.length];
+                let success = false;
+                let lastError = null;
+
+                // ── 1. THỬ DÙNG GEMINI API TRƯỚC (CHẤT LƯỢNG AUTO-CORRECT TỐT NHẤT CHO TIẾNG VIỆT) ──
+                try {
+                    const base64 = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    });
+
+                    const cleanMimeType = mimeType.split(';')[0];
+                    const MODELS = [CONFIG.gemini.model, 'gemini-2.5-flash-lite'];
+                    const maxRetries = CONFIG.gemini.keys.length * MODELS.length;
+
+                    for (let i = 0; i < maxRetries; i++) {
+                        const model = MODELS[i % MODELS.length]; // Xoay vòng MODEL trước để tránh nghẹt 503/Spike ở model chính
+                        const key = GeminiKeys.next(); // Xoay vòng KEY đồng thời
+                        try {
+                            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: cleanMimeType, data: base64 } }] }],
+                                    generationConfig: { temperature: 0.1 }
+                                })
+                            });
+
+                            const data = await res.json();
+                            if (res.ok && !data.error) {
+                                text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+                                lastError = null;
+                                success = true;
+                                console.log(`Speech recognition using Gemini (${model}) succeeded!`);
+                                break;
+                            }
+                            lastError = data?.error?.message || 'Lỗi không xác định';
+                            console.warn(`Gemini (${model}) failed:`, lastError);
+                        } catch (err) {
+                            lastError = err.message;
+                            console.warn(`Gemini (${model}) error:`, lastError);
+                        }
+                        // Nếu bị lỗi quá tải (503/High Demand), thử ngay model khác không cần chờ lâu
+                        if (i < maxRetries - 1) {
+                            await new Promise(resolve => setTimeout(resolve, 300));
+                        }
+                    }
+                } catch (geminiErr) {
+                    console.error("Gemini Stt failed, fallback to Groq...", geminiErr);
+                    lastError = geminiErr.message;
+                }
+
+                // ── 2. FALLBACK SANG GROQ WHISPER (NẾU TOÀN BỘ GEMINI KHÓA/LỖI) ──
+                if (!success && CONFIG.groq && CONFIG.groq.key) {
                     try {
-                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+                        console.log("Attempting fallback to Groq Whisper...");
+                        const fileExtension = mimeType.includes('mp4') ? 'mp4' : 'webm';
+                        const formData = new FormData();
+                        formData.append('file', blob, `audio.${fileExtension}`);
+                        formData.append('model', 'whisper-large-v3'); // Dùng bản v3 đầy đủ để tăng độ chính xác tiếng Việt
+                        formData.append('language', 'vi');
+                        
+                        // Whisper prompt: dùng danh sách từ chuyên ngành thay vì câu lệnh instruction để tránh gây nhiễu
+                        const WHISPER_PROMPT = 'cản xe, lườn xe, vè xe, móp, xước, bể, nứt, trầy, va chạm, tai nạn xe cơ giới, giám định bồi thường bảo hiểm Tasco Đắk Lắk.';
+                        formData.append('prompt', WHISPER_PROMPT);
+
+                        const res = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: mimeType, data: base64 } }] }],
-                                generationConfig: { temperature: 0.1 }
-                            })
+                            headers: {
+                                'Authorization': `Bearer ${CONFIG.groq.key}`
+                            },
+                            body: formData
                         });
 
                         const data = await res.json();
-                        if (res.ok && !data.error) {
-                            text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+                        if (res.ok && data.text) {
+                            text = data.text.trim();
+                            success = true;
                             lastError = null;
-                            break;
+                            console.log("Speech recognition using Groq Whisper (v3) succeeded!");
+                        } else {
+                            console.warn("Groq Whisper also failed:", data.error || '');
+                            lastError = data.error?.message || JSON.stringify(data.error || 'Unknown Groq error');
                         }
-                        lastError = data?.error?.message || 'Lỗi không xác định';
-                    } catch (err) {
-                        lastError = err.message;
-                    }
-                    if (i < maxRetries - 1) {
-                        await new Promise(resolve => setTimeout(resolve, Math.min(500 * Math.pow(2, i), 3000)));
+                    } catch (groqErr) {
+                        console.error("Groq Whisper fallback error:", groqErr);
+                        lastError = groqErr.message;
                     }
                 }
 
-                if (lastError) throw new Error(lastError);
+                if (lastError && !success) throw new Error(lastError);
                 
                 if (text) {
                     const ta = document.getElementById(this._targetTextarea);
@@ -16353,7 +16406,7 @@ YÊU CẦU ĐẦU RA:
 - KHÔNG giải thích gì thêm, KHÔNG thêm bất kỳ lời thoại nào khác.`;
 
             try {
-                const MODELS = ['gemini-2.5-flash-lite', 'gemini-2.0-flash', CONFIG.gemini.model];
+                const MODELS = ['gemini-2.5-flash-lite', CONFIG.gemini.model];
                 const maxRetries = CONFIG.gemini.keys.length * MODELS.length;
                 let lastError = null;
                 let text = '';
@@ -16473,7 +16526,7 @@ YÊU CẦU ĐẦU RA:
             Lưu ý: Chỉ trả về JSON thô (raw JSON text), không đặt trong thẻ code block tam giác ngược (markdown), không giải thích gì thêm.`;
 
             try {
-                const MODELS = ['gemini-2.5-flash-lite', 'gemini-2.0-flash', CONFIG.gemini.model];
+                const MODELS = ['gemini-2.5-flash-lite', CONFIG.gemini.model];
                 const maxRetries = CONFIG.gemini.keys.length * MODELS.length;
                 let lastError = null;
                 let text = '';
@@ -19698,7 +19751,7 @@ YÊU CẦU ĐẦU RA:
 
         // ── Call Gemini with retry ────────────────────────────────
         async function callGemini(promptText, base64Image = null) {
-            const MODELS = ['gemini-2.5-flash-lite', 'gemini-2.0-flash', CONFIG.gemini.model];
+            const MODELS = ['gemini-2.5-flash-lite', CONFIG.gemini.model];
             const maxRetries = CONFIG.gemini.keys.length * MODELS.length;
             let lastErr = null;
             for (let i = 0; i < maxRetries; i++) {
