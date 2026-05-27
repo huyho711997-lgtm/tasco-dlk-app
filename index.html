@@ -602,6 +602,7 @@
             border-color: rgba(255, 255, 255, 0.08) !important;
         }
         [data-theme="dark"] #accident-report-modal,
+        [data-theme="dark"] #scene-survey-modal,
         [data-theme="dark"] #scene-report-modal {
             background-color: var(--bg-app) !important;
         }
@@ -18053,8 +18054,10 @@ YÊU CẦU ĐẦU RA:
                     .btn-print-close-ss:hover {
                         background: #b91c1c;
                     }
+                    #ss-print-container,
                     #ss-print-container * {
                         box-sizing: border-box;
+                        font-family: "Times New Roman", Times, serif !important;
                     }
                     #ss-print-container .header {
                         display: flex;
@@ -18143,17 +18146,15 @@ YÊU CẦU ĐẦU RA:
                         font-weight: bold;
                         text-align: center;
                     }
-                    #ss-print-container .checkbox-grid {
-                        display: grid;
-                        grid-template-cols: repeat(2, 1fr);
-                        gap: 4px;
+                    #ss-print-container .checkbox-table {
+                        width: 100%;
+                        border-collapse: collapse;
                         margin-bottom: 8px;
-                        padding-left: 10px;
                     }
-                    #ss-print-container .checkbox-item {
-                        display: flex;
-                        align-items: center;
-                        gap: 6px;
+                    #ss-print-container .checkbox-table td {
+                        padding: 3.5px 0;
+                        vertical-align: top;
+                        border: none !important;
                     }
                     #ss-print-container .signatures-grid {
                         display: flex;
@@ -18256,13 +18257,13 @@ YÊU CẦU ĐẦU RA:
                     <td style="text-align:center;">1</td>
                     <td class="editable" contenteditable="true" spellcheck="false">${ss.rep1Name || ''}</td>
                     <td>GĐV Bảo hiểm Tasco</td>
-                    <td class="editable font-mono" contenteditable="true" spellcheck="false">${ss.rep1Phone || ''}</td>
+                    <td class="editable" contenteditable="true" spellcheck="false">${ss.rep1Phone || ''}</td>
                   </tr>
                   <tr>
                     <td style="text-align:center;">2</td>
                     <td class="editable" contenteditable="true" spellcheck="false">${ss.rep2Name || ''}</td>
                     <td>Lái xe / Chủ xe</td>
-                    <td class="editable font-mono" contenteditable="true" spellcheck="false">${ss.rep2Phone || ''}</td>
+                    <td class="editable" contenteditable="true" spellcheck="false">${ss.rep2Phone || ''}</td>
                   </tr>
                   ${ss.rep3Name ? `
                   <tr>
@@ -18283,66 +18284,78 @@ YÊU CẦU ĐẦU RA:
               </div>
               <div class="info-row">
                 <span>giữa: xe ô tô BKS:</span>
-                <span class="info-val editable font-mono" contenteditable="true" spellcheck="false" id="pr-ss-vehicle1" style="font-weight:bold;">${ss.vehicle1 || '.......................'}</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-vehicle1" style="font-weight:bold;">${ss.vehicle1 || '.......................'}</span>
                 <span> do anh:</span>
                 <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-driverName">${ss.driverName || '.......................'}</span>
                 <span> điều khiển, với xe ô tô BKS:</span>
-                <span class="info-val editable font-mono" contenteditable="true" spellcheck="false" id="pr-ss-vehicle2">${ss.vehicle2 || '.......................'}</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-vehicle2">${ss.vehicle2 || '.......................'}</span>
               </div>
 
               <div class="section-title">II. Hiện trường vụ tai nạn</div>
               
-              <div class="checkbox-grid">
-                <div class="checkbox-item">
-                  <span>[1] Tình trạng hiện trường:</span>
-                  <span>${check(ss.htTinhTrang, 'Nguyên vẹn')} Nguyên vẹn</span>
-                  <span style="margin-left: 8px;">${check(ss.htTinhTrang, 'Không nguyên vẹn')} Không nguyên vẹn</span>
-                </div>
-                <div class="checkbox-item">
-                  <span>[2] Nhiệt độ động cơ:</span>
-                  <span>${check(ss.htNhietDo, 'Nóng ấm')} Nóng ấm</span>
-                  <span style="margin-left: 8px;">${check(ss.htNhietDo, 'Lạnh')} Lạnh</span>
-                </div>
-                <div class="checkbox-item">
-                  <span>[3] Địa hình, vật liệu nền:</span>
-                  <span class="editable" contenteditable="true" spellcheck="false">${ss.htDiaHinh || '................................'}</span>
-                </div>
-                <div class="checkbox-item">
-                  <span>[4] Tính chất nền:</span>
-                  <span>${check(ss.htTinhChatNen, 'Cứng, không lún/sụt')} Cứng</span>
-                  <span style="margin-left: 5px;">${check(ss.htTinhChatNen, 'Mềm lún/Sụt')} Mềm</span>
-                  <span style="margin-left: 5px;">${check(ss.htTinhChatNen, 'Ngập nước')} Ngập</span>
-                </div>
-                <div class="checkbox-item" style="grid-column: span 2;">
-                  <span>[5] Điều kiện thời tiết:</span>
-                  <span>${check(htThoiTietVal, 'Nắng')} Nắng</span>
-                  <span style="margin-left: 10px;">${check(htThoiTietVal, 'Râm mát')} Râm mát</span>
-                  <span style="margin-left: 10px;">${check(htThoiTietVal, 'Mưa')} Mưa</span>
-                  <span style="margin-left: 10px;">${check(htThoiTietVal, 'Sáng')} Sáng</span>
-                  <span style="margin-left: 10px;">${check(htThoiTietVal, 'Tối')} Tối</span>
-                </div>
-                <div class="checkbox-item" style="grid-column: span 2;">
-                  <span>[6] Người điều khiển phương tiện tại hiện trường:</span>
-                  <span>${check(ss.htLaiXeCoMat, 'Có mặt')} Có mặt</span>
-                  <span style="margin-left: 10px;">${check(ss.htLaiXeCoMat, 'Vắng mặt')} Vắng mặt</span>
-                  ${ss.htLaiXeLyDo ? `<span style="font-style:italic; margin-left: 6px;">(Lý do: ${ss.htLaiXeLyDo})</span>` : ''}
-                </div>
-                <div class="checkbox-item" style="grid-column: span 2;">
-                  <span>[7] Dấu hiệu tình trạng lái xe:</span>
-                  <span>${check(htDauHieuVal, 'Sắc mặt bình thường')} Sắc mặt bình thường</span>
-                  <span style="margin-left: 10px;">${check(htDauHieuVal, 'Sắc mặt đỏ, tái..')} Đỏ, tái</span>
-                  <span style="margin-left: 10px;">${check(htDauHieuVal, 'Hơi thở không mùi')} Hơi thở không mùi</span>
-                  <span style="margin-left: 10px;">${check(htDauHieuVal, 'Hơi thở có mùi lạ')} Hơi thở có mùi lạ</span>
-                </div>
-                <div class="checkbox-item" style="grid-column: span 2;">
-                  <span>[8] Giấy tờ cung cấp tại hiện trường:</span>
-                  <span>${check(htGiayToVal, 'Đăng kí xe')} Đăng ký</span>
-                  <span style="margin-left: 8px;">${check(htGiayToVal, 'Đăng kiểm (ATKT&BVMT)')} Đăng kiểm</span>
-                  <span style="margin-left: 8px;">${check(htGiayToVal, 'GCN/Hợp đồng Bảo hiểm')} GCN Bảo hiểm</span>
-                  <span style="margin-left: 8px;">${check(htGiayToVal, 'Giấy phép lái xe hợp lệ')} GPLX hợp lệ</span>
-                  <span style="margin-left: 8px;">${check(htGiayToVal, 'Chứng từ hàng hóa')} Chứng từ hàng hóa</span>
-                </div>
-              </div>
+              <table class="checkbox-table">
+                <tr>
+                  <td style="width: 53%;">
+                    <span>[1] Tình trạng hiện trường:</span>
+                    <span style="margin-left: 4px;">${check(ss.htTinhTrang, 'Nguyên vẹn')} Nguyên vẹn</span>
+                    <span style="margin-left: 8px;">${check(ss.htTinhTrang, 'Không nguyên vẹn')} Không nguyên vẹn</span>
+                  </td>
+                  <td style="width: 47%;">
+                    <span>[2] Nhiệt độ động cơ:</span>
+                    <span style="margin-left: 4px;">${check(ss.htNhietDo, 'Nóng ấm')} Nóng ấm</span>
+                    <span style="margin-left: 8px;">${check(ss.htNhietDo, 'Lạnh')} Lạnh</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span>[3] Địa hình, vật liệu nền:</span>
+                    <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1px dotted #000; min-width: 100px; display: inline-block;">${ss.htDiaHinh || '................................'}</span>
+                  </td>
+                  <td>
+                    <span>[4] Tính chất nền:</span>
+                    <span style="margin-left: 4px;">${check(ss.htTinhChatNen, 'Cứng, không lún/sụt')} Cứng</span>
+                    <span style="margin-left: 5px;">${check(ss.htTinhChatNen, 'Mềm lún/Sụt')} Mềm</span>
+                    <span style="margin-left: 5px;">${check(ss.htTinhChatNen, 'Ngập nước')} Ngập</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2">
+                    <span>[5] Điều kiện thời tiết:</span>
+                    <span style="margin-left: 8px;">${check(htThoiTietVal, 'Nắng')} Nắng</span>
+                    <span style="margin-left: 12px;">${check(htThoiTietVal, 'Râm mát')} Râm mát</span>
+                    <span style="margin-left: 12px;">${check(htThoiTietVal, 'Mưa')} Mưa</span>
+                    <span style="margin-left: 12px;">${check(htThoiTietVal, 'Sáng')} Sáng</span>
+                    <span style="margin-left: 12px;">${check(htThoiTietVal, 'Tối')} Tối</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2">
+                    <span>[6] Người điều khiển phương tiện tại hiện trường:</span>
+                    <span style="margin-left: 8px;">${check(ss.htLaiXeCoMat, 'Có mặt')} Có mặt</span>
+                    <span style="margin-left: 12px;">${check(ss.htLaiXeCoMat, 'Vắng mặt')} Vắng mặt</span>
+                    ${ss.htLaiXeLyDo ? `<span style="font-style:italic; margin-left: 6px;">(Lý do: ${ss.htLaiXeLyDo})</span>` : ''}
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2">
+                    <span>[7] Dấu hiệu tình trạng lái xe:</span>
+                    <span style="margin-left: 8px;">${check(htDauHieuVal, 'Sắc mặt bình thường')} Sắc mặt bình thường</span>
+                    <span style="margin-left: 12px;">${check(htDauHieuVal, 'Sắc mặt đỏ, tái..')} Đỏ, tái</span>
+                    <span style="margin-left: 12px;">${check(htDauHieuVal, 'Hơi thở không mùi')} Hơi thở không mùi</span>
+                    <span style="margin-left: 12px;">${check(htDauHieuVal, 'Hơi thở có mùi lạ')} Hơi thở có mùi lạ</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2">
+                    <span>[8] Giấy tờ cung cấp tại hiện trường:</span>
+                    <span style="margin-left: 8px;">${check(htGiayToVal, 'Đăng kí xe')} Đăng ký</span>
+                    <span style="margin-left: 10px;">${check(htGiayToVal, 'Đăng kiểm (ATKT&BVMT)')} Đăng kiểm</span>
+                    <span style="margin-left: 10px;">${check(htGiayToVal, 'GCN/Hợp đồng Bảo hiểm')} GCN Bảo hiểm</span>
+                    <span style="margin-left: 10px;">${check(htGiayToVal, 'Giấy phép lái xe hợp lệ')} GPLX hợp lệ</span>
+                    <span style="margin-left: 10px;">${check(htGiayToVal, 'Chứng từ hàng hóa')} Chứng từ hàng hóa</span>
+                  </td>
+                </tr>
+              </table>
 
               <div class="info-row" style="margin-top: 10px;">
                 <span class="info-label">[9] Mô tả hiện trường tai nạn, vị trí phương tiện:</span>
