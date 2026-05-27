@@ -18408,68 +18408,155 @@ YÊU CẦU ĐẦU RA:
                 <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-vehicle2">${ss.vehicle2 || '.......................'}</span>
               </div>
 
-              <div class="section-title">II. Hiện trường vụ tai nạn</div>
+              <div style="font-weight: bold; font-size: 14px; margin-top: 15px; margin-bottom: 8px;">Hiện trường vụ tai nạn</div>
               
-              <table class="checkbox-table">
+              <table class="ht-table" style="width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 13px;">
+                <!-- Row 1: [1] -->
                 <tr>
-                  <td style="width: 53%;">
-                    <span>[1] Tình trạng hiện trường:</span>
-                    <span style="margin-left: 4px;">${check(ss.htTinhTrang, 'Nguyên vẹn')} Nguyên vẹn</span>
-                    <span style="margin-left: 8px;">${check(ss.htTinhTrang, 'Không nguyên vẹn')} Không nguyên vẹn</span>
+                  <td style="width: 48%; padding: 2.5px 0; vertical-align: top; border: none !important;">
+                    <span>[1] Tình trạng hiện trường khi giám định: :</span>
                   </td>
-                  <td style="width: 47%;">
+                  <td style="width: 26%; padding: 2.5px 0; vertical-align: top; border: none !important;">
+                    <span>${check(ss.htTinhTrang, 'Nguyên vẹn')} Nguyên vẹn</span>
+                  </td>
+                  <td style="width: 26%; padding: 2.5px 0; vertical-align: top; border: none !important;">
+                    <span>${check(ss.htTinhTrang, 'Không nguyên vẹn')} Không nguyên vẹn</span>
+                  </td>
+                </tr>
+                
+                <!-- Row 2: [2] -->
+                <tr>
+                  <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
                     <span>[2] Nhiệt độ động cơ:</span>
-                    <span style="margin-left: 4px;">${check(ss.htNhietDo, 'Nóng ấm')} Nóng ấm</span>
-                    <span style="margin-left: 8px;">${check(ss.htNhietDo, 'Lạnh')} Lạnh</span>
+                  </td>
+                  <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+                    <span>${check(ss.htNhietDo, 'Nóng ấm')} Nóng ấm</span>
+                  </td>
+                  <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+                    <span>${check(ss.htNhietDo, 'Lạnh')} Lạnh</span>
                   </td>
                 </tr>
+                
+                <!-- Row 3: [3] -->
                 <tr>
-                  <td>
-                    <span>[3] Địa hình, vật liệu nền:</span>
-                    <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1px dotted #000; min-width: 100px; display: inline-block;">${ss.htDiaHinh || '................................'}</span>
+                  <td colspan="3" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+                    <span>[3] Địa hình hiện trường, vật liệu nền hiện trường: </span>
+                    <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1.5px solid #000; padding: 0 4px; font-weight: bold;">${ss.htDiaHinh || 'đường trải nhựa'}</span>
                   </td>
-                  <td>
+                </tr>
+                
+                <!-- Row 4: [4] -->
+                <tr>
+                  <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
                     <span>[4] Tính chất nền:</span>
-                    <span style="margin-left: 4px;">${check(ss.htTinhChatNen, 'Cứng, không lún/sụt')} Cứng</span>
-                    <span style="margin-left: 5px;">${check(ss.htTinhChatNen, 'Mềm lún/Sụt')} Mềm</span>
-                    <span style="margin-left: 5px;">${check(ss.htTinhChatNen, 'Ngập nước')} Ngập</span>
+                  </td>
+                  <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+                    <span>${check(ss.htTinhChatNen, 'Cứng, không lún/sụt')} Cứng, không lún/sụt</span>
+                  </td>
+                  <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+                    <span>${check(ss.htTinhChatNen, 'Mềm lún/Sụt')} Mềm lún/Sụt</span>
                   </td>
                 </tr>
+                
+                <!-- Row 5: [4] Ngập -->
                 <tr>
-                  <td colspan="2">
-                    <span>[5] Điều kiện thời tiết:</span>
-                    <span style="margin-left: 8px;">${check(htThoiTietVal, 'Nắng')} Nắng</span>
-                    <span style="margin-left: 12px;">${check(htThoiTietVal, 'Râm mát')} Râm mát</span>
-                    <span style="margin-left: 12px;">${check(htThoiTietVal, 'Mưa')} Mưa</span>
-                    <span style="margin-left: 12px;">${check(htThoiTietVal, 'Sáng')} Sáng</span>
-                    <span style="margin-left: 12px;">${check(htThoiTietVal, 'Tối')} Tối</span>
+                  <td style="border: none !important;"></td>
+                  <td colspan="2" style="padding: 1px 0 2.5px 0; vertical-align: top; border: none !important;">
+                    <span>${check(ss.htTinhChatNen, 'Ngập nước')} Ngập nước</span>
                   </td>
                 </tr>
+                
+                <!-- Row 6: [5] -->
                 <tr>
-                  <td colspan="2">
+                  <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+                    <span>[5] Điều kiện thời tiết hiện trường:</span>
+                  </td>
+                  <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+                    <span>${check(htThoiTietVal, 'Nắng')} Nắng</span>
+                  </td>
+                  <td style="padding: 2.5px 0; vertical-align: top; border: none !important; display: flex; gap: 40px;">
+                    <span>${check(htThoiTietVal, 'Mưa')} Mưa</span>
+                    <span>${check(htThoiTietVal, 'Râm mát')} Râm mát</span>
+                  </td>
+                </tr>
+                
+                <!-- Row 7: [5] Sáng, Tối -->
+                <tr>
+                  <td style="border: none !important;"></td>
+                  <td style="padding: 1px 0 2.5px 0; vertical-align: top; border: none !important;">
+                    <span>${check(htThoiTietVal, 'Sáng')} Sáng</span>
+                  </td>
+                  <td style="padding: 1px 0 2.5px 0; vertical-align: top; border: none !important;">
+                    <span>${check(htThoiTietVal, 'Tối')} Tối</span>
+                  </td>
+                </tr>
+                
+                <!-- Row 8: [6] -->
+                <tr>
+                  <td colspan="3" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
                     <span>[6] Người điều khiển phương tiện tại hiện trường:</span>
-                    <span style="margin-left: 8px;">${check(ss.htLaiXeCoMat, 'Có mặt')} Có mặt</span>
-                    <span style="margin-left: 12px;">${check(ss.htLaiXeCoMat, 'Vắng mặt')} Vắng mặt</span>
-                    ${ss.htLaiXeLyDo ? `<span style="font-style:italic; margin-left: 6px;">(Lý do: ${ss.htLaiXeLyDo})</span>` : ''}
                   </td>
                 </tr>
                 <tr>
-                  <td colspan="2">
-                    <span>[7] Dấu hiệu tình trạng lái xe:</span>
-                    <span style="margin-left: 8px;">${check(htDauHieuVal, 'Sắc mặt bình thường')} Sắc mặt bình thường</span>
-                    <span style="margin-left: 12px;">${check(htDauHieuVal, 'Sắc mặt đỏ, tái..')} Đỏ, tái</span>
-                    <span style="margin-left: 12px;">${check(htDauHieuVal, 'Hơi thở không mùi')} Hơi thở không mùi</span>
-                    <span style="margin-left: 12px;">${check(htDauHieuVal, 'Hơi thở có mùi lạ')} Hơi thở có mùi lạ</span>
+                  <td colspan="3" style="padding: 2.5px 0 2.5px 15px; vertical-align: top; border: none !important;">
+                    <span>${ss.htLaiXeCoMat === 'Vắng mặt' ? '☑' : '☐'} Không có mặt tại hiện trường. Lý do: </span>
+                    <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1px dotted #000; min-width: 250px; display: inline-block;">${ss.htLaiXeCoMat === 'Vắng mặt' ? (ss.htLaiXeLyDo || '......................................................') : '......................................................'}</span>
                   </td>
                 </tr>
                 <tr>
-                  <td colspan="2">
+                  <td colspan="3" style="padding: 2.5px 0 2.5px 15px; vertical-align: top; border: none !important;">
+                    <span>Địa điểm đến: </span>
+                    <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1px dotted #000; min-width: 350px; display: inline-block;">.........................................................................................</span>
+                  </td>
+                </tr>
+                
+                <!-- Row 9: [7] -->
+                <tr>
+                  <td colspan="3" style="padding: 4px 0 2.5px 0; vertical-align: top; border: none !important;">
+                    <span>${ss.htLaiXeCoMat === 'Có mặt' ? '☑' : '☐'} [7] Người điều khiển có mặt tại hiện trường.</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 2.5px 0 2.5px 15px; vertical-align: top; border: none !important;">
+                    <span>Dấu hiệu tình trạng lái xe:</span>
+                  </td>
+                  <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+                    <span>${check(htDauHieuVal, 'Sắc mặt bình thường')} Sắc mặt bình thường</span>
+                  </td>
+                  <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+                    <span>${check(htDauHieuVal, 'Hơi thở không mùi')} Hơi thở không mùi</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: none !important;"></td>
+                  <td style="padding: 1px 0 4px 15px; vertical-align: top; border: none !important;">
+                    <span>${check(htDauHieuVal, 'Sắc mặt đỏ, tái..')} Sắc mặt đỏ, tái..</span>
+                  </td>
+                  <td style="padding: 1px 0 4px 15px; vertical-align: top; border: none !important;">
+                    <span>${check(htDauHieuVal, 'Hơi thở có mùi lạ')} Hơi thở có mùi lạ</span>
+                  </td>
+                </tr>
+                
+                <!-- Row 10: [8] -->
+                <tr>
+                  <td colspan="3" style="padding: 4px 0 2.5px 0; vertical-align: top; border: none !important;">
                     <span>[8] Giấy tờ cung cấp tại hiện trường:</span>
-                    <span style="margin-left: 8px;">${check(htGiayToVal, 'Đăng kí xe')} Đăng ký</span>
-                    <span style="margin-left: 10px;">${check(htGiayToVal, 'Đăng kiểm (ATKT&BVMT)')} Đăng kiểm</span>
-                    <span style="margin-left: 10px;">${check(htGiayToVal, 'GCN/Hợp đồng Bảo hiểm')} GCN Bảo hiểm</span>
-                    <span style="margin-left: 10px;">${check(htGiayToVal, 'Giấy phép lái xe hợp lệ')} GPLX hợp lệ</span>
-                    <span style="margin-left: 10px;">${check(htGiayToVal, 'Chứng từ hàng hóa')} Chứng từ hàng hóa</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="3" style="padding: 3px 0 3px 15px; vertical-align: top; border: none !important; display: flex; justify-content: space-between; gap: 10px;">
+                    <span style="flex: 1;">${check(htGiayToVal, 'Đăng kí xe')} Đăng kí xe</span>
+                    <span style="flex: 1.2;">${check(htGiayToVal, 'Đăng kiểm (ATKT&BVMT)')} Đăng kiểm (ATKT&BVMT)</span>
+                    <span style="flex: 1.1;">${check(htGiayToVal, 'GCN/Hợp đồng Bảo hiểm')} GCN/Hợp đồng Bảo hiểm</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="3" style="padding: 3px 0 3px 15px; vertical-align: top; border: none !important; display: flex; gap: 10px;">
+                    <span style="width: 30%; shrink-0: 1;">${check(htGiayToVal, 'Chứng từ hàng hóa')} Chứng từ hàng hóa</span>
+                    <span style="width: 70%; shrink-0: 1;">
+                      <span>${check(htGiayToVal, 'Giấy phép lái xe hợp lệ')} Giấy phép lái xe hợp lệ (Trường hợp không có ghi rõ nguyên nhân không có, thời gian có thể cung cấp)</span>
+                      <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1.5px dotted #000; min-width: 400px; display: block; margin-top: 4px;">.......................................................................................................................</span>
+                    </span>
                   </td>
                 </tr>
               </table>
