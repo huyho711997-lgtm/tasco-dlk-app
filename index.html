@@ -30,6 +30,123 @@
             background-color: #f8fafc;
             -webkit-tap-highlight-color: transparent;
         }
+        /* Custom premium Segmented & Chip selectors */
+        .segmented-control {
+            display: flex;
+            background-color: #f1f5f9;
+            padding: 0.25rem;
+            border-radius: 0.75rem;
+            gap: 0.25rem;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        [data-theme="dark"] .segmented-control {
+            background-color: rgba(15, 23, 42, 0.4);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+        .segmented-item {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+        }
+        .segmented-item input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .segmented-item span {
+            display: block;
+            padding: 0.45rem;
+            font-size: 11px;
+            font-weight: 800;
+            border-radius: 0.625rem;
+            color: #475569;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        [data-theme="dark"] .segmented-item span {
+            color: #94a3b8;
+        }
+        .segmented-item input:checked + span {
+            background-color: #ffffff;
+            color: #2563eb;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        [data-theme="dark"] .segmented-item input:checked + span {
+            background-color: #1e293b;
+            color: #60a5fa;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Beautiful customized checkbox chips */
+        .checkbox-chip {
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.55rem 0.75rem;
+            border-radius: 0.75rem;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        [data-theme="dark"] .checkbox-chip {
+            background-color: rgba(15, 23, 42, 0.2);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+        .checkbox-chip input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .checkbox-chip span {
+            font-size: 11px;
+            font-weight: 800;
+            color: #475569;
+        }
+        [data-theme="dark"] .checkbox-chip span {
+            color: #94a3b8;
+        }
+        .checkbox-chip::before {
+            content: "";
+            width: 13px;
+            height: 13px;
+            border-radius: 4px;
+            border: 1.5px solid #94a3b8;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+        .checkbox-chip:has(input:checked) {
+            background-color: #eff6ff;
+            border-color: #3b82f6;
+        }
+        [data-theme="dark"] .checkbox-chip:has(input:checked) {
+            background-color: rgba(59, 130, 246, 0.08);
+            border-color: rgba(59, 130, 246, 0.25);
+        }
+        .checkbox-chip:has(input:checked) span {
+            color: #2563eb;
+        }
+        [data-theme="dark"] .checkbox-chip:has(input:checked) span {
+            color: #60a5fa;
+        }
+        .checkbox-chip:has(input:checked)::before {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+            background-size: 9px;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        [data-theme="dark"] .checkbox-chip:has(input:checked)::before {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+
         /* Thêm class này vào phần tử nằm ở viền trái/phải của bạn */
         .sidebar-edge {
             touch-action: none; 
@@ -22401,27 +22518,27 @@ YÊU CẦU ĐẦU RA:
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="input-label">Tình trạng hiện trường</label>
-                            <div class="flex gap-4 mt-1">
-                                <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer">
-                                    <input type="radio" name="sr-htTinhTrang" value="Nguyên vẹn" checked class="w-4 h-4 text-blue-600">
-                                    Nguyên vẹn
+                            <div class="segmented-control mt-1">
+                                <label class="segmented-item">
+                                    <input type="radio" name="sr-htTinhTrang" value="Nguyên vẹn" checked>
+                                    <span>Nguyên vẹn</span>
                                 </label>
-                                <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer">
-                                    <input type="radio" name="sr-htTinhTrang" value="Không nguyên vẹn" class="w-4 h-4 text-blue-600">
-                                    Không nguyên vẹn
+                                <label class="segmented-item">
+                                    <input type="radio" name="sr-htTinhTrang" value="Không nguyên vẹn">
+                                    <span>Không nguyên vẹn</span>
                                 </label>
                             </div>
                         </div>
                         <div>
                             <label class="input-label">Nhiệt độ động cơ</label>
-                            <div class="flex gap-4 mt-1">
-                                <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer">
-                                    <input type="radio" name="sr-htNhietDo" value="Nóng ấm" checked class="w-4 h-4 text-blue-600">
-                                    Nóng ấm
+                            <div class="segmented-control mt-1">
+                                <label class="segmented-item">
+                                    <input type="radio" name="sr-htNhietDo" value="Nóng ấm" checked>
+                                    <span>Nóng ấm</span>
                                 </label>
-                                <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer">
-                                    <input type="radio" name="sr-htNhietDo" value="Lạnh" class="w-4 h-4 text-blue-600">
-                                    Lạnh
+                                <label class="segmented-item">
+                                    <input type="radio" name="sr-htNhietDo" value="Lạnh">
+                                    <span>Lạnh</span>
                                 </label>
                             </div>
                         </div>
@@ -22440,18 +22557,18 @@ YÊU CẦU ĐẦU RA:
                         </div>
                         <div>
                             <label class="input-label">Tính chất nền hiện trường</label>
-                            <div class="flex flex-col gap-1.5 mt-1">
-                                <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer">
-                                    <input type="radio" name="sr-htTinhChatNen" value="Cứng, không lún/sụt" checked class="w-4 h-4 text-blue-600">
-                                    Cứng, không lún/sụt
+                            <div class="segmented-control mt-1">
+                                <label class="segmented-item">
+                                    <input type="radio" name="sr-htTinhChatNen" value="Cứng, không lún/sụt" checked>
+                                    <span>Cứng</span>
                                 </label>
-                                <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer">
-                                    <input type="radio" name="sr-htTinhChatNen" value="Mềm lún/Sụt" class="w-4 h-4 text-blue-600">
-                                    Mềm lún/Sụt
+                                <label class="segmented-item">
+                                    <input type="radio" name="sr-htTinhChatNen" value="Mềm lún/Sụt">
+                                    <span>Mềm lún</span>
                                 </label>
-                                <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer">
-                                    <input type="radio" name="sr-htTinhChatNen" value="Ngập nước" class="w-4 h-4 text-blue-600">
-                                    Ngập nước
+                                <label class="segmented-item">
+                                    <input type="radio" name="sr-htTinhChatNen" value="Ngập nước">
+                                    <span>Ngập</span>
                                 </label>
                             </div>
                         </div>
@@ -22461,25 +22578,25 @@ YÊU CẦU ĐẦU RA:
                     <div>
                         <label class="input-label">Điều kiện thời tiết (chọn nhiều)</label>
                         <div class="grid grid-cols-3 gap-2 mt-1.5">
-                            <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer bg-slate-50 border border-slate-100 p-2 rounded-xl">
-                                <input type="checkbox" name="sr-htThoiTiet" value="Nắng" checked class="w-4 h-4 text-blue-600 rounded">
-                                Nắng
+                            <label class="checkbox-chip">
+                                <input type="checkbox" name="sr-htThoiTiet" value="Nắng" checked>
+                                <span>Nắng</span>
                             </label>
-                            <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer bg-slate-50 border border-slate-100 p-2 rounded-xl">
-                                <input type="checkbox" name="sr-htThoiTiet" value="Sáng" checked class="w-4 h-4 text-blue-600 rounded">
-                                Sáng
+                            <label class="checkbox-chip">
+                                <input type="checkbox" name="sr-htThoiTiet" value="Sáng" checked>
+                                <span>Sáng</span>
                             </label>
-                            <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer bg-slate-50 border border-slate-100 p-2 rounded-xl">
-                                <input type="checkbox" name="sr-htThoiTiet" value="Râm mát" class="w-4 h-4 text-blue-600 rounded">
-                                Râm mát
+                            <label class="checkbox-chip">
+                                <input type="checkbox" name="sr-htThoiTiet" value="Râm mát">
+                                <span>Râm mát</span>
                             </label>
-                            <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer bg-slate-50 border border-slate-100 p-2 rounded-xl">
-                                <input type="checkbox" name="sr-htThoiTiet" value="Mưa" class="w-4 h-4 text-blue-600 rounded">
-                                Mưa
+                            <label class="checkbox-chip">
+                                <input type="checkbox" name="sr-htThoiTiet" value="Mưa">
+                                <span>Mưa</span>
                             </label>
-                            <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer bg-slate-50 border border-slate-100 p-2 rounded-xl">
-                                <input type="checkbox" name="sr-htThoiTiet" value="Tối" class="w-4 h-4 text-blue-600 rounded">
-                                Tối
+                            <label class="checkbox-chip">
+                                <input type="checkbox" name="sr-htThoiTiet" value="Tối">
+                                <span>Tối</span>
                             </label>
                         </div>
                     </div>
@@ -22489,14 +22606,14 @@ YÊU CẦU ĐẦU RA:
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="input-label">Người điều khiển tại hiện trường</label>
-                                <div class="flex flex-col gap-2 mt-1">
-                                    <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer">
-                                        <input type="radio" name="sr-htLaiXeCoMat" value="Có mặt" checked class="w-4 h-4 text-blue-600">
-                                        Có mặt tại hiện trường
+                                <div class="segmented-control mt-1">
+                                    <label class="segmented-item">
+                                        <input type="radio" name="sr-htLaiXeCoMat" value="Có mặt" checked>
+                                        <span>Có mặt</span>
                                     </label>
-                                    <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer">
-                                        <input type="radio" name="sr-htLaiXeCoMat" value="Vắng mặt" class="w-4 h-4 text-blue-600">
-                                        Vắng mặt
+                                    <label class="segmented-item">
+                                        <input type="radio" name="sr-htLaiXeCoMat" value="Vắng mặt">
+                                        <span>Vắng mặt</span>
                                     </label>
                                 </div>
                             </div>
@@ -22509,21 +22626,21 @@ YÊU CẦU ĐẦU RA:
                         <div>
                             <label class="input-label">Dấu hiệu lái xe (chọn nhiều)</label>
                             <div class="grid grid-cols-2 gap-2 mt-1">
-                                <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer bg-slate-50 border border-slate-100 p-2 rounded-xl">
-                                    <input type="checkbox" name="sr-htDauHieuLaiXe" value="Sắc mặt bình thường" checked class="w-4 h-4 text-blue-600 rounded">
-                                    Sắc mặt bình thường
+                                <label class="checkbox-chip">
+                                    <input type="checkbox" name="sr-htDauHieuLaiXe" value="Sắc mặt bình thường" checked>
+                                    <span>Sắc mặt bình thường</span>
                                 </label>
-                                <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer bg-slate-50 border border-slate-100 p-2 rounded-xl">
-                                    <input type="checkbox" name="sr-htDauHieuLaiXe" value="Hơi thở không mùi" checked class="w-4 h-4 text-blue-600 rounded">
-                                    Hơi thở không mùi
+                                <label class="checkbox-chip">
+                                    <input type="checkbox" name="sr-htDauHieuLaiXe" value="Hơi thở không mùi" checked>
+                                    <span>Hơi thở không mùi</span>
                                 </label>
-                                <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer bg-slate-50 border border-slate-100 p-2 rounded-xl">
-                                    <input type="checkbox" name="sr-htDauHieuLaiXe" value="Sắc mặt đỏ, tái.." class="w-4 h-4 text-blue-600 rounded">
-                                    Sắc mặt đỏ, tái..
+                                <label class="checkbox-chip">
+                                    <input type="checkbox" name="sr-htDauHieuLaiXe" value="Sắc mặt đỏ, tái..">
+                                    <span>Sắc mặt đỏ, tái..</span>
                                 </label>
-                                <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer bg-slate-50 border border-slate-100 p-2 rounded-xl">
-                                    <input type="checkbox" name="sr-htDauHieuLaiXe" value="Hơi thở có mùi lạ" class="w-4 h-4 text-blue-600 rounded">
-                                    Hơi thở có mùi lạ
+                                <label class="checkbox-chip">
+                                    <input type="checkbox" name="sr-htDauHieuLaiXe" value="Hơi thở có mùi lạ">
+                                    <span>Hơi thở có mùi lạ</span>
                                 </label>
                             </div>
                         </div>
@@ -22533,25 +22650,25 @@ YÊU CẦU ĐẦU RA:
                     <div class="border-t border-slate-100 pt-3">
                         <label class="input-label">Giấy tờ cung cấp tại hiện trường</label>
                         <div class="grid grid-cols-2 gap-2 mt-1.5">
-                            <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer bg-slate-50 border border-slate-100 p-2 rounded-xl">
-                                <input type="checkbox" name="sr-htGiayTo" value="Đăng kí xe" checked class="w-4 h-4 text-blue-600 rounded">
-                                Đăng kí xe
+                            <label class="checkbox-chip">
+                                <input type="checkbox" name="sr-htGiayTo" value="Đăng kí xe" checked>
+                                <span>Đăng kí xe</span>
                             </label>
-                            <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer bg-slate-50 border border-slate-100 p-2 rounded-xl">
-                                <input type="checkbox" name="sr-htGiayTo" value="Đăng kiểm (ATKT&BVMT)" checked class="w-4 h-4 text-blue-600 rounded">
-                                Đăng kiểm (ATKT)
+                            <label class="checkbox-chip">
+                                <input type="checkbox" name="sr-htGiayTo" value="Đăng kiểm (ATKT&BVMT)" checked>
+                                <span>Đăng kiểm (ATKT)</span>
                             </label>
-                            <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer bg-slate-50 border border-slate-100 p-2 rounded-xl">
-                                <input type="checkbox" name="sr-htGiayTo" value="GCN/Hợp đồng Bảo hiểm" checked class="w-4 h-4 text-blue-600 rounded">
-                                GCN Bảo hiểm
+                            <label class="checkbox-chip">
+                                <input type="checkbox" name="sr-htGiayTo" value="GCN/Hợp đồng Bảo hiểm" checked>
+                                <span>GCN Bảo hiểm</span>
                             </label>
-                            <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer bg-slate-50 border border-slate-100 p-2 rounded-xl">
-                                <input type="checkbox" name="sr-htGiayTo" value="Giấy phép lái xe hợp lệ" checked class="w-4 h-4 text-blue-600 rounded">
-                                Giấy phép lái xe
+                            <label class="checkbox-chip">
+                                <input type="checkbox" name="sr-htGiayTo" value="Giấy phép lái xe hợp lệ" checked>
+                                <span>Giấy phép lái xe</span>
                             </label>
-                            <label class="flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer bg-slate-50 border border-slate-100 p-2 rounded-xl col-span-2">
-                                <input type="checkbox" name="sr-htGiayTo" value="Chứng từ hàng hóa" class="w-4 h-4 text-blue-600 rounded">
-                                Chứng từ hàng hóa
+                            <label class="checkbox-chip col-span-2">
+                                <input type="checkbox" name="sr-htGiayTo" value="Chứng từ hàng hóa">
+                                <span>Chứng từ hàng hóa</span>
                             </label>
                         </div>
                     </div>
@@ -22642,35 +22759,35 @@ YÊU CẦU ĐẦU RA:
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="input-label">Vị trí tổn thất trên xe</label>
-                            <div class="grid grid-cols-2 gap-1.5 mt-1">
-                                <label class="flex items-center gap-1 cursor-pointer">
-                                    <input type="checkbox" name="sr-thViTri" value="Đầu xe" class="w-3.5 h-3.5 text-blue-600">
-                                    Đầu xe
+                            <div class="grid grid-cols-2 gap-2 mt-1">
+                                <label class="checkbox-chip">
+                                    <input type="checkbox" name="sr-thViTri" value="Đầu xe">
+                                    <span>Đầu xe</span>
                                 </label>
-                                <label class="flex items-center gap-1 cursor-pointer">
-                                    <input type="checkbox" name="sr-thViTri" value="Thân xe" class="w-3.5 h-3.5 text-blue-600">
-                                    Thân xe
+                                <label class="checkbox-chip">
+                                    <input type="checkbox" name="sr-thViTri" value="Thân xe">
+                                    <span>Thân xe</span>
                                 </label>
-                                <label class="flex items-center gap-1 cursor-pointer">
-                                    <input type="checkbox" name="sr-thViTri" value="Đuôi xe" class="w-3.5 h-3.5 text-blue-600">
-                                    Đuôi xe
+                                <label class="checkbox-chip">
+                                    <input type="checkbox" name="sr-thViTri" value="Đuôi xe">
+                                    <span>Đuôi xe</span>
                                 </label>
-                                <label class="flex items-center gap-1 cursor-pointer">
-                                    <input type="checkbox" name="sr-thViTri" value="Gầm/Nóc" class="w-3.5 h-3.5 text-blue-600">
-                                    Gầm/Nóc
+                                <label class="checkbox-chip">
+                                    <input type="checkbox" name="sr-thViTri" value="Gầm/Nóc">
+                                    <span>Gầm/Nóc</span>
                                 </label>
                             </div>
                         </div>
                         <div>
                             <label class="input-label">Đối tượng thiệt hại</label>
-                            <div class="flex flex-col gap-1.5 mt-1">
-                                <label class="flex items-center gap-1 cursor-pointer">
-                                    <input type="checkbox" name="sr-thTaiSan" value="Xe tham gia vật chất BH Tasco" checked class="w-3.5 h-3.5 text-blue-600">
-                                    Xe vật chất Tasco
+                            <div class="grid grid-cols-1 gap-2 mt-1">
+                                <label class="checkbox-chip">
+                                    <input type="checkbox" name="sr-thTaiSan" value="Xe tham gia vật chất BH Tasco" checked>
+                                    <span>Xe vật chất Tasco</span>
                                 </label>
-                                <label class="flex items-center gap-1 cursor-pointer">
-                                    <input type="checkbox" name="sr-thTaiSan" value="Tài sản bên thứ ba" class="w-3.5 h-3.5 text-blue-600">
-                                    Tài sản bên thứ ba
+                                <label class="checkbox-chip">
+                                    <input type="checkbox" name="sr-thTaiSan" value="Tài sản bên thứ ba">
+                                    <span>Tài sản bên thứ ba</span>
                                 </label>
                             </div>
                         </div>
@@ -22679,18 +22796,18 @@ YÊU CẦU ĐẦU RA:
                     <!-- Ước lượng thiệt hại -->
                     <div>
                         <label class="input-label">Đánh giá thiệt hại, ước thiệt hại</label>
-                        <div class="flex flex-col gap-2 mt-1">
-                            <label class="flex items-center gap-2 font-bold text-slate-700 cursor-pointer">
-                                <input type="radio" name="sr-thUocLuong" value="Khoảng từ 10 đến 20 triệu đồng" checked class="w-4 h-4 text-blue-600">
-                                Khoảng từ 10 đến 20 triệu đồng
+                        <div class="segmented-control mt-1">
+                            <label class="segmented-item">
+                                <input type="radio" name="sr-thUocLuong" value="Khoảng từ 10 đến 20 triệu đồng" checked>
+                                <span>10 - 20 Triệu</span>
                             </label>
-                            <label class="flex items-center gap-2 font-bold text-slate-700 cursor-pointer">
-                                <input type="radio" name="sr-thUocLuong" value="Khoảng trên 20 đến 50 triệu đồng" class="w-4 h-4 text-blue-600">
-                                Khoảng trên 20 đến 50 triệu đồng
+                            <label class="segmented-item">
+                                <input type="radio" name="sr-thUocLuong" value="Khoảng trên 20 đến 50 triệu đồng">
+                                <span>20 - 50 Triệu</span>
                             </label>
-                            <label class="flex items-center gap-2 font-bold text-slate-700 cursor-pointer">
-                                <input type="radio" name="sr-thUocLuong" value="Khác" class="w-4 h-4 text-blue-600">
-                                Khác (Chi tiết trong phần mô tả vật tư)
+                            <label class="segmented-item">
+                                <input type="radio" name="sr-thUocLuong" value="Khác">
+                                <span>Khác</span>
                             </label>
                         </div>
                     </div>
