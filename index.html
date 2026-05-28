@@ -2146,7 +2146,7 @@
             width: 100%; padding: 16px; margin-top: 8px;
             background: linear-gradient(135deg, #2563eb, #4f46e5);
             border: none; border-radius: 16px; color: white;
-            font-size: 15px; font-weight: 800; cursor: pointer;
+            font-size: 17px; font-weight: 800; cursor: pointer;
             transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1); font-family: inherit;
             box-shadow: 0 8px 20px rgba(37,99,235,0.4);
             display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -6344,7 +6344,7 @@
                     <div style="width:28px; height:28px; background: var(--bg-white, #ffffff); border-radius: 8px; display:flex; align-items:center; justify-content:center; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid var(--border-light, #f1f5f9); flex-shrink:0;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
                     </div>
-                    <span style="font-size: 15px; font-weight: 900; color: var(--text-primary, #1e293b); letter-spacing: 0.05em; text-transform: uppercase;">${item.bsx || 'CHƯA CÓ BSX'}</span>
+                    <span style="font-size: 17px; font-weight: 900; color: var(--text-primary, #1e293b); letter-spacing: 0.05em; text-transform: uppercase;">${item.bsx || 'CHƯA CÓ BSX'}</span>
                 </div>
             `;
 
@@ -18124,7 +18124,7 @@ YÊU CẦU ĐẦU RA:
                         display: flex;
                         flex-direction: column;
                         font-family: "Times New Roman", Times, serif;
-                        font-size: 11.5px;
+                        font-size: 13.5px;
                         color: #000;
                         line-height: 1.45;
                         text-align: left;
@@ -18200,7 +18200,7 @@ YÊU CẦU ĐẦU RA:
                         margin-bottom: 20px;
                     }
                     #ss-print-container .title-main {
-                        font-size: 15px;
+                        font-size: 17px;
                         font-weight: bold;
                         text-transform: uppercase;
                         letter-spacing: 0.2px;
@@ -18340,7 +18340,7 @@ YÊU CẦU ĐẦU RA:
                 <div class="header-right">
                   CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>
                   Độc lập - Tự do - Hạnh phúc<br>
-                  <span style="font-weight:normal; font-size:10px;">---------------</span>
+                  <span style="font-weight:normal; font-size:12px;">---------------</span>
                 </div>
               </div>
               
@@ -18410,7 +18410,7 @@ YÊU CẦU ĐẦU RA:
 
               <div style="font-weight: bold; font-size: 14px; margin-top: 15px; margin-bottom: 8px;">Hiện trường vụ tai nạn</div>
               
-              <table class="ht-table" style="width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 11.5px; table-layout: fixed;">
+              <table class="ht-table" style="width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed;">
                 <colgroup>
                   <col style="width: 38%;">
                   <col style="width: 22%;">
@@ -18500,6 +18500,7 @@ YÊU CẦU ĐẦU RA:
                   </td>
                 </tr>
                 
+                ${ss.htLaiXeCoMat === 'Vắng mặt' ? `
                 <!-- Row 8: [6] -->
                 <tr>
                   <td colspan="4" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
@@ -18508,19 +18509,19 @@ YÊU CẦU ĐẦU RA:
                 </tr>
                 <tr>
                   <td colspan="4" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
-                    <span>${ss.htLaiXeCoMat === 'Vắng mặt' ? '☑' : '☐'} Không có mặt tại hiện trường. Lý do: </span>
-                    <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1.5px dotted #000; min-width: 150px; display: inline-block; font-weight: bold; padding: 0 4px;">${ss.htLaiXeCoMat === 'Vắng mặt' ? (ss.htLaiXeLyDo || '') : ''}</span>
-                    <span style="letter-spacing: 1.5px; font-weight: normal; font-size: 11.5px;">............................................................................................................</span>
+                    <span>☑ Không có mặt tại hiện trường. Lý do: </span>
+                    <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1.5px dotted #000; min-width: 150px; display: inline-block; font-weight: bold; padding: 0 4px;">${ss.htLaiXeLyDo || ''}</span>
+                    <span style="letter-spacing: 1.5px; font-weight: normal;">............................................................................................................</span>
                   </td>
                 </tr>
                 <tr>
                   <td colspan="4" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
                     <span>Địa điểm đến: </span>
                     <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1.5px dotted #000; min-width: 250px; display: inline-block; font-weight: bold; padding: 0 4px;"></span>
-                    <span style="letter-spacing: 1.5px; font-weight: normal; font-size: 11.5px;">..............................................................................................................................................</span>
+                    <span style="letter-spacing: 1.5px; font-weight: normal;">..............................................................................................................................................</span>
                   </td>
                 </tr>
-                
+                ` : `
                 <!-- Row 9: [7] -->
                 <tr>
                   <td colspan="4" style="padding: 4px 0 2.5px 0; vertical-align: top; border: none !important;">
@@ -18547,6 +18548,7 @@ YÊU CẦU ĐẦU RA:
                     <span>${check(htDauHieuVal, 'Hơi thở có mùi lạ')} Hơi thở có mùi lạ</span>
                   </td>
                 </tr>
+                `}
                 
                 <!-- Row 10: [8] -->
                 <tr>
@@ -18577,17 +18579,17 @@ YÊU CẦU ĐẦU RA:
                   <td colspan="4" style="padding: 3px 0; vertical-align: top; border: none !important;">
                     <span>không có, thời gian có thể cung cấp) </span>
                     <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1.5px dotted #000; min-width: 200px; display: inline-block; font-weight: bold; padding: 0 4px;"></span>
-                    <span style="letter-spacing: 1.5px; font-weight: normal; font-size: 11.5px;">...........................................................................................................</span>
+                    <span style="letter-spacing: 1.5px; font-weight: normal; font-size: 13.5px;">...........................................................................................................</span>
                   </td>
                 </tr>
                 <tr>
                   <td colspan="4" style="padding: 3px 0; vertical-align: top; border: none !important;">
-                    <span style="letter-spacing: 1.5px; font-weight: normal; font-size: 11.5px;">........................................................................................................................................................................</span>
+                    <span style="letter-spacing: 1.5px; font-weight: normal; font-size: 13.5px;">........................................................................................................................................................................</span>
                   </td>
                 </tr>
                 <tr>
                   <td colspan="4" style="padding: 3px 0; vertical-align: top; border: none !important;">
-                    <span style="letter-spacing: 1.5px; font-weight: normal; font-size: 11.5px;">........................................................................................................................................................................</span>
+                    <span style="letter-spacing: 1.5px; font-weight: normal; font-size: 13.5px;">........................................................................................................................................................................</span>
                   </td>
                 </tr>
               </table>
