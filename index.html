@@ -17524,44 +17524,34 @@ YÊU CẦU ĐẦU RA:
         _hasExistingThirdPartySig: false,
 
         setGplxValidity(isValid, isInit = false) {
-            const validBtn = document.getElementById('gplx-valid-btn');
-            const invalidBtn = document.getElementById('gplx-invalid-btn');
+            const validRadio = document.getElementById('gplx-radio-valid');
+            const invalidRadio = document.getElementById('gplx-radio-invalid');
             const validCheckbox = document.getElementById('gplx-valid-checkbox');
             const invalidCheckbox = document.getElementById('gplx-invalid-checkbox');
             const reasonContainer = document.getElementById('gplx-reason-container');
             const badge = document.getElementById('gplx-status-badge');
 
             if (isValid) {
-                if (validBtn) {
-                    validBtn.className = "flex-1 py-2 rounded-lg text-[11px] font-black transition-all bg-white text-emerald-600 shadow-sm flex items-center justify-center gap-1 cursor-pointer";
-                }
-                if (invalidBtn) {
-                    invalidBtn.className = "flex-1 py-2 rounded-lg text-[11px] font-black transition-all text-slate-400 flex items-center justify-center gap-1 cursor-pointer";
-                }
+                if (validRadio) validRadio.checked = true;
                 if (validCheckbox) validCheckbox.checked = true;
                 if (invalidCheckbox) invalidCheckbox.checked = false;
                 if (reasonContainer) reasonContainer.classList.add('hidden');
                 if (badge) {
                     badge.textContent = "HỢP LỆ";
-                    badge.className = "text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 transition-colors";
+                    badge.className = "text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50 transition-colors";
                 }
                 if (!isInit) {
                     const reasonInput = document.getElementById('sr-htGiayTo-gplxReason');
                     if (reasonInput) reasonInput.value = '';
                 }
             } else {
-                if (validBtn) {
-                    validBtn.className = "flex-1 py-2 rounded-lg text-[11px] font-black transition-all text-slate-400 flex items-center justify-center gap-1 cursor-pointer";
-                }
-                if (invalidBtn) {
-                    invalidBtn.className = "flex-1 py-2 rounded-lg text-[11px] font-black transition-all bg-white text-rose-600 shadow-sm flex items-center justify-center gap-1 cursor-pointer";
-                }
+                if (invalidRadio) invalidRadio.checked = true;
                 if (validCheckbox) validCheckbox.checked = false;
                 if (invalidCheckbox) invalidCheckbox.checked = true;
                 if (reasonContainer) reasonContainer.classList.remove('hidden');
                 if (badge) {
                     badge.textContent = "KHÔNG HỢP LỆ";
-                    badge.className = "text-[9px] font-black px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-100 transition-colors animate-pulse";
+                    badge.className = "text-[9px] font-black px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50 transition-colors animate-pulse";
                 }
             }
             if (!isInit) lucide.createIcons();
@@ -23200,13 +23190,19 @@ YÊU CẦU ĐẦU RA:
                                     <span class="input-label">Giấy phép lái xe (GPLX)</span>
                                     <span id="gplx-status-badge" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 transition-colors">HỢP LỆ</span>
                                 </div>
-                                <div class="flex bg-slate-100/80 p-0.5 rounded-xl border border-slate-200/50 gap-0.5 shadow-inner">
-                                    <button type="button" id="gplx-valid-btn" onclick="SceneSurvey.setGplxValidity(true)" class="flex-1 py-2 rounded-lg text-[11px] font-black transition-all bg-white text-emerald-600 shadow-sm flex items-center justify-center gap-1 cursor-pointer">
-                                        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Hợp lệ
-                                    </button>
-                                    <button type="button" id="gplx-invalid-btn" onclick="SceneSurvey.setGplxValidity(false)" class="flex-1 py-2 rounded-lg text-[11px] font-black transition-all text-slate-400 flex items-center justify-center gap-1 cursor-pointer">
-                                        <i data-lucide="alert-octagon" class="w-3.5 h-3.5"></i> Không hợp lệ
-                                    </button>
+                                <div class="segmented-control mt-1">
+                                    <label class="segmented-item">
+                                        <input type="radio" name="sr-htGiayTo-gplxRadio" id="gplx-radio-valid" checked onchange="SceneSurvey.setGplxValidity(true)">
+                                        <span class="seg-green">
+                                            <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Hợp lệ
+                                        </span>
+                                    </label>
+                                    <label class="segmented-item">
+                                        <input type="radio" name="sr-htGiayTo-gplxRadio" id="gplx-radio-invalid" onchange="SceneSurvey.setGplxValidity(false)">
+                                        <span class="seg-red">
+                                            <i data-lucide="alert-octagon" class="w-3.5 h-3.5"></i> Không hợp lệ
+                                        </span>
+                                    </label>
                                 </div>
                                 
                                 <!-- Container nhập thời gian & nguyên nhân nếu KHÔNG HỢP LỆ -->
