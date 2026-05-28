@@ -16985,6 +16985,16 @@ YÊU CẦU ĐẦU RA:
             ar.sigDriver = sigDriver;
             ar.sigAssessor = sigAssessor;
 
+            const toTitleCase = (str) => {
+                if (!str) return '';
+                return str.toLowerCase().replace(/(^|\s)\S/g, l => l.toUpperCase());
+            };
+
+            const rep1NameFormatted = toTitleCase(ar.rep1Name || '');
+            const rep2NameFormatted = toTitleCase(ar.rep2Name || '');
+            const rep3NameFormatted = toTitleCase(ar.rep3Name || '');
+            const rep4NameFormatted = toTitleCase(ar.rep4Name || '');
+
             // Create print wrapper
             let printWrapper = document.getElementById('ar-print-wrapper');
             if (!printWrapper) {
@@ -17257,14 +17267,14 @@ YÊU CẦU ĐẦU RA:
               
               <div class="info-row">
                 <span class="info-label">1. Đại diện chủ xe / Lái xe (Ông/Bà):</span>
-                <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep1Name || '..................................................................'}</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false">${rep1NameFormatted || '..................................................................'}</span>
                 <span class="info-label" style="margin-left:10px;">Chức danh:</span>
                 <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep1Role || '................................................'}</span>
               </div>
               
               <div class="info-row">
                 <span class="info-label">2. Đại diện Bảo hiểm Tasco (Ông/Bà):</span>
-                <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep2Name || '..................................................................'}</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false">${rep2NameFormatted || '..................................................................'}</span>
                 <span class="info-label" style="margin-left:10px;">Chức danh:</span>
                 <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep2Role || '................................................'}</span>
               </div>
@@ -17272,7 +17282,7 @@ YÊU CẦU ĐẦU RA:
               ${(ar.rep3Name || ar.rep3Role) ? `
               <div class="info-row">
                 <span class="info-label">3. Đại diện bên liên quan / Khác (Ông/Bà):</span>
-                <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep3Name || ''}</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false">${rep3NameFormatted || ''}</span>
                 <span class="info-label" style="margin-left:10px;">Chức danh:</span>
                 <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep3Role || ''}</span>
               </div>
@@ -17281,7 +17291,7 @@ YÊU CẦU ĐẦU RA:
               ${(ar.rep4Name || ar.rep4Role) ? `
               <div class="info-row">
                 <span class="info-label">4. Đại diện khác (Ông/Bà):</span>
-                <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep4Name || ''}</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false">${rep4NameFormatted || ''}</span>
                 <span class="info-label" style="margin-left:10px;">Chức danh:</span>
                 <span class="info-val editable" contenteditable="true" spellcheck="false">${ar.rep4Role || ''}</span>
               </div>
@@ -17341,21 +17351,21 @@ YÊU CẦU ĐẦU RA:
                     <span class="sig-title">ĐẠI DIỆN CHỦ XE / LÁI XE</span>
                     <span class="sig-sub">(Ký, ghi rõ họ tên)</span>
                     <div class="sig-space"></div>
-                    <span class="sig-name">${ar.rep1Name || ''}</span>
+                    <span class="sig-name">${rep1NameFormatted || ''}</span>
                   </div>
                   
                   <div class="sig-col">
                     <span class="sig-title">ĐẠI DIỆN BÊN LIÊN QUAN / NHÂN CHỨNG</span>
                     <span class="sig-sub">(Ký, ghi rõ họ tên)</span>
                     <div class="sig-space"></div>
-                    <span class="sig-name">${ar.rep3Name || ''}</span>
+                    <span class="sig-name">${rep3NameFormatted || ''}</span>
                   </div>
                   
                   <div class="sig-col">
                     <span class="sig-title">ĐẠI DIỆN BẢO HIỂM TASCO</span>
                     <span class="sig-sub">(Ký, ghi rõ họ tên)</span>
                     <div class="sig-space"></div>
-                    <span class="sig-name">${ar.rep2Name || ''}</span>
+                    <span class="sig-name">${rep2NameFormatted || ''}</span>
                   </div>
                 </div>
               </div>
@@ -18315,6 +18325,16 @@ YÊU CẦU ĐẦU RA:
                 document.head.appendChild(printStyle);
             }
 
+            const toTitleCase = (str) => {
+                if (!str) return '';
+                return str.toLowerCase().replace(/(^|\s)\S/g, l => l.toUpperCase());
+            };
+
+            const rep1NameFormatted = toTitleCase(ss.rep1Name || Auth.getCurrentUser()?.name || '');
+            const rep2NameFormatted = toTitleCase(ss.rep2Name || item.driverName || item.chuXe || item.customer || '');
+            const rep3NameFormatted = toTitleCase(ss.rep3Name || '');
+            const driverNameFormatted = toTitleCase(ss.driverName || item.driverName || item.chuXe || item.customer || '');
+
             const check = (val, target) => {
                 return (val || '').includes(target) ? '☑' : '☐';
             };
@@ -18375,20 +18395,20 @@ YÊU CẦU ĐẦU RA:
                 <tbody>
                   <tr>
                     <td style="text-align:center;">1</td>
-                    <td class="editable" contenteditable="true" spellcheck="false">${ss.rep1Name || ''}</td>
+                    <td class="editable" contenteditable="true" spellcheck="false">${rep1NameFormatted}</td>
                     <td>GĐV Bảo hiểm Tasco</td>
                     <td class="editable" contenteditable="true" spellcheck="false">${ss.rep1Phone || ''}</td>
                   </tr>
                   <tr>
                     <td style="text-align:center;">2</td>
-                    <td class="editable" contenteditable="true" spellcheck="false">${ss.rep2Name || ''}</td>
+                    <td class="editable" contenteditable="true" spellcheck="false">${rep2NameFormatted}</td>
                     <td>Lái xe / Chủ xe</td>
                     <td class="editable" contenteditable="true" spellcheck="false">${ss.rep2Phone || ''}</td>
                   </tr>
                   ${ss.rep3Name ? `
                   <tr>
                     <td style="text-align:center;">3</td>
-                    <td class="editable" contenteditable="true" spellcheck="false">${ss.rep3Name}</td>
+                    <td class="editable" contenteditable="true" spellcheck="false">${rep3NameFormatted}</td>
                     <td class="editable" contenteditable="true" spellcheck="false">${ss.rep3Role || 'Người liên quan'}</td>
                     <td></td>
                   </tr>
@@ -18406,7 +18426,7 @@ YÊU CẦU ĐẦU RA:
                 <span>giữa: xe ô tô BKS:</span>
                 <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-vehicle1" style="font-weight:bold;">${ss.vehicle1 || '.......................'}</span>
                 <span> do anh:</span>
-                <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-driverName">${ss.driverName || '.......................'}</span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-driverName">${driverNameFormatted || '.......................'}</span>
                 <span> điều khiển, với xe ô tô BKS:</span>
                 <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-vehicle2">${ss.vehicle2 || '.......................'}</span>
               </div>
@@ -18648,21 +18668,21 @@ YÊU CẦU ĐẦU RA:
                   <span class="sig-title">Đại diện lái xe/chủ xe</span>
                   <span class="sig-sub">(Ký và ghi rõ họ tên)</span>
                   ${sigDriver ? `<img src="${sigDriver}" class="sig-canvas-img">` : `<div class="sig-space"></div>`}
-                  <span class="sig-name">${ss.rep2Name || '.....................................'}</span>
+                  <span class="sig-name">${rep2NameFormatted || '.....................................'}</span>
                 </div>
                 
                 <div class="sig-col">
                   <span class="sig-title">Đại diện bên liên quan</span>
                   <span class="sig-sub">(Ký và ghi rõ họ tên)</span>
                   ${sigThirdParty ? `<img src="${sigThirdParty}" class="sig-canvas-img">` : `<div class="sig-space"></div>`}
-                  <span class="sig-name">${ss.rep3Name || '.....................................'}</span>
+                  <span class="sig-name">${rep3NameFormatted || '.....................................'}</span>
                 </div>
 
                 <div class="sig-col">
                   <span class="sig-title">Đại diện giám định BH Tasco</span>
                   <span class="sig-sub">(Ký và ghi rõ họ tên)</span>
                   ${sigAssessor ? `<img src="${sigAssessor}" class="sig-canvas-img">` : `<div class="sig-space"></div>`}
-                  <span class="sig-name">${ss.rep1Name || '.....................................'}</span>
+                  <span class="sig-name">${rep1NameFormatted || '.....................................'}</span>
                 </div>
               </div>
             `;
