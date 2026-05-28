@@ -18412,9 +18412,10 @@ YÊU CẦU ĐẦU RA:
               
               <table class="ht-table" style="width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 11.5px; table-layout: fixed;">
                 <colgroup>
-                  <col style="width: 48%;">
-                  <col style="width: 26%;">
-                  <col style="width: 26%;">
+                  <col style="width: 38%;">
+                  <col style="width: 22%;">
+                  <col style="width: 20%;">
+                  <col style="width: 20%;">
                 </colgroup>
                 
                 <!-- Row 1: [1] -->
@@ -18425,7 +18426,7 @@ YÊU CẦU ĐẦU RA:
                   <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
                     <span>${check(ss.htTinhTrang, 'Nguyên vẹn')} Nguyên vẹn</span>
                   </td>
-                  <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+                  <td colspan="2" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
                     <span>${check(ss.htTinhTrang, 'Không nguyên vẹn')} Không nguyên vẹn</span>
                   </td>
                 </tr>
@@ -18438,16 +18439,16 @@ YÊU CẦU ĐẦU RA:
                   <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
                     <span>${check(ss.htNhietDo, 'Nóng ấm')} Nóng ấm</span>
                   </td>
-                  <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+                  <td colspan="2" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
                     <span>${check(ss.htNhietDo, 'Lạnh')} Lạnh</span>
                   </td>
                 </tr>
                 
                 <!-- Row 3: [3] -->
                 <tr>
-                  <td colspan="3" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+                  <td colspan="4" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
                     <span>[3] Địa hình hiện trường, vật liệu nền hiện trường: </span>
-                    <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1.5px solid #000; padding: 0 4px; font-weight: bold;">${ss.htDiaHinh || 'đường trải nhựa'}</span>
+                    <span class="editable" contenteditable="true" spellcheck="false" style="font-weight: normal; padding: 0 2px;">${ss.htDiaHinh || 'đường trải nhựa'}</span>
                   </td>
                 </tr>
                 
@@ -18459,7 +18460,7 @@ YÊU CẦU ĐẦU RA:
                   <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
                     <span>${check(ss.htTinhChatNen, 'Cứng, không lún/sụt')} Cứng, không lún/sụt</span>
                   </td>
-                  <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+                  <td colspan="2" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
                     <span>${check(ss.htTinhChatNen, 'Mềm lún/Sụt')} Mềm lún/Sụt</span>
                   </td>
                 </tr>
@@ -18467,7 +18468,7 @@ YÊU CẦU ĐẦU RA:
                 <!-- Row 5: [4] Ngập -->
                 <tr>
                   <td style="border: none !important;"></td>
-                  <td colspan="2" style="padding: 1px 0 2.5px 0; vertical-align: top; border: none !important;">
+                  <td colspan="3" style="padding: 1px 0 2.5px 0; vertical-align: top; border: none !important;">
                     <span>${check(ss.htTinhChatNen, 'Ngập nước')} Ngập nước</span>
                   </td>
                 </tr>
@@ -18481,10 +18482,10 @@ YÊU CẦU ĐẦU RA:
                     <span>${check(htThoiTietVal, 'Nắng')} Nắng</span>
                   </td>
                   <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
-                    <div style="display: flex; gap: 40px;">
-                      <span>${check(htThoiTietVal, 'Mưa')} Mưa</span>
-                      <span>${check(htThoiTietVal, 'Râm mát')} Râm mát</span>
-                    </div>
+                    <span>${check(htThoiTietVal, 'Mưa')} Mưa</span>
+                  </td>
+                  <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+                    <span>${check(htThoiTietVal, 'Râm mát')} Râm mát</span>
                   </td>
                 </tr>
                 
@@ -18494,81 +18495,97 @@ YÊU CẦU ĐẦU RA:
                   <td style="padding: 1px 0 2.5px 0; vertical-align: top; border: none !important;">
                     <span>${check(htThoiTietVal, 'Sáng')} Sáng</span>
                   </td>
-                  <td style="padding: 1px 0 2.5px 0; vertical-align: top; border: none !important;">
+                  <td colspan="2" style="padding: 1px 0 2.5px 0; vertical-align: top; border: none !important;">
                     <span>${check(htThoiTietVal, 'Tối')} Tối</span>
                   </td>
                 </tr>
                 
                 <!-- Row 8: [6] -->
                 <tr>
-                  <td colspan="3" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+                  <td colspan="4" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
                     <span>[6] Người điều khiển phương tiện tại hiện trường:</span>
                   </td>
                 </tr>
                 <tr>
-                  <td colspan="3" style="padding: 2.5px 0 2.5px 15px; vertical-align: top; border: none !important;">
+                  <td colspan="4" style="padding: 2.5px 0 2.5px 0; vertical-align: top; border: none !important;">
                     <span>${ss.htLaiXeCoMat === 'Vắng mặt' ? '☑' : '☐'} Không có mặt tại hiện trường. Lý do: </span>
-                    <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1px dotted #000; min-width: 250px; display: inline-block;">${ss.htLaiXeCoMat === 'Vắng mặt' ? (ss.htLaiXeLyDo || '......................................................') : '......................................................'}</span>
+                    <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1px dotted #000; min-width: 250px; display: inline-block;">${ss.htLaiXeCoMat === 'Vắng mặt' ? (ss.htLaiXeLyDo || '......') : '......'}</span>
+                    <span style="border-bottom: 1px dotted #000; flex-grow: 1; display: inline-block; min-width: 250px;">..................................................................................................................</span>
                   </td>
                 </tr>
                 <tr>
-                  <td colspan="3" style="padding: 2.5px 0 2.5px 15px; vertical-align: top; border: none !important;">
+                  <td colspan="4" style="padding: 2.5px 0 2.5px 0; vertical-align: top; border: none !important;">
                     <span>Địa điểm đến: </span>
-                    <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1px dotted #000; min-width: 350px; display: inline-block;">.........................................................................................</span>
+                    <span style="border-bottom: 1px dotted #000; width: calc(100% - 80px); display: inline-block; vertical-align: bottom;">..........................................................................................................................................................</span>
                   </td>
                 </tr>
                 
                 <!-- Row 9: [7] -->
                 <tr>
-                  <td colspan="3" style="padding: 4px 0 2.5px 0; vertical-align: top; border: none !important;">
-                    <span>${ss.htLaiXeCoMat === 'Có mặt' ? '☑' : '☐'} [7] Người điều khiển có mặt tại hiện trường.</span>
+                  <td colspan="4" style="padding: 4px 0 2.5px 0; vertical-align: top; border: none !important;">
+                    <span>[7] Người điều khiển có mặt tại hiện trường.</span>
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding: 2.5px 0 2.5px 15px; vertical-align: top; border: none !important;">
+                  <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
                     <span>Dấu hiệu tình trạng lái xe:</span>
                   </td>
                   <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
                     <span>${check(htDauHieuVal, 'Sắc mặt bình thường')} Sắc mặt bình thường</span>
                   </td>
-                  <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+                  <td colspan="2" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
                     <span>${check(htDauHieuVal, 'Hơi thở không mùi')} Hơi thở không mùi</span>
                   </td>
                 </tr>
                 <tr>
                   <td style="border: none !important;"></td>
-                  <td style="padding: 1px 0 4px 15px; vertical-align: top; border: none !important;">
+                  <td style="padding: 1px 0 4px 0; vertical-align: top; border: none !important;">
                     <span>${check(htDauHieuVal, 'Sắc mặt đỏ, tái..')} Sắc mặt đỏ, tái..</span>
                   </td>
-                  <td style="padding: 1px 0 4px 15px; vertical-align: top; border: none !important;">
+                  <td colspan="2" style="padding: 1px 0 4px 0; vertical-align: top; border: none !important;">
                     <span>${check(htDauHieuVal, 'Hơi thở có mùi lạ')} Hơi thở có mùi lạ</span>
                   </td>
                 </tr>
                 
                 <!-- Row 10: [8] -->
                 <tr>
-                  <td colspan="3" style="padding: 4px 0 2.5px 0; vertical-align: top; border: none !important;">
+                  <td colspan="4" style="padding: 4px 0 2.5px 0; vertical-align: top; border: none !important;">
                     <span>[8] Giấy tờ cung cấp tại hiện trường:</span>
                   </td>
                 </tr>
                 <tr>
-                  <td colspan="3" style="padding: 3px 0 3px 15px; vertical-align: top; border: none !important;">
-                    <div style="display: flex; justify-content: space-between; gap: 10px; width: 100%;">
-                      <span style="flex: 1;">${check(htGiayToVal, 'Đăng kí xe')} Đăng kí xe</span>
-                      <span style="flex: 1.2;">${check(htGiayToVal, 'Đăng kiểm (ATKT&BVMT)')} Đăng kiểm (ATKT&BVMT)</span>
-                      <span style="flex: 1.1;">${check(htGiayToVal, 'GCN/Hợp đồng Bảo hiểm')} GCN/Hợp đồng Bảo hiểm</span>
-                    </div>
+                  <td style="padding: 3px 0; vertical-align: top; border: none !important;">
+                    <span>${check(htGiayToVal, 'Đăng kí xe')} Đăng kí xe</span>
+                  </td>
+                  <td colspan="2" style="padding: 3px 0; vertical-align: top; border: none !important;">
+                    <span>${check(htGiayToVal, 'Đăng kiểm (ATKT&BVMT)')} Đăng kiểm (ATKT&BVMT)</span>
+                  </td>
+                  <td style="padding: 3px 0; vertical-align: top; border: none !important;">
+                    <span>${check(htGiayToVal, 'GCN/Hợp đồng Bảo hiểm')} GCN/Hợp đồng Bảo hiểm</span>
                   </td>
                 </tr>
                 <tr>
-                  <td colspan="3" style="padding: 3px 0 3px 15px; vertical-align: top; border: none !important;">
-                    <div style="display: flex; gap: 10px; width: 100%;">
-                      <span style="width: 30%; flex-shrink: 0;">${check(htGiayToVal, 'Chứng từ hàng hóa')} Chứng từ hàng hóa</span>
-                      <span style="width: 70%; flex-shrink: 0;">
-                        <span>${check(htGiayToVal, 'Giấy phép lái xe hợp lệ')} Giấy phép lái xe hợp lệ (Trường hợp không có ghi rõ nguyên nhân không có, thời gian có thể cung cấp)</span>
-                        <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1.5px dotted #000; min-width: 400px; display: block; margin-top: 4px;">.......................................................................................................................</span>
-                      </span>
-                    </div>
+                  <td style="padding: 3px 0; vertical-align: top; border: none !important;">
+                    <span>${check(htGiayToVal, 'Chứng từ hàng hóa')} Chứng từ hàng hóa</span>
+                  </td>
+                  <td colspan="3" style="padding: 3px 0; vertical-align: top; border: none !important;">
+                    <span>${check(htGiayToVal, 'Giấy phép lái xe hợp lệ')} Giấy phép lái xe hợp lệ (Trường hợp không có ghi rõ nguyên nhân</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="4" style="padding: 3px 0; vertical-align: top; border: none !important;">
+                    <span>không có, thời gian có thể cung cấp) </span>
+                    <span style="border-bottom: 1px dotted #000; width: calc(100% - 210px); display: inline-block; vertical-align: bottom;">.........................................................................................................</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="4" style="padding: 3px 0; vertical-align: top; border: none !important;">
+                    <span style="border-bottom: 1px dotted #000; width: 100%; display: inline-block;">........................................................................................................................................................................</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="4" style="padding: 3px 0; vertical-align: top; border: none !important;">
+                    <span style="border-bottom: 1px dotted #000; width: 100%; display: inline-block;">........................................................................................................................................................................</span>
                   </td>
                 </tr>
               </table>
