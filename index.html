@@ -17502,9 +17502,10 @@ YÊU CẦU ĐẦU RA:
         _hasExistingAssessorSig: false,
         _hasExistingThirdPartySig: false,
 
-        initWeatherExclusivity() {
-            const checkboxes = document.querySelectorAll('input[name="sr-htThoiTiet"]');
-            checkboxes.forEach(cb => {
+        initFormExclusivity() {
+            // 1. Weather exclusivity logic (Nắng vs Mưa, Sáng vs Tối)
+            const weatherCbs = document.querySelectorAll('input[name="sr-htThoiTiet"]');
+            weatherCbs.forEach(cb => {
                 cb.addEventListener('change', (e) => {
                     if (e.target.checked) {
                         const val = e.target.value;
@@ -17536,6 +17537,57 @@ YÊU CẦU ĐẦU RA:
                     }
                 });
             });
+
+            // 2. Driver signs exclusivity logic (Sắc mặt bình thường vs Đỏ/tái, Hơi thở không mùi vs Mùi lạ)
+            const driverCbs = document.querySelectorAll('input[name="sr-htDauHieuLaiXe"]');
+            driverCbs.forEach(cb => {
+                cb.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        const val = e.target.value;
+                        if (val === 'Sắc mặt bình thường') {
+                            const doTai = document.querySelector('input[name="sr-htDauHieuLaiXe"][value="Sắc mặt đỏ, tái.."]');
+                            if (doTai) {
+                                doTai.checked = false;
+                                doTai.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                        } else if (val === 'Sắc mặt đỏ, tái..') {
+                            const binhThuong = document.querySelector('input[name="sr-htDauHieuLaiXe"][value="Sắc mặt bình thường"]');
+                            if (binhThuong) {
+                                binhThuong.checked = false;
+                                binhThuong.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                        } else if (val === 'Hơi thở không mùi') {
+                            const muiLa = document.querySelector('input[name="sr-htDauHieuLaiXe"][value="Hơi thở có mùi lạ"]');
+                            if (muiLa) {
+                                muiLa.checked = false;
+                                muiLa.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                        } else if (val === 'Hơi thở có mùi lạ') {
+                            const khongMui = document.querySelector('input[name="sr-htDauHieuLaiXe"][value="Hơi thở không mùi"]');
+                            if (khongMui) {
+                                khongMui.checked = false;
+                                khongMui.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                        }
+                    }
+                });
+            });
+
+            // 3. Cargo Documents show/hide input logic
+            const cthhCheckbox = document.querySelector('input[name="sr-htGiayTo"][value="Chứng từ hàng hóa"]');
+            const cthhContainer = document.getElementById('sr-htGiayTo-cthh-container');
+            if (cthhCheckbox && cthhContainer) {
+                const toggleContainer = () => {
+                    if (cthhCheckbox.checked) {
+                        cthhContainer.classList.remove('hidden');
+                    } else {
+                        cthhContainer.classList.add('hidden');
+                        const inp = document.getElementById('sr-htGiayTo-cthh');
+                        if (inp) inp.value = '';
+                    }
+                };
+                cthhCheckbox.addEventListener('change', toggleContainer);
+            }
         },
 
         openMobileModal() {
@@ -17590,6 +17642,19 @@ YÊU CẦU ĐẦU RA:
             setCheckboxValues('sr-htGiayTo', ss.htGiayTo || 'Đăng kí xe, Đăng kiểm (ATKT&BVMT), GCN/Hợp đồng Bảo hiểm, Giấy phép lái xe hợp lệ');
             setCheckboxValues('sr-thViTri', ss.thViTri || 'Đuôi xe');
             setCheckboxValues('sr-thTaiSan', ss.thTaiSan || 'Xe tham gia vật chất BH Tasco');
+
+            // Prefill and Sync Cargo Documents detailed input field
+            const cthhInput = document.getElementById('sr-htGiayTo-cthh');
+            const cthhContainer = document.getElementById('sr-htGiayTo-cthh-container');
+            const cthhCheckbox = document.querySelector('input[name="sr-htGiayTo"][value="Chứng từ hàng hóa"]');
+            if (cthhInput && cthhContainer && cthhCheckbox) {
+                cthhInput.value = ss.htGiayToCthh || '';
+                if (cthhCheckbox.checked) {
+                    cthhContainer.classList.remove('hidden');
+                } else {
+                    cthhContainer.classList.add('hidden');
+                }
+            }
 
             // Textareas
             document.getElementById('sr-htMoTa').value = ss.htMoTa || 'Theo sơ đồ hiện trường đính kèm theo hồ sơ';
@@ -17860,6 +17925,7 @@ YÊU CẦU ĐẦU RA:
                 htLaiXeLyDo: document.getElementById('sr-htLaiXeLyDo').value.trim(),
                 htDauHieuLaiXe: getCheckboxValues('sr-htDauHieuLaiXe'),
                 htGiayTo: getCheckboxValues('sr-htGiayTo'),
+                htGiayToCthh: document.getElementById('sr-htGiayTo-cthh')?.value.trim() || '',
 
                 htMoTa: document.getElementById('sr-htMoTa').value.trim(),
                 htDauVet: document.getElementById('sr-htDauVet').value.trim(),
@@ -18456,6 +18522,7 @@ YÊU CẦU ĐẦU RA:
             const htThoiTietVal = ss.htThoiTiet || '';
             const htDauHieuVal = ss.htDauHieuLaiXe || '';
             const htGiayToVal = ss.htGiayTo || '';
+            const htGiayToCthhVal = ss.htGiayToCthh || '';
 
             const templateHtml = `
               <div class="btn-print-controls-ss">
@@ -18702,9 +18769,12 @@ YÊU CẦU ĐẦU RA:
                 </tr>
                 <tr>
                   <td colspan="4" style="padding: 3.5px 0; vertical-align: top; border: none !important;">
-                    <div style="display: flex; width: 100%; font-size: 14.5px;">
-                      <span style="width: 24%; flex-shrink: 0;">${check(htGiayToVal, 'Chứng từ hàng hóa')} Chứng từ hàng hóa</span>
-                      <span style="width: 76%; flex-shrink: 0;">${check(htGiayToVal, 'Giấy phép lái xe hợp lệ')} Giấy phép lái xe hợp lệ (Trường hợp không có ghi rõ nguyên nhân</span>
+                    <div style="display: flex; align-items: baseline; width: 100%; font-size: 14.5px;">
+                      <span style="flex-shrink: 0; margin-right: 15px;">
+                        ${check(htGiayToVal, 'Chứng từ hàng hóa')} Chứng từ hàng hóa
+                        ${htGiayToVal.includes('Chứng từ hàng hóa') && htGiayToCthhVal ? `<span style="font-weight: bold; font-style: italic; font-size: 13.5px; margin-left: 4px;">(${htGiayToCthhVal})</span>` : ''}
+                      </span>
+                      <span style="flex-grow: 1;">${check(htGiayToVal, 'Giấy phép lái xe hợp lệ')} Giấy phép lái xe hợp lệ (Trường hợp không có ghi rõ nguyên nhân</span>
                     </div>
                   </td>
                 </tr>
@@ -21753,7 +21823,7 @@ YÊU CẦU ĐẦU RA:
         document.getElementById('plate-scanner-modal').classList.add('hidden');
         Inspection.startWatcher();
         SpareParts.init();
-        SceneSurvey.initWeatherExclusivity();
+        SceneSurvey.initFormExclusivity();
         Nav.switchView('home', document.getElementById('nav-home-btn'));
 
         // 1. Scroll to top cho màn hình chính (main)
@@ -22951,6 +23021,15 @@ YÊU CẦU ĐẦU RA:
                                 <input type="checkbox" name="sr-htGiayTo" value="Chứng từ hàng hóa">
                                 <span>Chứng từ hàng hóa</span>
                             </label>
+                            <div id="sr-htGiayTo-cthh-container" class="col-span-2 hidden mt-1 space-y-1">
+                                <label class="input-label text-[10px] text-slate-500 font-bold">Chi tiết chứng từ hàng hóa cung cấp</label>
+                                <div class="ar-input-wrapper">
+                                    <input type="text" id="sr-htGiayTo-cthh" class="input-field py-2 text-xs font-semibold" placeholder="Nhập tên chứng từ (ví dụ: Hóa đơn GTGT, Phiếu xuất kho...)">
+                                    <button type="button" onclick="SceneSurvey.clearField('sr-htGiayTo-cthh')" class="ar-clear-btn" title="Xóa">
+                                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
