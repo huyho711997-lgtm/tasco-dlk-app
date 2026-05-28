@@ -18855,8 +18855,8 @@ YÊU CẦU ĐẦU RA:
                 
                 <!-- Row 10: [8] -->
                 <tr>
-                  <td colspan="4" style="padding: 4px 0 2.5px 0; vertical-align: top; border: none !important;">
-                    <span>[8] Giấy tờ cung cấp tại hiện trường:</span>
+                  <td colspan="4" style="padding: 5px 0 3px 0; vertical-align: top; border: none !important;">
+                    <span style="font-weight: bold; font-size: 15px; color: #1e293b;">[8] Giấy tờ cung cấp tại hiện trường:</span>
                   </td>
                 </tr>
                 <tr>
@@ -18870,20 +18870,22 @@ YÊU CẦU ĐẦU RA:
                 </tr>
                 <tr>
                   <td colspan="4" style="padding: 3.5px 0; vertical-align: top; border: none !important;">
-                    <div style="display: flex; align-items: baseline; width: 100%; font-size: 14.5px;">
-                      <span style="flex-shrink: 0; margin-right: 15px;">
-                        ${check(htGiayToVal, 'Chứng từ hàng hóa')} Chứng từ hàng hóa
-                        ${htGiayToVal.includes('Chứng từ hàng hóa') && htGiayToCthhVal ? `<span style="font-weight: bold; font-style: italic; font-size: 13.5px; margin-left: 4px;">(${htGiayToCthhVal})</span>` : ''}
-                      </span>
-                      <span style="flex-grow: 1;">${check(htGiayToVal, 'Giấy phép lái xe hợp lệ')} Giấy phép lái xe hợp lệ (Trường hợp không có ghi rõ nguyên nhân</span>
+                    <div style="font-size: 14.5px;">
+                      <span>${check(htGiayToVal, 'Chứng từ hàng hóa')} Chứng từ hàng hóa</span>
+                      ${htGiayToVal.includes('Chứng từ hàng hóa') && htGiayToCthhVal ? `<span style="font-weight: bold; font-style: italic; font-size: 13.5px; margin-left: 6px; color: #0f172a;">(${htGiayToCthhVal})</span>` : ''}
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="4" style="padding: 3.5px 0; vertical-align: top; border: none !important;">
+                    <div style="font-size: 14.5px;">
+                      <span>${check(htGiayToVal, 'Giấy phép lái xe hợp lệ')} Giấy phép lái xe hợp lệ (Trường hợp không có ghi rõ nguyên nhân không có, thời gian có thể cung cấp):</span>
                     </div>
                   </td>
                 </tr>
                 <tr>
                   <td colspan="4" style="padding: 3px 0; vertical-align: top; border: none !important;">
-                    <span>không có, thời gian có thể cung cấp) </span>
-                    <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1.5px dotted #000; min-width: 200px; display: inline-block; font-weight: bold; padding: 0 4px;"></span>
-                    <span style="letter-spacing: 1.5px; font-weight: normal; font-size: 15px;">...........................................................................................................</span>
+                    <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1.5px dotted #000; min-width: 100%; display: inline-block; font-weight: bold; padding: 0 4px; outline: none; min-height: 20px;"></span>
                   </td>
                 </tr>
                 <tr>
