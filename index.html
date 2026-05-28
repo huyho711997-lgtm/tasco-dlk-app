@@ -17588,6 +17588,24 @@ YÊU CẦU ĐẦU RA:
                 };
                 cthhCheckbox.addEventListener('change', toggleContainer);
             }
+
+            // 4. Estimated Damage "Khác" show/hide input logic
+            const uocLuongRadios = document.querySelectorAll('input[name="sr-thUocLuong"]');
+            const uocLuongKhacContainer = document.getElementById('sr-thUocLuong-khac-container');
+            if (uocLuongRadios && uocLuongKhacContainer) {
+                uocLuongRadios.forEach(radio => {
+                    radio.addEventListener('change', () => {
+                        const khacRadio = document.querySelector('input[name="sr-thUocLuong"][value="Khác"]');
+                        if (khacRadio && khacRadio.checked) {
+                            uocLuongKhacContainer.classList.remove('hidden');
+                        } else {
+                            uocLuongKhacContainer.classList.add('hidden');
+                            const inp = document.getElementById('sr-thUocLuong-khac');
+                            if (inp) inp.value = '';
+                        }
+                    });
+                });
+            }
         },
 
         openMobileModal() {
@@ -17629,7 +17647,21 @@ YÊU CẦU ĐẦU RA:
             setRadioValue('sr-htTinhChatNen', ss.htTinhChatNen || 'Cứng, không lún/sụt');
             setRadioValue('sr-htLaiXeCoMat', ss.htLaiXeCoMat || 'Có mặt');
             document.getElementById('sr-htLaiXeLyDo').value = ss.htLaiXeLyDo || '';
-            setRadioValue('sr-thUocLuong', ss.thUocLuong || 'Khoảng từ 10 đến 20 triệu đồng');
+            // Prefill and Sync Estimated Damage "Khác" field
+            const uocLuongInput = document.getElementById('sr-thUocLuong-khac');
+            const uocLuongContainer = document.getElementById('sr-thUocLuong-khac-container');
+            const uocLuongRadioKhac = document.querySelector('input[name="sr-thUocLuong"][value="Khác"]');
+            
+            const rawUocLuong = ss.thUocLuong || 'Khoảng từ 10 đến 20 triệu đồng';
+            if (rawUocLuong !== 'Khoảng từ 10 đến 20 triệu đồng' && rawUocLuong !== 'Khoảng trên 20 đến 50 triệu đồng') {
+                if (uocLuongRadioKhac) uocLuongRadioKhac.checked = true;
+                if (uocLuongInput) uocLuongInput.value = rawUocLuong;
+                if (uocLuongContainer) uocLuongContainer.classList.remove('hidden');
+            } else {
+                setRadioValue('sr-thUocLuong', rawUocLuong);
+                if (uocLuongInput) uocLuongInput.value = '';
+                if (uocLuongContainer) uocLuongContainer.classList.add('hidden');
+            }
 
             const setCheckboxValues = (name, str) => {
                 const vals = str ? str.split(',').map(s => s.trim()) : [];
@@ -17640,7 +17672,36 @@ YÊU CẦU ĐẦU RA:
             setCheckboxValues('sr-htThoiTiet', ss.htThoiTiet || 'Nắng, Sáng');
             setCheckboxValues('sr-htDauHieuLaiXe', ss.htDauHieuLaiXe || 'Sắc mặt bình thường, Hơi thở không mùi');
             setCheckboxValues('sr-htGiayTo', ss.htGiayTo || 'Đăng kí xe, Đăng kiểm (ATKT&BVMT), GCN/Hợp đồng Bảo hiểm, Giấy phép lái xe hợp lệ');
-            setCheckboxValues('sr-thViTri', ss.thViTri || 'Đuôi xe');
+            
+            // Prefill Vị trí tổn thất "Trái, Phải, Ở giữa" sub-options
+            document.querySelectorAll('input[name="sr-thViTri-base"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('input[class="sr-thViTri-sub"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('[id^="sr-thViTri-sub-"]').forEach(div => div.classList.add('hidden'));
+
+            const thViTriVal = ss.thViTri || 'Đuôi xe';
+            const thViTriParts = thViTriVal ? thViTriVal.split(/,\s*(?![^()]*\))/) : [];
+            thViTriParts.forEach(part => {
+                const match = part.match(/^([^(]+)(?:\(([^)]+)\))?$/);
+                if (match) {
+                    const baseName = match[1].trim();
+                    const subNotesStr = match[2] || '';
+                    const subs = subNotesStr.split(',').map(s => s.trim()).filter(Boolean);
+                    
+                    const baseCb = document.querySelector(`input[name="sr-thViTri-base"][value="${baseName}"]`);
+                    if (baseCb) {
+                        baseCb.checked = true;
+                        const container = document.getElementById(`sr-thViTri-sub-${baseName}`);
+                        if (container) container.classList.remove('hidden');
+                    }
+                    
+                    subs.forEach(subVal => {
+                        const subCb = document.querySelector(`input[class="sr-thViTri-sub"][data-parent="${baseName}"][value="${subVal}"]`);
+                        if (subCb) subCb.checked = true;
+                    });
+                }
+            });
+            this.updateThViTriOutput();
+
             setCheckboxValues('sr-thTaiSan', ss.thTaiSan || 'Xe tham gia vật chất BH Tasco');
 
             // Prefill and Sync Cargo Documents detailed input field
@@ -17689,6 +17750,40 @@ YÊU CẦU ĐẦU RA:
                 el.value = '';
                 el.dispatchEvent(new Event('input'));
                 el.focus();
+            }
+        },
+
+        toggleSubNoteContainer(baseName) {
+            const cb = document.querySelector(`input[name="sr-thViTri-base"][value="${baseName}"]`);
+            const container = document.getElementById(`sr-thViTri-sub-${baseName}`);
+            if (cb && container) {
+                if (cb.checked) {
+                    container.classList.remove('hidden');
+                } else {
+                    container.classList.add('hidden');
+                    // Uncheck sub checkboxes
+                    const subs = container.querySelectorAll('.sr-thViTri-sub');
+                    subs.forEach(sub => {
+                        sub.checked = false;
+                    });
+                }
+            }
+            this.updateThViTriOutput();
+        },
+
+        updateThViTriOutput() {
+            const checkedBases = Array.from(document.querySelectorAll('input[name="sr-thViTri-base"]:checked'));
+            const parts = checkedBases.map(baseCb => {
+                const baseName = baseCb.value;
+                const checkedSubs = Array.from(document.querySelectorAll(`.sr-thViTri-sub[data-parent="${baseName}"]:checked`)).map(el => el.value);
+                if (checkedSubs.length > 0) {
+                    return `${baseName} (${checkedSubs.join(', ')})`;
+                }
+                return baseName;
+            });
+            const finalInput = document.getElementById('sr-thViTri-final');
+            if (finalInput) {
+                finalInput.value = parts.join(', ');
             }
         },
 
@@ -17777,8 +17872,8 @@ YÊU CẦU ĐẦU RA:
                 const canvas = document.getElementById('sr-canvas-' + role);
                 if (!canvas) return;
 
-                canvas.width = canvas.parentElement.clientWidth;
-                canvas.height = canvas.parentElement.clientHeight;
+                canvas.width = canvas.parentElement ? (canvas.parentElement.clientWidth || 300) : 300;
+                canvas.height = canvas.parentElement ? (canvas.parentElement.clientHeight || 100) : 100;
 
                 const ctx = canvas.getContext('2d');
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -17931,9 +18026,15 @@ YÊU CẦU ĐẦU RA:
                 htDauVet: document.getElementById('sr-htDauVet').value.trim(),
                 htMauVat: document.getElementById('sr-htMauVat').value.trim(),
 
-                thViTri: getCheckboxValues('sr-thViTri'),
+                thViTri: document.getElementById('sr-thViTri-final')?.value || '',
                 thTaiSan: getCheckboxValues('sr-thTaiSan'),
-                thUocLuong: document.querySelector('input[name="sr-thUocLuong"]:checked')?.value || '',
+                thUocLuong: (() => {
+                    const baseVal = document.querySelector('input[name="sr-thUocLuong"]:checked')?.value || '';
+                    if (baseVal === 'Khác') {
+                        return document.getElementById('sr-thUocLuong-khac')?.value.trim() || 'Khác';
+                    }
+                    return baseVal;
+                })(),
                 thLietKe: document.getElementById('sr-thLietKe').value.trim(),
                 thNguoi: document.getElementById('sr-thNguoi').value.trim(),
                 thGhiChu: document.getElementById('sr-thGhiChu').value.trim(),
@@ -23170,6 +23271,15 @@ YÊU CẦU ĐẦU RA:
                                 <span>Khác</span>
                             </label>
                         </div>
+                        <div id="sr-thUocLuong-khac-container" class="hidden mt-2 space-y-1">
+                            <label class="input-label text-[10px] text-slate-500 font-bold">Số tiền ước tính thiệt hại khác (đơn vị: triệu đồng hoặc mô tả)</label>
+                            <div class="ar-input-wrapper">
+                                <input type="text" id="sr-thUocLuong-khac" class="input-field py-2 text-xs font-semibold" placeholder="Nhập số tiền hoặc mô tả (ví dụ: Khoảng 80 triệu đồng)">
+                                <button type="button" onclick="SceneSurvey.clearField('sr-thUocLuong-khac')" class="ar-clear-btn" title="Xóa">
+                                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Liệt kê sơ bộ vật tư -->
@@ -23240,8 +23350,8 @@ YÊU CẦU ĐẦU RA:
                 </div>
             </div>
 
-            <!-- NHÓM 6: CHỮ KÝ BA BÊN -->
-            <div class="p-4 rounded-2xl border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(148,163,184,0.12)] space-y-4 hover:shadow-md transition-shadow mb-8">
+            <!-- NHÓM 6: CHỮ KÝ BA BÊN (HIDDEN per user request) -->
+            <div class="hidden p-4 rounded-2xl border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(148,163,184,0.12)] space-y-4 hover:shadow-md transition-shadow mb-8">
                 <h3 class="text-xs font-black text-slate-800 uppercase flex items-center gap-2 border-b border-slate-100 pb-2.5">
                     <div class="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
                         <i data-lucide="pen-tool" class="w-4 h-4 text-blue-600"></i>
