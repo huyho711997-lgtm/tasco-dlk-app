@@ -17426,21 +17426,27 @@ YÊU CẦU ĐẦU RA:
                   <div class="sig-col">
                     <span class="sig-title">ĐẠI DIỆN CHỦ XE / LÁI XE</span>
                     <span class="sig-sub">(Ký, ghi rõ họ tên)</span>
-                    <div class="sig-space"></div>
+                    <div style="height: 70px; display: flex; align-items: center; justify-content: center; width: 100%;">
+                      ${sigDriver ? `<img src="${sigDriver}" class="sig-canvas-img">` : ''}
+                    </div>
                     <span class="sig-name">${rep1NameFormatted || ''}</span>
                   </div>
                   
                   <div class="sig-col">
                     <span class="sig-title">ĐẠI DIỆN BÊN LIÊN QUAN / NHÂN CHỨNG</span>
                     <span class="sig-sub">(Ký, ghi rõ họ tên)</span>
-                    <div class="sig-space"></div>
+                    <div style="height: 70px; display: flex; align-items: center; justify-content: center; width: 100%;">
+                      <!-- bên liên quan / nhân chứng signature if any -->
+                    </div>
                     <span class="sig-name">${rep3NameFormatted || ''}</span>
                   </div>
                   
                   <div class="sig-col">
                     <span class="sig-title">ĐẠI DIỆN BẢO HIỂM TASCO</span>
                     <span class="sig-sub">(Ký, ghi rõ họ tên)</span>
-                    <div class="sig-space"></div>
+                    <div style="height: 70px; display: flex; align-items: center; justify-content: center; width: 100%;">
+                      ${sigAssessor ? `<img src="${sigAssessor}" class="sig-canvas-img">` : ''}
+                    </div>
                     <span class="sig-name">${rep2NameFormatted || ''}</span>
                   </div>
                 </div>
@@ -18711,7 +18717,7 @@ YÊU CẦU ĐẦU RA:
                 <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-vehicle2">${ss.vehicle2 || '.......................'}</span>
               </div>
 
-              <div style="font-weight: bold; font-size: 14px; margin-top: 15px; margin-bottom: 8px;">Hiện trường vụ tai nạn</div>
+              <div class="section-title">II. Hiện trường vụ tai nạn</div>
               
               <table class="ht-table" style="width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed;">
                 <colgroup>
@@ -18884,18 +18890,10 @@ YÊU CẦU ĐẦU RA:
                   </td>
                 </tr>
                 <tr>
-                  <td colspan="4" style="padding: 3px 0; vertical-align: top; border: none !important;">
-                    <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1.5px dotted #000; min-width: 100%; display: inline-block; font-weight: bold; padding: 0 4px; outline: none; min-height: 20px;"></span>
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="4" style="padding: 3px 0; vertical-align: top; border: none !important;">
-                    <span style="letter-spacing: 1.5px; font-weight: normal; font-size: 15px;">........................................................................................................................................................................</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="4" style="padding: 3px 0; vertical-align: top; border: none !important;">
-                    <span style="letter-spacing: 1.5px; font-weight: normal; font-size: 15px;">........................................................................................................................................................................</span>
+                  <td colspan="4" style="padding: 4px 0; vertical-align: top; border: none !important;">
+                    <div class="editable" contenteditable="true" spellcheck="false" style="width: 100%; min-height: 60px; outline: none; font-weight: bold; font-size: 16px; line-height: 1.85; text-align: justify; word-break: break-all; letter-spacing: 1.5px; padding: 0 4px;">
+                      ${ss.htGiayToGplxReason || '................................................................................................................................................................................................................................................................................................................................................................................................................'}
+                    </div>
                   </td>
                 </tr>
               </table>
@@ -18931,9 +18929,9 @@ YÊU CẦU ĐẦU RA:
                 <span style="margin-left: 10px;">${check(thTaiSanVal, 'Xe tham gia vật chất BH Tasco')} Xe vật chất Tasco</span>
                 <span style="margin-left: 10px;">${check(thTaiSanVal, 'Tài sản bên thứ ba')} Tài sản bên thứ ba</span>
               </div>
-              <div class="info-row" style="padding-left: 15px;">
-                <span style="font-style:italic;">Liệt kê sơ bộ phụ tùng hư hỏng:</span>
-                <div class="editable" contenteditable="true" spellcheck="false" style="display:inline-block; border-bottom:1px dotted #ccc; min-width: 300px;">${ss.thLietKe || '.......................................................................................'}</div>
+              <div class="info-row" style="text-align: left; padding-left: 15px; margin-top: 4px;">
+                <span style="font-style: italic; font-weight: bold; display: block; margin-bottom: 4px; color: #334155;">Liệt kê sơ bộ phụ tùng hư hỏng:</span>
+                <div class="editable" contenteditable="true" spellcheck="false" style="display: block; border-bottom: 1.5px dotted #000; min-height: 28px; font-weight: bold; width: 100%; outline: none; line-height: 1.65; text-align: justify; word-break: break-all; padding: 2px 4px;">${ss.thLietKe || '........................................................................................................................................................................'}</div>
               </div>
               <div class="info-row">
                 <span class="info-label">[15] Thiệt hại về người:</span>
@@ -18952,21 +18950,27 @@ YÊU CẦU ĐẦU RA:
                 <div class="sig-col">
                   <span class="sig-title">Đại diện lái xe/chủ xe</span>
                   <span class="sig-sub">(Ký và ghi rõ họ tên)</span>
-                  ${sigDriver ? `<img src="${sigDriver}" class="sig-canvas-img">` : `<div class="sig-space"></div>`}
+                  <div style="height: 70px; display: flex; align-items: center; justify-content: center; width: 100%;">
+                    ${sigDriver ? `<img src="${sigDriver}" class="sig-canvas-img">` : ''}
+                  </div>
                   <span class="sig-name">${rep2NameFormatted || '.....................................'}</span>
                 </div>
                 
                 <div class="sig-col">
                   <span class="sig-title">Đại diện bên liên quan</span>
                   <span class="sig-sub">(Ký và ghi rõ họ tên)</span>
-                  ${sigThirdParty ? `<img src="${sigThirdParty}" class="sig-canvas-img">` : `<div class="sig-space"></div>`}
+                  <div style="height: 70px; display: flex; align-items: center; justify-content: center; width: 100%;">
+                    ${sigThirdParty ? `<img src="${sigThirdParty}" class="sig-canvas-img">` : ''}
+                  </div>
                   <span class="sig-name">${rep3NameFormatted || '.....................................'}</span>
                 </div>
 
                 <div class="sig-col">
                   <span class="sig-title">Đại diện giám định BH Tasco</span>
                   <span class="sig-sub">(Ký và ghi rõ họ tên)</span>
-                  ${sigAssessor ? `<img src="${sigAssessor}" class="sig-canvas-img">` : `<div class="sig-space"></div>`}
+                  <div style="height: 70px; display: flex; align-items: center; justify-content: center; width: 100%;">
+                    ${sigAssessor ? `<img src="${sigAssessor}" class="sig-canvas-img">` : ''}
+                  </div>
                   <span class="sig-name">${rep1NameFormatted || '.....................................'}</span>
                 </div>
               </div>
