@@ -3548,6 +3548,21 @@
                             </div>
                             <div><label class="input-label">Nguyên nhân</label><input type="text" id="edit-cause" class="input-field"></div>
                             <div><label class="input-label">Mô tả tổn thất</label><textarea id="edit-description" rows="2" class="input-field resize-none"></textarea></div>
+                            <div class="space-y-1.5 mt-3">
+                                <label class="input-label">Diễn biến vụ tai nạn</label>
+                                <div class="relative border border-slate-200/80 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 rounded-2xl bg-slate-50/50 p-3 transition-all">
+                                    <textarea id="edit-accidentDevelopment" rows="3" class="w-full bg-transparent border-0 outline-none resize-none pr-8 text-xs text-slate-800 font-bold leading-relaxed" placeholder="Nhập diễn biến vụ tai nạn..."></textarea>
+                                    <button type="button" onclick="document.getElementById('edit-accidentDevelopment').value=''" class="absolute right-3.5 top-3 text-slate-400 hover:text-rose-500 transition-colors bg-white/80 p-1 rounded-full shadow-sm border border-slate-100">
+                                        <i data-lucide="x" class="w-3 h-3"></i>
+                                    </button>
+                                    <div class="flex items-center justify-between border-t border-slate-200/50 pt-2 mt-2">
+                                        <button type="button" onclick="SpeechInput.toggle('edit-accidentDevelopment', 'mic-edit-accidentDevelopment', 'st-edit-accidentDevelopment')" id="mic-edit-accidentDevelopment" class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100/80 active:scale-95 text-blue-600 rounded-xl text-[10px] font-black transition-all border border-blue-100/50 shadow-sm cursor-pointer">
+                                            <i data-lucide="mic" class="w-3.5 h-3.5"></i> Ghi âm
+                                        </button>
+                                        <div id="st-edit-accidentDevelopment" class="text-[9px] font-bold text-blue-500 animate-pulse"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -7783,7 +7798,7 @@
     // ============================================================
     const MODAL_FIELDS = [
         'bsx','claimCode','customer','driverName','phone',
-        'location','cause','description',
+        'location','cause','description', 'accidentDevelopment',
         'chuXe','hangXe','loaiXe','soKhung','soMay','diaChi',
         'soGPLX','hangGPLX','ngayCapGPLX','hetHanGPLX',
         'soDangKiem','ngayCapDK','hetHanDK','namSanXuat','soChoNgoi',
@@ -10913,7 +10928,7 @@
                     'Đắk Lắk, Đắk Nông, Buôn Ma Thuột, Buôn Hồ, Buôn Đôn, Cư M\'gar, Ea H\'leo, Ea Kar, Ea Súp, Krông Ana, Krông Bông, Krông Búk, Krông Năng, Krông Pắc, Lắk, M\'Drắk, Cư Kuin, ' +
                     'Gia Nghĩa, Cư Jút, Đắk Glong, Đắk Mil, Đắk R\'lấp, Đắk Song, Krông Nô, Tuy Đức. ' +
                     'CHỈ trả về nội dung văn bản đã nhận dạng, không thêm bất kỳ giải thích nào.';
-                if (['edit-htDienBien', 'edit-htNhanDinh', 'bbgd-input', 'dm-nguyenNhan', 'dm-kienNghi'].includes(this._targetTextarea) || (this._targetTextarea && this._targetTextarea.startsWith('ar-'))) {
+                if (['edit-htDienBien', 'edit-htNhanDinh', 'edit-accidentDevelopment', 'bbgd-input', 'dm-nguyenNhan', 'dm-kienNghi'].includes(this._targetTextarea) || (this._targetTextarea && this._targetTextarea.startsWith('ar-'))) {
                      PROMPT = 'Bạn là chuyên gia giám định bồi thường xe cơ giới tại địa bàn Đắk Lắk và Đắk Nông. ' +
                          'Hãy chuyển đổi giọng nói thành văn bản tiếng Việt. Tự động nắn lại các từ địa phương hoặc nói ngọng về đúng chính tả thuật ngữ kỹ thuật ô tô (Ví dụ: cảng -> cản, lường -> lườn, dè -> vè, mốp -> móp...) ' +
                          'và nhận dạng chuẩn xác các địa danh địa phương tại Đắk Lắk, Đắk Nông (Ví dụ: Buôn Ma Thuột, Buôn Hồ, Krông Pắc, Krông Nô, Gia Nghĩa, Cư Jút, Đắk Mil, Đắk R\'lấp, Cư M\'gar, Ea H\'leo, Ea Kar, Ea Súp, Buôn Đôn, Lắk, M\'Drắk, Cư Kuin, Đắk Glong, Đắk Song, Tuy Đức...). ' +
@@ -16338,7 +16353,7 @@ QUAN TRỌNG:
             const fields = ['htDienBien','htNhanDinh','htUocTonThat','htDeXuat'];
             fields.forEach(f => {
                 const el = document.getElementById('edit-' + f);
-                if (el) el.value = item[f] || '';
+                if (el) el.value = item[f] || (f === 'htDienBien' ? item.accidentDevelopment : '') || '';
             });
             
             const donViEl = document.getElementById('edit-htDonVi');
@@ -16427,7 +16442,7 @@ QUAN TRỌNG:
             document.getElementById('ar-vehicle1').value = ar.vehicle1 || item.bsx || '';
             document.getElementById('ar-accTime').value = ar.accTime || item.accidentDate || '';
             document.getElementById('ar-accLoc').value = ar.accLoc || item.location || '';
-            document.getElementById('ar-dienBien').value = ar.dienBien || item.htDienBien || item.description || '';
+            document.getElementById('ar-dienBien').value = ar.dienBien || item.accidentDevelopment || item.htDienBien || item.description || '';
             document.getElementById('ar-nguyenNhan').value = ar.nguyenNhan || item.cause || item.damageNguyenNhan || '';
             document.getElementById('ar-loi').value = ar.loi || '';
             
