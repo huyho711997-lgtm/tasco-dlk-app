@@ -17523,6 +17523,50 @@ YÊU CẦU ĐẦU RA:
         _hasExistingAssessorSig: false,
         _hasExistingThirdPartySig: false,
 
+        setGplxValidity(isValid, isInit = false) {
+            const validBtn = document.getElementById('gplx-valid-btn');
+            const invalidBtn = document.getElementById('gplx-invalid-btn');
+            const validCheckbox = document.getElementById('gplx-valid-checkbox');
+            const invalidCheckbox = document.getElementById('gplx-invalid-checkbox');
+            const reasonContainer = document.getElementById('gplx-reason-container');
+            const badge = document.getElementById('gplx-status-badge');
+
+            if (isValid) {
+                if (validBtn) {
+                    validBtn.className = "flex-1 py-2 rounded-lg text-[11px] font-black transition-all bg-white text-emerald-600 shadow-sm flex items-center justify-center gap-1 cursor-pointer";
+                }
+                if (invalidBtn) {
+                    invalidBtn.className = "flex-1 py-2 rounded-lg text-[11px] font-black transition-all text-slate-400 flex items-center justify-center gap-1 cursor-pointer";
+                }
+                if (validCheckbox) validCheckbox.checked = true;
+                if (invalidCheckbox) invalidCheckbox.checked = false;
+                if (reasonContainer) reasonContainer.classList.add('hidden');
+                if (badge) {
+                    badge.textContent = "HỢP LỆ";
+                    badge.className = "text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 transition-colors";
+                }
+                if (!isInit) {
+                    const reasonInput = document.getElementById('sr-htGiayTo-gplxReason');
+                    if (reasonInput) reasonInput.value = '';
+                }
+            } else {
+                if (validBtn) {
+                    validBtn.className = "flex-1 py-2 rounded-lg text-[11px] font-black transition-all text-slate-400 flex items-center justify-center gap-1 cursor-pointer";
+                }
+                if (invalidBtn) {
+                    invalidBtn.className = "flex-1 py-2 rounded-lg text-[11px] font-black transition-all bg-white text-rose-600 shadow-sm flex items-center justify-center gap-1 cursor-pointer";
+                }
+                if (validCheckbox) validCheckbox.checked = false;
+                if (invalidCheckbox) invalidCheckbox.checked = true;
+                if (reasonContainer) reasonContainer.classList.remove('hidden');
+                if (badge) {
+                    badge.textContent = "KHÔNG HỢP LỆ";
+                    badge.className = "text-[9px] font-black px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-100 transition-colors animate-pulse";
+                }
+            }
+            if (!isInit) lucide.createIcons();
+        },
+
         initFormExclusivity() {
             // 1. Weather exclusivity logic (Nắng vs Mưa, Sáng vs Tối)
             const weatherCbs = document.querySelectorAll('input[name="sr-htThoiTiet"]');
@@ -17693,6 +17737,14 @@ YÊU CẦU ĐẦU RA:
             setCheckboxValues('sr-htThoiTiet', ss.htThoiTiet || 'Nắng, Sáng');
             setCheckboxValues('sr-htDauHieuLaiXe', ss.htDauHieuLaiXe || 'Sắc mặt bình thường, Hơi thở không mùi');
             setCheckboxValues('sr-htGiayTo', ss.htGiayTo || 'Đăng kí xe, Đăng kiểm (ATKT&BVMT), GCN/Hợp đồng Bảo hiểm, Giấy phép lái xe hợp lệ');
+            
+            // Prefill and Sync GPLX validity buttons and reason field
+            const isGplxValid = (ss.htGiayTo || 'Giấy phép lái xe hợp lệ').includes('Giấy phép lái xe hợp lệ');
+            this.setGplxValidity(isGplxValid, true);
+            const gplxReasonInput = document.getElementById('sr-htGiayTo-gplxReason');
+            if (gplxReasonInput) {
+                gplxReasonInput.value = ss.htGiayToGplxReason || '';
+            }
             
             // Prefill Vị trí tổn thất "Trái, Phải, Ở giữa" sub-options
             document.querySelectorAll('input[name="sr-thViTri-base"]').forEach(cb => cb.checked = false);
@@ -18042,6 +18094,7 @@ YÊU CẦU ĐẦU RA:
                 htDauHieuLaiXe: getCheckboxValues('sr-htDauHieuLaiXe'),
                 htGiayTo: getCheckboxValues('sr-htGiayTo'),
                 htGiayToCthh: document.getElementById('sr-htGiayTo-cthh')?.value.trim() || '',
+                htGiayToGplxReason: document.getElementById('sr-htGiayTo-gplxReason')?.value.trim() || '',
 
                 htMoTa: document.getElementById('sr-htMoTa').value.trim(),
                 htDauVet: document.getElementById('sr-htDauVet').value.trim(),
@@ -18897,10 +18950,11 @@ YÊU CẦU ĐẦU RA:
                     </div>
                   </td>
                 </tr>
+                ${htGiayToVal.includes('Giấy phép lái xe không hợp lệ') ? `
                 <tr>
                   <td colspan="4" style="padding: 3.5px 0; vertical-align: top; border: none !important;">
                     <div style="font-size: 16px;">
-                      <span>${check(htGiayToVal, 'Giấy phép lái xe hợp lệ')} Giấy phép lái xe hợp lệ (Trường hợp không có ghi rõ nguyên nhân không có, thời gian có thể cung cấp):</span>
+                      <span>☑ Giấy phép lái xe không cung cấp được tại hiện trường (Ghi rõ nguyên nhân, thời gian có thể cung cấp):</span>
                     </div>
                   </td>
                 </tr>
@@ -18911,6 +18965,7 @@ YÊU CẦU ĐẦU RA:
                     </div>
                   </td>
                 </tr>
+                ` : ''}
               </table>
 
               <div class="info-row" style="margin-top: 10px;">
@@ -23135,10 +23190,38 @@ YÊU CẦU ĐẦU RA:
                                 <input type="checkbox" name="sr-htGiayTo" value="GCN/Hợp đồng Bảo hiểm" checked>
                                 <span>GCN Bảo hiểm</span>
                             </label>
-                            <label class="checkbox-chip">
-                                <input type="checkbox" name="sr-htGiayTo" value="Giấy phép lái xe hợp lệ" checked>
-                                <span>Giấy phép lái xe</span>
-                            </label>
+                            <!-- Hidden checkboxes to preserve standard checkbox collection behavior seamlessly -->
+                            <input type="checkbox" name="sr-htGiayTo" id="gplx-valid-checkbox" value="Giấy phép lái xe hợp lệ" class="hidden" checked>
+                            <input type="checkbox" name="sr-htGiayTo" id="gplx-invalid-checkbox" value="Giấy phép lái xe không hợp lệ" class="hidden">
+
+                            <!-- Premium Segmented Toggle Buttons for Driving License Validity -->
+                            <div class="col-span-2 mt-2 pt-2 border-t border-slate-100/50">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="input-label">Giấy phép lái xe (GPLX)</span>
+                                    <span id="gplx-status-badge" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 transition-colors">HỢP LỆ</span>
+                                </div>
+                                <div class="flex bg-slate-100/80 p-0.5 rounded-xl border border-slate-200/50 gap-0.5 shadow-inner">
+                                    <button type="button" id="gplx-valid-btn" onclick="SceneSurvey.setGplxValidity(true)" class="flex-1 py-2 rounded-lg text-[11px] font-black transition-all bg-white text-emerald-600 shadow-sm flex items-center justify-center gap-1 cursor-pointer">
+                                        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Hợp lệ
+                                    </button>
+                                    <button type="button" id="gplx-invalid-btn" onclick="SceneSurvey.setGplxValidity(false)" class="flex-1 py-2 rounded-lg text-[11px] font-black transition-all text-slate-400 flex items-center justify-center gap-1 cursor-pointer">
+                                        <i data-lucide="alert-octagon" class="w-3.5 h-3.5"></i> Không hợp lệ
+                                    </button>
+                                </div>
+                                
+                                <!-- Container nhập thời gian & nguyên nhân nếu KHÔNG HỢP LỆ -->
+                                <div id="gplx-reason-container" class="hidden mt-2 space-y-1 bg-amber-50/30 border border-amber-100 rounded-xl p-2.5 transition-all">
+                                    <label class="input-label text-[10px] text-amber-700 font-bold flex items-center gap-1">
+                                        <i data-lucide="clock" class="w-3 h-3"></i> Thời gian & Nguyên nhân không hợp lệ
+                                    </label>
+                                    <div class="relative">
+                                        <textarea id="sr-htGiayTo-gplxReason" rows="2" class="w-full input-field py-2 text-xs font-semibold pr-8 resize-none" placeholder="Nhập lý do không hợp lệ, hẹn thời gian cung cấp..."></textarea>
+                                        <button type="button" onclick="SceneSurvey.clearField('sr-htGiayTo-gplxReason')" class="absolute right-2 top-2 text-slate-400 hover:text-rose-500 transition-colors p-1 rounded-full bg-white/80 border border-slate-100" title="Xóa">
+                                            <i data-lucide="x" class="w-3 h-3"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                             <label class="checkbox-chip col-span-2">
                                 <input type="checkbox" name="sr-htGiayTo" value="Chứng từ hàng hóa">
                                 <span>Chứng từ hàng hóa</span>
