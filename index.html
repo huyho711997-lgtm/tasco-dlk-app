@@ -6119,6 +6119,56 @@
             }
         },
 
+        saveDataMap(id, updates) {
+            // 1. Get raw map from localStorage
+            let raw = {};
+            const cachedRaw = localStorage.getItem("tasco_cases_cache");
+            if (cachedRaw) {
+                try { raw = JSON.parse(cachedRaw); } catch(e) {}
+            }
+            
+            // 2. Ensure the case exists in the map
+            if (!raw[id]) {
+                raw[id] = { id: id };
+            }
+            
+            // 3. Deep apply updates to raw[id]
+            for (const key in updates) {
+                raw[id][key] = updates[key];
+            }
+            raw[id].stepUpdatedAt = new Date().toISOString();
+            
+            // 4. Save updated map back to localStorage
+            try {
+                localStorage.setItem("tasco_cases_cache", JSON.stringify(raw));
+            } catch(e) {
+                console.error("[Offline Save] Fail to cache updated case:", e);
+            }
+            
+            // 5. Instantly update memory array and refresh UI
+            this.masterData = Object.keys(raw).map(key => ({ 
+                id: key, 
+                ...raw[key],
+                step: Number(raw[key].step || 1) 
+            })).sort((a, b) => new Date(b.stepUpdatedAt) - new Date(a.stepUpdatedAt));
+            
+            this._updateUI();
+            
+            // 6. Write asynchronously to Firebase (optimistic background sync)
+            const isOnline = navigator.onLine;
+            
+            return new Promise((resolve) => {
+                db.ref(`Workstation/${id}`).update(updates).catch(err => {
+                    console.error("[Firebase Sync Error] queued for retry:", err);
+                });
+                
+                resolve({
+                    success: true,
+                    isOffline: !isOnline
+                });
+            });
+        },
+
         // Hàm chuyển tuần
         changeHomeWeek(offset) {
             this._homeWeekOffset += offset;
@@ -6273,9 +6323,14 @@
         toggleUrgent(id) {
             const item = this.find(id);
             if (!item) return;
-            db.ref(`Workstation/${id}/urgent`).set(!item.urgent).then(()=>{
-                Toast.fire({icon:'success',title:!item.urgent?'Đã bật Xử lý gấp':'Đã tắt Xử lý gấp'});
-                Modal.open(id);
+            this.saveDataMap(id, { urgent: !item.urgent }).then((res) => {
+                const title = !item.urgent ? 'Đã bật Xử lý gấp' : 'Đã tắt Xử lý gấp';
+                if (res.isOffline) {
+                    Toast.fire({ icon: 'success', title: title + ' (Offline)' });
+                } else {
+                    Toast.fire({ icon: 'success', title: title });
+                }
+                if (typeof Modal !== 'undefined' && Modal.open) Modal.open(id);
             });
         },
         
@@ -7965,7 +8020,13 @@
             if (nn) updates.damageNguyenNhan=nn;
             if (kn) updates.damageKienNghi=kn;
             Garage.saveIfNew();
-            db.ref(`Workstation/${id}`).update(updates).then(()=>{ Toast.fire({icon:'success',title:'Đã lưu thay đổi!'}); });
+            App.saveDataMap(id, updates).then((res) => {
+                if (res.isOffline) {
+                    Toast.fire({icon:'success',title:'Đã lưu tạm thời ngoại tuyến! (Sẽ tự động đồng bộ khi có mạng)'});
+                } else {
+                    Toast.fire({icon:'success',title:'Đã lưu thay đổi!'});
+                }
+            });
         },
 
         openApptPicker() {
@@ -9260,9 +9321,21 @@
         _createNewFromPlate(plate) {
             PlateScanner.close();
             var newId='HS_'+Date.now();
-            db.ref('Workstation/'+newId).set({id:newId,bsx:plate,claimCode:'HS-'+moment().format('YYMMDD-HHmm'),step:1,stepUpdatedAt:new Date().toISOString(),receivedAt:new Date().toISOString()}).then(()=>{
-                setTimeout(()=>Modal.open(newId),450);
-                Toast.fire({icon:'success',title:'Đã tạo hồ sơ '+plate});
+            const newItem = {
+                id: newId,
+                bsx: plate,
+                claimCode: 'HS-' + moment().format('YYMMDD-HHmm'),
+                step: 1,
+                stepUpdatedAt: new Date().toISOString(),
+                receivedAt: new Date().toISOString()
+            };
+            App.saveDataMap(newId, newItem).then((res) => {
+                setTimeout(() => Modal.open(newId), 450);
+                if (res.isOffline) {
+                    Toast.fire({ icon: 'success', title: 'Đã tạo hồ sơ ' + plate + ' (Offline)' });
+                } else {
+                    Toast.fire({ icon: 'success', title: 'Đã tạo hồ sơ ' + plate });
+                }
             });
         },
         _showErrorResult(msg) {
@@ -16299,8 +16372,12 @@ QUAN TRỌNG:
                 htType:        this._types.join(','),
                 stepUpdatedAt: new Date().toISOString()
             };
-            db.ref(`Workstation/${id}`).update(updates).then(() => {
-                Toast.fire({ icon: 'success', title: 'Đã lưu báo cáo vào hồ sơ!' });
+            App.saveDataMap(id, updates).then((res) => {
+                if (res.isOffline) {
+                    Toast.fire({ icon: 'success', title: 'Đã lưu tạm thời ngoại tuyến! (Sẽ tự động đồng bộ khi có mạng)' });
+                } else {
+                    Toast.fire({ icon: 'success', title: 'Đã lưu báo cáo vào hồ sơ!' });
+                }
             });
         },
 
@@ -16806,11 +16883,13 @@ QUAN TRỌNG:
                 sigAssessor: ''
             };
 
-            db.ref(`Workstation/${id}/accidentReport`).set(arPayload).then(() => {
-                Toast.fire({ icon: 'success', title: 'Đã lưu Biên bản tai nạn!' });
+            App.saveDataMap(id, { accidentReport: arPayload }).then((res) => {
+                if (res.isOffline) {
+                    Toast.fire({ icon: 'success', title: 'Đã lưu tạm thời ngoại tuyến! (Sẽ tự động đồng bộ khi có mạng)' });
+                } else {
+                    Toast.fire({ icon: 'success', title: 'Đã lưu Biên bản tai nạn!' });
+                }
                 this.closeMobileModal();
-            }).catch(e => {
-                Toast.fire({ icon: 'error', title: 'Lỗi lưu Firebase: ' + e.message });
             });
         },
 
@@ -18171,11 +18250,13 @@ YÊU CẦU ĐẦU RA:
                 sigThirdParty
             };
 
-            db.ref(`Workstation/${id}/sceneSurveyReport`).set(ssPayload).then(() => {
-                Toast.fire({ icon: 'success', title: 'Đã lưu Biên bản hiện trường!' });
+            App.saveDataMap(id, { sceneSurveyReport: ssPayload }).then((res) => {
+                if (res.isOffline) {
+                    Toast.fire({ icon: 'success', title: 'Đã lưu tạm thời ngoại tuyến! (Sẽ tự động đồng bộ khi có mạng)' });
+                } else {
+                    Toast.fire({ icon: 'success', title: 'Đã lưu Biên bản hiện trường!' });
+                }
                 this.closeMobileModal();
-            }).catch(e => {
-                Toast.fire({ icon: 'error', title: 'Lỗi lưu Firebase: ' + e.message });
             });
         },
 
