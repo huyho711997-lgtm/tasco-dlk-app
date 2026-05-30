@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tasco DLK - Mobile App Pro</title>
+    <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -2871,7 +2872,12 @@
                     <i data-lucide="shield-check" class="w-5 h-5 text-white drop-shadow-md"></i>
                 </div>
                 <div class="ml-1">
-                    <h1 class="font-black text-[18px] text-slate-800 tracking-tight leading-none mb-1">TASCO <span class="text-blue-500 drop-shadow-sm">DLK</span></h1>
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <h1 class="font-black text-[18px] text-slate-800 tracking-tight leading-none">TASCO <span class="text-blue-500 drop-shadow-sm">DLK</span></h1>
+                        <span id="connection-status-badge" class="flex items-center gap-0.5 text-[8px] font-black px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 transition-all select-none">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> TRỰC TUYẾN
+                        </span>
+                    </div>
                     <p class="text-[9px] text-slate-500 uppercase font-extrabold tracking-widest leading-none" id="header-subtitle">Mobile App</p>
                 </div>
             </div>
@@ -6055,12 +6061,41 @@
             Auth.init();
             CostCalculator.init(); // Kích hoạt lấy setting từ Firebase
             DateUtil.setup();
+
+            // Load masterData from offline cache immediately for instantaneous startup without internet
+            const cachedRaw = localStorage.getItem("tasco_cases_cache");
+            if (cachedRaw) {
+                try {
+                    const raw = JSON.parse(cachedRaw);
+                    this.masterData = Object.keys(raw).map(key => ({ 
+                        id: key, 
+                        ...raw[key],
+                        step: Number(raw[key].step || 1) 
+                    })).sort((a, b) => new Date(b.stepUpdatedAt) - new Date(a.stepUpdatedAt));
+                    
+                    // Render UI using cached data first
+                    setTimeout(() => {
+                        this._updateUI();
+                    }, 50);
+                } catch(e) {
+                    console.error("[Offline Cache] Fail to parse cases cache:", e);
+                }
+            }
+
             this._listen();
         },
 
         _listen() {
             db.ref("Workstation").on("value", snapshot => {
                 const raw = snapshot.val() || {};
+                
+                // Cache standard MasterData to localStorage for fully offline access
+                try {
+                    localStorage.setItem("tasco_cases_cache", JSON.stringify(raw));
+                } catch(e) {
+                    console.error("[Offline Cache] Fail to cache cases list:", e);
+                }
+
                 // Cập nhật masterData và ép kiểu step về Number để tính toán chính xác
                 this.masterData = Object.keys(raw).map(key => ({ 
                     id: key, 
@@ -22006,12 +22041,77 @@ YÊU CẦU ĐẦU RA:
         return { open, close, analyze: _analyze, applyAll: _applyAll, pasteClipboard, clearInput, onTextInput, onFileSelect, onDragOver, onDragLeave, onDrop, _removeFile };
     })();
     // ============================================================
+    // CONNECTION MONITOR (OFFLINE SUPPORT)
+    // ============================================================
+    const ConnectionMonitor = {
+        init() {
+            window.addEventListener('online', () => this.updateStatus(true));
+            window.addEventListener('offline', () => this.updateStatus(false));
+            this.updateStatus(navigator.onLine);
+        },
+        updateStatus(isOnline) {
+            const badge = document.getElementById('connection-status-badge');
+            if (!badge) return;
+
+            if (isOnline) {
+                badge.className = "flex items-center gap-0.5 text-[8px] font-black px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 transition-all select-none";
+                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> TRỰC TUYẾN';
+                
+                if (typeof db !== 'undefined' && db.goOnline) {
+                    try { db.goOnline(); } catch(e) {}
+                }
+                
+                if (this._hasBeenOffline) {
+                    Swal.fire({
+                        title: 'Đã có kết nối Internet!',
+                        text: 'Hệ thống đang hoạt động trực tuyến và tự động đồng bộ dữ liệu đám mây.',
+                        icon: 'success',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                }
+            } else {
+                badge.className = "flex items-center gap-0.5 text-[8px] font-black px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-600 dark:bg-amber-950/20 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30 transition-all select-none";
+                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> NGOẠI TUYẾN';
+                
+                if (typeof db !== 'undefined' && db.goOffline) {
+                    try { db.goOffline(); } catch(e) {}
+                }
+
+                this._hasBeenOffline = true;
+                Swal.fire({
+                    title: 'Chế độ Ngoại tuyến!',
+                    text: 'Bạn đã mất mạng. Ứng dụng vẫn có thể đọc, viết và tạo biên bản 100% offline. Dữ liệu sẽ tự động đồng bộ khi có kết nối trở lại!',
+                    icon: 'warning',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 5000,
+                    timerProgressBar: true
+                });
+            }
+        },
+        _hasBeenOffline: false
+    };
+
+    // ============================================================
     // BOOT
     // ============================================================
     window.onload = () => {
+        // Register Service Worker for PWA Offline Caching
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('[PWA] Service Worker registered with scope:', reg.scope))
+                .catch(err => console.error('[PWA] Service Worker registration failed:', err));
+        }
+
         DarkMode.init();
         NotificationManager.init();
         App.init();
+        ConnectionMonitor.init();
         Garage.init();
         MyCloud.init();
         document.getElementById('plate-scanner-modal').classList.add('hidden');

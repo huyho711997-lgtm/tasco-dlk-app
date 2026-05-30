@@ -1,0 +1,24 @@
+{
+  "name": "Tasco DLK Mobile App Pro",
+  "short_name": "Tasco DLK",
+  "description": "Hệ thống giám định hiện trường di động chuyên nghiệp Tasco",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#1e293b",
+  "background_color": "#f8fafc",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/color/192/000000/shield.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://img.icons8.com/color/512/000000/shield.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
