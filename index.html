@@ -17661,6 +17661,32 @@ YÊU CẦU ĐẦU RA:
                     });
                 });
             }
+
+            // 5. Driver Presence show/hide logic
+            const coMatRadios = document.querySelectorAll('input[name="sr-htLaiXeCoMat"]');
+            coMatRadios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    this.syncDriverPresence();
+                });
+            });
+        },
+
+        syncDriverPresence() {
+            const coMatRadio = document.querySelector('input[name="sr-htLaiXeCoMat"][value="Có mặt"]');
+            const lyDoContainer = document.getElementById('sr-htLaiXeLyDo-container');
+            const dauHieuContainer = document.getElementById('sr-htDauHieuLaiXe-container');
+
+            if (!coMatRadio) return;
+
+            if (coMatRadio.checked) {
+                // Present -> Hide absent reason, Show driving signs
+                if (lyDoContainer) lyDoContainer.classList.add('hidden');
+                if (dauHieuContainer) dauHieuContainer.classList.remove('hidden');
+            } else {
+                // Absent -> Show absent reason, Hide driving signs
+                if (lyDoContainer) lyDoContainer.classList.remove('hidden');
+                if (dauHieuContainer) dauHieuContainer.classList.add('hidden');
+            }
         },
 
         openMobileModal() {
@@ -17702,6 +17728,7 @@ YÊU CẦU ĐẦU RA:
             setRadioValue('sr-htTinhChatNen', ss.htTinhChatNen || 'Cứng, không lún/sụt');
             setRadioValue('sr-htLaiXeCoMat', ss.htLaiXeCoMat || 'Có mặt');
             document.getElementById('sr-htLaiXeLyDo').value = ss.htLaiXeLyDo || '';
+            this.syncDriverPresence();
             // Prefill and Sync Estimated Damage "Khác" field
             const uocLuongInput = document.getElementById('sr-thUocLuong-khac');
             const uocLuongContainer = document.getElementById('sr-thUocLuong-khac-container');
@@ -23135,13 +23162,13 @@ YÊU CẦU ĐẦU RA:
                                     </label>
                                 </div>
                             </div>
-                            <div class="space-y-1">
+                            <div class="space-y-1" id="sr-htLaiXeLyDo-container">
                                 <label class="input-label">Lý do vắng mặt / Địa điểm đến</label>
                                 <input type="text" id="sr-htLaiXeLyDo" class="input-field py-2 text-xs" placeholder="Nếu vắng mặt ghi lý do...">
                             </div>
                         </div>
 
-                        <div>
+                        <div id="sr-htDauHieuLaiXe-container">
                             <label class="input-label">Dấu hiệu lái xe (chọn nhiều)</label>
                             <div class="grid grid-cols-2 gap-2 mt-1">
                                 <label class="checkbox-chip">
