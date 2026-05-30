@@ -15504,15 +15504,7 @@ QUAN TRỌNG:
                     return null;
                 }
             },
-            {
-                id: 'no_images',
-                level: 'info',
-                check(item) {
-                    if (!(item.documentImages||[]).length)
-                        return 'Chưa có <b>ảnh chứng từ</b> đính kèm';
-                    return null;
-                }
-            },
+
             {
                 id: 'no_damage_items',
                 level: 'info',
@@ -15583,10 +15575,40 @@ QUAN TRỌNG:
             const warnings = results.filter(r => r.level === 'warning');
             const infos    = results.filter(r => r.level === 'info');
 
-            // Màu border theo mức cao nhất
-            const borderColor = errors.length ? '#fca5a5' : warnings.length ? '#fde68a' : '#bfdbfe';
-            const headerBg    = errors.length ? '#fee2e2' : warnings.length ? '#fef9c3' : '#eff6ff';
-            const headerColor = errors.length ? '#b91c1c' : warnings.length ? '#92400e' : '#1e40af';
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+            // Màu sắc theo mức độ cảnh báo cao nhất & chế độ sáng/tối
+            let borderColor, headerBg, headerColor, bodyBg, textPrimary;
+            let errColor, errBg, warnColor, warnBg, infoColor, infoBg;
+
+            if (isDark) {
+                borderColor = errors.length ? '#f87171' : warnings.length ? '#fbbf24' : '#60a5fa';
+                headerBg    = errors.length ? 'rgba(239, 68, 68, 0.15)' : warnings.length ? 'rgba(245, 158, 11, 0.15)' : 'rgba(59, 130, 246, 0.15)';
+                headerColor = errors.length ? '#f87171' : warnings.length ? '#fbbf24' : '#60a5fa';
+                bodyBg      = '#1e293b';
+                textPrimary = '#f8fafc';
+                
+                errColor    = '#f87171';
+                errBg       = 'rgba(239, 68, 68, 0.08)';
+                warnColor   = '#fbbf24';
+                warnBg      = 'rgba(245, 158, 11, 0.08)';
+                infoColor   = '#60a5fa';
+                infoBg      = 'rgba(59, 130, 246, 0.08)';
+            } else {
+                borderColor = errors.length ? '#fca5a5' : warnings.length ? '#fde68a' : '#bfdbfe';
+                headerBg    = errors.length ? '#fee2e2' : warnings.length ? '#fef9c3' : '#eff6ff';
+                headerColor = errors.length ? '#b91c1c' : warnings.length ? '#92400e' : '#1e40af';
+                bodyBg      = 'white';
+                textPrimary = '#1e293b';
+                
+                errColor    = '#ef4444';
+                errBg       = '#fff5f5';
+                warnColor   = '#f59e0b';
+                warnBg      = '#fffbeb';
+                infoColor   = '#3b82f6';
+                infoBg      = '#eff6ff';
+            }
+
             const headerIcon  = errors.length
                 ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
                 : warnings.length
@@ -15605,7 +15627,7 @@ QUAN TRỌNG:
                 return items.map(r => `
                     <div style="display:flex;align-items:flex-start;gap:8px;padding:8px 12px;background:${bg};border-left:3px solid ${color};margin-bottom:2px;">
                         <svg style="flex-shrink:0;margin-top:1px;color:${color};" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round"><path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        <span style="font-size:12px;font-weight:600;color:#1e293b;line-height:1.4;">${r.msg}</span>
+                        <span style="font-size:12px;font-weight:600;color:${textPrimary};line-height:1.4;">${r.msg}</span>
                     </div>`).join('');
             };
 
@@ -15614,7 +15636,7 @@ QUAN TRỌNG:
             panel.innerHTML = `
                 <!-- Header -->
                 <div style="background:${headerBg};padding:10px 12px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;"
-                    onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.warn-chevron').style.transform = this.nextElementSibling.classList.contains('hidden') ? '' : 'rotate(180deg)'">
+                     onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.warn-chevron').style.transform = this.nextElementSibling.classList.contains('hidden') ? '' : 'rotate(180deg)'">
                     <div style="display:flex;align-items:center;gap:7px;">
                         <span style="color:${headerColor};">${headerIcon}</span>
                         <div>
@@ -15625,10 +15647,10 @@ QUAN TRỌNG:
                     <svg class="warn-chevron" style="color:${headerColor};transition:transform .2s;flex-shrink:0;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${headerColor}" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
                 </div>
                 <!-- Body -->
-                <div style="background:white;">
-                    ${renderGroup(errors,   '#ef4444', '#fff5f5', 'Lỗi')}
-                    ${renderGroup(warnings, '#f59e0b', '#fffbeb', 'Cảnh báo')}
-                    ${renderGroup(infos,    '#3b82f6', '#eff6ff', 'Thông tin')}
+                <div style="background:${bodyBg};">
+                    ${renderGroup(errors,   errColor,  errBg,  'Lỗi')}
+                    ${renderGroup(warnings, warnColor, warnBg, 'Cảnh báo')}
+                    ${renderGroup(infos,    infoColor, infoBg, 'Thông tin')}
                 </div>`;
         }
     };  
