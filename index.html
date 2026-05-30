@@ -2897,8 +2897,12 @@
                 <div class="ml-1">
                     <div class="flex items-center gap-1.5 mb-1">
                         <h1 class="font-black text-[18px] text-slate-800 tracking-tight leading-none">TASCO <span class="text-blue-500 drop-shadow-sm">DLK</span></h1>
-                        <span id="connection-status-badge" class="flex items-center gap-0.5 text-[8px] font-black px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 transition-all select-none">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> TRỰC TUYẾN
+                        <span id="connection-status-badge" class="flex items-center gap-1.5 text-[9.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-500/35 transition-all select-none shadow-sm shadow-emerald-100/50 dark:shadow-none">
+                            <span class="relative flex h-1.5 w-1.5">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                            </span>
+                            Trực tuyến
                         </span>
                     </div>
                     <p class="text-[9px] text-slate-500 uppercase font-extrabold tracking-widest leading-none" id="header-subtitle">Mobile App</p>
@@ -22272,8 +22276,8 @@ YÊU CẦU ĐẦU RA:
             if (!badge) return;
 
             if (isOnline) {
-                badge.className = "flex items-center gap-0.5 text-[8px] font-black px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 transition-all select-none";
-                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> TRỰC TUYẾN';
+                badge.className = "flex items-center gap-1.5 text-[9.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-500/35 transition-all select-none shadow-sm shadow-emerald-100/50 dark:shadow-none";
+                badge.innerHTML = '<span class="relative flex h-1.5 w-1.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span></span> Trực tuyến';
                 
                 if (typeof db !== 'undefined' && db.goOnline) {
                     try { db.goOnline(); } catch(e) {}
@@ -22292,8 +22296,8 @@ YÊU CẦU ĐẦU RA:
                     });
                 }
             } else {
-                badge.className = "flex items-center gap-0.5 text-[8px] font-black px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-600 dark:bg-amber-950/20 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30 transition-all select-none";
-                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> NGOẠI TUYẾN';
+                badge.className = "flex items-center gap-1.5 text-[9.5px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-500/35 transition-all select-none shadow-sm shadow-amber-100/50 dark:shadow-none";
+                badge.innerHTML = '<span class="relative flex h-1.5 w-1.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span></span> Ngoại tuyến';
                 
                 if (typeof db !== 'undefined' && db.goOffline) {
                     try { db.goOffline(); } catch(e) {}
