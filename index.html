@@ -16528,6 +16528,26 @@ QUAN TRỌNG:
         _isSignedAssessor: false,
         _hasExistingDriverSig: false,
         _hasExistingAssessorSig: false,
+        importFromGeneral() {
+            const id = App.currentEditId;
+            if (!id) return;
+            const item = App.find(id);
+            const domVal = document.getElementById('edit-htDienBien')?.value.trim();
+            const dbVal = item ? (item.htDienBien || item.accidentDevelopment || item.description) : '';
+            const finalVal = domVal || dbVal || '';
+
+            if (!finalVal) {
+                Toast.fire({ icon: 'warning', title: 'Không tìm thấy diễn biến nào trong Dữ liệu chung!' });
+                return;
+            }
+
+            const target = document.getElementById('ar-dienBien');
+            if (target) {
+                target.value = finalVal;
+                target.dispatchEvent(new Event('input'));
+                Toast.fire({ icon: 'success', title: 'Đã lấy diễn biến từ Dữ liệu chung!' });
+            }
+        },
 
         openMobileModal() {
             const id = App.currentEditId;
@@ -17635,6 +17655,27 @@ YÊU CẦU ĐẦU RA:
         _hasExistingDriverSig: false,
         _hasExistingAssessorSig: false,
         _hasExistingThirdPartySig: false,
+
+        importFromGeneral(targetId) {
+            const id = App.currentEditId;
+            if (!id) return;
+            const item = App.find(id);
+            const domVal = document.getElementById('edit-htDienBien')?.value.trim();
+            const dbVal = item ? (item.htDienBien || item.accidentDevelopment || item.description) : '';
+            const finalVal = domVal || dbVal || '';
+
+            if (!finalVal) {
+                Toast.fire({ icon: 'warning', title: 'Không tìm thấy diễn biến nào trong Dữ liệu chung!' });
+                return;
+            }
+
+            const target = document.getElementById(targetId);
+            if (target) {
+                target.value = finalVal;
+                target.dispatchEvent(new Event('input'));
+                Toast.fire({ icon: 'success', title: 'Đã lấy diễn biến từ Dữ liệu chung!' });
+            }
+        },
 
         setGplxValidity(isValid, isInit = false) {
             const validRadio = document.getElementById('gplx-radio-valid');
@@ -22872,6 +22913,9 @@ YÊU CẦU ĐẦU RA:
                                 <button onclick="AccidentReport.normalizeField('ar-dienBien')" class="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100/80 active:scale-95 text-purple-600 rounded-lg text-[10px] font-black transition-all border border-purple-100/50 shadow-sm">
                                     <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI Tinh chỉnh
                                 </button>
+                                <button onclick="AccidentReport.importFromGeneral()" class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100/80 active:scale-95 text-emerald-600 rounded-lg text-[10px] font-black transition-all border border-emerald-100/50 shadow-sm">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i> Lấy dữ liệu chung
+                                </button>
                             </div>
                             <div id="st-ar-dienbien" class="text-[9px] font-bold text-blue-500 animate-pulse"></div>
                         </div>
@@ -23468,6 +23512,9 @@ YÊU CẦU ĐẦU RA:
                                         <button onclick="SceneSurvey.normalizeField('sr-htMoTa')" class="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100/80 active:scale-95 text-purple-600 rounded-lg text-[10px] font-black transition-all border border-purple-100/50 shadow-sm">
                                             <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI Tinh chỉnh
                                         </button>
+                                        <button onclick="SceneSurvey.importFromGeneral('sr-htMoTa')" class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100/80 active:scale-95 text-emerald-600 rounded-lg text-[10px] font-black transition-all border border-emerald-100/50 shadow-sm">
+                                            <i data-lucide="download" class="w-3.5 h-3.5"></i> Lấy dữ liệu chung
+                                        </button>
                                     </div>
                                     <div id="st-sr-mota" class="text-[9px] font-bold text-blue-500 animate-pulse"></div>
                                 </div>
@@ -23647,6 +23694,9 @@ YÊU CẦU ĐẦU RA:
                                     </button>
                                     <button onclick="SceneSurvey.normalizeField('sr-thGhiChu')" class="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100/80 active:scale-95 text-purple-600 rounded-lg text-[10px] font-black transition-all border border-purple-100/50 shadow-sm">
                                         <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI Tinh chỉnh
+                                    </button>
+                                    <button onclick="SceneSurvey.importFromGeneral('sr-thGhiChu')" class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100/80 active:scale-95 text-emerald-600 rounded-lg text-[10px] font-black transition-all border border-emerald-100/50 shadow-sm">
+                                        <i data-lucide="download" class="w-3.5 h-3.5"></i> Lấy dữ liệu chung
                                     </button>
                                 </div>
                                 <div id="st-sr-ghichu" class="text-[9px] font-bold text-blue-500 animate-pulse"></div>
