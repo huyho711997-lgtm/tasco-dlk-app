@@ -23207,6 +23207,19 @@ YÊU CẦU ĐẦU RA:
                                 <input type="checkbox" name="sr-htGiayTo" value="GCN/Hợp đồng Bảo hiểm" checked>
                                 <span>GCN Bảo hiểm</span>
                             </label>
+                            <label class="checkbox-chip">
+                                <input type="checkbox" name="sr-htGiayTo" value="Chứng từ hàng hóa">
+                                <span>Chứng từ hàng hóa</span>
+                            </label>
+                            <div id="sr-htGiayTo-cthh-container" class="col-span-2 hidden mt-1 space-y-1">
+                                <label class="input-label text-[10px] text-slate-500 font-bold">Chi tiết chứng từ hàng hóa cung cấp</label>
+                                <div class="ar-input-wrapper">
+                                    <input type="text" id="sr-htGiayTo-cthh" class="input-field py-2 text-xs font-semibold" placeholder="Nhập tên chứng từ (ví dụ: Hóa đơn GTGT, Phiếu xuất kho...)">
+                                    <button type="button" onclick="SceneSurvey.clearField('sr-htGiayTo-cthh')" class="ar-clear-btn" title="Xóa">
+                                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </div>
+                            </div>
                             <!-- Hidden checkboxes to preserve standard checkbox collection behavior seamlessly -->
                             <input type="checkbox" name="sr-htGiayTo" id="gplx-valid-checkbox" value="Giấy phép lái xe hợp lệ" class="hidden" checked>
                             <input type="checkbox" name="sr-htGiayTo" id="gplx-invalid-checkbox" value="Giấy phép lái xe không hợp lệ" class="hidden">
@@ -23243,19 +23256,6 @@ YÊU CẦU ĐẦU RA:
                                             <i data-lucide="x" class="w-3 h-3"></i>
                                         </button>
                                     </div>
-                                </div>
-                            </div>
-                            <label class="checkbox-chip col-span-2">
-                                <input type="checkbox" name="sr-htGiayTo" value="Chứng từ hàng hóa">
-                                <span>Chứng từ hàng hóa</span>
-                            </label>
-                            <div id="sr-htGiayTo-cthh-container" class="col-span-2 hidden mt-1 space-y-1">
-                                <label class="input-label text-[10px] text-slate-500 font-bold">Chi tiết chứng từ hàng hóa cung cấp</label>
-                                <div class="ar-input-wrapper">
-                                    <input type="text" id="sr-htGiayTo-cthh" class="input-field py-2 text-xs font-semibold" placeholder="Nhập tên chứng từ (ví dụ: Hóa đơn GTGT, Phiếu xuất kho...)">
-                                    <button type="button" onclick="SceneSurvey.clearField('sr-htGiayTo-cthh')" class="ar-clear-btn" title="Xóa">
-                                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                                    </button>
                                 </div>
                             </div>
                         </div>
