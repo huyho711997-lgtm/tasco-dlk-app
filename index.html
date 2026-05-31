@@ -18,6 +18,8 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fslightbox/3.3.1/index.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
@@ -3450,6 +3452,11 @@
                 </div>
             </div>
 
+            <!-- AI AUTH BOX -->
+            <div id="ai-auth-box" class="mt-3 flex items-center justify-between bg-white rounded-2xl border border-slate-200/80 p-3.5 shadow-sm dark:bg-slate-800/50 dark:border-slate-700/60">
+                <!-- Will be dynamically populated by SpareParts.updateAuthUI() -->
+            </div>
+
             <!-- SEARCH & FILTER FORM -->
             <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm mt-3 space-y-3.5 dark:bg-slate-800/50 dark:border-slate-700/60">
                 <div class="grid grid-cols-2 gap-3">
@@ -4861,6 +4868,23 @@
     
     firebase.initializeApp(CONFIG.firebase);
     const db = firebase.database();
+
+    // Khởi tạo Firebase App thứ 2 cho module Tra cứu AI
+    const lookupConfig = {
+      apiKey: "AIzaSyCT8G6mI1w5woinOU5QgfHGhUhcVzuy5Oo",
+      authDomain: "tra-cuu-phu-tung-e70b3.firebaseapp.com",
+      projectId: "tra-cuu-phu-tung-e70b3",
+      storageBucket: "tra-cuu-phu-tung-e70b3.firebasestorage.app",
+      messagingSenderId: "948573734280",
+      appId: "1:948573734280:web:5708bba29b6b6dce6f263d"
+    };
+    const lookupApp = firebase.initializeApp(lookupConfig, "LookupApp");
+    const lookupFs = lookupApp.firestore();
+    const lookupAuth = lookupApp.auth();
+
+    // Đăng nhập ẩn danh cho LookupApp
+    lookupAuth.signInAnonymously().catch(err => console.error("LookupApp Auth Error:", err));
+
     moment.locale('vi');
 
     
@@ -20469,7 +20493,14 @@ YÊU CẦU ĐẦU RA:
     // SPARE PARTS & PRICE COMPARE (TRA GIÁ KHO)
     // ============================================================
     const SpareParts = {
-        list: [],
+        _user: null,
+        _metadata: null,
+        _inited: false,
+        currentPage: 1,
+        pageSize: 5,
+        filteredData: [],
+        exactMatch: false,
+
         seedData: [
             // Toyota Vios
             { hang: "Toyota", hieu: "Vios", nam: 2020, name: "Cản trước Vios 2020", code: "52119-0D560", type: "genuine", price: 1850000, verified: true },
@@ -20539,55 +20570,78 @@ YÊU CẦU ĐẦU RA:
         ],
 
         data: [],
-        currentPage: 1,
-        pageSize: 5,
-        filteredData: [],
-        exactMatch: false,
 
         init() {
-            db.ref('SparePartsPrice').on('value', snap => {
-                const raw = snap.val() || {};
-                this.list = Object.keys(raw).map(k => ({ _key: k, ...raw[k] }));
+            lookupAuth.onAuthStateChanged(user => {
+                this._user = user;
+                this.updateAuthUI();
 
-                // Map Firebase live database properties to fit the schema
-                const liveData = this.list.map(item => ({
-                    hang: item.hang || item.brand || "Toyota",
-                    hieu: item.hieu || item.model || "Vios",
-                    nam: parseInt(item.nam || item.year) || 2020,
-                    name: item.name || item.partName || "Cản trước",
-                    code: item.code || item.partCode || "52119-0D560",
-                    type: item.type || (item.chinhHang ? "genuine" : "aftermarket"),
-                    price: parseInt(item.price || item.cost) || 1200000,
-                    verified: item.verified !== undefined ? item.verified : true
-                }));
-
-                // Combine them without duplicates (keyed by code)
-                const combined = [...liveData];
-                this.seedData.forEach(seed => {
-                    if (!combined.some(c => c.code === seed.code)) {
-                        combined.push(seed);
+                if (user) {
+                    this.loadMetadata();
+                } else {
+                    // Fall back to seedData if not logged in
+                    this.data = [...this.seedData];
+                    const countBadge = document.getElementById('spare-total-count');
+                    if (countBadge) {
+                        countBadge.textContent = `Tổng kho: ${this.data.length} phụ tùng mẫu`;
                     }
-                });
-
-                this.data = combined;
-
-                // Sync total count elements in UI
-                const countBadge = document.getElementById('spare-total-count');
-                if (countBadge) {
-                    countBadge.textContent = `Tổng kho: ${this.data.length} phụ tùng chuẩn`;
-                }
-
-                // If the spare parts tab is currently visible, refresh results
-                const spareView = document.getElementById('view-spare');
-                if (spareView && !spareView.classList.contains('hidden')) {
-                    this.search();
+                    this.loadLocalFilters();
                 }
             });
         },
 
-        loadFilters() {
-            // Lấy danh sách duy nhất các hãng xe
-            const hangs = [...new Set(this.data.map(item => item.hang))].sort();
+        async loadMetadata() {
+            try {
+                // Tải hãng xe và model
+                const snap = await lookupFs.collection('metadata').doc('family_tree').get();
+                if (snap.exists) {
+                    this._metadata = snap.data();
+                    this.populateBrands();
+                }
+
+                // Tải danh sách năm sản xuất
+                const yearSnap = await lookupFs.collection('metadata').doc('years').get();
+                if (yearSnap.exists) {
+                    const years = yearSnap.data().list || [];
+                    const filterNam = document.getElementById('filterNam');
+                    if (filterNam) {
+                        filterNam.innerHTML = '<option value="">Tất cả năm</option>';
+                        years.sort((a, b) => b - a).forEach(y => {
+                            const opt = document.createElement('option');
+                            opt.value = y;
+                            opt.textContent = y;
+                            filterNam.appendChild(opt);
+                        });
+                    }
+                }
+                this._inited = true;
+                this.search();
+            } catch (e) {
+                console.error("AI Metadata Load Error:", e);
+                // Fallback to local filters
+                this.loadLocalFilters();
+            }
+        },
+
+        populateBrands() {
+            const filterHang = document.getElementById('filterHang');
+            if (!filterHang || !this._metadata) return;
+
+            filterHang.innerHTML = '<option value="">Tất cả hãng</option>';
+            const brands = Object.keys(this._metadata).sort();
+            brands.forEach(b => {
+                const opt = document.createElement('option');
+                opt.value = b;
+                opt.textContent = b;
+                filterHang.appendChild(opt);
+            });
+
+            const filterHieu = document.getElementById('filterHieu');
+            if (filterHieu) filterHieu.innerHTML = '<option value="">Tất cả dòng</option>';
+        },
+
+        loadLocalFilters() {
+            const hangs = [...new Set(this.seedData.map(item => item.hang))].sort();
             const filterHang = document.getElementById('filterHang');
             if (filterHang) {
                 filterHang.innerHTML = '<option value="">Tất cả hãng</option>';
@@ -20599,14 +20653,13 @@ YÊU CẦU ĐẦU RA:
                 });
             }
 
-            // Reset dòng xe và đời xe
             const filterHieu = document.getElementById('filterHieu');
             if (filterHieu) filterHieu.innerHTML = '<option value="">Tất cả dòng</option>';
 
             const filterNam = document.getElementById('filterNam');
             if (filterNam) {
                 filterNam.innerHTML = '<option value="">Tất cả năm</option>';
-                const nams = [...new Set(this.data.map(item => item.nam))].sort((a,b) => b - a);
+                const nams = [...new Set(this.seedData.map(item => item.nam))].sort((a,b) => b - a);
                 nams.forEach(nam => {
                     const opt = document.createElement('option');
                     opt.value = nam;
@@ -20627,15 +20680,145 @@ YÊU CẦU ĐẦU RA:
             hieuSelect.innerHTML = '<option value="">Tất cả dòng</option>';
 
             if (hang) {
-                const hieus = [...new Set(this.data.filter(item => item.hang === hang).map(item => item.hieu))].sort();
-                hieus.forEach(hieu => {
-                    const opt = document.createElement('option');
-                    opt.value = hieu;
-                    opt.textContent = hieu;
-                    hieuSelect.appendChild(opt);
-                });
+                if (this._metadata && this._metadata[hang]) {
+                    const hieus = this._metadata[hang].sort();
+                    hieus.forEach(hieu => {
+                        const opt = document.createElement('option');
+                        opt.value = hieu;
+                        opt.textContent = hieu;
+                        hieuSelect.appendChild(opt);
+                    });
+                } else {
+                    // Fallback to seedData
+                    const hieus = [...new Set(this.seedData.filter(item => item.hang === hang).map(item => item.hieu))].sort();
+                    hieus.forEach(hieu => {
+                        const opt = document.createElement('option');
+                        opt.value = hieu;
+                        opt.textContent = hieu;
+                        hieuSelect.appendChild(opt);
+                    });
+                }
             }
             this.search();
+        },
+
+        async showLoginForm() {
+            const { value: formValues } = await Swal.fire({
+                title: 'Đăng nhập hệ thống AI',
+                html: `
+                    <div class="space-y-4 py-4 font-sans text-left">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 mb-1 ml-1 uppercase tracking-wider">Email tài khoản AI</label>
+                            <input id="ai-email" type="email" class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-500 font-bold text-sm" placeholder="example@gmail.com">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 mb-1 ml-1 uppercase tracking-wider">Mật khẩu</label>
+                            <input id="ai-pass" type="password" class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-500 font-bold text-sm" placeholder="••••••••">
+                        </div>
+                    </div>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Đăng nhập',
+                cancelButtonText: 'Bỏ qua',
+                customClass: { popup: 'custom-rounded' },
+                preConfirm: () => {
+                    return {
+                        email: document.getElementById('ai-email').value,
+                        pass: document.getElementById('ai-pass').value
+                    }
+                }
+            });
+
+            if (formValues) {
+                this.login(formValues.email, formValues.pass);
+            }
+        },
+
+        async login(email, pass) {
+            Swal.fire({
+                title: 'Đang xác thực...',
+                html: '<div class="py-4"><div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div></div>',
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                customClass: { popup: 'custom-rounded' }
+            });
+
+            try {
+                await lookupAuth.signInWithEmailAndPassword(email, pass);
+                Swal.close();
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Đăng nhập AI thành công!',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            } catch (e) {
+                Swal.close();
+                console.error("Login Error:", e);
+                let msg = 'Đăng nhập thất bại!';
+                if (e.code === 'auth/user-not-found') msg = 'Email không tồn tại!';
+                if (e.code === 'auth/wrong-password') msg = 'Mật khẩu không chính xác!';
+                Swal.fire({ icon: 'error', title: 'Lỗi đăng nhập', text: msg, customClass: { popup: 'custom-rounded' } });
+            }
+        },
+
+        async logout() {
+            await lookupAuth.signOut();
+            this._user = null;
+            this._inited = false;
+            this.updateAuthUI();
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Đã đăng xuất tài khoản AI!',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        },
+
+        updateAuthUI() {
+            const box = document.getElementById('ai-auth-box');
+            if (!box) return;
+
+            if (this._user) {
+                box.innerHTML = `
+                    <div class="flex items-center justify-between w-full">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-xs shadow-sm">
+                                ${this._user.email.charAt(0).toUpperCase()}
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-xs font-black text-slate-800 leading-none dark:text-white">${this._user.email.split('@')[0]}</span>
+                                <span class="text-[9px] text-slate-400 font-extrabold mt-1 tracking-wider uppercase">Tài khoản AI Live</span>
+                            </div>
+                        </div>
+                        <button onclick="SpareParts.logout()" class="p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-400 hover:text-rose-500 active:scale-95 transition-all dark:bg-slate-800 dark:border-slate-700">
+                            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                `;
+            } else {
+                box.innerHTML = `
+                    <div class="flex items-center justify-between w-full">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></div>
+                            <span class="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Chưa kết nối dữ liệu thực</span>
+                        </div>
+                        <button onclick="SpareParts.showLoginForm()" class="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all text-white text-[11px] font-black shadow-md shadow-blue-200 dark:shadow-none">
+                            <i data-lucide="key-round" class="w-3 h-3"></i>
+                            <span>Đăng Nhập AI</span>
+                        </button>
+                    </div>
+                `;
+            }
+
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
         },
 
         toggleExactMatch() {
@@ -20687,7 +20870,7 @@ YÊU CẦU ĐẦU RA:
             this.search();
         },
 
-        search() {
+        async search() {
             const hangEl = document.getElementById('filterHang');
             const hieuEl = document.getElementById('filterHieu');
             const namEl = document.getElementById('filterNam');
@@ -20700,23 +20883,110 @@ YÊU CẦU ĐẦU RA:
             const type = typeEl ? typeEl.value : 'all';
             const keyword = searchEl ? searchEl.value.trim().toLowerCase() : '';
 
-            this.filteredData = this.data.filter(item => {
-                if (hang && item.hang !== hang) return false;
-                if (hieu && item.hieu !== hieu) return false;
-                if (nam && item.nam !== parseInt(nam)) return false;
-                if (type !== 'all' && item.type !== type) return false;
+            const listContainer = document.getElementById('resultsSpareList');
+            const countBadge = document.getElementById('spare-total-count');
 
-                if (keyword) {
-                    const nameLower = item.name.toLowerCase();
-                    const codeLower = item.code.toLowerCase();
-                    if (this.exactMatch) {
-                        return nameLower === keyword || codeLower === keyword;
-                    } else {
-                        return nameLower.includes(keyword) || codeLower.includes(keyword);
-                    }
+            if (this._user) {
+                // Query Firestore
+                if (listContainer) {
+                    listContainer.innerHTML = `
+                        <div class="text-center py-20">
+                            <div class="inline-block animate-spin rounded-full h-7 w-7 border-4 border-blue-600 border-t-transparent"></div>
+                            <p class="mt-4 text-slate-400 font-extrabold uppercase text-[10px] tracking-widest animate-pulse">Đang truy vấn kho AI...</p>
+                        </div>
+                    `;
                 }
-                return true;
-            });
+
+                try {
+                    let q = lookupFs.collection('LichSuBaoGia');
+                    if (hang) q = q.where('hang_xe', '==', hang);
+                    if (hieu) q = q.where('hieu_xe', '==', hieu);
+                    if (nam) q = q.where('nam_sx', '==', parseInt(nam));
+
+                    const snap = await q.orderBy('ngay_bao_gia', 'desc').limit(200).get();
+                    let rawResults = [];
+                    snap.forEach(doc => {
+                        const item = doc.data();
+                        
+                        // Map Firestore fields to local schema
+                        const mappedItem = {
+                            hang: item.hang_xe || "N/A",
+                            hieu: item.hieu_xe || "N/A",
+                            nam: item.nam_sx || 2020,
+                            name: item.ten_phu_tung || "N/A",
+                            code: item.so_hsbt || "N/A",
+                            type: item.chinh_hang === "Chính hãng" ? "genuine" : "aftermarket",
+                            price: parseInt(item.gia_duyet) || 0,
+                            tinh_thanh: item.tinh_thanh || "",
+                            ten_garage: item.ten_garage || "",
+                            ngay_bao_gia: item.ngay_bao_gia || "",
+                            verified: true
+                        };
+
+                        if (keyword) {
+                            const nameMatch = mappedItem.name.toLowerCase().includes(keyword);
+                            const codeMatch = mappedItem.code.toLowerCase().includes(keyword);
+                            if (this.exactMatch) {
+                                if (mappedItem.name.toLowerCase() === keyword || mappedItem.code.toLowerCase() === keyword) {
+                                    rawResults.push(mappedItem);
+                                }
+                            } else {
+                                if (nameMatch || codeMatch) {
+                                    rawResults.push(mappedItem);
+                                }
+                            }
+                        } else {
+                            rawResults.push(mappedItem);
+                        }
+                    });
+
+                    this.data = rawResults;
+                    if (countBadge) {
+                        countBadge.textContent = `Tổng kho: ${this.data.length} giá trực tuyến`;
+                    }
+                } catch (e) {
+                    console.error("AI Search Query Error:", e);
+                    if (e.message.includes('permission')) {
+                        if (listContainer) {
+                            listContainer.innerHTML = `
+                                <div class="text-center py-10 px-4">
+                                    <p class="text-rose-500 font-black text-sm uppercase">Thiếu quyền truy cập dữ liệu</p>
+                                    <p class="text-[10px] font-bold text-slate-400 mt-2 leading-relaxed">Tài khoản AI của bạn chưa được kích hoạt trạng thái "active" để đọc kho.</p>
+                                    <button onclick="SpareParts.showLoginForm()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-xl font-bold text-xs uppercase shadow-md shadow-blue-200">Đổi tài khoản</button>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        if (listContainer) {
+                            listContainer.innerHTML = `<div class="text-center py-10 text-rose-500 font-bold text-xs">Lỗi truy vấn: ${e.message}</div>`;
+                        }
+                    }
+                    return;
+                }
+            } else {
+                // Fall back to seedData
+                this.data = this.seedData.filter(item => {
+                    if (hang && item.hang !== hang) return false;
+                    if (hieu && item.hieu !== hieu) return false;
+                    if (nam && item.nam !== parseInt(nam)) return false;
+                    if (type !== 'all' && item.type !== type) return false;
+
+                    if (keyword) {
+                        const nameLower = item.name.toLowerCase();
+                        const codeLower = item.code.toLowerCase();
+                        if (this.exactMatch) {
+                            return nameLower === keyword || codeLower === keyword;
+                        } else {
+                            return nameLower.includes(keyword) || codeLower.includes(keyword);
+                        }
+                    }
+                    return true;
+                });
+                
+                if (countBadge) {
+                    countBadge.textContent = `Tổng kho: ${this.data.length} phụ tùng mẫu`;
+                }
+            }
 
             this.currentPage = 1;
             this.render();
@@ -20728,7 +20998,7 @@ YÊU CẦU ĐẦU RA:
             const analysisBox = document.getElementById('priceAnalysisBox');
             if (!summaryBox || !analysisBox) return;
 
-            if (this.filteredData.length === 0) {
+            if (this.data.length === 0) {
                 summaryBox.classList.add('hidden');
                 analysisBox.classList.add('hidden');
                 return;
@@ -20737,7 +21007,7 @@ YÊU CẦU ĐẦU RA:
             summaryBox.classList.remove('hidden');
             analysisBox.classList.remove('hidden');
 
-            const prices = this.filteredData.map(item => item.price).sort((a,b) => a - b);
+            const prices = this.data.map(item => item.price).sort((a,b) => a - b);
             const count = prices.length;
             const min = prices[0];
             const max = prices[count - 1];
@@ -20824,35 +21094,11 @@ YÊU CẦU ĐẦU RA:
         },
 
         changePage(direction) {
-            const maxPage = Math.ceil(this.filteredData.length / this.pageSize) || 1;
+            const maxPage = Math.ceil(this.data.length / this.pageSize) || 1;
             const newPage = this.currentPage + direction;
             if (newPage >= 1 && newPage <= maxPage) {
                 this.currentPage = newPage;
                 this.render();
-            }
-        },
-
-        toggleVerifyItem(index) {
-            const targetItem = this.filteredData[index];
-            if (!targetItem) return;
-
-            const realIndex = this.data.findIndex(item => item.code === targetItem.code && item.name === targetItem.name);
-            if (realIndex !== -1) {
-                this.data[realIndex].verified = !this.data[realIndex].verified;
-
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'success',
-                    title: this.data[realIndex].verified ? 'Đã duyệt giá thành công' : 'Đã hủy duyệt giá',
-                    showConfirmButton: false,
-                    timer: 1500,
-                    timerProgressBar: true,
-                    background: document.documentElement.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
-                    color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#f8fafc' : '#0f172a'
-                });
-
-                this.search();
             }
         },
 
@@ -20862,7 +21108,7 @@ YÊU CẦU ĐẦU RA:
             const pageInfo = document.getElementById('sparePageInfo');
             if (!listContainer || !paginationContainer) return;
 
-            if (this.filteredData.length === 0) {
+            if (this.data.length === 0) {
                 listContainer.innerHTML = `
                     <div class="text-center py-20 text-slate-300 font-extrabold uppercase italic text-xs tracking-wider dark:text-slate-600">
                         Không tìm thấy phụ tùng phù hợp
@@ -20873,7 +21119,7 @@ YÊU CẦU ĐẦU RA:
             }
 
             paginationContainer.classList.remove('hidden');
-            const maxPage = Math.ceil(this.filteredData.length / this.pageSize) || 1;
+            const maxPage = Math.ceil(this.data.length / this.pageSize) || 1;
             if (pageInfo) pageInfo.textContent = `Trang ${this.currentPage} / ${maxPage}`;
 
             const prevBtn = document.getElementById('btnSparePrev');
@@ -20883,11 +21129,11 @@ YÊU CẦU ĐẦU RA:
 
             const start = (this.currentPage - 1) * this.pageSize;
             const end = start + this.pageSize;
-            const pageItems = this.filteredData.slice(start, end);
+            const pageItems = this.data.slice(start, end);
 
             const formatVnd = (num) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num).replace('₫', 'đ');
 
-            const prices = this.filteredData.map(item => item.price).sort((a,b) => a - b);
+            const prices = this.data.map(item => item.price).sort((a,b) => a - b);
             const count = prices.length;
             let median = 0;
             if (count % 2 === 1) {
@@ -20914,9 +21160,10 @@ YÊU CẦU ĐẦU RA:
                     ? '<span class="badge-pro badge-genuine"><i data-lucide="shield-check" class="w-3 h-3"></i> Chính hãng</span>'
                     : '<span class="badge-pro badge-aftermarket"><i data-lucide="wrench" class="w-3 h-3"></i> Thay thế</span>';
 
-                const verifyBadge = item.verified
-                    ? `<span onclick="SpareParts.toggleVerifyItem(${displayIndex})" class="badge-pro badge-verified"><i data-lucide="check-check" class="w-3 h-3"></i> Đã duyệt giá</span>`
-                    : `<span onclick="SpareParts.toggleVerifyItem(${displayIndex})" class="badge-pro badge-unverified"><i data-lucide="help-circle" class="w-3 h-3"></i> Chờ duyệt giá</span>`;
+                // Real Live quotes are pre-verified, but for seedData we allow toggling
+                const verifyBadge = !this._user
+                    ? `<span onclick="SpareParts.toggleLocalVerify(${displayIndex})" class="badge-pro ${item.verified ? 'badge-verified' : 'badge-unverified'}"><i data-lucide="${item.verified ? 'check-check' : 'help-circle'}" class="w-3 h-3"></i> ${item.verified ? 'Đã duyệt giá' : 'Chờ duyệt giá'}</span>`
+                    : `<span class="badge-pro badge-verified"><i data-lucide="check-check" class="w-3 h-3"></i> Đã duyệt giá</span>`;
 
                 let priceSignal = '';
                 if (item.price < q1) {
@@ -20929,19 +21176,44 @@ YÊU CẦU ĐẦU RA:
                     priceSignal = '<span class="price-signal-badge price-signal-watch"><i data-lucide="alert-triangle" class="w-2.5 h-2.5"></i> Cần cân đối</span>';
                 }
 
+                // If this is a real live quote, format the date beautifully
+                let dateBadge = '';
+                if (item.ngay_bao_gia) {
+                    const formattedDate = moment(item.ngay_bao_gia).format('DD/MM/YYYY');
+                    dateBadge = `<span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">${formattedDate}</span>`;
+                }
+
+                let provBadge = '';
+                if (item.tinh_thanh) {
+                    provBadge = `<span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400">${item.tinh_thanh}</span>`;
+                }
+
+                let garageInfo = '';
+                if (item.ten_garage) {
+                    garageInfo = `
+                        <div class="flex items-center gap-1.5 mt-2 bg-slate-50 dark:bg-slate-900/40 p-2 rounded-xl border border-slate-100 dark:border-slate-800/80">
+                            <i data-lucide="home" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 leading-tight">${item.ten_garage}</span>
+                        </div>
+                    `;
+                }
+
                 html += `
                     <div class="spare-part-card">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-2 dark:border-slate-800">
                             <div class="flex items-center gap-1.5">
                                 <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">${item.hang}</span>
-                                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400">${item.hieu} (${item.nam})</span>
+                                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400">${item.hieu} (${item.nam})</span>
                             </div>
                             <span class="text-[9px] font-mono font-bold text-slate-400 dark:text-slate-500">${item.code}</span>
                         </div>
-                        <div class="flex flex-col gap-1">
+                        <div class="flex flex-col gap-1 mt-1">
                             <span class="text-xs font-black text-slate-800 leading-tight dark:text-white">${item.name}</span>
                         </div>
-                        <div class="flex items-center justify-between mt-1">
+                        
+                        ${garageInfo}
+
+                        <div class="flex items-center justify-between mt-2 pt-1">
                             <div class="flex flex-wrap gap-1.5 items-center">
                                 ${typeBadge}
                                 ${verifyBadge}
@@ -20959,6 +21231,30 @@ YÊU CẦU ĐẦU RA:
 
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
+            }
+        },
+
+        toggleLocalVerify(index) {
+            const targetItem = this.data[index];
+            if (!targetItem) return;
+
+            const realIndex = this.seedData.findIndex(item => item.code === targetItem.code && item.name === targetItem.name);
+            if (realIndex !== -1) {
+                this.seedData[realIndex].verified = !this.seedData[realIndex].verified;
+
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: this.seedData[realIndex].verified ? 'Đã duyệt giá thành công' : 'Đã hủy duyệt giá',
+                    showConfirmButton: false,
+                    timer: 1500,
+                    timerProgressBar: true,
+                    background: document.documentElement.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                    color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#f8fafc' : '#0f172a'
+                });
+
+                this.search();
             }
         }
     };
