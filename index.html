@@ -3158,26 +3158,22 @@
                     <h2 class="text-2xl font-black text-slate-800 dark:text-white tracking-tight leading-tight">Xin chào, <br><span class="text-blue-600 dark:text-blue-400" id="home-greeting-name">Đồng nghiệp</span>! 👋</h2>
                     <p class="text-slate-500 dark:text-slate-400 text-[12.5px] font-medium mt-1.5">Hệ thống giám định Tasco DLK</p>
                 </div>
-                <!-- Integrated Weather & Duty Widget -->
-                <div id="weather-widget" onclick="WeatherWidget.openDutySettings()" class="relative flex items-center justify-between pl-2 pr-2 py-2 bg-transparent border-0 shadow-none backdrop-blur-none w-44 h-16 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] select-none cursor-pointer shrink-0">
-                    <div class="flex flex-col justify-between h-full z-10">
-                        <!-- Badges Row -->
-                        <div class="flex items-center gap-1 shrink-0">
-                            <span id="weather-badge" class="px-1.5 py-0.5 text-[8px] font-black bg-blue-500/10 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 rounded-full tracking-wider uppercase">BMT</span>
-                            <span id="weather-duty-badge" class="px-1.5 py-0.5 text-[8px] font-black bg-indigo-500/10 dark:bg-indigo-400/10 text-indigo-600 dark:text-indigo-400 rounded-full tracking-wider uppercase">Đang tải...</span>
-                        </div>
-                        <div class="mt-1 flex items-baseline gap-1.5 shrink-0">
-                            <span id="weather-temp" class="text-xl font-black text-slate-850 dark:text-slate-100 tracking-tighter leading-none">27°C</span>
-                            <span id="weather-desc" class="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">U ám</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Floating Icon Wrapper -->
-                    <div id="weather-icon-wrapper" class="relative w-11 h-11 flex items-center justify-center filter drop-shadow-[0_8px_16px_rgba(59,130,246,0.15)] z-10 transition-transform duration-500 hover:scale-110 shrink-0">
-                        <div id="weather-icon-bg" class="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl opacity-10 pointer-events-none"></div>
-                        <div id="weather-icon-container" class="text-blue-500 dark:text-blue-400 flex items-center justify-center weather-float">
+                <!-- Premium Compact Weather & Duty Widget -->
+                <div id="weather-widget" onclick="WeatherWidget.openDutySettings()" class="flex flex-col items-end justify-center select-none cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shrink-0 text-right">
+                    <!-- Temp and Icon Row -->
+                    <div class="flex items-center gap-2">
+                        <span id="weather-temp" class="text-3xl font-black text-slate-800 dark:text-white tracking-tighter leading-none">22°C</span>
+                        <div id="weather-icon-container" class="text-blue-500 dark:text-blue-400 flex items-center justify-center weather-float w-8 h-8">
                             <i data-lucide="cloud-sun" class="w-7 h-7"></i>
                         </div>
+                    </div>
+                    <!-- Info Row -->
+                    <div class="mt-1 flex items-center gap-1.5 text-[9px] font-black tracking-wider uppercase text-slate-400 dark:text-slate-500">
+                        <span>BMT</span>
+                        <span class="text-slate-300 dark:text-slate-700">•</span>
+                        <span id="weather-desc">U ám</span>
+                        <span class="text-slate-300 dark:text-slate-700">•</span>
+                        <span id="weather-duty-badge" class="text-blue-600 dark:text-blue-400">Đang tải...</span>
                     </div>
                 </div>
             </div>
@@ -24249,10 +24245,10 @@ YÊU CẦU ĐẦU RA:
             if (dutyBadgeEl) {
                 if (isFieldDuty) {
                     dutyBadgeEl.textContent = 'Hiện trường';
-                    dutyBadgeEl.className = 'px-1.5 py-0.5 text-[8px] font-black bg-blue-500/10 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 rounded-full tracking-wider uppercase';
+                    dutyBadgeEl.className = 'text-blue-600 dark:text-blue-400 font-black';
                 } else {
                     dutyBadgeEl.textContent = 'Chi tiết';
-                    dutyBadgeEl.className = 'px-1.5 py-0.5 text-[8px] font-black bg-emerald-500/10 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400 rounded-full tracking-wider uppercase';
+                    dutyBadgeEl.className = 'text-emerald-600 dark:text-emerald-400 font-black';
                 }
             }
         }
