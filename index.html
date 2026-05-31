@@ -3516,22 +3516,17 @@
         <!-- SPARE PARTS VIEW -->
         <div id="view-spare" class="view-section p-4 hidden">
             <!-- STICKY HEADER -->
-            <div class="sticky top-0 z-40 -mx-4 -mt-4 px-4 pt-4 pb-3 shadow-[0_4px_12px_-5px_rgba(0,0,0,0.02)] transition-colors" style="background-color: var(--bg-app);">
-                <div class="flex items-center gap-3 bg-gradient-to-r from-slate-50 to-white dark:from-slate-900/60 dark:to-slate-800/40 border border-slate-200/50 dark:border-slate-700/40 px-3.5 py-2.5 rounded-2xl shadow-sm">
-                    <div class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center text-blue-600 dark:text-blue-400 shadow-sm shrink-0">
-                        <i data-lucide="search" class="w-4.5 h-4.5"></i>
+            <div class="sticky top-0 z-40 -mx-4 -mt-4 px-4 pt-4 pb-3 shadow-[0_8px_15px_-5px_rgba(0,0,0,0.05)] transition-colors" style="background-color: var(--bg-app);">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="font-black text-slate-800 text-base tracking-tight flex items-center gap-1.5 dark:text-white">
+                            <i data-lucide="search" class="w-[18px] h-[18px] text-blue-500"></i> Tra Cứu Phụ Tùng
+                        </h2>
+                        <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-0.5 block" id="spare-total-count">Kho giá tối ưu</span>
                     </div>
-                    <div class="flex flex-col text-left">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <h2 class="font-black text-slate-800 text-[13.5px] tracking-tight leading-none dark:text-white">
-                                Tra Cứu Phụ Tùng
-                            </h2>
-                            <!-- COMPACT AI AUTH PILL -->
-                            <div id="ai-auth-box" class="flex items-center shrink-0">
-                                <!-- Will be dynamically populated by SpareParts.updateAuthUI() with space-optimized pills -->
-                            </div>
-                        </div>
-                        <span class="text-[8.5px] text-slate-400 dark:text-slate-500 font-extrabold uppercase tracking-widest mt-1.5 block" id="spare-total-count">Kho giá tối ưu</span>
+                    <!-- COMPACT AI AUTH PILL -->
+                    <div id="ai-auth-box" class="flex items-center shrink-0">
+                        <!-- Will be dynamically populated by SpareParts.updateAuthUI() with space-optimized pills -->
                     </div>
                 </div>
             </div>
@@ -21140,21 +21135,26 @@ YÊU CẦU ĐẦU RA:
 
             if (this._user && !this._user.isAnonymous) {
                 box.innerHTML = `
-                    <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 px-1.5 py-0.5 rounded-lg border border-slate-200/50 dark:border-slate-700/50 h-6 transition-all">
-                        <div class="w-4 h-4 rounded-md bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-[8px] shadow-sm select-none">
-                            ${this._user.email ? this._user.email.charAt(0).toUpperCase() : 'U'}
+                    <div class="flex items-center gap-2 bg-gradient-to-r from-blue-50/60 to-indigo-50/40 border border-blue-100/40 px-3 py-1.5 rounded-2xl dark:from-slate-800/80 dark:to-slate-850/60 dark:border-slate-700/50 shadow-[0_2px_8px_-3px_rgba(59,130,246,0.08)] select-none">
+                        <div class="relative shrink-0 flex items-center">
+                            <div class="w-6 h-6 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-[9px] shadow-sm select-none">
+                                ${this._user.email ? this._user.email.charAt(0).toUpperCase() : 'U'}
+                            </div>
+                            <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border border-white dark:border-slate-850 animate-pulse"></span>
                         </div>
-                        <span class="text-[8.5px] font-black text-slate-700 dark:text-slate-200 leading-none max-w-[60px] truncate">${this._user.email ? this._user.email.split('@')[0] : 'User'}</span>
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
-                        <button onclick="SpareParts.logout()" class="p-0.5 rounded text-slate-400 hover:text-rose-500 active:scale-95 transition-all ml-0.5" title="Đăng xuất">
-                            <i data-lucide="log-out" class="w-2.5 h-2.5"></i>
+                        <div class="flex flex-col text-left max-w-[80px]">
+                            <span class="text-[9.5px] font-black text-slate-800 dark:text-slate-200 leading-none truncate">${this._user.email ? this._user.email.split('@')[0] : 'User'}</span>
+                            <span class="text-[7.5px] text-blue-500 dark:text-blue-400 font-extrabold tracking-widest uppercase mt-0.5">AI LIVE</span>
+                        </div>
+                        <button onclick="SpareParts.logout()" class="w-5 h-5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 active:scale-90 transition-all flex items-center justify-center ml-0.5" title="Đăng xuất">
+                            <i data-lucide="log-out" class="w-2.8 h-2.8"></i>
                         </button>
                     </div>
                 `;
             } else {
                 box.innerHTML = `
-                    <button onclick="SpareParts.showLoginForm()" class="shrink-0 flex items-center gap-1 h-6 px-2 rounded-lg bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all text-white text-[9px] font-black shadow-sm" title="Đăng nhập tài khoản AI để kết nối dữ liệu thực tế">
-                        <i data-lucide="key-round" class="w-2.5 h-2.5"></i>
+                    <button onclick="SpareParts.showLoginForm()" class="shrink-0 flex items-center gap-1.5 h-8.5 px-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 active:scale-95 transition-all text-white text-[10.5px] font-black shadow-md shadow-blue-500/10 uppercase tracking-wider" title="Đăng nhập tài khoản AI để kết nối dữ liệu thực tế">
+                        <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
                         <span>Đăng Nhập AI</span>
                     </button>
                 `;
