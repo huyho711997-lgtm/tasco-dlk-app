@@ -3161,9 +3161,7 @@
                 <!-- Weather & Duty Stack -->
                 <div class="flex flex-col items-stretch gap-2 shrink-0">
                     <!-- Weather Widget -->
-                    <div id="weather-widget" onclick="WeatherWidget.openDutySettings()" class="relative overflow-visible flex items-center justify-between pl-4 pr-5 py-3.5 bg-gradient-to-br from-white/90 to-blue-50/20 dark:from-slate-800/90 dark:to-slate-900/60 border border-white dark:border-slate-850 rounded-3xl shrink-0 shadow-[0_12px_30px_-10px_rgba(59,130,246,0.12)] dark:shadow-[0_15px_35px_-12px_rgba(0,0,0,0.5)] backdrop-blur-xl w-36 h-20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] select-none cursor-pointer">
-                        <!-- Glow Effect Background -->
-                        <div id="weather-glow" class="absolute -right-2 -bottom-2 w-14 h-14 rounded-full bg-blue-400/20 dark:bg-blue-500/10 blur-xl pointer-events-none transition-all duration-700"></div>
+                    <div id="weather-widget" onclick="WeatherWidget.openDutySettings()" class="relative flex items-center justify-between pl-2 pr-2 py-3 bg-transparent border-0 shadow-none backdrop-blur-none w-36 h-20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] select-none cursor-pointer">
                         
                         <div class="flex flex-col justify-between h-full z-10">
                             <span id="weather-badge" class="self-start px-2 py-0.5 text-[8px] font-black bg-blue-500/10 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 rounded-full tracking-wider uppercase">BMT</span>
@@ -3173,8 +3171,8 @@
                             </div>
                         </div>
                         
-                        <!-- 3D Overlapping Floating Icon -->
-                        <div id="weather-icon-wrapper" class="relative -mr-3 -mt-2 w-14 h-14 flex items-center justify-center filter drop-shadow-[0_8px_16px_rgba(59,130,246,0.22)] z-10 transition-transform duration-500 hover:scale-110">
+                        <!-- Floating Icon Wrapper -->
+                        <div id="weather-icon-wrapper" class="relative w-14 h-14 flex items-center justify-center filter drop-shadow-[0_8px_16px_rgba(59,130,246,0.15)] z-10 transition-transform duration-500 hover:scale-110">
                             <div id="weather-icon-bg" class="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl opacity-10 pointer-events-none"></div>
                             <div id="weather-icon-container" class="text-blue-500 dark:text-blue-400 flex items-center justify-center weather-float">
                                 <i data-lucide="cloud-sun" class="w-8 h-8"></i>
@@ -24115,7 +24113,7 @@ YÊU CẦU ĐẦU RA:
                 iconBg.className = `absolute inset-0 bg-gradient-to-br ${gradClasses} rounded-2xl opacity-10 pointer-events-none`;
             }
             if (iconWrapper) {
-                iconWrapper.className = `relative -mr-3 -mt-2 w-14 h-14 flex items-center justify-center filter ${shadowWrapper} z-10 transition-transform duration-500 hover:scale-110`;
+                iconWrapper.className = `relative w-14 h-14 flex items-center justify-center filter ${shadowWrapper} z-10 transition-transform duration-500 hover:scale-110`;
             }
             if (glowEl) {
                 glowEl.className = `absolute -right-2 -bottom-2 w-14 h-14 rounded-full ${glowClass} blur-xl pointer-events-none transition-all duration-700`;
