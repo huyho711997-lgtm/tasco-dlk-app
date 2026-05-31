@@ -20754,7 +20754,7 @@ YÊU CẦU ĐẦU RA:
             
             const sheet = document.createElement('div');
             sheet.id = 'mobile-select-sheet';
-            sheet.className = 'fixed inset-x-0 bottom-0 bg-white dark:bg-slate-900 rounded-t-[32px] z-[201] hidden translate-y-full transition-transform duration-300 flex flex-col max-h-[85vh] shadow-2xl pb-safe';
+            sheet.className = 'fixed inset-x-0 bottom-0 bg-white dark:bg-slate-900 rounded-t-[32px] z-[201] hidden translate-y-full transition-all duration-300 flex flex-col max-h-[85vh] shadow-2xl pb-safe';
             sheet.style.paddingBottom = 'env(safe-area-inset-bottom)';
             sheet.innerHTML = `
                 <div class="flex items-center justify-between px-6 pt-5 pb-3 border-b border-slate-100 dark:border-slate-800 shrink-0">
@@ -20788,6 +20788,24 @@ YÊU CẦU ĐẦU RA:
             const closeBtn = document.getElementById('mobile-select-close');
             closeBtn.addEventListener('click', () => this.closeMobileSheet());
             overlay.addEventListener('click', () => this.closeMobileSheet());
+
+            // Listen to VisualViewport to handle mobile soft-keyboard popup dynamic offsets
+            if (window.visualViewport) {
+                const handleViewportChange = () => {
+                    const sheetEl = document.getElementById('mobile-select-sheet');
+                    const overlayEl = document.getElementById('mobile-select-sheet-overlay');
+                    if (sheetEl && !sheetEl.classList.contains('hidden') && !sheetEl.classList.contains('translate-y-full')) {
+                        const vv = window.visualViewport;
+                        const offsetBottom = window.innerHeight - vv.height - vv.offsetTop;
+                        sheetEl.style.bottom = `${Math.max(0, offsetBottom)}px`;
+                        if (overlayEl) {
+                            overlayEl.style.bottom = `${Math.max(0, offsetBottom)}px`;
+                        }
+                    }
+                };
+                window.visualViewport.addEventListener('resize', handleViewportChange);
+                window.visualViewport.addEventListener('scroll', handleViewportChange);
+            }
         },
 
         openMobileSheet(selectId) {
@@ -20894,9 +20912,15 @@ YÊU CẦU ĐẦU RA:
             sheet.classList.add('translate-y-full');
             overlay.classList.remove('opacity-100');
             overlay.classList.add('opacity-0');
+            
+            const activeInput = sheet.querySelector('input');
+            if (activeInput) activeInput.blur();
+
             setTimeout(() => {
                 sheet.classList.add('hidden');
                 overlay.classList.add('hidden');
+                sheet.style.bottom = '0px';
+                if (overlay) overlay.style.bottom = '0px';
             }, 300);
         },
 
