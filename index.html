@@ -3524,16 +3524,9 @@
                         </h2>
                         <p class="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-0.5" id="spare-total-count">Kho giá tối ưu</p>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <!-- COMPACT AI AUTH PILL -->
-                        <div id="ai-auth-box" class="flex items-center">
-                            <!-- Will be dynamically populated by SpareParts.updateAuthUI() with space-optimized pills -->
-                        </div>
-
-                        <button onclick="SpareParts.clearFilters()" class="shrink-0 flex items-center gap-1 h-9 px-3 rounded-xl border border-slate-200 bg-white text-slate-500 active:scale-95 transition-all font-bold text-[11px] shadow-sm dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400">
-                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                            <span>Xóa bộ lọc</span>
-                        </button>
+                    <!-- COMPACT AI AUTH PILL -->
+                    <div id="ai-auth-box" class="flex items-center">
+                        <!-- Will be dynamically populated by SpareParts.updateAuthUI() with space-optimized pills -->
                     </div>
                 </div>
             </div>
@@ -3596,10 +3589,16 @@
                     </div>
                 </div>
 
-                <!-- SEARCH ACTION BUTTON -->
-                <button onclick="SpareParts.search()" class="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-md shadow-blue-500/25 active:scale-98 transition-all flex items-center justify-center gap-2">
-                    <i data-lucide="search" class="w-4 h-4"></i> TRA CỨU NGAY
-                </button>
+                <!-- SEARCH & CLEAR ACTION BUTTONS -->
+                <div class="grid grid-cols-4 gap-2.5">
+                    <button onclick="SpareParts.clearFilters()" class="col-span-1 h-12 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-400 active:scale-95 transition-all font-bold text-[9px] uppercase tracking-wider shadow-sm flex flex-col items-center justify-center gap-1 dark:bg-slate-900/60 dark:border-slate-700 dark:text-slate-400">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
+                        <span>Xoá lọc</span>
+                    </button>
+                    <button onclick="SpareParts.search()" class="col-span-3 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-md shadow-blue-500/25 active:scale-98 transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="search" class="w-4 h-4"></i> TRA CỨU NGAY
+                    </button>
+                </div>
             </div>
 
             <!-- PRICE SUMMARY CARDS -->
