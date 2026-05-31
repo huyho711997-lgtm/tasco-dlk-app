@@ -2898,8 +2898,8 @@
                     <div class="flex items-center gap-1.5 mb-1">
                         <h1 class="font-black text-[18px] text-slate-800 tracking-tight leading-none">TASCO <span class="text-blue-500 drop-shadow-sm">DLK</span></h1>
                         <span id="connection-status-badge" class="relative flex h-2 w-2 ml-1" title="Trực tuyến">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                            <span class="animate-ping absolute block h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative block rounded-full h-2 w-2 bg-emerald-500"></span>
                         </span>
                     </div>
                     <p class="text-[9px] text-slate-500 uppercase font-extrabold tracking-widest leading-none" id="header-subtitle">Mobile App</p>
@@ -22274,7 +22274,7 @@ YÊU CẦU ĐẦU RA:
 
             if (isOnline) {
                 badge.className = "relative flex h-2 w-2 ml-1";
-                badge.innerHTML = '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>';
+                badge.innerHTML = '<span class="animate-ping absolute block h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative block rounded-full h-2 w-2 bg-emerald-500"></span>';
                 badge.setAttribute('title', 'Trực tuyến');
                 
                 if (typeof db !== 'undefined' && db.goOnline) {
@@ -22295,7 +22295,7 @@ YÊU CẦU ĐẦU RA:
                 }
             } else {
                 badge.className = "relative flex h-2 w-2 ml-1";
-                badge.innerHTML = '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>';
+                badge.innerHTML = '<span class="animate-ping absolute block h-full w-full rounded-full bg-amber-400 opacity-75"></span><span class="relative block rounded-full h-2 w-2 bg-amber-500"></span>';
                 badge.setAttribute('title', 'Ngoại tuyến');
                 
                 if (typeof db !== 'undefined' && db.goOffline) {
