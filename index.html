@@ -47,6 +47,27 @@
             background-color: #f8fafc;
             -webkit-tap-highlight-color: transparent;
         }
+        /* Weather Widget Premium Custom Styles */
+        @keyframes float-subtle {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-3px) rotate(1.5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .weather-float {
+            animation: float-subtle 4s ease-in-out infinite;
+        }
+        .weather-glow-sun {
+            background: radial-gradient(circle, rgba(245,158,11,0.2) 0%, rgba(245,158,11,0) 70%) !important;
+        }
+        .weather-glow-rain {
+            background: radial-gradient(circle, rgba(14,165,233,0.2) 0%, rgba(14,165,233,0) 70%) !important;
+        }
+        .weather-glow-cloudy {
+            background: radial-gradient(circle, rgba(99,102,241,0.2) 0%, rgba(99,102,241,0) 70%) !important;
+        }
+        .weather-glow-lightning {
+            background: radial-gradient(circle, rgba(139,92,246,0.2) 0%, rgba(139,92,246,0) 70%) !important;
+        }
         /* Custom premium Segmented & Chip selectors */
         .segmented-control {
             display: flex;
@@ -3133,17 +3154,24 @@
                     <p class="text-slate-500 dark:text-slate-400 text-[12.5px] font-medium mt-1.5">Hệ thống giám định Tasco DLK</p>
                 </div>
                 <!-- Weather Widget -->
-                <div id="weather-widget" class="flex items-center gap-3 pl-3 pr-4 py-2 bg-gradient-to-br from-white to-blue-50/20 dark:from-slate-800 dark:to-slate-900/80 border border-blue-100/60 dark:border-slate-700/60 rounded-2xl shrink-0 shadow-[0_8px_20px_-6px_rgba(59,130,246,0.1)] dark:shadow-[0_8px_25px_-10px_rgba(0,0,0,0.5)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] select-none cursor-pointer">
-                    <div id="weather-icon-container" class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 dark:shadow-none shrink-0 relative overflow-hidden group">
-                        <span class="absolute inset-0 bg-white/15 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                        <i data-lucide="cloud-sun" class="w-5.5 h-5.5 relative z-10 animate-pulse"></i>
-                    </div>
-                    <div class="text-left">
-                        <div class="flex items-center gap-1.5">
-                            <span id="weather-temp" class="text-base font-black text-slate-800 dark:text-slate-100 tracking-tight leading-none">27°C</span>
-                            <span id="weather-badge" class="px-1.5 py-0.5 text-[8px] font-extrabold bg-blue-100/80 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-md tracking-wider">BMT</span>
+                <div id="weather-widget" class="relative overflow-visible flex items-center justify-between pl-4 pr-5 py-3.5 bg-gradient-to-br from-white/90 to-blue-50/20 dark:from-slate-800/90 dark:to-slate-900/60 border border-white dark:border-slate-850 rounded-3xl shrink-0 shadow-[0_12px_30px_-10px_rgba(59,130,246,0.12)] dark:shadow-[0_15px_35px_-12px_rgba(0,0,0,0.5)] backdrop-blur-xl w-36 h-20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] select-none cursor-pointer">
+                    <!-- Glow Effect Background -->
+                    <div id="weather-glow" class="absolute -right-2 -bottom-2 w-14 h-14 rounded-full bg-blue-400/20 dark:bg-blue-500/10 blur-xl pointer-events-none transition-all duration-700"></div>
+                    
+                    <div class="flex flex-col justify-between h-full z-10">
+                        <span id="weather-badge" class="self-start px-2 py-0.5 text-[8px] font-black bg-blue-500/10 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 rounded-full tracking-wider uppercase">BMT</span>
+                        <div class="mt-1">
+                            <span id="weather-temp" class="text-2xl font-black text-slate-850 dark:text-slate-100 tracking-tighter leading-none">27°C</span>
+                            <p id="weather-desc" class="text-[9px] font-black text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-widest leading-none">U ám</p>
                         </div>
-                        <p id="weather-desc" class="text-[10px] font-extrabold text-slate-400 dark:text-slate-400 mt-1 leading-none uppercase tracking-widest">Đang tải...</p>
+                    </div>
+                    
+                    <!-- 3D Overlapping Floating Icon -->
+                    <div id="weather-icon-wrapper" class="relative -mr-3 -mt-2 w-14 h-14 flex items-center justify-center filter drop-shadow-[0_8px_16px_rgba(59,130,246,0.22)] z-10 transition-transform duration-500 hover:scale-110">
+                        <div id="weather-icon-bg" class="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl opacity-10 pointer-events-none"></div>
+                        <div id="weather-icon-container" class="text-blue-500 dark:text-blue-400 flex items-center justify-center weather-float">
+                            <i data-lucide="cloud-sun" class="w-8 h-8"></i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -24030,44 +24058,56 @@ YÊU CẦU ĐẦU RA:
             const tempEl = document.getElementById('weather-temp');
             const descEl = document.getElementById('weather-desc');
             const iconContainer = document.getElementById('weather-icon-container');
+            const iconBg = document.getElementById('weather-icon-bg');
+            const iconWrapper = document.getElementById('weather-icon-wrapper');
+            const glowEl = document.getElementById('weather-glow');
             const badgeEl = document.getElementById('weather-badge');
             
             if (tempEl) tempEl.textContent = `${temp}°C`;
             if (descEl) descEl.textContent = desc;
             
+            // Set styles dynamically based on conditions
+            let gradClasses = 'from-slate-400 to-indigo-500';
+            let textClasses = 'text-indigo-500 dark:text-indigo-400';
+            let shadowWrapper = 'drop-shadow-[0_8px_16px_rgba(99,102,241,0.25)]';
+            let badgeClasses = 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400';
+            let glowClass = 'weather-glow-cloudy';
+            
+            if (iconName === 'sun') {
+                gradClasses = 'from-amber-400 to-orange-500';
+                textClasses = 'text-amber-500 dark:text-amber-400';
+                shadowWrapper = 'drop-shadow-[0_8px_16px_rgba(245,158,11,0.3)]';
+                badgeClasses = 'bg-orange-500/10 text-orange-600 dark:text-orange-400';
+                glowClass = 'weather-glow-sun';
+            } else if (iconName.includes('rain') || iconName.includes('drizzle')) {
+                gradClasses = 'from-sky-400 to-blue-600';
+                textClasses = 'text-blue-500 dark:text-blue-400';
+                shadowWrapper = 'drop-shadow-[0_8px_16px_rgba(59,130,246,0.3)]';
+                badgeClasses = 'bg-blue-500/10 text-blue-600 dark:text-blue-400';
+                glowClass = 'weather-glow-rain';
+            } else if (iconName.includes('lightning')) {
+                gradClasses = 'from-violet-500 to-purple-700';
+                textClasses = 'text-purple-500 dark:text-purple-400';
+                shadowWrapper = 'drop-shadow-[0_8px_16px_rgba(139,92,246,0.3)]';
+                badgeClasses = 'bg-purple-500/10 text-purple-600 dark:text-purple-400';
+                glowClass = 'weather-glow-lightning';
+            }
+            
+            if (iconBg) {
+                iconBg.className = `absolute inset-0 bg-gradient-to-br ${gradClasses} rounded-2xl opacity-10 pointer-events-none`;
+            }
+            if (iconWrapper) {
+                iconWrapper.className = `relative -mr-3 -mt-2 w-14 h-14 flex items-center justify-center filter ${shadowWrapper} z-10 transition-transform duration-500 hover:scale-110`;
+            }
+            if (glowEl) {
+                glowEl.className = `absolute -right-2 -bottom-2 w-14 h-14 rounded-full ${glowClass} blur-xl pointer-events-none transition-all duration-700`;
+            }
+            if (badgeEl) {
+                badgeEl.className = `self-start px-2 py-0.5 text-[8px] font-black ${badgeClasses} rounded-full tracking-wider uppercase`;
+            }
             if (iconContainer) {
-                // Determine theme color based on icon type
-                let gradClasses = 'from-slate-450 to-indigo-500';
-                let shadowClasses = 'shadow-indigo-500/25';
-                let badgeClasses = 'bg-indigo-100/80 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400';
-                
-                if (iconName === 'sun') {
-                    gradClasses = 'from-amber-400 to-orange-500';
-                    shadowClasses = 'shadow-orange-500/25';
-                    badgeClasses = 'bg-orange-100/80 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400';
-                } else if (iconName.includes('rain') || iconName.includes('drizzle')) {
-                    gradClasses = 'from-sky-400 to-blue-600';
-                    shadowClasses = 'shadow-blue-550/25';
-                    badgeClasses = 'bg-blue-100/80 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400';
-                } else if (iconName.includes('lightning')) {
-                    gradClasses = 'from-violet-500 to-purple-700';
-                    shadowClasses = 'shadow-purple-500/25';
-                    badgeClasses = 'bg-purple-100/80 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400';
-                }
-                
-                // Update icon container class list
-                iconContainer.className = `w-10 h-10 rounded-xl bg-gradient-to-br ${gradClasses} text-white flex items-center justify-center shadow-md ${shadowClasses} dark:shadow-none shrink-0 relative overflow-hidden group`;
-                
-                // Update badge class list
-                if (badgeEl) {
-                    badgeEl.className = `px-1.5 py-0.5 text-[8px] font-extrabold ${badgeClasses} rounded-md tracking-wider`;
-                }
-
-                // Replace inner icon
-                iconContainer.innerHTML = `
-                    <span class="absolute inset-0 bg-white/15 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                    <i data-lucide="${iconName}" class="w-5.5 h-5.5 relative z-10 animate-pulse"></i>
-                `;
+                iconContainer.className = `${textClasses} flex items-center justify-center weather-float`;
+                iconContainer.innerHTML = `<i data-lucide="${iconName}" class="w-8 h-8"></i>`;
                 
                 if (window.lucide) {
                     window.lucide.createIcons({
