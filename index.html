@@ -20601,17 +20601,15 @@ YÊU CẦU ĐẦU RA:
 
         async loadMetadata() {
             try {
-                // Tải hãng xe và model
-                const snap = await lookupFs.collection('metadata').doc('family_tree').get();
+                // Tải hãng xe và model từ document 'filters'
+                const snap = await lookupFs.collection('metadata').doc('filters').get();
                 if (snap.exists) {
-                    this._metadata = snap.data();
+                    const dbData = snap.data();
+                    this._metadata = dbData.cay_gia_pha_xe || {};
                     this.populateBrands();
-                }
 
-                // Tải danh sách năm sản xuất
-                const yearSnap = await lookupFs.collection('metadata').doc('years').get();
-                if (yearSnap.exists) {
-                    const years = yearSnap.data().list || [];
+                    // Tải danh sách năm sản xuất từ dbData.nam_sx_all
+                    const years = dbData.nam_sx_all || [];
                     const filterNam = document.getElementById('filterNam');
                     if (filterNam) {
                         filterNam.innerHTML = '<option value="">Tất cả năm</option>';
@@ -20690,7 +20688,7 @@ YÊU CẦU ĐẦU RA:
 
             if (hang) {
                 if (this._metadata && this._metadata[hang]) {
-                    const hieus = this._metadata[hang].sort();
+                    const hieus = Object.keys(this._metadata[hang]).sort();
                     hieus.forEach(hieu => {
                         const opt = document.createElement('option');
                         opt.value = hieu;
