@@ -3665,14 +3665,26 @@
             </div>
 
             <!-- PAGINATION -->
-            <div id="sparePagination" class="hidden flex items-center justify-between py-3 border-t border-slate-200/60 mt-3 dark:border-slate-700/50 pb-10">
-                <button id="btnSparePrev" onclick="SpareParts.changePage(-1)" class="h-9 px-3 rounded-lg border border-slate-200 bg-white text-slate-600 active:scale-95 transition-all text-xs font-extrabold flex items-center gap-1 disabled:opacity-40 disabled:pointer-events-none dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400">
-                    <i data-lucide="chevron-left" class="w-4 h-4"></i> Trước
-                </button>
-                <span id="sparePageInfo" class="text-[10.5px] text-slate-500 font-extrabold dark:text-slate-400">Trang 1 / 1</span>
-                <button id="btnSpareNext" onclick="SpareParts.changePage(1)" class="h-9 px-3 rounded-lg border border-slate-200 bg-white text-slate-600 active:scale-95 transition-all text-xs font-extrabold flex items-center gap-1 disabled:opacity-40 disabled:pointer-events-none dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400">
-                    Sau <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                </button>
+            <div id="sparePagination" class="hidden flex flex-col sm:flex-row items-center justify-between py-4 border-t border-slate-200/60 mt-3 dark:border-slate-700/50 gap-4 pb-10">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest leading-none">Hiển thị:</span>
+                    <select id="sparePageSizeSelect" onchange="SpareParts.changePageSize(this.value)" class="h-8 pl-2 pr-8 text-[11px] font-bold text-slate-600 dark:text-slate-350 bg-white dark:bg-slate-805 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-blue-500 transition-all select-none cursor-pointer">
+                        <option value="5" selected>5 kết quả</option>
+                        <option value="10">10 kết quả</option>
+                        <option value="20">20 kết quả</option>
+                        <option value="50">50 kết quả</option>
+                        <option value="100">100 kết quả</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button id="btnSparePrev" onclick="SpareParts.changePage(-1)" class="h-9 px-3 rounded-lg border border-slate-200 bg-white text-slate-600 active:scale-95 transition-all text-xs font-extrabold flex items-center gap-1 disabled:opacity-40 disabled:pointer-events-none dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400">
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i> Trước
+                    </button>
+                    <span id="sparePageInfo" class="text-[10.5px] text-slate-500 font-extrabold dark:text-slate-400">Trang 1 / 1</span>
+                    <button id="btnSpareNext" onclick="SpareParts.changePage(1)" class="h-9 px-3 rounded-lg border border-slate-200 bg-white text-slate-600 active:scale-95 transition-all text-xs font-extrabold flex items-center gap-1 disabled:opacity-40 disabled:pointer-events-none dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400">
+                        Sau <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </main>
@@ -21557,6 +21569,12 @@ YÊU CẦU ĐẦU RA:
                 this.currentPage = newPage;
                 this.render();
             }
+        },
+
+        changePageSize(size) {
+            this.pageSize = parseInt(size) || 5;
+            this.currentPage = 1;
+            this.render();
         },
 
         render() {
