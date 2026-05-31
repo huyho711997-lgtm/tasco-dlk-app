@@ -21575,6 +21575,8 @@ YÊU CẦU ĐẦU RA:
         filteredData: [],
         exactMatch: false,
 
+        init() {},
+
         loadFilters() {
             // Lấy danh sách duy nhất các hãng xe
             const hangs = [...new Set(this.data.map(item => item.hang))].sort();
@@ -23048,7 +23050,6 @@ YÊU CẦU ĐẦU RA:
         MyCloud.init();
         document.getElementById('plate-scanner-modal').classList.add('hidden');
         Inspection.startWatcher();
-        SpareParts.init();
         SceneSurvey.initFormExclusivity();
         Nav.switchView('home', document.getElementById('nav-home-btn'));
 
