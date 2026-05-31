@@ -2778,6 +2778,71 @@
             left: 16px; /* Dời sang góc trái */
             z-index: 50;
         }
+
+        /* ============================================================ */
+        /* PREMIUM CUSTOM SELECT DROPDOWNS                              */
+        /* ============================================================ */
+        .custom-select-container {
+            position: relative;
+            width: 100%;
+        }
+        .custom-select-trigger {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+        }
+        .custom-select-trigger:focus,
+        .custom-select-container.open .custom-select-trigger {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12) !important;
+            background-color: #ffffff !important;
+        }
+        [data-theme="dark"] .custom-select-trigger:focus,
+        [data-theme="dark"] .custom-select-container.open .custom-select-trigger {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2) !important;
+            background-color: #0f172a !important;
+        }
+        .custom-select-menu {
+            transform-origin: top;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+        [data-theme="dark"] .custom-select-menu {
+            background-color: rgba(30, 41, 59, 0.96) !important;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+        }
+        .custom-select-search {
+            transition: all 0.2s;
+        }
+        .custom-select-search:focus {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+            background-color: #ffffff !important;
+        }
+        [data-theme="dark"] .custom-select-search:focus {
+            background-color: #0f172a !important;
+        }
+        .custom-select-options::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-select-options::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-select-options::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        [data-theme="dark"] .custom-select-options::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        .custom-select-option {
+            transition: all 0.15s ease;
+        }
+        .custom-select-option:hover {
+            transform: translateX(3px);
+        }
     </style>
 </head>
 <body class="h-screen w-full flex flex-col overflow-hidden bg-slate-50">
@@ -20503,6 +20568,204 @@ YÊU CẦU ĐẦU RA:
         }
     };   
     // ============================================================
+    // PREMIUM CUSTOM SELECT COMPONENT MANAGER
+    // ============================================================
+    const CustomSelectManager = {
+        init(selectId, placeholder) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+
+            // Hide native select
+            select.classList.add('hidden');
+
+            // Look for existing container
+            let container = select.parentNode.querySelector(`.custom-select-container[data-select-id="${selectId}"]`);
+            if (!container) {
+                container = document.createElement('div');
+                container.className = 'relative custom-select-container w-full';
+                container.setAttribute('data-select-id', selectId);
+                
+                // Build trigger button
+                const trigger = document.createElement('button');
+                trigger.type = 'button';
+                trigger.className = 'custom-select-trigger w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-3 flex items-center justify-between text-xs font-semibold text-slate-700 outline-none transition-all dark:bg-slate-900/60 dark:border-slate-700 dark:text-slate-300';
+                
+                const label = document.createElement('span');
+                label.className = 'custom-select-label truncate';
+                label.textContent = placeholder;
+                
+                const icon = document.createElement('i');
+                icon.setAttribute('data-lucide', 'chevron-down');
+                icon.className = 'w-4 h-4 text-slate-400 select-arrow transition-transform';
+                
+                trigger.appendChild(label);
+                trigger.appendChild(icon);
+                
+                // Build dropdown menu card
+                const menu = document.createElement('div');
+                menu.className = 'custom-select-menu absolute left-0 right-0 mt-1.5 z-[100] hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-2xl shadow-2xl p-2.5 transition-all';
+                
+                // Build search input wrapper
+                const searchWrap = document.createElement('div');
+                searchWrap.className = 'relative mb-2';
+                
+                const searchIcon = document.createElement('i');
+                searchIcon.setAttribute('data-lucide', 'search');
+                searchIcon.className = 'w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400';
+                
+                const searchInput = document.createElement('input');
+                searchInput.type = 'text';
+                searchInput.className = 'custom-select-search w-full h-9 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 pl-9 pr-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10';
+                searchInput.placeholder = 'Tìm kiếm nhanh...';
+                
+                searchWrap.appendChild(searchIcon);
+                searchWrap.appendChild(searchInput);
+                
+                // Build options list
+                const optionsWrap = document.createElement('div');
+                optionsWrap.className = 'custom-select-options max-h-48 overflow-y-auto space-y-0.5 pr-1';
+                
+                menu.appendChild(searchWrap);
+                menu.appendChild(optionsWrap);
+                
+                container.appendChild(trigger);
+                container.appendChild(menu);
+                
+                // Insert in DOM right after the native select element
+                select.parentNode.insertBefore(container, select.nextSibling);
+
+                // Open/close dropdown logic
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleDropdown(container);
+                });
+
+                // Keypress search filter logic
+                searchInput.addEventListener('input', (e) => {
+                    this.filterOptions(container, e.target.value);
+                });
+            }
+
+            this.sync(selectId);
+        },
+
+        toggleDropdown(container) {
+            const menu = container.querySelector('.custom-select-menu');
+            const isHidden = menu.classList.contains('hidden');
+
+            // Close all other dropdown menus in the application
+            document.querySelectorAll('.custom-select-menu').forEach(m => m.classList.add('hidden'));
+            document.querySelectorAll('.select-arrow').forEach(a => a.style.transform = 'rotate(0deg)');
+            document.querySelectorAll('.custom-select-container').forEach(c => c.classList.remove('open'));
+
+            if (isHidden) {
+                menu.classList.remove('hidden');
+                container.classList.add('open');
+                const arrow = container.querySelector('.select-arrow');
+                if (arrow) arrow.style.transform = 'rotate(180deg)';
+                
+                // Auto focus search input on click open
+                const search = container.querySelector('.custom-select-search');
+                if (search) {
+                    search.value = '';
+                    search.focus();
+                    this.filterOptions(container, ''); // reset filter
+                }
+            }
+        },
+
+        filterOptions(container, query) {
+            const q = query.toLowerCase().trim();
+            const options = container.querySelectorAll('.custom-select-option');
+            options.forEach(opt => {
+                const txt = opt.querySelector('span').textContent.toLowerCase();
+                if (txt.includes(q)) {
+                    opt.style.display = 'flex';
+                } else {
+                    opt.style.display = 'none';
+                }
+            });
+        },
+
+        sync(selectId) {
+            const select = document.getElementById(selectId);
+            const container = select ? select.parentNode.querySelector(`.custom-select-container[data-select-id="${selectId}"]`) : null;
+            if (!select || !container) return;
+
+            const optionsWrap = container.querySelector('.custom-select-options');
+            if (!optionsWrap) return;
+            optionsWrap.innerHTML = '';
+
+            const selectedVal = select.value;
+            let selectedLabel = '';
+
+            Array.from(select.options).forEach(opt => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'custom-select-option w-full px-3 py-2 text-left text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white flex items-center justify-between transition-colors';
+                btn.setAttribute('data-value', opt.value);
+
+                const span = document.createElement('span');
+                span.textContent = opt.textContent;
+                
+                const check = document.createElement('i');
+                check.setAttribute('data-lucide', 'check');
+                check.className = 'w-3.5 h-3.5 text-blue-500 option-check hidden';
+
+                btn.appendChild(span);
+                btn.appendChild(check);
+
+                if (opt.value === selectedVal) {
+                    selectedLabel = opt.textContent;
+                    btn.classList.add('bg-blue-50/50', 'dark:bg-blue-500/10', 'text-blue-600', 'dark:text-blue-400');
+                    check.classList.remove('hidden');
+                }
+
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    select.value = opt.value;
+                    
+                    // Fire native 'change' event to notify other scripts
+                    const event = new Event('change', { bubbles: true });
+                    select.dispatchEvent(event);
+
+                    // Close dropdown and sync active class
+                    container.querySelector('.custom-select-menu').classList.add('hidden');
+                    container.classList.remove('open');
+                    const arrow = container.querySelector('.select-arrow');
+                    if (arrow) arrow.style.transform = 'rotate(0deg)';
+
+                    this.sync(selectId);
+                });
+
+                optionsWrap.appendChild(btn);
+            });
+
+            const label = container.querySelector('.custom-select-label');
+            if (label) {
+                label.textContent = selectedLabel || select.options[0]?.textContent || '';
+            }
+
+            // Sync beautiful Lucide icons
+            if (window.lucide) {
+                window.lucide.createIcons({
+                    attrs: {
+                        'data-lucide': true
+                    },
+                    nameAttr: 'data-lucide'
+                });
+            }
+        }
+    };
+
+    // Document click to close custom dropdowns
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.custom-select-menu').forEach(m => m.classList.add('hidden'));
+        document.querySelectorAll('.select-arrow').forEach(a => a.style.transform = 'rotate(0deg)');
+        document.querySelectorAll('.custom-select-container').forEach(c => c.classList.remove('open'));
+    });
+
+    // ============================================================
     // SPARE PARTS & PRICE COMPARE (TRA GIÁ KHO)
     // ============================================================
     const SpareParts = {
@@ -20585,6 +20848,12 @@ YÊU CẦU ĐẦU RA:
         data: [],
 
         init() {
+            // Initialize premium custom selects
+            CustomSelectManager.init('filterHang', 'Tất cả hãng');
+            CustomSelectManager.init('filterHieu', 'Tất cả dòng');
+            CustomSelectManager.init('filterNam', 'Tất cả năm');
+            CustomSelectManager.init('filterType', 'Tất cả loại hàng');
+
             lookupAuth.onAuthStateChanged(user => {
                 this._user = user;
                 this.updateAuthUI();
@@ -20658,6 +20927,9 @@ YÊU CẦU ĐẦU RA:
 
             const filterHieu = document.getElementById('filterHieu');
             if (filterHieu) filterHieu.innerHTML = '<option value="">Tất cả dòng</option>';
+
+            CustomSelectManager.sync('filterHang');
+            CustomSelectManager.sync('filterHieu');
         },
 
         loadLocalFilters() {
@@ -20687,6 +20959,11 @@ YÊU CẦU ĐẦU RA:
                     filterNam.appendChild(opt);
                 });
             }
+
+            CustomSelectManager.sync('filterHang');
+            CustomSelectManager.sync('filterHieu');
+            CustomSelectManager.sync('filterNam');
+            CustomSelectManager.sync('filterType');
 
             this.search();
         },
@@ -20719,6 +20996,7 @@ YÊU CẦU ĐẦU RA:
                     });
                 }
             }
+            CustomSelectManager.sync('filterHieu');
             this.search();
         },
 
@@ -20887,6 +21165,12 @@ YÊU CẦU ĐẦU RA:
             if (exactBtn) exactBtn.classList.remove('active');
 
             this.toggleClearBtn();
+
+            CustomSelectManager.sync('filterHang');
+            CustomSelectManager.sync('filterHieu');
+            CustomSelectManager.sync('filterNam');
+            CustomSelectManager.sync('filterType');
+
             this.search();
         },
 
