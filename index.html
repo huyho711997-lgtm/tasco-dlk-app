@@ -21070,27 +21070,22 @@ YÊU CẦU ĐẦU RA:
 
             if (this._user && !this._user.isAnonymous) {
                 box.innerHTML = `
-                    <div class="flex items-center gap-2.5 bg-gradient-to-r from-blue-50/60 to-indigo-50/40 border border-blue-100/40 px-3.5 h-9 rounded-xl dark:from-slate-800/80 dark:to-slate-850/60 dark:border-slate-700/50 shadow-[0_2px_8px_-3px_rgba(59,130,246,0.08)] select-none">
-                        <div class="relative shrink-0 flex items-center">
-                            <div class="w-6.5 h-6.5 rounded-lg bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-[9.5px] shadow-sm select-none">
-                                ${this._user.email ? this._user.email.charAt(0).toUpperCase() : 'U'}
-                            </div>
-                            <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border border-white dark:border-slate-850 animate-pulse"></span>
+                    <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 px-1.5 py-0.5 rounded-lg border border-slate-200/50 dark:border-slate-700/50 h-6 transition-all">
+                        <div class="w-4 h-4 rounded-md bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-[8px] shadow-sm select-none">
+                            ${this._user.email ? this._user.email.charAt(0).toUpperCase() : 'U'}
                         </div>
-                        <div class="flex flex-col text-left max-w-[80px]">
-                            <span class="text-[10px] font-black text-slate-800 dark:text-slate-200 leading-none truncate">${this._user.email ? this._user.email.split('@')[0] : 'User'}</span>
-                            <span class="text-[7.5px] text-blue-500 dark:text-blue-400 font-extrabold tracking-widest uppercase mt-0.5">AI LIVE</span>
-                        </div>
-                        <button onclick="SpareParts.logout()" class="w-5.5 h-5.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 active:scale-90 transition-all flex items-center justify-center ml-0.5" title="Đăng xuất">
-                            <i data-lucide="log-out" class="w-3 h-3"></i>
+                        <span class="text-[8.5px] font-black text-slate-700 dark:text-slate-200 leading-none max-w-[60px] truncate">${this._user.email ? this._user.email.split('@')[0] : 'User'}</span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                        <button onclick="SpareParts.logout()" class="p-0.5 rounded text-slate-400 hover:text-rose-500 active:scale-95 transition-all ml-0.5" title="Đăng xuất">
+                            <i data-lucide="log-out" class="w-2.5 h-2.5"></i>
                         </button>
                     </div>
                 `;
             } else {
                 box.innerHTML = `
-                    <button onclick="SpareParts.showLoginForm()" class="shrink-0 flex items-center gap-1.5 h-9 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 active:scale-95 transition-all text-white text-xs font-bold shadow-md shadow-blue-500/10" title="Đăng nhập tài khoản AI để kết nối dữ liệu thực tế">
-                        <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
-                        <span>Đăng nhập AI</span>
+                    <button onclick="SpareParts.showLoginForm()" class="shrink-0 flex items-center gap-1 h-6 px-2 rounded-lg bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all text-white text-[9px] font-black shadow-sm" title="Đăng nhập tài khoản AI để kết nối dữ liệu thực tế">
+                        <i data-lucide="key-round" class="w-2.5 h-2.5"></i>
+                        <span>Đăng Nhập AI</span>
                     </button>
                 `;
             }
