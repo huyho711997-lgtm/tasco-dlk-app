@@ -1,21 +1,10 @@
-const CACHE_NAME = 'tasco-dlk-cache-v2';
+const CACHE_NAME = 'tasco-dlk-cache-v3';
 const PRE_CACHE_ASSETS = [
   './',
   './index.html',
   './desktop.html',
   './gara-portal.html',
-  'https://cdn.tailwindcss.com',
-  'https://unpkg.com/lucide@latest',
-  'https://cdn.jsdelivr.net/npm/sweetalert2@11',
-  'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/vi.min.js',
-  'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js',
-  'https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js',
-  'https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/fslightbox/3.3.1/index.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
-  'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap'
+  './manifest.json'
 ];
 
 // Install: pre-cache critical assets
