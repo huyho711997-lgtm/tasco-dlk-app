@@ -20912,7 +20912,7 @@ YÊU CẦU ĐẦU RA:
                     if (hieu) q = q.where('hieu_xe', '==', hieu);
                     if (nam) q = q.where('nam_sx', '==', parseInt(nam));
 
-                    const snap = await q.orderBy('ngay_bao_gia', 'desc').limit(200).get();
+                    const snap = await q.limit(200).get();
                     let rawResults = [];
                     snap.forEach(doc => {
                         const item = doc.data();
@@ -20947,6 +20947,13 @@ YÊU CẦU ĐẦU RA:
                         } else {
                             rawResults.push(mappedItem);
                         }
+                    });
+
+                    // Sort in memory by ngay_bao_gia descending to avoid needing compound indexes
+                    rawResults.sort((a, b) => {
+                        const dateA = a.ngay_bao_gia ? new Date(a.ngay_bao_gia).getTime() : 0;
+                        const dateB = b.ngay_bao_gia ? new Date(b.ngay_bao_gia).getTime() : 0;
+                        return dateB - dateA;
                     });
 
                     this.data = rawResults;
