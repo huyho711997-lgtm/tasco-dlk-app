@@ -20470,11 +20470,496 @@ YÊU CẦU ĐẦU RA:
     // ============================================================
     const SpareParts = {
         list: [],
+        seedData: [
+            // Toyota Vios
+            { hang: "Toyota", hieu: "Vios", nam: 2020, name: "Cản trước Vios 2020", code: "52119-0D560", type: "genuine", price: 1850000, verified: true },
+            { hang: "Toyota", hieu: "Vios", nam: 2020, name: "Cản trước Vios 2020 (Thái Lan)", code: "52119-0D560-ALT", type: "aftermarket", price: 1100000, verified: true },
+            { hang: "Toyota", hieu: "Vios", nam: 2020, name: "Cản trước Vios 2020 (Đài Loan)", code: "TY-VIOS20-FT", type: "aftermarket", price: 950000, verified: false },
+            { hang: "Toyota", hieu: "Vios", nam: 2020, name: "Cản trước Vios 2020 (Trung Quốc)", code: "TY-VIOS20-FT-CN", type: "aftermarket", price: 800000, verified: false },
+            { hang: "Toyota", hieu: "Vios", nam: 2020, name: "Đèn pha phải Vios 2020 Halogen", code: "81110-0D650", type: "genuine", price: 3450000, verified: true },
+            { hang: "Toyota", hieu: "Vios", nam: 2020, name: "Đèn pha phải Vios 2020 (TYC Taiwan)", code: "20-E453-05-2B", type: "aftermarket", price: 2150000, verified: true },
+            { hang: "Toyota", hieu: "Vios", nam: 2019, name: "Đèn pha trái Vios 2019 Halogen", code: "81150-0D650", type: "genuine", price: 3450000, verified: true },
+            { hang: "Toyota", hieu: "Vios", nam: 2019, name: "Gương chiếu hậu phải Vios 2019 (Có xi nhan)", code: "87910-0D530", type: "genuine", price: 2200000, verified: true },
+            { hang: "Toyota", hieu: "Vios", nam: 2019, name: "Gương chiếu hậu phải Vios 2019 (OEM Taiwan)", code: "TY-VIOS19-MR", type: "aftermarket", price: 1350000, verified: false },
+            { hang: "Toyota", hieu: "Vios", nam: 2021, name: "Má phanh trước Vios 2021", code: "04465-0D150", type: "genuine", price: 1250000, verified: true },
+            { hang: "Toyota", hieu: "Vios", nam: 2021, name: "Má phanh trước Vios 2021 (Bendix)", code: "DB1941-GCT", type: "aftermarket", price: 650000, verified: true },
+            { hang: "Toyota", hieu: "Vios", nam: 2021, name: "Má phanh trước Vios 2021 (Akebono)", code: "AN-718K", type: "aftermarket", price: 580000, verified: true },
+            { hang: "Toyota", hieu: "Vios", nam: 2021, name: "Giảm xóc trước phải Vios 2021", code: "48510-0D510", type: "genuine", price: 2100000, verified: true },
+            { hang: "Toyota", hieu: "Vios", nam: 2021, name: "Giảm xóc trước phải Vios 2021 (KYB)", code: "3330058", type: "aftermarket", price: 1350000, verified: true },
+            { hang: "Toyota", hieu: "Vios", nam: 2018, name: "Kính chắn gió trước Vios 2018-2022", code: "56111-0D270", type: "genuine", price: 3800000, verified: true },
+            { hang: "Toyota", hieu: "Vios", nam: 2018, name: "Kính chắn gió trước Vios (OEM AGC)", code: "56111-0D270-AGC", type: "aftermarket", price: 2300000, verified: true },
+            { hang: "Toyota", hieu: "Vios", nam: 2020, name: "Lốc lạnh điều hòa Vios 2020 (Denso)", code: "447280-3150", type: "genuine", price: 7900000, verified: true },
+            { hang: "Toyota", hieu: "Vios", nam: 2020, name: "Lốc lạnh điều hòa Vios 2020 (Denso Cool Gear)", code: "DI447280-3150", type: "aftermarket", price: 4350000, verified: true },
+
+            // Hyundai Accent
+            { hang: "Hyundai", hieu: "Accent", nam: 2021, name: "Cản trước Hyundai Accent 2021", code: "86511-H5000", type: "genuine", price: 1650000, verified: true },
+            { hang: "Hyundai", hieu: "Accent", nam: 2021, name: "Cản trước Hyundai Accent 2021 (Đài Loan)", code: "HY-ACC21-FT", type: "aftermarket", price: 920000, verified: false },
+            { hang: "Hyundai", hieu: "Accent", nam: 2021, name: "Cản trước Hyundai Accent 2021 (Hàn Quốc OEM)", code: "86511-H5000-KOR", type: "aftermarket", price: 1200000, verified: true },
+            { hang: "Hyundai", hieu: "Accent", nam: 2020, name: "Đèn pha phải Accent 2020 LED", code: "92102-H5500", type: "genuine", price: 6800000, verified: true },
+            { hang: "Hyundai", hieu: "Accent", nam: 2020, name: "Đèn pha phải Accent 2020 Halogen", code: "92102-H5000", type: "genuine", price: 3100000, verified: true },
+            { hang: "Hyundai", hieu: "Accent", nam: 2020, name: "Đèn pha phải Accent 2020 Halogen (Taiwan)", code: "HY-ACC20-HL-R", type: "aftermarket", price: 1850000, verified: false },
+            { hang: "Hyundai", hieu: "Accent", nam: 2020, name: "Két nước làm mát Accent 2018-2022 (AT)", code: "25310-H5100", type: "genuine", price: 2150000, verified: true },
+            { hang: "Hyundai", hieu: "Accent", nam: 2020, name: "Két nước làm mát Accent 2018-2022 (AT HCC)", code: "25310-H5100-HCC", type: "aftermarket", price: 1300000, verified: true },
+            { hang: "Hyundai", hieu: "Accent", nam: 2019, name: "Gương chiếu hậu trái Accent 2019 (Có xi nhan chỉnh điện)", code: "87610-H5030", type: "genuine", price: 2600000, verified: true },
+            { hang: "Hyundai", hieu: "Accent", nam: 2019, name: "Gương chiếu hậu trái Accent 2019 (OEM)", code: "87610-H5030-OEM", type: "aftermarket", price: 1450000, verified: false },
+            { hang: "Hyundai", hieu: "Accent", nam: 2022, name: "Má phanh trước Hyundai Accent 2022", code: "58101-H5A25", type: "genuine", price: 1150000, verified: true },
+            { hang: "Hyundai", hieu: "Accent", nam: 2022, name: "Má phanh trước Accent 2022 (Sangsin Hàn Quốc)", code: "SP1848", type: "aftermarket", price: 480000, verified: true },
+            { hang: "Hyundai", hieu: "Accent", nam: 2022, name: "Má phanh trước Accent 2022 (Hi-Q Korea)", code: "SP1848-HIQ", type: "aftermarket", price: 390000, verified: true },
+            { hang: "Hyundai", hieu: "Accent", nam: 2021, name: "Rotuyn cân bằng trước Accent 2021", code: "54830-H5000", type: "genuine", price: 450000, verified: true },
+            { hang: "Hyundai", hieu: "Accent", nam: 2021, name: "Rotuyn cân bằng trước Accent (CTR Korea)", code: "CLKH-46", type: "aftermarket", price: 230000, verified: true },
+
+            // Mazda 3
+            { hang: "Mazda", hieu: "Mazda 3", nam: 2019, name: "Đèn pha phải Mazda 3 2019 LED", code: "B63B-51-030", type: "genuine", price: 16500000, verified: true },
+            { hang: "Mazda", hieu: "Mazda 3", nam: 2019, name: "Đèn pha phải Mazda 3 2019 LED (Hàng OEM tháo xe)", code: "B63B-51-030-U", type: "aftermarket", price: 8500000, verified: true },
+            { hang: "Mazda", hieu: "Mazda 3", nam: 2018, name: "Đèn pha phải Mazda 3 2018 LED FL", code: "B62D-51-030B", type: "genuine", price: 13500000, verified: true },
+            { hang: "Mazda", hieu: "Mazda 3", nam: 2018, name: "Đèn pha phải Mazda 3 2018 LED (OEM)", code: "MZ-M3-18-LED-R", type: "aftermarket", price: 6200000, verified: false },
+            { hang: "Mazda", hieu: "Mazda 3", nam: 2020, name: "Cản trước Mazda 3 2020 (Sedan)", code: "BCKA-50-031A-AA", type: "genuine", price: 4200000, verified: true },
+            { hang: "Mazda", hieu: "Mazda 3", nam: 2020, name: "Cản trước Mazda 3 2020 (Hàng OEM Đài Loan)", code: "MZ-M320-FT", type: "aftermarket", price: 2100000, verified: false },
+            { hang: "Mazda", hieu: "Mazda 3", nam: 2020, name: "Má phanh trước Mazda 3 2020", code: "BDY2-33-28Z", type: "genuine", price: 2250000, verified: true },
+            { hang: "Mazda", hieu: "Mazda 3", nam: 2020, name: "Má phanh trước Mazda 3 2020 (Bendix)", code: "DB2368-GCT", type: "aftermarket", price: 850000, verified: true },
+            { hang: "Mazda", hieu: "Mazda 3", nam: 2020, name: "Má phanh trước Mazda 3 2020 (Akebono)", code: "AN-820WK", type: "aftermarket", price: 790000, verified: true },
+
+            // VinFast Fadil
+            { hang: "VinFast", hieu: "Fadil", nam: 2021, name: "Cản trước VinFast Fadil", code: "42713600", type: "genuine", price: 1450000, verified: true },
+            { hang: "VinFast", hieu: "Fadil", nam: 2021, name: "Cản trước VinFast Fadil (OEM Việt Nam)", code: "VF-FADIL-FT", type: "aftermarket", price: 850000, verified: false },
+            { hang: "VinFast", hieu: "Fadil", nam: 2020, name: "Đèn pha phải VinFast Fadil (Halogen)", code: "42714201", type: "genuine", price: 2950000, verified: true },
+            { hang: "VinFast", hieu: "Fadil", nam: 2020, name: "Đèn pha phải VinFast Fadil (OEM Taiwan)", code: "VF-FADIL-HL-R", type: "aftermarket", price: 1750000, verified: false },
+            { hang: "VinFast", hieu: "Fadil", nam: 2020, name: "Lốc điều hòa VinFast Fadil", code: "42716301", type: "genuine", price: 5800000, verified: true },
+            { hang: "VinFast", hieu: "Fadil", nam: 2020, name: "Lốc điều hòa VinFast Fadil (Hàng Sanden)", code: "SD-FADIL-AC", type: "aftermarket", price: 3450000, verified: true },
+            { hang: "VinFast", hieu: "Fadil", nam: 2021, name: "Kính chiếu hậu phải Fadil (Gập tay)", code: "42718105", type: "genuine", price: 1650000, verified: true },
+            { hang: "VinFast", hieu: "Fadil", nam: 2021, name: "Kính chiếu hậu phải Fadil (Gập điện OEM)", code: "VF-FADIL-MRE", type: "aftermarket", price: 1100000, verified: false },
+
+            // Honda City
+            { hang: "Honda", hieu: "City", nam: 2021, name: "Cản trước Honda City 2021", code: "71101-T00-T00", type: "genuine", price: 1950000, verified: true },
+            { hang: "Honda", hieu: "City", nam: 2021, name: "Cản trước Honda City 2021 (Taiwan OEM)", code: "HD-CITY21-FT", type: "aftermarket", price: 1050000, verified: false },
+            { hang: "Honda", hieu: "City", nam: 2020, name: "Đèn pha phải Honda City 2020 LED", code: "33100-T9A-T91", type: "genuine", price: 8900000, verified: true },
+            { hang: "Honda", hieu: "City", nam: 2020, name: "Đèn pha phải Honda City 2020 LED (OEM TYC)", code: "HD-CITY20-LED-R", type: "aftermarket", price: 4400000, verified: true },
+            { hang: "Honda", hieu: "City", nam: 2020, name: "Gương chiếu hậu trái City 2020 (9 giắc có camera)", code: "76250-T9A-T91", type: "genuine", price: 4600000, verified: true },
+            { hang: "Honda", hieu: "City", nam: 2020, name: "Gương chiếu hậu trái City 2020 (OEM Đài Loan)", code: "HD-CITY20-MR-L", type: "aftermarket", price: 2350000, verified: false }
+        ],
+
+        data: [],
+        currentPage: 1,
+        pageSize: 5,
+        filteredData: [],
+        exactMatch: false,
+
         init() {
             db.ref('SparePartsPrice').on('value', snap => {
                 const raw = snap.val() || {};
                 this.list = Object.keys(raw).map(k => ({ _key: k, ...raw[k] }));
+
+                // Map Firebase live database properties to fit the schema
+                const liveData = this.list.map(item => ({
+                    hang: item.hang || item.brand || "Toyota",
+                    hieu: item.hieu || item.model || "Vios",
+                    nam: parseInt(item.nam || item.year) || 2020,
+                    name: item.name || item.partName || "Cản trước",
+                    code: item.code || item.partCode || "52119-0D560",
+                    type: item.type || (item.chinhHang ? "genuine" : "aftermarket"),
+                    price: parseInt(item.price || item.cost) || 1200000,
+                    verified: item.verified !== undefined ? item.verified : true
+                }));
+
+                // Combine them without duplicates (keyed by code)
+                const combined = [...liveData];
+                this.seedData.forEach(seed => {
+                    if (!combined.some(c => c.code === seed.code)) {
+                        combined.push(seed);
+                    }
+                });
+
+                this.data = combined;
+
+                // Sync total count elements in UI
+                const countBadge = document.getElementById('spare-total-count');
+                if (countBadge) {
+                    countBadge.textContent = `Tổng kho: ${this.data.length} phụ tùng chuẩn`;
+                }
+
+                // If the spare parts tab is currently visible, refresh results
+                const spareView = document.getElementById('view-spare');
+                if (spareView && !spareView.classList.contains('hidden')) {
+                    this.search();
+                }
             });
+        },
+
+        loadFilters() {
+            // Lấy danh sách duy nhất các hãng xe
+            const hangs = [...new Set(this.data.map(item => item.hang))].sort();
+            const filterHang = document.getElementById('filterHang');
+            if (filterHang) {
+                filterHang.innerHTML = '<option value="">Tất cả hãng</option>';
+                hangs.forEach(hang => {
+                    const opt = document.createElement('option');
+                    opt.value = hang;
+                    opt.textContent = hang;
+                    filterHang.appendChild(opt);
+                });
+            }
+
+            // Reset dòng xe và đời xe
+            const filterHieu = document.getElementById('filterHieu');
+            if (filterHieu) filterHieu.innerHTML = '<option value="">Tất cả dòng</option>';
+
+            const filterNam = document.getElementById('filterNam');
+            if (filterNam) {
+                filterNam.innerHTML = '<option value="">Tất cả năm</option>';
+                const nams = [...new Set(this.data.map(item => item.nam))].sort((a,b) => b - a);
+                nams.forEach(nam => {
+                    const opt = document.createElement('option');
+                    opt.value = nam;
+                    opt.textContent = nam;
+                    filterNam.appendChild(opt);
+                });
+            }
+
+            this.search();
+        },
+
+        onHangChange() {
+            const hangSelect = document.getElementById('filterHang');
+            const hieuSelect = document.getElementById('filterHieu');
+            if (!hangSelect || !hieuSelect) return;
+
+            const hang = hangSelect.value;
+            hieuSelect.innerHTML = '<option value="">Tất cả dòng</option>';
+
+            if (hang) {
+                const hieus = [...new Set(this.data.filter(item => item.hang === hang).map(item => item.hieu))].sort();
+                hieus.forEach(hieu => {
+                    const opt = document.createElement('option');
+                    opt.value = hieu;
+                    opt.textContent = hieu;
+                    hieuSelect.appendChild(opt);
+                });
+            }
+            this.search();
+        },
+
+        toggleExactMatch() {
+            this.exactMatch = !this.exactMatch;
+            const btn = document.getElementById('btnExactPartName');
+            if (btn) {
+                if (this.exactMatch) btn.classList.add('active');
+                else btn.classList.remove('active');
+            }
+            this.search();
+        },
+
+        clearSearchInput() {
+            const input = document.getElementById('spareSearchInput');
+            if (input) input.value = '';
+            this.toggleClearBtn();
+            this.search();
+        },
+
+        toggleClearBtn() {
+            const input = document.getElementById('spareSearchInput');
+            const clearBtn = document.getElementById('spareClearBtn');
+            if (!input || !clearBtn) return;
+
+            if (input.value.trim().length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+        },
+
+        clearFilters() {
+            const hang = document.getElementById('filterHang');
+            const hieu = document.getElementById('filterHieu');
+            const nam = document.getElementById('filterNam');
+            const type = document.getElementById('filterType');
+            const searchInput = document.getElementById('spareSearchInput');
+            const exactBtn = document.getElementById('btnExactPartName');
+
+            if (hang) hang.value = '';
+            if (hieu) hieu.innerHTML = '<option value="">Tất cả dòng</option>';
+            if (nam) nam.value = '';
+            if (type) type.value = 'all';
+            if (searchInput) searchInput.value = '';
+            this.exactMatch = false;
+            if (exactBtn) exactBtn.classList.remove('active');
+
+            this.toggleClearBtn();
+            this.search();
+        },
+
+        search() {
+            const hangEl = document.getElementById('filterHang');
+            const hieuEl = document.getElementById('filterHieu');
+            const namEl = document.getElementById('filterNam');
+            const typeEl = document.getElementById('filterType');
+            const searchEl = document.getElementById('spareSearchInput');
+
+            const hang = hangEl ? hangEl.value : '';
+            const hieu = hieuEl ? hieuEl.value : '';
+            const nam = namEl ? namEl.value : '';
+            const type = typeEl ? typeEl.value : 'all';
+            const keyword = searchEl ? searchEl.value.trim().toLowerCase() : '';
+
+            this.filteredData = this.data.filter(item => {
+                if (hang && item.hang !== hang) return false;
+                if (hieu && item.hieu !== hieu) return false;
+                if (nam && item.nam !== parseInt(nam)) return false;
+                if (type !== 'all' && item.type !== type) return false;
+
+                if (keyword) {
+                    const nameLower = item.name.toLowerCase();
+                    const codeLower = item.code.toLowerCase();
+                    if (this.exactMatch) {
+                        return nameLower === keyword || codeLower === keyword;
+                    } else {
+                        return nameLower.includes(keyword) || codeLower.includes(keyword);
+                    }
+                }
+                return true;
+            });
+
+            this.currentPage = 1;
+            this.render();
+            this.calculateStats();
+        },
+
+        calculateStats() {
+            const summaryBox = document.getElementById('priceSummaryBox');
+            const analysisBox = document.getElementById('priceAnalysisBox');
+            if (!summaryBox || !analysisBox) return;
+
+            if (this.filteredData.length === 0) {
+                summaryBox.classList.add('hidden');
+                analysisBox.classList.add('hidden');
+                return;
+            }
+
+            summaryBox.classList.remove('hidden');
+            analysisBox.classList.remove('hidden');
+
+            const prices = this.filteredData.map(item => item.price).sort((a,b) => a - b);
+            const count = prices.length;
+            const min = prices[0];
+            const max = prices[count - 1];
+
+            const sum = prices.reduce((acc, p) => acc + p, 0);
+            const avg = Math.round(sum / count);
+
+            let median = 0;
+            if (count % 2 === 1) {
+                median = prices[Math.floor(count / 2)];
+            } else {
+                median = Math.round((prices[count / 2 - 1] + prices[count / 2]) / 2);
+            }
+
+            const getPercentile = (arr, p) => {
+                const index = (arr.length - 1) * p;
+                const lower = Math.floor(index);
+                const upper = Math.ceil(index);
+                const weight = index - lower;
+                return Math.round(arr[lower] * (1 - weight) + arr[upper] * weight);
+            };
+            const q1 = getPercentile(prices, 0.25);
+            const q3 = getPercentile(prices, 0.75);
+
+            const formatVnd = (num) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num).replace('₫', 'đ');
+
+            const minEl = document.getElementById('priceMinValue');
+            const avgEl = document.getElementById('priceAvgValue');
+            const maxEl = document.getElementById('priceMaxValue');
+            if (minEl) minEl.textContent = formatVnd(min);
+            if (avgEl) avgEl.textContent = formatVnd(avg);
+            if (maxEl) maxEl.textContent = formatVnd(max);
+
+            const medEl = document.getElementById('analysisMedianValue');
+            const sugEl = document.getElementById('analysisSuggestedRange');
+            const smpEl = document.getElementById('analysisSampleCount');
+            const q1El = document.getElementById('analysisQ1Chip');
+            const q3El = document.getElementById('analysisQ3Chip');
+
+            if (medEl) medEl.textContent = formatVnd(median);
+            if (sugEl) sugEl.textContent = `${formatVnd(q1)} - ${formatVnd(q3)}`;
+            if (smpEl) smpEl.textContent = `Mẫu: ${count}`;
+            if (q1El) q1El.textContent = `Q1: ${formatVnd(q1)}`;
+            if (q3El) q3El.textContent = `Q3: ${formatVnd(q3)}`;
+
+            const confidenceText = document.getElementById('analysisConfidenceText');
+            if (confidenceText) {
+                if (count >= 10) {
+                    confidenceText.textContent = "Độ tin cậy: Rất Cao";
+                    confidenceText.className = "text-[8.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400";
+                } else if (count >= 5) {
+                    confidenceText.textContent = "Độ tin cậy: Cao";
+                    confidenceText.className = "text-[8.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400";
+                } else if (count >= 3) {
+                    confidenceText.textContent = "Độ tin cậy: Vừa phải";
+                    confidenceText.className = "text-[8.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400";
+                } else {
+                    confidenceText.textContent = "Độ tin cậy: Thấp (Mẫu ít)";
+                    confidenceText.className = "text-[8.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400";
+                }
+            }
+
+            const statusBadge = document.getElementById('analysisStatusBadge');
+            if (statusBadge) {
+                const priceSpread = (max - min) / (median || 1);
+                if (priceSpread < 0.3) {
+                    statusBadge.textContent = "Mẫu ổn định";
+                    statusBadge.className = "px-2.5 py-1 text-[8.5px] font-black uppercase tracking-widest rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-500/20";
+                } else if (priceSpread < 0.8) {
+                    statusBadge.textContent = "Biến động nhẹ";
+                    statusBadge.className = "px-2.5 py-1 text-[8.5px] font-black uppercase tracking-widest rounded-full bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-500/20";
+                } else {
+                    statusBadge.textContent = "Phân tán rộng";
+                    statusBadge.className = "px-2.5 py-1 text-[8.5px] font-black uppercase tracking-widest rounded-full bg-rose-50 text-rose-600 border border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-500/20";
+                }
+            }
+
+            const warningTitle = document.getElementById('analysisWarningTitle');
+            const warningText = document.getElementById('analysisWarningText');
+            if (warningTitle) warningTitle.textContent = "GỢI Ý DUYỆT GIÁ TỐI ƯU";
+            if (warningText) {
+                warningText.textContent = `Hệ thống khuyên dùng khoảng duyệt giá tối ưu từ ${formatVnd(q1)} đến ${formatVnd(q3)} (khoảng trung tâm 50% thị trường). Các mức giá dưới ${formatVnd(q1)} có thể là hàng chất lượng thấp hoặc báo giá ảo. Các mức giá vượt ${formatVnd(q3)} cần được kiểm tra kỹ tài liệu chứng minh nguồn gốc chính hãng hoặc có sự chấp thuận đặc biệt.`;
+            }
+        },
+
+        changePage(direction) {
+            const maxPage = Math.ceil(this.filteredData.length / this.pageSize) || 1;
+            const newPage = this.currentPage + direction;
+            if (newPage >= 1 && newPage <= maxPage) {
+                this.currentPage = newPage;
+                this.render();
+            }
+        },
+
+        toggleVerifyItem(index) {
+            const targetItem = this.filteredData[index];
+            if (!targetItem) return;
+
+            const realIndex = this.data.findIndex(item => item.code === targetItem.code && item.name === targetItem.name);
+            if (realIndex !== -1) {
+                this.data[realIndex].verified = !this.data[realIndex].verified;
+
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: this.data[realIndex].verified ? 'Đã duyệt giá thành công' : 'Đã hủy duyệt giá',
+                    showConfirmButton: false,
+                    timer: 1500,
+                    timerProgressBar: true,
+                    background: document.documentElement.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                    color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#f8fafc' : '#0f172a'
+                });
+
+                this.search();
+            }
+        },
+
+        render() {
+            const listContainer = document.getElementById('resultsSpareList');
+            const paginationContainer = document.getElementById('sparePagination');
+            const pageInfo = document.getElementById('sparePageInfo');
+            if (!listContainer || !paginationContainer) return;
+
+            if (this.filteredData.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="text-center py-20 text-slate-300 font-extrabold uppercase italic text-xs tracking-wider dark:text-slate-600">
+                        Không tìm thấy phụ tùng phù hợp
+                    </div>
+                `;
+                paginationContainer.classList.add('hidden');
+                return;
+            }
+
+            paginationContainer.classList.remove('hidden');
+            const maxPage = Math.ceil(this.filteredData.length / this.pageSize) || 1;
+            if (pageInfo) pageInfo.textContent = `Trang ${this.currentPage} / ${maxPage}`;
+
+            const prevBtn = document.getElementById('btnSparePrev');
+            const nextBtn = document.getElementById('btnSpareNext');
+            if (prevBtn) prevBtn.disabled = this.currentPage === 1;
+            if (nextBtn) nextBtn.disabled = this.currentPage === maxPage;
+
+            const start = (this.currentPage - 1) * this.pageSize;
+            const end = start + this.pageSize;
+            const pageItems = this.filteredData.slice(start, end);
+
+            const formatVnd = (num) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num).replace('₫', 'đ');
+
+            const prices = this.filteredData.map(item => item.price).sort((a,b) => a - b);
+            const count = prices.length;
+            let median = 0;
+            if (count % 2 === 1) {
+                median = prices[Math.floor(count / 2)];
+            } else {
+                median = Math.round((prices[count / 2 - 1] + prices[count / 2]) / 2);
+            }
+
+            const getPercentile = (arr, p) => {
+                const index = (arr.length - 1) * p;
+                const lower = Math.floor(index);
+                const upper = Math.ceil(index);
+                const weight = index - lower;
+                return Math.round(arr[lower] * (1 - weight) + arr[upper] * weight);
+            };
+            const q1 = getPercentile(prices, 0.25);
+            const q3 = getPercentile(prices, 0.75);
+
+            let html = '';
+            pageItems.forEach((item, idx) => {
+                const displayIndex = start + idx;
+
+                const typeBadge = item.type === 'genuine'
+                    ? '<span class="badge-pro badge-genuine"><i data-lucide="shield-check" class="w-3 h-3"></i> Chính hãng</span>'
+                    : '<span class="badge-pro badge-aftermarket"><i data-lucide="wrench" class="w-3 h-3"></i> Thay thế</span>';
+
+                const verifyBadge = item.verified
+                    ? `<span onclick="SpareParts.toggleVerifyItem(${displayIndex})" class="badge-pro badge-verified"><i data-lucide="check-check" class="w-3 h-3"></i> Đã duyệt giá</span>`
+                    : `<span onclick="SpareParts.toggleVerifyItem(${displayIndex})" class="badge-pro badge-unverified"><i data-lucide="help-circle" class="w-3 h-3"></i> Chờ duyệt giá</span>`;
+
+                let priceSignal = '';
+                if (item.price < q1) {
+                    priceSignal = '<span class="price-signal-badge price-signal-low"><i data-lucide="trending-down" class="w-2.5 h-2.5"></i> Giá cực tốt</span>';
+                } else if (item.price > q3) {
+                    priceSignal = '<span class="price-signal-badge price-signal-high"><i data-lucide="trending-up" class="w-2.5 h-2.5"></i> Vượt khung Q3</span>';
+                } else if (Math.abs(item.price - median) / (median || 1) < 0.1) {
+                    priceSignal = '<span class="price-signal-badge price-signal-ok"><i data-lucide="award" class="w-2.5 h-2.5"></i> Giá chuẩn</span>';
+                } else {
+                    priceSignal = '<span class="price-signal-badge price-signal-watch"><i data-lucide="alert-triangle" class="w-2.5 h-2.5"></i> Cần cân đối</span>';
+                }
+
+                html += `
+                    <div class="spare-part-card">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-2 dark:border-slate-800">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">${item.hang}</span>
+                                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400">${item.hieu} (${item.nam})</span>
+                            </div>
+                            <span class="text-[9px] font-mono font-bold text-slate-400 dark:text-slate-500">${item.code}</span>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <span class="text-xs font-black text-slate-800 leading-tight dark:text-white">${item.name}</span>
+                        </div>
+                        <div class="flex items-center justify-between mt-1">
+                            <div class="flex flex-wrap gap-1.5 items-center">
+                                ${typeBadge}
+                                ${verifyBadge}
+                            </div>
+                            <div class="flex flex-col items-end">
+                                ${priceSignal}
+                                <span class="price-text mt-1.5">${formatVnd(item.price)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            listContainer.innerHTML = html;
+
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
         }
     };
 
@@ -21498,454 +21983,6 @@ YÊU CẦU ĐẦU RA:
             }
         }
     }; 
-    // ============================================================
-    // TRA CỨU PHỤ TÙNG (SPARE PARTS LOOKUP & STATS)
-    // ============================================================
-    const SpareParts = {
-        data: [
-            // Toyota Vios
-            { hang: "Toyota", hieu: "Vios", nam: 2020, name: "Cản trước Vios 2020", code: "52119-0D560", type: "genuine", price: 1850000, verified: true },
-            { hang: "Toyota", hieu: "Vios", nam: 2020, name: "Cản trước Vios 2020 (Thái Lan)", code: "52119-0D560-ALT", type: "aftermarket", price: 1100000, verified: true },
-            { hang: "Toyota", hieu: "Vios", nam: 2020, name: "Cản trước Vios 2020 (Đài Loan)", code: "TY-VIOS20-FT", type: "aftermarket", price: 950000, verified: false },
-            { hang: "Toyota", hieu: "Vios", nam: 2020, name: "Cản trước Vios 2020 (Trung Quốc)", code: "TY-VIOS20-FT-CN", type: "aftermarket", price: 800000, verified: false },
-            { hang: "Toyota", hieu: "Vios", nam: 2020, name: "Đèn pha phải Vios 2020 Halogen", code: "81110-0D650", type: "genuine", price: 3450000, verified: true },
-            { hang: "Toyota", hieu: "Vios", nam: 2020, name: "Đèn pha phải Vios 2020 (TYC Taiwan)", code: "20-E453-05-2B", type: "aftermarket", price: 2150000, verified: true },
-            { hang: "Toyota", hieu: "Vios", nam: 2019, name: "Đèn pha trái Vios 2019 Halogen", code: "81150-0D650", type: "genuine", price: 3450000, verified: true },
-            { hang: "Toyota", hieu: "Vios", nam: 2019, name: "Gương chiếu hậu phải Vios 2019 (Có xi nhan)", code: "87910-0D530", type: "genuine", price: 2200000, verified: true },
-            { hang: "Toyota", hieu: "Vios", nam: 2019, name: "Gương chiếu hậu phải Vios 2019 (OEM Taiwan)", code: "TY-VIOS19-MR", type: "aftermarket", price: 1350000, verified: false },
-            { hang: "Toyota", hieu: "Vios", nam: 2021, name: "Má phanh trước Vios 2021", code: "04465-0D150", type: "genuine", price: 1250000, verified: true },
-            { hang: "Toyota", hieu: "Vios", nam: 2021, name: "Má phanh trước Vios 2021 (Bendix)", code: "DB1941-GCT", type: "aftermarket", price: 650000, verified: true },
-            { hang: "Toyota", hieu: "Vios", nam: 2021, name: "Má phanh trước Vios 2021 (Akebono)", code: "AN-718K", type: "aftermarket", price: 580000, verified: true },
-            { hang: "Toyota", hieu: "Vios", nam: 2021, name: "Giảm xóc trước phải Vios 2021", code: "48510-0D510", type: "genuine", price: 2100000, verified: true },
-            { hang: "Toyota", hieu: "Vios", nam: 2021, name: "Giảm xóc trước phải Vios 2021 (KYB)", code: "3330058", type: "aftermarket", price: 1350000, verified: true },
-            { hang: "Toyota", hieu: "Vios", nam: 2018, name: "Kính chắn gió trước Vios 2018-2022", code: "56111-0D270", type: "genuine", price: 3800000, verified: true },
-            { hang: "Toyota", hieu: "Vios", nam: 2018, name: "Kính chắn gió trước Vios (OEM AGC)", code: "56111-0D270-AGC", type: "aftermarket", price: 2300000, verified: true },
-            { hang: "Toyota", hieu: "Vios", nam: 2020, name: "Lốc lạnh điều hòa Vios 2020 (Denso)", code: "447280-3150", type: "genuine", price: 7900000, verified: true },
-            { hang: "Toyota", hieu: "Vios", nam: 2020, name: "Lốc lạnh điều hòa Vios 2020 (Denso Cool Gear)", code: "DI447280-3150", type: "aftermarket", price: 4350000, verified: true },
-
-            // Hyundai Accent
-            { hang: "Hyundai", hieu: "Accent", nam: 2021, name: "Cản trước Hyundai Accent 2021", code: "86511-H5000", type: "genuine", price: 1650000, verified: true },
-            { hang: "Hyundai", hieu: "Accent", nam: 2021, name: "Cản trước Hyundai Accent 2021 (Đài Loan)", code: "HY-ACC21-FT", type: "aftermarket", price: 920000, verified: false },
-            { hang: "Hyundai", hieu: "Accent", nam: 2021, name: "Cản trước Hyundai Accent 2021 (Hàn Quốc OEM)", code: "86511-H5000-KOR", type: "aftermarket", price: 1200000, verified: true },
-            { hang: "Hyundai", hieu: "Accent", nam: 2020, name: "Đèn pha phải Accent 2020 LED", code: "92102-H5500", type: "genuine", price: 6800000, verified: true },
-            { hang: "Hyundai", hieu: "Accent", nam: 2020, name: "Đèn pha phải Accent 2020 Halogen", code: "92102-H5000", type: "genuine", price: 3100000, verified: true },
-            { hang: "Hyundai", hieu: "Accent", nam: 2020, name: "Đèn pha phải Accent 2020 Halogen (Taiwan)", code: "HY-ACC20-HL-R", type: "aftermarket", price: 1850000, verified: false },
-            { hang: "Hyundai", hieu: "Accent", nam: 2020, name: "Két nước làm mát Accent 2018-2022 (AT)", code: "25310-H5100", type: "genuine", price: 2150000, verified: true },
-            { hang: "Hyundai", hieu: "Accent", nam: 2020, name: "Két nước làm mát Accent 2018-2022 (AT HCC)", code: "25310-H5100-HCC", type: "aftermarket", price: 1300000, verified: true },
-            { hang: "Hyundai", hieu: "Accent", nam: 2019, name: "Gương chiếu hậu trái Accent 2019 (Có xi nhan chỉnh điện)", code: "87610-H5030", type: "genuine", price: 2600000, verified: true },
-            { hang: "Hyundai", hieu: "Accent", nam: 2019, name: "Gương chiếu hậu trái Accent 2019 (OEM)", code: "87610-H5030-OEM", type: "aftermarket", price: 1450000, verified: false },
-            { hang: "Hyundai", hieu: "Accent", nam: 2022, name: "Má phanh trước Hyundai Accent 2022", code: "58101-H5A25", type: "genuine", price: 1150000, verified: true },
-            { hang: "Hyundai", hieu: "Accent", nam: 2022, name: "Má phanh trước Accent 2022 (Sangsin Hàn Quốc)", code: "SP1848", type: "aftermarket", price: 480000, verified: true },
-            { hang: "Hyundai", hieu: "Accent", nam: 2022, name: "Má phanh trước Accent 2022 (Hi-Q Korea)", code: "SP1848-HIQ", type: "aftermarket", price: 390000, verified: true },
-            { hang: "Hyundai", hieu: "Accent", nam: 2021, name: "Rotuyn cân bằng trước Accent 2021", code: "54830-H5000", type: "genuine", price: 450000, verified: true },
-            { hang: "Hyundai", hieu: "Accent", nam: 2021, name: "Rotuyn cân bằng trước Accent (CTR Korea)", code: "CLKH-46", type: "aftermarket", price: 230000, verified: true },
-
-            // Mazda 3
-            { hang: "Mazda", hieu: "Mazda 3", nam: 2019, name: "Đèn pha phải Mazda 3 2019 LED", code: "B63B-51-030", type: "genuine", price: 16500000, verified: true },
-            { hang: "Mazda", hieu: "Mazda 3", nam: 2019, name: "Đèn pha phải Mazda 3 2019 LED (Hàng OEM tháo xe)", code: "B63B-51-030-U", type: "aftermarket", price: 8500000, verified: true },
-            { hang: "Mazda", hieu: "Mazda 3", nam: 2018, name: "Đèn pha phải Mazda 3 2018 LED FL", code: "B62D-51-030B", type: "genuine", price: 13500000, verified: true },
-            { hang: "Mazda", hieu: "Mazda 3", nam: 2018, name: "Đèn pha phải Mazda 3 2018 LED (OEM)", code: "MZ-M3-18-LED-R", type: "aftermarket", price: 6200000, verified: false },
-            { hang: "Mazda", hieu: "Mazda 3", nam: 2020, name: "Cản trước Mazda 3 2020 (Sedan)", code: "BCKA-50-031A-AA", type: "genuine", price: 4200000, verified: true },
-            { hang: "Mazda", hieu: "Mazda 3", nam: 2020, name: "Cản trước Mazda 3 2020 (Hàng OEM Đài Loan)", code: "MZ-M320-FT", type: "aftermarket", price: 2100000, verified: false },
-            { hang: "Mazda", hieu: "Mazda 3", nam: 2020, name: "Má phanh trước Mazda 3 2020", code: "BDY2-33-28Z", type: "genuine", price: 2250000, verified: true },
-            { hang: "Mazda", hieu: "Mazda 3", nam: 2020, name: "Má phanh trước Mazda 3 2020 (Bendix)", code: "DB2368-GCT", type: "aftermarket", price: 850000, verified: true },
-            { hang: "Mazda", hieu: "Mazda 3", nam: 2020, name: "Má phanh trước Mazda 3 2020 (Akebono)", code: "AN-820WK", type: "aftermarket", price: 790000, verified: true },
-
-            // VinFast Fadil
-            { hang: "VinFast", hieu: "Fadil", nam: 2021, name: "Cản trước VinFast Fadil", code: "42713600", type: "genuine", price: 1450000, verified: true },
-            { hang: "VinFast", hieu: "Fadil", nam: 2021, name: "Cản trước VinFast Fadil (OEM Việt Nam)", code: "VF-FADIL-FT", type: "aftermarket", price: 850000, verified: false },
-            { hang: "VinFast", hieu: "Fadil", nam: 2020, name: "Đèn pha phải VinFast Fadil (Halogen)", code: "42714201", type: "genuine", price: 2950000, verified: true },
-            { hang: "VinFast", hieu: "Fadil", nam: 2020, name: "Đèn pha phải VinFast Fadil (OEM Taiwan)", code: "VF-FADIL-HL-R", type: "aftermarket", price: 1750000, verified: false },
-            { hang: "VinFast", hieu: "Fadil", nam: 2020, name: "Lốc điều hòa VinFast Fadil", code: "42716301", type: "genuine", price: 5800000, verified: true },
-            { hang: "VinFast", hieu: "Fadil", nam: 2020, name: "Lốc điều hòa VinFast Fadil (Hàng Sanden)", code: "SD-FADIL-AC", type: "aftermarket", price: 3450000, verified: true },
-            { hang: "VinFast", hieu: "Fadil", nam: 2021, name: "Kính chiếu hậu phải Fadil (Gập tay)", code: "42718105", type: "genuine", price: 1650000, verified: true },
-            { hang: "VinFast", hieu: "Fadil", nam: 2021, name: "Kính chiếu hậu phải Fadil (Gập điện OEM)", code: "VF-FADIL-MRE", type: "aftermarket", price: 1100000, verified: false },
-
-            // Honda City
-            { hang: "Honda", hieu: "City", nam: 2021, name: "Cản trước Honda City 2021", code: "71101-T00-T00", type: "genuine", price: 1950000, verified: true },
-            { hang: "Honda", hieu: "City", nam: 2021, name: "Cản trước Honda City 2021 (Taiwan OEM)", code: "HD-CITY21-FT", type: "aftermarket", price: 1050000, verified: false },
-            { hang: "Honda", hieu: "City", nam: 2020, name: "Đèn pha phải Honda City 2020 LED", code: "33100-T9A-T91", type: "genuine", price: 8900000, verified: true },
-            { hang: "Honda", hieu: "City", nam: 2020, name: "Đèn pha phải Honda City 2020 LED (OEM TYC)", code: "HD-CITY20-LED-R", type: "aftermarket", price: 4400000, verified: true },
-            { hang: "Honda", hieu: "City", nam: 2020, name: "Gương chiếu hậu trái City 2020 (9 giắc có camera)", code: "76250-T9A-T91", type: "genuine", price: 4600000, verified: true },
-            { hang: "Honda", hieu: "City", nam: 2020, name: "Gương chiếu hậu trái City 2020 (OEM Đài Loan)", code: "HD-CITY20-MR-L", type: "aftermarket", price: 2350000, verified: false }
-        ],
-
-        currentPage: 1,
-        pageSize: 5,
-        filteredData: [],
-        exactMatch: false,
-
-        init() {},
-
-        loadFilters() {
-            // Lấy danh sách duy nhất các hãng xe
-            const hangs = [...new Set(this.data.map(item => item.hang))].sort();
-            const filterHang = document.getElementById('filterHang');
-            
-            // Xóa sạch ngoại trừ option đầu tiên
-            filterHang.innerHTML = '<option value="">Tất cả hãng</option>';
-            hangs.forEach(hang => {
-                const opt = document.createElement('option');
-                opt.value = hang;
-                opt.textContent = hang;
-                filterHang.appendChild(opt);
-            });
-
-            // Reset dòng xe và năm
-            document.getElementById('filterHieu').innerHTML = '<option value="">Tất cả dòng</option>';
-            document.getElementById('filterNam').innerHTML = '<option value="">Tất cả năm</option>';
-
-            // Load đầy đủ năm có sẵn trong toàn bộ data
-            const nams = [...new Set(this.data.map(item => item.nam))].sort((a,b) => b - a);
-            const filterNam = document.getElementById('filterNam');
-            nams.forEach(nam => {
-                const opt = document.createElement('option');
-                opt.value = nam;
-                opt.textContent = nam;
-                filterNam.appendChild(opt);
-            });
-
-            // Render số lượng tổng
-            document.getElementById('spare-total-count').textContent = `Tổng kho: ${this.data.length} phụ tùng chuẩn`;
-
-            // Thực hiện tra cứu ban đầu
-            this.search();
-        },
-
-        onHangChange() {
-            const hang = document.getElementById('filterHang').value;
-            const filterHieu = document.getElementById('filterHieu');
-            filterHieu.innerHTML = '<option value="">Tất cả dòng</option>';
-
-            if (hang) {
-                // Lọc các dòng xe thuộc hãng đã chọn
-                const hieus = [...new Set(this.data.filter(item => item.hang === hang).map(item => item.hieu))].sort();
-                hieus.forEach(hieu => {
-                    const opt = document.createElement('option');
-                    opt.value = hieu;
-                    opt.textContent = hieu;
-                    filterHieu.appendChild(opt);
-                });
-            }
-            this.search();
-        },
-
-        toggleExactMatch() {
-            this.exactMatch = !this.exactMatch;
-            const btn = document.getElementById('btnExactPartName');
-            if (this.exactMatch) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-            this.search();
-        },
-
-        clearSearchInput() {
-            const input = document.getElementById('spareSearchInput');
-            input.value = '';
-            this.toggleClearBtn();
-            this.search();
-        },
-
-        toggleClearBtn() {
-            const input = document.getElementById('spareSearchInput');
-            const clearBtn = document.getElementById('spareClearBtn');
-            if (input.value.trim().length > 0) {
-                clearBtn.classList.remove('hidden');
-            } else {
-                clearBtn.classList.add('hidden');
-            }
-        },
-
-        clearFilters() {
-            document.getElementById('filterHang').value = '';
-            document.getElementById('filterHieu').innerHTML = '<option value="">Tất cả dòng</option>';
-            document.getElementById('filterNam').value = '';
-            document.getElementById('filterType').value = 'all';
-            document.getElementById('spareSearchInput').value = '';
-            this.exactMatch = false;
-            document.getElementById('btnExactPartName').classList.remove('active');
-            this.toggleClearBtn();
-            this.search();
-        },
-
-        search() {
-            const hang = document.getElementById('filterHang').value;
-            const hieu = document.getElementById('filterHieu').value;
-            const nam = document.getElementById('filterNam').value;
-            const type = document.getElementById('filterType').value;
-            const keyword = document.getElementById('spareSearchInput').value.trim().toLowerCase();
-
-            // Thực hiện bộ lọc
-            this.filteredData = this.data.filter(item => {
-                if (hang && item.hang !== hang) return false;
-                if (hieu && item.hieu !== hieu) return false;
-                if (nam && item.nam !== parseInt(nam)) return false;
-                if (type !== 'all' && item.type !== type) return false;
-                
-                if (keyword) {
-                    const nameLower = item.name.toLowerCase();
-                    const codeLower = item.code.toLowerCase();
-                    if (this.exactMatch) {
-                        // Khớp chính xác hoàn toàn từ khóa trong tên hoặc mã
-                        return nameLower === keyword || codeLower === keyword;
-                    } else {
-                        // Khớp tương đối
-                        return nameLower.includes(keyword) || codeLower.includes(keyword);
-                    }
-                }
-                return true;
-            });
-
-            this.currentPage = 1;
-            this.render();
-            this.calculateStats();
-        },
-
-        calculateStats() {
-            const summaryBox = document.getElementById('priceSummaryBox');
-            const analysisBox = document.getElementById('priceAnalysisBox');
-            
-            if (this.filteredData.length === 0) {
-                summaryBox.classList.add('hidden');
-                analysisBox.classList.add('hidden');
-                return;
-            }
-
-            // Hiển thị hộp phân tích
-            summaryBox.classList.remove('hidden');
-            analysisBox.classList.remove('hidden');
-
-            const prices = this.filteredData.map(item => item.price).sort((a,b) => a - b);
-            const count = prices.length;
-
-            const min = prices[0];
-            const max = prices[count - 1];
-            
-            // Tính trung bình cộng
-            const sum = prices.reduce((acc, p) => acc + p, 0);
-            const avg = Math.round(sum / count);
-
-            // Tính trung vị (Median)
-            let median = 0;
-            if (count % 2 === 1) {
-                median = prices[Math.floor(count / 2)];
-            } else {
-                median = Math.round((prices[count / 2 - 1] + prices[count / 2]) / 2);
-            }
-
-            // Tính phân vị Q1 (25th percentile) và Q3 (75th percentile)
-            const getPercentile = (arr, p) => {
-                const index = (arr.length - 1) * p;
-                const lower = Math.floor(index);
-                const upper = Math.ceil(index);
-                const weight = index - lower;
-                return Math.round(arr[lower] * (1 - weight) + arr[upper] * weight);
-            };
-
-            const q1 = getPercentile(prices, 0.25);
-            const q3 = getPercentile(prices, 0.75);
-
-            // Format tiền tệ VNĐ
-            const formatVnd = (num) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num).replace('₫', 'đ');
-
-            // Render thống kê cơ bản
-            document.getElementById('priceMinValue').textContent = formatVnd(min);
-            document.getElementById('priceAvgValue').textContent = formatVnd(avg);
-            document.getElementById('priceMaxValue').textContent = formatVnd(max);
-
-            // Render phân tích nâng cao
-            document.getElementById('analysisMedianValue').textContent = formatVnd(median);
-            document.getElementById('analysisSuggestedRange').textContent = `${formatVnd(q1)} - ${formatVnd(q3)}`;
-            document.getElementById('analysisSampleCount').textContent = `Mẫu: ${count}`;
-            document.getElementById('analysisQ1Chip').textContent = `Q1: ${formatVnd(q1)}`;
-            document.getElementById('analysisQ3Chip').textContent = `Q3: ${formatVnd(q3)}`;
-
-            // Đánh giá mức độ tin cậy của mẫu dữ liệu
-            const confidenceText = document.getElementById('analysisConfidenceText');
-            if (count >= 10) {
-                confidenceText.textContent = "Độ tin cậy: Rất Cao";
-                confidenceText.className = "text-[8.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400";
-            } else if (count >= 5) {
-                confidenceText.textContent = "Độ tin cậy: Cao";
-                confidenceText.className = "text-[8.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400";
-            } else if (count >= 3) {
-                confidenceText.textContent = "Độ tin cậy: Vừa phải";
-                confidenceText.className = "text-[8.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400";
-            } else {
-                confidenceText.textContent = "Độ tin cậy: Thấp (Mẫu ít)";
-                confidenceText.className = "text-[8.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400";
-            }
-
-            // Đánh giá chất lượng phân bố (Biên độ biến động giá)
-            const statusBadge = document.getElementById('analysisStatusBadge');
-            const priceSpread = (max - min) / (median || 1);
-            if (priceSpread < 0.3) {
-                statusBadge.textContent = "Mẫu ổn định";
-                statusBadge.className = "px-2.5 py-1 text-[8.5px] font-black uppercase tracking-widest rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-500/20";
-            } else if (priceSpread < 0.8) {
-                statusBadge.textContent = "Biến động nhẹ";
-                statusBadge.className = "px-2.5 py-1 text-[8.5px] font-black uppercase tracking-widest rounded-full bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-500/20";
-            } else {
-                statusBadge.textContent = "Phân tán rộng";
-                statusBadge.className = "px-2.5 py-1 text-[8.5px] font-black uppercase tracking-widest rounded-full bg-rose-50 text-rose-600 border border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-500/20";
-            }
-
-            // Gợi ý báo cáo thông minh dựa trên khoảng liên tứ phân vị
-            const warningTitle = document.getElementById('analysisWarningTitle');
-            const warningText = document.getElementById('analysisWarningText');
-            
-            warningTitle.textContent = "GỢI Ý DUYỆT GIÁ TỐI ƯU";
-            warningText.textContent = `Hệ thống khuyên dùng khoảng duyệt giá tối ưu từ ${formatVnd(q1)} đến ${formatVnd(q3)} (khoảng trung tâm 50% thị trường). Các mức giá dưới ${formatVnd(q1)} có thể là hàng chất lượng thấp hoặc báo giá ảo. Các mức giá vượt ${formatVnd(q3)} cần được kiểm tra kỹ tài liệu chứng minh nguồn gốc chính hãng hoặc có sự chấp thuận đặc biệt.`;
-        },
-
-        changePage(direction) {
-            const maxPage = Math.ceil(this.filteredData.length / this.pageSize) || 1;
-            const newPage = this.currentPage + direction;
-            if (newPage >= 1 && newPage <= maxPage) {
-                this.currentPage = newPage;
-                this.render();
-            }
-        },
-
-        toggleVerifyItem(index) {
-            const realIndex = this.data.findIndex(item => item.code === this.filteredData[index].code && item.name === this.filteredData[index].name);
-            if (realIndex !== -1) {
-                this.data[realIndex].verified = !this.data[realIndex].verified;
-                
-                // Show a brief premium toast using SweetAlert2
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'success',
-                    title: this.data[realIndex].verified ? 'Đã duyệt giá thành công' : 'Đã hủy duyệt giá',
-                    showConfirmButton: false,
-                    timer: 1500,
-                    timerProgressBar: true,
-                    background: document.documentElement.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
-                    color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#f8fafc' : '#0f172a'
-                });
-                
-                this.search();
-            }
-        },
-
-        render() {
-            const listContainer = document.getElementById('resultsSpareList');
-            const paginationContainer = document.getElementById('sparePagination');
-            const pageInfo = document.getElementById('sparePageInfo');
-
-            if (this.filteredData.length === 0) {
-                listContainer.innerHTML = `
-                    <div class="text-center py-20 text-slate-300 font-extrabold uppercase italic text-xs tracking-wider dark:text-slate-600">
-                        Không tìm thấy phụ tùng phù hợp
-                    </div>
-                `;
-                paginationContainer.classList.add('hidden');
-                return;
-            }
-
-            paginationContainer.classList.remove('hidden');
-            const maxPage = Math.ceil(this.filteredData.length / this.pageSize) || 1;
-            pageInfo.textContent = `Trang ${this.currentPage} / ${maxPage}`;
-
-            // Nút bấm phân trang
-            document.getElementById('btnSparePrev').disabled = this.currentPage === 1;
-            document.getElementById('btnSpareNext').disabled = this.currentPage === maxPage;
-
-            // Tính toán lát dữ liệu của trang hiện tại
-            const start = (this.currentPage - 1) * this.pageSize;
-            const end = start + this.pageSize;
-            const pageItems = this.filteredData.slice(start, end);
-
-            const formatVnd = (num) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num).replace('₫', 'đ');
-
-            // Tính toán giá để so sánh Price Signal
-            const prices = this.filteredData.map(item => item.price).sort((a,b) => a - b);
-            const count = prices.length;
-            let median = 0;
-            if (count % 2 === 1) {
-                median = prices[Math.floor(count / 2)];
-            } else {
-                median = Math.round((prices[count / 2 - 1] + prices[count / 2]) / 2);
-            }
-
-            const getPercentile = (arr, p) => {
-                const index = (arr.length - 1) * p;
-                const lower = Math.floor(index);
-                const upper = Math.ceil(index);
-                const weight = index - lower;
-                return Math.round(arr[lower] * (1 - weight) + arr[upper] * weight);
-            };
-            const q1 = getPercentile(prices, 0.25);
-            const q3 = getPercentile(prices, 0.75);
-
-            let html = '';
-            pageItems.forEach((item, idx) => {
-                const displayIndex = start + idx;
-
-                // Xác định nhãn xuất xứ loại hàng
-                const typeBadge = item.type === 'genuine' 
-                    ? '<span class="badge-pro badge-genuine"><i data-lucide="shield-check" class="w-3 h-3"></i> Chính hãng</span>'
-                    : '<span class="badge-pro badge-aftermarket"><i data-lucide="wrench" class="w-3 h-3"></i> Thay thế</span>';
-
-                // Xác định nhãn duyệt giá
-                const verifyBadge = item.verified
-                    ? `<span onclick="SpareParts.toggleVerifyItem(${displayIndex})" class="badge-pro badge-verified"><i data-lucide="check-check" class="w-3 h-3"></i> Đã duyệt giá</span>`
-                    : `<span onclick="SpareParts.toggleVerifyItem(${displayIndex})" class="badge-pro badge-unverified"><i data-lucide="help-circle" class="w-3 h-3"></i> Chờ duyệt giá</span>`;
-
-                // Xác định nhãn tín hiệu giá (Price Signal)
-                let priceSignal = '';
-                if (item.price < q1) {
-                    priceSignal = '<span class="price-signal-badge price-signal-low"><i data-lucide="trending-down" class="w-2.5 h-2.5"></i> Giá cực tốt</span>';
-                } else if (item.price > q3) {
-                    priceSignal = '<span class="price-signal-badge price-signal-high"><i data-lucide="trending-up" class="w-2.5 h-2.5"></i> Vượt khung Q3</span>';
-                } else if (Math.abs(item.price - median) / (median || 1) < 0.1) {
-                    priceSignal = '<span class="price-signal-badge price-signal-ok"><i data-lucide="award" class="w-2.5 h-2.5"></i> Giá chuẩn</span>';
-                } else {
-                    priceSignal = '<span class="price-signal-badge price-signal-watch"><i data-lucide="alert-triangle" class="w-2.5 h-2.5"></i> Cần cân đối</span>';
-                }
-
-                html += `
-                    <div class="spare-part-card">
-                        <!-- HEADER CỦA CARD: HÃNG & DÒNG XE -->
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-2 dark:border-slate-800">
-                            <div class="flex items-center gap-1.5">
-                                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">${item.hang}</span>
-                                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400">${item.hieu} (${item.nam})</span>
-                            </div>
-                            <span class="text-[9px] font-mono font-bold text-slate-400 dark:text-slate-500">${item.code}</span>
-                        </div>
-
-                        <!-- BODY CỦA CARD: TÊN & CHI TIẾT -->
-                        <div class="flex flex-col gap-1">
-                            <span class="text-xs font-black text-slate-800 leading-tight dark:text-white">${item.name}</span>
-                        </div>
-
-                        <!-- FOOTER CỦA CARD: LOẠI HÀNG & GIÁ -->
-                        <div class="flex items-center justify-between mt-1">
-                            <div class="flex flex-wrap gap-1.5 items-center">
-                                ${typeBadge}
-                                ${verifyBadge}
-                            </div>
-                            <div class="flex flex-col items-end">
-                                ${priceSignal}
-                                <span class="price-text mt-1.5">${formatVnd(item.price)}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            listContainer.innerHTML = html;
-
-            // Kích hoạt lại Lucide Icons
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-        }
-    };
 
     // ============================================================
     // MY CLOUD (LƯU FILE CÁ NHÂN)
@@ -23050,6 +23087,7 @@ YÊU CẦU ĐẦU RA:
         MyCloud.init();
         document.getElementById('plate-scanner-modal').classList.add('hidden');
         Inspection.startWatcher();
+        SpareParts.init();
         SceneSurvey.initFormExclusivity();
         Nav.switchView('home', document.getElementById('nav-home-btn'));
 
