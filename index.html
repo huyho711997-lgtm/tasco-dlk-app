@@ -25,6 +25,20 @@
     <script>
         window.pdfjsLib = window['pdfjs-dist/build/pdf'];
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // Moment.js Safe Parser Proxy to resolve deprecation warnings globally
+        if (window.moment) {
+            window.moment = new Proxy(window.moment, {
+                apply(target, thisArg, argumentsList) {
+                    const input = argumentsList[0];
+                    const format = argumentsList[1];
+                    if (typeof input === 'string' && input.includes('/') && !format) {
+                        argumentsList[1] = ['DD/MM/YYYY HH:mm', 'DD/MM/YYYY'];
+                    }
+                    return Reflect.apply(target, thisArg, argumentsList);
+                }
+            });
+        }
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -23834,7 +23848,7 @@ YÊU CẦU ĐẦU RA:
             <div class="flex items-center gap-2">
                 <!-- AI OCR button -->
                 <button onclick="AccidentReport.triggerOCR()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 active:scale-90 transition-all border border-purple-500/30" title="AI quét ảnh biên bản giấy">
-                    <i data-lucide="camera-scan" class="w-5 h-5"></i>
+                    <i data-lucide="scan-search" class="w-5 h-5"></i>
                 </button>
                 <input type="file" id="ar-ocr-file" accept="image/*" class="hidden" onchange="AccidentReport.handleOCRFile(event)">
                 <!-- Print button -->
@@ -24211,7 +24225,7 @@ YÊU CẦU ĐẦU RA:
             <div class="flex items-center gap-2">
                 <!-- AI OCR button -->
                 <button onclick="SceneSurvey.triggerOCR()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 active:scale-90 transition-all border border-purple-500/30" title="AI quét ảnh biên bản giấy">
-                    <i data-lucide="camera-scan" class="w-5 h-5"></i>
+                    <i data-lucide="scan-search" class="w-5 h-5"></i>
                 </button>
                 <input type="file" id="ss-ocr-file" accept="image/*" class="hidden" onchange="SceneSurvey.handleOCRFile(event)">
                 <!-- Print button -->
