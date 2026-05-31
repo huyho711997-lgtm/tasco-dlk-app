@@ -4882,8 +4882,7 @@
     const lookupFs = lookupApp.firestore();
     const lookupAuth = lookupApp.auth();
 
-    // Đăng nhập ẩn danh cho LookupApp
-    lookupAuth.signInAnonymously().catch(err => console.error("LookupApp Auth Error:", err));
+    // Đăng nhập tự động khôi phục session lưu trong trình duyệt (Không ghi đè bằng ẩn danh)
 
     moment.locale('vi');
 
