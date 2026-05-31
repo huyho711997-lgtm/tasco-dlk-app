@@ -3532,48 +3532,48 @@
             </div>
 
             <!-- SEARCH & FILTER FORM -->
-            <div class="bg-white dark:bg-[#111c30] border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-5 shadow-[0_8px_30px_rgba(0,0,0,0.02)] mt-3.5 space-y-4.5">
-                <div class="grid grid-cols-2 gap-3.5">
+            <div class="bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-800/40 dark:to-slate-900/40 border border-slate-200/60 dark:border-slate-700/50 rounded-3xl p-5 shadow-[0_8px_30px_-6px_rgba(0,0,0,0.02)] mt-3 space-y-4">
+                <div class="grid grid-cols-2 gap-3">
                     <!-- HÃNG XE DROPDOWN -->
                     <div class="relative">
-                        <label class="flex items-center gap-1.5 text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 select-none">
+                        <label class="flex items-center gap-1.5 text-[9.5px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 select-none">
                             <i data-lucide="car-front" class="w-3.5 h-3.5 text-blue-500"></i>
                             <span>Hãng xe</span>
                         </label>
-                        <select id="filterHang" onchange="SpareParts.onHangChange()" class="w-full h-11 bg-slate-50 border border-slate-200/85 rounded-xl px-3.5 text-xs font-bold text-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-300 dark:focus:border-blue-500/60 dark:focus:ring-blue-500/5">
+                        <select id="filterHang" onchange="SpareParts.onHangChange()" class="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-3 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all dark:bg-slate-900/60 dark:border-slate-700 dark:text-slate-300">
                             <option value="">Tất cả hãng</option>
                         </select>
                     </div>
 
                     <!-- HIỆU XE DROPDOWN -->
                     <div class="relative">
-                        <label class="flex items-center gap-1.5 text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 select-none">
+                        <label class="flex items-center gap-1.5 text-[9.5px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 select-none">
                             <i data-lucide="cog" class="w-3.5 h-3.5 text-blue-500"></i>
                             <span>Dòng xe</span>
                         </label>
-                        <select id="filterHieu" onchange="SpareParts.search()" class="w-full h-11 bg-slate-50 border border-slate-200/85 rounded-xl px-3.5 text-xs font-bold text-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-300 dark:focus:border-blue-500/60 dark:focus:ring-blue-500/5">
+                        <select id="filterHieu" onchange="SpareParts.search()" class="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-3 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all dark:bg-slate-900/60 dark:border-slate-700 dark:text-slate-300">
                             <option value="">Tất cả dòng</option>
                         </select>
                     </div>
 
                     <!-- NĂM SẢN XUẤT -->
                     <div class="relative">
-                        <label class="flex items-center gap-1.5 text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 select-none">
+                        <label class="flex items-center gap-1.5 text-[9.5px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 select-none">
                             <i data-lucide="calendar" class="w-3.5 h-3.5 text-blue-500"></i>
                             <span>Đời xe (Năm)</span>
                         </label>
-                        <select id="filterNam" onchange="SpareParts.search()" class="w-full h-11 bg-slate-50 border border-slate-200/85 rounded-xl px-3.5 text-xs font-bold text-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-300 dark:focus:border-blue-500/60 dark:focus:ring-blue-500/5">
+                        <select id="filterNam" onchange="SpareParts.search()" class="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-3 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all dark:bg-slate-900/60 dark:border-slate-700 dark:text-slate-300">
                             <option value="">Tất cả năm</option>
                         </select>
                     </div>
 
                     <!-- LOẠI PHỤ TÙNG -->
                     <div class="relative">
-                        <label class="flex items-center gap-1.5 text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 select-none">
+                        <label class="flex items-center gap-1.5 text-[9.5px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 select-none">
                             <i data-lucide="layers" class="w-3.5 h-3.5 text-blue-500"></i>
                             <span>Loại hàng</span>
                         </label>
-                        <select id="filterType" onchange="SpareParts.search()" class="w-full h-11 bg-slate-50 border border-slate-200/85 rounded-xl px-3.5 text-xs font-bold text-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-300 dark:focus:border-blue-500/60 dark:focus:ring-blue-500/5">
+                        <select id="filterType" onchange="SpareParts.search()" class="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-3 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all dark:bg-slate-900/60 dark:border-slate-700 dark:text-slate-300">
                             <option value="all">Tất cả loại hàng</option>
                             <option value="genuine">Chính hãng (OEM)</option>
                             <option value="aftermarket">Thay thế (Ngoài)</option>
@@ -3583,18 +3583,18 @@
 
                 <!-- KEYWORD INPUT -->
                 <div class="relative">
-                    <label class="flex items-center gap-1.5 text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 select-none">
+                    <label class="flex items-center gap-1.5 text-[9.5px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 select-none">
                         <i data-lucide="tag" class="w-3.5 h-3.5 text-blue-500"></i>
                         <span>Tên hoặc Mã phụ tùng</span>
                     </label>
                     <div class="relative">
                         <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors"></i>
-                        <input type="text" id="spareSearchInput" onkeydown="if(event.key==='Enter') SpareParts.search()" oninput="SpareParts.toggleClearBtn()" placeholder="Nhập tên phụ tùng, số hiệu, mã oem..." class="w-full h-11 bg-slate-50 pl-10 pr-26 rounded-xl text-xs font-bold outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-slate-700 placeholder-slate-400 border border-slate-200/85 focus:border-blue-400 dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-300 dark:focus:border-blue-500/60 dark:focus:ring-blue-500/5">
-                        <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                            <button id="spareClearBtn" title="Xóa từ khóa" onclick="SpareParts.clearSearchInput()" class="hidden w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 active:scale-95 transition-all">
+                        <input type="text" id="spareSearchInput" onkeydown="if(event.key==='Enter') SpareParts.search()" oninput="SpareParts.toggleClearBtn()" placeholder="Nhập tên phụ tùng, số hiệu, mã oem..." class="w-full bg-slate-50 pl-10 pr-24 py-3 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-blue-500/10 transition-all text-slate-700 placeholder-slate-400 border border-slate-200 focus:border-blue-400 dark:bg-slate-900/60 dark:border-slate-700 dark:text-slate-300">
+                        <div class="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                            <button id="spareClearBtn" title="Xóa từ khóa" onclick="SpareParts.clearSearchInput()" class="hidden w-7 h-7 flex items-center justify-center text-slate-400 active:text-slate-600 transition-colors">
                                 <i data-lucide="x" class="w-4 h-4"></i>
                             </button>
-                            <button id="btnExactPartName" onclick="SpareParts.toggleExactMatch()" title="Chỉ tìm kiếm khớp 100% tên phụ tùng" class="h-7.5 px-3 rounded-lg text-[10px] font-extrabold transition-all border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:border-slate-300 dark:bg-slate-850 dark:border-slate-700 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700 active:scale-95">
+                            <button id="btnExactPartName" onclick="SpareParts.toggleExactMatch()" title="Chỉ tìm kiếm khớp 100% tên phụ tùng" class="h-7 px-2.5 rounded-lg text-[10px] font-bold flex items-center gap-1 active:scale-95 transition-all border border-slate-200 bg-white text-slate-500 hover:text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400 dark:hover:text-slate-300">
                                 <span class="flex items-center gap-1 select-none">
                                     <i data-lucide="check" class="w-3 h-3 hidden text-blue-500 dark:text-blue-400" id="exact-check-icon"></i>
                                     <span>Khớp 100%</span>
@@ -3606,11 +3606,11 @@
 
                 <!-- SEARCH & CLEAR ACTION BUTTONS -->
                 <div class="grid grid-cols-4 gap-3 pt-1">
-                    <button onclick="SpareParts.clearFilters()" class="col-span-1 h-11.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-800 active:scale-95 transition-all text-xs font-black shadow-sm flex items-center justify-center gap-1.5 dark:bg-slate-800/40 dark:border-slate-700/80 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/80">
+                    <button onclick="SpareParts.clearFilters()" class="col-span-1 h-12 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-700 active:scale-95 transition-all text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
                         <i data-lucide="rotate-ccw" class="w-4 h-4 text-slate-400 dark:text-slate-400"></i>
                         <span>Xoá lọc</span>
                     </button>
-                    <button onclick="SpareParts.search()" class="col-span-3 h-11.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-500 hover:via-indigo-500 hover:to-violet-500 text-white rounded-xl text-xs font-black shadow-md shadow-blue-500/10 hover:shadow-lg hover:shadow-blue-500/20 active:scale-98 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2">
+                    <button onclick="SpareParts.search()" class="col-span-3 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 active:scale-98 transition-all flex items-center justify-center gap-2">
                         <i data-lucide="search" class="w-4 h-4"></i>
                         <span>Tra cứu ngay</span>
                     </button>
@@ -20640,7 +20640,7 @@ YÊU CẦU ĐẦU RA:
                 // Build trigger button
                 const trigger = document.createElement('button');
                 trigger.type = 'button';
-                trigger.className = 'custom-select-trigger w-full h-11 bg-slate-50/60 border border-slate-200/85 rounded-xl pl-3.5 pr-3 flex items-center justify-between text-xs font-bold text-slate-700 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-350 dark:focus:border-blue-500/60 dark:focus:ring-blue-500/5';
+                trigger.className = 'custom-select-trigger w-full h-11 bg-slate-50 border border-slate-200 rounded-xl px-3 flex items-center justify-between text-xs font-semibold text-slate-700 outline-none transition-all dark:bg-slate-900/60 dark:border-slate-700 dark:text-slate-300';
                 
                 const label = document.createElement('span');
                 label.className = 'custom-select-label truncate';
@@ -20648,14 +20648,14 @@ YÊU CẦU ĐẦU RA:
                 
                 const icon = document.createElement('i');
                 icon.setAttribute('data-lucide', 'chevron-down');
-                icon.className = 'w-3.5 h-3.5 text-slate-400 select-arrow transition-transform dark:text-slate-550';
+                icon.className = 'w-4 h-4 text-slate-400 select-arrow transition-transform';
                 
                 trigger.appendChild(label);
                 trigger.appendChild(icon);
                 
                 // Build dropdown menu card
                 const menu = document.createElement('div');
-                menu.className = 'custom-select-menu absolute left-0 right-0 mt-1.5 z-[100] hidden bg-white dark:bg-[#131f35] border border-slate-200/85 dark:border-slate-800 rounded-2xl shadow-xl p-2.5 transition-all';
+                menu.className = 'custom-select-menu absolute left-0 right-0 mt-1.5 z-[100] hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-2xl shadow-2xl p-2.5 transition-all';
                 
                 // Build search input wrapper
                 const searchWrap = document.createElement('div');
@@ -20663,11 +20663,11 @@ YÊU CẦU ĐẦU RA:
                 
                 const searchIcon = document.createElement('i');
                 searchIcon.setAttribute('data-lucide', 'search');
-                searchIcon.className = 'w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500';
+                searchIcon.className = 'w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400';
                 
                 const searchInput = document.createElement('input');
                 searchInput.type = 'text';
-                searchInput.className = 'custom-select-search w-full h-9 bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 pl-9 pr-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:focus:ring-blue-500/5';
+                searchInput.className = 'custom-select-search w-full h-9 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 pl-9 pr-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10';
                 searchInput.placeholder = 'Tìm kiếm nhanh...';
                 
                 searchWrap.appendChild(searchIcon);
@@ -20754,7 +20754,7 @@ YÊU CẦU ĐẦU RA:
             Array.from(select.options).forEach(opt => {
                 const btn = document.createElement('button');
                 btn.type = 'button';
-                btn.className = 'custom-select-option w-full px-3 py-2 text-left text-xs font-bold rounded-lg text-slate-650 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white flex items-center justify-between transition-colors';
+                btn.className = 'custom-select-option w-full px-3 py-2 text-left text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white flex items-center justify-between transition-colors';
                 btn.setAttribute('data-value', opt.value);
 
                 const span = document.createElement('span');
@@ -20769,7 +20769,7 @@ YÊU CẦU ĐẦU RA:
 
                 if (opt.value === selectedVal) {
                     selectedLabel = opt.textContent;
-                    btn.classList.add('bg-blue-50/70', 'dark:bg-blue-500/10', 'text-blue-600', 'dark:text-blue-400');
+                    btn.classList.add('bg-blue-50/50', 'dark:bg-blue-500/10', 'text-blue-600', 'dark:text-blue-400');
                     check.classList.remove('hidden');
                 }
 
