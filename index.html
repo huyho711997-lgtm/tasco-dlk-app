@@ -2945,6 +2945,11 @@
                     <div><p class="user-menu-label">Đổi mật khẩu</p><p class="user-menu-sub">Thay đổi mật khẩu đăng nhập</p></div>
                     <svg class="ml-auto" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"><path d="M6 4l4 4-4 4"/></svg>
                 </div>
+                <div class="user-menu-item" onclick="WeatherWidget.openDutySettings()">
+                    <div class="user-menu-icon bg-indigo-50"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+                    <div><p class="user-menu-label">Thiết lập ngày trực</p><p class="user-menu-sub">Chọn ngày chẵn/lẻ trực hiện trường</p></div>
+                    <svg class="ml-auto" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"><path d="M6 4l4 4-4 4"/></svg>
+                </div>
 
                 <div id="menu-admin-section" class="hidden">
                     <div class="px-4 pt-4 pb-1">
@@ -3153,25 +3158,34 @@
                     <h2 class="text-2xl font-black text-slate-800 dark:text-white tracking-tight leading-tight">Xin chào, <br><span class="text-blue-600 dark:text-blue-400" id="home-greeting-name">Đồng nghiệp</span>! 👋</h2>
                     <p class="text-slate-500 dark:text-slate-400 text-[12.5px] font-medium mt-1.5">Hệ thống giám định Tasco DLK</p>
                 </div>
-                <!-- Weather Widget -->
-                <div id="weather-widget" class="relative overflow-visible flex items-center justify-between pl-4 pr-5 py-3.5 bg-gradient-to-br from-white/90 to-blue-50/20 dark:from-slate-800/90 dark:to-slate-900/60 border border-white dark:border-slate-850 rounded-3xl shrink-0 shadow-[0_12px_30px_-10px_rgba(59,130,246,0.12)] dark:shadow-[0_15px_35px_-12px_rgba(0,0,0,0.5)] backdrop-blur-xl w-36 h-20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] select-none cursor-pointer">
-                    <!-- Glow Effect Background -->
-                    <div id="weather-glow" class="absolute -right-2 -bottom-2 w-14 h-14 rounded-full bg-blue-400/20 dark:bg-blue-500/10 blur-xl pointer-events-none transition-all duration-700"></div>
-                    
-                    <div class="flex flex-col justify-between h-full z-10">
-                        <span id="weather-badge" class="self-start px-2 py-0.5 text-[8px] font-black bg-blue-500/10 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 rounded-full tracking-wider uppercase">BMT</span>
-                        <div class="mt-1">
-                            <span id="weather-temp" class="text-2xl font-black text-slate-850 dark:text-slate-100 tracking-tighter leading-none">27°C</span>
-                            <p id="weather-desc" class="text-[9px] font-black text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-widest leading-none">U ám</p>
+                <!-- Weather & Duty Stack -->
+                <div class="flex flex-col items-stretch gap-2 shrink-0">
+                    <!-- Weather Widget -->
+                    <div id="weather-widget" onclick="WeatherWidget.openDutySettings()" class="relative overflow-visible flex items-center justify-between pl-4 pr-5 py-3.5 bg-gradient-to-br from-white/90 to-blue-50/20 dark:from-slate-800/90 dark:to-slate-900/60 border border-white dark:border-slate-850 rounded-3xl shrink-0 shadow-[0_12px_30px_-10px_rgba(59,130,246,0.12)] dark:shadow-[0_15px_35px_-12px_rgba(0,0,0,0.5)] backdrop-blur-xl w-36 h-20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] select-none cursor-pointer">
+                        <!-- Glow Effect Background -->
+                        <div id="weather-glow" class="absolute -right-2 -bottom-2 w-14 h-14 rounded-full bg-blue-400/20 dark:bg-blue-500/10 blur-xl pointer-events-none transition-all duration-700"></div>
+                        
+                        <div class="flex flex-col justify-between h-full z-10">
+                            <span id="weather-badge" class="self-start px-2 py-0.5 text-[8px] font-black bg-blue-500/10 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 rounded-full tracking-wider uppercase">BMT</span>
+                            <div class="mt-1">
+                                <span id="weather-temp" class="text-2xl font-black text-slate-850 dark:text-slate-100 tracking-tighter leading-none">27°C</span>
+                                <p id="weather-desc" class="text-[9px] font-black text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-widest leading-none">U ám</p>
+                            </div>
+                        </div>
+                        
+                        <!-- 3D Overlapping Floating Icon -->
+                        <div id="weather-icon-wrapper" class="relative -mr-3 -mt-2 w-14 h-14 flex items-center justify-center filter drop-shadow-[0_8px_16px_rgba(59,130,246,0.22)] z-10 transition-transform duration-500 hover:scale-110">
+                            <div id="weather-icon-bg" class="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl opacity-10 pointer-events-none"></div>
+                            <div id="weather-icon-container" class="text-blue-500 dark:text-blue-400 flex items-center justify-center weather-float">
+                                <i data-lucide="cloud-sun" class="w-8 h-8"></i>
+                            </div>
                         </div>
                     </div>
                     
-                    <!-- 3D Overlapping Floating Icon -->
-                    <div id="weather-icon-wrapper" class="relative -mr-3 -mt-2 w-14 h-14 flex items-center justify-center filter drop-shadow-[0_8px_16px_rgba(59,130,246,0.22)] z-10 transition-transform duration-500 hover:scale-110">
-                        <div id="weather-icon-bg" class="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl opacity-10 pointer-events-none"></div>
-                        <div id="weather-icon-container" class="text-blue-500 dark:text-blue-400 flex items-center justify-center weather-float">
-                            <i data-lucide="cloud-sun" class="w-8 h-8"></i>
-                        </div>
+                    <!-- Duty Status Badge -->
+                    <div id="duty-widget" onclick="WeatherWidget.openDutySettings()" class="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 text-white rounded-full shadow-[0_4px_12px_-3px_rgba(59,130,246,0.3)] select-none transition-all duration-350 hover:scale-[1.03] active:scale-[0.97] cursor-pointer">
+                        <i data-lucide="shield" class="w-3.5 h-3.5 text-blue-100 animate-pulse"></i>
+                        <span id="duty-status-text" class="text-[9px] font-black uppercase tracking-wider">Trực hiện trường</span>
                     </div>
                 </div>
             </div>
@@ -24006,8 +24020,12 @@ YÊU CẦU ĐẦU RA:
     const WeatherWidget = {
         init() {
             this.fetchWeather();
+            this.updateDutyUI();
             // Cập nhật mỗi 30 phút
-            setInterval(() => this.fetchWeather(), 30 * 60 * 1000);
+            setInterval(() => {
+                this.fetchWeather();
+                this.updateDutyUI();
+            }, 30 * 60 * 1000);
         },
         async fetchWeather() {
             try {
@@ -24108,6 +24126,153 @@ YÊU CẦU ĐẦU RA:
             if (iconContainer) {
                 iconContainer.className = `${textClasses} flex items-center justify-center weather-float`;
                 iconContainer.innerHTML = `<i data-lucide="${iconName}" class="w-8 h-8"></i>`;
+                
+                if (window.lucide) {
+                    window.lucide.createIcons({
+                        attrs: { 'data-lucide': true },
+                        nameAttr: 'data-lucide'
+                    });
+                }
+            }
+        },
+        
+        async openDutySettings() {
+            // Đóng user menu nếu đang mở
+            if (typeof UserMenu !== 'undefined' && UserMenu.close) {
+                UserMenu.close();
+            }
+            
+            const user = Auth.getCurrentUser();
+            if (!user) return;
+            
+            // Lấy cấu hình lịch trực hiện tại (mặc định là trực ngày lẻ)
+            // Lựa chọn: 'odd' (ngày lẻ), 'even' (ngày chẵn)
+            const currentChoice = user.dutyFieldDay || 'odd';
+            
+            const { value: formValues } = await Swal.fire({
+                title: '<span style="font-size:16px;font-weight:900;">Thiết lập lịch trực</span>',
+                html: `
+                    <div style="text-align:left;display:flex;flex-direction:column;gap:16px;margin-top:10px;">
+                        <p class="text-xs text-slate-500 font-semibold leading-relaxed">
+                            Chọn loại ngày (chẵn/lẻ) để thực hiện nhiệm vụ <strong>Giám định hiện trường</strong>. Những ngày còn lại trong tháng sẽ mặc định là <strong>Giám định chi tiết</strong>.
+                        </p>
+                        
+                        <div class="bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
+                            <label class="input-label" style="font-weight:800;font-size:11px;color:#475569;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;display:block;">Trực hiện trường vào ngày:</label>
+                            <div class="flex gap-2">
+                                <label class="flex-1 flex items-center justify-center gap-2 p-3 bg-white dark:bg-slate-850 border-2 rounded-xl cursor-pointer select-none transition-all ${currentChoice === 'odd' ? 'border-blue-500 bg-blue-50/10' : 'border-slate-250 dark:border-slate-800'}" id="lbl-duty-odd" onclick="WeatherWidget.selectDutyRadio('odd')">
+                                    <input type="radio" name="dutyFieldDay" value="odd" class="hidden" ${currentChoice === 'odd' ? 'checked' : ''}>
+                                    <span class="text-xs font-black ${currentChoice === 'odd' ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'}">NGÀY LẺ</span>
+                                </label>
+                                <label class="flex-1 flex items-center justify-center gap-2 p-3 bg-white dark:bg-slate-850 border-2 rounded-xl cursor-pointer select-none transition-all ${currentChoice === 'even' ? 'border-blue-500 bg-blue-50/10' : 'border-slate-250 dark:border-slate-800'}" id="lbl-duty-even" onclick="WeatherWidget.selectDutyRadio('even')">
+                                    <input type="radio" name="dutyFieldDay" value="even" class="hidden" ${currentChoice === 'even' ? 'checked' : ''}>
+                                    <span class="text-xs font-black ${currentChoice === 'even' ? 'text-blue-600' : 'text-slate-600 dark:text-slate-400'}">NGÀY CHẴN</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="text-[11px] font-bold text-slate-400 bg-slate-100/50 dark:bg-slate-900/20 p-2.5 rounded-xl border border-slate-200/20 leading-normal">
+                            💡 Ví dụ: Nếu chọn <strong>Ngày lẻ</strong>, thì các ngày 1, 3, 5... sẽ báo <strong>Trực hiện trường</strong>, các ngày 2, 4, 6... sẽ báo <strong>Giám định chi tiết</strong>.
+                        </div>
+                    </div>`,
+                showCancelButton: true,
+                confirmButtonText: 'Lưu cài đặt',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#2563eb',
+                customClass: { popup: 'custom-rounded' },
+                preConfirm: () => {
+                    const selected = document.querySelector('input[name="dutyFieldDay"]:checked').value;
+                    return { dutyFieldDay: selected };
+                }
+            });
+            
+            if (formValues) {
+                const users = Auth.getUsers();
+                const idx = users.findIndex(u => u.id === user.id);
+                if (idx >= 0) {
+                    users[idx] = { ...users[idx], ...formValues };
+                    Auth.saveUsers(users);
+                    
+                    const newSession = { ...Auth.getCurrentUser(), ...formValues };
+                    localStorage.setItem(Auth._KEY_SESSION, JSON.stringify(newSession));
+                    
+                    // Cập nhật ngay UI lịch trực
+                    WeatherWidget.updateDutyUI();
+                    
+                    Toast.fire({ icon: 'success', title: 'Đã lưu lịch trực mới!' });
+                }
+            }
+        },
+        
+        selectDutyRadio(choice) {
+            const oddLabel = document.getElementById('lbl-duty-odd');
+            const evenLabel = document.getElementById('lbl-duty-even');
+            const oddRadio = document.querySelector('input[name="dutyFieldDay"][value="odd"]');
+            const evenRadio = document.querySelector('input[name="dutyFieldDay"][value="even"]');
+            
+            if (choice === 'odd') {
+                if (oddRadio) oddRadio.checked = true;
+                if (oddLabel) {
+                    oddLabel.className = 'flex-1 flex items-center justify-center gap-2 p-3 bg-white dark:bg-slate-850 border-2 border-blue-500 bg-blue-50/10 rounded-xl cursor-pointer select-none transition-all';
+                    const span = oddLabel.querySelector('span');
+                    if (span) span.className = 'text-xs font-black text-blue-600';
+                }
+                if (evenLabel) {
+                    evenLabel.className = 'flex-1 flex items-center justify-center gap-2 p-3 bg-white dark:bg-slate-850 border-2 border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer select-none transition-all';
+                    const span = evenLabel.querySelector('span');
+                    if (span) span.className = 'text-xs font-black text-slate-600 dark:text-slate-400';
+                }
+            } else {
+                if (evenRadio) evenRadio.checked = true;
+                if (evenLabel) {
+                    evenLabel.className = 'flex-1 flex items-center justify-center gap-2 p-3 bg-white dark:bg-slate-850 border-2 border-blue-500 bg-blue-50/10 rounded-xl cursor-pointer select-none transition-all';
+                    const span = evenLabel.querySelector('span');
+                    if (span) span.className = 'text-xs font-black text-blue-600';
+                }
+                if (oddLabel) {
+                    oddLabel.className = 'flex-1 flex items-center justify-center gap-2 p-3 bg-white dark:bg-slate-850 border-2 border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer select-none transition-all';
+                    const span = oddLabel.querySelector('span');
+                    if (span) span.className = 'text-xs font-black text-slate-600 dark:text-slate-400';
+                }
+            }
+        },
+        
+        updateDutyUI() {
+            const user = Auth.getCurrentUser();
+            if (!user) return;
+            
+            const currentChoice = user.dutyFieldDay || 'odd'; // Mặc định trực ngày lẻ
+            const todayDay = new Date().getDate();
+            const isOddDay = todayDay % 2 !== 0;
+            
+            let isFieldDuty = false;
+            if (currentChoice === 'odd') {
+                isFieldDuty = isOddDay;
+            } else {
+                isFieldDuty = !isOddDay;
+            }
+            
+            const dutyTextEl = document.getElementById('duty-status-text');
+            const dutyWidgetEl = document.getElementById('duty-widget');
+            
+            if (dutyTextEl) {
+                dutyTextEl.textContent = isFieldDuty ? 'Trực hiện trường' : 'Giám định chi tiết';
+            }
+            
+            if (dutyWidgetEl) {
+                if (isFieldDuty) {
+                    dutyWidgetEl.className = 'flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 text-white rounded-full shadow-[0_4px_12px_-3px_rgba(59,130,246,0.3)] select-none transition-all duration-350 hover:scale-[1.03] active:scale-[0.97] cursor-pointer';
+                    dutyWidgetEl.innerHTML = `
+                        <i data-lucide="shield" class="w-3.5 h-3.5 text-blue-100 animate-pulse"></i>
+                        <span id="duty-status-text" class="text-[9px] font-black uppercase tracking-wider">Trực hiện trường</span>
+                    `;
+                } else {
+                    dutyWidgetEl.className = 'flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 dark:from-emerald-600 dark:to-teal-700 text-white rounded-full shadow-[0_4px_12px_-3px_rgba(16,185,129,0.3)] select-none transition-all duration-350 hover:scale-[1.03] active:scale-[0.97] cursor-pointer';
+                    dutyWidgetEl.innerHTML = `
+                        <i data-lucide="clipboard-list" class="w-3.5 h-3.5 text-emerald-100 animate-pulse"></i>
+                        <span id="duty-status-text" class="text-[9px] font-black uppercase tracking-wider">Giám định chi tiết</span>
+                    `;
+                }
                 
                 if (window.lucide) {
                     window.lucide.createIcons({
