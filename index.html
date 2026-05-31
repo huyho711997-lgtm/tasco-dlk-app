@@ -20930,6 +20930,9 @@ YÊU CẦU ĐẦU RA:
                             verified: true
                         };
 
+                        // Apply type filter (Genuine / Aftermarket)
+                        if (type !== 'all' && mappedItem.type !== type) return;
+
                         if (keyword) {
                             const nameMatch = mappedItem.name.toLowerCase().includes(keyword);
                             const codeMatch = mappedItem.code.toLowerCase().includes(keyword);
