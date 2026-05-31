@@ -3475,9 +3475,18 @@
                 </div>
 
                 <div class="flex gap-1 bg-slate-100 p-1 rounded-xl mb-3">
-                    <button class="cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-cyan-600 shadow-sm" onclick="MyCloud.setTab('all', this)">Tất cả</button>
-                    <button class="cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500" onclick="MyCloud.setTab('image', this)">Hình ảnh</button>
-                    <button class="cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500" onclick="MyCloud.setTab('document', this)">Tài liệu</button>
+                    <button class="cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-cyan-600 shadow-sm flex items-center justify-center gap-1.5" onclick="MyCloud.setTab('all', this)">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                        <span>Tất cả</span>
+                    </button>
+                    <button class="cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 flex items-center justify-center gap-1.5" onclick="MyCloud.setTab('image', this)">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <span>Hình ảnh</span>
+                    </button>
+                    <button class="cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 flex items-center justify-center gap-1.5" onclick="MyCloud.setTab('document', this)">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        <span>Tài liệu</span>
+                    </button>
                 </div>
 
                 <div id="mycloud-quota-container" class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm transition-all">
@@ -22901,8 +22910,8 @@ YÊU CẦU ĐẦU RA:
             this._activeTab = tab;
             this._selectMode = false;
             this._selectedKeys.clear();
-            document.querySelectorAll('.cloud-tab').forEach(b => b.className = 'cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500');
-            if(btn) btn.className = 'cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-cyan-600 shadow-sm';
+            document.querySelectorAll('.cloud-tab').forEach(b => b.className = 'cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 flex items-center justify-center gap-1.5');
+            if(btn) btn.className = 'cloud-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-cyan-600 shadow-sm flex items-center justify-center gap-1.5';
             this.render();
         },
 
