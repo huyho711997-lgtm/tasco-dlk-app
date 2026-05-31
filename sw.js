@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tasco-dlk-cache-v1';
+const CACHE_NAME = 'tasco-dlk-cache-v2';
 const PRE_CACHE_ASSETS = [
   './',
   './index.html',
