@@ -3712,8 +3712,8 @@
 
             <!-- SEARCH RESULTS CARD LIST -->
             <div id="resultsSpareList" class="mt-4 space-y-3 pb-10">
-                <div class="text-center py-20 text-slate-300 font-extrabold uppercase italic text-xs tracking-wider">
-                    Sẵn sàng tra cứu phụ tùng
+                <div class="text-center py-20 text-slate-400 font-bold text-xs select-none">
+                    Vui lòng nhập từ khóa hoặc chọn bộ lọc để tra cứu phụ tùng
                 </div>
             </div>
 
@@ -21170,6 +21170,24 @@ YÊU CẦU ĐẦU RA:
 
             const listContainer = document.getElementById('resultsSpareList');
             const countBadge = document.getElementById('spare-total-count');
+
+            if (!hang && !hieu && !nam && !keyword) {
+                this.data = [];
+                if (countBadge) {
+                    countBadge.textContent = this._user && !this._user.isAnonymous ? 'Tổng kho: 0 giá trực tuyến' : 'Tổng kho: 0 phụ tùng';
+                }
+                if (listContainer) {
+                    listContainer.innerHTML = `
+                        <div class="text-center py-20 text-slate-400 font-bold text-xs select-none">
+                            Vui lòng nhập từ khóa hoặc chọn bộ lọc để tra cứu phụ tùng
+                        </div>
+                    `;
+                }
+                const paginationContainer = document.getElementById('sparePagination');
+                if (paginationContainer) paginationContainer.classList.add('hidden');
+                this.calculateStats();
+                return;
+            }
 
             if (this._user && !this._user.isAnonymous) {
                 // Query Firestore
