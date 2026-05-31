@@ -3303,8 +3303,25 @@
         </div>
 
         <!-- VIEW: TIẾP NHẬN AI -->
-        <div id="view-import" class="view-section p-5 hidden">
-            <div class="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100 text-center">
+        <div id="view-import" class="view-section p-4 hidden">
+            <!-- STICKY HEADER -->
+            <div class="sticky top-0 z-40 -mx-4 -mt-4 px-4 pt-4 pb-3 shadow-[0_8px_15px_-5px_rgba(0,0,0,0.05)] transition-colors mb-4" style="background-color: var(--bg-app);">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <button onclick="Nav.switchView('home', document.getElementById('nav-home-btn'))" class="w-8 h-8 flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-350 rounded-xl active:scale-90 transition-transform">
+                            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                        </button>
+                        <div>
+                            <h2 class="font-black text-slate-800 text-base tracking-tight flex items-center gap-1.5 dark:text-white">
+                                AI Nhập Liệu
+                            </h2>
+                            <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-0.5 block">Tiếp nhận & bóc tách tự động</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white dark:bg-slate-850 rounded-[32px] p-6 shadow-sm border border-slate-100 dark:border-slate-800 text-center">
                 <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <i data-lucide="bot" class="w-8 h-8"></i>
                 </div>
@@ -3571,11 +3588,16 @@
             <!-- STICKY HEADER -->
             <div class="sticky top-0 z-40 -mx-4 -mt-4 px-4 pt-4 pb-3 shadow-[0_8px_15px_-5px_rgba(0,0,0,0.05)] transition-colors" style="background-color: var(--bg-app);">
                 <div class="flex items-center justify-between">
-                    <div>
-                        <h2 class="font-black text-slate-800 text-base tracking-tight flex items-center gap-1.5 dark:text-white">
-                            <i data-lucide="search" class="w-[18px] h-[18px] text-blue-500"></i> Tra Cứu Phụ Tùng
-                        </h2>
-                        <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-0.5 block" id="spare-total-count">Kho giá tối ưu</span>
+                    <div class="flex items-center gap-3">
+                        <button onclick="Nav.switchView('home', document.getElementById('nav-home-btn'))" class="w-8 h-8 flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-350 rounded-xl active:scale-90 transition-transform">
+                            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                        </button>
+                        <div>
+                            <h2 class="font-black text-slate-800 text-base tracking-tight flex items-center gap-1.5 dark:text-white">
+                                Tra Cứu Phụ Tùng
+                            </h2>
+                            <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-0.5 block" id="spare-total-count">Kho giá tối ưu</span>
+                        </div>
                     </div>
                     <!-- COMPACT AI AUTH PILL -->
                     <div id="ai-auth-box" class="flex items-center shrink-0">
