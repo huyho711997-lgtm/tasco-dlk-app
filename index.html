@@ -3584,7 +3584,7 @@
         </div>
 
         <!-- SPARE PARTS VIEW -->
-        <div id="view-spare" class="view-section p-4 hidden">
+        <div id="view-spare" class="view-section p-4 hidden overscroll-y-contain">
             <!-- STICKY HEADER -->
             <div class="sticky top-0 z-40 -mx-4 -mt-4 px-4 pt-4 pb-3 shadow-[0_8px_15px_-5px_rgba(0,0,0,0.05)] transition-colors" style="background-color: var(--bg-app);">
                 <div class="flex items-center justify-between">
@@ -3733,7 +3733,7 @@
 
 
             <!-- SEARCH RESULTS CARD LIST -->
-            <div id="resultsSpareList" class="mt-4 space-y-3 pb-10">
+            <div id="resultsSpareList" class="mt-4 space-y-3 pb-10 overscroll-y-contain">
                 <div class="text-center py-20 text-slate-400 font-bold text-xs select-none">
                     Vui lòng nhập từ khóa hoặc chọn bộ lọc để tra cứu phụ tùng
                 </div>
@@ -21197,6 +21197,19 @@ YÊU CẦU ĐẦU RA:
                     this.render();
                 }
             });
+
+            // Anti-scroll chaining and virtual keyboard dismissal on scroll/touch outside
+            const searchInput = document.getElementById('spareSearchInput');
+            const viewSpare = document.getElementById('view-spare');
+            if (searchInput && viewSpare) {
+                const handleDismissKeyboard = (e) => {
+                    if (document.activeElement === searchInput && e.target !== searchInput) {
+                        searchInput.blur();
+                    }
+                };
+                viewSpare.addEventListener('touchstart', handleDismissKeyboard, { passive: true });
+                viewSpare.addEventListener('touchmove', handleDismissKeyboard, { passive: true });
+            }
         },
 
         loadFilters() {
@@ -21503,6 +21516,7 @@ YÊU CẦU ĐẦU RA:
             const namEl = document.getElementById('filterNam');
             const typeEl = document.getElementById('filterType');
             const searchEl = document.getElementById('spareSearchInput');
+            if (searchEl) searchEl.blur();
 
             const hang = hangEl ? hangEl.value : '';
             const hieu = hieuEl ? Array.from(hieuEl.selectedOptions).map(o => o.value).filter(v => v !== "") : [];
