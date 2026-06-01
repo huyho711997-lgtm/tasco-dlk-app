@@ -20909,6 +20909,13 @@ YÊU CẦU ĐẦU RA:
             overlay.classList.add('opacity-100');
             overlay.classList.remove('opacity-0');
             sheet.classList.remove('translate-y-full');
+
+            // Freeze background view scrolling
+            const mainEl = document.querySelector('main');
+            if (mainEl) {
+                mainEl.classList.remove('overflow-y-auto');
+                mainEl.classList.add('overflow-hidden');
+            }
         },
 
         closeMobileSheet() {
@@ -20922,6 +20929,13 @@ YÊU CẦU ĐẦU RA:
             
             const activeInput = sheet.querySelector('input');
             if (activeInput) activeInput.blur();
+
+            // Restore background view scrolling
+            const mainEl = document.querySelector('main');
+            if (mainEl) {
+                mainEl.classList.remove('overflow-hidden');
+                mainEl.classList.add('overflow-y-auto');
+            }
 
             setTimeout(() => {
                 sheet.classList.add('hidden');
