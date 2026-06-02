@@ -20903,6 +20903,10 @@ YÊU CẦU ĐẦU RA:
 
             data.forEach(item => {
                 const step = parseInt(item.step) || 1;
+                const carDetails = `${item.hangXe || ''} ${item.hieuXe || item.loaiXe || item.hieuxe || ''}`.trim() || 'Chưa gán xe';
+                const garaName = item.garaName || 'Chưa gán Gara';
+                const garaAdvisorName = item.garaAdvisorName || 'Chưa gán Cố vấn';
+                const customerName = item.chuXe || item.customer || 'Khách hàng';
                 
                 // Quy tắc 1: Tiếp nhận trễ hẹn
                 if (step === 1) {
@@ -20913,7 +20917,10 @@ YÊU CẦU ĐẦU RA:
                             alerts.push({
                                 id: item.id,
                                 bsx: item.bsx || 'CHƯA CÓ BSX',
-                                customer: item.customer || 'Khách hàng',
+                                customer: customerName,
+                                carDetails,
+                                garaName,
+                                garaAdvisorName,
                                 type: 'danger',
                                 icon: 'clock-3',
                                 ruleType: 'step1',
@@ -20933,7 +20940,10 @@ YÊU CẦU ĐẦU RA:
                         alerts.push({
                             id: item.id,
                             bsx: item.bsx || 'CHƯA CÓ BSX',
-                            customer: item.customer || 'Khách hàng',
+                            customer: customerName,
+                            carDetails,
+                            garaName,
+                            garaAdvisorName,
                             type: 'warning',
                             icon: 'alert-triangle',
                             ruleType: 'step2',
@@ -20961,7 +20971,10 @@ YÊU CẦU ĐẦU RA:
                         alerts.push({
                             id: item.id,
                             bsx: item.bsx || 'CHƯA CÓ BSX',
-                            customer: item.customer || 'Khách hàng',
+                            customer: customerName,
+                            carDetails,
+                            garaName,
+                            garaAdvisorName,
                             type: 'info',
                             icon: 'file-warning',
                             ruleType: 'step3',
@@ -20978,7 +20991,10 @@ YÊU CẦU ĐẦU RA:
                         alerts.push({
                             id: item.id,
                             bsx: item.bsx || 'CHƯA CÓ BSX',
-                            customer: item.customer || 'Khách hàng',
+                            customer: customerName,
+                            carDetails,
+                            garaName,
+                            garaAdvisorName,
                             type: 'warning',
                             icon: 'clock-7',
                             ruleType: 'step5',
@@ -21004,7 +21020,10 @@ YÊU CẦU ĐẦU RA:
                         alerts.push({
                             id: item.id,
                             bsx: item.bsx || 'CHƯA CÓ BSX',
-                            customer: item.customer || 'Khách hàng',
+                            customer: customerName,
+                            carDetails,
+                            garaName,
+                            garaAdvisorName,
                             type: 'warning',
                             icon: 'receipt',
                             ruleType: 'step6',
@@ -21076,18 +21095,44 @@ YÊU CẦU ĐẦU RA:
                                     <div class="flex items-center justify-between gap-1 mb-1.5">
                                         <div class="flex items-center gap-1.5 min-w-0">
                                             <span class="text-[10px] font-black uppercase tracking-wider text-slate-800 dark:text-slate-100 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg truncate">${alert.bsx}</span>
-                                            <span class="text-[9.5px] text-slate-400 dark:text-slate-500 font-bold truncate max-w-[85px]">${alert.customer}</span>
+                                            <span class="text-[9.5px] text-slate-450 dark:text-slate-500 font-bold truncate max-w-[85px]">${alert.customer}</span>
                                         </div>
-                                        <span class="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider ${alert.type === 'danger' ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400' : alert.type === 'warning' ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-450' : 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-450'}">
+                                        <span class="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider ${alert.type === 'danger' ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-450' : alert.type === 'warning' ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-450' : 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-450'}">
                                             <span class="w-1 h-1 rounded-full ${alert.type === 'danger' ? 'bg-rose-500 animate-pulse' : alert.type === 'warning' ? 'bg-amber-500 animate-pulse' : 'bg-blue-500 animate-pulse'}"></span>
                                             ${alert.type === 'danger' ? 'Khẩn cấp' : alert.type === 'warning' ? 'Cảnh báo' : 'Nhắc việc'}
                                         </span>
                                     </div>
-                                    <p class="text-[11px] text-slate-650 dark:text-slate-400 leading-relaxed font-semibold">${alert.desc}</p>
+                                    <p class="text-[11px] text-slate-650 dark:text-slate-400 leading-relaxed font-semibold mb-2">${alert.desc}</p>
+                                    
+                                    <!-- Metadata Grid -->
+                                    <div class="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[9.5px] text-slate-500 dark:text-slate-400 mt-2.5 pt-2.5 border-t border-slate-100/60 dark:border-slate-800/40">
+                                        <div class="flex items-center gap-1.5 min-w-0">
+                                            <i data-lucide="user" class="w-3.5 h-3.5 text-slate-455 dark:text-slate-550 shrink-0"></i>
+                                            <span class="truncate font-semibold text-slate-700 dark:text-slate-350" title="${alert.customer}">Chủ xe: ${alert.customer}</span>
+                                        </div>
+                                        <div class="flex items-center gap-1.5 min-w-0">
+                                            <i data-lucide="car-front" class="w-3.5 h-3.5 text-slate-455 dark:text-slate-550 shrink-0"></i>
+                                            <span class="truncate font-semibold text-slate-700 dark:text-slate-350" title="${alert.carDetails}">Hiệu xe: ${alert.carDetails}</span>
+                                        </div>
+                                        <div class="flex items-center gap-1.5 min-w-0 col-span-2">
+                                            <i data-lucide="wrench" class="w-3.5 h-3.5 text-slate-455 dark:text-slate-550 shrink-0"></i>
+                                            <span class="truncate font-semibold text-slate-700 dark:text-slate-350" title="${alert.garaName}">Gara: ${alert.garaName}</span>
+                                        </div>
+                                        <div class="flex items-center gap-1.5 min-w-0 col-span-2">
+                                            <i data-lucide="user-check" class="w-3.5 h-3.5 text-slate-455 dark:text-slate-550 shrink-0"></i>
+                                            <span class="truncate font-semibold text-slate-700 dark:text-slate-350" title="${alert.garaAdvisorName}">Cố vấn: ${alert.garaAdvisorName}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="flex justify-end gap-1.5 mt-3 pt-2.5 border-t border-slate-100/50 dark:border-slate-800/30">
-                                ${ctaButtons}
+                            <div class="flex justify-between items-center gap-1.5 mt-3 pt-2.5 border-t border-slate-100/50 dark:border-slate-800/30">
+                                <button onclick="Modal.open('${alert.id}')" class="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-650 bg-slate-50 active:bg-slate-100 hover:shadow-sm dark:border-slate-700 dark:bg-slate-850 dark:text-slate-300 text-[10px] font-black transition-all flex items-center gap-1.5 select-none">
+                                    <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                    <span>Vào hồ sơ</span>
+                                </button>
+                                <div class="flex gap-1.5 justify-end">
+                                    ${ctaButtons}
+                                </div>
                             </div>
                         </div>
                     `;
@@ -21115,7 +21160,7 @@ YÊU CẦU ĐẦU RA:
     // ============================================================
     // PREMIUM CUSTOM SELECT COMPONENT MANAGER
     // ============================================================
-    const CustomSelectManager = {
+const CustomSelectManager = {
         init(selectId, placeholder) {
             const select = document.getElementById(selectId);
             if (!select) return;
