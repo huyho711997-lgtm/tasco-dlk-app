@@ -3222,6 +3222,60 @@
                 </button>
             </div>
 
+            <!-- AI WORK ASSISTANT SECTION -->
+            <div id="home-assistant-section" class="mb-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-5 shadow-[0_8px_30px_-6px_rgba(0,0,0,0.02)]">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-50 dark:border-slate-850">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md shadow-indigo-100 dark:shadow-none">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-slate-800 dark:text-white text-[13.5px] tracking-tight leading-none">Trợ lý Nhắc việc AI</h3>
+                            <span class="text-[9.5px] text-slate-400 dark:text-slate-500 font-extrabold uppercase tracking-wider mt-1 block" id="home-assistant-summary">Đang quét tiến độ...</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span id="home-assistant-badge" class="hidden text-[9px] font-black bg-rose-500 text-white px-2 py-0.5 rounded-full select-none">0 việc gấp</span>
+                        <button onclick="ClaimAssistant.toggleConfig()" class="w-7 h-7 flex items-center justify-center bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-750 text-slate-500 dark:text-slate-400 rounded-lg active:scale-90 transition-transform">
+                            <i data-lucide="settings" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Settings Slide Down Panel -->
+                <div id="home-assistant-config-panel" class="hidden pb-4 mb-4 border-b border-slate-100 dark:border-slate-800 space-y-3">
+                    <p class="text-[10px] font-black uppercase tracking-wider text-indigo-500 dark:text-indigo-400">Thiết lập thời gian cảnh báo</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-1">Chưa hẹn lịch (giờ):</label>
+                            <input type="number" id="cfg-threshold-step1" min="1" class="w-full h-9 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-xl px-2 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-1">Thiếu báo giá (giờ):</label>
+                            <input type="number" id="cfg-threshold-step3" min="1" class="w-full h-9 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-xl px-2 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-1">Chờ duyệt giá (giờ):</label>
+                            <input type="number" id="cfg-threshold-step5" min="1" class="w-full h-9 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-xl px-2 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-1">Chờ hóa đơn (ngày):</label>
+                            <input type="number" id="cfg-threshold-step6" min="1" class="w-full h-9 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-xl px-2 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-blue-500">
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-2 pt-1">
+                        <button onclick="ClaimAssistant.toggleConfig()" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold active:scale-95 transition-all">Hủy</button>
+                        <button onclick="ClaimAssistant.saveConfig()" class="h-8 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold active:scale-95 transition-all shadow-sm">Lưu thiết lập</button>
+                    </div>
+                </div>
+
+                <!-- Alert Cards Area -->
+                <div id="home-assistant-panel" class="space-y-2.5 max-h-[380px] overflow-y-auto no-scrollbar">
+                    <!-- Cards will render here -->
+                </div>
+            </div>
+
             <div class="flex items-center justify-between mb-3 px-1 mt-2">
                 <h3 class="font-black text-slate-800 text-sm">Lịch hẹn giám định</h3>
                 <div class="flex items-center gap-3">
@@ -6539,6 +6593,7 @@
             Auth.init();
             CostCalculator.init(); // Kích hoạt lấy setting từ Firebase
             DateUtil.setup();
+            ClaimAssistant.init(); // Load AI Assistant configs
 
             // Load masterData from offline cache immediately for instantaneous startup without internet
             const cachedRaw = localStorage.getItem("tasco_cases_cache");
@@ -6738,6 +6793,9 @@
                     homeWarnBadge.textContent = navWarnBadge.textContent;
                     homeWarnBadge.classList.toggle('hidden', navWarnBadge.classList.contains('hidden'));
                 }
+                
+                // Cập nhật Trợ lý Nhắc việc AI
+                ClaimAssistant.update();
                 
                 lucide.createIcons();
             } catch(e) {
@@ -20655,6 +20713,300 @@ YÊU CẦU ĐẦU RA:
             });
         }
     };   
+
+    // ============================================================
+    // CLAIM ASSISTANT (TRỢ LÝ NHẮC VIỆC AI)
+    // ============================================================
+    const ClaimAssistant = {
+        thresholds: {
+            step1: 24, // giờ
+            step3: 4,  // giờ
+            step5: 48, // giờ
+            step6: 7   // ngày
+        },
+
+        init() {
+            this.loadConfig();
+        },
+
+        loadConfig() {
+            try {
+                const saved = localStorage.getItem('tasco_assistant_thresholds');
+                if (saved) {
+                    this.thresholds = { ...this.thresholds, ...JSON.parse(saved) };
+                }
+            } catch (e) {
+                console.error('[Assistant] Fail to load thresholds:', e);
+            }
+            
+            // Điền vào form khi chúng tồn tại
+            const i1 = document.getElementById('cfg-threshold-step1');
+            const i3 = document.getElementById('cfg-threshold-step3');
+            const i5 = document.getElementById('cfg-threshold-step5');
+            const i6 = document.getElementById('cfg-threshold-step6');
+            if (i1) i1.value = this.thresholds.step1;
+            if (i3) i3.value = this.thresholds.step3;
+            if (i5) i5.value = this.thresholds.step5;
+            if (i6) i6.value = this.thresholds.step6;
+        },
+
+        saveConfig() {
+            const i1 = document.getElementById('cfg-threshold-step1');
+            const i3 = document.getElementById('cfg-threshold-step3');
+            const i5 = document.getElementById('cfg-threshold-step5');
+            const i6 = document.getElementById('cfg-threshold-step6');
+            
+            if (i1) this.thresholds.step1 = Math.max(1, parseInt(i1.value) || 24);
+            if (i3) this.thresholds.step3 = Math.max(1, parseInt(i3.value) || 4);
+            if (i5) this.thresholds.step5 = Math.max(1, parseInt(i5.value) || 48);
+            if (i6) this.thresholds.step6 = Math.max(1, parseInt(i6.value) || 7);
+
+            try {
+                localStorage.setItem('tasco_assistant_thresholds', JSON.stringify(this.thresholds));
+                Toast.fire({ icon: 'success', title: 'Đã lưu cấu hình trợ lý!' });
+            } catch(e) {
+                console.error('[Assistant] Fail to save thresholds:', e);
+            }
+            
+            this.toggleConfig();
+            this.update();
+        },
+
+        toggleConfig() {
+            const panel = document.getElementById('home-assistant-config-panel');
+            if (panel) {
+                panel.classList.toggle('hidden');
+                if (!panel.classList.contains('hidden')) {
+                    this.loadConfig();
+                }
+            }
+        },
+
+        scheduleAppointment(id) {
+            const item = App.find(id);
+            if (!item) return;
+
+            DateTimePicker.open({
+                title: '📅 Đặt lịch hẹn mới',
+                initial: item.appointmentTime || null,
+                showLocation: true,
+                locationValue: item.location || '',
+                showGarage: false,
+                onConfirm: (iso, location) => {
+                    const updates = { 
+                        appointmentTime: iso, 
+                        stepUpdatedAt: new Date().toISOString() 
+                    };
+                    if (location !== undefined) updates.location = location;
+                    if (item.step === 1) updates.step = 2;
+
+                    db.ref(`Workstation/${id}`).update(updates).then(() => {
+                        Toast.fire({ icon: 'success', title: 'Đã đặt lịch hẹn bồi thường!' });
+                    });
+                }
+            });
+        },
+
+        enterDamageItems(id) {
+            Modal.open(id);
+            setTimeout(() => {
+                const dmTab = document.querySelector('button[onclick*="damage"]');
+                if (dmTab) {
+                    ModalTabs.switch('damage', dmTab);
+                }
+            }, 350);
+        },
+
+        update() {
+            const container = document.getElementById('home-assistant-panel');
+            const badge = document.getElementById('home-assistant-badge');
+            const summary = document.getElementById('home-assistant-summary');
+            if (!container) return;
+
+            const data = App.masterData || [];
+            const alerts = [];
+            const now = moment();
+
+            data.forEach(item => {
+                const step = parseInt(item.step) || 1;
+                
+                // Quy tắc 1: Tiếp nhận trễ hẹn
+                if (step === 1) {
+                    const baseTime = item.receivedAt || item.stepUpdatedAt || item.createdAt;
+                    if (baseTime) {
+                        const diffHrs = now.diff(moment(baseTime), 'hours');
+                        if (diffHrs >= this.thresholds.step1) {
+                            alerts.push({
+                                id: item.id,
+                                bsx: item.bsx || 'CHƯA CÓ BSX',
+                                customer: item.customer || 'Khách hàng',
+                                type: 'danger',
+                                icon: 'clock-3',
+                                desc: `Hồ sơ tiếp nhận <b>${diffHrs} giờ</b> trước nhưng chưa lên lịch hẹn.`,
+                                cta: [
+                                    { text: '📅 Đặt lịch hẹn', action: `ClaimAssistant.scheduleAppointment('${item.id}')`, classes: 'bg-rose-100 text-rose-700 active:bg-rose-200 border-rose-200 dark:bg-rose-950/30 dark:text-rose-450 dark:border-rose-900/40' }
+                                ]
+                            });
+                        }
+                    }
+                }
+                
+                // Quy tắc 2: Quá giờ hẹn giám định
+                else if (step === 2 && item.appointmentTime) {
+                    const diffHrs = now.diff(moment(item.appointmentTime), 'hours');
+                    if (diffHrs >= 1) {
+                        alerts.push({
+                            id: item.id,
+                            bsx: item.bsx || 'CHƯA CÓ BSX',
+                            customer: item.customer || 'Khách hàng',
+                            type: 'warning',
+                            icon: 'alert-triangle',
+                            desc: `Quá giờ hẹn giám định <b>${diffHrs} giờ</b> nhưng chưa có kết quả.`,
+                            cta: [
+                                { text: '⚡ Chuyển bước', action: `Modal.openStatusSheet('${item.id}')`, classes: 'bg-amber-100 text-amber-800 active:bg-amber-200 border-amber-200 dark:bg-amber-950/30 dark:text-amber-450 dark:border-amber-900/40' },
+                                { text: '📅 Đổi lịch', action: `ClaimAssistant.scheduleAppointment('${item.id}')`, classes: 'bg-slate-100 text-slate-700 active:bg-slate-200 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-700' }
+                            ]
+                        });
+                    }
+                }
+                
+                // Quy tắc 3: Thiếu hạng mục tổn thất
+                else if (step === 3 && item.inspectedAt) {
+                    const diffHrs = now.diff(moment(item.inspectedAt), 'hours');
+                    const hasDamage = (item.damageItems && item.damageItems.length > 0);
+                    if (diffHrs >= this.thresholds.step3 && !hasDamage) {
+                        const phone = item.garaAdvisorPhone || item.garaPhone || item.phone || '';
+                        const ctas = [
+                            { text: '🛠 Nhập hạng mục', action: `ClaimAssistant.enterDamageItems('${item.id}')`, classes: 'bg-blue-100 text-blue-700 active:bg-blue-200 border-blue-200 dark:bg-blue-950/30 dark:text-blue-450 dark:border-blue-900/40' }
+                        ];
+                        if (phone) {
+                            ctas.push({ text: '💬 Nhắc báo giá (Zalo)', action: `ZaloHelper.send('${phone}', 'nhacBaoGia', '${item.id}')`, classes: 'bg-emerald-100 text-emerald-700 active:bg-emerald-200 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-450 dark:border-emerald-900/40' });
+                        }
+                        alerts.push({
+                            id: item.id,
+                            bsx: item.bsx || 'CHƯA CÓ BSX',
+                            customer: item.customer || 'Khách hàng',
+                            type: 'info',
+                            icon: 'file-warning',
+                            desc: `Đã giám định <b>${diffHrs} giờ</b> trước nhưng chưa có hạng mục tổn thất.`,
+                            cta: ctas
+                        });
+                    }
+                }
+                
+                // Quy tắc 4: Chờ duyệt giá lâu
+                else if (step === 5 && item.stepUpdatedAt) {
+                    const diffHrs = now.diff(moment(item.stepUpdatedAt), 'hours');
+                    if (diffHrs >= this.thresholds.step5) {
+                        alerts.push({
+                            id: item.id,
+                            bsx: item.bsx || 'CHƯA CÓ BSX',
+                            customer: item.customer || 'Khách hàng',
+                            type: 'warning',
+                            icon: 'clock-7',
+                            desc: `Hồ sơ chờ duyệt giá đã <b>${Math.round(diffHrs)} giờ</b> — cần đôn đốc duyệt.`,
+                            cta: [
+                                { text: '📞 Gọi Zalo Gara', action: `ZaloHelper.showMenu('${item.id}')`, classes: 'bg-amber-100 text-amber-800 active:bg-amber-200 border-amber-200 dark:bg-amber-950/30 dark:text-amber-450 dark:border-amber-900/40' }
+                            ]
+                        });
+                    }
+                }
+                
+                // Quy tắc 5: Chờ hóa đơn lâu
+                else if (step === 6 && item.stepUpdatedAt) {
+                    const diffDays = now.diff(moment(item.stepUpdatedAt), 'days');
+                    if (diffDays >= this.thresholds.step6) {
+                        const phone = item.garaAdvisorPhone || item.garaPhone || item.phone || '';
+                        const ctas = [];
+                        if (phone) {
+                            ctas.push({ text: '💬 Nhắc xuất HĐ (Zalo)', action: `ZaloHelper.send('${phone}', 'nhacHoaDon', '${item.id}')`, classes: 'bg-emerald-100 text-emerald-700 active:bg-emerald-200 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-450 dark:border-emerald-900/40' });
+                        } else {
+                            ctas.push({ text: '📞 Zalo Gara', action: `ZaloHelper.showMenu('${item.id}')`, classes: 'bg-slate-100 text-slate-700 active:bg-slate-200 border-slate-200 dark:bg-slate-800 dark:text-slate-350 dark:border-slate-700' });
+                        }
+                        alerts.push({
+                            id: item.id,
+                            bsx: item.bsx || 'CHƯA CÓ BSX',
+                            customer: item.customer || 'Khách hàng',
+                            type: 'warning',
+                            icon: 'receipt',
+                            desc: `Hồ sơ chờ hóa đơn đã <b>${diffDays} ngày</b> — liên hệ xuất hóa đơn.`,
+                            cta: ctas
+                        });
+                    }
+                }
+            });
+
+            // Sắp xếp cảnh báo: danger > warning > info
+            const severityOrder = { danger: 1, warning: 2, info: 3 };
+            alerts.sort((a, b) => severityOrder[a.type] - severityOrder[b.type]);
+
+            // Render
+            if (alerts.length === 0) {
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-6 text-center select-none bg-slate-50/50 dark:bg-slate-800/10 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl animate-fade-in">
+                        <div class="w-10 h-10 bg-emerald-50 dark:bg-emerald-950/20 rounded-full flex items-center justify-center text-emerald-500 mb-2">
+                            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                        </div>
+                        <p class="text-xs font-black text-slate-700 dark:text-slate-300">Không có hồ sơ trễ hạn</p>
+                        <p class="text-[10px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">Tuyệt vời! Công việc của bạn đều đúng tiến độ.</p>
+                    </div>
+                `;
+                if (badge) badge.classList.add('hidden');
+                if (summary) summary.textContent = 'Mọi việc đều đúng tiến độ';
+            } else {
+                container.innerHTML = alerts.map(alert => {
+                    const themeClasses = {
+                        danger: 'border-rose-100 bg-rose-50/25 text-rose-800 dark:border-rose-950/30 dark:bg-rose-950/5',
+                        warning: 'border-amber-100 bg-amber-50/25 text-amber-800 dark:border-amber-950/30 dark:bg-amber-950/5',
+                        info: 'border-blue-100 bg-blue-50/25 text-blue-800 dark:border-blue-950/30 dark:bg-blue-950/5'
+                    };
+
+                    const iconColor = {
+                        danger: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/20',
+                        warning: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20',
+                        info: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/20'
+                    };
+
+                    const ctaButtons = alert.cta.map(btn => `
+                        <button onclick="${btn.action}" class="px-2.5 py-1.5 rounded-lg border text-[10px] font-black active:scale-95 transition-all flex items-center gap-1 ${btn.classes}">
+                            ${btn.text}
+                        </button>
+                    `).join('');
+
+                    return `
+                        <div class="flex flex-col p-3 rounded-2xl border ${themeClasses[alert.type]} shadow-[0_4px_12px_rgba(0,0,0,0.01)] transition-all">
+                            <div class="flex items-start gap-2.5">
+                                <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${iconColor[alert.type]}">
+                                    <i data-lucide="${alert.icon}" class="w-4 h-4"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center justify-between gap-1">
+                                        <span class="text-xs font-black uppercase tracking-wide truncate text-slate-800 dark:text-slate-200">${alert.bsx}</span>
+                                        <span class="text-[9px] text-slate-400 dark:text-slate-500 font-bold truncate">${alert.customer}</span>
+                                    </div>
+                                    <p class="text-[10.5px] text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">${alert.desc}</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-end gap-1.5 mt-2.5 pt-2 border-t border-slate-100/50 dark:border-slate-800/50">
+                                ${ctaButtons}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                if (badge) {
+                    badge.textContent = `${alerts.length} việc gấp`;
+                    badge.classList.remove('hidden');
+                }
+                if (summary) {
+                    summary.textContent = `Có ${alerts.length} hồ sơ cần xử lý ngay`;
+                }
+            }
+
+            lucide.createIcons();
+        }
+    };
+
     // ============================================================
     // PREMIUM CUSTOM SELECT COMPONENT MANAGER
     // ============================================================
