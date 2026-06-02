@@ -3222,60 +3222,6 @@
                 </button>
             </div>
 
-            <!-- AI WORK ASSISTANT SECTION -->
-            <div id="home-assistant-section" class="mb-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-5 shadow-[0_8px_30px_-6px_rgba(0,0,0,0.02)]">
-                <!-- Header -->
-                <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-50 dark:border-slate-850">
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md shadow-indigo-100 dark:shadow-none">
-                            <i data-lucide="sparkles" class="w-4 h-4"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-black text-slate-800 dark:text-white text-[13.5px] tracking-tight leading-none">Trợ lý Nhắc việc AI</h3>
-                            <span class="text-[9.5px] text-slate-400 dark:text-slate-500 font-extrabold uppercase tracking-wider mt-1 block" id="home-assistant-summary">Đang quét tiến độ...</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span id="home-assistant-badge" class="hidden text-[9px] font-black bg-rose-500 text-white px-2 py-0.5 rounded-full select-none">0 việc gấp</span>
-                        <button onclick="ClaimAssistant.toggleConfig()" class="w-7 h-7 flex items-center justify-center bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-750 text-slate-500 dark:text-slate-400 rounded-lg active:scale-90 transition-transform">
-                            <i data-lucide="settings" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Settings Slide Down Panel -->
-                <div id="home-assistant-config-panel" class="hidden pb-4 mb-4 border-b border-slate-100 dark:border-slate-800 space-y-3">
-                    <p class="text-[10px] font-black uppercase tracking-wider text-indigo-500 dark:text-indigo-400">Thiết lập thời gian cảnh báo</p>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-1">Chưa hẹn lịch (giờ):</label>
-                            <input type="number" id="cfg-threshold-step1" min="1" class="w-full h-9 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-xl px-2 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-1">Thiếu báo giá (giờ):</label>
-                            <input type="number" id="cfg-threshold-step3" min="1" class="w-full h-9 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-xl px-2 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-1">Chờ duyệt giá (giờ):</label>
-                            <input type="number" id="cfg-threshold-step5" min="1" class="w-full h-9 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-xl px-2 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-1">Chờ hóa đơn (ngày):</label>
-                            <input type="number" id="cfg-threshold-step6" min="1" class="w-full h-9 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-xl px-2 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-blue-500">
-                        </div>
-                    </div>
-                    <div class="flex justify-end gap-2 pt-1">
-                        <button onclick="ClaimAssistant.toggleConfig()" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold active:scale-95 transition-all">Hủy</button>
-                        <button onclick="ClaimAssistant.saveConfig()" class="h-8 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold active:scale-95 transition-all shadow-sm">Lưu thiết lập</button>
-                    </div>
-                </div>
-
-                <!-- Alert Cards Area -->
-                <div id="home-assistant-panel" class="space-y-2.5 max-h-[380px] overflow-y-auto no-scrollbar">
-                    <!-- Cards will render here -->
-                </div>
-            </div>
-
             <div class="flex items-center justify-between mb-3 px-1 mt-2">
                 <h3 class="font-black text-slate-800 text-sm">Lịch hẹn giám định</h3>
                 <div class="flex items-center gap-3">
@@ -3291,6 +3237,52 @@
             <div id="home-week-calendar" class="flex justify-between bg-white p-2 rounded-2xl border border-slate-100 shadow-sm mb-6 min-h-[85px]">
                 </div>
 
+        </div>
+
+        <!-- VIEW: TRỢ LÝ NHẮC VIỆC AI (TAB RIÊNG) -->
+        <div id="view-assistant" class="view-section p-5 hidden">
+            <!-- Header -->
+            <div class="mb-5 mt-2 flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">Trợ lý Nhắc việc AI</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1" id="tab-assistant-summary">Đang quét tiến độ...</p>
+                </div>
+                <button onclick="ClaimAssistant.toggleConfig()" class="w-8 h-8 flex items-center justify-center bg-white dark:bg-slate-800 hover:bg-slate-50 border border-slate-200 dark:border-slate-700 text-slate-500 rounded-xl active:scale-90 transition-transform shadow-sm">
+                    <i data-lucide="settings" class="w-4 h-4 text-slate-500"></i>
+                </button>
+            </div>
+
+            <!-- Settings Panel -->
+            <div id="home-assistant-config-panel" class="hidden bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-5 shadow-[0_8px_30px_-6px_rgba(0,0,0,0.02)] mb-5 space-y-3">
+                <p class="text-[10px] font-black uppercase tracking-wider text-indigo-500 dark:text-indigo-400">Thiết lập thời gian cảnh báo</p>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-1">Chưa hẹn lịch (giờ):</label>
+                        <input type="number" id="cfg-threshold-step1" min="1" class="w-full h-9 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-xl px-2 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-1">Thiếu báo giá (giờ):</label>
+                        <input type="number" id="cfg-threshold-step3" min="1" class="w-full h-9 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-xl px-2 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-1">Chờ duyệt giá (giờ):</label>
+                        <input type="number" id="cfg-threshold-step5" min="1" class="w-full h-9 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-xl px-2 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-1">Chờ hóa đơn (ngày):</label>
+                        <input type="number" id="cfg-threshold-step6" min="1" class="w-full h-9 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-xl px-2 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-blue-500">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-1">
+                    <button onclick="ClaimAssistant.toggleConfig()" class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold active:scale-95 transition-all">Hủy</button>
+                    <button onclick="ClaimAssistant.saveConfig()" class="h-8 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold active:scale-95 transition-all shadow-sm">Lưu thiết lập</button>
+                </div>
+            </div>
+
+            <!-- Alert Cards Area -->
+            <div id="home-assistant-panel" class="space-y-3 pb-24">
+                <!-- Cards will render here -->
+            </div>
         </div>
 
         <div id="view-list" class="view-section p-4 hidden">
@@ -3831,6 +3823,14 @@
         <button id="nav-list-btn" onclick="Nav.switchView('list', this)" class="nav-btn">
             <div class="nav-icon-wrap"><i data-lucide="list-todo" class="w-5 h-5"></i></div>
             <span class="nav-text">Hồ sơ</span>
+        </button>
+        
+        <button id="nav-assistant-btn" onclick="Nav.switchView('assistant', this)" class="nav-btn">
+            <div class="nav-icon-wrap relative">
+                <i data-lucide="sparkles" class="w-5 h-5"></i>
+                <span id="assistant-nav-badge" class="nav-badge-pro hidden">0</span>
+            </div>
+            <span class="nav-text">Trợ lý</span>
         </button>
         
         <button id="nav-overdue-btn" onclick="Nav.switchView('overdue', this)" class="nav-btn">
@@ -6526,7 +6526,7 @@
 
     const Nav = {
         calendarInit: false,
-        viewTitles: { home: 'Trang chủ', list:'Hồ sơ bồi thường', overdue:'Tiến độ hồ sơ', import:'Tiếp nhận tự động', calendar:'Lịch làm việc', report:'Báo cáo tổng hợp', cloud: 'Cloud của tôi', spare: 'Tra cứu phụ tùng' },
+        viewTitles: { home: 'Trang chủ', list:'Hồ sơ bồi thường', overdue:'Tiến độ hồ sơ', import:'Tiếp nhận tự động', calendar:'Lịch làm việc', report:'Báo cáo tổng hợp', cloud: 'Cloud của tôi', spare: 'Tra cứu phụ tùng', assistant: 'Trợ lý nhắc việc AI' },
         switchView(view, btn) {
             if (AI._open) {
                 AI._open = false;
@@ -6568,6 +6568,7 @@
             // ------------------------------------
 
             if (view==='home') App._updateHomeDashboard();
+            if (view==='assistant') ClaimAssistant.update();
             if (view==='report') Report.open();
             if (view==='spare') SpareParts.loadFilters();
             if (view==='calendar') {
@@ -20819,8 +20820,8 @@ YÊU CẦU ĐẦU RA:
 
         update() {
             const container = document.getElementById('home-assistant-panel');
-            const badge = document.getElementById('home-assistant-badge');
-            const summary = document.getElementById('home-assistant-summary');
+            const badge = document.getElementById('assistant-nav-badge');
+            const summary = document.getElementById('tab-assistant-summary');
             if (!container) return;
 
             const data = App.masterData || [];
@@ -20995,7 +20996,7 @@ YÊU CẦU ĐẦU RA:
                 }).join('');
 
                 if (badge) {
-                    badge.textContent = `${alerts.length} việc gấp`;
+                    badge.textContent = alerts.length;
                     badge.classList.remove('hidden');
                 }
                 if (summary) {
