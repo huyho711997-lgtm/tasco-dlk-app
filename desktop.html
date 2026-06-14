@@ -23998,13 +23998,20 @@ const AiLookup = {
             if (model) q = q.where('hieu_xe', '==', model);
             if (year) q = q.where('nam_sx', '==', parseInt(year));
             
-            const snap = await q.orderBy('ngay_bao_gia', 'desc').limit(200).get(); 
+            const snap = await q.limit(200).get(); 
             let results = [];
             snap.forEach(doc => {
                 const data = doc.data();
                 if (!query || (data.ten_phu_tung && data.ten_phu_tung.toLowerCase().includes(query.toLowerCase()))) {
                     results.push(data);
                 }
+            });
+
+            // Sort results client-side to avoid needing composite indexes in Firestore
+            results.sort((a, b) => {
+                const dateA = a.ngay_bao_gia ? new Date(a.ngay_bao_gia).getTime() : 0;
+                const dateB = b.ngay_bao_gia ? new Date(b.ngay_bao_gia).getTime() : 0;
+                return dateB - dateA;
             });
 
             this.renderTable(results);
