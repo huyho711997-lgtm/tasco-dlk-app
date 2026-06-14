@@ -19822,7 +19822,7 @@ YÊU CẦU ĐẦU RA:
             if (!id) return;
             const item = App.find(id) || {};
             const ss = item.sceneSurveyReport || {};
-            
+
             // Get signatures
             let sigDriver = ss.sigDriver || '';
             if (this._isSignedDriver) {
@@ -19920,16 +19920,16 @@ YÊU CẦU ĐẦU RA:
                         background: #fff;
                         width: 210mm;
                         min-height: 297mm;
-                        padding: 18mm;
+                        padding: 14mm 16mm;
                         box-shadow: 0 10px 25px rgba(0,0,0,0.5);
                         position: relative;
                         box-sizing: border-box;
                         display: flex;
                         flex-direction: column;
                         font-family: "Times New Roman", Times, serif;
-                        font-size: 16px;
+                        font-size: 14.5px;
                         color: #000;
-                        line-height: 1.55;
+                        line-height: 1.42;
                         text-align: left;
                     }
                     .btn-print-controls-ss {
@@ -20000,10 +20000,10 @@ YÊU CẦU ĐẦU RA:
                     }
                     #ss-print-container .title-area {
                         text-align: center;
-                        margin-bottom: 20px;
+                        margin-bottom: 14px;
                     }
                     #ss-print-container .title-main {
-                        font-size: 21px;
+                        font-size: 18px;
                         font-weight: bold;
                         text-transform: uppercase;
                         letter-spacing: 0.2px;
@@ -20011,14 +20011,14 @@ YÊU CẦU ĐẦU RA:
                         line-height: 1.3;
                     }
                     #ss-print-container .title-sub {
-                        font-size: 15px;
+                        font-size: 16px;
                         font-weight: bold;
                         text-transform: uppercase;
                         margin-top: 3px;
                         margin-bottom: 0;
                     }
                     #ss-print-container .info-row {
-                        margin-bottom: 6px;
+                        margin-bottom: 4px;
                         text-align: justify;
                     }
                     #ss-print-container .info-label {
@@ -20043,11 +20043,44 @@ YÊU CẦU ĐẦU RA:
                     #ss-print-container .section-title {
                         font-weight: bold;
                         text-transform: uppercase;
-                        margin-top: 12px;
-                        margin-bottom: 6px;
-                        font-size: 13.5px;
-                        border-bottom: 1px solid #ddd;
-                        padding-bottom: 2px;
+                        margin-top: 9px;
+                        margin-bottom: 4px;
+                        font-size: 14px;
+                        border-bottom: none;
+                        padding-bottom: 0;
+                    }
+                    #ss-print-container .participant-line {
+                        display: grid;
+                        grid-template-columns: 28px 1.15fr 1fr 0.7fr;
+                        gap: 8px;
+                        align-items: baseline;
+                        margin-bottom: 4px;
+                    }
+                    #ss-print-container .form-note {
+                        font-size: 12.5px;
+                        font-style: italic;
+                        font-weight: normal;
+                    }
+                    #ss-print-container .dotted-block {
+                        display: block;
+                        min-height: 25px;
+                        border-bottom: 1px dotted #000;
+                        padding: 1px 4px;
+                        text-align: justify;
+                    }
+                    #ss-print-container .closing-text {
+                        margin-top: 8px;
+                        text-align: justify;
+                    }
+                    #ss-print-container .doc-footer {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-top: auto;
+                        padding-top: 10px;
+                        font-size: 11.5px;
+                        font-style: italic;
+                        color: #111827;
                     }
                     #ss-print-container .table-participants {
                         width: 100%;
@@ -20119,11 +20152,38 @@ YÊU CẦU ĐẦU RA:
                 if (!str) return '';
                 return str.toLowerCase().replace(/(^|\s)\S/g, l => l.toUpperCase());
             };
+            const formatDocTime = (value) => {
+                const raw = (value || '').trim();
+                if (!raw) return '........ giờ........ ngày .......... tháng .......... năm 20....';
+                const m = raw.match(/(\d{1,2})[:hH](\d{1,2})\s+(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+                if (m) return `${m[1].padStart(2, '0')} giờ ${m[2].padStart(2, '0')} ngày ${m[3].padStart(2, '0')} tháng ${m[4].padStart(2, '0')} năm ${m[5]}`;
+                const dateOnly = raw.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+                if (dateOnly) return `........ giờ........ ngày ${dateOnly[1].padStart(2, '0')} tháng ${dateOnly[2].padStart(2, '0')} năm ${dateOnly[3]}`;
+                return raw;
+            };
 
             const rep1NameFormatted = toTitleCase(ss.rep1Name || Auth.getCurrentUser()?.name || '');
             const rep2NameFormatted = toTitleCase(ss.rep2Name || item.driverName || item.chuXe || item.customer || '');
             const rep3NameFormatted = toTitleCase(ss.rep3Name || '');
             const driverNameFormatted = toTitleCase(ss.driverName || item.driverName || item.chuXe || item.customer || '');
+            const bbTimeFormatted = formatDocTime(ss.bbTime);
+            const accTimeFormatted = formatDocTime(ss.accTime);
+            const closingTime = (ss.bbTime || '').match(/(\d{1,2})[:hH](\d{1,2})/)
+                ? `${(ss.bbTime.match(/(\d{1,2})[:hH](\d{1,2})/) || [])[1]} giờ ${(ss.bbTime.match(/(\d{1,2})[:hH](\d{1,2})/) || [])[2]}`
+                : '............ giờ ...........';
+            const participants = [
+                { name: rep1NameFormatted, role: 'GĐV Bảo hiểm Tasco', phone: ss.rep1Phone || '' },
+                { name: rep2NameFormatted, role: 'Lái xe / Chủ xe', phone: ss.rep2Phone || '' },
+                ss.rep3Name ? { name: rep3NameFormatted, role: ss.rep3Role || 'Bên liên quan', phone: '' } : null
+            ].filter(Boolean);
+            const participantsPrintHtml = participants.map((p, index) => `
+                <div class="participant-line">
+                  <span>${index + 1}.</span>
+                  <span class="editable" contenteditable="true" spellcheck="false">${p.name || '........................................'}</span>
+                  <span>là: <span class="editable" contenteditable="true" spellcheck="false">${p.role || '........................................'}</span></span>
+                  <span>Số ĐT: <span class="editable" contenteditable="true" spellcheck="false">${p.phone || '....................'}</span></span>
+                </div>
+            `).join('');
 
             // Build the vehicles print HTML dynamically
             let vehiclesPrintHtml = '';
@@ -20133,14 +20193,14 @@ YÊU CẦU ĐẦU RA:
                     { bks: ss.vehicle1 || item.bsx || '', driver: ss.driverName || item.driverName || item.chuXe || item.customer || '' },
                     { bks: ss.vehicle2 || '', driver: ss.driver2 || '' }
                   ].filter(v => v.bks || v.driver);
-                  
+
             if (listToUse.length === 0) {
                 vehiclesPrintHtml = `
-                    <span>giữa: xe ô tô BKS: </span>
+                    <span>giữa: xe ôtô BKS: </span>
                     <span class="info-val editable" contenteditable="true" id="pr-ss-vehicle1" style="font-weight:bold;">.......................</span>
-                    <span> do anh/chị: </span>
+                    <span> do: </span>
                     <span class="info-val editable" contenteditable="true" id="pr-ss-driverName">.......................</span>
-                    <span> điều khiển, với xe ô tô BKS: </span>
+                    <span> điều khiển, với: </span>
                     <span class="info-val editable" contenteditable="true" id="pr-ss-vehicle2">.......................</span>
                 `;
             } else {
@@ -20149,17 +20209,17 @@ YÊU CẦU ĐẦU RA:
                     const bksVal = v.bks || '.......................';
                     const driverVal = toTitleCase(v.driver || '');
                     const hasDriver = driverVal.trim().length > 0;
-                    
-                    const prefix = index === 0 ? 'xe ô tô BKS: ' : ', với xe ô tô BKS: ';
-                    
+
+                    const prefix = index === 0 ? 'xe ôtô BKS: ' : ', với: xe ôtô BKS: ';
+
                     vehiclesPrintHtml += `
                         <span>${prefix}</span>
                         <span class="info-val editable" contenteditable="true" spellcheck="false" style="font-weight:bold;">${bksVal}</span>
                     `;
-                    
+
                     if (hasDriver) {
                         vehiclesPrintHtml += `
-                            <span> do anh/chị: </span>
+                            <span> do: </span>
                             <span class="info-val editable" contenteditable="true" spellcheck="false">${driverVal}</span>
                             <span> điều khiển</span>
                         `;
@@ -20188,7 +20248,7 @@ YÊU CẦU ĐẦU RA:
                   Đóng / Quay lại
                 </button>
               </div>
-              
+
               <div class="header">
                 <div class="header-left">
                   <img src="https://i.ibb.co/0jP8BN3c/undefined-Imgur.jpg" class="logo-img">
@@ -20199,60 +20259,28 @@ YÊU CẦU ĐẦU RA:
                   <span style="font-weight:normal; font-size:12px;">---------------</span>
                 </div>
               </div>
-              
+
               <div class="title-area">
                 <h1 class="title-main">BIÊN BẢN GIÁM ĐỊNH HIỆN TRƯỜNG/XÁC MINH HIỆN TRƯỜNG</h1>
                 <h2 class="title-sub">TỔN THẤT XE CƠ GIỚI</h2>
               </div>
-              
-              <div class="info-row">
-                <span>Hôm nay, vào hồi:</span>
-                <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-bbTime">${ss.bbTime || '...................................................'}</span>
-              </div>
-              <div class="info-row">
-                <span>Tại địa điểm:</span>
-                <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-bbLoc">${ss.bbLoc || '.......................................................................................................................'}</span>
-              </div>
-              
-              <div class="section-title">I. Thành phần tham gia</div>
-              
-              <table class="table-participants">
-                <thead>
-                  <tr>
-                    <th style="width: 8%;">STT</th>
-                    <th style="width: 45%;">Họ và tên</th>
-                    <th style="width: 27%;">Chức vụ/Đại diện</th>
-                    <th style="width: 20%;">Số điện thoại</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td style="text-align:center;">1</td>
-                    <td class="editable" contenteditable="true" spellcheck="false">${rep1NameFormatted}</td>
-                    <td>GĐV Bảo hiểm Tasco</td>
-                    <td class="editable" contenteditable="true" spellcheck="false">${ss.rep1Phone || ''}</td>
-                  </tr>
-                  <tr>
-                    <td style="text-align:center;">2</td>
-                    <td class="editable" contenteditable="true" spellcheck="false">${rep2NameFormatted}</td>
-                    <td>Lái xe / Chủ xe</td>
-                    <td class="editable" contenteditable="true" spellcheck="false">${ss.rep2Phone || ''}</td>
-                  </tr>
-                  ${ss.rep3Name ? `
-                  <tr>
-                    <td style="text-align:center;">3</td>
-                    <td class="editable" contenteditable="true" spellcheck="false">${rep3NameFormatted}</td>
-                    <td class="editable" contenteditable="true" spellcheck="false">${ss.rep3Role || 'Người liên quan'}</td>
-                    <td></td>
-                  </tr>
-                  ` : ''}
-                </tbody>
-              </table>
 
               <div class="info-row">
-                <span>Cùng tiến hành lập biên bản giám định xác minh tại hiện trường vụ tai nạn xảy ra lúc:</span>
-                <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-accTime">${ss.accTime || '.......................'}</span>
-                <span>, tại:</span>
+                <span>Hôm nay, vào hồi </span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-bbTime">${bbTimeFormatted}</span>
+              </div>
+              <div class="info-row">
+                <span>Tại địa điểm: </span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-bbLoc">${ss.bbLoc || '.......................................................................................................................'}</span>
+              </div>
+
+              <div class="section-title">Thành phần tham gia:</div>
+              ${participantsPrintHtml}
+
+              <div class="info-row">
+                <span>Cùng tiến hành lập biên bản giám định xác minh tại hiện trường vụ tai nạn xảy ra lúc </span>
+                <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-accTime">${accTimeFormatted}</span>
+                <span>, tại (cây số, đường, thôn, xã, huyện tỉnh hoặc trước cửa nhà, đường, phường, quận, thành phố): </span>
                 <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-accLoc">${ss.accLoc || '............................................................................................................'}</span>
               </div>
               <div class="info-row">
@@ -20260,7 +20288,7 @@ YÊU CẦU ĐẦU RA:
               </div>
 
               <div class="section-title">II. Hiện trường vụ tai nạn</div>
-              
+
               <table class="ht-table" style="width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed;">
                 <colgroup>
                   <col style="width: 38%;">
@@ -20268,7 +20296,7 @@ YÊU CẦU ĐẦU RA:
                   <col style="width: 20%;">
                   <col style="width: 20%;">
                 </colgroup>
-                
+
                 <!-- Row 1: [1] -->
                 <tr>
                   <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
@@ -20281,7 +20309,7 @@ YÊU CẦU ĐẦU RA:
                     <span>${check(ss.htTinhTrang, 'Không nguyên vẹn')} Không nguyên vẹn</span>
                   </td>
                 </tr>
-                
+
                 <!-- Row 2: [2] -->
                 <tr>
                   <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
@@ -20294,7 +20322,7 @@ YÊU CẦU ĐẦU RA:
                     <span>${check(ss.htNhietDo, 'Lạnh')} Lạnh</span>
                   </td>
                 </tr>
-                
+
                 <!-- Row 3: [3] -->
                 <tr>
                   <td colspan="4" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
@@ -20302,7 +20330,7 @@ YÊU CẦU ĐẦU RA:
                     <span class="editable" contenteditable="true" spellcheck="false" style="font-weight: normal; padding: 0 2px;">${ss.htDiaHinh || 'đường trải nhựa'}</span>
                   </td>
                 </tr>
-                
+
                 <!-- Row 4: [4] -->
                 <tr>
                   <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
@@ -20315,7 +20343,7 @@ YÊU CẦU ĐẦU RA:
                     <span>${check(ss.htTinhChatNen, 'Mềm lún/Sụt')} Mềm lún/Sụt</span>
                   </td>
                 </tr>
-                
+
                 <!-- Row 5: [4] Ngập -->
                 <tr>
                   <td style="border: none !important;"></td>
@@ -20323,7 +20351,7 @@ YÊU CẦU ĐẦU RA:
                     <span>${check(ss.htTinhChatNen, 'Ngập nước')} Ngập nước</span>
                   </td>
                 </tr>
-                
+
                 <!-- Row 6: [5] -->
                 <tr>
                   <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
@@ -20339,7 +20367,7 @@ YÊU CẦU ĐẦU RA:
                     <span>${check(htThoiTietVal, 'Râm mát')} Râm mát</span>
                   </td>
                 </tr>
-                
+
                 <!-- Row 7: [5] Sáng, Tối -->
                 <tr>
                   <td style="border: none !important;"></td>
@@ -20350,7 +20378,7 @@ YÊU CẦU ĐẦU RA:
                     <span>${check(htThoiTietVal, 'Tối')} Tối</span>
                   </td>
                 </tr>
-                
+
                 ${ss.htLaiXeCoMat === 'Vắng mặt' ? `
                 <!-- Row 8: [6] -->
                 <tr>
@@ -20400,7 +20428,7 @@ YÊU CẦU ĐẦU RA:
                   </td>
                 </tr>
                 `}
-                
+
                 <!-- Row 10: [8] -->
                 <tr>
                   <td colspan="4" style="padding: 5px 0 3px 0; vertical-align: top; border: none !important;">
@@ -20443,51 +20471,64 @@ YÊU CẦU ĐẦU RA:
               </table>
 
               <div class="info-row" style="margin-top: 10px;">
-                <span class="info-label">[9] Mô tả hiện trường tai nạn, vị trí phương tiện:</span>
-                <div class="info-val editable" contenteditable="true" spellcheck="false" style="display:block; padding-left: 15px; text-align: justify;">${ss.htMoTa || 'Theo sơ đồ hiện trường đính kèm theo hồ sơ'}</div>
+                <span class="info-label">[9] Mô tả hiện trường tai nạn, vị trí phương tiện </span>
+                <span class="form-note">(Ghi nhận và đánh số thứ tự theo số tự nhiên vị trí phương tiện, nạn nhân, dấu vết tại sơ đồ hiện trường):</span>
+                <div class="info-val editable dotted-block" contenteditable="true" spellcheck="false">${ss.htMoTa || 'Theo sơ đồ hiện trường đính kèm theo hồ sơ'}</div>
               </div>
               <div class="info-row" style="margin-top: 6px;">
-                <span class="info-label">[10] Dấu vết tại hiện trường:</span>
-                <div class="info-val editable" contenteditable="true" spellcheck="false" style="display:block; padding-left: 15px; text-align: justify;">${ss.htDauVet || '.......................................................................................................................'}</div>
+                <span class="info-label">[10] Dấu vết tại hiện trường </span>
+                <span class="form-note">(Ghi nhận vị trí, khoảng cách, chiều hướng từng dấu vết, vật chứng trong mối liên quan với đồ vật cũng như những dấu vết, vật chứng khác ở hiện trường. Xác định điểm đâm va của tai nạn):</span>
+                <div class="info-val editable dotted-block" contenteditable="true" spellcheck="false">${ss.htDauVet || '.......................................................................................................................'}</div>
               </div>
               <div class="info-row" style="margin-top: 6px;">
                 <span class="info-label">[11] Mẫu vật thu được tại hiện trường:</span>
-                <div class="info-val editable" contenteditable="true" spellcheck="false" style="display:block; padding-left: 15px; text-align: justify;">${ss.htMauVat || 'Không thu được mẫu vật.'}</div>
+                <div class="info-val editable dotted-block" contenteditable="true" spellcheck="false">${ss.htMauVat || 'Không thu được mẫu vật.'}</div>
+              </div>
+              <div class="info-row">
+                <span>Những mẫu vật nói trên được thu lượm bảo quản đưa về BH Tasco để xem xét xử lý. Trong quá trình giám định chúng tôi đã vẽ sơ đồ hiện trường, đo đạc, chụp ảnh, ghi hình.</span>
               </div>
 
-              <div class="section-title">III. Thiệt hại sơ bộ</div>
+              <div class="section-title">Thiệt hại sơ bộ:</div>
 
               <div class="info-row">
-                <span class="info-label">[12] Vị trí tổn thất:</span>
+                <span class="info-label">[12] Vị trí tổn thất (Trái/phải/ở giữa):</span>
                 <span style="margin-left: 10px;">${check(thViTriVal, 'Đầu xe')} Đầu xe</span>
                 <span style="margin-left: 10px;">${check(thViTriVal, 'Thân xe')} Thân xe</span>
                 <span style="margin-left: 10px;">${check(thViTriVal, 'Đuôi xe')} Đuôi xe</span>
                 <span style="margin-left: 10px;">${check(thViTriVal, 'Gầm/Nóc')} Gầm/Nóc</span>
               </div>
               <div class="info-row">
-                <span class="info-label">[13] Ước tính thiệt hại:</span>
+                <span class="info-label">[13] Đánh giá thiệt hại, ước thiệt hại:</span>
                 <span class="editable" contenteditable="true" spellcheck="false">${ss.thUocLuong || '...................................................'}</span>
               </div>
               <div class="info-row">
-                <span class="info-label">[14] Đối tượng tổn thất tài sản:</span>
+                <span class="info-label">[14] Thiệt hại về tài sản:</span>
                 <span style="margin-left: 10px;">${check(thTaiSanVal, 'Xe tham gia vật chất BH Tasco')} Xe vật chất Tasco</span>
                 <span style="margin-left: 10px;">${check(thTaiSanVal, 'Tài sản bên thứ ba')} Tài sản bên thứ ba</span>
+                <span style="margin-left: 10px;">${check(ss.thUocLuong, 'Khoảng từ 10 đến 20 triệu đồng')} Khoảng từ 10 đến 20 triệu đồng</span>
+                <span style="margin-left: 10px;">${check(ss.thUocLuong, 'Khoảng trên 20 đến 50 triệu đồng')} Khoảng trên 20 đến 50 triệu đồng</span>
+                <span style="margin-left: 10px;">${ss.thUocLuong && !ss.thUocLuong.includes('Khoảng từ 10 đến 20 triệu đồng') && !ss.thUocLuong.includes('Khoảng trên 20 đến 50 triệu đồng') ? '☑' : '☐'} Khác</span>
               </div>
               <div class="info-row" style="text-align: left; padding-left: 15px; margin-top: 4px;">
-                <span style="font-style: italic; font-weight: bold; display: block; margin-bottom: 4px; color: #334155;">Liệt kê sơ bộ phụ tùng hư hỏng:</span>
-                <div class="editable" contenteditable="true" spellcheck="false" style="display: block; border-bottom: 1.5px dotted #000; min-height: 28px; font-weight: bold; width: 100%; outline: none; line-height: 1.65; text-align: justify; word-break: break-all; padding: 2px 4px;">${ss.thLietKe || '........................................................................................................................................................................'}</div>
+                <span style="font-style: italic; font-weight: bold; display: block; margin-bottom: 4px; color: #334155;">Liệt kê sơ bộ vật tư, phụ tùng thiệt hại:</span>
+                <div class="editable dotted-block" contenteditable="true" spellcheck="false" style="font-weight: bold;">${ss.thLietKe || '........................................................................................................................................................................'}</div>
               </div>
               <div class="info-row">
                 <span class="info-label">[15] Thiệt hại về người:</span>
                 <span class="info-val editable" contenteditable="true" spellcheck="false">${ss.thNguoi || 'Không có thiệt hại về người.'}</span>
               </div>
               <div class="info-row">
-                <span class="info-label">[16] Ghi chú / Lời khai lái xe:</span>
-                <div class="info-val editable" contenteditable="true" spellcheck="false" style="display:block; padding-left: 15px; text-align: justify;">${ss.thGhiChu || '.......................................................................................................................'}</div>
+                <span class="info-label">[16] Ghi chú </span>
+                <span class="form-note">(Ghi lại lời khai lái xe, nhân chứng)</span>
+                <div class="info-val editable dotted-block" contenteditable="true" spellcheck="false">${ss.thGhiChu || '.......................................................................................................................'}</div>
               </div>
               <div class="info-row">
                 <span class="info-label">Đề xuất khác:</span>
                 <span class="info-val editable" contenteditable="true" spellcheck="false">${ss.thDeXuat || 'Giải quyết quyền lợi theo quy định'}</span>
+              </div>
+
+              <div class="closing-text">
+                Biên bản được lập xong vào hồi <span class="editable" contenteditable="true" spellcheck="false">${closingTime}</span> cùng ngày, thông qua các bên liên quan và thống nhất cùng ký tên dưới đây.
               </div>
 
               <div class="signatures-grid">
@@ -20499,7 +20540,7 @@ YÊU CẦU ĐẦU RA:
                   </div>
                   <span class="sig-name">${rep2NameFormatted || '.....................................'}</span>
                 </div>
-                
+
                 <div class="sig-col">
                   <span class="sig-title">Đại diện bên liên quan</span>
                   <span class="sig-sub">(Ký và ghi rõ họ tên)</span>
@@ -20518,17 +20559,22 @@ YÊU CẦU ĐẦU RA:
                   <span class="sig-name">${rep1NameFormatted || '.....................................'}</span>
                 </div>
               </div>
+
+              <div class="doc-footer">
+                <span>Quy trình giám định bảo hiểm xe cơ giới</span>
+                <span>BM.TASCO.XCG.01.04</span>
+              </div>
             `;
 
             printContainer.innerHTML = templateHtml;
             document.body.classList.add('printing-mode-ss');
-            
+
             const adjustPrintScale = () => {
                 const container = document.getElementById('ss-print-container');
                 if (!container) return;
                 const screenWidth = window.innerWidth;
                 const targetWidth = 794; // 210mm in pixels at 96dpi
-                
+
                 if (screenWidth < targetWidth + 40) {
                     const scale = (screenWidth - 40) / targetWidth;
                     container.style.zoom = scale;
@@ -20542,12 +20588,12 @@ YÊU CẦU ĐẦU RA:
                     container.style.marginBottom = '';
                 }
             };
-            
+
             SceneSurvey.adjustPrintScale = adjustPrintScale;
-            
+
             // Trigger scaling immediately
             setTimeout(adjustPrintScale, 50);
-            
+
             // Add listeners
             window.removeEventListener('resize', SceneSurvey.adjustPrintScale);
             window.addEventListener('resize', SceneSurvey.adjustPrintScale);
