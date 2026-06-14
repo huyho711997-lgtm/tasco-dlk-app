@@ -1043,6 +1043,19 @@
         /* 7. KHOÁ PULL-TO-REFRESH TRONG FORM CHỈNH SỬA */
         #native-edit-modal { overscroll-behavior-y: none; touch-action: pan-y; }
         #modal-scroll-area { overscroll-behavior-y: contain; }
+        @media (min-width: 1024px) {
+            #native-edit-modal {
+                top: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                max-width: none !important;
+                max-height: none !important;
+                z-index: 100000 !important;
+            }
+        }
 
         /* 8. NÚT TOGGLE DARK MODE */
         #dark-toggle {
