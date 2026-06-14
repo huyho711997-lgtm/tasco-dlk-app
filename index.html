@@ -11633,7 +11633,7 @@
                     'Đắk Lắk, Đắk Nông, Buôn Ma Thuột, Buôn Hồ, Buôn Đôn, Cư M\'gar, Ea H\'leo, Ea Kar, Ea Súp, Krông Ana, Krông Bông, Krông Búk, Krông Năng, Krông Pắc, Lắk, M\'Drắk, Cư Kuin, ' +
                     'Gia Nghĩa, Cư Jút, Đắk Glong, Đắk Mil, Đắk R\'lấp, Đắk Song, Krông Nô, Tuy Đức. ' +
                     'CHỈ trả về nội dung văn bản đã nhận dạng, không thêm bất kỳ giải thích nào.';
-                if (['edit-htDienBien', 'edit-htNhanDinh', 'edit-accidentDevelopment', 'bbgd-input', 'dm-nguyenNhan', 'dm-kienNghi'].includes(this._targetTextarea) || (this._targetTextarea && this._targetTextarea.startsWith('ar-'))) {
+                if (['edit-htDienBien', 'edit-htNhanDinh', 'edit-accidentDevelopment', 'bbgd-input', 'dm-nguyenNhan', 'dm-kienNghi', 'SceneSurveyVoiceInput'].includes(this._targetTextarea) || (this._targetTextarea && this._targetTextarea.startsWith('ar-'))) {
                      PROMPT = 'Bạn là chuyên gia giám định bồi thường xe cơ giới tại địa bàn Đắk Lắk và Đắk Nông. ' +
                          'Hãy chuyển đổi giọng nói thành văn bản tiếng Việt. Tự động nắn lại các từ địa phương hoặc nói ngọng về đúng chính tả thuật ngữ kỹ thuật ô tô (Ví dụ: cảng -> cản, lường -> lườn, dè -> vè, mốp -> móp...) ' +
                          'và nhận dạng chuẩn xác các địa danh địa phương tại Đắk Lắk, Đắk Nông (Ví dụ: Buôn Ma Thuột, Buôn Hồ, Krông Pắc, Krông Nô, Gia Nghĩa, Cư Jút, Đắk Mil, Đắk R\'lấp, Cư M\'gar, Ea H\'leo, Ea Kar, Ea Súp, Buôn Đôn, Lắk, M\'Drắk, Cư Kuin, Đắk Glong, Đắk Song, Tuy Đức...). ' +
@@ -11789,11 +11789,19 @@ Văn bản cần sửa: "${text}"`;
                 if (lastError && !success) throw new Error(lastError);
                 
                 if (text) {
-                    const ta = document.getElementById(this._targetTextarea);
-                    if (ta) {
-                        ta.value = (ta.value ? ta.value + ' ' : '') + text;
-                        ta.dispatchEvent(new Event('input'));
-                        ta.scrollTop = ta.scrollHeight;
+                    if (this._targetTextarea === 'SceneSurveyVoiceInput') {
+                        if (window.SceneSurvey && typeof window.SceneSurvey.processVoiceText === 'function') {
+                            window.SceneSurvey.processVoiceText(text);
+                        } else {
+                            console.error("SceneSurvey.processVoiceText is not defined");
+                        }
+                    } else {
+                        const ta = document.getElementById(this._targetTextarea);
+                        if (ta) {
+                            ta.value = (ta.value ? ta.value + ' ' : '') + text;
+                            ta.dispatchEvent(new Event('input'));
+                            ta.scrollTop = ta.scrollHeight;
+                        }
                     }
                     
                     const sta = document.getElementById(this._targetStatus);
@@ -18301,6 +18309,68 @@ YÊU CẦU ĐẦU RA:
     // SCENE SURVEY REPORT CONTROLLER (BIÊN BẢN HIỆN TRƯỜNG A4)
     // ============================================================
     const SceneSurvey = {
+        addVehicleRow(bks = '', driver = '') {
+            const container = document.getElementById('sr-vehicles-container');
+            if (!container) return;
+            
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'vehicle-row flex items-start gap-2.5 p-3 rounded-2xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40 relative group/vrow';
+            rowDiv.innerHTML = `
+                <div class="grid grid-cols-2 gap-3 flex-1">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">BKS Phương Tiện</label>
+                        <div class="ar-input-wrapper">
+                            <input type="text" class="input-field text-xs font-bold font-mono text-center uppercase sr-v-bks" placeholder="Ví dụ: 48A-123.45" value="${bks}">
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Người điều khiển</label>
+                        <div class="ar-input-wrapper">
+                            <input type="text" class="input-field text-xs font-bold sr-v-driver" placeholder="Họ tên người lái" value="${driver}">
+                        </div>
+                    </div>
+                </div>
+                <button type="button" onclick="SceneSurvey.removeVehicleRow(this)" class="btn-remove-vehicle mt-5 p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 active:scale-90 transition-all rounded-xl border border-transparent hover:border-rose-100/50" title="Xóa xe này">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+            `;
+            container.appendChild(rowDiv);
+            if (window.lucide) window.lucide.createIcons();
+        },
+        
+        removeVehicleRow(btn) {
+            const container = document.getElementById('sr-vehicles-container');
+            if (!container) return;
+            if (container.children.length <= 1) {
+                Toast.fire({ icon: 'warning', title: 'Phải có ít nhất 1 phương tiện liên quan!' });
+                return;
+            }
+            btn.closest('.vehicle-row').remove();
+        },
+
+        renderVehicles(vehiclesList) {
+            const container = document.getElementById('sr-vehicles-container');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            if (Array.isArray(vehiclesList) && vehiclesList.length > 0) {
+                vehiclesList.forEach(v => {
+                    this.addVehicleRow(v.bks || '', v.driver || '');
+                });
+            } else {
+                this.addVehicleRow('', '');
+                this.addVehicleRow('', '');
+            }
+        },
+
+        startVoiceInput() {
+            if (window.SpeechInput) {
+                window.SpeechInput.toggle('SceneSurveyVoiceInput', null, null);
+            } else {
+                Toast.fire({ icon: 'error', title: 'Không tìm thấy chức năng ghi âm!' });
+            }
+        },
+
         _isSignedDriver: false,
         _isSignedAssessor: false,
         _isSignedThirdParty: false,
@@ -18518,9 +18588,22 @@ YÊU CẦU ĐẦU RA:
 
             document.getElementById('sr-accTime').value = ss.accTime || item.accidentDate || '';
             document.getElementById('sr-accLoc').value = ss.accLoc || item.location || '';
-            document.getElementById('sr-driverName').value = ss.driverName || item.driverName || item.chuXe || item.customer || '';
-            document.getElementById('sr-vehicle1').value = ss.vehicle1 || item.bsx || '';
-            document.getElementById('sr-vehicle2').value = ss.vehicle2 || '';
+            // Handle dynamic vehicles loading (backward compatibility)
+            let vehicles = ss.vehicles || [];
+            if (vehicles.length === 0) {
+                const v1_bks = ss.vehicle1 || item.bsx || '';
+                const v1_driver = ss.driverName || item.driverName || item.chuXe || item.customer || '';
+                const v2_bks = ss.vehicle2 || '';
+                const v2_driver = ss.driver2 || '';
+                
+                if (v1_bks || v1_driver) {
+                    vehicles.push({ bks: v1_bks, driver: v1_driver });
+                }
+                if (v2_bks || v2_driver) {
+                    vehicles.push({ bks: v2_bks, driver: v2_driver });
+                }
+            }
+            this.renderVehicles(vehicles);
 
             // Checkboxes & Radios logic:
             const setRadioValue = (name, val) => {
@@ -18893,6 +18976,16 @@ YÊU CẦU ĐẦU RA:
                 return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(el => el.value).join(', ');
             };
 
+            const vehicles = [];
+            const vehicleRows = document.querySelectorAll('#sr-vehicles-container .vehicle-row');
+            vehicleRows.forEach(row => {
+                const bks = row.querySelector('.sr-v-bks')?.value.trim() || '';
+                const driver = row.querySelector('.sr-v-driver')?.value.trim() || '';
+                if (bks || driver) {
+                    vehicles.push({ bks, driver });
+                }
+            });
+
             const ssPayload = {
                 bbTime: document.getElementById('sr-bbTime').value.trim(),
                 bbLoc: document.getElementById('sr-bbLoc').value.trim(),
@@ -18905,9 +18998,12 @@ YÊU CẦU ĐẦU RA:
 
                 accTime: document.getElementById('sr-accTime').value.trim(),
                 accLoc: document.getElementById('sr-accLoc').value.trim(),
-                driverName: document.getElementById('sr-driverName').value.trim(),
-                vehicle1: document.getElementById('sr-vehicle1').value.trim(),
-                vehicle2: document.getElementById('sr-vehicle2').value.trim(),
+                
+                driverName: vehicles[0] ? vehicles[0].driver : '',
+                vehicle1: vehicles[0] ? vehicles[0].bks : '',
+                vehicle2: vehicles[1] ? vehicles[1].bks : '',
+                driver2: vehicles[1] ? vehicles[1].driver : '',
+                vehicles: vehicles,
 
                 htTinhTrang: document.querySelector('input[name="sr-htTinhTrang"]:checked')?.value || '',
                 htNhietDo: document.querySelector('input[name="sr-htNhietDo"]:checked')?.value || '',
@@ -18953,89 +19049,62 @@ YÊU CẦU ĐẦU RA:
             });
         },
 
-        triggerOCR() {
-            const fileInput = document.getElementById('ss-ocr-file');
-            if (fileInput) fileInput.click();
-        },
+        async processVoiceText(rawSpeechText) {
+            Swal.fire({
+                title: 'AI đang trích xuất dữ liệu...',
+                html: '<div class="space-y-3 mt-2"><div class="flex justify-center"><div class="animate-spin rounded-full h-8 w-8 border-4 border-indigo-500 border-t-transparent"></div></div><p class="text-xs text-slate-500 dark:text-slate-400">Đang phân tích lời thoại và tự động điền các trường...</p></div>',
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                customClass: { popup: 'custom-rounded' }
+            });
 
-        handleOCRFile(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+            const PROMPT = `Bạn là chuyên gia giám định bảo hiểm xe cơ giới cao cấp của Tasco.
+Hãy phân tích đoạn hội thoại/văn bản mô tả hiện trường tai nạn dưới đây và trích xuất toàn bộ thông tin có thể đọc được vào một đối tượng JSON.
+Nếu thông tin nào không được đề cập, hãy trả về giá trị rỗng hoặc để trống.
 
-            const loading = document.getElementById('ss-ocr-loading');
-            if (loading) loading.classList.remove('hidden');
+Cú pháp các thuộc tính JSON cần trả về chính xác như sau:
+{
+  "bbTime": "Thời gian lập biên bản (ví dụ: '12:00 29/03/2026' hoặc để trống nếu không có)",
+  "bbLoc": "Địa điểm lập biên bản",
+  "rep1Name": "Họ tên Giám định viên bảo hiểm Tasco",
+  "rep1Phone": "Số điện thoại GĐV",
+  "rep2Name": "Họ tên Lái xe / Chủ xe",
+  "rep2Phone": "Số điện thoại Lái xe",
+  "rep3Name": "Họ tên Đại diện bên liên quan hoặc người chứng kiến",
+  "rep3Role": "Vai trò Đại diện bên liên quan",
+  "accTime": "Thời gian xảy ra tai nạn (ví dụ: '09:25 29/03/2026')",
+  "accLoc": "Địa điểm xảy ra tai nạn",
+  "vehicles": [
+    {
+      "bks": "Biển kiểm soát xe (ví dụ: '48A-262.31')",
+      "driver": "Họ tên người điều khiển phương tiện (để trống nếu không có/không biết)"
+    }
+  ],
+  "htTinhTrang": "Tình trạng hiện trường (trả về đúng: 'Nguyên vẹn' hoặc 'Không nguyên vẹn')",
+  "htNhietDo": "Nhiệt độ động cơ (trả về đúng: 'Nóng ấm' hoặc 'Lạnh')",
+  "htDiaHinh": "Địa hình, vật liệu nền (ví dụ: 'đường trải nhựa')",
+  "htTinhChatNen": "Tính chất nền (trả về đúng: 'Cứng, không lún/sụt', 'Mềm lún/Sụt' hoặc 'Ngập nước')",
+  "htThoiTiet": "Các điều kiện thời tiết (trả về đúng: 'Nắng, Sáng, Mưa, Râm mát, Tối' - ví dụ: 'Nắng, Sáng')",
+  "htLaiXeCoMat": "Người điều khiển có mặt tại hiện trường (trả về đúng: 'Có mặt' hoặc 'Vắng mặt')",
+  "htLaiXeLyDo": "Lý do vắng mặt / Địa điểm đến (nếu có)",
+  "htDauHieuLaiXe": "Các dấu hiệu lái xe (ví dụ: 'Sắc mặt bình thường, Hơi thở không mùi')",
+  "htGiayTo": "Các giấy tờ cung cấp (ví dụ: 'Đăng kí xe, Đăng kiểm (ATKT&BVMT), GCN/Hợp đồng Bảo hiểm, Giấy phép lái xe hợp lệ')",
+  "htMoTa": "Nội dung mô tả hiện trường, vị trí phương tiện",
+  "htDauVet": "Nội dung dấu vết tại hiện trường",
+  "htMauVat": "Nội dung mẫu vật thu được tại hiện trường",
+  "thViTri": "Vị trí tổn thất trên xe (ví dụ: 'Đầu xe, Thân xe, Đuôi xe, Gầm/Nóc')",
+  "thTaiSan": "Đối tượng thiệt hại (ví dụ: 'Xe tham gia vật chất BH Tasco, Tài sản bên thứ ba')",
+  "thUocLuong": "Ước lượng thiệt hại (trả về đúng: 'Khoảng từ 10 đến 20 triệu đồng', 'Khoảng trên 20 đến 50 triệu đồng' hoặc 'Khác')",
+  "thLietKe": "Liệt kê sơ bộ vật tư, phụ tùng thiệt hại",
+  "thNguoi": "Thiệt hại về người (ví dụ: 'Không có thiệt hại về người.')",
+  "thGhiChu": "Ghi chú (Lời khai lái xe, nhân chứng)",
+  "thDeXuat": "Đề xuất khác"
+}
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const maxDim = 1200;
-                    let width = img.width;
-                    let height = img.height;
-                    if (width > maxDim || height > maxDim) {
-                        if (width > height) {
-                            height = Math.round((height * maxDim) / width);
-                            width = maxDim;
-                        } else {
-                            width = Math.round((width * maxDim) / height);
-                            height = maxDim;
-                        }
-                    }
+VĂN BẢN MÔ TẢ TAI NẠN:
+"${rawSpeechText}"
 
-                    const canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    const base64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
-                    this.runOCR(base64);
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        },
-
-        async runOCR(base64Image) {
-            const loading = document.getElementById('ss-ocr-loading');
-            const PROMPT = `Bạn là trợ lý AI chuyên đọc Biên bản Giám định hiện trường / Xác minh hiện trường tổn thất xe cơ giới của bảo hiểm Tasco. 
-            Hãy phân tích hình ảnh biên bản hiện trường này và trích xuất toàn bộ thông tin có thể đọc được vào một đối tượng JSON. 
-            Các thuộc tính JSON cần trả về chính xác như sau:
-            {
-              "bbTime": "Thời gian lập biên bản (ví dụ: '12:00 29/03/2026' hoặc để trống nếu không có)",
-              "bbLoc": "Địa điểm lập biên bản",
-              "rep1Name": "Họ tên Giám định viên bảo hiểm Tasco",
-              "rep1Phone": "Số điện thoại GĐV",
-              "rep2Name": "Họ tên Lái xe / Chủ xe",
-              "rep2Phone": "Số điện thoại Lái xe",
-              "rep3Name": "Họ tên Đại diện bên liên quan hoặc người chứng kiến",
-              "rep3Role": "Vai trò Đại diện bên liên quan",
-              "accTime": "Thời gian xảy ra tai nạn (ví dụ: '09:25 29/03/2026')",
-              "accLoc": "Địa điểm xảy ra tai nạn",
-              "driverName": "Họ tên người điều khiển phương tiện",
-              "vehicle1": "Biển kiểm soát xe bảo hiểm (ví dụ: '48A-262.31')",
-              "vehicle2": "Biển kiểm soát xe đối ứng / liên quan (ví dụ: '48A-110.61')",
-              "htTinhTrang": "Tình trạng hiện trường (trả về đúng: 'Nguyên vẹn' hoặc 'Không nguyên vẹn')",
-              "htNhietDo": "Nhiệt độ động cơ (trả về đúng: 'Nóng ấm' hoặc 'Lạnh')",
-              "htDiaHinh": "Địa hình, vật liệu nền (ví dụ: 'đường trải nhựa')",
-              "htTinhChatNen": "Tính chất nền (trả về đúng: 'Cứng, không lún/sụt', 'Mềm lún/Sụt' hoặc 'Ngập nước')",
-              "htThoiTiet": "Các điều kiện thời tiết (ví dụ: 'Nắng, Sáng')",
-              "htLaiXeCoMat": "Người điều khiển có mặt tại hiện trường (trả về đúng: 'Có mặt' hoặc 'Vắng mặt')",
-              "htLaiXeLyDo": "Lý do vắng mặt / Địa điểm đến (nếu có)",
-              "htDauHieuLaiXe": "Các dấu hiệu lái xe (ví dụ: 'Sắc mặt bình thường, Hơi thở không mùi')",
-              "htGiayTo": "Các giấy tờ cung cấp (ví dụ: 'Đăng kí xe, Đăng kiểm (ATKT&BVMT), GCN/Hợp đồng Bảo hiểm, Giấy phép lái xe hợp lệ')",
-              "htMoTa": "Nội dung mô tả hiện trường, vị trí phương tiện",
-              "htDauVet": "Nội dung dấu vết tại hiện trường",
-              "htMauVat": "Nội dung mẫu vật thu được tại hiện trường",
-              "thViTri": "Vị trí tổn thất trên xe (ví dụ: 'Đuôi xe')",
-              "thTaiSan": "Đối tượng thiệt hại (ví dụ: 'Xe tham gia vật chất BH Tasco, Tài sản bên thứ ba')",
-              "thUocLuong": "Ước lượng thiệt hại (trả về đúng: 'Khoảng từ 10 đến 20 triệu đồng', 'Khoảng trên 20 đến 50 triệu đồng' hoặc 'Khác')",
-              "thLietKe": "Liệt kê sơ bộ vật tư, phụ tùng thiệt hại",
-              "thNguoi": "Thiệt hại về người (ví dụ: 'Không có thiệt hại về người.')",
-              "thGhiChu": "Ghi chú (Lời khai lái xe, nhân chứng)",
-              "thDeXuat": "Đề xuất khác"
-            }
-            Lưu ý: Chỉ trả về JSON thô (raw JSON text), không đặt trong thẻ code block tam giác ngược (markdown), không giải thích gì thêm.`;
+Lưu ý: Chỉ trả về JSON thô (raw JSON text), không đặt trong thẻ code block tam giác ngược (markdown), không giải thích gì thêm.`;
 
             try {
                 const MODELS = ['gemini-2.5-flash-lite', 'gemini-2.5-flash'];
@@ -19053,8 +19122,7 @@ YÊU CẦU ĐẦU RA:
                             body: JSON.stringify({
                                 contents: [{
                                     parts: [
-                                        { text: PROMPT },
-                                        { inline_data: { mime_type: 'image/jpeg', data: base64Image } }
+                                        { text: PROMPT }
                                     ]
                                 }],
                                 generationConfig: { temperature: 0.1 }
@@ -19071,12 +19139,10 @@ YÊU CẦU ĐẦU RA:
                     } catch (err) {
                         lastError = err.message;
                     }
-                    if (i < maxRetries - 1) {
-                        await new Promise(resolve => setTimeout(resolve, Math.min(500 * Math.pow(2, i), 3000)));
-                    }
                 }
 
                 if (lastError) throw new Error(lastError);
+                
                 let cleanJson = text;
                 if (cleanJson.startsWith('```')) {
                     cleanJson = cleanJson.replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
@@ -19095,9 +19161,28 @@ YÊU CẦU ĐẦU RA:
                 if (result.rep3Role) document.getElementById('sr-rep3Role').value = result.rep3Role;
                 if (result.accTime) document.getElementById('sr-accTime').value = result.accTime;
                 if (result.accLoc) document.getElementById('sr-accLoc').value = result.accLoc;
-                if (result.driverName) document.getElementById('sr-driverName').value = result.driverName;
-                if (result.vehicle1) document.getElementById('sr-vehicle1').value = result.vehicle1;
-                if (result.vehicle2) document.getElementById('sr-vehicle2').value = result.vehicle2;
+                
+                // Map vehicles list
+                let ocrVehicles = [];
+                if (result.vehicles && Array.isArray(result.vehicles)) {
+                    ocrVehicles = result.vehicles;
+                } else {
+                    const v1_bks = result.vehicle1 || '';
+                    const v1_driver = result.driverName || '';
+                    const v2_bks = result.vehicle2 || '';
+                    const v2_driver = result.driver2 || '';
+                    
+                    if (v1_bks || v1_driver) {
+                        ocrVehicles.push({ bks: v1_bks, driver: v1_driver });
+                    }
+                    if (v2_bks || v2_driver) {
+                        ocrVehicles.push({ bks: v2_bks, driver: v2_driver });
+                    }
+                }
+                if (ocrVehicles.length > 0) {
+                    this.renderVehicles(ocrVehicles);
+                }
+
                 if (result.htDiaHinh) document.getElementById('sr-htDiaHinh').value = result.htDiaHinh;
                 if (result.htLaiXeLyDo) document.getElementById('sr-htLaiXeLyDo').value = result.htLaiXeLyDo;
                 if (result.htMoTa) document.getElementById('sr-htMoTa').value = result.htMoTa;
@@ -19132,13 +19217,26 @@ YÊU CẦU ĐẦU RA:
                 setCheckboxValues('sr-thViTri', result.thViTri);
                 setCheckboxValues('sr-thTaiSan', result.thTaiSan);
 
-                Toast.fire({ icon: 'success', title: 'Đã quét ảnh và điền tự động biên bản hiện trường!' });
+                // Sync UI helper states
+                this.syncDriverPresence();
+                
+                // Prefill and Sync Estimated Damage "Khác" field
+                const uocLuongInput = document.getElementById('sr-thUocLuong-khac');
+                const uocLuongContainer = document.getElementById('sr-thUocLuong-khac-container');
+                const uocLuongRadioKhac = document.querySelector('input[name="sr-thUocLuong"][value="Khác"]');
+                
+                if (result.thUocLuong && result.thUocLuong !== 'Khoảng từ 10 đến 20 triệu đồng' && result.thUocLuong !== 'Khoảng trên 20 đến 50 triệu đồng') {
+                    if (uocLuongRadioKhac) uocLuongRadioKhac.checked = true;
+                    if (uocLuongInput) uocLuongInput.value = result.thUocLuong;
+                    if (uocLuongContainer) uocLuongContainer.classList.remove('hidden');
+                }
+
+                Swal.close();
+                Toast.fire({ icon: 'success', title: 'Đã trích xuất thông tin từ giọng nói thành công!' });
             } catch (e) {
                 console.error(e);
-                Toast.fire({ icon: 'error', title: 'Không thể phân tích ảnh: ' + e.message });
-            } finally {
-                if (loading) loading.classList.add('hidden');
-                document.getElementById('ss-ocr-file').value = ''; // Reset input
+                Swal.close();
+                Toast.fire({ icon: 'error', title: 'Không thể phân tích giọng nói: ' + e.message });
             }
         },
 
@@ -19532,6 +19630,48 @@ YÊU CẦU ĐẦU RA:
             const rep3NameFormatted = toTitleCase(ss.rep3Name || '');
             const driverNameFormatted = toTitleCase(ss.driverName || item.driverName || item.chuXe || item.customer || '');
 
+            // Build the vehicles print HTML dynamically
+            let vehiclesPrintHtml = '';
+            const listToUse = (ss.vehicles && Array.isArray(ss.vehicles) && ss.vehicles.length > 0)
+                ? ss.vehicles
+                : [
+                    { bks: ss.vehicle1 || item.bsx || '', driver: ss.driverName || item.driverName || item.chuXe || item.customer || '' },
+                    { bks: ss.vehicle2 || '', driver: ss.driver2 || '' }
+                  ].filter(v => v.bks || v.driver);
+                  
+            if (listToUse.length === 0) {
+                vehiclesPrintHtml = `
+                    <span>giữa: xe ô tô BKS: </span>
+                    <span class="info-val editable" contenteditable="true" id="pr-ss-vehicle1" style="font-weight:bold;">.......................</span>
+                    <span> do anh/chị: </span>
+                    <span class="info-val editable" contenteditable="true" id="pr-ss-driverName">.......................</span>
+                    <span> điều khiển, với xe ô tô BKS: </span>
+                    <span class="info-val editable" contenteditable="true" id="pr-ss-vehicle2">.......................</span>
+                `;
+            } else {
+                vehiclesPrintHtml = '<span>giữa: </span>';
+                listToUse.forEach((v, index) => {
+                    const bksVal = v.bks || '.......................';
+                    const driverVal = toTitleCase(v.driver || '');
+                    const hasDriver = driverVal.trim().length > 0;
+                    
+                    const prefix = index === 0 ? 'xe ô tô BKS: ' : ', với xe ô tô BKS: ';
+                    
+                    vehiclesPrintHtml += `
+                        <span>${prefix}</span>
+                        <span class="info-val editable" contenteditable="true" spellcheck="false" style="font-weight:bold;">${bksVal}</span>
+                    `;
+                    
+                    if (hasDriver) {
+                        vehiclesPrintHtml += `
+                            <span> do anh/chị: </span>
+                            <span class="info-val editable" contenteditable="true" spellcheck="false">${driverVal}</span>
+                            <span> điều khiển</span>
+                        `;
+                    }
+                });
+            }
+
             const check = (val, target) => {
                 return (val || '').includes(target) ? '☑' : '☐';
             };
@@ -19621,12 +19761,7 @@ YÊU CẦU ĐẦU RA:
                 <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-accLoc">${ss.accLoc || '............................................................................................................'}</span>
               </div>
               <div class="info-row">
-                <span>giữa: xe ô tô BKS:</span>
-                <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-vehicle1" style="font-weight:bold;">${ss.vehicle1 || '.......................'}</span>
-                <span> do anh:</span>
-                <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-driverName">${driverNameFormatted || '.......................'}</span>
-                <span> điều khiển, với xe ô tô BKS:</span>
-                <span class="info-val editable" contenteditable="true" spellcheck="false" id="pr-ss-vehicle2">${ss.vehicle2 || '.......................'}</span>
+                ${vehiclesPrintHtml}
               </div>
 
               <div class="section-title">II. Hiện trường vụ tai nạn</div>
@@ -25728,11 +25863,10 @@ const CustomSelectManager = {
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <!-- AI OCR button -->
-                <button onclick="SceneSurvey.triggerOCR()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 active:scale-90 transition-all border border-purple-500/30" title="AI quét ảnh biên bản giấy">
-                    <i data-lucide="scan-search" class="w-5 h-5"></i>
+                <!-- AI Voice Input button -->
+                <button onclick="SceneSurvey.startVoiceInput()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 active:scale-90 transition-all border border-indigo-500/30" title="AI nhập dữ liệu bằng giọng nói">
+                    <i data-lucide="mic" class="w-5 h-5"></i>
                 </button>
-                <input type="file" id="ss-ocr-file" accept="image/*" class="hidden" onchange="SceneSurvey.handleOCRFile(event)">
                 <!-- Print button -->
                 <button onclick="SceneSurvey.print()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 active:scale-90 transition-all border border-blue-500/30" title="Xem & in mẫu A4">
                     <i data-lucide="printer" class="w-5 h-5"></i>
@@ -25742,12 +25876,6 @@ const CustomSelectManager = {
 
         <!-- Body (Scrollable form) -->
         <div class="flex-1 overflow-y-auto p-4 space-y-4">
-            <!-- OCR Loading State -->
-            <div id="ss-ocr-loading" class="hidden p-4 rounded-2xl bg-purple-50 border border-purple-100 text-center space-y-2 shadow-sm animate-pulse">
-                <div class="flex justify-center"><div class="w-6 h-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div></div>
-                <p class="text-xs font-black text-purple-700">Tasco AI đang đọc biên bản từ ảnh chụp...</p>
-                <p class="text-[10px] text-purple-400">Có thể mất 5-10 giây để xử lý chữ viết tay</p>
-            </div>
 
             <!-- NHÓM 1: THÔNG TIN LẬP BIÊN BẢN -->
             <div class="p-4 rounded-2xl border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(148,163,184,0.12)] space-y-3.5 hover:shadow-md transition-shadow">
@@ -25868,7 +25996,7 @@ const CustomSelectManager = {
                     Thông tin vụ tai nạn
                 </h3>
                 <div class="space-y-3">
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div class="space-y-1">
                             <label class="input-label">Thời gian xảy ra tai nạn</label>
                             <div class="ar-input-wrapper">
@@ -25879,49 +26007,31 @@ const CustomSelectManager = {
                             </div>
                         </div>
                         <div class="space-y-1">
-                            <label class="input-label">Họ tên người điều khiển</label>
+                            <div class="flex justify-between items-center">
+                                <label class="input-label mb-0">Địa điểm xảy ra tai nạn</label>
+                                <button type="button" onclick="SceneSurvey.getCurrentLocation('sr-accLoc')" class="text-[10px] font-black text-blue-600 bg-blue-50/60 px-2.5 py-1 rounded-lg border border-blue-100/50 hover:bg-blue-100/50 active:scale-95 transition-all flex items-center gap-1">
+                                    <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Lấy định vị
+                                </button>
+                            </div>
                             <div class="ar-input-wrapper">
-                                <input type="text" id="sr-driverName" class="input-field text-xs font-bold" placeholder="Họ tên người lái">
-                                <button onclick="SceneSurvey.clearField('sr-driverName')" class="ar-clear-btn" title="Xóa">
+                                <input type="text" id="sr-accLoc" class="input-field text-xs" placeholder="Ví dụ: QL14, đoạn qua thôn 9, xã Nhân Cơ, Đắk Nông">
+                                <button onclick="SceneSurvey.clearField('sr-accLoc')" class="ar-clear-btn" title="Xóa">
                                     <i data-lucide="x" class="w-3.5 h-3.5"></i>
                                 </button>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-1">
-                        <div class="flex justify-between items-center">
-                            <label class="input-label mb-0">Địa điểm xảy ra tai nạn</label>
-                            <button type="button" onclick="SceneSurvey.getCurrentLocation('sr-accLoc')" class="text-[10px] font-black text-blue-600 bg-blue-50/60 px-2.5 py-1 rounded-lg border border-blue-100/50 hover:bg-blue-100/50 active:scale-95 transition-all flex items-center gap-1">
-                                <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Lấy định vị
-                            </button>
-                        </div>
-                        <div class="ar-input-wrapper">
-                            <input type="text" id="sr-accLoc" class="input-field text-xs" placeholder="Ví dụ: QL14, đoạn qua thôn 9, xã Nhân Cơ, Đắk Nông">
-                            <button onclick="SceneSurvey.clearField('sr-accLoc')" class="ar-clear-btn" title="Xóa">
-                                <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                            </button>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="space-y-1">
-                            <label class="input-label">Xe ô tô BKS (Xe bảo hiểm)</label>
-                            <div class="ar-input-wrapper">
-                                <input type="text" id="sr-vehicle1" class="input-field text-xs font-bold font-mono text-center" placeholder="Ví dụ: 48A-262.31">
-                                <button onclick="SceneSurvey.clearField('sr-vehicle1')" class="ar-clear-btn" title="Xóa">
-                                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                                </button>
-                            </div>
+                    <!-- Danh sách phương tiện liên quan -->
+                    <div class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800/50">
+                        <div class="flex justify-between items-center">
+                            <label class="input-label mb-0 font-extrabold text-slate-700 dark:text-slate-300">Danh sách phương tiện liên quan</label>
+                            <button type="button" onclick="SceneSurvey.addVehicleRow()" class="text-[10px] font-black text-emerald-600 bg-emerald-50/60 px-2.5 py-1 rounded-lg border border-emerald-100/50 hover:bg-emerald-100/50 active:scale-95 transition-all flex items-center gap-1">
+                                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Thêm xe
+                            </button>
                         </div>
-                        <div class="space-y-1">
-                            <label class="input-label">Xe đối ứng / Liên quan (nếu có)</label>
-                            <div class="ar-input-wrapper">
-                                <input type="text" id="sr-vehicle2" class="input-field text-xs font-bold font-mono text-center" placeholder="Ví dụ: 48A-110.61">
-                                <button onclick="SceneSurvey.clearField('sr-vehicle2')" class="ar-clear-btn" title="Xóa">
-                                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                                </button>
-                            </div>
+                        <div id="sr-vehicles-container" class="space-y-2.5">
+                            <!-- Sẽ được điền động bằng SceneSurvey.renderVehicles() -->
                         </div>
                     </div>
                 </div>
