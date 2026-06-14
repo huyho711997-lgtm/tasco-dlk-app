@@ -32,6 +32,12 @@ self.addEventListener('activate', event => {
         })
       );
     }).then(() => self.clients.claim())
+      .then(() => self.clients.matchAll({ type: 'window' }))
+      .then(clients => {
+        clients.forEach(client => {
+          if (client.url) client.navigate(client.url);
+        });
+      })
   );
 });
 
