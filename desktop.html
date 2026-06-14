@@ -219,6 +219,37 @@ textarea.inp { resize:vertical; }
 /* Recv card */
 .recv-card{cursor:pointer;background:transparent;}
 
+/* Modal viewport guard */
+#modal-wrap {
+  width: 100vw;
+  height: 100vh;
+  padding: 12px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+#modal-box {
+  width: 100% !important;
+  max-width: none !important;
+  height: calc(100vh - 24px) !important;
+  max-height: calc(100vh - 24px) !important;
+  min-width: 0;
+}
+#modal-box > .flex-1,
+#modal-box .m-tab-panel {
+  width: 100%;
+  min-width: 0;
+}
+#modal-box .m-tab-panel {
+  overflow-x: hidden;
+}
+#modal-box .grid,
+#modal-box .section-card,
+#modal-box input,
+#modal-box textarea,
+#modal-box select {
+  min-width: 0;
+}
+
 /* Modal footer */
 .modal-footer-bar {
   background: linear-gradient(to right, #f8fafc, #f1f5f9);
@@ -3605,7 +3636,7 @@ textarea.inp { resize:vertical; }
 
 <!-- ══════════ EDIT MODAL ══════════ -->
 <div id="modal-wrap" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity duration-300">
-<div id="modal-box" class="bg-white w-[98vw] h-[95vh] rounded-lg shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-300">
+<div id="modal-box" class="bg-white rounded-lg shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-300">
 
   <!-- Modal Header -->
   <!-- Modal Header -->
