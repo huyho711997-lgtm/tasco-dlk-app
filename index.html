@@ -18450,6 +18450,54 @@ YÊU CẦU ĐẦU RA:
             }
         },
 
+        collectCurrentSceneSurveyData() {
+            const getVal = (id) => document.getElementById(id)?.value.trim() || '';
+            const getRadioValue = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value || '';
+            const getCheckboxValues = (name) => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(el => el.value).join(', ');
+            const vehicles = Array.from(document.querySelectorAll('#sr-vehicles-container .vehicle-row')).map(row => ({
+                bks: row.querySelector('.sr-v-bks')?.value.trim() || '',
+                driver: row.querySelector('.sr-v-driver')?.value.trim() || ''
+            })).filter(v => v.bks || v.driver);
+
+            return {
+                bbTime: getVal('sr-bbTime'),
+                bbLoc: getVal('sr-bbLoc'),
+                rep1Name: getVal('sr-rep1Name'),
+                rep1Phone: getVal('sr-rep1Phone'),
+                rep2Name: getVal('sr-rep2Name'),
+                rep2Phone: getVal('sr-rep2Phone'),
+                rep3Name: getVal('sr-rep3Name'),
+                rep3Role: getVal('sr-rep3Role'),
+                accTime: getVal('sr-accTime'),
+                accLoc: getVal('sr-accLoc'),
+                vehicles,
+                htTinhTrang: getRadioValue('sr-htTinhTrang'),
+                htNhietDo: getRadioValue('sr-htNhietDo'),
+                htDiaHinh: getVal('sr-htDiaHinh'),
+                htTinhChatNen: getRadioValue('sr-htTinhChatNen'),
+                htThoiTiet: getCheckboxValues('sr-htThoiTiet'),
+                htLaiXeCoMat: getRadioValue('sr-htLaiXeCoMat'),
+                htLaiXeLyDo: getVal('sr-htLaiXeLyDo'),
+                htDauHieuLaiXe: getCheckboxValues('sr-htDauHieuLaiXe'),
+                htGiayTo: getCheckboxValues('sr-htGiayTo'),
+                htGiayToCthh: getVal('sr-htGiayTo-cthh'),
+                htGiayToGplxReason: getVal('sr-htGiayTo-gplxReason'),
+                htMoTa: getVal('sr-htMoTa'),
+                htDauVet: getVal('sr-htDauVet'),
+                htMauVat: getVal('sr-htMauVat'),
+                thViTri: getVal('sr-thViTri-final'),
+                thTaiSan: getCheckboxValues('sr-thTaiSan'),
+                thUocLuong: (() => {
+                    const baseVal = getRadioValue('sr-thUocLuong');
+                    return baseVal === 'Khác' ? (getVal('sr-thUocLuong-khac') || 'Khác') : baseVal;
+                })(),
+                thLietKe: getVal('sr-thLietKe'),
+                thNguoi: getVal('sr-thNguoi'),
+                thGhiChu: getVal('sr-thGhiChu'),
+                thDeXuat: getVal('sr-thDeXuat')
+            };
+        },
+
         startVoiceInput() {
             const speechInputObj = window.SpeechInput || (typeof SpeechInput !== 'undefined' ? SpeechInput : null);
             if (speechInputObj) {
@@ -18741,33 +18789,7 @@ YÊU CẦU ĐẦU RA:
             }
             
             // Prefill Vị trí tổn thất "Trái, Phải, Ở giữa" sub-options
-            document.querySelectorAll('input[name="sr-thViTri-base"]').forEach(cb => cb.checked = false);
-            document.querySelectorAll('input[class="sr-thViTri-sub"]').forEach(cb => cb.checked = false);
-            document.querySelectorAll('[id^="sr-thViTri-sub-"]').forEach(div => div.classList.add('hidden'));
-
-            const thViTriVal = ss.thViTri || 'Đuôi xe';
-            const thViTriParts = thViTriVal ? thViTriVal.split(/,\s*(?![^()]*\))/) : [];
-            thViTriParts.forEach(part => {
-                const match = part.match(/^([^(]+)(?:\(([^)]+)\))?$/);
-                if (match) {
-                    const baseName = match[1].trim();
-                    const subNotesStr = match[2] || '';
-                    const subs = subNotesStr.split(',').map(s => s.trim()).filter(Boolean);
-                    
-                    const baseCb = document.querySelector(`input[name="sr-thViTri-base"][value="${baseName}"]`);
-                    if (baseCb) {
-                        baseCb.checked = true;
-                        const container = document.getElementById(`sr-thViTri-sub-${baseName}`);
-                        if (container) container.classList.remove('hidden');
-                    }
-                    
-                    subs.forEach(subVal => {
-                        const subCb = document.querySelector(`input[class="sr-thViTri-sub"][data-parent="${baseName}"][value="${subVal}"]`);
-                        if (subCb) subCb.checked = true;
-                    });
-                }
-            });
-            this.updateThViTriOutput();
+            this.applyThViTriFromString(ss.thViTri || 'Đuôi xe');
 
             setCheckboxValues('sr-thTaiSan', ss.thTaiSan || 'Xe tham gia vật chất BH Tasco');
 
@@ -18835,6 +18857,34 @@ YÊU CẦU ĐẦU RA:
                     });
                 }
             }
+            this.updateThViTriOutput();
+        },
+
+        applyThViTriFromString(value) {
+            document.querySelectorAll('input[name="sr-thViTri-base"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('input[class="sr-thViTri-sub"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('[id^="sr-thViTri-sub-"]').forEach(div => div.classList.add('hidden'));
+
+            const parts = value ? String(value).split(/,\s*(?![^()]*\))/) : [];
+            parts.forEach(part => {
+                const match = part.match(/^([^(]+)(?:\(([^)]+)\))?$/);
+                if (!match) return;
+
+                const baseName = match[1].trim();
+                const subs = (match[2] || '').split(',').map(s => s.trim()).filter(Boolean);
+                const baseCb = document.querySelector(`input[name="sr-thViTri-base"][value="${baseName}"]`);
+                if (!baseCb) return;
+
+                baseCb.checked = true;
+                const container = document.getElementById(`sr-thViTri-sub-${baseName}`);
+                if (container) container.classList.remove('hidden');
+
+                subs.forEach(subVal => {
+                    const subCb = document.querySelector(`input[class="sr-thViTri-sub"][data-parent="${baseName}"][value="${subVal}"]`);
+                    if (subCb) subCb.checked = true;
+                });
+            });
+
             this.updateThViTriOutput();
         },
 
@@ -19146,9 +19196,21 @@ YÊU CẦU ĐẦU RA:
                 customClass: { popup: 'custom-rounded' }
             });
 
+            const currentFormData = this.collectCurrentSceneSurveyData();
+            const currentFormJson = JSON.stringify(currentFormData, null, 2);
+
             const PROMPT = `Bạn là chuyên gia giám định bảo hiểm xe cơ giới cao cấp của Tasco.
-Hãy phân tích đoạn hội thoại/văn bản mô tả hiện trường tai nạn dưới đây và trích xuất toàn bộ thông tin có thể đọc được vào một đối tượng JSON.
-Nếu thông tin nào không được đề cập, hãy trả về giá trị rỗng hoặc để trống.
+Hãy phân tích đoạn hội thoại/văn bản mô tả hiện trường tai nạn dưới đây và cập nhật vào dữ liệu biên bản hiện trường đang có.
+
+QUY TẮC CẬP NHẬT BẮT BUỘC:
+1. Luôn xem DỮ LIỆU FORM HIỆN TẠI là dữ liệu gốc đang có trên màn hình.
+2. Nếu lời nói/văn bản có ý "bổ sung", "thêm", "cập nhật thêm", "ghi nhận thêm", hãy nối thông tin mới vào nội dung hiện có, không xóa phần cũ. Áp dụng đặc biệt cho: htMoTa, htDauVet, htMauVat, thLietKe, thGhiChu, thDeXuat.
+3. Nếu lời nói/văn bản yêu cầu "thay thế", "sửa thành", "đổi thành", hãy cập nhật trường tương ứng theo nội dung mới.
+4. Nếu lời nói/văn bản không nhắc đến một trường nào, hãy giữ nguyên giá trị hiện có của trường đó trong JSON trả về.
+5. Trả về JSON là trạng thái cuối cùng sau khi đã hợp nhất dữ liệu hiện có và dữ liệu mới.
+6. Không tự bịa thông tin không có trong dữ liệu hiện có hoặc lời nói mới.
+
+Ví dụ: nếu htDauVet hiện có là "Có mảnh vỡ đèn trước" và lời nói là "bổ sung dấu vết phanh dài 3 mét", thì htDauVet trả về phải là "Có mảnh vỡ đèn trước; bổ sung dấu vết phanh dài 3 mét.".
 
 Cú pháp các thuộc tính JSON cần trả về chính xác như sau:
 {
@@ -19188,6 +19250,9 @@ Cú pháp các thuộc tính JSON cần trả về chính xác như sau:
   "thGhiChu": "Ghi chú (Lời khai lái xe, nhân chứng)",
   "thDeXuat": "Đề xuất khác"
 }
+
+DỮ LIỆU FORM HIỆN TẠI:
+${currentFormJson}
 
 VĂN BẢN MÔ TẢ TAI NẠN:
 "${rawSpeechText}"
@@ -19295,6 +19360,7 @@ Lưu ý: Chỉ trả về JSON thô (raw JSON text), không đặt trong thẻ c
                 setRadioValue('sr-thUocLuong', result.thUocLuong);
 
                 const setCheckboxValues = (name, str) => {
+                    if (!str) return;
                     const vals = str ? str.split(',').map(s => s.trim()) : [];
                     document.querySelectorAll(`input[name="${name}"]`).forEach(el => {
                         el.checked = vals.includes(el.value);
@@ -19303,11 +19369,12 @@ Lưu ý: Chỉ trả về JSON thô (raw JSON text), không đặt trong thẻ c
                 setCheckboxValues('sr-htThoiTiet', result.htThoiTiet);
                 setCheckboxValues('sr-htDauHieuLaiXe', result.htDauHieuLaiXe);
                 setCheckboxValues('sr-htGiayTo', result.htGiayTo);
-                setCheckboxValues('sr-thViTri', result.thViTri);
                 setCheckboxValues('sr-thTaiSan', result.thTaiSan);
+                if (result.thViTri) this.applyThViTriFromString(result.thViTri);
 
                 // Sync UI helper states
                 this.syncDriverPresence();
+                this.syncConditionalSceneSurveyControls();
                 
                 // Prefill and Sync Estimated Damage "Khác" field
                 const uocLuongInput = document.getElementById('sr-thUocLuong-khac');
@@ -19319,6 +19386,7 @@ Lưu ý: Chỉ trả về JSON thô (raw JSON text), không đặt trong thẻ c
                     if (uocLuongInput) uocLuongInput.value = result.thUocLuong;
                     if (uocLuongContainer) uocLuongContainer.classList.remove('hidden');
                 }
+                this.adjustTextareasHeight();
 
                 // Build premium OCR review summary
                 const summaryHtml = this.buildOCRSummaryHtml(result, ocrVehicles);
