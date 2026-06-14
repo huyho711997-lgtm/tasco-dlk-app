@@ -20069,15 +20069,17 @@ YÊU CẦU ĐẦU RA:
                         text-align: justify;
                     }
                     #ss-print-container .closing-text {
-                        margin-top: 8px;
+                        margin-top: 6px;
                         text-align: justify;
+                        break-inside: avoid;
+                        page-break-inside: avoid;
                     }
                     #ss-print-container .doc-footer {
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
-                        margin-top: auto;
-                        padding-top: 10px;
+                        margin-top: 10px;
+                        padding-top: 4px;
                         font-size: 11.5px;
                         font-style: italic;
                         color: #111827;
@@ -20113,7 +20115,9 @@ YÊU CẦU ĐẦU RA:
                         display: flex;
                         justify-content: space-between;
                         text-align: center;
-                        margin-top: 35px;
+                        margin-top: 16px;
+                        break-inside: avoid;
+                        page-break-inside: avoid;
                     }
                     #ss-print-container .sig-col {
                         display: flex;
@@ -20137,7 +20141,7 @@ YÊU CẦU ĐẦU RA:
                         margin: 4px 0;
                     }
                     #ss-print-container .sig-space {
-                        height: 65px;
+                        height: 48px;
                     }
                     #ss-print-container .sig-name {
                         font-weight: bold;
@@ -20535,7 +20539,7 @@ YÊU CẦU ĐẦU RA:
                 <div class="sig-col">
                   <span class="sig-title">Đại diện lái xe/chủ xe</span>
                   <span class="sig-sub">(Ký và ghi rõ họ tên)</span>
-                  <div style="height: 70px; display: flex; align-items: center; justify-content: center; width: 100%;">
+                  <div style="height: 48px; display: flex; align-items: center; justify-content: center; width: 100%;">
                     ${sigDriver ? `<img src="${sigDriver}" class="sig-canvas-img">` : ''}
                   </div>
                   <span class="sig-name">${rep2NameFormatted || '.....................................'}</span>
@@ -20544,7 +20548,7 @@ YÊU CẦU ĐẦU RA:
                 <div class="sig-col">
                   <span class="sig-title">Đại diện bên liên quan</span>
                   <span class="sig-sub">(Ký và ghi rõ họ tên)</span>
-                  <div style="height: 70px; display: flex; align-items: center; justify-content: center; width: 100%;">
+                  <div style="height: 48px; display: flex; align-items: center; justify-content: center; width: 100%;">
                     ${sigThirdParty ? `<img src="${sigThirdParty}" class="sig-canvas-img">` : ''}
                   </div>
                   <span class="sig-name">${rep3NameFormatted || '.....................................'}</span>
@@ -20553,7 +20557,7 @@ YÊU CẦU ĐẦU RA:
                 <div class="sig-col">
                   <span class="sig-title">Đại diện giám định BH Tasco</span>
                   <span class="sig-sub">(Ký và ghi rõ họ tên)</span>
-                  <div style="height: 70px; display: flex; align-items: center; justify-content: center; width: 100%;">
+                  <div style="height: 48px; display: flex; align-items: center; justify-content: center; width: 100%;">
                     ${sigAssessor ? `<img src="${sigAssessor}" class="sig-canvas-img">` : ''}
                   </div>
                   <span class="sig-name">${rep1NameFormatted || '.....................................'}</span>
