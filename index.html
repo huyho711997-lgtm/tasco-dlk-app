@@ -20043,7 +20043,6 @@ YÊU CẦU ĐẦU RA:
                     }
                     #ss-print-container .section-title {
                         font-weight: bold;
-                        text-transform: uppercase;
                         margin-top: 9px;
                         margin-bottom: 4px;
                         font-size: 14px;
@@ -20158,17 +20157,27 @@ YÊU CẦU ĐẦU RA:
                 return str.toLowerCase().replace(/(^|\s)\S/g, l => l.toUpperCase());
             };
             const formatDocTime = (value) => {
+                const parts = parseDocTimeParts(value);
+                if (!parts) return '........ giờ........ ngày .......... tháng .......... năm 20....';
+                return `${parts.hour} giờ ${parts.minute} ngày ${parts.day} tháng ${parts.month} năm ${parts.year}`;
+            };
+            const formatAccidentDocTime = (value) => {
+                const parts = parseDocTimeParts(value);
+                if (!parts) return '…… giờ ……phút, ngày …... tháng ….. năm 20 …..';
+                return `${parts.hour} giờ ${parts.minute} phút, ngày ${parts.day} tháng ${parts.month} năm ${parts.year}`;
+            };
+            const parseDocTimeParts = (value) => {
                 const raw = (value || '').trim();
-                if (!raw) return '........ giờ........ ngày .......... tháng .......... năm 20....';
+                if (!raw) return null;
                 const iso = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})[T\s](\d{1,2}):(\d{1,2})/);
-                if (iso) return `${iso[4].padStart(2, '0')} giờ ${iso[5].padStart(2, '0')} ngày ${iso[3].padStart(2, '0')} tháng ${iso[2].padStart(2, '0')} năm ${iso[1]}`;
+                if (iso) return { year: iso[1], month: iso[2].padStart(2, '0'), day: iso[3].padStart(2, '0'), hour: iso[4].padStart(2, '0'), minute: iso[5].padStart(2, '0') };
                 const dateFirst = raw.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})\s+(\d{1,2})[:hH](\d{1,2})/);
-                if (dateFirst) return `${dateFirst[4].padStart(2, '0')} giờ ${dateFirst[5].padStart(2, '0')} ngày ${dateFirst[1].padStart(2, '0')} tháng ${dateFirst[2].padStart(2, '0')} năm ${dateFirst[3]}`;
+                if (dateFirst) return { year: dateFirst[3], month: dateFirst[2].padStart(2, '0'), day: dateFirst[1].padStart(2, '0'), hour: dateFirst[4].padStart(2, '0'), minute: dateFirst[5].padStart(2, '0') };
                 const m = raw.match(/(\d{1,2})[:hH](\d{1,2})\s+(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
-                if (m) return `${m[1].padStart(2, '0')} giờ ${m[2].padStart(2, '0')} ngày ${m[3].padStart(2, '0')} tháng ${m[4].padStart(2, '0')} năm ${m[5]}`;
+                if (m) return { year: m[5], month: m[4].padStart(2, '0'), day: m[3].padStart(2, '0'), hour: m[1].padStart(2, '0'), minute: m[2].padStart(2, '0') };
                 const dateOnly = raw.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
-                if (dateOnly) return `........ giờ........ ngày ${dateOnly[1].padStart(2, '0')} tháng ${dateOnly[2].padStart(2, '0')} năm ${dateOnly[3]}`;
-                return raw;
+                if (dateOnly) return { year: dateOnly[3], month: dateOnly[2].padStart(2, '0'), day: dateOnly[1].padStart(2, '0'), hour: '........', minute: '........' };
+                return null;
             };
 
             const rep1NameFormatted = toTitleCase(ss.rep1Name || Auth.getCurrentUser()?.name || '');
@@ -20176,18 +20185,19 @@ YÊU CẦU ĐẦU RA:
             const rep3NameFormatted = toTitleCase(ss.rep3Name || '');
             const driverNameFormatted = toTitleCase(ss.driverName || item.driverName || item.chuXe || item.customer || '');
             const bbTimeFormatted = formatDocTime(ss.bbTime);
-            const accTimeFormatted = formatDocTime(ss.accTime);
+            const accTimeFormatted = formatAccidentDocTime(ss.accTime);
             const closingTime = (ss.bbTime || '').match(/(\d{1,2})[:hH](\d{1,2})/)
                 ? `${(ss.bbTime.match(/(\d{1,2})[:hH](\d{1,2})/) || [])[1]} giờ ${(ss.bbTime.match(/(\d{1,2})[:hH](\d{1,2})/) || [])[2]}`
                 : '............ giờ ...........';
             const participants = [
                 { name: rep1NameFormatted, role: 'GĐV Bảo hiểm Tasco', phone: ss.rep1Phone || '' },
                 { name: rep2NameFormatted, role: 'Lái xe / Chủ xe', phone: ss.rep2Phone || '' },
-                ss.rep3Name ? { name: rep3NameFormatted, role: ss.rep3Role || 'Bên liên quan', phone: '' } : null
-            ].filter(Boolean);
+                { name: rep3NameFormatted, role: ss.rep3Name ? (ss.rep3Role || 'Bên liên quan') : '', phone: '' },
+                { name: '', role: '', phone: '' }
+            ];
             const participantsPrintHtml = participants.map((p, index) => `
                 <div class="participant-line">
-                  <span>${index + 1}.</span>
+                  <span>${index + 1}</span>
                   <span class="editable" contenteditable="true" spellcheck="false">${p.name || '........................................'}</span>
                   <span>là: <span class="editable" contenteditable="true" spellcheck="false">${p.role || '........................................'}</span></span>
                   <span>Số ĐT: <span class="editable" contenteditable="true" spellcheck="false">${p.phone || '....................'}</span></span>
@@ -20205,7 +20215,7 @@ YÊU CẦU ĐẦU RA:
 
             if (listToUse.length === 0) {
                 vehiclesPrintHtml = `
-                    <span>giữa: xe ôtô BKS: </span>
+                    <span>giữa: xe ôtô BKS </span>
                     <span class="info-val editable" contenteditable="true" id="pr-ss-vehicle1" style="font-weight:bold;">.......................</span>
                     <span> do: </span>
                     <span class="info-val editable" contenteditable="true" id="pr-ss-driverName">.......................</span>
@@ -20219,7 +20229,7 @@ YÊU CẦU ĐẦU RA:
                     const driverVal = toTitleCase(v.driver || '');
                     const hasDriver = driverVal.trim().length > 0;
 
-                    const prefix = index === 0 ? 'xe ôtô BKS: ' : ', với: xe ôtô BKS: ';
+                    const prefix = index === 0 ? 'xe ôtô BKS ' : ', với: xe ôtô BKS ';
 
                     vehiclesPrintHtml += `
                         <span>${prefix}</span>
@@ -20296,7 +20306,7 @@ YÊU CẦU ĐẦU RA:
                 ${vehiclesPrintHtml}
               </div>
 
-              <div class="section-title">II. Hiện trường vụ tai nạn</div>
+              <div class="section-title">Hiện trường vụ tai nạn</div>
 
               <table class="ht-table" style="width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed;">
                 <colgroup>
