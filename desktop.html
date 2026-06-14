@@ -237,6 +237,8 @@ textarea.inp { resize:vertical; }
   height: auto !important;
   max-height: none !important;
   min-width: 0;
+  box-sizing: border-box;
+  padding-bottom: 64px;
   background: #fff;
   display: flex;
   flex-direction: column;
@@ -268,11 +270,16 @@ textarea.inp { resize:vertical; }
 
 /* Modal footer */
 .modal-footer-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  height: 64px;
   background: linear-gradient(to right, #f8fafc, #f1f5f9);
   border-top: 1px solid #e2e8f0;
   padding: .875rem 1.25rem;
   display: flex; align-items: center; justify-content: flex-end; gap: .75rem;
-  flex-shrink: 0;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
