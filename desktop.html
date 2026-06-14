@@ -4425,7 +4425,7 @@ textarea.inp { resize:vertical; }
                 </button>
                 <button type="button" id="mic-ht-nhandinh" onclick="SpeechInput.toggle('edit-htNhanDinh','mic-ht-nhandinh','st-ht-nhandinh')"
                   class="px-2.5 py-1 bg-white text-emerald-600 border border-emerald-200 text-[11px] rounded font-bold hover:bg-emerald-50 flex items-center gap-1">
-                  <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg> Nói
+                  <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg> Nói
                 </button>
               </div>
             </div>
@@ -4481,24 +4481,591 @@ textarea.inp { resize:vertical; }
             <!-- Sẽ được di chuyển động bằng JS hoặc để tĩnh ở đây -->
           </div>
 
-          <!-- BIÊN BẢN TAI NẠN (MẪU A4) -->
+          <!-- BIÊN BẢN HIỆN TRƯỜNG & TAI NẠN (MẪU A4) -->
           <div class="section-card border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden bg-white">
-            <div class="section-header flex justify-between items-center bg-gradient-to-r from-slate-900 via-slate-800 to-slate-950 text-white px-4 py-3.5 border-b border-slate-800 shadow-sm" style="display: flex; justify-content: space-between; align-items: center;">
-              <div class="section-header-title text-slate-100 flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider">
-                <svg class="w-4 h-4 text-blue-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                Biên bản tai nạn (Mẫu A4)
+            <div class="section-header flex justify-between items-center bg-gradient-to-r from-slate-900 via-slate-800 to-slate-950 text-white px-4 py-2 border-b border-slate-800 shadow-sm" style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="flex bg-white/10 p-0.5 rounded-lg border border-white/5">
+                <button type="button" onclick="switchReportSubTab('hientruong')" id="btn-subtab-hientruong" class="px-3 py-1 rounded-md text-[11px] font-black transition-all bg-white text-slate-800 shadow-sm">
+                  Biên bản hiện trường
+                </button>
+                <button type="button" onclick="switchReportSubTab('tainan')" id="btn-subtab-tainan" class="px-3 py-1 rounded-md text-[11px] font-black transition-all text-white/60 hover:text-white bg-transparent">
+                  Biên bản tai nạn (Mẫu A4)
+                </button>
               </div>
-              <div class="flex gap-2" style="display: flex; gap: 8px;">
-                <button type="button" onclick="AccidentReport.triggerOCR()" class="px-3 py-1.5 bg-purple-500/20 text-purple-300 border border-purple-500/35 text-[11px] rounded-lg font-black hover:bg-purple-500/30 transition-all flex items-center gap-1.5 active:scale-95 shadow-sm" title="AI quét ảnh biên bản giấy">
-                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> AI Quét ảnh
-                </button>
-                <input type="file" id="ar-ocr-file" accept="image/*" class="hidden" onchange="AccidentReport.handleOCRFile(event)">
-                <button type="button" onclick="AccidentReport.print()" class="px-3 py-1.5 bg-blue-500/20 text-blue-300 border border-blue-500/35 text-[11px] rounded-lg font-black hover:bg-blue-500/30 transition-all flex items-center gap-1.5 active:scale-95 shadow-sm" title="Xem & in mẫu A4">
-                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg> In A4
-                </button>
+              
+              <!-- Dynamic Actions for report types -->
+              <div class="flex items-center gap-2">
+                <!-- Actions for Hientruong report -->
+                <div id="actions-report-hientruong" class="flex gap-2">
+                  <button type="button" onclick="SceneSurvey.startVoiceInput()" class="px-2.5 py-1.5 bg-indigo-500/20 text-indigo-300 border border-indigo-500/35 text-[10.5px] rounded-lg font-black hover:bg-indigo-500/30 transition-all flex items-center gap-1 active:scale-95 shadow-sm" title="AI nhập dữ liệu bằng giọng nói">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg> AI Trích xuất
+                  </button>
+                  <button type="button" onclick="SceneSurvey.print()" class="px-2.5 py-1.5 bg-blue-500/20 text-blue-300 border border-blue-500/35 text-[10.5px] rounded-lg font-black hover:bg-blue-500/30 transition-all flex items-center gap-1 active:scale-95 shadow-sm" title="Xem & in mẫu A4">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg> In A4
+                  </button>
+                </div>
+                <!-- Actions for Tainan report -->
+                <div id="actions-report-tainan" class="hidden flex gap-2">
+                  <button type="button" onclick="AccidentReport.triggerOCR()" class="px-2.5 py-1.5 bg-purple-500/20 text-purple-300 border border-purple-500/35 text-[10.5px] rounded-lg font-black hover:bg-purple-500/30 transition-all flex items-center gap-1 active:scale-95 shadow-sm" title="AI quét ảnh biên bản giấy">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> AI Quét ảnh
+                  </button>
+                  <input type="file" id="ar-ocr-file" accept="image/*" class="hidden" onchange="AccidentReport.handleOCRFile(event)">
+                  <button type="button" onclick="AccidentReport.print()" class="px-2.5 py-1.5 bg-blue-500/20 text-blue-300 border border-blue-500/35 text-[10.5px] rounded-lg font-black hover:bg-blue-500/30 transition-all flex items-center gap-1 active:scale-95 shadow-sm" title="Xem & in mẫu A4">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg> In A4
+                  </button>
+                </div>
               </div>
             </div>
-            <div class="section-body p-4 space-y-4">
+
+            <!-- CONTAINER 1: BIÊN BẢN HIỆN TRƯỜNG -->
+            <div id="panel-report-hientruong" class="section-body p-4 space-y-4">
+              <!-- Nhóm 1: Thông tin lập biên bản -->
+              <div class="border border-slate-100 rounded-2xl p-4 bg-white shadow-[0_4px_20px_-4px_rgba(148,163,184,0.12)] space-y-3">
+                <div class="text-[11px] font-black text-slate-800 uppercase flex items-center gap-2 border-b border-slate-100 pb-2">
+                  <div class="w-5.5 h-5.5 rounded-md bg-blue-50 flex items-center justify-center shrink-0">
+                    <svg class="w-3.5 h-3.5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  </div>
+                  1. Thông tin lập biên bản
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="space-y-1">
+                    <label class="lbl text-[11px] mb-0">Thời gian lập biên bản</label>
+                    <div class="ar-input-wrapper">
+                      <input type="text" id="sr-bbTime" class="inp text-xs font-bold text-slate-800" placeholder="Ví dụ: 12:00 29/03/2026">
+                      <button onclick="SceneSurvey.clearField('sr-bbTime')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="space-y-1">
+                    <div class="flex justify-between items-center mb-0.5">
+                      <label class="lbl text-[11px] mb-0">Địa điểm lập biên bản</label>
+                      <button type="button" onclick="SceneSurvey.getCurrentLocation('sr-bbLoc')" class="text-[9px] font-black text-blue-600 bg-blue-50/60 px-2 py-0.5 rounded border border-blue-100/50 hover:bg-blue-100/50 active:scale-95 transition-all flex items-center gap-0.5">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Lấy định vị
+                      </button>
+                    </div>
+                    <div class="ar-input-wrapper">
+                      <input type="text" id="sr-bbLoc" class="inp text-xs font-bold text-slate-800" placeholder="Địa điểm lập biên bản">
+                      <button onclick="SceneSurvey.clearField('sr-bbLoc')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Nhóm 2: Thành phần tham gia -->
+              <div class="border border-slate-100 rounded-2xl p-4 bg-white shadow-[0_4px_20px_-4px_rgba(148,163,184,0.12)] space-y-3">
+                <div class="text-[11px] font-black text-slate-800 uppercase flex items-center gap-2 border-b border-slate-100 pb-2">
+                  <div class="w-5.5 h-5.5 rounded-md bg-blue-50 flex items-center justify-center shrink-0">
+                    <svg class="w-3.5 h-3.5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  </div>
+                  2. Thành phần tham gia
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                  <!-- GĐV Tasco -->
+                  <div class="space-y-2.5 p-3 rounded-xl border border-slate-100 bg-slate-50/20">
+                    <div class="space-y-1">
+                      <label class="lbl text-[11px] mb-0">Giám định viên Tasco</label>
+                      <div class="ar-input-wrapper">
+                        <input type="text" id="sr-rep1Name" class="inp text-xs font-bold text-slate-800" placeholder="Họ tên GĐV">
+                        <button onclick="SceneSurvey.clearField('sr-rep1Name')" class="ar-clear-btn" title="Xóa">
+                          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="space-y-1">
+                      <label class="lbl text-[11px] mb-0">SĐT Giám định viên</label>
+                      <div class="ar-input-wrapper">
+                        <input type="text" id="sr-rep1Phone" class="inp text-xs font-bold text-slate-800 font-mono" placeholder="SĐT GĐV">
+                        <button onclick="SceneSurvey.clearField('sr-rep1Phone')" class="ar-clear-btn" title="Xóa">
+                          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Lái xe -->
+                  <div class="space-y-2.5 p-3 rounded-xl border border-slate-100 bg-slate-50/20">
+                    <div class="space-y-1">
+                      <label class="lbl text-[11px] mb-0">Họ tên Lái xe / Chủ xe</label>
+                      <div class="ar-input-wrapper">
+                        <input type="text" id="sr-rep2Name" class="inp text-xs font-bold text-slate-800" placeholder="Họ tên lái xe">
+                        <button onclick="SceneSurvey.clearField('sr-rep2Name')" class="ar-clear-btn" title="Xóa">
+                          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="space-y-1">
+                      <label class="lbl text-[11px] mb-0">Số điện thoại Lái xe</label>
+                      <div class="ar-input-wrapper">
+                        <input type="text" id="sr-rep2Phone" class="inp text-xs font-bold text-slate-800 font-mono" placeholder="SĐT Lái xe">
+                        <button onclick="SceneSurvey.clearField('sr-rep2Phone')" class="ar-clear-btn" title="Xóa">
+                          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Khác / Liên quan -->
+                  <div class="space-y-2.5 p-3 rounded-xl border border-slate-100 bg-slate-50/20">
+                    <div class="space-y-1">
+                      <label class="lbl text-[11px] mb-0">Đại diện bên liên quan</label>
+                      <div class="ar-input-wrapper">
+                        <input type="text" id="sr-rep3Name" class="inp text-xs font-bold text-slate-800" placeholder="Họ tên (nếu có)">
+                        <button onclick="SceneSurvey.clearField('sr-rep3Name')" class="ar-clear-btn" title="Xóa">
+                          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="space-y-1">
+                      <label class="lbl text-[11px] mb-0">Vai trò / Chức vụ</label>
+                      <div class="ar-input-wrapper">
+                        <input type="text" id="sr-rep3Role" class="inp text-xs font-bold text-slate-800" placeholder="VD: Lái xe liên quan">
+                        <button onclick="SceneSurvey.clearField('sr-rep3Role')" class="ar-clear-btn" title="Xóa">
+                          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Nhóm 3: Thông tin tai nạn & Danh sách xe động -->
+              <div class="border border-slate-100 rounded-2xl p-4 bg-white shadow-[0_4px_20px_-4px_rgba(148,163,184,0.12)] space-y-3">
+                <div class="text-[11px] font-black text-slate-800 uppercase flex items-center gap-2 border-b border-slate-100 pb-2">
+                  <div class="w-5.5 h-5.5 rounded-md bg-blue-50 flex items-center justify-center shrink-0">
+                    <svg class="w-3.5 h-3.5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  </div>
+                  3. Thông tin vụ tai nạn
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="space-y-1">
+                    <label class="lbl text-[11px] mb-0">Thời gian xảy ra tai nạn</label>
+                    <div class="ar-input-wrapper">
+                      <input type="text" id="sr-accTime" class="inp text-xs font-bold text-slate-800" placeholder="Ví dụ: 09:25 29/03/2026">
+                      <button onclick="SceneSurvey.clearField('sr-accTime')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="space-y-1">
+                    <div class="flex justify-between items-center mb-0.5">
+                      <label class="lbl text-[11px] mb-0">Địa điểm xảy ra tai nạn</label>
+                      <button type="button" onclick="SceneSurvey.getCurrentLocation('sr-accLoc')" class="text-[9px] font-black text-blue-600 bg-blue-50/60 px-2 py-0.5 rounded border border-blue-100/50 hover:bg-blue-100/50 active:scale-95 transition-all flex items-center gap-0.5">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Lấy định vị
+                      </button>
+                    </div>
+                    <div class="ar-input-wrapper">
+                      <input type="text" id="sr-accLoc" class="inp text-xs font-bold text-slate-800" placeholder="Địa điểm tai nạn">
+                      <button onclick="SceneSurvey.clearField('sr-accLoc')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Danh sách xe động -->
+                <div class="border-t border-slate-100 pt-3 space-y-2">
+                  <div class="flex justify-between items-center">
+                    <label class="lbl text-[11px] mb-0 font-extrabold text-slate-700">Danh sách phương tiện liên quan</label>
+                    <button type="button" onclick="SceneSurvey.addVehicleRow()" class="text-[9.5px] font-black text-emerald-600 bg-emerald-50/60 px-2.5 py-1 rounded-lg border border-emerald-100/50 hover:bg-emerald-100/50 active:scale-95 transition-all flex items-center gap-1 shadow-sm">
+                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Thêm xe
+                    </button>
+                  </div>
+                  <div id="sr-vehicles-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <!-- Được điền động bằng renderVehicles -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Nhóm 4: Khảo sát hiện trường -->
+              <div class="border border-slate-100 rounded-2xl p-4 bg-white shadow-[0_4px_20px_-4px_rgba(148,163,184,0.12)] space-y-3.5">
+                <div class="text-[11px] font-black text-slate-800 uppercase flex items-center gap-2 border-b border-slate-100 pb-2">
+                  <div class="w-5.5 h-5.5 rounded-md bg-blue-50 flex items-center justify-center shrink-0">
+                    <svg class="w-3.5 h-3.5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg>
+                  </div>
+                  4. Hiện trạng hiện trường tai nạn
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="lbl text-[11px] mb-1.5">Tình trạng hiện trường</label>
+                    <div class="segmented-control">
+                      <label class="segmented-item">
+                        <input type="radio" name="sr-htTinhTrang" value="Nguyên vẹn" checked>
+                        <span class="seg-green text-[11px] font-bold">Nguyên vẹn</span>
+                      </label>
+                      <label class="segmented-item">
+                        <input type="radio" name="sr-htTinhTrang" value="Không nguyên vẹn">
+                        <span class="seg-orange text-[11px] font-bold">Không nguyên vẹn</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="lbl text-[11px] mb-1.5">Nhiệt độ động cơ</label>
+                    <div class="segmented-control">
+                      <label class="segmented-item">
+                        <input type="radio" name="sr-htNhietDo" value="Nóng ấm" checked>
+                        <span class="seg-red text-[11px] font-bold">Nóng ấm</span>
+                      </label>
+                      <label class="segmented-item">
+                        <input type="radio" name="sr-htNhietDo" value="Lạnh">
+                        <span class="seg-cyan text-[11px] font-bold">Lạnh</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="space-y-1">
+                    <label class="lbl text-[11px] mb-0">Địa hình, vật liệu nền</label>
+                    <div class="ar-input-wrapper">
+                      <input type="text" id="sr-htDiaHinh" class="inp text-xs font-bold text-slate-800" value="đường trải nhựa" placeholder="Ví dụ: đường trải nhựa">
+                      <button onclick="SceneSurvey.clearField('sr-htDiaHinh')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="lbl text-[11px] mb-1.5">Tính chất nền hiện trường</label>
+                    <div class="segmented-control">
+                      <label class="segmented-item">
+                        <input type="radio" name="sr-htTinhChatNen" value="Cứng, không lún/sụt" checked>
+                        <span class="seg-indigo text-[11px] font-bold">Cứng</span>
+                      </label>
+                      <label class="segmented-item">
+                        <input type="radio" name="sr-htTinhChatNen" value="Mềm lún/Sụt">
+                        <span class="seg-orange text-[11px] font-bold">Mềm lún</span>
+                      </label>
+                      <label class="segmented-item">
+                        <input type="radio" name="sr-htTinhChatNen" value="Ngập nước">
+                        <span class="seg-blue text-[11px] font-bold">Ngập</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="border-t border-slate-100 pt-3">
+                  <label class="lbl text-[11px] mb-1.5">Điều kiện thời tiết (chọn nhiều)</label>
+                  <div class="grid grid-cols-5 gap-2">
+                    <label class="checkbox-chip">
+                      <input type="checkbox" name="sr-htThoiTiet" value="Nắng" checked>
+                      <span class="text-[11px] font-bold">Nắng</span>
+                    </label>
+                    <label class="checkbox-chip">
+                      <input type="checkbox" name="sr-htThoiTiet" value="Sáng" checked>
+                      <span class="text-[11px] font-bold">Sáng</span>
+                    </label>
+                    <label class="checkbox-chip">
+                      <input type="checkbox" name="sr-htThoiTiet" value="Râm mát">
+                      <span class="text-[11px] font-bold">Râm mát</span>
+                    </label>
+                    <label class="checkbox-chip">
+                      <input type="checkbox" name="sr-htThoiTiet" value="Mưa">
+                      <span class="text-[11px] font-bold">Mưa</span>
+                    </label>
+                    <label class="checkbox-chip">
+                      <input type="checkbox" name="sr-htThoiTiet" value="Tối">
+                      <span class="text-[11px] font-bold">Tối</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 border-t border-slate-100 pt-3">
+                  <div>
+                    <label class="lbl text-[11px] mb-1.5">Người điều khiển tại hiện trường</label>
+                    <div class="segmented-control">
+                      <label class="segmented-item">
+                        <input type="radio" name="sr-htLaiXeCoMat" value="Có mặt" checked>
+                        <span class="seg-green text-[11px] font-bold">Có mặt</span>
+                      </label>
+                      <label class="segmented-item">
+                        <input type="radio" name="sr-htLaiXeCoMat" value="Vắng mặt">
+                        <span class="seg-red text-[11px] font-bold">Vắng mặt</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div id="sr-htLaiXeLyDo-container" class="space-y-1 bg-amber-50/30 border border-amber-100 rounded-xl p-2.5">
+                    <label class="lbl text-[10px] text-amber-700 font-bold">Lý do vắng mặt / Địa điểm đến</label>
+                    <div class="relative">
+                      <input type="text" id="sr-htLaiXeLyDo" class="inp text-xs font-bold" placeholder="Nếu vắng mặt ghi lý do...">
+                      <button type="button" onclick="SceneSurvey.clearField('sr-htLaiXeLyDo')" class="absolute right-2 top-2 text-slate-400 hover:text-rose-500 transition-colors p-1 rounded-full bg-white/80 border border-slate-100" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="sr-htDauHieuLaiXe-container" class="border-t border-slate-100 pt-3">
+                  <label class="lbl text-[11px] mb-1.5">Dấu hiệu lái xe (chọn nhiều)</label>
+                  <div class="grid grid-cols-4 gap-2">
+                    <label class="checkbox-chip">
+                      <input type="checkbox" name="sr-htDauHieuLaiXe" value="Sắc mặt bình thường" checked>
+                      <span class="text-[10px] font-bold">Sắc mặt bình thường</span>
+                    </label>
+                    <label class="checkbox-chip">
+                      <input type="checkbox" name="sr-htDauHieuLaiXe" value="Hơi thở không mùi" checked>
+                      <span class="text-[10px] font-bold">Hơi thở không mùi</span>
+                    </label>
+                    <label class="checkbox-chip">
+                      <input type="checkbox" name="sr-htDauHieuLaiXe" value="Sắc mặt đỏ, tái..">
+                      <span class="text-[10px] font-bold">Sắc mặt đỏ, tái..</span>
+                    </label>
+                    <label class="checkbox-chip">
+                      <input type="checkbox" name="sr-htDauHieuLaiXe" value="Hơi thở có mùi lạ">
+                      <span class="text-[10px] font-bold">Hơi thở có mùi lạ</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="border-t border-slate-100 pt-3">
+                  <label class="lbl text-[11px] mb-1.5">Giấy tờ cung cấp tại hiện trường</label>
+                  <div class="grid grid-cols-4 gap-2">
+                    <label class="checkbox-chip">
+                      <input type="checkbox" name="sr-htGiayTo" value="Đăng kí xe" checked>
+                      <span class="text-[11px] font-bold">Đăng kí xe</span>
+                    </label>
+                    <label class="checkbox-chip">
+                      <input type="checkbox" name="sr-htGiayTo" value="Đăng kiểm (ATKT&BVMT)" checked>
+                      <span class="text-[11px] font-bold">Đăng kiểm (ATKT)</span>
+                    </label>
+                    <label class="checkbox-chip">
+                      <input type="checkbox" name="sr-htGiayTo" value="GCN/Hợp đồng Bảo hiểm" checked>
+                      <span class="text-[11px] font-bold">GCN Bảo hiểm</span>
+                    </label>
+                    <label class="checkbox-chip">
+                      <input type="checkbox" name="sr-htGiayTo" value="Chứng từ hàng hóa">
+                      <span class="text-[11px] font-bold">Chứng từ hàng hóa</span>
+                    </label>
+                  </div>
+                  
+                  <div id="sr-htGiayTo-cthh-container" class="hidden mt-2.5 space-y-1 bg-amber-50/30 border border-amber-100 rounded-xl p-2.5">
+                    <label class="lbl text-[10px] text-amber-700 font-bold">Chi tiết chứng từ hàng hóa cung cấp</label>
+                    <div class="relative">
+                      <input type="text" id="sr-htGiayTo-cthh" class="inp text-xs font-bold" placeholder="Nhập tên chứng từ (ví dụ: Hóa đơn GTGT, Phiếu xuất kho...)">
+                      <button type="button" onclick="SceneSurvey.clearField('sr-htGiayTo-cthh')" class="absolute right-2 top-2 text-slate-400 hover:text-rose-500 transition-colors p-1 rounded-full bg-white/80 border border-slate-100" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Segmented Toggle for GPLX validity -->
+                  <div class="mt-2.5 pt-2 border-t border-slate-100/50">
+                    <div class="flex items-center justify-between mb-1.5">
+                      <label class="lbl text-[11px] mb-0">Giấy phép lái xe (GPLX)</label>
+                      <span id="gplx-status-badge" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100">HỢP LỆ</span>
+                    </div>
+                    <div class="segmented-control">
+                      <label class="segmented-item">
+                        <input type="radio" name="sr-htGiayTo-gplxRadio" id="gplx-radio-valid" checked onchange="SceneSurvey.setGplxValidity(true)">
+                        <span class="seg-green text-[11px] font-bold">Hợp lệ</span>
+                      </label>
+                      <label class="segmented-item">
+                        <input type="radio" name="sr-htGiayTo-gplxRadio" id="gplx-radio-invalid" onchange="SceneSurvey.setGplxValidity(false)">
+                        <span class="seg-red text-[11px] font-bold">Không hợp lệ</span>
+                      </label>
+                    </div>
+                    
+                    <input type="checkbox" name="sr-htGiayTo" id="gplx-valid-checkbox" value="Giấy phép lái xe hợp lệ" class="hidden" checked>
+                    <input type="checkbox" name="sr-htGiayTo" id="gplx-invalid-checkbox" value="Giấy phép lái xe không hợp lệ" class="hidden">
+                    
+                    <div id="gplx-reason-container" class="hidden mt-2 space-y-1 bg-amber-50/30 border border-amber-100 rounded-xl p-2.5">
+                      <label class="lbl text-[10px] text-amber-700 font-bold">Thời gian & Nguyên nhân không hợp lệ</label>
+                      <div class="relative">
+                        <textarea id="sr-htGiayTo-gplxReason" rows="2" class="inp text-xs font-bold resize-none" placeholder="Nhập lý do không hợp lệ, hẹn thời gian cung cấp..."></textarea>
+                        <button type="button" onclick="SceneSurvey.clearField('sr-htGiayTo-gplxReason')" class="absolute right-2 top-2 text-slate-400 hover:text-rose-500 transition-colors p-1 rounded-full bg-white/80 border border-slate-100" title="Xóa">
+                          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Mô tả chi tiết hiện trường (Textareas with Mic & AI) -->
+                <div class="border-t border-slate-100 pt-3 space-y-3">
+                  <!-- Mô tả hiện trường -->
+                  <div class="space-y-1">
+                    <div class="flex justify-between items-center mb-1">
+                      <label class="lbl text-[11px] mb-0">Mô tả hiện trường, vị trí phương tiện</label>
+                      <div class="flex gap-1">
+                        <button type="button" onclick="SceneSurvey.importFromGeneral('sr-htMoTa')" class="px-2 py-0.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded text-[9.5px] font-bold border border-emerald-200">Lấy DL chung</button>
+                        <button type="button" onclick="SceneSurvey.normalizeField('sr-htMoTa')" class="px-2 py-0.5 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded text-[9.5px] font-bold border border-purple-200">AI Tinh chỉnh</button>
+                        <button type="button" id="mic-sr-mota" onclick="SpeechInput.toggle('sr-htMoTa', 'mic-sr-mota', 'st-sr-mota')" class="px-2 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded text-[9.5px] font-bold border border-blue-200">Nói</button>
+                      </div>
+                    </div>
+                    <div class="relative">
+                      <textarea id="sr-htMoTa" rows="3" class="inp text-xs font-bold resize-none pb-5" placeholder="Ghi nhận vị trí, sơ đồ hiện trường vụ tai nạn..."></textarea>
+                      <span id="st-sr-mota" class="absolute bottom-1.5 left-2.5 text-[9px] font-bold text-blue-500"></span>
+                    </div>
+                  </div>
+
+                  <!-- Dấu vết hiện trường -->
+                  <div class="space-y-1">
+                    <div class="flex justify-between items-center mb-1">
+                      <label class="lbl text-[11px] mb-0">Dấu vết tại hiện trường</label>
+                      <div class="flex gap-1">
+                        <button type="button" onclick="SceneSurvey.normalizeField('sr-htDauVet')" class="px-2 py-0.5 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded text-[9.5px] font-bold border border-purple-200">AI Tinh chỉnh</button>
+                        <button type="button" id="mic-sr-dauvet" onclick="SpeechInput.toggle('sr-htDauVet', 'mic-sr-dauvet', 'st-sr-dauvet')" class="px-2 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded text-[9.5px] font-bold border border-blue-200">Nói</button>
+                      </div>
+                    </div>
+                    <div class="relative">
+                      <textarea id="sr-htDauVet" rows="3" class="inp text-xs font-bold resize-none pb-5" placeholder="Ghi nhận vị trí, khoảng cách, chiều hướng từng dấu vết, vật chứng..."></textarea>
+                      <span id="st-sr-dauvet" class="absolute bottom-1.5 left-2.5 text-[9px] font-bold text-blue-500"></span>
+                    </div>
+                  </div>
+
+                  <!-- Mẫu vật hiện trường -->
+                  <div class="space-y-1">
+                    <div class="flex justify-between items-center mb-1">
+                      <label class="lbl text-[11px] mb-0">Mẫu vật thu được tại hiện trường</label>
+                      <div class="flex gap-1">
+                        <button type="button" onclick="SceneSurvey.normalizeField('sr-htMauVat')" class="px-2 py-0.5 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded text-[9.5px] font-bold border border-purple-200">AI Tinh chỉnh</button>
+                        <button type="button" id="mic-sr-mauvat" onclick="SpeechInput.toggle('sr-htMauVat', 'mic-sr-mauvat', 'st-sr-mauvat')" class="px-2 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded text-[9.5px] font-bold border border-blue-200">Nói</button>
+                      </div>
+                    </div>
+                    <div class="relative">
+                      <textarea id="sr-htMauVat" rows="2" class="inp text-xs font-bold resize-none pb-5" placeholder="Ví dụ: Mảnh vỡ đèn xe, cản xe rơi tại hiện trường..."></textarea>
+                      <span id="st-sr-mauvat" class="absolute bottom-1.5 left-2.5 text-[9px] font-bold text-blue-500"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Nhóm 5: Thiệt hại sơ bộ & Đề xuất -->
+              <div class="border border-slate-100 rounded-2xl p-4 bg-white shadow-[0_4px_20px_-4px_rgba(148,163,184,0.12)] space-y-4">
+                <div class="text-[11px] font-black text-slate-800 uppercase flex items-center gap-2 border-b border-slate-100 pb-2">
+                  <div class="w-5.5 h-5.5 rounded-md bg-blue-50 flex items-center justify-center shrink-0">
+                    <svg class="w-3.5 h-3.5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  </div>
+                  5. Thiệt hại sơ bộ & Đề xuất
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="lbl text-[11px] mb-1.5">Vị trí tổn thất trên xe</label>
+                    <div class="grid grid-cols-4 gap-2">
+                      <label class="checkbox-chip">
+                        <input type="checkbox" name="sr-thViTri" value="Đầu xe">
+                        <span class="text-[10px] font-bold">Đầu xe</span>
+                      </label>
+                      <label class="checkbox-chip">
+                        <input type="checkbox" name="sr-thViTri" value="Thân xe">
+                        <span class="text-[10px] font-bold">Thân xe</span>
+                      </label>
+                      <label class="checkbox-chip">
+                        <input type="checkbox" name="sr-thViTri" value="Đuôi xe">
+                        <span class="text-[10px] font-bold">Đuôi xe</span>
+                      </label>
+                      <label class="checkbox-chip">
+                        <input type="checkbox" name="sr-thViTri" value="Gầm/Nóc">
+                        <span class="text-[10px] font-bold">Gầm/Nóc</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="lbl text-[11px] mb-1.5">Đối tượng thiệt hại</label>
+                    <div class="grid grid-cols-2 gap-2">
+                      <label class="checkbox-chip">
+                        <input type="checkbox" name="sr-thTaiSan" value="Xe tham gia vật chất BH Tasco" checked>
+                        <span class="text-[10.5px] font-bold">Xe vật chất Tasco</span>
+                      </label>
+                      <label class="checkbox-chip">
+                        <input type="checkbox" name="sr-thTaiSan" value="Tài sản bên thứ ba">
+                        <span class="text-[10.5px] font-bold">Tài sản bên thứ ba</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="lbl text-[11px] mb-1.5">Đánh giá thiệt hại, ước lượng</label>
+                  <div class="segmented-control">
+                    <label class="segmented-item">
+                      <input type="radio" name="sr-thUocLuong" value="Khoảng từ 10 đến 20 triệu đồng" checked>
+                      <span class="text-[11px] font-bold">10 - 20 Triệu</span>
+                    </label>
+                    <label class="segmented-item">
+                      <input type="radio" name="sr-thUocLuong" value="Khoảng trên 20 đến 50 triệu đồng">
+                      <span class="text-[11px] font-bold">20 - 50 Triệu</span>
+                    </label>
+                    <label class="segmented-item">
+                      <input type="radio" name="sr-thUocLuong" value="Khác">
+                      <span class="text-[11px] font-bold">Khác</span>
+                    </label>
+                  </div>
+                  
+                  <div id="sr-thUocLuong-khac-container" class="hidden mt-2.5 space-y-1 bg-amber-50/30 border border-amber-100 rounded-xl p-2.5">
+                    <label class="lbl text-[10px] text-amber-700 font-bold">Số tiền ước tính thiệt hại khác</label>
+                    <div class="relative">
+                      <input type="text" id="sr-thUocLuong-khac" class="inp text-xs font-bold" placeholder="Nhập số tiền hoặc mô tả (ví dụ: Khoảng 80 triệu đồng)">
+                      <button type="button" onclick="SceneSurvey.clearField('sr-thUocLuong-khac')" class="absolute right-2 top-2 text-slate-400 hover:text-rose-500 transition-colors p-1 rounded-full bg-white/80 border border-slate-100" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="space-y-3 pt-2">
+                  <!-- Liệt kê sơ bộ -->
+                  <div class="space-y-1">
+                    <div class="flex justify-between items-center mb-1">
+                      <label class="lbl text-[11px] mb-0">Liệt kê sơ bộ vật tư, phụ tùng thiệt hại</label>
+                      <div class="flex gap-1">
+                        <button type="button" onclick="SceneSurvey.normalizeField('sr-thLietKe')" class="px-2 py-0.5 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded text-[9.5px] font-bold border border-purple-200">AI Tinh chỉnh</button>
+                        <button type="button" id="mic-sr-lietke" onclick="SpeechInput.toggle('sr-thLietKe', 'mic-sr-lietke', 'st-sr-lietke')" class="px-2 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded text-[9.5px] font-bold border border-blue-200">Nói</button>
+                      </div>
+                    </div>
+                    <div class="relative">
+                      <textarea id="sr-thLietKe" rows="2" class="inp text-xs font-bold resize-none pb-5" placeholder="Ví dụ: cản trước bên trái móp méo, capo trầy xước lồi lõm..."></textarea>
+                      <span id="st-sr-lietke" class="absolute bottom-1.5 left-2.5 text-[9px] font-bold text-blue-500"></span>
+                    </div>
+                  </div>
+
+                  <!-- Thiệt hại về người -->
+                  <div class="space-y-1">
+                    <label class="lbl text-[11px] mb-1">Thiệt hại về người</label>
+                    <div class="relative">
+                      <input type="text" id="sr-thNguoi" class="inp text-xs font-bold" value="Không có thiệt hại về người." placeholder="Ghi nhận thiệt hại về người (nếu có)...">
+                      <button onclick="SceneSurvey.clearField('sr-thNguoi')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Ghi chú / Lời khai -->
+                  <div class="space-y-1">
+                    <div class="flex justify-between items-center mb-1">
+                      <label class="lbl text-[11px] mb-0">Ghi chú (Lời khai lái xe, nhân chứng)</label>
+                      <div class="flex gap-1">
+                        <button type="button" onclick="SceneSurvey.importFromGeneral('sr-thGhiChu')" class="px-2 py-0.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded text-[9.5px] font-bold border border-emerald-200">Lấy DL chung</button>
+                        <button type="button" onclick="SceneSurvey.normalizeField('sr-thGhiChu')" class="px-2 py-0.5 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded text-[9.5px] font-bold border border-purple-200">AI Tinh chỉnh</button>
+                        <button type="button" id="mic-sr-ghichu" onclick="SpeechInput.toggle('sr-thGhiChu', 'mic-sr-ghichu', 'st-sr-ghichu')" class="px-2 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded text-[9.5px] font-bold border border-blue-200">Nói</button>
+                      </div>
+                    </div>
+                    <div class="relative">
+                      <textarea id="sr-thGhiChu" rows="2" class="inp text-xs font-bold resize-none pb-5" placeholder="Nhập ý kiến hoặc ghi chú thêm..."></textarea>
+                      <span id="st-sr-ghichu" class="absolute bottom-1.5 left-2.5 text-[9px] font-bold text-blue-500"></span>
+                    </div>
+                  </div>
+
+                  <!-- Đề xuất khác -->
+                  <div class="space-y-1">
+                    <label class="lbl text-[11px] mb-1">Đề xuất khác của Giám định viên</label>
+                    <div class="relative">
+                      <input type="text" id="sr-thDeXuat" class="inp text-xs font-bold" value="Giải quyết quyền lợi theo quy định" placeholder="Đề xuất phương án giải quyết...">
+                      <button onclick="SceneSurvey.clearField('sr-thDeXuat')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- CONTAINER 2: BIÊN BẢN TAI NẠN (MẪU A4) -->
+            <div id="panel-report-tainan" class="hidden section-body p-4 space-y-4">
               <!-- OCR Loading State -->
               <div id="ar-ocr-loading" class="hidden p-4 rounded-2xl bg-purple-50 border border-purple-100 text-center space-y-2 shadow-sm animate-pulse">
                 <div class="flex justify-center"><div class="w-6 h-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div></div>
@@ -4548,78 +5115,62 @@ textarea.inp { resize:vertical; }
                   <div class="space-y-1.5 p-3 rounded-xl border border-slate-50 bg-slate-50/20">
                     <label class="lbl text-[11px] mb-0">Đại diện 1 (Lái/Chủ xe)</label>
                     <div class="ar-input-wrapper mb-1">
-                      <input type="text" id="ar-rep1Name" class="inp text-xs font-bold text-slate-800" placeholder="Họ tên">
+                      <input type="text" id="ar-rep1Name" class="inp text-xs font-bold text-slate-800" placeholder="Họ tên Đại diện 1">
                       <button onclick="AccidentReport.clearField('ar-rep1Name')" class="ar-clear-btn" title="Xóa">
-                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                       </button>
                     </div>
                     <div class="ar-input-wrapper">
-                      <input type="text" id="ar-rep1Role" class="inp text-[10px] text-slate-500 font-semibold" placeholder="Vai trò (VD: Lái xe)">
+                      <input type="text" id="ar-rep1Role" class="inp text-xs text-slate-600" placeholder="Vai trò Đại diện 1">
                       <button onclick="AccidentReport.clearField('ar-rep1Role')" class="ar-clear-btn" title="Xóa">
-                        <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                       </button>
                     </div>
                   </div>
-                  <div class="space-y-1.5 p-3 rounded-xl border border-slate-50 bg-slate-50/20">
-                    <label class="lbl text-[11px] mb-0">Đại diện 2 (Bảo hiểm)</label>
-                    <div class="ar-input-wrapper mb-1">
-                      <input type="text" id="ar-rep2Name" class="inp text-xs font-bold text-slate-800" placeholder="Họ tên">
-                      <button onclick="AccidentReport.clearField('ar-rep2Name')" class="ar-clear-btn" title="Xóa">
-                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                      </button>
-                    </div>
-                    <div class="ar-input-wrapper">
-                      <input type="text" id="ar-rep2Role" class="inp text-[10px] text-slate-500 font-semibold" placeholder="Chức danh (VD: Giám định viên)">
-                      <button onclick="AccidentReport.clearField('ar-rep2Role')" class="ar-clear-btn" title="Xóa">
-                        <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                  <div class="space-y-1.5 p-3 rounded-xl border border-slate-50 bg-slate-50/20">
-                    <label class="lbl text-[11px] mb-0">Đại diện 3 (Bên thứ ba/Khác)</label>
-                    <div class="ar-input-wrapper mb-1">
-                      <input type="text" id="ar-rep3Name" class="inp text-xs font-bold text-slate-800" placeholder="Họ tên">
-                      <button onclick="AccidentReport.clearField('ar-rep3Name')" class="ar-clear-btn" title="Xóa">
-                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                      </button>
-                    </div>
-                    <div class="ar-input-wrapper">
-                      <input type="text" id="ar-rep3Role" class="inp text-[10px] text-slate-500 font-semibold" placeholder="Chức danh/Nhiệm vụ">
-                      <button onclick="AccidentReport.clearField('ar-rep3Role')" class="ar-clear-btn" title="Xóa">
-                        <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="space-y-1.5 p-3 rounded-xl border border-slate-50 bg-slate-50/20">
-                    <label class="lbl text-[11px] mb-0">Đại diện 4 (Khác)</label>
-                    <div class="ar-input-wrapper mb-1">
-                      <input type="text" id="ar-rep4Name" class="inp text-xs font-bold text-slate-800" placeholder="Họ tên">
-                      <button onclick="AccidentReport.clearField('ar-rep4Name')" class="ar-clear-btn" title="Xóa">
-                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                      </button>
-                    </div>
-                    <div class="ar-input-wrapper">
-                      <input type="text" id="ar-rep4Role" class="inp text-[10px] text-slate-500 font-semibold" placeholder="Chức danh/Nhiệm vụ">
-                      <button onclick="AccidentReport.clearField('ar-rep4Role')" class="ar-clear-btn" title="Xóa">
-                        <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              <!-- Nhóm 3: Thông tin vụ việc -->
-              <div class="border border-slate-100 rounded-2xl p-4 bg-white shadow-[0_4px_20px_-4px_rgba(148,163,184,0.12)] space-y-3">
-                <div class="text-[11px] font-black text-slate-800 uppercase flex items-center gap-2 border-b border-slate-100 pb-2">
-                  <div class="w-5.5 h-5.5 rounded-md bg-blue-50 flex items-center justify-center shrink-0">
-                    <i data-lucide="car" class="w-3.5 h-3.5 text-blue-600"></i>
+                  <div class="space-y-1.5 p-3 rounded-xl border border-slate-50 bg-slate-50/20">
+                    <label class="lbl text-[11px] mb-0">Đại diện 2 (GĐV Tasco)</label>
+                    <div class="ar-input-wrapper mb-1">
+                      <input type="text" id="ar-rep2Name" class="inp text-xs font-bold text-slate-800" placeholder="Họ tên Đại diện 2">
+                      <button onclick="AccidentReport.clearField('ar-rep2Name')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                    <div class="ar-input-wrapper">
+                      <input type="text" id="ar-rep2Role" class="inp text-xs text-slate-600" placeholder="Vai trò Đại diện 2">
+                      <button onclick="AccidentReport.clearField('ar-rep2Role')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
                   </div>
-                  3. Phương tiện & Vụ tai nạn
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                  <div class="space-y-1">
+
+                  <div class="space-y-1.5 p-3 rounded-xl border border-slate-50 bg-slate-50/20">
+                    <label class="lbl text-[11px] mb-0">Đại diện 3 (Bên liên quan - nếu có)</label>
+                    <div class="ar-input-wrapper mb-1">
+                      <input type="text" id="ar-rep3Name" class="inp text-xs font-bold text-slate-800" placeholder="Họ tên Đại diện 3">
+                      <button onclick="AccidentReport.clearField('ar-rep3Name')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                    <div class="ar-input-wrapper">
+                      <input type="text" id="ar-rep3Role" class="inp text-xs text-slate-600" placeholder="Vai trò Đại diện 3">
+                      <button onclick="AccidentReport.clearField('ar-rep3Role')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="space-y-1.5 p-3 rounded-xl border border-slate-50 bg-slate-50/20">
+                    <label class="lbl text-[11px] mb-0">Đại diện 4 (Bên làm chứng - nếu có)</label>
+                    <div class="ar-input-wrapper mb-1">
+                      <input type="text" id="ar-rep4Name" class="inp text-xs font-bold text-slate-800" placeholder="Họ tên Đại diện 4">
+                      <button onclick="AccidentReport.clearField('ar-rep4Name')" class="ar-clear-btn" title="Xóa">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                    <div class="ar-input-wrapper">
+                      <input type="text" id="ar-rep4Role" class="inp text-xs text-slate-600" placeholder="Vai trò Đại diện 4">
+                      <button onclick="AccidentReport.clearField('ar-rep4Role')" class="ar-clear-btn" title="Xóa">
                     <label class="lbl text-[11px] mb-0">Xe bảo hiểm (Xe 1)</label>
                     <div class="ar-input-wrapper">
                       <input type="text" id="ar-vehicle1" class="inp text-xs font-mono font-bold uppercase tracking-wider text-slate-800" placeholder="Biển số xe 1">
@@ -6206,6 +6757,42 @@ function switchModalTab(panelId, tabEl) {
     if (typeof AccidentReport !== 'undefined' && typeof AccidentReport.onTabActive === 'function') {
       AccidentReport.onTabActive();
     }
+    if (typeof SceneSurvey !== 'undefined' && typeof SceneSurvey.onTabActive === 'function') {
+      SceneSurvey.onTabActive();
+    }
+  }
+}
+
+function switchReportSubTab(type) {
+  const panelHientruong = document.getElementById('panel-report-hientruong');
+  const panelTainan = document.getElementById('panel-report-tainan');
+  const actionsHientruong = document.getElementById('actions-report-hientruong');
+  const actionsTainan = document.getElementById('actions-report-tainan');
+  const btnHientruong = document.getElementById('btn-subtab-hientruong');
+  const btnTainan = document.getElementById('btn-subtab-tainan');
+
+  if (type === 'hientruong') {
+    if (panelHientruong) panelHientruong.classList.remove('hidden');
+    if (panelTainan) panelTainan.classList.add('hidden');
+    if (actionsHientruong) actionsHientruong.classList.remove('hidden');
+    if (actionsTainan) actionsTainan.classList.add('hidden');
+    
+    if (btnHientruong) btnHientruong.className = 'px-3 py-1 rounded-md text-[11px] font-black transition-all bg-white text-slate-800 shadow-sm';
+    if (btnTainan) btnTainan.className = 'px-3 py-1 rounded-md text-[11px] font-black transition-all text-white/60 hover:text-white bg-transparent';
+    if (typeof SceneSurvey !== 'undefined' && typeof SceneSurvey.adjustTextareasHeight === 'function') {
+      SceneSurvey.adjustTextareasHeight();
+    }
+  } else {
+    if (panelHientruong) panelHientruong.classList.add('hidden');
+    if (panelTainan) panelTainan.classList.remove('hidden');
+    if (actionsHientruong) actionsHientruong.classList.add('hidden');
+    if (actionsTainan) actionsTainan.classList.remove('hidden');
+    
+    if (btnHientruong) btnHientruong.className = 'px-3 py-1 rounded-md text-[11px] font-black transition-all text-white/60 hover:text-white bg-transparent';
+    if (btnTainan) btnTainan.className = 'px-3 py-1 rounded-md text-[11px] font-black transition-all bg-white text-slate-800 shadow-sm';
+    if (typeof AccidentReport !== 'undefined' && typeof AccidentReport.adjustTextareasHeight === 'function') {
+      AccidentReport.adjustTextareasHeight();
+    }
   }
 }
 /* ═══════════════════════════════════════
@@ -6323,6 +6910,12 @@ function openRecord(id) {
   if (typeof AccidentReport !== 'undefined') {
     AccidentReport.loadFromItem(rec);
   }
+  // Tải dữ liệu Biên bản hiện trường
+  if (typeof SceneSurvey !== 'undefined') {
+    SceneSurvey.loadFromItem(rec);
+  }
+  // Reset subtab về Biên bản hiện trường
+  switchReportSubTab('hientruong');
 
   var wrap=document.getElementById('modal-wrap'),box=document.getElementById('modal-box');
   wrap.classList.remove('hidden');
@@ -6422,6 +7015,10 @@ function saveModal() {
   // Save accident report
   if (typeof AccidentReport !== 'undefined') {
     upd.accidentReport = AccidentReport.getPayload();
+  }
+  // Save scene survey report
+  if (typeof SceneSurvey !== 'undefined') {
+    upd.sceneSurveyReport = SceneSurvey.getPayload();
   }
 
   AppLoader.show('Đang lưu dữ liệu...', 'Hệ thống đang đồng bộ lên Cloud');
@@ -24669,6 +25266,1641 @@ YÊU CẦU ĐẦU RA:
 };
 window.AccidentReport = AccidentReport;
 
+// ============================================================
+// BIÊN BẢN HIỆN TRƯỜNG - DESKTOP INTEGRATION
+// ============================================================
+const SceneSurvey = {
+    addVehicleRow(bks = '', driver = '') {
+        const container = document.getElementById('sr-vehicles-container');
+        if (!container) return;
+        
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'vehicle-row flex items-start gap-2.5 p-3 rounded-2xl border border-slate-100 bg-slate-50/50 relative group/vrow';
+        rowDiv.innerHTML = `
+            <div class="grid grid-cols-2 gap-3 flex-1">
+                <div class="space-y-1">
+                    <label class="lbl text-[10px] mb-0">BKS Phương Tiện</label>
+                    <div class="ar-input-wrapper">
+                        <input type="text" class="inp text-xs font-bold font-mono text-center uppercase sr-v-bks" placeholder="Ví dụ: 48A-123.45" value="${bks}">
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <label class="lbl text-[10px] mb-0">Người điều khiển</label>
+                    <div class="ar-input-wrapper">
+                        <input type="text" class="inp text-xs font-bold sr-v-driver" placeholder="Họ tên người lái" value="${driver}">
+                    </div>
+                </div>
+            </div>
+            <button type="button" onclick="SceneSurvey.removeVehicleRow(this)" class="mt-5 p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 active:scale-90 transition-all rounded-xl border border-transparent hover:border-rose-100/50" title="Xóa xe này">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+            </button>
+        `;
+        container.appendChild(rowDiv);
+    },
+    
+    removeVehicleRow(btn) {
+        const container = document.getElementById('sr-vehicles-container');
+        if (!container) return;
+        if (container.children.length <= 1) {
+            Toast.fire({ icon: 'warning', title: 'Phải có ít nhất 1 phương tiện liên quan!' });
+            return;
+        }
+        btn.closest('.vehicle-row').remove();
+    },
+
+    renderVehicles(vehiclesList) {
+        const container = document.getElementById('sr-vehicles-container');
+        if (!container) return;
+        container.innerHTML = '';
+        
+        if (Array.isArray(vehiclesList) && vehiclesList.length > 0) {
+            vehiclesList.forEach(v => {
+                this.addVehicleRow(v.bks || '', v.driver || '');
+            });
+        } else {
+            this.addVehicleRow('', '');
+            this.addVehicleRow('', '');
+        }
+    },
+
+    importFromGeneral(targetId) {
+        if (!curId) return;
+        const item = allData.find(r => r.id === curId);
+        const domVal = document.getElementById('edit-htDienBien')?.value.trim();
+        const dbVal = item ? (item.htDienBien || item.accidentDevelopment || item.description) : '';
+        const finalVal = domVal || dbVal || '';
+
+        if (!finalVal) {
+            Toast.fire({ icon: 'warning', title: 'Không tìm thấy diễn biến nào trong Dữ liệu chung!' });
+            return;
+        }
+
+        const target = document.getElementById(targetId);
+        if (target) {
+            target.value = finalVal;
+            target.dispatchEvent(new Event('input'));
+            Toast.fire({ icon: 'success', title: 'Đã lấy diễn biến từ Dữ liệu chung!' });
+        }
+    },
+
+    setGplxValidity(isValid, isInit = false) {
+        const validRadio = document.getElementById('gplx-radio-valid');
+        const invalidRadio = document.getElementById('gplx-radio-invalid');
+        const validCheckbox = document.getElementById('gplx-valid-checkbox');
+        const invalidCheckbox = document.getElementById('gplx-invalid-checkbox');
+        const reasonContainer = document.getElementById('gplx-reason-container');
+        const badge = document.getElementById('gplx-status-badge');
+
+        if (isValid) {
+            if (validRadio) validRadio.checked = true;
+            if (validCheckbox) validCheckbox.checked = true;
+            if (invalidCheckbox) invalidCheckbox.checked = false;
+            if (reasonContainer) reasonContainer.classList.add('hidden');
+            if (badge) {
+                badge.textContent = "HỢP LỆ";
+                badge.className = "text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 transition-colors";
+            }
+            if (!isInit) {
+                const reasonInput = document.getElementById('sr-htGiayTo-gplxReason');
+                if (reasonInput) reasonInput.value = '';
+            }
+        } else {
+            if (invalidRadio) invalidRadio.checked = true;
+            if (validCheckbox) validCheckbox.checked = false;
+            if (invalidCheckbox) invalidCheckbox.checked = true;
+            if (reasonContainer) reasonContainer.classList.remove('hidden');
+            if (badge) {
+                badge.textContent = "KHÔNG HỢP LỆ";
+                badge.className = "text-[9px] font-black px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-100 transition-colors animate-pulse";
+            }
+        }
+    },
+
+    initFormExclusivity() {
+        // 1. Weather exclusivity logic (Nắng vs Mưa, Sáng vs Tối)
+        const weatherCbs = document.querySelectorAll('input[name="sr-htThoiTiet"]');
+        weatherCbs.forEach(cb => {
+            cb.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    const val = e.target.value;
+                    if (val === 'Nắng') {
+                        const mua = document.querySelector('input[name="sr-htThoiTiet"][value="Mưa"]');
+                        if (mua) {
+                            mua.checked = false;
+                            mua.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    } else if (val === 'Mưa') {
+                        const nang = document.querySelector('input[name="sr-htThoiTiet"][value="Nắng"]');
+                        if (nang) {
+                            nang.checked = false;
+                            nang.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    } else if (val === 'Sáng') {
+                        const toi = document.querySelector('input[name="sr-htThoiTiet"][value="Tối"]');
+                        if (toi) {
+                            toi.checked = false;
+                            toi.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    } else if (val === 'Tối') {
+                        const sang = document.querySelector('input[name="sr-htThoiTiet"][value="Sáng"]');
+                        if (sang) {
+                            sang.checked = false;
+                            sang.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }
+                }
+            });
+        });
+
+        // 2. Driver signs exclusivity logic (Sắc mặt bình thường vs Đỏ/tái, Hơi thở không mùi vs Mùi lạ)
+        const driverCbs = document.querySelectorAll('input[name="sr-htDauHieuLaiXe"]');
+        driverCbs.forEach(cb => {
+            cb.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    const val = e.target.value;
+                    if (val === 'Sắc mặt bình thường') {
+                        const doTai = document.querySelector('input[name="sr-htDauHieuLaiXe"][value="Sắc mặt đỏ, tái.."]');
+                        if (doTai) {
+                            doTai.checked = false;
+                            doTai.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    } else if (val === 'Sắc mặt đỏ, tái..') {
+                        const binhThuong = document.querySelector('input[name="sr-htDauHieuLaiXe"][value="Sắc mặt bình thường"]');
+                        if (binhThuong) {
+                            binhThuong.checked = false;
+                            binhThuong.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    } else if (val === 'Hơi thở không mùi') {
+                        const muiLa = document.querySelector('input[name="sr-htDauHieuLaiXe"][value="Hơi thở có mùi lạ"]');
+                        if (muiLa) {
+                            muiLa.checked = false;
+                            muiLa.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    } else if (val === 'Hơi thở có mùi lạ') {
+                        const khongMui = document.querySelector('input[name="sr-htDauHieuLaiXe"][value="Hơi thở không mùi"]');
+                        if (khongMui) {
+                            khongMui.checked = false;
+                            khongMui.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }
+                }
+            });
+        });
+
+        // 3. Cargo Documents show/hide input logic
+        const cthhCheckbox = document.querySelector('input[name="sr-htGiayTo"][value="Chứng từ hàng hóa"]');
+        const cthhContainer = document.getElementById('sr-htGiayTo-cthh-container');
+        if (cthhCheckbox && cthhContainer) {
+            const toggleContainer = () => {
+                if (cthhCheckbox.checked) {
+                    cthhContainer.classList.remove('hidden');
+                } else {
+                    cthhContainer.classList.add('hidden');
+                    const inp = document.getElementById('sr-htGiayTo-cthh');
+                    if (inp) inp.value = '';
+                }
+            };
+            cthhCheckbox.addEventListener('change', toggleContainer);
+        }
+
+        // 4. Estimated Damage "Khác" show/hide input logic
+        const uocLuongRadios = document.querySelectorAll('input[name="sr-thUocLuong"]');
+        const uocLuongKhacContainer = document.getElementById('sr-thUocLuong-khac-container');
+        if (uocLuongRadios && uocLuongKhacContainer) {
+            uocLuongRadios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    const khacRadio = document.querySelector('input[name="sr-thUocLuong"][value="Khác"]');
+                    if (khacRadio && khacRadio.checked) {
+                        uocLuongKhacContainer.classList.remove('hidden');
+                    } else {
+                        uocLuongKhacContainer.classList.add('hidden');
+                        const inp = document.getElementById('sr-thUocLuong-khac');
+                        if (inp) inp.value = '';
+                    }
+                });
+            });
+        }
+
+        // 5. Driver Presence show/hide logic
+        const coMatRadios = document.querySelectorAll('input[name="sr-htLaiXeCoMat"]');
+        coMatRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                this.syncDriverPresence();
+            });
+        });
+    },
+
+    syncDriverPresence() {
+        const coMatRadio = document.querySelector('input[name="sr-htLaiXeCoMat"][value="Có mặt"]');
+        const lyDoContainer = document.getElementById('sr-htLaiXeLyDo-container');
+        const dauHieuContainer = document.getElementById('sr-htDauHieuLaiXe-container');
+
+        if (!coMatRadio) return;
+
+        if (coMatRadio.checked) {
+            if (lyDoContainer) lyDoContainer.classList.add('hidden');
+            if (dauHieuContainer) dauHieuContainer.classList.remove('hidden');
+        } else {
+            if (lyDoContainer) lyDoContainer.classList.remove('hidden');
+            if (dauHieuContainer) dauHieuContainer.classList.add('hidden');
+        }
+    },
+
+    loadFromItem(item) {
+        if (!item) return;
+        const ss = item.sceneSurveyReport || {};
+
+        // Prefill values
+        document.getElementById('sr-bbTime').value = ss.bbTime || moment().format('HH:mm DD/MM/YYYY');
+        document.getElementById('sr-bbLoc').value = ss.bbLoc || item.location || '';
+        document.getElementById('sr-rep1Name').value = ss.rep1Name || (typeof Auth !== 'undefined' ? Auth.getCurrentUser()?.name : '') || '';
+        document.getElementById('sr-rep1Phone').value = ss.rep1Phone || '0917828538';
+        document.getElementById('sr-rep2Name').value = ss.rep2Name || item.driverName || item.chuXe || item.customer || '';
+        document.getElementById('sr-rep2Phone').value = ss.rep2Phone || item.driverPhone || item.phone || '';
+        document.getElementById('sr-rep3Name').value = ss.rep3Name || '';
+        document.getElementById('sr-rep3Role').value = ss.rep3Role || '';
+
+        document.getElementById('sr-accTime').value = ss.accTime || item.accidentDate || '';
+        document.getElementById('sr-accLoc').value = ss.accLoc || item.location || '';
+
+        // Handle dynamic vehicles loading
+        let vehicles = ss.vehicles || [];
+        if (vehicles.length === 0) {
+            const v1_bks = ss.vehicle1 || item.bsx || '';
+            const v1_driver = ss.driverName || item.driverName || item.chuXe || item.customer || '';
+            const v2_bks = ss.vehicle2 || '';
+            const v2_driver = ss.driver2 || '';
+            
+            if (v1_bks || v1_driver) {
+                vehicles.push({ bks: v1_bks, driver: v1_driver });
+            }
+            if (v2_bks || v2_driver) {
+                vehicles.push({ bks: v2_bks, driver: v2_driver });
+            }
+        }
+        this.renderVehicles(vehicles);
+
+        // Checkboxes & Radios logic:
+        const setRadioValue = (name, val) => {
+            if (!val) return;
+            const el = document.querySelector(`input[name="${name}"][value="${val}"]`);
+            if (el) el.checked = true;
+        };
+        setRadioValue('sr-htTinhTrang', ss.htTinhTrang || 'Nguyên vẹn');
+        setRadioValue('sr-htNhietDo', ss.htNhietDo || 'Nóng ấm');
+        document.getElementById('sr-htDiaHinh').value = ss.htDiaHinh || 'đường trải nhựa';
+        setRadioValue('sr-htTinhChatNen', ss.htTinhChatNen || 'Cứng, không lún/sụt');
+        setRadioValue('sr-htLaiXeCoMat', ss.htLaiXeCoMat || 'Có mặt');
+        document.getElementById('sr-htLaiXeLyDo').value = ss.htLaiXeLyDo || '';
+        this.syncDriverPresence();
+
+        // Prefill and Sync Estimated Damage "Khác" field
+        const uocLuongInput = document.getElementById('sr-thUocLuong-khac');
+        const uocLuongContainer = document.getElementById('sr-thUocLuong-khac-container');
+        const uocLuongRadioKhac = document.querySelector('input[name="sr-thUocLuong"][value="Khác"]');
+        
+        const rawUocLuong = ss.thUocLuong || 'Khoảng từ 10 đến 20 triệu đồng';
+        if (rawUocLuong !== 'Khoảng từ 10 đến 20 triệu đồng' && rawUocLuong !== 'Khoảng trên 20 đến 50 triệu đồng') {
+            if (uocLuongRadioKhac) uocLuongRadioKhac.checked = true;
+            if (uocLuongInput) uocLuongInput.value = rawUocLuong;
+            if (uocLuongContainer) uocLuongContainer.classList.remove('hidden');
+        } else {
+            setRadioValue('sr-thUocLuong', rawUocLuong);
+            if (uocLuongInput) uocLuongInput.value = '';
+            if (uocLuongContainer) uocLuongContainer.classList.add('hidden');
+        }
+
+        const setCheckboxValues = (name, str) => {
+            const vals = str ? str.split(',').map(s => s.trim()) : [];
+            document.querySelectorAll(`input[name="${name}"]`).forEach(el => {
+                el.checked = vals.includes(el.value);
+            });
+        };
+        setCheckboxValues('sr-htThoiTiet', ss.htThoiTiet || 'Nắng, Sáng');
+        setCheckboxValues('sr-htDauHieuLaiXe', ss.htDauHieuLaiXe || 'Sắc mặt bình thường, Hơi thở không mùi');
+        setCheckboxValues('sr-htGiayTo', ss.htGiayTo || 'Đăng kí xe, Đăng kiểm (ATKT&BVMT), GCN/Hợp đồng Bảo hiểm, Giấy phép lái xe hợp lệ');
+        
+        // Prefill and Sync GPLX validity buttons and reason field
+        const isGplxValid = (ss.htGiayTo || 'Giấy phép lái xe hợp lệ').includes('Giấy phép lái xe hợp lệ');
+        this.setGplxValidity(isGplxValid, true);
+        const gplxReasonInput = document.getElementById('sr-htGiayTo-gplxReason');
+        if (gplxReasonInput) {
+            gplxReasonInput.value = ss.htGiayToGplxReason || '';
+        }
+        
+        setCheckboxValues('sr-thViTri', ss.thViTri || '');
+        setCheckboxValues('sr-thTaiSan', ss.thTaiSan || 'Xe tham gia vật chất BH Tasco');
+
+        // Prefill and Sync Cargo Documents detailed input field
+        const cthhInput = document.getElementById('sr-htGiayTo-cthh');
+        const cthhContainer = document.getElementById('sr-htGiayTo-cthh-container');
+        const cthhCheckbox = document.querySelector('input[name="sr-htGiayTo"][value="Chứng từ hàng hóa"]');
+        if (cthhInput && cthhContainer && cthhCheckbox) {
+            cthhInput.value = ss.htGiayToCthh || '';
+            if (cthhCheckbox.checked) {
+                cthhContainer.classList.remove('hidden');
+            } else {
+                cthhContainer.classList.add('hidden');
+            }
+        }
+
+        // Textareas
+        document.getElementById('sr-htMoTa').value = ss.htMoTa || 'Theo sơ đồ hiện trường đính kèm theo hồ sơ';
+        
+        // Dấu vết mặc định
+        let defaultDauVet = '';
+        if (item.damageItems && item.damageItems.length > 0) {
+            defaultDauVet = 'Tại hiện trường ghi nhận: ' + item.damageItems.map(d => d.chiTiet).join(', ');
+        }
+        document.getElementById('sr-htDauVet').value = ss.htDauVet || defaultDauVet || '';
+        document.getElementById('sr-htMauVat').value = ss.htMauVat || 'Tại hiện trường chỉ ghi nhận được các dấu vết va chạm để lại trên các bộ phận của xe, phụ tùng bị hư hỏng còn dính lại trên xe không rơi ra.';
+        document.getElementById('sr-thLietKe').value = ss.thLietKe || '';
+        document.getElementById('sr-thNguoi').value = ss.thNguoi || 'Không có thiệt hại về người.';
+        document.getElementById('sr-thGhiChu').value = ss.thGhiChu || '';
+        document.getElementById('sr-thDeXuat').value = ss.thDeXuat || 'Giải quyết quyền lợi theo quy định';
+
+        this.initAutoGrowTextareas();
+        this.adjustTextareasHeight();
+    },
+
+    onTabActive() {
+        this.initAutoGrowTextareas();
+        this.adjustTextareasHeight();
+    },
+
+    clearField(fieldId) {
+        const el = document.getElementById(fieldId);
+        if (el) {
+            el.value = '';
+            el.dispatchEvent(new Event('input'));
+            el.focus();
+        }
+    },
+
+    initAutoGrowTextareas() {
+        const textareas = [
+            'sr-htMoTa',
+            'sr-htDauVet',
+            'sr-htMauVat',
+            'sr-thLietKe',
+            'sr-thNguoi',
+            'sr-thGhiChu',
+            'sr-thDeXuat'
+        ];
+        textareas.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && !el.dataset.autogrowInitialized) {
+                el.dataset.autogrowInitialized = 'true';
+                el.style.overflowY = 'hidden';
+                el.style.boxSizing = 'border-box';
+                
+                const adjustHeight = () => {
+                    el.style.height = 'auto';
+                    el.style.height = el.scrollHeight + 'px';
+                };
+                el.addEventListener('input', adjustHeight);
+                el.adjustHeight = adjustHeight;
+            }
+        });
+    },
+
+    adjustTextareasHeight() {
+        const textareas = [
+            'sr-htMoTa',
+            'sr-htDauVet',
+            'sr-htMauVat',
+            'sr-thLietKe',
+            'sr-thNguoi',
+            'sr-thGhiChu',
+            'sr-thDeXuat'
+        ];
+        textareas.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.adjustHeight) {
+                el.adjustHeight();
+            }
+        });
+    },
+
+    async getCurrentLocation(targetId) {
+        const input = document.getElementById(targetId);
+        if (!input) return;
+        const originalVal = input.value;
+        input.value = "⏳ Đang xác định vị trí...";
+        try {
+            const address = await LocationHelper.get(true);
+            if (address && !address.startsWith('Lỗi')) {
+                input.value = address;
+                Toast.fire({ icon: 'success', title: 'Đã định vị thành công!' });
+            } else {
+                throw new Error(address);
+            }
+        } catch (e) {
+            input.value = originalVal;
+            Toast.fire({ icon: 'error', title: 'Không lấy được GPS. Hãy bật định vị thiết bị và cấp quyền.' });
+        }
+    },
+
+    getPayload() {
+        const getCheckboxValues = (name) => {
+            return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(el => el.value).join(', ');
+        };
+
+        const vehicles = [];
+        const vehicleRows = document.querySelectorAll('#sr-vehicles-container .vehicle-row');
+        vehicleRows.forEach(row => {
+            const bks = row.querySelector('.sr-v-bks')?.value.trim() || '';
+            const driver = row.querySelector('.sr-v-driver')?.value.trim() || '';
+            if (bks || driver) {
+                vehicles.push({ bks, driver });
+            }
+        });
+
+        const rec = allData.find(r => r.id === curId) || {};
+        const ss = rec.sceneSurveyReport || {};
+
+        return {
+            bbTime: document.getElementById('sr-bbTime').value.trim(),
+            bbLoc: document.getElementById('sr-bbLoc').value.trim(),
+            rep1Name: document.getElementById('sr-rep1Name').value.trim(),
+            rep1Phone: document.getElementById('sr-rep1Phone').value.trim(),
+            rep2Name: document.getElementById('sr-rep2Name').value.trim(),
+            rep2Phone: document.getElementById('sr-rep2Phone').value.trim(),
+            rep3Name: document.getElementById('sr-rep3Name').value.trim(),
+            rep3Role: document.getElementById('sr-rep3Role').value.trim(),
+
+            accTime: document.getElementById('sr-accTime').value.trim(),
+            accLoc: document.getElementById('sr-accLoc').value.trim(),
+            
+            driverName: vehicles[0] ? vehicles[0].driver : '',
+            vehicle1: vehicles[0] ? vehicles[0].bks : '',
+            vehicle2: vehicles[1] ? vehicles[1].bks : '',
+            driver2: vehicles[1] ? vehicles[1].driver : '',
+            vehicles: vehicles,
+
+            htTinhTrang: document.querySelector('input[name="sr-htTinhTrang"]:checked')?.value || '',
+            htNhietDo: document.querySelector('input[name="sr-htNhietDo"]:checked')?.value || '',
+            htDiaHinh: document.getElementById('sr-htDiaHinh').value.trim(),
+            htTinhChatNen: document.querySelector('input[name="sr-htTinhChatNen"]:checked')?.value || '',
+            htThoiTiet: getCheckboxValues('sr-htThoiTiet'),
+            htLaiXeCoMat: document.querySelector('input[name="sr-htLaiXeCoMat"]:checked')?.value || '',
+            htLaiXeLyDo: document.getElementById('sr-htLaiXeLyDo').value.trim(),
+            htDauHieuLaiXe: getCheckboxValues('sr-htDauHieuLaiXe'),
+            htGiayTo: getCheckboxValues('sr-htGiayTo'),
+            htGiayToCthh: document.getElementById('sr-htGiayTo-cthh')?.value.trim() || '',
+            htGiayToGplxReason: document.getElementById('sr-htGiayTo-gplxReason')?.value.trim() || '',
+
+            htMoTa: document.getElementById('sr-htMoTa').value.trim(),
+            htDauVet: document.getElementById('sr-htDauVet').value.trim(),
+            htMauVat: document.getElementById('sr-htMauVat').value.trim(),
+
+            thViTri: getCheckboxValues('sr-thViTri'),
+            thTaiSan: getCheckboxValues('sr-thTaiSan'),
+            thUocLuong: (() => {
+                const baseVal = document.querySelector('input[name="sr-thUocLuong"]:checked')?.value || '';
+                if (baseVal === 'Khác') {
+                    return document.getElementById('sr-thUocLuong-khac')?.value.trim() || 'Khác';
+                }
+                return baseVal;
+            })(),
+            thLietKe: document.getElementById('sr-thLietKe').value.trim(),
+            thNguoi: document.getElementById('sr-thNguoi').value.trim(),
+            thGhiChu: document.getElementById('sr-thGhiChu').value.trim(),
+            thDeXuat: document.getElementById('sr-thDeXuat').value.trim(),
+            
+            sigDriver: ss.sigDriver || '',
+            sigAssessor: ss.sigAssessor || '',
+            sigThirdParty: ss.sigThirdParty || ''
+        };
+    },
+
+    startVoiceInput() {
+        let recognition = null;
+        let isListening = false;
+        
+        Swal.fire({
+            title: '<span class="text-sm font-black text-slate-800 uppercase tracking-wider block mb-1">AI Trích xuất Hiện trường</span>',
+            html: `
+                <div class="space-y-3 text-left">
+                    <p class="text-[11px] text-slate-500 font-semibold leading-relaxed">Nhập hoặc nói đoạn hội thoại hiện trường. Trợ lý AI sẽ tự động điền các trường thông tin trong Biên bản.</p>
+                    <div class="relative">
+                        <textarea id="ai-voice-input-text" class="w-full p-3 border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none resize-none" rows="5" placeholder="Ví dụ: Giám định viên Nguyễn Văn A lập biên bản lúc 12:00 hôm nay 29/03/2026 tại ngã tư Trần Hưng Đạo, Buôn Ma Thuột. Lái xe Nguyễn Văn B điều khiển xe 48A-123.45 va chạm với xe 47C-678.90..."></textarea>
+                        <span id="ai-voice-input-status" class="absolute bottom-2 left-3 text-[10px] font-bold text-blue-500"></span>
+                    </div>
+                    <div class="flex gap-2 justify-end">
+                        <button type="button" id="btn-ai-voice-record" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-[10.5px] font-black border border-blue-100 flex items-center gap-1 active:scale-95 transition-all">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg> Bắt đầu nói
+                        </button>
+                    </div>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Phân tích & Trích xuất',
+            cancelButtonText: 'Hủy bỏ',
+            customClass: {
+                popup: 'custom-rounded bg-white shadow-2xl border border-slate-100',
+                confirmButton: 'px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-xl font-black text-xs transition-all shadow-md cursor-pointer mr-2',
+                cancelButton: 'px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs transition-all border border-slate-200 cursor-pointer'
+            },
+            buttonsStyling: false,
+            didOpen: () => {
+                const recordBtn = document.getElementById('btn-ai-voice-record');
+                const textarea = document.getElementById('ai-voice-input-text');
+                const statusEl = document.getElementById('ai-voice-input-status');
+                
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) {
+                    recordBtn.style.display = 'none';
+                    return;
+                }
+                
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'vi-VN';
+                
+                recognition.onstart = () => {
+                    isListening = true;
+                    recordBtn.innerHTML = `<svg class="w-3.5 h-3.5 animate-pulse" viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="12" r="10"/></svg> Dừng nghe`;
+                    recordBtn.className = 'px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-[10.5px] font-black border border-red-200 flex items-center gap-1 transition-all';
+                    statusEl.textContent = '🎙️ Đang lắng nghe...';
+                };
+                
+                recognition.onend = () => {
+                    isListening = false;
+                    recordBtn.innerHTML = `<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg> Bắt đầu nói`;
+                    recordBtn.className = 'px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-[10.5px] font-black border border-blue-100 flex items-center gap-1 active:scale-95 transition-all';
+                    statusEl.textContent = '';
+                };
+                
+                recognition.onerror = (e) => {
+                    console.error(e);
+                    statusEl.textContent = '';
+                };
+                
+                recognition.onresult = (event) => {
+                    let finalTranscript = '';
+                    let interimTranscript = '';
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            finalTranscript += event.results[i][0].transcript;
+                        } else {
+                            interimTranscript += event.results[i][0].transcript;
+                        }
+                    }
+                    if (finalTranscript) {
+                        textarea.value = (textarea.value ? textarea.value + ' ' : '') + finalTranscript.trim();
+                        textarea.dispatchEvent(new Event('input'));
+                    }
+                    statusEl.textContent = interimTranscript ? '🎙️ Đang nghe: ' + interimTranscript.trim() : '🎙️ Đang nghe...';
+                };
+                
+                recordBtn.addEventListener('click', () => {
+                    if (isListening) {
+                        recognition.stop();
+                    } else {
+                        recognition.start();
+                    }
+                });
+            },
+            willClose: () => {
+                if (recognition && isListening) {
+                    recognition.stop();
+                }
+            }
+        }).then((res) => {
+            if (res.isConfirmed) {
+                const val = document.getElementById('ai-voice-input-text')?.value.trim();
+                if (val) {
+                    this.processVoiceText(val);
+                } else {
+                    Toast.fire({ icon: 'warning', title: 'Vui lòng nhập hoặc nói nội dung cần trích xuất!' });
+                }
+            }
+        });
+    },
+
+    async processVoiceText(rawSpeechText) {
+        Swal.fire({
+            title: 'AI đang trích xuất dữ liệu...',
+            html: '<div class="space-y-3 mt-2"><div class="flex justify-center"><div class="animate-spin rounded-full h-8 w-8 border-4 border-indigo-500 border-t-transparent"></div></div><p class="text-xs text-slate-500">Đang phân tích lời thoại và tự động điền các trường...</p></div>',
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            customClass: { popup: 'custom-rounded' }
+        });
+
+        const PROMPT = `Bạn là chuyên gia giám định bảo hiểm xe cơ giới cao cấp của Tasco.
+Hãy phân tích đoạn hội thoại/văn bản mô tả hiện trường tai nạn dưới đây và trích xuất toàn bộ thông tin có thể đọc được vào một đối tượng JSON.
+Nếu thông tin nào không được đề cập, hãy trả về giá trị rỗng hoặc để trống.
+
+Cú pháp các thuộc tính JSON cần trả về chính xác như sau:
+{
+  "bbTime": "Thời gian lập biên bản (ví dụ: '12:00 29/03/2026' hoặc để trống nếu không có)",
+  "bbLoc": "Địa điểm lập biên bản",
+  "rep1Name": "Họ tên Giám định viên bảo hiểm Tasco",
+  "rep1Phone": "Số điện thoại GĐV",
+  "rep2Name": "Họ tên Lái xe / Chủ xe",
+  "rep2Phone": "Số điện thoại Lái xe",
+  "rep3Name": "Họ tên Đại diện bên liên quan hoặc người chứng kiến",
+  "rep3Role": "Vai trò Đại diện bên liên quan",
+  "accTime": "Thời gian xảy ra tai nạn (ví dụ: '09:25 29/03/2026')",
+  "accLoc": "Địa điểm xảy ra tai nạn",
+  "vehicles": [
+    {
+      "bks": "Biển kiểm soát xe (ví dụ: '48A-262.31')",
+      "driver": "Họ tên người điều khiển phương tiện (để trống nếu không có/không biết)"
+    }
+  ],
+  "htTinhTrang": "Tình trạng hiện trường (trả về đúng: 'Nguyên vẹn' hoặc 'Không nguyên vẹn')",
+  "htNhietDo": "Nhiệt độ động cơ (trả về đúng: 'Nóng ấm' hoặc 'Lạnh')",
+  "htDiaHinh": "Địa hình, vật liệu nền (ví dụ: 'đường trải nhựa')",
+  "htTinhChatNen": "Tính chất nền (trả về đúng: 'Cứng, không lún/sụt', 'Mềm lún/Sụt' hoặc 'Ngập nước')",
+  "htThoiTiet": "Các điều kiện thời tiết (trả về đúng: 'Nắng, Sáng, Mưa, Râm mát, Tối' - ví dụ: 'Nắng, Sáng')",
+  "htLaiXeCoMat": "Người điều khiển có mặt tại hiện trường (trả về đúng: 'Có mặt' hoặc 'Vắng mặt')",
+  "htLaiXeLyDo": "Lý do vắng mặt / Địa điểm đến (nếu có)",
+  "htDauHieuLaiXe": "Các dấu hiệu lái xe (ví dụ: 'Sắc mặt bình thường, Hơi thở không mùi')",
+  "htGiayTo": "Các giấy tờ cung cấp (ví dụ: 'Đăng kí xe, Đăng kiểm (ATKT&BVMT), GCN/Hợp đồng Bảo hiểm, Giấy phép lái xe hợp lệ')",
+  "htMoTa": "Nội dung mô tả hiện trường, vị trí phương tiện",
+  "htDauVet": "Nội dung dấu vết tại hiện trường",
+  "htMauVat": "Nội dung mẫu vật thu được tại hiện trường",
+  "thViTri": "Vị trí tổn thất trên xe (ví dụ: 'Đầu xe, Thân xe, Đuôi xe, Gầm/Nóc')",
+  "thTaiSan": "Đối tượng thiệt hại (ví dụ: 'Xe tham gia vật chất BH Tasco, Tài sản bên thứ ba')",
+  "thUocLuong": "Ước lượng thiệt hại (trả về đúng: 'Khoảng từ 10 đến 20 triệu đồng', 'Khoảng trên 20 đến 50 triệu đồng' hoặc 'Khác')",
+  "thLietKe": "Liệt kê sơ bộ vật tư, phụ tùng thiệt hại",
+  "thNguoi": "Thiệt hại về người (ví dụ: 'Không có thiệt hại về người.')",
+  "thGhiChu": "Ghi chú (Lời khai lái xe, nhân chứng)",
+  "thDeXuat": "Đề xuất khác"
+}
+
+VĂN BẢN MÔ TẢ TAI NẠN:
+"${rawSpeechText}"
+
+Lưu ý: Chỉ trả về JSON thô (raw JSON text), không đặt trong thẻ code block tam giác ngược (markdown), không giải thích gì thêm.`;
+
+        try {
+            const MODELS = ['gemini-2.5-flash-lite', 'gemini-2.0-flash', GEM_MODEL];
+            const maxRetries = GEM_KEYS.length * MODELS.length;
+            let lastError = null;
+            let text = '';
+            
+            for (let i = 0; i < maxRetries; i++) {
+                const key = nextGemKey();
+                const model = MODELS[Math.floor(i / GEM_KEYS.length) % MODELS.length];
+                try {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: PROMPT }] }],
+                            generationConfig: { temperature: 0.1 }
+                        })
+                    });
+
+                    const data = await res.json();
+                    if (res.ok && !data.error) {
+                        text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+                        lastError = null;
+                        break;
+                    }
+                    lastError = data?.error?.message || 'Lỗi không xác định';
+                } catch (err) {
+                    lastError = err.message;
+                }
+                if (i < maxRetries - 1) {
+                    await new Promise(resolve => setTimeout(resolve, Math.min(250 * Math.pow(2, i), 2000)));
+                }
+            }
+
+            if (lastError) throw new Error(lastError);
+            
+            let cleanJson = text;
+            if (cleanJson.startsWith('```')) {
+                cleanJson = cleanJson.replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '').trim();
+            }
+
+            const result = JSON.parse(cleanJson);
+
+            // Auto fill fields
+            if (result.bbTime) document.getElementById('sr-bbTime').value = result.bbTime;
+            if (result.bbLoc) document.getElementById('sr-bbLoc').value = result.bbLoc;
+            if (result.rep1Name) document.getElementById('sr-rep1Name').value = result.rep1Name;
+            if (result.rep1Phone) document.getElementById('sr-rep1Phone').value = result.rep1Phone;
+            if (result.rep2Name) document.getElementById('sr-rep2Name').value = result.rep2Name;
+            if (result.rep2Phone) document.getElementById('sr-rep2Phone').value = result.rep2Phone;
+            if (result.rep3Name) document.getElementById('sr-rep3Name').value = result.rep3Name;
+            if (result.rep3Role) document.getElementById('sr-rep3Role').value = result.rep3Role;
+            if (result.accTime) document.getElementById('sr-accTime').value = result.accTime;
+            if (result.accLoc) document.getElementById('sr-accLoc').value = result.accLoc;
+            
+            // Map vehicles list
+            let ocrVehicles = [];
+            if (result.vehicles && Array.isArray(result.vehicles)) {
+                ocrVehicles = result.vehicles;
+            } else {
+                const v1_bks = result.vehicle1 || '';
+                const v1_driver = result.driverName || '';
+                const v2_bks = result.vehicle2 || '';
+                const v2_driver = result.driver2 || '';
+                
+                if (v1_bks || v1_driver) {
+                    ocrVehicles.push({ bks: v1_bks, driver: v1_driver });
+                }
+                if (v2_bks || v2_driver) {
+                    ocrVehicles.push({ bks: v2_bks, driver: v2_driver });
+                }
+            }
+            if (ocrVehicles.length > 0) {
+                this.renderVehicles(ocrVehicles);
+            }
+
+            if (result.htDiaHinh) document.getElementById('sr-htDiaHinh').value = result.htDiaHinh;
+            if (result.htLaiXeLyDo) document.getElementById('sr-htLaiXeLyDo').value = result.htLaiXeLyDo;
+            if (result.htMoTa) document.getElementById('sr-htMoTa').value = result.htMoTa;
+            if (result.htDauVet) document.getElementById('sr-htDauVet').value = result.htDauVet;
+            if (result.htMauVat) document.getElementById('sr-htMauVat').value = result.htMauVat;
+            if (result.thLietKe) document.getElementById('sr-thLietKe').value = result.thLietKe;
+            if (result.thNguoi) document.getElementById('sr-thNguoi').value = result.thNguoi;
+            if (result.thGhiChu) document.getElementById('sr-thGhiChu').value = result.thGhiChu;
+            if (result.thDeXuat) document.getElementById('sr-thDeXuat').value = result.thDeXuat;
+
+            // Checkboxes & Radios logic:
+            const setRadioValue = (name, val) => {
+                if (!val) return;
+                const el = document.querySelector(`input[name="${name}"][value="${val}"]`);
+                if (el) el.checked = true;
+            };
+            setRadioValue('sr-htTinhTrang', result.htTinhTrang);
+            setRadioValue('sr-htNhietDo', result.htNhietDo);
+            setRadioValue('sr-htTinhChatNen', result.htTinhChatNen);
+            setRadioValue('sr-htLaiXeCoMat', result.htLaiXeCoMat);
+            setRadioValue('sr-thUocLuong', result.thUocLuong);
+
+            const setCheckboxValues = (name, str) => {
+                const vals = str ? str.split(',').map(s => s.trim()) : [];
+                document.querySelectorAll(`input[name="${name}"]`).forEach(el => {
+                    el.checked = vals.includes(el.value);
+                });
+            };
+            setCheckboxValues('sr-htThoiTiet', result.htThoiTiet);
+            setCheckboxValues('sr-htDauHieuLaiXe', result.htDauHieuLaiXe);
+            setCheckboxValues('sr-htGiayTo', result.htGiayTo);
+            setCheckboxValues('sr-thViTri', result.thViTri);
+            setCheckboxValues('sr-thTaiSan', result.thTaiSan);
+
+            // Sync UI helper states
+            this.syncDriverPresence();
+            
+            // Prefill and Sync Estimated Damage "Khác" field
+            const uocLuongInput = document.getElementById('sr-thUocLuong-khac');
+            const uocLuongContainer = document.getElementById('sr-thUocLuong-khac-container');
+            const uocLuongRadioKhac = document.querySelector('input[name="sr-thUocLuong"][value="Khác"]');
+            
+            if (result.thUocLuong && result.thUocLuong !== 'Khoảng từ 10 đến 20 triệu đồng' && result.thUocLuong !== 'Khoảng trên 20 đến 50 triệu đồng') {
+                if (uocLuongRadioKhac) uocLuongRadioKhac.checked = true;
+                if (uocLuongInput) uocLuongInput.value = result.thUocLuong;
+                if (uocLuongContainer) uocLuongContainer.classList.remove('hidden');
+            }
+
+            // Sync GPLX validity buttons and reason field
+            const isGplxValid = (result.htGiayTo || 'Giấy phép lái xe hợp lệ').includes('Giấy phép lái xe hợp lệ');
+            this.setGplxValidity(isGplxValid, false);
+            if (result.htGiayToGplxReason) {
+                document.getElementById('sr-htGiayTo-gplxReason').value = result.htGiayToGplxReason;
+            }
+
+            // Sync Cargo Documents detailed input field
+            if (result.htGiayToCthh) {
+                document.getElementById('sr-htGiayTo-cthh').value = result.htGiayToCthh;
+            }
+            const cthhCheckbox = document.querySelector('input[name="sr-htGiayTo"][value="Chứng từ hàng hóa"]');
+            const cthhContainer = document.getElementById('sr-htGiayTo-cthh-container');
+            if (cthhCheckbox && cthhContainer) {
+                if (cthhCheckbox.checked) {
+                    cthhContainer.classList.remove('hidden');
+                } else {
+                    cthhContainer.classList.add('hidden');
+                }
+            }
+
+            // Build a beautiful summary HTML
+            let summaryHtml = `
+                <div class="text-left space-y-4 max-h-[50vh] overflow-y-auto pr-1 text-slate-700 text-xs custom-scrollbar">
+                    <!-- Top Banner Card -->
+                    <div class="relative overflow-hidden rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-transparent p-4 shadow-sm">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl"></div>
+                        <div class="flex items-start gap-3 relative z-10">
+                            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-200">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            </div>
+                            <div class="space-y-0.5">
+                                <h4 class="font-black text-emerald-950 text-sm tracking-wide">Trích xuất thông minh thành công</h4>
+                                <p class="text-[10px] text-emerald-700/80 leading-relaxed font-semibold">Trợ lý AI đã xử lý hội thoại hiện trường, chuẩn hóa dữ liệu và tự động điền các trường bên dưới.</p>
+                            </div>
+                        </div>
+                    </div>
+            `;
+
+            let sections = [];
+
+            // Section 1: Thông tin chung
+            let generalInfo = [];
+            if (result.bbTime) {
+                generalInfo.push(`
+                    <div class="flex flex-col gap-0.5 p-2.5 bg-slate-50 rounded-xl border border-slate-100/50">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Thời gian lập BB</span>
+                        <span class="text-xs font-bold text-slate-700">${result.bbTime}</span>
+                    </div>
+                `);
+            }
+            if (result.accTime) {
+                generalInfo.push(`
+                    <div class="flex flex-col gap-0.5 p-2.5 bg-slate-50 rounded-xl border border-slate-100/50">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Thời gian xảy ra</span>
+                        <span class="text-xs font-bold text-slate-700">${result.accTime}</span>
+                    </div>
+                `);
+            }
+            if (result.bbLoc) {
+                generalInfo.push(`
+                    <div class="col-span-2 flex flex-col gap-0.5 p-2.5 bg-slate-50 rounded-xl border border-slate-100/50">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Địa điểm lập BB</span>
+                        <span class="text-xs font-bold text-slate-700 leading-tight">${result.bbLoc}</span>
+                    </div>
+                `);
+            }
+            if (result.accLoc) {
+                generalInfo.push(`
+                    <div class="col-span-2 flex flex-col gap-0.5 p-2.5 bg-slate-50 rounded-xl border border-slate-100/50">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Địa điểm xảy ra vụ việc</span>
+                        <span class="text-xs font-bold text-slate-700 leading-tight">${result.accLoc}</span>
+                    </div>
+                `);
+            }
+
+            if (generalInfo.length > 0) {
+                sections.push(`
+                    <div class="p-3.5 rounded-2xl bg-white border border-slate-100 shadow-[0_4px_20px_-6px_rgba(148,163,184,0.08)]">
+                        <div class="flex items-center gap-2 mb-2.5">
+                            <div class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            </div>
+                            <span class="font-extrabold text-xs text-slate-800">Thông Tin Hồ Sơ & Vụ Việc</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">${generalInfo.join('')}</div>
+                    </div>
+                `);
+            }
+
+            // Section 2: Nhân sự tham gia
+            let participants = [];
+            if (result.rep1Name) {
+                participants.push(`
+                    <div class="flex items-center gap-2.5 p-2 bg-slate-50 rounded-xl border border-slate-100/50">
+                        <div class="w-7 h-7 rounded-lg bg-blue-100/50 text-blue-600 flex items-center justify-center font-extrabold text-[10px] shrink-0">GĐV</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-xs font-bold text-slate-800 truncate">${result.rep1Name}</div>
+                            <div class="text-[9px] text-slate-400 font-semibold truncate">${result.rep1Phone || 'Giám định viên Tasco'}</div>
+                        </div>
+                    </div>
+                `);
+            }
+            if (result.rep2Name) {
+                participants.push(`
+                    <div class="flex items-center gap-2.5 p-2 bg-slate-50 rounded-xl border border-slate-100/50">
+                        <div class="w-7 h-7 rounded-lg bg-purple-100/50 text-purple-600 flex items-center justify-center font-extrabold text-[10px] shrink-0">LX</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-xs font-bold text-slate-800 truncate">${result.rep2Name}</div>
+                            <div class="text-[9px] text-slate-400 font-semibold truncate">${result.rep2Phone || 'Lái xe / Chủ xe'}</div>
+                        </div>
+                    </div>
+                `);
+            }
+            if (result.rep3Name) {
+                participants.push(`
+                    <div class="flex items-center gap-2.5 p-2 bg-slate-50 rounded-xl border border-slate-100/50">
+                        <div class="w-7 h-7 rounded-lg bg-amber-100/50 text-amber-600 flex items-center justify-center font-extrabold text-[10px] shrink-0">BLQ</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-xs font-bold text-slate-800 truncate">${result.rep3Name}</div>
+                            <div class="text-[9px] text-slate-400 font-semibold truncate">${result.rep3Role || 'Bên liên quan / Chứng kiến'}</div>
+                        </div>
+                    </div>
+                `);
+            }
+
+            if (participants.length > 0) {
+                sections.push(`
+                    <div class="p-3.5 rounded-2xl bg-white border border-slate-100 shadow-[0_4px_20px_-6px_rgba(148,163,184,0.08)]">
+                        <div class="flex items-center gap-2 mb-2.5">
+                            <div class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            </div>
+                            <span class="font-extrabold text-xs text-slate-800">Thành Phần Tham Gia</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${participants.join('')}</div>
+                    </div>
+                `);
+            }
+
+            // Section 3: Danh sách phương tiện liên quan
+            if (ocrVehicles.length > 0) {
+                let vehiclesHtml = ocrVehicles.map((v, i) => `
+                    <div class="flex items-center gap-3 p-2.5 bg-gradient-to-r from-slate-50 to-white rounded-xl border border-slate-100/80">
+                        <div class="px-2 py-0.5 rounded-md bg-slate-900 text-white font-mono text-[9px] font-black border border-slate-700/50 shadow-sm uppercase tracking-wider shrink-0">
+                            ${v.bks || 'CHƯA RÕ BKS'}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-[11px] font-bold text-slate-800 truncate">${v.driver || 'Chưa rõ họ tên lái xe'}</div>
+                            <div class="text-[8.5px] text-slate-400 font-semibold uppercase tracking-wider">Phương tiện #${i + 1}</div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                sections.push(`
+                    <div class="p-3.5 rounded-2xl bg-white border border-slate-100 shadow-[0_4px_20px_-6px_rgba(148,163,184,0.08)]">
+                        <div class="flex items-center gap-2 mb-2.5">
+                            <div class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13" rx="2" ry="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                            </div>
+                            <span class="font-extrabold text-xs text-slate-800">Phương Tiện Liên Quan</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${vehiclesHtml}</div>
+                    </div>
+                `);
+            }
+
+            // Section 4: Khảo sát hiện trường
+            let detailInfo = [];
+            if (result.htTinhTrang) {
+                detailInfo.push(`
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100/50">
+                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Hiện trường</div>
+                        <span class="px-2 py-0.5 text-[9px] font-black rounded-lg inline-block mt-1 ${result.htTinhTrang === 'Nguyên vẹn' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100/50' : 'bg-rose-50 text-rose-700 border border-rose-100/50'}">${result.htTinhTrang}</span>
+                    </div>
+                `);
+            }
+            if (result.htDiaHinh) {
+                detailInfo.push(`
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100/50">
+                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Địa hình & Mặt nền</div>
+                        <span class="text-[11px] font-bold text-slate-700 mt-1 block truncate">${result.htDiaHinh}</span>
+                    </div>
+                `);
+            }
+            if (result.htThoiTiet) {
+                detailInfo.push(`
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100/50">
+                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Thời tiết</div>
+                        <span class="text-[11px] font-bold text-slate-700 mt-1 block truncate">${result.htThoiTiet}</span>
+                    </div>
+                `);
+            }
+            if (result.htNhietDo) {
+                detailInfo.push(`
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100/50">
+                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Nhiệt độ động cơ</div>
+                        <span class="text-[11px] font-bold text-slate-700 mt-1 block truncate">${result.htNhietDo}</span>
+                    </div>
+                `);
+            }
+            
+            let textDescriptions = [];
+            if (result.htMoTa) textDescriptions.push(`<div><b>Sơ đồ hiện trường:</b> <span class="text-slate-600 font-medium">${result.htMoTa}</span></div>`);
+            if (result.htDauVet) textDescriptions.push(`<div><b>Dấu vết ghi nhận:</b> <span class="text-slate-600 font-medium">${result.htDauVet}</span></div>`);
+            if (result.htMauVat) textDescriptions.push(`<div><b>Mẫu vật thu giữ:</b> <span class="text-slate-600 font-medium">${result.htMauVat}</span></div>`);
+
+            if (detailInfo.length > 0 || textDescriptions.length > 0) {
+                sections.push(`
+                    <div class="p-3.5 rounded-2xl bg-white border border-slate-100 shadow-[0_4px_20px_-6px_rgba(148,163,184,0.08)]">
+                        <div class="flex items-center gap-2 mb-2.5">
+                            <div class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                            </div>
+                            <span class="font-extrabold text-xs text-slate-800">Khảo Sát Hiện Trường</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 mb-2.5">${detailInfo.join('')}</div>
+                        ${textDescriptions.length > 0 ? `<div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100/50 text-[10px] space-y-2 leading-relaxed text-slate-700">${textDescriptions.join('')}</div>` : ''}
+                    </div>
+                `);
+            }
+
+            // Section 5: Đánh giá tổn thất
+            let damageInfo = [];
+            if (result.thViTri) {
+                damageInfo.push(`
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100/50">
+                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Vị trí tổn thất chính</div>
+                        <span class="text-[11px] font-bold text-slate-700 mt-1 block truncate">${result.thViTri}</span>
+                    </div>
+                `);
+            }
+            if (result.thUocLuong) {
+                damageInfo.push(`
+                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100/50">
+                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Ước lượng thiệt hại</div>
+                        <span class="text-[11px] font-bold text-rose-600 mt-1 block truncate">${result.thUocLuong}</span>
+                    </div>
+                `);
+            }
+            
+            let damageList = [];
+            if (result.thLietKe) damageList.push(`<div><b>Hạng mục hư hỏng sơ bộ:</b> <span class="text-slate-600 font-medium">${result.thLietKe}</span></div>`);
+            if (result.thNguoi) damageList.push(`<div><b>Thiệt hại về người:</b> <span class="text-slate-600 font-medium">${result.thNguoi}</span></div>`);
+            if (result.thDeXuat) damageList.push(`<div><b>Phương án đề xuất:</b> <span class="text-indigo-600 font-bold">${result.thDeXuat}</span></div>`);
+
+            if (damageInfo.length > 0 || damageList.length > 0) {
+                sections.push(`
+                    <div class="p-3.5 rounded-2xl bg-white border border-slate-100 shadow-[0_4px_20px_-6px_rgba(148,163,184,0.08)]">
+                        <div class="flex items-center gap-2 mb-2.5">
+                            <div class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                            </div>
+                            <span class="font-extrabold text-xs text-slate-800">Đánh Giá Tổn Thất & Đề Xuất</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 mb-2.5">${damageInfo.join('')}</div>
+                        ${damageList.length > 0 ? `<div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100/50 text-[10px] space-y-2 leading-relaxed text-slate-700">${damageList.join('')}</div>` : ''}
+                    </div>
+                `);
+            }
+
+            summaryHtml += sections.join('<div class="h-3"></div>') + '</div>';
+
+            Swal.close();
+            Swal.fire({
+                title: '<span class="text-xs font-black text-slate-500 uppercase tracking-widest block mb-0.5">TRỢ LÝ GIÁM ĐỊNH AI</span><span class="text-sm font-black text-slate-900 uppercase tracking-wider">KẾT QUẢ TRÍCH XUẤT BIÊN BẢN</span>',
+                html: summaryHtml,
+                icon: 'success',
+                confirmButtonText: '<div class="flex items-center gap-1.5 justify-center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Đồng ý & Đóng</div>',
+                customClass: {
+                    popup: 'custom-rounded bg-slate-50/95 backdrop-blur-xl border border-white/20 shadow-2xl',
+                    confirmButton: 'w-full py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-2xl font-black text-xs active:scale-95 transition-all shadow-lg shadow-indigo-200 cursor-pointer text-center mt-3'
+                },
+                buttonsStyling: false
+            });
+        } catch (e) {
+            console.error(e);
+            Swal.close();
+            Toast.fire({ icon: 'error', title: 'Không thể phân tích giọng nói: ' + e.message });
+        }
+    },
+
+    async normalizeField(fieldId) {
+        const input = document.getElementById(fieldId);
+        const rawText = (input?.value || '').trim();
+        if (!rawText) return Toast.fire({ icon: 'warning', title: 'Vui lòng nhập hoặc nói nội dung trước!' });
+
+        const originalVal = input.value;
+        input.value = '⏳ AI đang phân tích & đối chiếu hồ sơ...';
+        input.disabled = true;
+
+        const item = allData.find(r => r.id === curId) || {};
+        
+        const metadataStr = `
+=== THÔNG TIN HỒ SƠ CHÍNH THỨC ===
+- Biển số xe (BSX): ${item.bsx || 'Chưa cập nhật'}
+- Họ tên lái xe: ${item.driverName || 'Chưa cập nhật'}
+- Họ tên chủ xe/khách hàng: ${item.chuXe || item.customer || 'Chưa cập nhật'}
+- Số điện thoại: ${item.phone || 'Chưa cập nhật'}
+- Thời gian tai nạn: ${item.accidentDate || 'Chưa cập nhật'}
+- Địa điểm xảy ra tai nạn: ${item.location || 'Chưa cập nhật'}
+- Hiệu xe/Hãng xe/Loại xe: ${[item.hangXe, item.loaiXe].filter(Boolean).join(' ') || 'Chưa cập nhật'}
+- Số GPLX: ${item.soGPLX || 'Chưa cập nhật'} (Hạng: ${item.hangGPLX || 'Chưa cập nhật'})
+- Nguyên nhân khai báo ban đầu: ${item.cause || 'Chưa cập nhật'}
+- Diễn biến khai báo ban đầu: ${item.description || 'Chưa cập nhật'}
+==================================
+`;
+
+        const PROMPT = `Nhiệm vụ: Bạn là chuyên gia giám định bảo hiểm xe cơ giới cao cấp của Tasco. Hãy chuẩn hóa văn bản Biên bản hiện trường dưới đây và kiểm tra tính hợp lý đối chiếu với thông tin hồ sơ chính thức. Đặc biệt lưu ý nhận diện đúng các địa danh thuộc tỉnh Đắk Lắk và Đắk Nông (Ví dụ: Buôn Ma Thuột, Gia Nghĩa, Nhân Cơ, Krông Nô, Cư Jút, Đắk Mil, Krông Pắc, Ea Kar, Cư M'gar, v.v...).
+
+${metadataStr}
+
+NỘI DUNG VĂN BẢN CẦN CHUẨN HÓA & KIỂM TRA:
+"${rawText}"
+
+CÁC YÊU CẦU BẮT BUỘC KHI XỬ LÝ VĂN BẢN:
+1. Sửa lỗi chính tả, ngữ pháp và lỗi phát âm sai do nhận diện giọng nói hoặc gõ phím. Đặc biệt sửa lỗi từ đồng âm (Ví dụ: "tiêu chí quan sát" -> "thiếu chú ý quan sát", "quốc lộ một a" -> "QL1A", "bốn tám a" -> "48A", "cảng" -> "cản", "lường" -> "lườn", "dè" -> "vè", "mốp" -> "móp", "kiến" -> "kính").
+2. Đối chiếu toàn bộ tên người, biển số xe, địa điểm, thời gian, dòng xe trong văn bản thô với THÔNG TIN HỒ SƠ CHÍNH THỨC ở trên. Đưa các thông tin này về đúng 100% với hồ sơ chính thức (Ví dụ: nếu hồ sơ là "Nguyễn Văn A" nhưng văn bản thô ghi "nguyễn văn an", hãy đổi thành "Nguyễn Văn A"; nếu hồ sơ BSX là "48A-262.31" nhưng văn bản ghi "48A-262.37", hãy sửa thành "48A-262.31").
+3. Giữ nguyên ý đồ cốt lõi, diễn biến chi tiết và mức độ tổn thất của hiện trường gốc. Không tự tiện bịa đặt các tình huống va chạm không có cơ sở.
+4. Trả về đoạn văn đã chuẩn hóa mạch lạc, kết thúc câu bằng dấu chấm (.).
+5. QUY TẮC CẢNH BÁO QUAN TRỌNG:
+   - Hãy kiểm tra xem trong nội dung đã nhập có bất kỳ thông tin nào mâu thuẫn trực tiếp với hồ sơ chính thức (Ví dụ: sai lệch ngày giờ tai nạn, sai lệch tên lái xe, sai lệch biển số xe, hoặc sai lệch cơ bản về vị trí/địa điểm).
+   - Hãy đánh giá xem có bất kỳ thông tin nào đáng ngờ hoặc thiếu sót nghiêm trọng không (Ví dụ: lùi xe va chạm nhưng không rõ hướng di chuyển, va chạm giao lộ nhưng không có hướng đi của hai xe, hoặc diễn biến quá mâu thuẫn với nguyên nhân khách hàng khai báo ban đầu).
+   - NẾU có bất kỳ điểm nghi ngờ hoặc mâu thuẫn nào, hãy thêm một dòng trống ở cuối cùng và ghi rõ cảnh báo:
+     "⚠️ [AI CẢNH BÁO]: <Ghi chi tiết các mâu thuẫn hoặc điểm nghi ngờ, thiếu sót đã phát hiện và đề xuất hướng kiểm tra>"
+   - NẾU tuyệt đối không có mâu thuẫn hay điểm nghi ngờ nào, TUYỆT ĐỐI không được thêm dòng cảnh báo này.
+
+YÊU CẦU ĐẦU RA:
+- Chỉ trả về đoạn văn bản thuần (plain text) sau khi đã chuẩn hóa (và dòng cảnh báo nếu có). KHÔNG dùng ký tự markdown như ** hay *. KHÔNG giải thích gì thêm.`;
+
+        try {
+            const MODELS = ['gemini-2.5-flash-lite', 'gemini-2.0-flash', GEM_MODEL];
+            const maxRetries = GEM_KEYS.length * MODELS.length;
+            let lastError = null;
+            let text = '';
+            
+            for (let i = 0; i < maxRetries; i++) {
+                const key = nextGemKey();
+                const model = MODELS[Math.floor(i / GEM_KEYS.length) % MODELS.length];
+                try {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: PROMPT }] }],
+                            generationConfig: { temperature: 0.2, maxOutputTokens: 1000 }
+                        })
+                    });
+
+                    const data = await res.json();
+                    if (res.ok && !data.error) {
+                        text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim().replace(/\*\*/g, '');
+                        lastError = null;
+                        break;
+                    }
+                    lastError = data?.error?.message || 'Lỗi không xác định';
+                } catch (err) {
+                    lastError = err.message;
+                }
+            }
+
+            if (lastError) throw new Error(lastError);
+            input.value = text;
+            input.dispatchEvent(new Event('input'));
+            Toast.fire({ icon: 'success', title: 'Đã chuẩn hóa và kiểm tra đối chiếu!' });
+        } catch (e) {
+            input.value = originalVal;
+            input.dispatchEvent(new Event('input'));
+            Toast.fire({ icon: 'error', title: 'Lỗi chuẩn hóa: ' + e.message });
+        } finally {
+            input.disabled = false;
+            if (input.adjustHeight) input.adjustHeight();
+        }
+    },
+
+    print() {
+        if (!curId) return;
+        const item = allData.find(r => r.id === curId) || {};
+        const ss = this.getPayload();
+        
+        const sigDriver = ss.sigDriver || '';
+        const sigAssessor = ss.sigAssessor || '';
+        const sigThirdParty = ss.sigThirdParty || '';
+
+        const w = window.open('', '_blank');
+        if (!w) { Toast.fire({ icon: 'error', title: 'Trình duyệt chặn popup!' }); return; }
+
+        const toTitleCase = (str) => {
+            if (!str) return '';
+            return str.toLowerCase().replace(/(^|\s)\S/g, l => l.toUpperCase());
+        };
+
+        const rep1NameFormatted = toTitleCase(ss.rep1Name || '');
+        const rep2NameFormatted = toTitleCase(ss.rep2Name || '');
+        const rep3NameFormatted = toTitleCase(ss.rep3Name || '');
+
+        // Build the vehicles print HTML dynamically
+        let vehiclesPrintHtml = '';
+        const listToUse = (ss.vehicles && Array.isArray(ss.vehicles) && ss.vehicles.length > 0)
+            ? ss.vehicles
+            : [
+                { bks: ss.vehicle1 || item.bsx || '', driver: ss.driverName || item.driverName || item.chuXe || item.customer || '' },
+                { bks: ss.vehicle2 || '', driver: ss.driver2 || '' }
+              ].filter(v => v.bks || v.driver);
+              
+        if (listToUse.length === 0) {
+            vehiclesPrintHtml = `
+                <span>giữa: xe ô tô BKS: </span>
+                <span class="info-val editable" contenteditable="true" style="font-weight:bold;">.......................</span>
+                <span> do anh/chị: </span>
+                <span class="info-val editable" contenteditable="true">.......................</span>
+                <span> điều khiển, với xe ô tô BKS: </span>
+                <span class="info-val editable" contenteditable="true">.......................</span>
+            `;
+        } else {
+            vehiclesPrintHtml = '<span>giữa: </span>';
+            listToUse.forEach((v, index) => {
+                const bksVal = v.bks || '.......................';
+                const driverVal = toTitleCase(v.driver || '');
+                const hasDriver = driverVal.trim().length > 0;
+                
+                const prefix = index === 0 ? 'xe ô tô BKS: ' : ', với xe ô tô BKS: ';
+                
+                vehiclesPrintHtml += `
+                    <span>${prefix}</span>
+                    <span class="info-val editable" contenteditable="true" spellcheck="false" style="font-weight:bold;">${bksVal}</span>
+                `;
+                
+                if (hasDriver) {
+                    vehiclesPrintHtml += `
+                        <span> do anh/chị: </span>
+                        <span class="info-val editable" contenteditable="true" spellcheck="false">${driverVal}</span>
+                        <span> điều khiển</span>
+                    `;
+                }
+            });
+        }
+
+        const check = (val, target) => {
+            return (val || '').includes(target) ? '☑' : '☐';
+        };
+
+        const thViTriVal = ss.thViTri || '';
+        const thTaiSanVal = ss.thTaiSan || '';
+        const htThoiTietVal = ss.htThoiTiet || '';
+        const htDauHieuVal = ss.htDauHieuLaiXe || '';
+        const htGiayToVal = ss.htGiayTo || '';
+        const htGiayToCthhVal = ss.htGiayToCthh || '';
+
+        const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Biên bản hiện hiện trường - ${item.bsx || ''}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Times New Roman", Times, serif; font-size: 15px; color: #000; background: #525659; line-height: 1.55; padding: 40px 20px; display: flex; justify-content: center; }
+    .page { background: #fff; width: 210mm; max-width: 100%; min-height: 297mm; padding: 20mm; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; }
+    
+    .btn-print { position: fixed; top: 20px; right: 20px; z-index: 999; background: #10b981; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .btn-print:hover { background: #059669; }
+    
+    .header { display: flex; justify-content: space-between; margin-bottom: 25px; align-items: flex-start; }
+    .header-left { width: 45%; }
+    .header-right { width: 50%; text-align: center; font-weight: bold; font-size: 13.5px; }
+    .company-name { font-size: 11.5px; font-weight: bold; text-transform: uppercase; }
+    .logo-img { height: 42px; margin-bottom: 4px; }
+    
+    .title-area { text-align: center; margin-bottom: 25px; }
+    .title-main { font-size: 19px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.3; }
+    .title-sub { font-size: 14px; font-weight: bold; text-transform: uppercase; margin-top: 5px; }
+    
+    .info-row { display: flex; margin-bottom: 8px; text-align: justify; line-height: 1.6; }
+    .info-label { font-weight: bold; white-space: nowrap; margin-right: 4px; }
+    .info-val { flex-grow: 1; border-bottom: 1px dotted #000; min-height: 20px; word-break: break-word; }
+    .editable { outline: none; transition: background 0.2s; }
+    .editable:hover { background: #f0f7ff; cursor: text; }
+    .editable:focus { background: #e0f2fe; border-bottom: 1.5px solid #0284c7; }
+    
+    .section-title { font-weight: bold; text-transform: uppercase; margin-top: 15px; margin-bottom: 8px; font-size: 14px; border-bottom: 1px solid #ddd; padding-bottom: 2px; }
+    .table-participants { width: 100%; border-collapse: collapse; margin-top: 5px; margin-bottom: 15px; }
+    .table-participants th, .table-participants td { border: 1px solid #000; padding: 6px 10px; text-align: left; }
+    .table-participants th { background: #f3f4f6; font-weight: bold; text-align: center; }
+    
+    .signatures-grid { display: flex; justify-content: space-between; text-align: center; margin-top: 40px; }
+    .sig-col { display: flex; flex-direction: column; align-items: center; width: 30%; }
+    .sig-title { font-size: 13.5px; font-weight: bold; }
+    .sig-sub { font-size: 11px; font-style: italic; margin-bottom: 10px; }
+    .sig-canvas-img { max-height: 65px; max-width: 140px; object-fit: contain; margin: 5px 0; }
+    .sig-space { height: 75px; }
+    .sig-name { font-weight: bold; font-size: 13.5px; margin-top: auto; }
+    
+    @media print {
+      body { background: transparent; padding: 0; display: block; margin: 0; }
+      .page { box-shadow: none; padding: 15mm; margin: 0; min-height: auto; width: 100%; border: none; }
+      .btn-print { display: none !important; }
+      .editable:hover { background: transparent; }
+      .editable:focus { background: transparent; border-bottom: 1px dotted #000; }
+    }
+  </style>
+</head>
+<body>
+  <button class="btn-print" onclick="window.print()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+    In Biên Bản
+  </button>
+  
+  <div class="page">
+    <div class="header">
+      <div class="header-left">
+        <img src="https://lh3.googleusercontent.com/d/1bpOB60B7o1NDwahpZsVxct9PbfdwvKmK" class="logo-img">
+        <div class="company-name">TỔNG CÔNG TY CP BẢO HIỂM TASCO</div>
+        <div style="font-size:10px; color:#555;">ĐƠN VỊ: TASCO ĐẮK LẮK</div>
+      </div>
+      <div class="header-right">
+        CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>
+        Độc lập - Tự do - Hạnh phúc<br>
+        <span style="font-weight:normal; font-size:11px;">---------------</span>
+      </div>
+    </div>
+    
+    <div class="title-area">
+      <h1 class="title-main">BIÊN BẢN GIÁM ĐỊNH HIỆN TRƯỜNG/XÁC MINH HIỆN TRƯỜNG</h1>
+      <h2 class="title-sub">TỔN THẤT XE CƠ GIỚI</h2>
+    </div>
+    
+    <div class="info-row">
+      <span class="info-label">Hôm nay, vào hồi:</span>
+      <span class="info-val editable" contenteditable="true" spellcheck="false">${ss.bbTime || '...................................................'}</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Tại địa điểm:</span>
+      <span class="info-val editable" contenteditable="true" spellcheck="false">${ss.bbLoc || '.......................................................................................................................'}</span>
+    </div>
+    
+    <div class="section-title">I. Thành phần tham gia</div>
+    
+    <table class="table-participants">
+      <thead>
+        <tr>
+          <th style="width: 8%;">STT</th>
+          <th style="width: 45%;">Họ và tên</th>
+          <th style="width: 27%;">Chức vụ/Đại diện</th>
+          <th style="width: 20%;">Số điện thoại</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="text-align:center;">1</td>
+          <td class="editable" contenteditable="true" spellcheck="false">${rep1NameFormatted}</td>
+          <td>GĐV Bảo hiểm Tasco</td>
+          <td class="editable" contenteditable="true" spellcheck="false">${ss.rep1Phone || ''}</td>
+        </tr>
+        <tr>
+          <td style="text-align:center;">2</td>
+          <td class="editable" contenteditable="true" spellcheck="false">${rep2NameFormatted}</td>
+          <td>Lái xe / Chủ xe</td>
+          <td class="editable" contenteditable="true" spellcheck="false">${ss.rep2Phone || ''}</td>
+        </tr>
+        ${ss.rep3Name ? `
+        <tr>
+          <td style="text-align:center;">3</td>
+          <td class="editable" contenteditable="true" spellcheck="false">${rep3NameFormatted}</td>
+          <td class="editable" contenteditable="true" spellcheck="false">${ss.rep3Role || 'Người liên quan'}</td>
+          <td></td>
+        </tr>
+        ` : ''}
+      </tbody>
+    </table>
+
+    <div class="info-row">
+      <span>Cùng tiến hành lập biên bản giám định xác minh tại hiện trường vụ tai nạn xảy ra lúc:</span>
+      <span class="info-val editable" contenteditable="true" spellcheck="false" style="font-weight:bold;">${ss.accTime || '.......................'}</span>
+      <span>, tại:</span>
+      <span class="info-val editable" contenteditable="true" spellcheck="false">${ss.accLoc || '............................................................................................................'}</span>
+    </div>
+    <div class="info-row">
+      ${vehiclesPrintHtml}
+    </div>
+
+    <div class="section-title">II. Hiện trường vụ tai nạn</div>
+    
+    <table class="ht-table" style="width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed;">
+      <colgroup>
+        <col style="width: 38%;">
+        <col style="width: 22%;">
+        <col style="width: 20%;">
+        <col style="width: 20%;">
+      </colgroup>
+      
+      <tr>
+        <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>[1] Tình trạng hiện trường khi giám định:</span>
+        </td>
+        <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>${check(ss.htTinhTrang, 'Nguyên vẹn')} Nguyên vẹn</span>
+        </td>
+        <td colspan="2" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>${check(ss.htTinhTrang, 'Không nguyên vẹn')} Không nguyên vẹn</span>
+        </td>
+      </tr>
+      
+      <tr>
+        <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>[2] Nhiệt độ động cơ:</span>
+        </td>
+        <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>${check(ss.htNhietDo, 'Nóng ấm')} Nóng ấm</span>
+        </td>
+        <td colspan="2" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>${check(ss.htNhietDo, 'Lạnh')} Lạnh</span>
+        </td>
+      </tr>
+      
+      <tr>
+        <td colspan="4" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>[3] Địa hình hiện trường, vật liệu nền hiện trường: </span>
+          <span class="editable" contenteditable="true" spellcheck="false" style="font-weight: normal; padding: 0 2px;">${ss.htDiaHinh || 'đường trải nhựa'}</span>
+        </td>
+      </tr>
+      
+      <tr>
+        <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>[4] Tính chất nền:</span>
+        </td>
+        <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>${check(ss.htTinhChatNen, 'Cứng, không lún/sụt')} Cứng, không lún/sụt</span>
+        </td>
+        <td colspan="2" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>${check(ss.htTinhChatNen, 'Mềm lún/Sụt')} Mềm lún/Sụt</span>
+        </td>
+      </tr>
+      
+      <tr>
+        <td style="border: none !important;"></td>
+        <td colspan="3" style="padding: 1px 0 2.5px 0; vertical-align: top; border: none !important;">
+          <span>${check(ss.htTinhChatNen, 'Ngập nước')} Ngập nước</span>
+        </td>
+      </tr>
+      
+      <tr>
+        <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>[5] Điều kiện thời tiết hiện trường:</span>
+        </td>
+        <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>${check(htThoiTietVal, 'Nắng')} Nắng</span>
+        </td>
+        <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>${check(htThoiTietVal, 'Mưa')} Mưa</span>
+        </td>
+        <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>${check(htThoiTietVal, 'Râm mát')} Râm mát</span>
+        </td>
+      </tr>
+      
+      <tr>
+        <td style="border: none !important;"></td>
+        <td style="padding: 1px 0 2.5px 0; vertical-align: top; border: none !important;">
+          <span>${check(htThoiTietVal, 'Sáng')} Sáng</span>
+        </td>
+        <td colspan="2" style="padding: 1px 0 2.5px 0; vertical-align: top; border: none !important;">
+          <span>${check(htThoiTietVal, 'Tối')} Tối</span>
+        </td>
+      </tr>
+      
+      ${ss.htLaiXeCoMat === 'Vắng mặt' ? `
+      <tr>
+        <td colspan="4" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>[6] Người điều khiển phương tiện tại hiện trường:</span>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>☑ Không có mặt tại hiện trường. Lý do: </span>
+          <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1.5px dotted #000; min-width: 150px; display: inline-block; font-weight: bold; padding: 0 4px;">${ss.htLaiXeLyDo || ''}</span>
+          <span style="letter-spacing: 1.5px; font-weight: normal;">............................................................................................................</span>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>Địa điểm đến: </span>
+          <span class="editable" contenteditable="true" spellcheck="false" style="border-bottom: 1.5px dotted #000; min-width: 250px; display: inline-block; font-weight: bold; padding: 0 4px;"></span>
+          <span style="letter-spacing: 1.5px; font-weight: normal;">..............................................................................................................................................</span>
+        </td>
+      </tr>
+      ` : `
+      <tr>
+        <td colspan="4" style="padding: 4px 0 2.5px 0; vertical-align: top; border: none !important;">
+          <span>[7] Người điều khiển có mặt tại hiện trường.</span>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>Dấu hiệu tình trạng lái xe:</span>
+        </td>
+        <td style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>${check(htDauHieuVal, 'Sắc mặt bình thường')} Sắc mặt bình thường</span>
+        </td>
+        <td colspan="2" style="padding: 2.5px 0; vertical-align: top; border: none !important;">
+          <span>${check(htDauHieuVal, 'Hơi thở không mùi')} Hơi thở không mùi</span>
+        </td>
+      </tr>
+      <tr>
+        <td style="border: none !important;"></td>
+        <td style="padding: 1px 0 4px 0; vertical-align: top; border: none !important;">
+          <span>${check(htDauHieuVal, 'Sắc mặt đỏ, tái..')} Sắc mặt đỏ, tái..</span>
+        </td>
+        <td colspan="2" style="padding: 1px 0 4px 0; vertical-align: top; border: none !important;">
+          <span>${check(htDauHieuVal, 'Hơi thở có mùi lạ')} Hơi thở có mùi lạ</span>
+        </td>
+      </tr>
+      `}
+      
+      <tr>
+        <td colspan="4" style="padding: 5px 0 3px 0; vertical-align: top; border: none !important;">
+          <span style="font-weight: bold; font-size: 15px;">[8] Giấy tờ cung cấp tại hiện trường:</span>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4" style="padding: 3.5px 0; vertical-align: top; border: none !important;">
+          <div style="display: flex; justify-content: space-between; width: 100%;">
+            <span style="width: 24%; flex-shrink: 0;">${check(htGiayToVal, 'Đăng kí xe')} Đăng kí xe</span>
+            <span style="width: 41%; flex-shrink: 0;">${check(htGiayToVal, 'Đăng kiểm (ATKT&BVMT)')} Đăng kiểm (ATKT&BVMT)</span>
+            <span style="width: 35%; flex-shrink: 0; text-align: left;">${check(htGiayToVal, 'GCN/Hợp đồng Bảo hiểm')} GCN Bảo hiểm</span>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4" style="padding: 3.5px 0; vertical-align: top; border: none !important;">
+          <div>
+            <span>${check(htGiayToVal, 'Chứng từ hàng hóa')} Chứng từ hàng hóa</span>
+            ${htGiayToVal.includes('Chứng từ hàng hóa') && htGiayToCthhVal ? `<span style="font-weight: bold; font-style: italic; font-size: 14px; margin-left: 6px;">(${htGiayToCthhVal})</span>` : ''}
+          </div>
+        </td>
+      </tr>
+      ${htGiayToVal.includes('Giấy phép lái xe không hợp lệ') ? `
+      <tr>
+        <td colspan="4" style="padding: 3.5px 0; vertical-align: top; border: none !important;">
+          <div>
+            <span>☑ Giấy phép lái xe không cung cấp được tại hiện trường (Ghi rõ nguyên nhân, thời gian có thể cung cấp):</span>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4" style="padding: 4px 0; vertical-align: top; border: none !important;">
+          <div class="editable" contenteditable="true" spellcheck="false" style="width: 100%; min-height: 60px; outline: none; font-weight: bold; font-size: 15px; line-height: 1.8; text-align: justify; word-break: break-all; letter-spacing: 1.5px; padding: 0 4px;">
+            ${ss.htGiayToGplxReason || '................................................................................................................................................................................................................................................................................................................................................................................................................'}
+          </div>
+        </td>
+      </tr>
+      ` : ''}
+    </table>
+
+    <div class="info-row" style="margin-top: 10px;">
+      <span class="info-label">[9] Mô tả hiện trường tai nạn, vị trí phương tiện:</span>
+      <div class="info-val editable" contenteditable="true" spellcheck="false" style="display:block; padding-left: 15px; text-align: justify;">${ss.htMoTa || 'Theo sơ đồ hiện trường đính kèm theo hồ sơ'}</div>
+    </div>
+    <div class="info-row" style="margin-top: 6px;">
+      <span class="info-label">[10] Dấu vết tại hiện trường:</span>
+      <div class="info-val editable" contenteditable="true" spellcheck="false" style="display:block; padding-left: 15px; text-align: justify;">${ss.htDauVet || '.......................................................................................................................'}</div>
+    </div>
+    <div class="info-row" style="margin-top: 6px;">
+      <span class="info-label">[11] Mẫu vật thu được tại hiện trường:</span>
+      <div class="info-val editable" contenteditable="true" spellcheck="false" style="display:block; padding-left: 15px; text-align: justify;">${ss.htMauVat || 'Không thu được mẫu vật.'}</div>
+    </div>
+
+    <div class="section-title">III. Thiệt hại sơ bộ</div>
+
+    <div class="info-row">
+      <span class="info-label">[12] Vị trí tổn thất:</span>
+      <span style="margin-left: 10px;">${check(thViTriVal, 'Đầu xe')} Đầu xe</span>
+      <span style="margin-left: 10px;">${check(thViTriVal, 'Thân xe')} Thân xe</span>
+      <span style="margin-left: 10px;">${check(thViTriVal, 'Đuôi xe')} Đuôi xe</span>
+      <span style="margin-left: 10px;">${check(thViTriVal, 'Gầm/Nóc')} Gầm/Nóc</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">[13] Ước tính thiệt hại:</span>
+      <span class="info-val editable" contenteditable="true" spellcheck="false">${ss.thUocLuong || '...................................................'}</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">[14] Đối tượng tổn thất tài sản:</span>
+      <span style="margin-left: 10px;">${check(thTaiSanVal, 'Xe tham gia vật chất BH Tasco')} Xe vật chất Tasco</span>
+      <span style="margin-left: 10px;">${check(thTaiSanVal, 'Tài sản bên thứ ba')} Tài sản bên thứ ba</span>
+    </div>
+    <div class="info-row" style="text-align: left; padding-left: 15px; margin-top: 4px;">
+      <span style="font-style: italic; font-weight: bold; display: block; margin-bottom: 4px;">Liệt kê sơ bộ phụ tùng hư hỏng:</span>
+      <div class="editable" contenteditable="true" spellcheck="false" style="display: block; border-bottom: 1.5px dotted #000; min-height: 28px; font-weight: bold; width: 100%; outline: none; line-height: 1.65; text-align: justify; word-break: break-all; padding: 2px 4px;">${ss.thLietKe || '........................................................................................................................................................................'}</div>
+    </div>
+    <div class="info-row">
+      <span class="info-label">[15] Thiệt hại về người:</span>
+      <span class="info-val editable" contenteditable="true" spellcheck="false">${ss.thNguoi || 'Không có thiệt hại về người.'}</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">[16] Ghi chú / Lời khai lái xe:</span>
+      <div class="info-val editable" contenteditable="true" spellcheck="false" style="display:block; padding-left: 15px; text-align: justify;">${ss.thGhiChu || '.......................................................................................................................'}</div>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Đề xuất khác:</span>
+      <span class="info-val editable" contenteditable="true" spellcheck="false">${ss.thDeXuat || 'Giải quyết quyền lợi theo quy định'}</span>
+    </div>
+
+    <div class="signatures-grid">
+      <div class="sig-col">
+        <span class="sig-title">Đại diện lái xe/chủ xe</span>
+        <span class="sig-sub">(Ký và ghi rõ họ tên)</span>
+        <div style="height: 70px; display: flex; align-items: center; justify-content: center; width: 100%;">
+          ${sigDriver ? `<img src="${sigDriver}" class="sig-canvas-img">` : ''}
+        </div>
+        <span class="sig-name">${rep2NameFormatted || '.....................................'}</span>
+      </div>
+      
+      <div class="sig-col">
+        <span class="sig-title">Đại diện bên liên quan</span>
+        <span class="sig-sub">(Ký và ghi rõ họ tên)</span>
+        <div style="height: 70px; display: flex; align-items: center; justify-content: center; width: 100%;">
+          ${sigThirdParty ? `<img src="${sigThirdParty}" class="sig-canvas-img">` : ''}
+        </div>
+        <span class="sig-name">${rep3NameFormatted || '.....................................'}</span>
+      </div>
+
+      <div class="sig-col">
+        <span class="sig-title">Đại diện giám định BH Tasco</span>
+        <span class="sig-sub">(Ký và ghi rõ họ tên)</span>
+        <div style="height: 70px; display: flex; align-items: center; justify-content: center; width: 100%;">
+          ${sigAssessor ? `<img src="${sigAssessor}" class="sig-canvas-img">` : ''}
+        </div>
+        <span class="sig-name">${rep1NameFormatted || '.....................................'}</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+        w.document.write(html);
+        w.document.close();
+    }
+};
+
+window.SceneSurvey = SceneSurvey;
+
 // Tự động chuyển sơ đồ hiện trường sang tab Hiện trường mới
 document.addEventListener("DOMContentLoaded", function() {
   var previewEl = document.getElementById("scene-diagram-preview");
@@ -24678,6 +26910,9 @@ document.addEventListener("DOMContentLoaded", function() {
     if (card && targetContainer) {
       targetContainer.appendChild(card);
     }
+  }
+  if (typeof SceneSurvey !== 'undefined' && typeof SceneSurvey.initFormExclusivity === 'function') {
+    SceneSurvey.initFormExclusivity();
   }
 });
 
