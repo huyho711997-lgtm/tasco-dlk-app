@@ -253,15 +253,19 @@ textarea.inp { resize:vertical; }
   flex: 0 0 auto;
 }
 #modal-box > .flex-1,
+#modal-body,
 #modal-box .m-tab-panel {
   width: 100%;
   min-width: 0;
 }
-#modal-box > .flex-1 {
+#modal-box > .flex-1,
+#modal-body {
   flex: 1 1 0%;
   min-height: 0;
   overflow: hidden;
   background: #f8fafc;
+  display: flex;
+  flex-direction: column;
 }
 #modal-box .m-tab-panel {
   flex: 1 1 0%;
@@ -281,10 +285,13 @@ textarea.inp { resize:vertical; }
   position: static !important;
   flex: 0 0 72px !important;
   height: 72px !important;
+  min-height: 72px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
   background: linear-gradient(to right, #f8fafc, #f1f5f9);
   border-top: 1px solid #e2e8f0;
   padding: .875rem 1.25rem;
-  display: flex; align-items: center; justify-content: flex-end; gap: .75rem;
+  display: flex !important; align-items: center; justify-content: flex-end; gap: .75rem;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
@@ -3760,7 +3767,7 @@ textarea.inp { resize:vertical; }
   </div>
 
   <!-- Modal Body -->
-  <div class="flex-1 overflow-hidden flex flex-col">
+  <div id="modal-body" class="flex-1 overflow-hidden flex flex-col">
 
     <!-- TAB: HỒ SƠ -->
     <div id="tab-info" class="m-tab-panel active flex-1 overflow-y-auto p-5">
@@ -6606,6 +6613,66 @@ function garaSaveNew(g) {
 /* ═══════════════════════════════════════
    MODAL TABS
 ═══════════════════════════════════════ */
+function fitRecordModalLayout() {
+  var box = document.getElementById('modal-box');
+  var body = document.getElementById('modal-body');
+  var header = box ? box.querySelector('.modal-dark-hdr') : null;
+  var footer = box ? box.querySelector('.modal-footer-bar') : null;
+  if (!box || !body || !header || !footer) return;
+
+  var viewportH = window.innerHeight || document.documentElement.clientHeight || 800;
+  var viewportW = window.innerWidth || document.documentElement.clientWidth || 1200;
+  var margin = 12;
+  var boxH = Math.max(420, viewportH - margin * 2);
+
+  box.style.setProperty('position', 'fixed', 'important');
+  box.style.setProperty('top', margin + 'px', 'important');
+  box.style.setProperty('right', margin + 'px', 'important');
+  box.style.setProperty('bottom', margin + 'px', 'important');
+  box.style.setProperty('left', margin + 'px', 'important');
+  box.style.setProperty('width', Math.max(320, viewportW - margin * 2) + 'px', 'important');
+  box.style.setProperty('height', boxH + 'px', 'important');
+  box.style.setProperty('max-height', boxH + 'px', 'important');
+  box.style.setProperty('display', 'flex', 'important');
+  box.style.setProperty('flex-direction', 'column', 'important');
+  box.style.setProperty('overflow', 'hidden', 'important');
+
+  header.style.setProperty('flex', '0 0 auto', 'important');
+
+  footer.style.setProperty('display', 'flex', 'important');
+  footer.style.setProperty('visibility', 'visible', 'important');
+  footer.style.setProperty('opacity', '1', 'important');
+  footer.style.setProperty('position', 'relative', 'important');
+  footer.style.setProperty('left', 'auto', 'important');
+  footer.style.setProperty('right', 'auto', 'important');
+  footer.style.setProperty('bottom', 'auto', 'important');
+  footer.style.setProperty('z-index', '5', 'important');
+  footer.style.setProperty('flex', '0 0 72px', 'important');
+  footer.style.setProperty('height', '72px', 'important');
+  footer.style.setProperty('min-height', '72px', 'important');
+  footer.style.setProperty('width', '100%', 'important');
+
+  var headerH = header.getBoundingClientRect().height || 104;
+  var footerH = footer.getBoundingClientRect().height || 72;
+  var bodyH = Math.max(180, boxH - headerH - footerH);
+
+  body.style.setProperty('flex', '0 0 ' + bodyH + 'px', 'important');
+  body.style.setProperty('height', bodyH + 'px', 'important');
+  body.style.setProperty('max-height', bodyH + 'px', 'important');
+  body.style.setProperty('min-height', '0', 'important');
+  body.style.setProperty('overflow', 'hidden', 'important');
+  body.style.setProperty('display', 'flex', 'important');
+  body.style.setProperty('flex-direction', 'column', 'important');
+
+  document.querySelectorAll('#modal-body .m-tab-panel').forEach(function(panel) {
+    panel.style.setProperty('min-height', '0', 'important');
+    panel.style.setProperty('max-height', bodyH + 'px', 'important');
+    if (panel.classList.contains('active')) {
+      panel.style.setProperty('height', '100%', 'important');
+    }
+  });
+}
+
 function switchModalTab(panelId, tabEl) {
   // Reset tất cả tab về trạng thái tối (trong header tối)
   document.querySelectorAll('.m-tab').forEach(function(t) {
@@ -6637,6 +6704,7 @@ function switchModalTab(panelId, tabEl) {
       SceneSurvey.onTabActive();
     }
   }
+  requestAnimationFrame(fitRecordModalLayout);
 }
 
 function switchReportSubTab(type) {
@@ -6670,6 +6738,7 @@ function switchReportSubTab(type) {
       AccidentReport.adjustTextareasHeight();
     }
   }
+  requestAnimationFrame(fitRecordModalLayout);
 }
 /* ═══════════════════════════════════════
    OPEN / CLOSE MODAL
@@ -6791,8 +6860,15 @@ function openRecord(id) {
   switchReportSubTab('hientruong');
 
   var wrap=document.getElementById('modal-wrap'),box=document.getElementById('modal-box');
+  fitRecordModalLayout();
   wrap.classList.remove('hidden');
-  setTimeout(function(){wrap.classList.remove('opacity-0');box.classList.remove('scale-95');},10);
+  fitRecordModalLayout();
+  setTimeout(function(){
+    wrap.classList.remove('opacity-0');
+    box.classList.remove('scale-95');
+    fitRecordModalLayout();
+  },10);
+  setTimeout(fitRecordModalLayout,80);
 }
 
 function closeModal() {
@@ -6801,6 +6877,11 @@ function closeModal() {
   wrap.classList.add('opacity-0');box.classList.add('scale-95');
   setTimeout(function(){wrap.classList.add('hidden');curId=null;},280);
 }
+
+window.addEventListener('resize', function() {
+  var wrap = document.getElementById('modal-wrap');
+  if (wrap && !wrap.classList.contains('hidden')) fitRecordModalLayout();
+});
 
 function saveModal() {
   if(!curId)return;
