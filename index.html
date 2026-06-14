@@ -11884,6 +11884,7 @@ Văn bản cần sửa: "${text}"`;
             this.cancel();
         }
     };
+    window.SpeechInput = SpeechInput;
 
 
     // ============================================================
@@ -18364,8 +18365,9 @@ YÊU CẦU ĐẦU RA:
         },
 
         startVoiceInput() {
-            if (window.SpeechInput) {
-                window.SpeechInput.toggle('SceneSurveyVoiceInput', null, null);
+            const speechInputObj = window.SpeechInput || (typeof SpeechInput !== 'undefined' ? SpeechInput : null);
+            if (speechInputObj) {
+                speechInputObj.toggle('SceneSurveyVoiceInput', null, null);
             } else {
                 Toast.fire({ icon: 'error', title: 'Không tìm thấy chức năng ghi âm!' });
             }
