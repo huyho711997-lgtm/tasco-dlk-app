@@ -221,23 +221,31 @@ textarea.inp { resize:vertical; }
 
 /* Modal viewport guard */
 #modal-wrap {
+  position: fixed !important;
+  inset: 0 !important;
   width: 100vw;
   height: 100vh;
-  padding: 12px;
+  padding: 0;
   overflow: hidden;
   box-sizing: border-box;
 }
 #modal-box {
-  width: 100% !important;
+  position: fixed !important;
+  inset: 12px !important;
+  width: auto !important;
   max-width: none !important;
-  height: calc(100vh - 24px) !important;
-  max-height: calc(100vh - 24px) !important;
+  height: auto !important;
+  max-height: none !important;
   min-width: 0;
+  background: #fff;
 }
 #modal-box > .flex-1,
 #modal-box .m-tab-panel {
   width: 100%;
   min-width: 0;
+}
+#modal-box > .flex-1 {
+  background: #f8fafc;
 }
 #modal-box .m-tab-panel {
   overflow-x: hidden;
@@ -257,6 +265,9 @@ textarea.inp { resize:vertical; }
   padding: .875rem 1.25rem;
   display: flex; align-items: center; justify-content: flex-end; gap: .75rem;
   flex-shrink: 0;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 .modal-save-btn {
   display: inline-flex; align-items: center; gap: .5rem;
