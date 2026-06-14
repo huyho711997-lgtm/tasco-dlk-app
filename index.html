@@ -20003,12 +20003,13 @@ YÊU CẦU ĐẦU RA:
                         margin-bottom: 14px;
                     }
                     #ss-print-container .title-main {
-                        font-size: 18px;
+                        font-size: 17px;
                         font-weight: bold;
                         text-transform: uppercase;
-                        letter-spacing: 0.2px;
+                        letter-spacing: 0;
                         margin: 0;
-                        line-height: 1.3;
+                        line-height: 1.22;
+                        white-space: nowrap;
                     }
                     #ss-print-container .title-sub {
                         font-size: 16px;
@@ -20159,6 +20160,10 @@ YÊU CẦU ĐẦU RA:
             const formatDocTime = (value) => {
                 const raw = (value || '').trim();
                 if (!raw) return '........ giờ........ ngày .......... tháng .......... năm 20....';
+                const iso = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})[T\s](\d{1,2}):(\d{1,2})/);
+                if (iso) return `${iso[4].padStart(2, '0')} giờ ${iso[5].padStart(2, '0')} ngày ${iso[3].padStart(2, '0')} tháng ${iso[2].padStart(2, '0')} năm ${iso[1]}`;
+                const dateFirst = raw.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})\s+(\d{1,2})[:hH](\d{1,2})/);
+                if (dateFirst) return `${dateFirst[4].padStart(2, '0')} giờ ${dateFirst[5].padStart(2, '0')} ngày ${dateFirst[1].padStart(2, '0')} tháng ${dateFirst[2].padStart(2, '0')} năm ${dateFirst[3]}`;
                 const m = raw.match(/(\d{1,2})[:hH](\d{1,2})\s+(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
                 if (m) return `${m[1].padStart(2, '0')} giờ ${m[2].padStart(2, '0')} ngày ${m[3].padStart(2, '0')} tháng ${m[4].padStart(2, '0')} năm ${m[5]}`;
                 const dateOnly = raw.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
