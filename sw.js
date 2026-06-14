@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tasco-dlk-cache-v4';
+const CACHE_NAME = 'tasco-dlk-cache-v5';
 const PRE_CACHE_ASSETS = [
   './',
   './index.html',
@@ -35,7 +35,7 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch strategy: Stale-While-Revalidate for app assets, Network-First for API requests, Cache-First for assets
+// Fetch strategy: Network-First for HTML/app shell, Cache-First fallback for static assets.
 self.addEventListener('fetch', event => {
   const requestUrl = new URL(event.request.url);
 
@@ -49,7 +49,27 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Handle standard GET requests
+  const isNavigation = event.request.mode === 'navigate';
+  const acceptsHtml = (event.request.headers.get('accept') || '').includes('text/html');
+  const isAppHtml = isNavigation || acceptsHtml || requestUrl.pathname.endsWith('/') || requestUrl.pathname.endsWith('.html');
+
+  if (isAppHtml) {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-store' }).then(networkResponse => {
+        if (networkResponse && networkResponse.ok) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
+        }
+        return networkResponse;
+      }).catch(() => {
+        return caches.match(event.request)
+          .then(cached => cached || caches.match('./desktop.html') || caches.match('./index.html') || caches.match('./'));
+      })
+    );
+    return;
+  }
+
+  // Handle standard asset GET requests
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
       if (cachedResponse) {
