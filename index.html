@@ -18498,6 +18498,84 @@ YÊU CẦU ĐẦU RA:
             };
         },
 
+        getVoiceMergeCandidates(result = {}, currentData = {}) {
+            const fields = [
+                { key: 'htMoTa', label: 'Mô tả hiện trường' },
+                { key: 'htDauVet', label: 'Dấu vết hiện trường' },
+                { key: 'htMauVat', label: 'Mẫu vật thu được' },
+                { key: 'thLietKe', label: 'Liệt kê phụ tùng' },
+                { key: 'thGhiChu', label: 'Ghi chú / lời khai' },
+                { key: 'thDeXuat', label: 'Đề xuất khác' }
+            ];
+
+            return fields.filter(field => {
+                const oldVal = String(currentData[field.key] || '').trim();
+                const newVal = String(result[field.key] || '').trim();
+                return oldVal && newVal && oldVal !== newVal;
+            });
+        },
+
+        mergeVoiceTextValue(currentValue, newValue, mode) {
+            const current = String(currentValue || '').trim();
+            const incoming = String(newValue || '').trim();
+            if (!incoming) return current;
+            if (mode !== 'append' || !current) return incoming;
+
+            const normalizedCurrent = current.toLowerCase();
+            const normalizedIncoming = incoming.toLowerCase();
+            if (normalizedCurrent.includes(normalizedIncoming)) return current;
+            if (normalizedIncoming.includes(normalizedCurrent)) return incoming;
+
+            const separator = /[.!?。]$/.test(current) ? ' ' : '; ';
+            return `${current}${separator}${incoming}`;
+        },
+
+        async chooseVoiceApplyMode(result = {}, currentData = {}) {
+            const candidates = this.getVoiceMergeCandidates(result, currentData);
+            if (candidates.length === 0) return 'replace';
+
+            Swal.close();
+            const fieldList = candidates.map(item => `
+                <div class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left dark:border-slate-700 dark:bg-slate-800">
+                    <i data-lucide="file-plus-2" class="h-4 w-4 text-indigo-500"></i>
+                    <span class="text-[11px] font-black text-slate-700 dark:text-slate-200">${item.label}</span>
+                </div>
+            `).join('');
+
+            const action = await Swal.fire({
+                title: 'Áp dụng dữ liệu AI',
+                html: `
+                    <div class="space-y-3 text-left">
+                        <p class="text-xs font-semibold leading-relaxed text-slate-500 dark:text-slate-400">
+                            AI phát hiện dữ liệu mới cho các trường đang có nội dung. Chọn cách áp dụng trước khi ghi vào form.
+                        </p>
+                        <div class="grid grid-cols-1 gap-2">${fieldList}</div>
+                    </div>
+                `,
+                showDenyButton: true,
+                showCancelButton: true,
+                confirmButtonText: 'Nối thêm',
+                denyButtonText: 'Thay thế',
+                cancelButtonText: 'Hủy',
+                customClass: {
+                    popup: 'custom-rounded',
+                    confirmButton: 'px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-xs active:scale-95 transition-all',
+                    denyButton: 'px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-xs active:scale-95 transition-all',
+                    cancelButton: 'px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 rounded-xl font-black text-xs active:scale-95 transition-all'
+                },
+                buttonsStyling: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    if (window.lucide) lucide.createIcons();
+                }
+            });
+
+            if (action.isConfirmed) return 'append';
+            if (action.isDenied) return 'replace';
+            return null;
+        },
+
         startVoiceInput() {
             const speechInputObj = window.SpeechInput || (typeof SpeechInput !== 'undefined' ? SpeechInput : null);
             if (speechInputObj) {
@@ -19200,17 +19278,17 @@ YÊU CẦU ĐẦU RA:
             const currentFormJson = JSON.stringify(currentFormData, null, 2);
 
             const PROMPT = `Bạn là chuyên gia giám định bảo hiểm xe cơ giới cao cấp của Tasco.
-Hãy phân tích đoạn hội thoại/văn bản mô tả hiện trường tai nạn dưới đây và cập nhật vào dữ liệu biên bản hiện trường đang có.
+Hãy phân tích đoạn hội thoại/văn bản mô tả hiện trường tai nạn dưới đây và trích xuất dữ liệu mới có trong lời nói/văn bản.
 
 QUY TẮC CẬP NHẬT BẮT BUỘC:
-1. Luôn xem DỮ LIỆU FORM HIỆN TẠI là dữ liệu gốc đang có trên màn hình.
-2. Nếu lời nói/văn bản có ý "bổ sung", "thêm", "cập nhật thêm", "ghi nhận thêm", hãy nối thông tin mới vào nội dung hiện có, không xóa phần cũ. Áp dụng đặc biệt cho: htMoTa, htDauVet, htMauVat, thLietKe, thGhiChu, thDeXuat.
-3. Nếu lời nói/văn bản yêu cầu "thay thế", "sửa thành", "đổi thành", hãy cập nhật trường tương ứng theo nội dung mới.
-4. Nếu lời nói/văn bản không nhắc đến một trường nào, hãy giữ nguyên giá trị hiện có của trường đó trong JSON trả về.
-5. Trả về JSON là trạng thái cuối cùng sau khi đã hợp nhất dữ liệu hiện có và dữ liệu mới.
+1. Luôn xem DỮ LIỆU FORM HIỆN TẠI là ngữ cảnh tham chiếu để hiểu người dùng đang bổ sung/sửa trường nào.
+2. Chỉ trả về dữ liệu mới được nhắc đến trong lời nói/văn bản, không tự nối với dữ liệu hiện có.
+3. Nếu lời nói/văn bản không nhắc đến một trường nào, hãy trả về trường đó rỗng hoặc giữ nguyên rỗng trong JSON.
+4. Nếu người dùng nói "bổ sung dấu vết...", hãy đưa phần bổ sung mới vào htDauVet, không kèm lại toàn bộ htDauVet hiện có.
+5. Nếu người dùng nói "sửa/thay thế/đổi thành...", hãy đưa nội dung mới vào trường tương ứng. Ứng dụng sẽ hỏi người dùng chọn Nối thêm hoặc Thay thế sau khi bạn trả kết quả.
 6. Không tự bịa thông tin không có trong dữ liệu hiện có hoặc lời nói mới.
 
-Ví dụ: nếu htDauVet hiện có là "Có mảnh vỡ đèn trước" và lời nói là "bổ sung dấu vết phanh dài 3 mét", thì htDauVet trả về phải là "Có mảnh vỡ đèn trước; bổ sung dấu vết phanh dài 3 mét.".
+Ví dụ: nếu htDauVet hiện có là "Có mảnh vỡ đèn trước" và lời nói là "bổ sung dấu vết phanh dài 3 mét", thì htDauVet chỉ trả về "Dấu vết phanh dài 3 mét.".
 
 Cú pháp các thuộc tính JSON cần trả về chính xác như sau:
 {
@@ -19303,6 +19381,11 @@ Lưu ý: Chỉ trả về JSON thô (raw JSON text), không đặt trong thẻ c
 
                 const result = JSON.parse(cleanJson);
                 const previousFormState = this.captureFormState();
+                const voiceApplyMode = await this.chooseVoiceApplyMode(result, currentFormData);
+                if (!voiceApplyMode) {
+                    Toast.fire({ icon: 'info', title: 'Đã hủy áp dụng dữ liệu AI' });
+                    return;
+                }
 
                 // Auto fill fields
                 if (result.bbTime) document.getElementById('sr-bbTime').value = result.bbTime;
@@ -19337,15 +19420,22 @@ Lưu ý: Chỉ trả về JSON thô (raw JSON text), không đặt trong thẻ c
                     this.renderVehicles(ocrVehicles);
                 }
 
+                const applyTextField = (key, fieldId) => {
+                    if (!result[key]) return;
+                    const finalValue = this.mergeVoiceTextValue(currentFormData[key], result[key], voiceApplyMode);
+                    result[key] = finalValue;
+                    document.getElementById(fieldId).value = finalValue;
+                };
+
                 if (result.htDiaHinh) document.getElementById('sr-htDiaHinh').value = result.htDiaHinh;
                 if (result.htLaiXeLyDo) document.getElementById('sr-htLaiXeLyDo').value = result.htLaiXeLyDo;
-                if (result.htMoTa) document.getElementById('sr-htMoTa').value = result.htMoTa;
-                if (result.htDauVet) document.getElementById('sr-htDauVet').value = result.htDauVet;
-                if (result.htMauVat) document.getElementById('sr-htMauVat').value = result.htMauVat;
-                if (result.thLietKe) document.getElementById('sr-thLietKe').value = result.thLietKe;
-                if (result.thNguoi) document.getElementById('sr-thNguoi').value = result.thNguoi;
-                if (result.thGhiChu) document.getElementById('sr-thGhiChu').value = result.thGhiChu;
-                if (result.thDeXuat) document.getElementById('sr-thDeXuat').value = result.thDeXuat;
+                applyTextField('htMoTa', 'sr-htMoTa');
+                applyTextField('htDauVet', 'sr-htDauVet');
+                applyTextField('htMauVat', 'sr-htMauVat');
+                applyTextField('thLietKe', 'sr-thLietKe');
+                applyTextField('thNguoi', 'sr-thNguoi');
+                applyTextField('thGhiChu', 'sr-thGhiChu');
+                applyTextField('thDeXuat', 'sr-thDeXuat');
 
                 // Checkboxes & Radios logic:
                 const setRadioValue = (name, val) => {
