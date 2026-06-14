@@ -422,9 +422,78 @@
             width: 100% !important;
             margin: 0 !important;
             padding: 0 16px 16px !important;
+            gap: 10px !important;
         }
         .swal2-popup.custom-rounded.ocr-premium-popup .swal2-confirm {
-            width: 100% !important;
+            flex: 1 1 0 !important;
+            width: auto !important;
+        }
+        .swal2-popup.custom-rounded.ocr-premium-popup .swal2-cancel {
+            flex: 1 1 0 !important;
+            width: auto !important;
+        }
+        .ocr-review-root {
+            background: #ffffff;
+            color: #1e293b;
+        }
+        .ocr-review-body {
+            background: rgba(241, 245, 249, 0.82);
+        }
+        .ocr-review-section,
+        .ocr-review-value-card {
+            background: #ffffff;
+            border-color: rgba(226, 232, 240, 0.86);
+        }
+        .ocr-review-section {
+            background: rgba(248, 250, 252, 0.86);
+        }
+        .ocr-review-title,
+        .ocr-review-value-text {
+            color: #1e293b;
+        }
+        .ocr-review-subtitle,
+        .ocr-review-label {
+            color: #94a3b8;
+        }
+        [data-theme="dark"] .swal2-popup.custom-rounded.ocr-premium-popup {
+            background: #0f172a !important;
+            border-color: rgba(51, 65, 85, 0.85) !important;
+        }
+        [data-theme="dark"] .ocr-review-root {
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+        [data-theme="dark"] .ocr-review-body {
+            background: rgba(2, 6, 23, 0.72);
+        }
+        [data-theme="dark"] .ocr-review-section {
+            background: rgba(15, 23, 42, 0.92);
+            border-color: rgba(51, 65, 85, 0.9);
+        }
+        [data-theme="dark"] .ocr-review-value-card {
+            background: rgba(30, 41, 59, 0.82);
+            border-color: rgba(71, 85, 105, 0.78);
+        }
+        [data-theme="dark"] .ocr-review-title,
+        [data-theme="dark"] .ocr-review-value-text {
+            color: #f8fafc;
+        }
+        [data-theme="dark"] .ocr-review-subtitle,
+        [data-theme="dark"] .ocr-review-label {
+            color: #94a3b8;
+        }
+        [data-theme="dark"] .ocr-review-badge {
+            background: rgba(51, 65, 85, 0.95) !important;
+            color: #cbd5e1 !important;
+        }
+        [data-theme="dark"] .swal2-popup.custom-rounded.ocr-premium-popup .swal2-cancel {
+            background: rgba(30, 41, 59, 0.92) !important;
+            border-color: rgba(71, 85, 105, 0.9) !important;
+            color: #e2e8f0 !important;
+        }
+        [data-theme="dark"] .swal2-popup.custom-rounded.ocr-premium-popup .swal2-confirm {
+            background: #f8fafc !important;
+            color: #0f172a !important;
         }
         .swal2-popup.custom-rounded.compact-modal {
             padding: 28px 24px 24px 24px !important;
@@ -19168,6 +19237,7 @@ Lưu ý: Chỉ trả về JSON thô (raw JSON text), không đặt trong thẻ c
                 }
 
                 const result = JSON.parse(cleanJson);
+                const previousFormState = this.captureFormState();
 
                 // Auto fill fields
                 if (result.bbTime) document.getElementById('sr-bbTime').value = result.bbTime;
@@ -19253,26 +19323,116 @@ Lưu ý: Chỉ trả về JSON thô (raw JSON text), không đặt trong thẻ c
                 // Build premium OCR review summary
                 const summaryHtml = this.buildOCRSummaryHtml(result, ocrVehicles);
                 Swal.close();
-                Swal.fire({
+                const reviewAction = await Swal.fire({
                     title: '',
                     html: summaryHtml,
                     width: 560,
                     confirmButtonText: 'Kiểm tra trên form',
+                    showCancelButton: true,
+                    cancelButtonText: 'Hủy áp dụng',
+                    reverseButtons: true,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
                     customClass: {
                         popup: 'custom-rounded ocr-premium-popup',
                         htmlContainer: '!m-0 !p-0',
                         actions: '!px-4 !pb-4 !pt-0',
-                        confirmButton: 'w-full px-5 py-3 bg-slate-950 hover:bg-slate-800 text-white rounded-2xl font-black text-xs active:scale-95 transition-all shadow-lg shadow-slate-900/15'
+                        confirmButton: 'flex-1 px-5 py-3 bg-slate-950 hover:bg-slate-800 text-white rounded-2xl font-black text-xs active:scale-95 transition-all shadow-lg shadow-slate-900/15',
+                        cancelButton: 'flex-1 px-5 py-3 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-2xl font-black text-xs active:scale-95 transition-all'
                     },
                     buttonsStyling: false,
                     didOpen: () => {
                         if (window.lucide) lucide.createIcons();
                     }
                 });
+
+                if (reviewAction.dismiss === Swal.DismissReason.cancel) {
+                    this.restoreFormState(previousFormState);
+                    Toast.fire({ icon: 'info', title: 'Đã hủy áp dụng dữ liệu AI' });
+                }
             } catch (e) {
                 console.error(e);
                 Swal.close();
                 Toast.fire({ icon: 'error', title: 'Không thể phân tích giọng nói: ' + e.message });
+            }
+        },
+
+        captureFormState() {
+            const modal = document.getElementById('scene-survey-modal');
+            const values = {};
+            const checks = {};
+            const vehicles = [];
+
+            if (!modal) return { values, checks, vehicles };
+
+            modal.querySelectorAll('input[id], textarea[id], select[id]').forEach(el => {
+                if (el.type !== 'checkbox' && el.type !== 'radio') {
+                    values[el.id] = el.value;
+                }
+            });
+
+            modal.querySelectorAll('input[type="checkbox"][name], input[type="radio"][name]').forEach(el => {
+                if (!checks[el.name]) checks[el.name] = {};
+                checks[el.name][el.value || el.id] = el.checked;
+            });
+
+            modal.querySelectorAll('#sr-vehicles-container .vehicle-row').forEach(row => {
+                vehicles.push({
+                    bks: row.querySelector('.sr-v-bks')?.value || '',
+                    driver: row.querySelector('.sr-v-driver')?.value || ''
+                });
+            });
+
+            return { values, checks, vehicles };
+        },
+
+        restoreFormState(state) {
+            if (!state) return;
+
+            if (Array.isArray(state.vehicles)) {
+                this.renderVehicles(state.vehicles);
+            }
+
+            Object.entries(state.values || {}).forEach(([id, value]) => {
+                const el = document.getElementById(id);
+                if (el && el.type !== 'checkbox' && el.type !== 'radio') {
+                    el.value = value;
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
+
+            Object.entries(state.checks || {}).forEach(([name, values]) => {
+                document.querySelectorAll(`input[name="${name}"]`).forEach(el => {
+                    const key = el.value || el.id;
+                    if (Object.prototype.hasOwnProperty.call(values, key)) {
+                        el.checked = !!values[key];
+                    }
+                });
+            });
+
+            this.syncDriverPresence();
+            this.syncConditionalSceneSurveyControls();
+            this.updateThViTriOutput();
+            this.adjustTextareasHeight();
+            if (window.lucide) lucide.createIcons();
+        },
+
+        syncConditionalSceneSurveyControls() {
+            const cthhCheckbox = document.querySelector('input[name="sr-htGiayTo"][value="Chứng từ hàng hóa"]');
+            const cthhContainer = document.getElementById('sr-htGiayTo-cthh-container');
+            if (cthhCheckbox && cthhContainer) {
+                cthhContainer.classList.toggle('hidden', !cthhCheckbox.checked);
+            }
+
+            const khacRadio = document.querySelector('input[name="sr-thUocLuong"][value="Khác"]');
+            const uocLuongContainer = document.getElementById('sr-thUocLuong-khac-container');
+            if (khacRadio && uocLuongContainer) {
+                uocLuongContainer.classList.toggle('hidden', !khacRadio.checked);
+            }
+
+            const gplxValid = document.getElementById('gplx-valid-checkbox')?.checked;
+            if (typeof gplxValid === 'boolean') {
+                this.setGplxValidity(gplxValid, true);
             }
         },
 
@@ -19294,9 +19454,9 @@ Lưu ý: Chỉ trả về JSON thô (raw JSON text), không đặt trong thẻ c
                 const muted = hasValue(value) ? '' : 'opacity-60 italic';
                 const span = options.full ? 'sm:col-span-2' : '';
                 return `
-                    <div class="rounded-xl border border-slate-200/70 bg-white px-3 py-2.5 ${span}">
-                        <div class="text-[9px] font-black uppercase tracking-[0.08em] text-slate-400">${esc(label)}</div>
-                        <div class="mt-1 text-[12px] font-bold leading-relaxed text-slate-800 break-words ${muted}">${text}</div>
+                    <div class="ocr-review-value-card rounded-xl border px-3 py-2.5 ${span}">
+                        <div class="ocr-review-label text-[9px] font-black uppercase tracking-[0.08em]">${esc(label)}</div>
+                        <div class="ocr-review-value-text mt-1 text-[12px] font-bold leading-relaxed break-words ${muted}">${text}</div>
                     </div>
                 `;
             };
@@ -19311,14 +19471,14 @@ Lưu ý: Chỉ trả về JSON thô (raw JSON text), không đặt trong thẻ c
                     rose: 'bg-rose-50 text-rose-600 border-rose-100'
                 };
                 return `
-                    <section class="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3 shadow-sm">
+                    <section class="ocr-review-section rounded-2xl border p-3 shadow-sm">
                         <div class="mb-3 flex items-center gap-2.5">
                             <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border ${colorMap[accent] || colorMap.blue}">
                                 <i data-lucide="${icon}" class="h-4 w-4"></i>
                             </div>
                             <div class="min-w-0 text-left">
-                                <div class="text-[11px] font-black uppercase tracking-[0.08em] text-slate-800">${esc(title)}</div>
-                                <div class="text-[10px] font-semibold text-slate-400">${esc(subtitle)}</div>
+                                <div class="ocr-review-title text-[11px] font-black uppercase tracking-[0.08em]">${esc(title)}</div>
+                                <div class="ocr-review-subtitle text-[10px] font-semibold">${esc(subtitle)}</div>
                             </div>
                         </div>
                         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">${body}</div>
@@ -19343,18 +19503,18 @@ Lưu ý: Chỉ trả về JSON thô (raw JSON text), không đặt trong thẻ c
             ].filter(hasValue).length;
 
             const vehiclesBody = (ocrVehicles || []).map((v, index) => `
-                <div class="rounded-xl border border-slate-200/70 bg-white p-3">
+                <div class="ocr-review-value-card rounded-xl border p-3">
                     <div class="mb-2 flex items-center justify-between gap-2">
-                        <span class="rounded-lg bg-slate-100 px-2 py-1 text-[9px] font-black uppercase tracking-wide text-slate-500">Xe ${index + 1}</span>
-                        <span class="font-mono text-[12px] font-black uppercase text-slate-900">${esc(v.bks || 'Chưa rõ BKS')}</span>
+                        <span class="ocr-review-label ocr-review-badge rounded-lg bg-slate-100 px-2 py-1 text-[9px] font-black uppercase tracking-wide">Xe ${index + 1}</span>
+                        <span class="ocr-review-value-text font-mono text-[12px] font-black uppercase">${esc(v.bks || 'Chưa rõ BKS')}</span>
                     </div>
-                    <div class="text-[10px] font-black uppercase tracking-wide text-slate-400">Người điều khiển</div>
-                    <div class="mt-1 text-[12px] font-bold text-slate-700">${esc(v.driver || 'Chưa rõ lái xe')}</div>
+                    <div class="ocr-review-label text-[10px] font-black uppercase tracking-wide">Người điều khiển</div>
+                    <div class="ocr-review-value-text mt-1 text-[12px] font-bold">${esc(v.driver || 'Chưa rõ lái xe')}</div>
                 </div>
             `).join('');
 
             return `
-                <div class="bg-white text-slate-800">
+                <div class="ocr-review-root">
                     <div class="relative overflow-hidden bg-slate-950 px-5 pb-5 pt-5 text-white">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0 text-left">
@@ -19384,7 +19544,7 @@ Lưu ý: Chỉ trả về JSON thô (raw JSON text), không đặt trong thẻ c
                             </div>
                         </div>
                     </div>
-                    <div class="max-h-[58vh] space-y-3 overflow-y-auto bg-slate-100/80 p-4 text-left">
+                    <div class="ocr-review-body max-h-[58vh] space-y-3 overflow-y-auto p-4 text-left">
                         ${section('calendar-clock', 'Thông tin lập biên bản', 'Thời gian và địa điểm', `
                             ${valueLine('Thời gian lập', result.bbTime)}
                             ${valueLine('Địa điểm lập', result.bbLoc)}
