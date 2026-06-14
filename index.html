@@ -20068,6 +20068,11 @@ YÊU CẦU ĐẦU RA:
                         padding: 1px 4px;
                         text-align: justify;
                     }
+                    #ss-print-container .dotted-block.has-content {
+                        border-bottom: none;
+                        padding-left: 0;
+                        padding-right: 0;
+                    }
                     #ss-print-container .closing-text {
                         margin-top: 6px;
                         text-align: justify;
@@ -20093,8 +20098,9 @@ YÊU CẦU ĐẦU RA:
                     #ss-print-container .table-participants th,
                     #ss-print-container .table-participants td {
                         border: 1px solid #000;
-                        padding: 5px 8px;
+                        padding: 3px 6px;
                         text-align: left;
+                        vertical-align: top;
                     }
                     #ss-print-container .table-participants th {
                         background: #f3f4f6;
@@ -20195,14 +20201,21 @@ YÊU CẦU ĐẦU RA:
                 { name: rep3NameFormatted, role: ss.rep3Name ? (ss.rep3Role || 'Bên liên quan') : '', phone: '' },
                 { name: '', role: '', phone: '' }
             ];
-            const participantsPrintHtml = participants.map((p, index) => `
-                <div class="participant-line">
-                  <span>${index + 1}</span>
-                  <span class="editable" contenteditable="true" spellcheck="false">${p.name || '........................................'}</span>
-                  <span>là: <span class="editable" contenteditable="true" spellcheck="false">${p.role || '........................................'}</span></span>
-                  <span>Số ĐT: <span class="editable" contenteditable="true" spellcheck="false">${p.phone || '....................'}</span></span>
-                </div>
-            `).join('');
+            const participantsPrintHtml = `
+                <table class="table-participants">
+                  <tbody>
+                    ${participants.map((p, index) => `
+                      <tr>
+                        <td style="width: 34px; text-align: center;">${index + 1}</td>
+                        <td class="editable" contenteditable="true" spellcheck="false">${p.name || '........................................'}</td>
+                        <td>là: <span class="editable" contenteditable="true" spellcheck="false">${p.role || '........................................'}</span></td>
+                        <td>Số ĐT: <span class="editable" contenteditable="true" spellcheck="false">${p.phone || '....................'}</span></td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+            `;
+            const dottedClass = (value) => (value || '').trim() ? 'dotted-block has-content' : 'dotted-block';
 
             // Build the vehicles print HTML dynamically
             let vehiclesPrintHtml = '';
@@ -20492,16 +20505,16 @@ YÊU CẦU ĐẦU RA:
               <div class="info-row" style="margin-top: 10px;">
                 <span class="info-label">[9] Mô tả hiện trường tai nạn, vị trí phương tiện </span>
                 <span class="form-note">(Ghi nhận và đánh số thứ tự theo số tự nhiên vị trí phương tiện, nạn nhân, dấu vết tại sơ đồ hiện trường):</span>
-                <div class="info-val editable dotted-block" contenteditable="true" spellcheck="false">${ss.htMoTa || 'Theo sơ đồ hiện trường đính kèm theo hồ sơ'}</div>
+                <div class="info-val editable ${dottedClass(ss.htMoTa || 'Theo sơ đồ hiện trường đính kèm theo hồ sơ')}" contenteditable="true" spellcheck="false">${ss.htMoTa || 'Theo sơ đồ hiện trường đính kèm theo hồ sơ'}</div>
               </div>
               <div class="info-row" style="margin-top: 6px;">
                 <span class="info-label">[10] Dấu vết tại hiện trường </span>
                 <span class="form-note">(Ghi nhận vị trí, khoảng cách, chiều hướng từng dấu vết, vật chứng trong mối liên quan với đồ vật cũng như những dấu vết, vật chứng khác ở hiện trường. Xác định điểm đâm va của tai nạn):</span>
-                <div class="info-val editable dotted-block" contenteditable="true" spellcheck="false">${ss.htDauVet || '.......................................................................................................................'}</div>
+                <div class="info-val editable ${dottedClass(ss.htDauVet)}" contenteditable="true" spellcheck="false">${ss.htDauVet || '.......................................................................................................................'}</div>
               </div>
               <div class="info-row" style="margin-top: 6px;">
                 <span class="info-label">[11] Mẫu vật thu được tại hiện trường:</span>
-                <div class="info-val editable dotted-block" contenteditable="true" spellcheck="false">${ss.htMauVat || 'Không thu được mẫu vật.'}</div>
+                <div class="info-val editable ${dottedClass(ss.htMauVat || 'Không thu được mẫu vật.')}" contenteditable="true" spellcheck="false">${ss.htMauVat || 'Không thu được mẫu vật.'}</div>
               </div>
               <div class="info-row">
                 <span>Những mẫu vật nói trên được thu lượm bảo quản đưa về BH Tasco để xem xét xử lý. Trong quá trình giám định chúng tôi đã vẽ sơ đồ hiện trường, đo đạc, chụp ảnh, ghi hình.</span>
@@ -20530,7 +20543,7 @@ YÊU CẦU ĐẦU RA:
               </div>
               <div class="info-row" style="text-align: left; padding-left: 15px; margin-top: 4px;">
                 <span style="font-style: italic; font-weight: bold; display: block; margin-bottom: 4px; color: #334155;">Liệt kê sơ bộ vật tư, phụ tùng thiệt hại:</span>
-                <div class="editable dotted-block" contenteditable="true" spellcheck="false" style="font-weight: bold;">${ss.thLietKe || '........................................................................................................................................................................'}</div>
+                <div class="editable ${dottedClass(ss.thLietKe)}" contenteditable="true" spellcheck="false" style="font-weight: bold;">${ss.thLietKe || '........................................................................................................................................................................'}</div>
               </div>
               <div class="info-row">
                 <span class="info-label">[15] Thiệt hại về người:</span>
@@ -20539,7 +20552,7 @@ YÊU CẦU ĐẦU RA:
               <div class="info-row">
                 <span class="info-label">[16] Ghi chú </span>
                 <span class="form-note">(Ghi lại lời khai lái xe, nhân chứng)</span>
-                <div class="info-val editable dotted-block" contenteditable="true" spellcheck="false">${ss.thGhiChu || '.......................................................................................................................'}</div>
+                <div class="info-val editable ${dottedClass(ss.thGhiChu)}" contenteditable="true" spellcheck="false">${ss.thGhiChu || '.......................................................................................................................'}</div>
               </div>
               <div class="info-row">
                 <span class="info-label">Đề xuất khác:</span>
