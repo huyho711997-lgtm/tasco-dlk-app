@@ -2009,7 +2009,7 @@ function openRecord(id) {
     gtSec.classList.add('hidden');
   }
 
-  // Hạng mục giám định (tab riêng)
+  // Hạng mục giám định (tab riêng & đếm động)
   const items = r.damageItems || [];
   const dmWrap  = document.getElementById('md-damage-wrap');
   const dmEmpty = document.getElementById('md-damage-empty');
@@ -2017,14 +2017,30 @@ function openRecord(id) {
     dmWrap.style.display = 'block';
     dmEmpty.style.display = 'none';
     const total = items.reduce((acc, d) => acc + (d.giaOem || d.giaAm || 0), 0);
+    const namedCount = items.filter(d => d.chiTiet && d.chiTiet.trim() !== '' && d.chiTiet !== '—').length;
+    const photoCount = items.filter(d => (d.photos && d.photos.length > 0) || d.hasPhoto).length;
+
+    // Cập nhật thẻ đếm động nếu có trên UI
+    const countNamedEl = document.getElementById('md-count-named');
+    if (countNamedEl) countNamedEl.textContent = `Ghi tên: ${String(namedCount).padStart(2, '0')}/${String(items.length).padStart(2, '0')}`;
+    const countPhotosEl = document.getElementById('md-count-photos');
+    if (countPhotosEl) countPhotosEl.textContent = `Có ảnh: ${String(photoCount).padStart(2, '0')}/${String(items.length).padStart(2, '0')}`;
+
     document.getElementById('md-damage-body').innerHTML = items.map((d, i) => {
-      const pa = d.suaChua ? 'Sửa chữa' : 'Thay thế';
+      const pa = d.suaChua ? 'Sửa chữa' : (d.thayThe ? 'Thay thế' : 'Phán đoán');
       const chipCls = d.suaChua ? 'chip-3' : 'chip-5';
       const gia = (d.giaOem || d.giaAm) ? Number(d.giaOem || d.giaAm).toLocaleString('vi-VN') + 'đ' : '—';
       const moTaHtml = d.moTa ? `<div style="font-size:10px;color:var(--muted);margin-top:3px">${d.moTa}</div>` : '';
+      const photoStatus = (d.photos && d.photos.length > 0) || d.hasPhoto
+        ? '<span class="chip chip-6" style="font-size:9px">✓ Đã có ảnh</span>'
+        : '<span class="chip chip-2" style="font-size:9px">📷 Cần ảnh</span>';
+
       return `<tr>
-        <td style="padding-left:16px;text-align:center;color:var(--muted);font-size:11px">${i+1}</td>
-        <td><div style="font-size:12px;font-weight:800">${d.chiTiet || '—'}</div>${moTaHtml}</td>
+        <td style="padding-left:16px;text-align:center;color:var(--muted);font-size:11px">${String(i + 1).padStart(2, '0')}</td>
+        <td>
+          <div style="font-size:12px;font-weight:800;display:flex;align-items:center;gap:6px">${d.chiTiet || '—'} ${photoStatus}</div>
+          ${moTaHtml}
+        </td>
         <td style="text-align:center"><span class="chip ${chipCls}" style="font-size:9px">${pa}</span></td>
         <td style="text-align:right;padding-right:16px;font-size:12px;font-weight:700;font-family:monospace">${gia}</td>
       </tr>`;
