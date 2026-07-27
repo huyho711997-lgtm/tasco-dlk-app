@@ -2035,10 +2035,19 @@ function openRecord(id) {
         ? '<span class="chip chip-6" style="font-size:9px">✓ Đã có ảnh</span>'
         : '<span class="chip chip-2" style="font-size:9px">📷 Cần ảnh</span>';
 
+      let catTagBadge = '';
+      if (d.categoryTag === 'giayTo') {
+        catTagBadge = '<span class="chip chip-5" style="font-size:9px">📄 Giấy tờ</span>';
+      } else if (d.categoryTag === 'tongThe') {
+        catTagBadge = '<span class="chip chip-1" style="font-size:9px">📸 Ảnh tổng thể</span>';
+      } else if (d.categoryTag === 'tonThat') {
+        catTagBadge = '<span class="chip chip-2" style="font-size:9px">🛠️ Tổn thất</span>';
+      }
+
       return `<tr>
         <td style="padding-left:16px;text-align:center;color:var(--muted);font-size:11px">${String(i + 1).padStart(2, '0')}</td>
         <td>
-          <div style="font-size:12px;font-weight:800;display:flex;align-items:center;gap:6px">${d.chiTiet || '—'} ${photoStatus}</div>
+          <div style="font-size:12px;font-weight:800;display:flex;align-items:center;gap:6px;flex-wrap:wrap">${d.chiTiet || '—'} ${catTagBadge} ${photoStatus}</div>
           ${moTaHtml}
         </td>
         <td style="text-align:center"><span class="chip ${chipCls}" style="font-size:9px">${pa}</span></td>
