@@ -22799,22 +22799,22 @@ const fullList = getCarBrandLossData();
       }).join('');
 
       container.innerHTML = `
-        <div style="padding: 24px 28px; max-width: 100%; margin: 0 auto;">
+        <div style="padding: 16px 0 32px 0; width: 100%; max-width: 100%; margin: 0 auto;">
           
           <!-- HERO HEADER BANNER -->
-          <div style="background: linear-gradient(145deg, rgba(239, 68, 68, 0.04) 0%, rgba(239, 68, 68, 0.1) 100%), var(--surface); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 20px; padding: 24px 32px; margin-bottom: 24px; box-shadow: 0 8px 30px -8px rgba(0,0,0,0.12); position: relative; overflow: hidden;">
+          <div style="background: linear-gradient(145deg, rgba(239, 68, 68, 0.04) 0%, rgba(239, 68, 68, 0.1) 100%), var(--surface); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 20px; padding: 24px 28px; margin-bottom: 20px; box-shadow: 0 8px 30px -8px rgba(0,0,0,0.12); position: relative; overflow: hidden;">
             <div style="position: absolute; right: -50px; top: -50px; width: 280px; height: 280px; background: radial-gradient(circle, rgba(239, 68, 68, 0.18) 0%, rgba(0,0,0,0) 70%); border-radius: 50%; pointer-events: none; filter: blur(24px);"></div>
             
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; position: relative; z-index: 2;">
               <div style="flex: 1; min-width: 320px;">
-                <div style="display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); border-radius: 16px; font-size: 11px; font-weight: 800; color: #ef4444; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">
+                <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; padding: 5px 14px; border-radius: 99px; font-size: 11.5px; font-weight: 850; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 10px;">
                   <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-                  Quản lý Nghiệp vụ Hủy hồ sơ
+                  <span>Quản lý Nghiệp vụ Hủy hồ sơ</span>
                 </div>
-                <h1 style="font-size: 28px; font-weight: 900; background: linear-gradient(135deg, var(--text-main) 0%, #9ca3af 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0 0 10px 0; letter-spacing: -0.02em; line-height: 1.2;">
+                <h1 style="font-size: 27px; font-weight: 900; color: var(--text-main); margin: 0 0 8px 0; letter-spacing: -0.02em; line-height: 1.25;">
                   Đề xuất Hủy Hồ sơ Bồi thường
                 </h1>
-                <p style="font-size: 13px; color: var(--text-soft); margin: 0; max-width: 800px; line-height: 1.5;">
+                <p style="margin: 0; font-size: 13.5px; color: var(--text-soft); max-width: 950px; line-height: 1.5;">
                   Tổng hợp toàn bộ hồ sơ do Giám định viên đề xuất hủy hoặc từ chối bồi thường • Theo dõi lý do, căn cứ giải trình và hỗ trợ nhập/xuất Excel trình ký.
                 </p>
               </div>
@@ -22834,7 +22834,7 @@ const fullList = getCarBrandLossData();
           </div>
 
           <!-- 4 SUMMARY KPI METRIC CARDS -->
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px;">
             <!-- Card 1: Tổng hồ sơ đề xuất hủy -->
             <div onclick="setCancelStatusFilter('all')" style="background: var(--surface); border: 1px solid ${activeCancelStatusFilter === 'all' ? '#ef4444' : 'var(--border-strong)'}; border-radius: 16px; padding: 18px 22px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
@@ -22887,7 +22887,7 @@ const fullList = getCarBrandLossData();
           </div>
 
           <!-- FILTER TOOLBAR ROW (STANDALONE CARD matching software design system) -->
-          <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; background: var(--surface); padding: 14px 20px; border-radius: 16px; border: 1px solid var(--border-strong); box-shadow: var(--shadow-sm);">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; background: var(--surface); padding: 14px 20px; border-radius: 16px; border: 1px solid var(--border-strong); box-shadow: var(--shadow-sm);">
             
             <!-- Left Side: Search Input -->
             <div class="search-wrap" style="margin: 0; min-width: 240px; max-width: 320px; flex: 1;">
