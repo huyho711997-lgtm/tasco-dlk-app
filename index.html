@@ -23128,8 +23128,11 @@ const fullList = getCarBrandLossData();
         }
 
         triggerToast(`Đã xóa đề xuất hủy cho hồ sơ ${bsx} thành công!`, 'success');
-        if (typeof renderClaimCancellationPage === 'function') {
+        if (activeDashboardTab === 'claim_cancellation' && typeof renderClaimCancellationPage === 'function') {
           renderClaimCancellationPage();
+        }
+        if (typeof executeUIRenderPendingClaims === 'function') {
+          executeUIRenderPendingClaims();
         }
         if (typeof renderPendingClaimsTable === 'function') {
           renderPendingClaimsTable();
@@ -23364,6 +23367,7 @@ const fullList = getCarBrandLossData();
       if (btnSave) btnSave.disabled = true;
 
       try {
+        const targetClaimId = activeCancelProposalClaimId;
         const currentUser = (activeUserProfile?.displayName || activeUserProfile?.fullName || 'Hệ thống');
         const updates = {
           deXuatHuy: true,
@@ -23377,23 +23381,26 @@ const fullList = getCarBrandLossData();
         };
 
         if (dbNodeInstance) {
-          await dbNodeInstance.ref(`pending_claims/${activeCancelProposalClaimId}`).update(updates);
+          await dbNodeInstance.ref(`pending_claims/${targetClaimId}`).update(updates);
         }
 
-        if (cachedPendingClaimsPayload && cachedPendingClaimsPayload[activeCancelProposalClaimId]) {
-          cachedPendingClaimsPayload[activeCancelProposalClaimId] = {
-            ...cachedPendingClaimsPayload[activeCancelProposalClaimId],
+        if (cachedPendingClaimsPayload && cachedPendingClaimsPayload[targetClaimId]) {
+          cachedPendingClaimsPayload[targetClaimId] = {
+            ...cachedPendingClaimsPayload[targetClaimId],
             ...updates
           };
         }
 
         triggerToast('Đã chuyển hồ sơ sang trạng thái Đề xuất hủy thành công!', 'success');
         closeCreateCancellationProposalModal();
-        if (typeof editingPendingClaimId !== 'undefined' && editingPendingClaimId === activeCancelProposalClaimId) {
-          updateHeaderCancelClaimProposalButton(cachedPendingClaimsPayload[activeCancelProposalClaimId]);
+        if (typeof editingPendingClaimId !== 'undefined' && editingPendingClaimId === targetClaimId) {
+          updateHeaderCancelClaimProposalButton(cachedPendingClaimsPayload[targetClaimId]);
         }
-        if (typeof renderClaimCancellationPage === 'function') {
+        if (activeDashboardTab === 'claim_cancellation' && typeof renderClaimCancellationPage === 'function') {
           renderClaimCancellationPage();
+        }
+        if (typeof executeUIRenderPendingClaims === 'function') {
+          executeUIRenderPendingClaims();
         }
         if (typeof renderPendingClaimsTable === 'function') {
           renderPendingClaimsTable();
@@ -23441,7 +23448,15 @@ const fullList = getCarBrandLossData();
         }
 
         triggerToast(`Đã phê duyệt hủy hồ sơ ${bsx} thành công!`, 'success');
-        renderClaimCancellationPage();
+        if (activeDashboardTab === 'claim_cancellation' && typeof renderClaimCancellationPage === 'function') {
+          renderClaimCancellationPage();
+        }
+        if (typeof executeUIRenderPendingClaims === 'function') {
+          executeUIRenderPendingClaims();
+        }
+        if (typeof renderPendingClaimsTable === 'function') {
+          renderPendingClaimsTable();
+        }
       } catch (err) {
         console.error("Lỗi duyệt hủy:", err);
         triggerToast('Lỗi duyệt hủy: ' + err.message, 'error');
@@ -23484,7 +23499,15 @@ const fullList = getCarBrandLossData();
         }
 
         triggerToast(`Đã hoàn tác đề xuất hủy cho ${bsx}!`, 'info');
-        renderClaimCancellationPage();
+        if (activeDashboardTab === 'claim_cancellation' && typeof renderClaimCancellationPage === 'function') {
+          renderClaimCancellationPage();
+        }
+        if (typeof executeUIRenderPendingClaims === 'function') {
+          executeUIRenderPendingClaims();
+        }
+        if (typeof renderPendingClaimsTable === 'function') {
+          renderPendingClaimsTable();
+        }
       } catch (err) {
         console.error("Lỗi hoàn tác:", err);
         triggerToast('Lỗi hoàn tác: ' + err.message, 'error');
@@ -23719,7 +23742,12 @@ const fullList = getCarBrandLossData();
 
         triggerToast(`Đã nhập thành công ${updatedCount + createdCount} đề xuất hủy từ Excel!`, 'success');
         closeImportCancellationExcelModal();
-        renderClaimCancellationPage();
+        if (activeDashboardTab === 'claim_cancellation' && typeof renderClaimCancellationPage === 'function') {
+          renderClaimCancellationPage();
+        }
+        if (typeof executeUIRenderPendingClaims === 'function') {
+          executeUIRenderPendingClaims();
+        }
       } catch (err) {
         console.error("Lỗi cập nhật danh sách đề xuất hủy:", err);
         triggerToast('Lỗi khi cập nhật dữ liệu: ' + err.message, 'error');
