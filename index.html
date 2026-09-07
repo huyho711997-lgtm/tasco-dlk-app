@@ -2678,7 +2678,13 @@
               <p id="addPendingClaimModalSubtitle" style="font-size: 12px; color: var(--text-muted); margin: 3px 0 0 0;">Quản lý và cập nhật thông tin chi tiết hồ sơ bồi thường xe cơ giới.</p>
             </div>
           </div>
-          <button type="button" class="btn-premium btn-secondary" onclick="closeAddPendingClaimModal()" aria-label="Đóng" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; border-radius: 10px; font-size: 18px; display: grid; place-items: center; cursor: pointer;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <button id="btnHeaderCancelClaimProposal" type="button" onclick="triggerHeaderClaimCancelAction()" style="display: none; height: 36px; padding: 0 16px; border-radius: 10px; font-size: 12.5px; font-weight: 850; cursor: pointer; transition: all 0.2s ease; align-items: center; gap: 6px;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+              <span>Hủy hồ sơ</span>
+            </button>
+            <button type="button" class="btn-premium btn-secondary" onclick="closeAddPendingClaimModal()" aria-label="Đóng" style="width: 36px; height: 36px; min-width: 36px; min-height: 36px; padding: 0; border-radius: 10px; font-size: 18px; display: grid; place-items: center; cursor: pointer;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+          </div>
         </div>
 
         <!-- Tabbed Navigation Menu Bar with SVG Icons -->
@@ -3121,7 +3127,7 @@
   </div>
 
   <!-- Modal Tạo / Sửa Đề xuất Hủy Hồ sơ -->
-  <div id="createCancellationProposalModalOverlay" class="p-modal-overlay" aria-hidden="true" style="display: none;">
+  <div id="createCancellationProposalModalOverlay" class="p-modal-overlay" aria-hidden="true" style="display: none; z-index: 9500;">
     <section class="profile-modal-panel" role="dialog" aria-modal="true" aria-labelledby="cancelModalTitle" style="max-width: 580px; width: 92%; border-radius: 20px; overflow: hidden; padding: 0; box-shadow: var(--shadow-lg);">
       <!-- Header -->
       <div style="padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--surface-strong);">
@@ -3181,19 +3187,16 @@
           <textarea id="txtCancelNotes" class="textarea-premium" rows="4" placeholder="Nhập diễn biến, căn cứ hồ sơ và giải trình chi tiết lý do đề xuất hủy..." style="width: 100%; min-height: 90px; padding: 12px 14px; font-family: inherit; font-size: 13px; font-weight: 600; border-radius: 12px; line-height: 1.5;"></textarea>
         </div>
 
-        <!-- Approval Option for Admins/Managers -->
-        <div style="background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px;">
-          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 12.5px; font-weight: 750; color: var(--text-main); margin: 0;">
-            <input type="checkbox" id="chkCancelDirectApproval" style="width: 17px; height: 17px; accent-color: #ef4444; cursor: pointer;" />
-            <span>Phê duyệt hủy chính thức ngay (Chuyển hồ sơ sang trạng thái "Từ chối")</span>
-          </label>
-          <p style="font-size: 11px; color: var(--text-muted); margin: 4px 0 0 27px;">Nếu bỏ chọn, hồ sơ sẽ lưu ở trạng thái "Chờ duyệt hủy" để cấp quản lý phê duyệt sau.</p>
-        </div>
+
       </div>
 
       <!-- Footer -->
-      <div style="padding: 14px 24px; border-top: 1px solid var(--border); background: var(--surface-strong); display: flex; justify-content: flex-end; gap: 10px;">
-        <button type="button" class="btn-premium btn-secondary" onclick="closeCreateCancellationProposalModal()" style="width: auto !important; padding: 0 16px; height: 38px; cursor: pointer; font-size: 12px;">Hủy bỏ</button>
+      <div style="padding: 14px 24px; border-top: 1px solid var(--border); background: var(--surface-strong); display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
+        <button id="btnRevertCancelProposal" type="button" class="btn-premium btn-secondary" onclick="revertCancellationFromModal()" style="display: none; margin-right: auto; background: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.35); font-size: 12px; font-weight: 800; height: 38px; padding: 0 14px; border-radius: 8px; cursor: pointer;">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3" style="vertical-align: middle; margin-right: 4px;"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+          <span>Hủy bỏ đề xuất hủy</span>
+        </button>
+        <button type="button" class="btn-premium btn-secondary" onclick="closeCreateCancellationProposalModal()" style="width: auto !important; padding: 0 16px; height: 38px; cursor: pointer; font-size: 12px;">Đóng</button>
         <button id="btnSaveCancelProposal" type="button" class="btn-premium" onclick="saveCancellationProposalFromModal()" style="width: auto !important; padding: 0 22px; height: 38px; font-weight: 800; background: linear-gradient(135deg, #ef4444, #dc2626); color: #ffffff; border: none; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12.5px; box-shadow: 0 4px 12px rgba(239,68,68,0.3);">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
           <span>Lưu Đề xuất Hủy</span>
@@ -6103,6 +6106,8 @@ let cachedCasesPayload = null;
 
       editingPendingClaimId = null;
 
+      updateHeaderCancelClaimProposalButton(null);
+
       const titleEl = document.getElementById('addPendingClaimModalTitle');
       if (titleEl) titleEl.textContent = 'Tiếp nhận hồ sơ tổn thất mới';
 
@@ -6184,6 +6189,8 @@ let cachedCasesPayload = null;
 
       editingPendingClaimId = claimId;
       const isEditing = true;
+
+      updateHeaderCancelClaimProposalButton(item);
 
       const titleEl = document.getElementById('addPendingClaimModalTitle');
       if (titleEl) titleEl.textContent = `Chỉnh sửa thông tin hồ sơ (${item.bienSo})`;
@@ -7888,6 +7895,14 @@ function formatDateDisplay(val) {
               <span style="background: ${statusConfig.bg}; color: ${statusConfig.color}; border: 1px solid ${statusConfig.border}; font-size: 10.5px; font-weight: 750; padding: 4px 10px; border-radius: 99px; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap;">
                 ${statusConfig.label}
               </span>
+              ${(item.deXuatHuy === true || item.deXuatHuy === 'co' || item.isCancelProposal === true) ? `
+                <div style="margin-top: 4px;">
+                  <span style="background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.35); font-size: 9.5px; font-weight: 800; padding: 2px 7px; border-radius: 99px; display: inline-flex; align-items: center; gap: 3px; white-space: nowrap;">
+                    <svg viewBox="0 0 24 24" width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                    Đề xuất hủy
+                  </span>
+                </div>
+              ` : ''}
               ${formattedUpdateDate ? `<div style="font-size: 10px; font-weight: 700; color: var(--text-soft); margin-top: 6px;">${formattedUpdateDate}</div>` : ''}
             </td>
             <td style="width: 220px;">
@@ -10858,17 +10873,26 @@ function formatDateDisplay(val) {
     }
 
     function triggerUploadFromGallery(index) {
+      prefetchGpsCoordinates();
       const inputEl = document.getElementById(`garageEvidenceInput_${index}`);
       if (inputEl) {
         inputEl.removeAttribute('capture');
+        inputEl.dataset.sourceType = 'gallery';
         inputEl.click();
       }
     }
 
     function openMobileCameraForEvidence(index) {
+      prefetchGpsCoordinates();
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (!isMobile) {
+        openCustomCameraModal(index);
+        return;
+      }
       const inputEl = document.getElementById(`garageEvidenceInput_${index}`);
       if (inputEl) {
         inputEl.setAttribute('capture', 'environment');
+        inputEl.dataset.sourceType = 'camera';
         inputEl.click();
       }
     }
@@ -11095,6 +11119,7 @@ function formatDateDisplay(val) {
     function renderPortalGarageInteractiveInputView() {
       if (!localActiveImageStack.length && !localActiveRequestedItems.length && !localActiveCaseNode) return renderErrorLayoutState('Hồ sơ hiện tại chưa có nội dung yêu cầu Garage xử lý.');
       garagePortalMounted = true;
+      try { prefetchGpsCoordinates(); } catch (_) {}
 
       let imageInputSection = '';
       if (localActiveImageStack.length > 0) {
@@ -11214,9 +11239,13 @@ function formatDateDisplay(val) {
         actionButtonsMarkup = `
           ${hiddenFileInputMarkup}
           <div class="evidence-upload-actions" style="margin-bottom: 8px; width: 100%; display: flex; gap: 6px; flex-wrap: wrap;">
-            <button type="button" class="btn-premium btn-secondary" onclick="triggerUploadFromGallery(${index})" style="width: 100%; min-height: 38px; font-size: 12px; border-radius: 8px; background: var(--surface); color: var(--text-main); font-weight: 800; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+            <button type="button" class="btn-premium" onclick="openMobileCameraForEvidence(${index})" style="flex: 1; min-width: 120px; min-height: 38px; font-size: 12px; border-radius: 8px; background: linear-gradient(135deg, #d8b46d 0%, #b38c43 100%); color: #080b11; font-weight: 850; border: none; box-shadow: 0 4px 12px rgba(216,180,109,0.25); display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: transform 0.15s ease;">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+              <span>Chụp ảnh</span>
+            </button>
+            <button type="button" class="btn-premium btn-secondary" onclick="triggerUploadFromGallery(${index})" style="flex: 1; min-width: 120px; min-height: 38px; font-size: 12px; border-radius: 8px; background: var(--surface); color: var(--text-main); font-weight: 800; border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: background 0.15s ease;">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#3b82f6" stroke-width="2.5" style="flex-shrink:0;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg>
-              <span>Tải ảnh từ máy</span>
+              <span>Tải từ máy</span>
             </button>
           </div>
         `;
@@ -11537,7 +11566,7 @@ function formatDateDisplay(val) {
           };
           reverseGeocodeAddress(lat, lon).then((address) => {
             if (address) lastFetchedAddress = address;
-          });
+          }).catch(() => {});
         },
         (error) => {
           console.warn('Real-time Geolocation error:', error);
@@ -11545,11 +11574,73 @@ function formatDateDisplay(val) {
             gpsPermissionDenied = true;
           }
         },
-        { enableHighAccuracy: false, timeout: 4000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 30000 }
       );
     }
 
-    function addWatermarkToImageFile(file, categoryName) {
+    async function ensureRealtimeGpsCoordinates() {
+      if (lastFetchedAddress && lastFetchedGpsCoords) {
+        return { address: lastFetchedAddress, coords: lastFetchedGpsCoords };
+      }
+      if (lastFetchedGpsCoords) {
+        try {
+          const addr = await Promise.race([
+            reverseGeocodeAddress(lastFetchedGpsCoords.latitude, lastFetchedGpsCoords.longitude),
+            new Promise(r => setTimeout(() => r(null), 1500))
+          ]);
+          if (addr) lastFetchedAddress = addr;
+        } catch (_) {}
+        return { address: lastFetchedAddress, coords: lastFetchedGpsCoords };
+      }
+      if (!navigator.geolocation || gpsPermissionDenied) {
+        return { address: null, coords: null };
+      }
+      return new Promise((resolve) => {
+        let finished = false;
+        const finish = () => {
+          if (!finished) {
+            finished = true;
+            resolve({ address: lastFetchedAddress, coords: lastFetchedGpsCoords });
+          }
+        };
+        const timer = setTimeout(finish, 2200);
+
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            lastFetchedGpsCoords = {
+              latitude: lat.toFixed(6),
+              longitude: lon.toFixed(6)
+            };
+            try {
+              const addr = await Promise.race([
+                reverseGeocodeAddress(lat, lon),
+                new Promise(r => setTimeout(() => r(null), 1200))
+              ]);
+              if (addr) lastFetchedAddress = addr;
+            } catch (_) {}
+            clearTimeout(timer);
+            finish();
+          },
+          (err) => {
+            console.warn('Geolocation error:', err);
+            if (err && err.code === 1) gpsPermissionDenied = true;
+            clearTimeout(timer);
+            finish();
+          },
+          { enableHighAccuracy: true, timeout: 3000, maximumAge: 30000 }
+        );
+      });
+    }
+
+    async function addWatermarkToImageFile(file, categoryName) {
+      // 1. Fetch real-time GPS & address
+      let gpsLocation = { address: lastFetchedAddress, coords: lastFetchedGpsCoords };
+      try {
+        gpsLocation = await ensureRealtimeGpsCoordinates();
+      } catch (_) {}
+
       return new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -11563,60 +11654,86 @@ function formatDateDisplay(val) {
             // Draw original image
             ctx.drawImage(img, 0, 0);
             
-            // Proportional layout configuration
+            // Proportional layout configuration - watermark matching user's reference design
             const w = canvas.width;
             const h = canvas.height;
-            const fontSize = Math.max(16, Math.round(w / 45));
-            const padding = Math.max(16, Math.round(w / 50));
+            // Font size slightly smaller as requested (w / 56)
+            const fontSize = Math.max(13, Math.round(w / 56));
+            const padding = Math.max(14, Math.round(w / 45));
             const lineHeight = fontSize * 1.35;
             
-            // Setup text style
+            // Setup text style: pure white, bold sans-serif, right aligned, bottom aligned
             ctx.font = `bold ${fontSize}px sans-serif`;
             ctx.fillStyle = '#FFFFFF';
             ctx.textBaseline = 'bottom';
             ctx.textAlign = 'right';
             
-            // Text shadow for readability on light backgrounds
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-            ctx.shadowBlur = Math.max(3, Math.round(w / 300));
+            // Text shadow for high contrast & legibility on all backgrounds
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+            ctx.shadowBlur = Math.max(3, Math.round(w / 350));
             ctx.shadowOffsetX = Math.max(1, Math.round(w / 600));
             ctx.shadowOffsetY = Math.max(1, Math.round(w / 600));
             
             // Prepare texts
             const caseNode = localActiveCaseNode || {};
-            const adjusterName = activeUserProfile?.tenHienThi || activeUserProfile?.email || caseNode.nguoiTao?.tenHienThi || caseNode.nguoiTao?.email || 'N/A';
-            
             const now = new Date();
             const timeStr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
             
-            let gpsStr = 'Chưa xác định (Chưa cấp quyền GPS)';
-            if (lastFetchedAddress) {
-              gpsStr = lastFetchedAddress;
-            } else if (lastFetchedGpsCoords) {
-              gpsStr = `${lastFetchedGpsCoords.latitude}, ${lastFetchedGpsCoords.longitude}`;
+            let gpsStr = '';
+            if (gpsLocation.address) {
+              gpsStr = gpsLocation.address;
+            } else if (gpsLocation.coords) {
+              gpsStr = `${gpsLocation.coords.latitude}, ${gpsLocation.coords.longitude}`;
+            } else {
+              const gName = caseNode.tenGara || caseNode.garaSuaChua || caseNode.garage || '';
+              gpsStr = gName ? `${gName} (GPS chưa cấp quyền)` : 'Chưa xác định (Chưa cấp quyền GPS)';
             }
             
-            const line1 = `TASCO DLK`;
-            const line3 = `${timeStr}`;
-            const line4 = `${gpsStr}`;
+            const line1 = 'TASCO DLK';
+            const line2 = timeStr;
+            const line3 = gpsStr;
             
-            // Draw lines of text from bottom to top
+            // Handle address wrapping if too long for one line
+            const maxLineWidth = w - padding * 2;
+            const addressLines = [];
+            if (ctx.measureText(line3).width > maxLineWidth) {
+              const parts = line3.split(', ');
+              let currentPart = '';
+              for (const part of parts) {
+                const test = currentPart ? `${currentPart}, ${part}` : part;
+                if (ctx.measureText(test).width > maxLineWidth && currentPart) {
+                  addressLines.push(currentPart);
+                  currentPart = part;
+                } else {
+                  currentPart = test;
+                }
+              }
+              if (currentPart) addressLines.push(currentPart);
+            } else {
+              addressLines.push(line3);
+            }
+            
+            const rightX = w - padding;
             let currentY = h - padding;
-            ctx.fillText(line4, w - padding, currentY);
-            currentY -= lineHeight;
-            ctx.fillText(line3, w - padding, currentY);
-            currentY -= lineHeight;
-            ctx.fillText(line1, w - padding, currentY);
             
-            // Convert canvas back to Blob/File
+            // Draw lines from bottom to top: Address -> Time -> TASCO DLK
+            for (let i = addressLines.length - 1; i >= 0; i--) {
+              ctx.fillText(addressLines[i], rightX, currentY);
+              currentY -= lineHeight;
+            }
+            ctx.fillText(line2, rightX, currentY);
+            currentY -= lineHeight;
+            ctx.fillText(line1, rightX, currentY);
+            
+            // Convert canvas back to Blob/File (using JPEG for universal compatibility)
             canvas.toBlob((blob) => {
               if (blob) {
-                const stampedFile = new File([blob], file.name, { type: file.type });
+                const stampedFile = new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg', lastModified: Date.now() });
                 resolve(stampedFile);
               } else {
                 resolve(file);
               }
-            }, file.type, 0.9);
+            }, 'image/jpeg', 0.92);
           };
           img.onerror = () => resolve(file);
           img.src = e.target.result;
@@ -11997,9 +12114,7 @@ function formatDateDisplay(val) {
       customCameraPhotos = [];
     }
 
-    function openMobileCameraForEvidence(index) {
-      openCustomCameraModal(index);
-    }
+    // Note: openMobileCameraForEvidence is declared above with automatic mobile/desktop routing
 
     function normalizeEvidenceImageUrls(item) {
       const rawValue = item?.hinhAnhGarage ?? item?.linkAnhGarage ?? [];
@@ -12106,13 +12221,10 @@ function formatDateDisplay(val) {
       const categoryName = localActiveRequestedItems[requestIndex].tenHangMuc || `H\u1ea1ng m\u1ee5c ${requestIndex + 1}`;
       setEvidenceUploadUI(requestIndex, true, `\u0110ang x\u1eed l\u00fd ${incomingFiles.length} \u1ea3nh`, 5);
 
-      let processedFiles = incomingFiles;
-      if (isCameraSource) {
-        setEvidenceUploadUI(requestIndex, true, `\u0110ang \u0111\u00f3ng d\u1ea5u \u1ea3nh...`, 10);
-        processedFiles = await Promise.all(
-          incomingFiles.map(file => addWatermarkToImageFile(file, categoryName))
-        );
-      }
+      setEvidenceUploadUI(requestIndex, true, 'Đang đóng dấu ngày giờ & toạ độ...', 10);
+      const processedFiles = await Promise.all(
+        incomingFiles.map(file => addWatermarkToImageFile(file, categoryName))
+      );
 
       const currentUrls = normalizeEvidenceImageUrls(localActiveRequestedItems[requestIndex]);
       const { valid, rejected } = validateGarageEvidenceFiles(processedFiles, currentUrls.length);
@@ -12737,9 +12849,18 @@ function formatDateDisplay(val) {
         
         const originalConfirmText = confirmButton.textContent;
         const originalCancelText = cancelButton.textContent;
-        confirmButton.textContent = confirmText;
+        const originalConfirmBg = confirmButton.style.background;
+        const originalConfirmColor = confirmButton.style.color;
+        const originalConfirmBorder = confirmButton.style.border;
 
+        confirmButton.textContent = confirmText;
         cancelButton.textContent = cancelText;
+
+        if (String(confirmText).toLowerCase().includes('xóa') || String(title).toLowerCase().includes('xóa')) {
+          confirmButton.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+          confirmButton.style.color = '#ffffff';
+          confirmButton.style.border = 'none';
+        }
 
         overlay.style.zIndex = '999999';
         overlay.style.display = 'grid';
@@ -12750,6 +12871,9 @@ function formatDateDisplay(val) {
           document.body.style.overflow = '';
           confirmButton.textContent = originalConfirmText;
           cancelButton.textContent = originalCancelText;
+          confirmButton.style.background = originalConfirmBg;
+          confirmButton.style.color = originalConfirmColor;
+          confirmButton.style.border = originalConfirmBorder;
           cancelButton.removeEventListener('click', onCancel);
           confirmButton.removeEventListener('click', onConfirm);
           overlay.removeEventListener('click', onBackdrop);
@@ -22463,18 +22587,11 @@ const fullList = getCarBrandLossData();
         _claimKey: k
       }));
 
-      // Candidate claims for cancellation
+      // Candidate claims for cancellation: Phù hợp điều chỉnh chỉ lấy hồ sơ được đánh dấu Đề xuất hủy
       const cancelClaims = allClaims.filter(c => {
-        if (c.deXuatHuy === true || c.deXuatHuy === 'co' || c.isCancelProposal === true) return true;
-        if (c.trangThai === 'tu_choi') return true;
-        if (c.cancelReasonCode) return true;
-        if (c.lyDoHuy && String(c.lyDoHuy).trim() !== '' && String(c.lyDoHuy).trim() !== '-') return true;
-        if (c.lyDoChoViecHuy && String(c.lyDoChoViecHuy).trim() !== '' && String(c.lyDoChoViecHuy).trim() !== '-') return true;
-        const deXuat = String(c.deXuat || '').toLowerCase();
-        if (deXuat.includes('hủy') || deXuat.includes('huy')) return true;
-        const note = String(c.ghiChu || '').toLowerCase();
-        if (note.includes('đề xuất hủy') || note.includes('đề xuất huỷ') || note.includes('de xuat huy')) return true;
-        return false;
+        if (!c) return false;
+        if (c.cancelStatus === 'da_hoan_tac') return false;
+        return (c.deXuatHuy === true || c.deXuatHuy === 'co' || c.isCancelProposal === true);
       });
 
       return cancelClaims.filter(c => {
@@ -22529,22 +22646,17 @@ const fullList = getCarBrandLossData();
       const container = targetContainer || document.getElementById('tabContentContainer');
       if (!container) return;
 
+      const isAdmin = activeUserProfile && String(activeUserProfile.role || '').trim().toLowerCase() === 'admin';
+
       const allClaims = Object.entries(cachedPendingClaimsPayload || {}).map(([k, v]) => ({
         ...v,
         id: k
       }));
 
       const allCancelClaims = allClaims.filter(c => {
-        if (c.deXuatHuy === true || c.deXuatHuy === 'co' || c.isCancelProposal === true) return true;
-        if (c.trangThai === 'tu_choi') return true;
-        if (c.cancelReasonCode) return true;
-        if (c.lyDoHuy && String(c.lyDoHuy).trim() !== '' && String(c.lyDoHuy).trim() !== '-') return true;
-        if (c.lyDoChoViecHuy && String(c.lyDoChoViecHuy).trim() !== '' && String(c.lyDoChoViecHuy).trim() !== '-') return true;
-        const deXuat = String(c.deXuat || '').toLowerCase();
-        if (deXuat.includes('hủy') || deXuat.includes('huy')) return true;
-        const note = String(c.ghiChu || '').toLowerCase();
-        if (note.includes('đề xuất hủy') || note.includes('đề xuất huỷ') || note.includes('de xuat huy')) return true;
-        return false;
+        if (!c) return false;
+        if (c.cancelStatus === 'da_hoan_tac') return false;
+        return (c.deXuatHuy === true || c.deXuatHuy === 'co' || c.isCancelProposal === true);
       });
 
       const filtered = getFilteredCancellationClaims();
@@ -22608,7 +22720,7 @@ const fullList = getCarBrandLossData();
                 </span>
               `}
             </td>
-            <td style="padding: 12px 10px; min-width: 140px; cursor: pointer;" onclick="openEditPendingClaimModal('${c.id}', 'Financial')" title="Xem chi tiết hồ sơ">
+            <td style="padding: 12px 10px; min-width: 140px;">
               <div style="font-weight: 850; color: var(--primary); font-size: 13.5px; display: flex; align-items: center; gap: 6px;">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
                 <span>${escapeHtmlOutput(bsx)}</span>
@@ -22651,21 +22763,14 @@ const fullList = getCarBrandLossData();
             <td style="padding: 12px 10px; min-width: 200px; max-width: 280px; font-size: 12px; color: var(--text-soft); line-height: 1.4;">
               <div style="max-height: 60px; overflow-y: auto;">${escapeHtmlOutput(notes)}</div>
             </td>
-            <td style="padding: 12px 10px; text-align: center; width: 110px; white-space: nowrap;">
-              <div style="display: inline-flex; align-items: center; gap: 6px;">
-                <button type="button" onclick="openCreateCancellationProposalModal('${c.id}')" title="Sửa đề xuất hủy" style="border: none; background: rgba(59,130,246,0.1); color: #3b82f6; width: 28px; height: 28px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.15s;" onmouseover="this.style.background='rgba(59,130,246,0.2)'" onmouseout="this.style.background='rgba(59,130,246,0.1)'">
-                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            ${isAdmin ? `
+              <td style="padding: 12px 10px; text-align: center; width: 90px; white-space: nowrap;">
+                <button type="button" onclick="deleteClaimCancellationProposalByAdmin('${c.id}', event)" title="Xóa đề xuất hủy (chuyển hồ sơ trở lại hồ sơ tồn)" style="border: 1px solid rgba(239, 68, 68, 0.35); background: rgba(239, 68, 68, 0.08); color: #ef4444; padding: 5px 12px; border-radius: 8px; font-size: 11.5px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s ease;" onmouseover="this.style.background='rgba(239, 68, 68, 0.18)'; this.style.transform='scale(1.04)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.08)'; this.style.transform='scale(1)'">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  <span>Xóa</span>
                 </button>
-                ${!isApproved ? `
-                  <button type="button" onclick="approveClaimCancellation('${c.id}')" title="Duyệt hủy hồ sơ (chuyển Từ chối)" style="border: none; background: rgba(16,185,129,0.12); color: #10b981; width: 28px; height: 28px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.15s;" onmouseover="this.style.background='rgba(16,185,129,0.25)'" onmouseout="this.style.background='rgba(16,185,129,0.12)'">
-                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  </button>
-                ` : ''}
-                <button type="button" onclick="revertClaimCancellationProposal('${c.id}')" title="Hoàn tác / Hủy đề xuất" style="border: none; background: rgba(245,158,11,0.1); color: #d97706; width: 28px; height: 28px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.15s;" onmouseover="this.style.background='rgba(245,158,11,0.2)'" onmouseout="this.style.background='rgba(245,158,11,0.1)'">
-                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
-                </button>
-              </div>
-            </td>
+              </td>
+            ` : ''}
           </tr>
         `;
       }).join('');
@@ -22693,10 +22798,6 @@ const fullList = getCarBrandLossData();
 
               <!-- Action Buttons -->
               <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                <button type="button" onclick="openCreateCancellationProposalModal()" style="padding: 0 18px; height: 42px; font-size: 13px; border-radius: 12px; font-weight: 850; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: #ffffff; border: none; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 6px 16px rgba(239,68,68,0.3); transition: all 0.2s ease;">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                  <span>+ Đề xuất hủy hồ sơ</span>
-                </button>
                 <button type="button" onclick="openImportCancellationExcelModal()" style="padding: 0 16px; height: 42px; font-size: 13px; border-radius: 12px; font-weight: 850; background: var(--surface); color: var(--text-main); border: 1px solid var(--border-strong); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: var(--shadow-xs); transition: all 0.2s ease;">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#10b981" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
                   <span>Nhập Excel cần hủy</span>
@@ -22712,7 +22813,7 @@ const fullList = getCarBrandLossData();
           <!-- 4 SUMMARY KPI METRIC CARDS -->
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
             <!-- Card 1: Tổng hồ sơ đề xuất hủy -->
-            <div style="background: var(--surface); border: 1px solid var(--border-strong); border-radius: 16px; padding: 18px 22px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden;">
+            <div onclick="setCancelStatusFilter('all')" style="background: var(--surface); border: 1px solid ${activeCancelStatusFilter === 'all' ? '#ef4444' : 'var(--border-strong)'}; border-radius: 16px; padding: 18px 22px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                 <span style="font-size: 12px; font-weight: 850; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.05em;">Tổng hồ sơ cần hủy</span>
                 <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(239, 68, 68, 0.12); color: #ef4444; display: grid; place-items: center;">
@@ -22738,7 +22839,7 @@ const fullList = getCarBrandLossData();
             </div>
 
             <!-- Card 3: Chờ duyệt hủy -->
-            <div style="background: var(--surface); border: 1px solid var(--border-strong); border-radius: 16px; padding: 18px 22px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden;">
+            <div onclick="setCancelStatusFilter('cho_duyet')" style="background: var(--surface); border: 1px solid ${activeCancelStatusFilter === 'cho_duyet' ? '#d97706' : 'var(--border-strong)'}; border-radius: 16px; padding: 18px 22px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                 <span style="font-size: 12px; font-weight: 850; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.05em;">Chờ duyệt hủy</span>
                 <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(245, 158, 11, 0.12); color: #d97706; display: grid; place-items: center;">
@@ -22750,7 +22851,7 @@ const fullList = getCarBrandLossData();
             </div>
 
             <!-- Card 4: Đã duyệt hủy / Từ chối -->
-            <div style="background: var(--surface); border: 1px solid var(--border-strong); border-radius: 16px; padding: 18px 22px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden;">
+            <div onclick="setCancelStatusFilter('da_duyet')" style="background: var(--surface); border: 1px solid ${activeCancelStatusFilter === 'da_duyet' ? '#3b82f6' : 'var(--border-strong)'}; border-radius: 16px; padding: 18px 22px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                 <span style="font-size: 12px; font-weight: 850; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.05em;">Đã duyệt hủy</span>
                 <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(59, 130, 246, 0.12); color: #3b82f6; display: grid; place-items: center;">
@@ -22762,76 +22863,93 @@ const fullList = getCarBrandLossData();
             </div>
           </div>
 
-          <!-- TABLE CARD CONTAINER -->
-          <div class="p-card" style="padding: 24px; border-radius: 20px; border: 1px solid var(--border-strong); background: var(--surface); box-shadow: var(--shadow-sm);">
+          <!-- FILTER TOOLBAR ROW (STANDALONE CARD matching software design system) -->
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; background: var(--surface); padding: 14px 20px; border-radius: 16px; border: 1px solid var(--border-strong); box-shadow: var(--shadow-sm);">
             
-            <!-- FILTER TOOLBAR -->
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 14px; padding-bottom: 16px; border-bottom: 1px dashed var(--border);">
+            <!-- Left Side: Search Input -->
+            <div class="search-wrap" style="margin: 0; min-width: 240px; max-width: 320px; flex: 1;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="svg-icon" style="color: var(--primary);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input
+                id="txtCancellationFilterSearch"
+                class="input-premium"
+                type="search"
+                placeholder="Tìm BSX, số HSBT, GĐV, lý do..."
+                autocomplete="off"
+                value="${escapeAttributeData(activeCancelSearch)}"
+                oninput="setCancelSearch(this.value)"
+                style="height: 42px; font-size: 13px; border-radius: 12px; font-weight: 600; padding-left: 42px; width: 100%;"
+              />
+              ${activeCancelSearch ? `
+                <button type="button" onclick="setCancelSearch('')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; border-radius: 50%; background: var(--bg-soft); color: var(--text-muted); display: grid; place-items: center; cursor: pointer; border: none; transition: all 0.2s ease;" title="Xóa tìm kiếm">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+              ` : ''}
+            </div>
+
+            <!-- Right Side: Filter Pills + Styled Dropdowns + Reset Button -->
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
               
-              <!-- Search Box -->
-              <div style="position: relative; flex: 1; min-width: 260px; max-width: 380px;">
-                <input
-                  id="txtCancellationFilterSearch"
-                  type="text"
-                  placeholder="Tìm biển số, số HSBT, GĐV, lý do hủy..."
-                  value="${escapeAttributeData(activeCancelSearch)}"
-                  oninput="setCancelSearch(this.value)"
-                  class="input-premium"
-                  style="width: 100%; height: 38px; padding-left: 36px; padding-right: 12px; border-radius: 10px; font-size: 13px;"
-                />
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" style="position: absolute; left: 11px; top: 11px; color: var(--text-soft); pointer-events: none;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                ${activeCancelSearch ? `
-                  <button type="button" onclick="setCancelSearch('')" style="position: absolute; right: 8px; top: 10px; background: none; border: none; color: var(--text-soft); cursor: pointer; padding: 2px;">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                  </button>
-                ` : ''}
+              <!-- Filter Status Pills (Tất cả (x), Chờ duyệt (x), Đã duyệt (x)) -->
+              <div style="display: inline-flex; align-items: center; gap: 4px; background: var(--bg-soft); padding: 4px; border-radius: 12px; border: 1px solid var(--border);">
+                <button type="button" onclick="setCancelStatusFilter('all')" style="height: 34px; padding: 0 13px; border-radius: 8px; border: none; font-size: 12px; font-weight: 800; cursor: pointer; transition: all 0.2s ease; ${activeCancelStatusFilter === 'all' ? 'background: #ef4444; color: #ffffff; box-shadow: 0 2px 8px rgba(239,68,68,0.35);' : 'background: transparent; color: var(--text-soft);'}">
+                  Tất cả (${allCancelClaims.length})
+                </button>
+                <button type="button" onclick="setCancelStatusFilter('cho_duyet')" style="height: 34px; padding: 0 13px; border-radius: 8px; border: none; font-size: 12px; font-weight: 800; cursor: pointer; transition: all 0.2s ease; ${activeCancelStatusFilter === 'cho_duyet' ? 'background: #d97706; color: #ffffff; box-shadow: 0 2px 8px rgba(245,158,11,0.35);' : 'background: transparent; color: var(--text-soft);'}">
+                  Chờ duyệt (${choDuyetCount})
+                </button>
+                <button type="button" onclick="setCancelStatusFilter('da_duyet')" style="height: 34px; padding: 0 13px; border-radius: 8px; border: none; font-size: 12px; font-weight: 800; cursor: pointer; transition: all 0.2s ease; ${activeCancelStatusFilter === 'da_duyet' ? 'background: #3b82f6; color: #ffffff; box-shadow: 0 2px 8px rgba(59,130,246,0.35);' : 'background: transparent; color: var(--text-soft);'}">
+                  Đã duyệt (${daDuyetCount})
+                </button>
               </div>
 
-              <!-- Dropdown Filters -->
-              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                <!-- Filter GĐV -->
-                <select id="selCancellationGdvFilter" onchange="setCancelGdvFilter(this.value)" class="input-premium" style="height: 38px; border-radius: 10px; font-size: 12.5px; font-weight: 750; padding: 0 12px; min-width: 150px;">
+              <!-- Filter GĐV -->
+              <div style="position: relative; min-width: 140px; max-width: 180px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#3b82f6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <select id="selCancellationGdvFilter" onchange="setCancelGdvFilter(this.value)" class="input-premium" style="width: 100%; height: 42px; padding: 0 28px 0 32px; border-radius: 12px; font-size: 12px; font-weight: 750; background: var(--bg-soft); border: 1px solid var(--border); color: var(--text-main); appearance: none; -webkit-appearance: none; cursor: pointer; text-overflow: ellipsis; white-space: nowrap;">
                   <option value="all" ${activeCancelGdvFilter === 'all' ? 'selected' : ''}>Tất cả GĐV (${uniqueGdvs.length})</option>
                   ${uniqueGdvs.map(g => `<option value="${escapeAttributeData(g)}" ${activeCancelGdvFilter === g ? 'selected' : ''}>${escapeHtmlOutput(g)}</option>`).join('')}
                 </select>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
 
-                <!-- Filter Chi nhánh -->
-                <select id="selCancellationBranchFilter" onchange="setCancelBranchFilter(this.value)" class="input-premium" style="height: 38px; border-radius: 10px; font-size: 12.5px; font-weight: 750; padding: 0 12px; min-width: 140px;">
+              <!-- Filter Chi nhánh -->
+              <div style="position: relative; min-width: 140px; max-width: 180px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="9" y2="22.01"></line><line x1="15" y1="22" x2="15" y2="22.01"></line><line x1="9" y1="18" x2="9" y2="18.01"></line><line x1="15" y1="18" x2="15" y2="18.01"></line><line x1="9" y1="14" x2="9" y2="14.01"></line><line x1="15" y1="14" x2="15" y2="14.01"></line><line x1="9" y1="10" x2="9" y2="10.01"></line><line x1="15" y1="10" x2="15" y2="10.01"></line><line x1="9" y1="6" x2="9" y2="6.01"></line><line x1="15" y1="6" x2="15" y2="6.01"></line></svg>
+                <select id="selCancellationBranchFilter" onchange="setCancelBranchFilter(this.value)" class="input-premium" style="width: 100%; height: 42px; padding: 0 28px 0 32px; border-radius: 12px; font-size: 12px; font-weight: 750; background: var(--bg-soft); border: 1px solid var(--border); color: var(--text-main); appearance: none; -webkit-appearance: none; cursor: pointer; text-overflow: ellipsis; white-space: nowrap;">
                   <option value="all" ${activeCancelBranchFilter === 'all' ? 'selected' : ''}>Tất cả Chi nhánh</option>
                   ${uniqueBranches.map(b => `<option value="${escapeAttributeData(b)}" ${activeCancelBranchFilter === b ? 'selected' : ''}>${escapeHtmlOutput(b)}</option>`).join('')}
                 </select>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
 
-                <!-- Filter Nhóm lý do -->
-                <select id="selCancellationReasonFilter" onchange="setCancelReasonFilter(this.value)" class="input-premium" style="height: 38px; border-radius: 10px; font-size: 12.5px; font-weight: 750; padding: 0 12px; min-width: 170px;">
-                  <option value="all" ${activeCancelReasonCodeFilter === 'all' ? 'selected' : ''}>Tất cả lý do hủy</option>
-                  <option value="HUY_10" ${activeCancelReasonCodeFilter === 'HUY_10' ? 'selected' : ''}>Huỷ 10: Ngoài phạm vi BH</option>
-                  <option value="HUY_01" ${activeCancelReasonCodeFilter === 'HUY_01' ? 'selected' : ''}>Huỷ 01: Trùng vụ tổn thất</option>
+              <!-- Filter Nhóm lý do -->
+              <div style="position: relative; min-width: 150px; max-width: 185px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                <select id="selCancellationReasonFilter" onchange="setCancelReasonFilter(this.value)" class="input-premium" style="width: 100%; height: 42px; padding: 0 28px 0 32px; border-radius: 12px; font-size: 12px; font-weight: 750; background: var(--bg-soft); border: 1px solid var(--border); color: var(--text-main); appearance: none; -webkit-appearance: none; cursor: pointer; text-overflow: ellipsis; white-space: nowrap;">
+                  <option value="all" ${activeCancelReasonCodeFilter === 'all' ? 'selected' : ''}>Tất cả lý do</option>
+                  <option value="HUY_10" ${activeCancelReasonCodeFilter === 'HUY_10' ? 'selected' : ''}>Huỷ 10: Ngoài phạm vi</option>
+                  <option value="HUY_01" ${activeCancelReasonCodeFilter === 'HUY_01' ? 'selected' : ''}>Huỷ 01: Trùng vụ</option>
                   <option value="HUY_02" ${activeCancelReasonCodeFilter === 'HUY_02' ? 'selected' : ''}>Huỷ 02: Treo quá lâu</option>
-                  <option value="HUY_03" ${activeCancelReasonCodeFilter === 'HUY_03' ? 'selected' : ''}>Huỷ 03: Khách rút yêu cầu</option>
+                  <option value="HUY_03" ${activeCancelReasonCodeFilter === 'HUY_03' ? 'selected' : ''}>Huỷ 03: Khách rút YC</option>
                   <option value="HUY_05" ${activeCancelReasonCodeFilter === 'HUY_05' ? 'selected' : ''}>Huỷ 05: Khách tự làm</option>
                   <option value="HUY_NGOAI_THO" ${activeCancelReasonCodeFilter === 'HUY_NGOAI_THO' ? 'selected' : ''}>Ngoài lãnh thổ VN</option>
                   <option value="HUY_KHAC" ${activeCancelReasonCodeFilter === 'HUY_KHAC' ? 'selected' : ''}>Lý do khác</option>
                 </select>
-
-                <!-- Filter Status Pills -->
-                <div style="display: flex; align-items: center; gap: 4px; background: var(--bg-soft); padding: 3px; border-radius: 10px; border: 1px solid var(--border);">
-                  <button type="button" onclick="setCancelStatusFilter('all')" style="padding: 6px 12px; border-radius: 8px; border: none; font-size: 12px; font-weight: 800; cursor: pointer; ${activeCancelStatusFilter === 'all' ? 'background: #ef4444; color: #fff;' : 'background: transparent; color: var(--text-soft);'}">
-                    Tất cả (${allCancelClaims.length})
-                  </button>
-                  <button type="button" onclick="setCancelStatusFilter('cho_duyet')" style="padding: 6px 12px; border-radius: 8px; border: none; font-size: 12px; font-weight: 800; cursor: pointer; ${activeCancelStatusFilter === 'cho_duyet' ? 'background: #d97706; color: #fff;' : 'background: transparent; color: var(--text-soft);'}">
-                    Chờ duyệt (${choDuyetCount})
-                  </button>
-                  <button type="button" onclick="setCancelStatusFilter('da_duyet')" style="padding: 6px 12px; border-radius: 8px; border: none; font-size: 12px; font-weight: 800; cursor: pointer; ${activeCancelStatusFilter === 'da_duyet' ? 'background: #3b82f6; color: #fff;' : 'background: transparent; color: var(--text-soft);'}">
-                    Đã duyệt (${daDuyetCount})
-                  </button>
-                </div>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;"><polyline points="6 9 12 15 18 9"></polyline></svg>
               </div>
 
+              <!-- Quick Reset Filters Button -->
+              <button type="button" class="btn-premium btn-secondary" onclick="resetAllCancellationFilters()" title="Đặt lại bộ lọc" style="width: 42px; height: 42px; min-width: 42px; min-height: 42px; padding: 0; border-radius: 12px; display: grid; place-items: center; cursor: pointer;" aria-label="Đặt lại bộ lọc">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+              </button>
             </div>
 
-            <!-- TABLE VIEW -->
-            <div style="overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; border: 1px solid var(--border);">
-              <table class="table-premium" style="width: 100%; font-size: 13px; border-collapse: collapse; text-align: left;">
+          </div>
+
+          <!-- TABLE CONTAINER (STANDALONE CARD matching software table-container class) -->
+          <div class="table-container" style="border: 1px solid var(--border); border-radius: 16px; background: var(--surface); overflow: hidden; box-shadow: var(--shadow-sm);">
+            <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+              <table class="p-table" style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
                 <thead>
                   <tr style="background: var(--bg-soft); border-bottom: 2px solid var(--border-strong); color: var(--text-soft); font-weight: 850; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px;">
                     <th style="padding: 12px 10px; text-align: center; width: 45px;">STT</th>
@@ -22844,16 +22962,17 @@ const fullList = getCarBrandLossData();
                     <th style="padding: 12px 10px; text-align: right; width: 125px;">Dự phòng BT</th>
                     <th style="padding: 12px 10px; min-width: 180px; color: #ef4444;">Mã & Lý do hủy</th>
                     <th style="padding: 12px 10px; min-width: 220px; color: var(--primary);">Ghi chú giải trình</th>
-                    <th style="padding: 12px 10px; text-align: center; width: 110px;">Thao tác</th>
+                    ${isAdmin ? `<th style="padding: 12px 10px; text-align: center; width: 90px; color: #ef4444;">Thao tác</th>` : ''}
                   </tr>
                 </thead>
                 <tbody>
                   ${filtered.length === 0 ? `
                     <tr>
-                      <td colspan="11" style="text-align: center; padding: 48px 20px; color: var(--text-soft);">
+                      <td colspan="${isAdmin ? 11 : 10}" style="text-align: center; padding: 48px 20px; color: var(--text-soft);">
                         <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
                           <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.5; color: #ef4444;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-                          <span style="font-weight: 750; font-size: 14px;">Không tìm thấy hồ sơ đề xuất hủy nào thỏa mãn điều kiện lọc.</span>
+                          <span style="font-weight: 750; font-size: 14px;">${allCancelClaims.length === 0 ? 'Chưa có hồ sơ nào được đề xuất hủy.' : 'Không tìm thấy hồ sơ đề xuất hủy nào thỏa mãn điều kiện lọc.'}</span>
+                          ${allCancelClaims.length === 0 ? '<span style="font-size: 12.5px; color: var(--text-muted); margin-top: 2px;">Để thêm hồ sơ vào bảng này, vào <b>Quản lý Hồ sơ tồn & Báo cáo tổn thất</b>, mở chi tiết hồ sơ cần hủy và bấm nút <b>[ ✕ Hủy hồ sơ ]</b> trên thanh tiêu đề.</span>' : ''}
                         </div>
                       </td>
                     </tr>
@@ -22861,7 +22980,6 @@ const fullList = getCarBrandLossData();
                 </tbody>
               </table>
             </div>
-
           </div>
 
         </div>
@@ -22888,9 +23006,132 @@ const fullList = getCarBrandLossData();
       renderClaimCancellationPage();
     }
 
+    async function deleteClaimCancellationProposalByAdmin(claimId, event) {
+      if (event) event.stopPropagation();
+      const isAdmin = activeUserProfile && String(activeUserProfile.role || '').trim().toLowerCase() === 'admin';
+      if (!isAdmin) {
+        triggerToast('Chỉ tài khoản Quản trị viên (Admin) mới có quyền xóa đề xuất hủy!', 'warning');
+        return;
+      }
+      if (!claimId) return;
+      const claim = (cachedPendingClaimsPayload || {})[claimId] || {};
+      const bsx = claim.bienSo || claim.soHoSoBoiThuong || 'hồ sơ';
+
+      const isConfirmed = await showConfirmModal(
+        'Xóa đề xuất hủy hồ sơ',
+        `Bạn có chắc chắn muốn XÓA đề xuất hủy của hồ sơ xe ${bsx} không?\n\n(Hồ sơ sẽ được khôi phục trở lại danh sách hồ sơ tồn bình thường)`,
+        'Xác nhận xóa',
+        'Hủy bỏ'
+      );
+      if (!isConfirmed) return;
+
+      try {
+        const updates = {
+          deXuatHuy: false,
+          cancelStatus: 'da_xoa_de_xuat',
+          cancelReasonCode: null,
+          lyDoHuy: null,
+          cancelNotes: null,
+          cancelProposedBy: null,
+          cancelProposedAt: null,
+          updatedAt: Date.now()
+        };
+        if (claim.trangThai === 'tu_choi') {
+          updates.trangThai = 'moi';
+        }
+
+        if (dbNodeInstance) {
+          await dbNodeInstance.ref(`pending_claims/${claimId}`).update(updates);
+        }
+
+        if (cachedPendingClaimsPayload && cachedPendingClaimsPayload[claimId]) {
+          cachedPendingClaimsPayload[claimId] = {
+            ...cachedPendingClaimsPayload[claimId],
+            ...updates
+          };
+        }
+
+        triggerToast(`Đã xóa đề xuất hủy cho hồ sơ ${bsx} thành công!`, 'success');
+        if (typeof renderClaimCancellationPage === 'function') {
+          renderClaimCancellationPage();
+        }
+        if (typeof renderPendingClaimsTable === 'function') {
+          renderPendingClaimsTable();
+        }
+      } catch (err) {
+        console.error("Lỗi xóa đề xuất hủy:", err);
+        triggerToast('Lỗi khi xóa đề xuất: ' + err.message, 'error');
+      }
+    }
+
+    function resetAllCancellationFilters() {
+      activeCancelSearch = '';
+      activeCancelStatusFilter = 'all';
+      activeCancelGdvFilter = 'all';
+      activeCancelBranchFilter = 'all';
+      activeCancelReasonCodeFilter = 'all';
+      renderClaimCancellationPage();
+      triggerToast('Đã đặt lại bộ lọc dữ liệu!', 'info');
+    }
+
     function setCancelStatusFilter(val) {
       activeCancelStatusFilter = val;
       renderClaimCancellationPage();
+    }
+
+    function updateHeaderCancelClaimProposalButton(item) {
+      const cancelBtn = document.getElementById('btnHeaderCancelClaimProposal');
+      if (!cancelBtn) return;
+      if (!item) {
+        cancelBtn.style.display = 'none';
+        return;
+      }
+      cancelBtn.style.display = 'inline-flex';
+      const isProposed = (item.deXuatHuy === true || item.deXuatHuy === 'co' || item.isCancelProposal === true);
+      const isDeclined = isProposed && (item.cancelStatus === 'da_duyet' || item.trangThai === 'tu_choi');
+
+      if (isDeclined) {
+        cancelBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+          <span>Đã duyệt hủy</span>
+        `;
+        cancelBtn.style.background = 'rgba(239, 68, 68, 0.12)';
+        cancelBtn.style.color = '#ef4444';
+        cancelBtn.style.border = '1.5px solid rgba(239, 68, 68, 0.35)';
+        cancelBtn.title = 'Hồ sơ đã được phê duyệt Từ chối/Hủy. Nhấp để xem chi tiết lý do';
+      } else if (isProposed) {
+        cancelBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <span>Đã đề xuất hủy</span>
+        `;
+        cancelBtn.style.background = 'rgba(245, 158, 11, 0.12)';
+        cancelBtn.style.color = '#d97706';
+        cancelBtn.style.border = '1.5px solid rgba(245, 158, 11, 0.45)';
+        cancelBtn.title = 'Hồ sơ đang ở trạng thái Chờ duyệt hủy. Nhấp để điều chỉnh hoặc hoàn tác';
+      } else {
+        cancelBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+          <span>Hủy hồ sơ</span>
+        `;
+        cancelBtn.style.background = 'rgba(239, 68, 68, 0.08)';
+        cancelBtn.style.color = '#ef4444';
+        cancelBtn.style.border = '1.5px solid rgba(239, 68, 68, 0.5)';
+        cancelBtn.title = 'Nhấp để chuyển hồ sơ sang trạng thái Đề xuất hủy';
+      }
+    }
+
+    function triggerHeaderClaimCancelAction() {
+      if (!editingPendingClaimId) return;
+      openCreateCancellationProposalModal(editingPendingClaimId);
+    }
+
+    async function revertCancellationFromModal() {
+      if (!activeCancelProposalClaimId) return;
+      await revertClaimCancellationProposal(activeCancelProposalClaimId);
+      closeCreateCancellationProposalModal();
+      if (typeof editingPendingClaimId !== 'undefined' && editingPendingClaimId === activeCancelProposalClaimId) {
+        updateHeaderCancelClaimProposalButton(cachedPendingClaimsPayload?.[activeCancelProposalClaimId]);
+      }
     }
 
     function openCreateCancellationProposalModal(claimId) {
@@ -22904,7 +23145,7 @@ const fullList = getCarBrandLossData();
       const searchResults = document.getElementById('cancelClaimSearchResults');
       const reasonSelect = document.getElementById('selCancelReasonCode');
       const notesTextarea = document.getElementById('txtCancelNotes');
-      const directApprChk = document.getElementById('chkCancelDirectApproval');
+
 
       if (searchResults) searchResults.style.display = 'none';
 
@@ -22925,18 +23166,26 @@ const fullList = getCarBrandLossData();
         }
         if (notesTextarea) {
           notesTextarea.value = claim.cancelNotes || claim.ghiChu || claim.ghiChuHoSo || '';
+          if (!notesTextarea.value.trim()) {
+            const rObj = CANCELLATION_REASONS.find(r => r.code === (reasonSelect?.value || 'HUY_10'));
+            notesTextarea.value = rObj ? rObj.label : 'Đề xuất hủy hồ sơ bồi thường';
+          }
         }
-        if (directApprChk) {
-          directApprChk.checked = (claim.trangThai === 'tu_choi' || claim.cancelStatus === 'da_duyet');
+
+        const revertBtn = document.getElementById('btnRevertCancelProposal');
+        if (revertBtn) {
+          revertBtn.style.display = (claim.deXuatHuy === true || claim.deXuatHuy === 'co' || claim.isCancelProposal === true) ? 'inline-flex' : 'none';
         }
-        document.getElementById('cancelModalTitle').textContent = 'Sửa Đề xuất Hủy Hồ sơ';
+        document.getElementById('cancelModalTitle').textContent = (claim.deXuatHuy === true || claim.deXuatHuy === 'co' || claim.isCancelProposal === true) ? 'Đề xuất Hủy Hồ sơ' : 'Chuyển Đề xuất Hủy Hồ sơ';
       } else {
+        const revertBtn = document.getElementById('btnRevertCancelProposal');
+        if (revertBtn) revertBtn.style.display = 'none';
         if (pickerGroup) pickerGroup.style.display = 'block';
         if (selectedCard) selectedCard.style.display = 'none';
         if (searchInput) searchInput.value = '';
         if (reasonSelect) reasonSelect.value = 'HUY_10';
         if (notesTextarea) notesTextarea.value = '';
-        if (directApprChk) directApprChk.checked = false;
+
         document.getElementById('cancelModalTitle').textContent = 'Lập Đề xuất Hủy Hồ sơ';
       }
 
@@ -23027,7 +23276,6 @@ const fullList = getCarBrandLossData();
 
       const reasonCode = document.getElementById('selCancelReasonCode')?.value || 'HUY_10';
       const notes = (document.getElementById('txtCancelNotes')?.value || '').trim();
-      const isDirectApproved = document.getElementById('chkCancelDirectApproval')?.checked;
       const reasonObj = CANCELLATION_REASONS.find(r => r.code === reasonCode);
       const reasonLabel = reasonObj ? reasonObj.label : reasonCode;
 
@@ -23048,15 +23296,9 @@ const fullList = getCarBrandLossData();
           cancelNotes: notes,
           cancelProposedBy: currentUser,
           cancelProposedAt: Date.now(),
-          cancelStatus: isDirectApproved ? 'da_duyet' : 'cho_duyet',
+          cancelStatus: 'cho_duyet',
           updatedAt: Date.now()
         };
-
-        if (isDirectApproved) {
-          updates.trangThai = 'tu_choi';
-          updates.cancelApprovedBy = currentUser;
-          updates.cancelApprovedAt = Date.now();
-        }
 
         if (dbNodeInstance) {
           await dbNodeInstance.ref(`pending_claims/${activeCancelProposalClaimId}`).update(updates);
@@ -23069,9 +23311,17 @@ const fullList = getCarBrandLossData();
           };
         }
 
-        triggerToast('Đã lưu đề xuất hủy hồ sơ thành công!', 'success');
+        triggerToast('Đã chuyển hồ sơ sang trạng thái Đề xuất hủy thành công!', 'success');
         closeCreateCancellationProposalModal();
-        renderClaimCancellationPage();
+        if (typeof editingPendingClaimId !== 'undefined' && editingPendingClaimId === activeCancelProposalClaimId) {
+          updateHeaderCancelClaimProposalButton(cachedPendingClaimsPayload[activeCancelProposalClaimId]);
+        }
+        if (typeof renderClaimCancellationPage === 'function') {
+          renderClaimCancellationPage();
+        }
+        if (typeof renderPendingClaimsTable === 'function') {
+          renderPendingClaimsTable();
+        }
       } catch (err) {
         console.error("Lỗi lưu đề xuất hủy:", err);
         triggerToast('Lỗi khi lưu đề xuất: ' + err.message, 'error');
@@ -23085,9 +23335,13 @@ const fullList = getCarBrandLossData();
       const claim = (cachedPendingClaimsPayload || {})[claimId] || {};
       const bsx = claim.bienSo || claim.soHoSoBoiThuong || 'hồ sơ';
 
-      if (!confirm(`Bạn có chắc chắn muốn PHÊ DUYỆT HỦY cho hồ sơ ${bsx}?\n(Hồ sơ sẽ được chuyển trạng thái sang "Từ chối bồi thường")`)) {
-        return;
-      }
+      const isConfirmed = await showConfirmModal(
+        'Phê duyệt hủy hồ sơ',
+        `Bạn có chắc chắn muốn PHÊ DUYỆT HỦY cho hồ sơ xe ${bsx}?\n\n(Hồ sơ sẽ được chuyển trạng thái sang "Từ chối bồi thường")`,
+        'Phê duyệt hủy',
+        'Hủy bỏ'
+      );
+      if (!isConfirmed) return;
 
       try {
         const currentUser = (activeUserProfile?.displayName || activeUserProfile?.fullName || 'Hệ thống');
@@ -23123,9 +23377,13 @@ const fullList = getCarBrandLossData();
       const claim = (cachedPendingClaimsPayload || {})[claimId] || {};
       const bsx = claim.bienSo || claim.soHoSoBoiThuong || 'hồ sơ';
 
-      if (!confirm(`Bạn có chắc muốn HOÀN TÁC đề xuất hủy cho hồ sơ ${bsx}?\n(Hồ sơ sẽ được gỡ khỏi danh sách đề xuất hủy)`)) {
-        return;
-      }
+      const isConfirmed = await showConfirmModal(
+        'Hủy bỏ đề xuất hủy',
+        `Bạn có chắc muốn HỦY BỎ đề xuất hủy cho hồ sơ xe ${bsx}?\n\n(Hồ sơ sẽ được gỡ khỏi danh sách đề xuất hủy và quay về trạng thái bình thường)`,
+        'Xác nhận hủy bỏ',
+        'Đóng'
+      );
+      if (!isConfirmed) return;
 
       try {
         const updates = {
@@ -23419,8 +23677,6 @@ const fullList = getCarBrandLossData();
           'Đơn vị cấp đơn': c.donViCapDon || c.chiNhanh || '',
           'Ngày tổn thất': formatDateDisplay(c.ngayVTT || c.ngayTonThat || c.ngayMoHs),
           'Dự phòng BT (VNĐ)': parseInt(String(c.duPhongBoiThuong || '0').replace(/\D/g, ''), 10) || 0,
-          'Mã lý do hủy': c.cancelReasonCode || c.lyDoChoViecHuy || '',
-          'Lý do hủy': c.lyDoHuy || c.lyDoChoViecHuy || '',
           'Ghi chú giải trình': c.cancelNotes || c.ghiChu || c.ghiChuHoSo || '',
           'Người đề xuất': c.cancelProposedBy || '',
           'Ngày đề xuất': c.cancelProposedAt ? new Date(c.cancelProposedAt).toLocaleDateString('vi-VN') : ''
