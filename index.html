@@ -2186,9 +2186,15 @@
     }
 
     /* Premium Hover Effects for Pagination & Dropdowns */
-    .custom-dropdown-item:hover:not(.selected) {
+    .custom-dropdown-item:hover:not(.selected),
+    .custom-select-item:hover:not(.active) {
       background: var(--bg-soft) !important;
       color: var(--primary) !important;
+    }
+    .custom-select-trigger:hover {
+      border-color: var(--primary) !important;
+      background: var(--surface) !important;
+      box-shadow: 0 4px 12px rgba(216,180,109,0.12) !important;
     }
     .per-page-btn:hover {
       background: var(--bg-soft) !important;
@@ -22691,6 +22697,23 @@ const fullList = getCarBrandLossData();
       });
       const uniqueBranches = Array.from(branchSet).sort();
 
+      // Display labels & options for custom dropdown menus
+      const activeGdvLabel = activeCancelGdvFilter === 'all' ? `Tất cả GĐV (${uniqueGdvs.length})` : activeCancelGdvFilter;
+      const activeBranchLabel = activeCancelBranchFilter === 'all' ? 'Tất cả Chi nhánh' : activeCancelBranchFilter;
+
+      const cancelReasonOptions = [
+        { code: 'all', short: 'Tất cả lý do', full: 'Tất cả lý do' },
+        { code: 'HUY_10', short: 'Huỷ 10: Ngoài phạm vi', full: 'Huỷ 10: Ngoài phạm vi bảo hiểm (hao mòn, bảo hành, cố ý...)' },
+        { code: 'HUY_01', short: 'Huỷ 01: Trùng vụ', full: 'Huỷ 01: Trùng vụ tổn thất (đã xử lý trong vụ khác)' },
+        { code: 'HUY_02', short: 'Huỷ 02: Treo quá lâu', full: 'Huỷ 02: Treo quá lâu / Mất liên lạc khách hàng' },
+        { code: 'HUY_03', short: 'Huỷ 03: Khách rút YC', full: 'Huỷ 03: Khách hàng chủ động rút yêu cầu bồi thường' },
+        { code: 'HUY_05', short: 'Huỷ 05: Khách tự làm', full: 'Huỷ 05: Khách hàng tự làm và không yêu cầu bồi thường' },
+        { code: 'HUY_NGOAI_THO', short: 'Ngoài lãnh thổ VN', full: 'Ngoài lãnh thổ: Tổn thất ngoài lãnh thổ Việt Nam' },
+        { code: 'HUY_KHAC', short: 'Lý do khác', full: 'Lý do khác (có giải trình cụ thể)' }
+      ];
+      const activeReasonObj = cancelReasonOptions.find(o => o.code === activeCancelReasonCodeFilter) || cancelReasonOptions[0];
+      const activeReasonLabel = activeReasonObj.short;
+
       const rowsHtml = filtered.map((c, idx) => {
         const bsx = c.bienSo || '—';
         const hsbt = c.soHoSoBoiThuong || c.soHsbt || '—';
@@ -22902,40 +22925,87 @@ const fullList = getCarBrandLossData();
                 </button>
               </div>
 
-              <!-- Filter GĐV -->
-              <div style="position: relative; min-width: 140px; max-width: 180px;">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#3b82f6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                <select id="selCancellationGdvFilter" onchange="setCancelGdvFilter(this.value)" class="input-premium" style="width: 100%; height: 42px; padding: 0 28px 0 32px; border-radius: 12px; font-size: 12px; font-weight: 750; background: var(--bg-soft); border: 1px solid var(--border); color: var(--text-main); appearance: none; -webkit-appearance: none; cursor: pointer; text-overflow: ellipsis; white-space: nowrap;">
-                  <option value="all" ${activeCancelGdvFilter === 'all' ? 'selected' : ''}>Tất cả GĐV (${uniqueGdvs.length})</option>
-                  ${uniqueGdvs.map(g => `<option value="${escapeAttributeData(g)}" ${activeCancelGdvFilter === g ? 'selected' : ''}>${escapeHtmlOutput(g)}</option>`).join('')}
-                </select>
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              <!-- Filter GĐV (Custom Dropdown) -->
+              <div class="custom-select-wrapper" style="position: relative;">
+                <button type="button" id="btnCancelGdvTrigger" class="custom-select-trigger" onclick="toggleCustomDropdownMenu('ddCancelGdvMenu', event)" style="height: 42px; padding: 0 14px; border-radius: 12px; background: var(--bg-soft); border: 1px solid var(--border); font-size: 12px; font-weight: 750; color: var(--text-main); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; min-width: 140px; max-width: 185px; justify-content: space-between; box-shadow: var(--shadow-xs); transition: all 0.2s ease;">
+                  <span style="display: flex; align-items: center; gap: 7px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#3b82f6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtmlOutput(activeGdvLabel)}</span>
+                  </span>
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted); flex-shrink: 0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+
+                <div id="ddCancelGdvMenu" class="custom-select-menu" style="display: ${activeOpenDropdownId === 'ddCancelGdvMenu' ? 'block' : 'none'}; position: absolute; top: calc(100% + 6px); right: 0; min-width: 220px; max-width: 280px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 14px; box-shadow: 0 16px 36px rgba(0,0,0,0.25); z-index: 999; padding: 6px; backdrop-filter: blur(16px); max-height: 300px; overflow-y: auto;">
+                  <div class="custom-select-item ${activeCancelGdvFilter === 'all' ? 'active' : ''}" data-gdv-option="all" onclick="setCancelGdvFilter('all')" style="padding: 8px 12px; border-radius: 9px; font-size: 12.5px; font-weight: 700; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 2px; transition: all 0.15s ease; ${activeCancelGdvFilter === 'all' ? 'background: rgba(59,130,246,0.12); color: #3b82f6; font-weight: 850;' : ''}">
+                    <span style="display: flex; align-items: center; gap: 7px;">
+                      <span style="width: 7px; height: 7px; border-radius: 50%; background: #3b82f6; flex-shrink: 0;"></span>
+                      <span>Tất cả GĐV (${uniqueGdvs.length})</span>
+                    </span>
+                    ${activeCancelGdvFilter === 'all' ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+                  </div>
+                  ${uniqueGdvs.map(g => `
+                    <div class="custom-select-item ${g === activeCancelGdvFilter ? 'active' : ''}" data-gdv-option="${escapeAttributeData(g)}" onclick="setCancelGdvFilter('${escapeAttributeData(g)}')" style="padding: 8px 12px; border-radius: 9px; font-size: 12.5px; font-weight: 700; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 2px; transition: all 0.15s ease; ${g === activeCancelGdvFilter ? 'background: rgba(59,130,246,0.12); color: #3b82f6; font-weight: 850;' : ''}">
+                      <span style="display: flex; align-items: center; gap: 7px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        <span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; flex-shrink: 0;"></span>
+                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtmlOutput(g)}</span>
+                      </span>
+                      ${g === activeCancelGdvFilter ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+                    </div>
+                  `).join('')}
+                </div>
               </div>
 
-              <!-- Filter Chi nhánh -->
-              <div style="position: relative; min-width: 140px; max-width: 180px;">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="9" y2="22.01"></line><line x1="15" y1="22" x2="15" y2="22.01"></line><line x1="9" y1="18" x2="9" y2="18.01"></line><line x1="15" y1="18" x2="15" y2="18.01"></line><line x1="9" y1="14" x2="9" y2="14.01"></line><line x1="15" y1="14" x2="15" y2="14.01"></line><line x1="9" y1="10" x2="9" y2="10.01"></line><line x1="15" y1="10" x2="15" y2="10.01"></line><line x1="9" y1="6" x2="9" y2="6.01"></line><line x1="15" y1="6" x2="15" y2="6.01"></line></svg>
-                <select id="selCancellationBranchFilter" onchange="setCancelBranchFilter(this.value)" class="input-premium" style="width: 100%; height: 42px; padding: 0 28px 0 32px; border-radius: 12px; font-size: 12px; font-weight: 750; background: var(--bg-soft); border: 1px solid var(--border); color: var(--text-main); appearance: none; -webkit-appearance: none; cursor: pointer; text-overflow: ellipsis; white-space: nowrap;">
-                  <option value="all" ${activeCancelBranchFilter === 'all' ? 'selected' : ''}>Tất cả Chi nhánh</option>
-                  ${uniqueBranches.map(b => `<option value="${escapeAttributeData(b)}" ${activeCancelBranchFilter === b ? 'selected' : ''}>${escapeHtmlOutput(b)}</option>`).join('')}
-                </select>
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              <!-- Filter Chi nhánh (Custom Dropdown) -->
+              <div class="custom-select-wrapper" style="position: relative;">
+                <button type="button" id="btnCancelBranchTrigger" class="custom-select-trigger" onclick="toggleCustomDropdownMenu('ddCancelBranchMenu', event)" style="height: 42px; padding: 0 14px; border-radius: 12px; background: var(--bg-soft); border: 1px solid var(--border); font-size: 12px; font-weight: 750; color: var(--text-main); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; min-width: 140px; max-width: 185px; justify-content: space-between; box-shadow: var(--shadow-xs); transition: all 0.2s ease;">
+                  <span style="display: flex; align-items: center; gap: 7px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="9" y2="22.01"></line><line x1="15" y1="22" x2="15" y2="22.01"></line><line x1="9" y1="18" x2="9" y2="18.01"></line><line x1="15" y1="18" x2="15" y2="18.01"></line><line x1="9" y1="14" x2="9" y2="14.01"></line><line x1="15" y1="14" x2="15" y2="14.01"></line><line x1="9" y1="10" x2="9" y2="10.01"></line><line x1="15" y1="10" x2="15" y2="10.01"></line><line x1="9" y1="6" x2="9" y2="6.01"></line><line x1="15" y1="6" x2="15" y2="6.01"></line></svg>
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtmlOutput(activeBranchLabel)}</span>
+                  </span>
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted); flex-shrink: 0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+
+                <div id="ddCancelBranchMenu" class="custom-select-menu" style="display: ${activeOpenDropdownId === 'ddCancelBranchMenu' ? 'block' : 'none'}; position: absolute; top: calc(100% + 6px); right: 0; min-width: 220px; max-width: 280px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 14px; box-shadow: 0 16px 36px rgba(0,0,0,0.25); z-index: 999; padding: 6px; backdrop-filter: blur(16px); max-height: 300px; overflow-y: auto;">
+                  <div class="custom-select-item ${activeCancelBranchFilter === 'all' ? 'active' : ''}" data-branch-option="all" onclick="setCancelBranchFilter('all')" style="padding: 8px 12px; border-radius: 9px; font-size: 12.5px; font-weight: 700; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 2px; transition: all 0.15s ease; ${activeCancelBranchFilter === 'all' ? 'background: rgba(16,185,129,0.12); color: #10b981; font-weight: 850;' : ''}">
+                    <span style="display: flex; align-items: center; gap: 7px;">
+                      <span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; flex-shrink: 0;"></span>
+                      <span>Tất cả Chi nhánh</span>
+                    </span>
+                    ${activeCancelBranchFilter === 'all' ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+                  </div>
+                  ${uniqueBranches.map(b => `
+                    <div class="custom-select-item ${b === activeCancelBranchFilter ? 'active' : ''}" data-branch-option="${escapeAttributeData(b)}" onclick="setCancelBranchFilter('${escapeAttributeData(b)}')" style="padding: 8px 12px; border-radius: 9px; font-size: 12.5px; font-weight: 700; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 2px; transition: all 0.15s ease; ${b === activeCancelBranchFilter ? 'background: rgba(16,185,129,0.12); color: #10b981; font-weight: 850;' : ''}">
+                      <span style="display: flex; align-items: center; gap: 7px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        <span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; flex-shrink: 0;"></span>
+                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtmlOutput(b)}</span>
+                      </span>
+                      ${b === activeCancelBranchFilter ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+                    </div>
+                  `).join('')}
+                </div>
               </div>
 
-              <!-- Filter Nhóm lý do -->
-              <div style="position: relative; min-width: 150px; max-width: 185px;">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-                <select id="selCancellationReasonFilter" onchange="setCancelReasonFilter(this.value)" class="input-premium" style="width: 100%; height: 42px; padding: 0 28px 0 32px; border-radius: 12px; font-size: 12px; font-weight: 750; background: var(--bg-soft); border: 1px solid var(--border); color: var(--text-main); appearance: none; -webkit-appearance: none; cursor: pointer; text-overflow: ellipsis; white-space: nowrap;">
-                  <option value="all" ${activeCancelReasonCodeFilter === 'all' ? 'selected' : ''}>Tất cả lý do</option>
-                  <option value="HUY_10" ${activeCancelReasonCodeFilter === 'HUY_10' ? 'selected' : ''}>Huỷ 10: Ngoài phạm vi</option>
-                  <option value="HUY_01" ${activeCancelReasonCodeFilter === 'HUY_01' ? 'selected' : ''}>Huỷ 01: Trùng vụ</option>
-                  <option value="HUY_02" ${activeCancelReasonCodeFilter === 'HUY_02' ? 'selected' : ''}>Huỷ 02: Treo quá lâu</option>
-                  <option value="HUY_03" ${activeCancelReasonCodeFilter === 'HUY_03' ? 'selected' : ''}>Huỷ 03: Khách rút YC</option>
-                  <option value="HUY_05" ${activeCancelReasonCodeFilter === 'HUY_05' ? 'selected' : ''}>Huỷ 05: Khách tự làm</option>
-                  <option value="HUY_NGOAI_THO" ${activeCancelReasonCodeFilter === 'HUY_NGOAI_THO' ? 'selected' : ''}>Ngoài lãnh thổ VN</option>
-                  <option value="HUY_KHAC" ${activeCancelReasonCodeFilter === 'HUY_KHAC' ? 'selected' : ''}>Lý do khác</option>
-                </select>
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              <!-- Filter Nhóm lý do (Custom Dropdown) -->
+              <div class="custom-select-wrapper" style="position: relative;">
+                <button type="button" id="btnCancelReasonTrigger" class="custom-select-trigger" onclick="toggleCustomDropdownMenu('ddCancelReasonMenu', event)" style="height: 42px; padding: 0 14px; border-radius: 12px; background: var(--bg-soft); border: 1px solid var(--border); font-size: 12px; font-weight: 750; color: var(--text-main); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; min-width: 150px; max-width: 195px; justify-content: space-between; box-shadow: var(--shadow-xs); transition: all 0.2s ease;">
+                  <span style="display: flex; align-items: center; gap: 7px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtmlOutput(activeReasonLabel)}</span>
+                  </span>
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted); flex-shrink: 0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+
+                <div id="ddCancelReasonMenu" class="custom-select-menu" style="display: ${activeOpenDropdownId === 'ddCancelReasonMenu' ? 'block' : 'none'}; position: absolute; top: calc(100% + 6px); right: 0; min-width: 250px; max-width: 320px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 14px; box-shadow: 0 16px 36px rgba(0,0,0,0.25); z-index: 999; padding: 6px; backdrop-filter: blur(16px); max-height: 320px; overflow-y: auto;">
+                  ${cancelReasonOptions.map(opt => `
+                    <div class="custom-select-item ${opt.code === activeCancelReasonCodeFilter ? 'active' : ''}" data-reason-option="${opt.code}" onclick="setCancelReasonFilter('${opt.code}')" style="padding: 8px 12px; border-radius: 9px; font-size: 12px; font-weight: 700; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 2px; transition: all 0.15s ease; ${opt.code === activeCancelReasonCodeFilter ? 'background: rgba(239,68,68,0.12); color: #ef4444; font-weight: 850;' : ''}">
+                      <span style="display: flex; align-items: center; gap: 7px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        <span style="width: 7px; height: 7px; border-radius: 50%; background: ${opt.code === 'all' ? '#6b7280' : '#ef4444'}; flex-shrink: 0;"></span>
+                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeAttributeData(opt.full)}">${escapeHtmlOutput(opt.short)}</span>
+                      </span>
+                      ${opt.code === activeCancelReasonCodeFilter ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+                    </div>
+                  `).join('')}
+                </div>
               </div>
 
               <!-- Quick Reset Filters Button -->
@@ -22993,16 +23063,22 @@ const fullList = getCarBrandLossData();
 
     function setCancelGdvFilter(val) {
       activeCancelGdvFilter = val;
+      activeOpenDropdownId = null;
+      document.querySelectorAll('.custom-select-menu').forEach(m => m.style.display = 'none');
       renderClaimCancellationPage();
     }
 
     function setCancelBranchFilter(val) {
       activeCancelBranchFilter = val;
+      activeOpenDropdownId = null;
+      document.querySelectorAll('.custom-select-menu').forEach(m => m.style.display = 'none');
       renderClaimCancellationPage();
     }
 
     function setCancelReasonFilter(val) {
       activeCancelReasonCodeFilter = val;
+      activeOpenDropdownId = null;
+      document.querySelectorAll('.custom-select-menu').forEach(m => m.style.display = 'none');
       renderClaimCancellationPage();
     }
 
